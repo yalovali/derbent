@@ -35,7 +35,7 @@ tech.derbent.api.services.pageservice.implementations
 
 ### Type/Status Entities (18)
 - `CPageServiceActivityPriority` - Activity priority types
-- `CPageServiceActivityStatus` - Activity status types
+- `CPageServiceProjectItemStatus` - Activity status types
 - `CPageServiceActivityType` - Activity types
 - `CPageServiceCommentPriority` - Comment priority types
 - `CPageServiceDecisionStatus` - Decision status types

@@ -22,6 +22,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CProjectItem;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.interfaces.IKanbanEntity;
 import tech.derbent.api.interfaces.IKanbanStatus;
 import tech.derbent.api.interfaces.IKanbanType;
@@ -151,14 +152,6 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 			hidden = false, order = 40
 	)
 	private LocalDate startDate;
-	// Status and Priority Management
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "cactivitystatus_id", nullable = true)
-	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30,
-			dataProviderBean = "CActivityStatusService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CActivityStatus status;
 
 	/** Default constructor for JPA. */
 	public CActivity() {
@@ -242,7 +235,7 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 	public LocalDate getStartDate() { return startDate; }
 
 	@Override
-	public CActivityStatus getStatus() { return status; }
+	public CProjectItemStatus getStatus() { return status; }
 
 	@Override
 	public IKanbanType getType() { return activityType; }
@@ -442,7 +435,7 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 		updateLastModified();
 	}
 
-	public void setStatus(final CActivityStatus status) {
+	public void setStatus(final CProjectItemStatus status) {
 		this.status = status;
 		// Auto-set completion date if status is final
 		if ((status != null) && status.getFinalStatus() && (completionDate == null)) {
@@ -457,8 +450,8 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 	// CKanbanEntity implementation methods
 	@Override
 	public void setStatus(final IKanbanStatus status) {
-		if (status instanceof CActivityStatus) {
-			setStatus((CActivityStatus) status);
+		if (status instanceof CProjectItemStatus) {
+			setStatus((CProjectItemStatus) status);
 		}
 	}
 }

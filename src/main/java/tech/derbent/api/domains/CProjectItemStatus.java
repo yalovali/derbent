@@ -1,26 +1,19 @@
-package tech.derbent.app.activities.domain;
+package tech.derbent.api.domains;
 
 import java.util.Objects;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.annotations.StatusEntity;
-import tech.derbent.api.domains.CStatus;
 import tech.derbent.api.interfaces.IKanbanStatus;
 import tech.derbent.app.projects.domain.CProject;
 
-/** CActivityStatus - Domain entity representing activity status types. Layer: Domain (MVC) Inherits from CStatus to provide status functionality for
- * activities. This entity defines the possible statuses an activity can have (e.g., TODO, IN_PROGRESS, DONE). */
-@StatusEntity (category = "activity", colorField = "color", nameField = "name")
-@Entity
-@Table (name = "cactivitystatus", uniqueConstraints = @UniqueConstraint (columnNames = {
+@Table (name = "cprojectitemstatus", uniqueConstraints = @UniqueConstraint (columnNames = {
 		"name", "project_id"
 }))
-@AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
-public class CActivityStatus extends CStatus<CActivityStatus> implements IKanbanStatus {
+@AttributeOverride (name = "id", column = @Column (name = "cprojectitemstatus_id"))
+public class CProjectItemStatus extends CStatus<CProjectItem> implements IKanbanStatus {
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:flag";
@@ -33,15 +26,15 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements IKanban
 	private Boolean finalStatus = Boolean.FALSE;
 
 	/** Default constructor for JPA. */
-	public CActivityStatus() {
+	public CProjectItemStatus() {
 		super();
 		setColor(DEFAULT_COLOR);
 		// Initialize with default values for JPA
 		finalStatus = Boolean.FALSE;
 	}
 
-	public CActivityStatus(final String name, final CProject project) {
-		super(CActivityStatus.class, name, project);
+	public CProjectItemStatus(final String name, final CProject project) {
+		super(CProjectItem.class, name, project);
 		setColor(DEFAULT_COLOR);
 	}
 
@@ -50,7 +43,7 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements IKanban
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof CActivityStatus)) {
+		if (!(o instanceof CProjectItemStatus)) {
 			return false;
 		}
 		return super.equals(o);

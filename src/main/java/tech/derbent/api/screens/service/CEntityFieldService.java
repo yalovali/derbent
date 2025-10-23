@@ -373,7 +373,7 @@ public class CEntityFieldService {
 	/** Get data provider beans for reference fields.
 	 * @return list of available data provider bean names */
 	public static List<String> getDataProviderBeans() {
-		return List.of("CActivityService", "CActivityTypeService", "CActivityStatusService", "CActivityPriorityService", "CMeetingService",
+		return List.of("CActivityService", "CActivityTypeService", "CProjectItemStatusService", "CActivityPriorityService", "CMeetingService",
 				"CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
 				"CProjectService", "CUserService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
 	}

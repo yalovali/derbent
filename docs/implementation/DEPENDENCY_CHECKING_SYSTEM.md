@@ -81,7 +81,7 @@ public String checkDependencies(final EntityClass entity) {
 
 ### Type/Status Entity Rules
 
-Applies to: ActivityType, ActivityStatus, UserType, and similar entities.
+Applies to: ActivityType, ProjectItemStatus, UserType, and similar entities.
 
 1. **Non-Deletable Flag**
    - System-configured entities cannot be deleted

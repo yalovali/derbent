@@ -50,7 +50,7 @@ src/main/java/tech/derbent/
 │   ├── utils/                # Utility classes
 │   └── views/                # Base view classes
 ├── activities/               # Activity management module
-│   ├── domain/              # CActivity, CActivityStatus, CActivityType
+│   ├── domain/              # CActivity, CProjectItemStatus, CActivityType
 │   ├── service/             # CActivityService, repositories
 │   └── view/                # Activity UI components
 ├── comments/                 # Comment management
@@ -99,14 +99,14 @@ module-name/
 activities/
 ├── domain/
 │   ├── CActivity.java         # Main activity entity
-│   ├── CActivityStatus.java   # Activity status
+│   ├── CProjectItemStatus.java   # Activity status
 │   ├── CActivityType.java     # Activity type
 │   └── CActivityPriority.java # Activity priority
 ├── service/
 │   ├── CActivityService.java
 │   ├── IActivityRepository.java
-│   ├── CActivityStatusService.java
-│   ├── IActivityStatusRepository.java
+│   ├── CProjectItemStatusService.java
+│   ├── IProjectItemStatusRepository.java
 │   ├── CActivityTypeService.java
 │   ├── IActivityTypeRepository.java
 │   ├── CActivityPriorityService.java

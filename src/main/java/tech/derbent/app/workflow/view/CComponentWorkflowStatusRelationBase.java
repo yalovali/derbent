@@ -8,7 +8,7 @@ import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentRelationPanelBase;
-import tech.derbent.app.activities.service.CActivityStatusService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
@@ -24,7 +24,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 
 	private static final long serialVersionUID = 1L;
 	protected final CUserProjectRoleService roleService;
-	protected final CActivityStatusService statusService;
+	protected final CProjectItemStatusService statusService;
 	protected final CWorkflowStatusRelationService workflowStatusRelationService;
 
 	public CComponentWorkflowStatusRelationBase(final String title, final Class<MasterClass> entityClass,
@@ -32,7 +32,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		super(title, entityClass, CWorkflowStatusRelation.class, entityService, applicationContext.getBean(CWorkflowStatusRelationService.class),
 				sessionService, applicationContext);
 		workflowStatusRelationService = applicationContext.getBean(CWorkflowStatusRelationService.class);
-		statusService = applicationContext.getBean(CActivityStatusService.class);
+		statusService = applicationContext.getBean(CProjectItemStatusService.class);
 		roleService = applicationContext.getBean(CUserProjectRoleService.class);
 	}
 

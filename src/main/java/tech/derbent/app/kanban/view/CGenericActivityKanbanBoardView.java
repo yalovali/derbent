@@ -7,10 +7,10 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.ui.CBaseKanbanBoardView;
 import tech.derbent.api.ui.CBaseKanbanColumn;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.domain.CActivityStatus;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -20,7 +20,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PageTitle ("Activity Kanban Board (Generic)")
 @Menu (order = 1.300, icon = "class:tech.derbent.app.kanban.view.CGenericActivityKanbanBoardView", title = "Project.Generic Kanban")
 @PermitAll
-public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActivity, CActivityStatus> {
+public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActivity, CProjectItemStatus> {
 
 	public static final String DEFAULT_COLOR = "#007bff";
 	public static final String DEFAULT_ICON = "vaadin:kanban";
@@ -37,7 +37,7 @@ public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActiv
 	}
 
 	@Override
-	protected CBaseKanbanColumn<CActivity, CActivityStatus> createKanbanColumn(final CActivityStatus status, final List<CActivity> entities) {
+	protected CBaseKanbanColumn<CActivity, CProjectItemStatus> createKanbanColumn(final CProjectItemStatus status, final List<CActivity> entities) {
 		return new CGenericActivityKanbanColumn(status, entities);
 	}
 

@@ -209,5 +209,5 @@ grid.setColumnFields(List.of(
 For questions or issues:
 1. Check implementation documentation
 2. Review sample data in CDataInitializer
-3. Examine existing entity patterns (CActivityStatus, CMeetingStatus)
+3. Examine existing entity patterns (CProjectItemStatus, CMeetingStatus)
 4. Consult development team

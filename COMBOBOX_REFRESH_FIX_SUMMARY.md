@@ -19,15 +19,15 @@ Lazy-loaded Hibernate entity fields were not initialized before binding, causing
 ```java
 // Without initialization
 entity.getFromStatus()  // Returns: HibernateProxy{id=1, uninitialized}
-comboBox.getItems()     // Contains: [CActivityStatus{id=1, name="New"}, ...]
+comboBox.getItems()     // Contains: [CProjectItemStatus{id=1, name="New"}, ...]
 proxy.equals(item)      // May fail due to proxy behavior
 ```
 
 ```java
 // With initialization
 entity.initializeAllFields()  // Triggers: fromStatus.getName()
-entity.getFromStatus()        // Returns: CActivityStatus{id=1, name="New", initialized}
-comboBox.getItems()           // Contains: [CActivityStatus{id=1, name="New"}, ...]
+entity.getFromStatus()        // Returns: CProjectItemStatus{id=1, name="New", initialized}
+comboBox.getItems()           // Contains: [CProjectItemStatus{id=1, name="New"}, ...]
 object.equals(item)           // Succeeds: IDs match via CEntityDB.equals()
 ```
 

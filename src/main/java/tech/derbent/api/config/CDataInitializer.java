@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
@@ -19,16 +20,15 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
-import tech.derbent.app.activities.domain.CActivityStatus;
 import tech.derbent.app.activities.domain.CActivityType;
 import tech.derbent.app.activities.service.CActivityInitializerService;
 import tech.derbent.app.activities.service.CActivityPriorityInitializerService;
 import tech.derbent.app.activities.service.CActivityPriorityService;
 import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.activities.service.CActivityStatusInitializerService;
-import tech.derbent.app.activities.service.CActivityStatusService;
 import tech.derbent.app.activities.service.CActivityTypeInitializerService;
 import tech.derbent.app.activities.service.CActivityTypeService;
+import tech.derbent.app.activities.service.CProjectItemStatusInitializerService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.CCommentPriority;
 import tech.derbent.app.comments.service.CCommentPriorityService;
@@ -38,7 +38,6 @@ import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyInitializerService;
 import tech.derbent.app.companies.service.CCompanyService;
 import tech.derbent.app.decisions.domain.CDecision;
-import tech.derbent.app.decisions.domain.CDecisionStatus;
 import tech.derbent.app.decisions.domain.CDecisionType;
 import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
@@ -131,7 +130,7 @@ public class CDataInitializer {
 	private static final String USER_ADMIN2 = "yasin";
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityService activityService;
-	private final CActivityStatusService activityStatusService;
+	private final CProjectItemStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
 	private final CCommentPriorityService commentPriorityService;
 	private final CCommentService commentService;
@@ -187,7 +186,7 @@ public class CDataInitializer {
 		meetingStatusService = CSpringContext.getBean(CMeetingStatusService.class);
 		decisionStatusService = CSpringContext.getBean(CDecisionStatusService.class);
 		decisionTypeService = CSpringContext.getBean(CDecisionTypeService.class);
-		activityStatusService = CSpringContext.getBean(CActivityStatusService.class);
+		activityStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		decisionService = CSpringContext.getBean(CDecisionService.class);
 		currencyService = CSpringContext.getBean(CCurrencyService.class);
 		screenService = CSpringContext.getBean(CDetailSectionService.class);
@@ -200,7 +199,7 @@ public class CDataInitializer {
 		workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 		Check.notNull(activityService, "ActivityService bean not found");
 		Check.notNull(activityPriorityService, "ActivityPriorityService bean not found");
-		Check.notNull(activityStatusService, "ActivityStatusService bean not found");
+		Check.notNull(activityStatusService, "ProjectItemStatusService bean not found");
 		Check.notNull(activityTypeService, "ActivityTypeService bean not found");
 		Check.notNull(commentService, "CommentService bean not found");
 		Check.notNull(commentPriorityService, "CommentPriorityService bean not found");
@@ -305,15 +304,6 @@ public class CDataInitializer {
 		activityPriorityService.save(priority);
 	}
 
-	private void createActivityStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
-			final int sortOrder) {
-		final CActivityStatus status = new CActivityStatus(name, project);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setSortOrder(sortOrder);
-		activityStatusService.save(status);
-	}
-
 	private void createApprovalStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
 			final int sortOrder) {
 		final CApprovalStatus status = new CApprovalStatus(name, project);
@@ -367,16 +357,6 @@ public class CDataInitializer {
 			LOGGER.error("Error creating currency: {} ({})", name, code, e);
 			throw new RuntimeException("Failed to create currency: " + code, e);
 		}
-	}
-
-	private void createDecisionStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
-			final int sortOrder) {
-		final CDecisionStatus status = new CDecisionStatus(name, project);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setFinal(isFinal);
-		status.setSortOrder(sortOrder);
-		decisionStatusService.save(status);
 	}
 
 	/** Creates healthcare company. */
@@ -460,6 +440,15 @@ public class CDataInitializer {
 		projectService.save(project);
 	}
 
+	private void createProjectItemStatus(final String name, final CProject project, final String description, final String color,
+			final boolean isFinal, final int sortOrder) {
+		final CProjectItemStatus status = new CProjectItemStatus(name, project);
+		status.setDescription(description);
+		status.setColor(color);
+		status.setSortOrder(sortOrder);
+		activityStatusService.save(status);
+	}
+
 	private void createProjectProductDevelopment(final CCompany company) {
 		final CProject project = new CProject("New Product Development", company);
 		project.setDescription("Development of innovative products to expand market reach");
@@ -481,7 +470,7 @@ public class CDataInitializer {
 		try {
 			// Comments require an activity - create a simple activity related to this decision
 			final CActivityType activityType = activityTypeService.getRandom(decision.getProject());
-			final CActivityStatus activityStatus = activityStatusService.getRandom(decision.getProject());
+			final CProjectItemStatus activityStatus = activityStatusService.getRandom(decision.getProject());
 			final CUser user = userService.getRandom();
 			final CActivity activity = new CActivity("Review Decision: " + decision.getName(), decision.getProject());
 			activity.setDescription("Activity to track review and implementation of decision");
@@ -513,7 +502,7 @@ public class CDataInitializer {
 		try {
 			// Comments require an activity - create a simple activity related to this meeting
 			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject());
-			final CActivityStatus activityStatus = activityStatusService.getRandom(meeting.getProject());
+			final CProjectItemStatus activityStatus = activityStatusService.getRandom(meeting.getProject());
 			final CUser user = userService.getRandom();
 			final CActivity activity = new CActivity("Follow-up: " + meeting.getName(), meeting.getProject());
 			activity.setDescription("Activity to track action items from meeting");
@@ -607,23 +596,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing activity priorities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize activity priorities for project: " + project.getName(), e);
-		}
-	}
-
-	/** Initializes comprehensive activity data with available fields populated. */
-	private void initializeSampleActivityStatuses(final CProject project, boolean minimal) {
-		try {
-			createActivityStatus(STATUS_NOT_STARTED, project, "Activity has not been started yet", "#95a5a6", false, 1);
-			if (minimal) {
-				return;
-			}
-			createActivityStatus(STATUS_IN_PROGRESS, project, "Activity is currently in progress", "#3498db", false, 2);
-			createActivityStatus(STATUS_ON_HOLD, project, "Activity is temporarily on hold", "#f39c12", false, 3);
-			createActivityStatus(STATUS_COMPLETED, project, "Activity has been completed", "#27ae60", true, 4);
-			createActivityStatus(STATUS_CANCELLED, project, "Activity has been cancelled", "#e74c3c", true, 5);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing activity statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize activity statuses for project: " + project.getName(), e);
 		}
 	}
 
@@ -987,6 +959,23 @@ public class CDataInitializer {
 		}
 	}
 
+	/** Initializes comprehensive activity data with available fields populated. */
+	private void initializeSampleProjectItemStatuses(final CProject project, boolean minimal) {
+		try {
+			createProjectItemStatus(STATUS_NOT_STARTED, project, "Activity has not been started yet", "#95a5a6", false, 1);
+			if (minimal) {
+				return;
+			}
+			createProjectItemStatus(STATUS_IN_PROGRESS, project, "Activity is currently in progress", "#3498db", false, 2);
+			createProjectItemStatus(STATUS_ON_HOLD, project, "Activity is temporarily on hold", "#f39c12", false, 3);
+			createProjectItemStatus(STATUS_COMPLETED, project, "Activity has been completed", "#27ae60", true, 4);
+			createProjectItemStatus(STATUS_CANCELLED, project, "Activity has been cancelled", "#e74c3c", true, 5);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing activity statuses for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize activity statuses for project: " + project.getName(), e);
+		}
+	}
+
 	private void initializeSampleProjectRoles(final CProject project, boolean minimal) {
 		try {
 			// Create three project roles: Admin, User, Guest (one for each role type)
@@ -1158,7 +1147,7 @@ public class CDataInitializer {
 					CUserProjectRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Type/Status InitializerServices
-					CActivityStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CProjectItemStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CActivityPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -1177,7 +1166,7 @@ public class CDataInitializer {
 					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
 					// Project-specific type and configuration entities
 					initializeSampleMeetingStatuses(project, minimal);
-					initializeSampleActivityStatuses(project, minimal);
+					initializeSampleProjectItemStatuses(project, minimal);
 					initializeSampleOrderStatuses(project, minimal);
 					initializeSampleApprovalStatuses(project, minimal);
 					initializeSampleRiskStatuses(project, minimal);

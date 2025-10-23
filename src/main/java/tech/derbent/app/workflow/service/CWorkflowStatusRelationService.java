@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivityStatus;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
@@ -30,8 +30,8 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	/** Add status transition to workflow with specific roles */
 	@Transactional
-	public CWorkflowStatusRelation addStatusTransition(final CWorkflowEntity workflowentity, final CActivityStatus fromStatus,
-			final CActivityStatus toStatus, final List<CUserProjectRole> roles) {
+	public CWorkflowStatusRelation addStatusTransition(final CWorkflowEntity workflowentity, final CProjectItemStatus fromStatus,
+			final CProjectItemStatus toStatus, final List<CUserProjectRole> roles) {
 		LOGGER.debug("Adding status transition to workflow {} from {} to {} for roles {}", workflowentity, fromStatus, toStatus, roles);
 		Check.notNull(workflowentity, "Workflow must not be null");
 		Check.notNull(fromStatus, "From status must not be null");
@@ -77,12 +77,12 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		// services This method should not be used directly - instead use the service
 		// methods that accept entities
 		throw new UnsupportedOperationException(
-				"Use addStatusTransition(CWorkflowEntity, CActivityStatus, CActivityStatus, CUserProjectRole) method instead");
+				"Use addStatusTransition(CWorkflowEntity, CProjectItemStatus, CProjectItemStatus, CUserProjectRole) method instead");
 	}
 
 	/** Remove status transition from workflow */
 	@Transactional
-	public void deleteByWorkflowAndStatuses(final CWorkflowEntity workflow, final CActivityStatus fromStatus, final CActivityStatus toStatus) {
+	public void deleteByWorkflowAndStatuses(final CWorkflowEntity workflow, final CProjectItemStatus fromStatus, final CProjectItemStatus toStatus) {
 		Check.notNull(workflow, "Workflow cannot be null");
 		Check.notNull(fromStatus, "From status cannot be null");
 		Check.notNull(toStatus, "To status cannot be null");
@@ -102,7 +102,7 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	/** Find workflow status relations by from status */
 	@Transactional (readOnly = true)
-	public List<CWorkflowStatusRelation> findByFromStatus(final CActivityStatus fromStatus) {
+	public List<CWorkflowStatusRelation> findByFromStatus(final CProjectItemStatus fromStatus) {
 		Check.notNull(fromStatus, "From status cannot be null");
 		return findByChildEntityId(fromStatus.getId());
 	}
@@ -122,7 +122,7 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	/** Find workflow status relations by to status */
 	@Transactional (readOnly = true)
-	public List<CWorkflowStatusRelation> findByToStatus(final CActivityStatus toStatus) {
+	public List<CWorkflowStatusRelation> findByToStatus(final CProjectItemStatus toStatus) {
 		Check.notNull(toStatus, "To status cannot be null");
 		return repository.findByToStatusId(toStatus.getId());
 	}
@@ -193,8 +193,8 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	/** Update workflow status relation */
 	@Transactional
-	public CWorkflowStatusRelation updateStatusTransition(final CWorkflowEntity workflow, final CActivityStatus fromStatus,
-			final CActivityStatus toStatus, final List<CUserProjectRole> newRoles) {
+	public CWorkflowStatusRelation updateStatusTransition(final CWorkflowEntity workflow, final CProjectItemStatus fromStatus,
+			final CProjectItemStatus toStatus, final List<CUserProjectRole> newRoles) {
 		LOGGER.debug("Updating workflow {} status transition from {} to {} roles to {}", workflow, fromStatus, toStatus, newRoles);
 		final Optional<CWorkflowStatusRelation> relationOpt = findRelationshipByStatuses(workflow.getId(), fromStatus.getId(), toStatus.getId());
 		if (relationOpt.isEmpty()) {

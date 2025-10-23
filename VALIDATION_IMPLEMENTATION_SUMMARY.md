@@ -81,8 +81,8 @@ Already implements proper validation in `checkSaveAllowed`:
 - Validates that from status and to status cannot be the same
 - Example: "From status and To status cannot be the same. New -> New"
 
-#### CActivityStatusService
-**File:** `src/main/java/tech/derbent/app/activities/service/CActivityStatusService.java`
+#### CProjectItemStatusService
+**File:** `src/main/java/tech/derbent/app/activities/service/CProjectItemStatusService.java`
 
 Already implements proper validation in `checkDeleteAllowed`:
 - Checks if status is used by any activities
@@ -143,7 +143,7 @@ All status services automatically inherit:
 - Non-deletable flag check (from CTypeEntityService)
 
 Examples:
-- CActivityStatusService - checks workflow usage
+- CProjectItemStatusService - checks workflow usage
 - CMeetingStatusService
 - CDecisionStatusService
 - COrderStatusService
@@ -164,7 +164,7 @@ Examples:
 ### Custom Services
 Services can override validation methods to add specific business rules:
 - CWorkflowStatusRelationService - validates from/to status consistency
-- CActivityStatusService - validates workflow usage before deletion
+- CProjectItemStatusService - validates workflow usage before deletion
 
 ## User Experience
 

@@ -324,10 +324,10 @@ Domain services extend the appropriate base service and add business logic.
 @Service
 @PreAuthorize("isAuthenticated()")
 public class CActivityService extends CEntityOfProjectService<CActivity> 
-    implements IKanbanService<CActivity, CActivityStatus> {
+    implements IKanbanService<CActivity, CProjectItemStatus> {
     
     private final CActivityPriorityService activityPriorityService;
-    private final CActivityStatusService activityStatusService;
+    private final CProjectItemStatusService activityStatusService;
     private final CActivityTypeService activityTypeService;
     
     public CActivityService(
@@ -335,7 +335,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
         final Clock clock,
         final ISessionService sessionService,
         final CActivityTypeService activityTypeService,
-        final CActivityStatusService activityStatusService,
+        final CProjectItemStatusService activityStatusService,
         final CActivityPriorityService activityPriorityService) {
         
         super(repository, clock, sessionService);
@@ -364,7 +364,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
     
     // Business logic methods
     @Transactional(readOnly = true)
-    public Map<CActivityStatus, List<CActivity>> 
+    public Map<CProjectItemStatus, List<CActivity>> 
         getActivitiesGroupedByStatus(final CProject project) {
         
         final List<CActivity> activities = 
@@ -382,7 +382,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
     @Transactional
     public void moveToStatus(
         final CActivity activity,
-        final CActivityStatus newStatus) {
+        final CProjectItemStatus newStatus) {
         
         Check.notNull(activity, "Activity cannot be null");
         Check.notNull(newStatus, "Status cannot be null");
@@ -445,7 +445,7 @@ public interface IActivityRepository
     extends IEntityOfProjectRepository<CActivity> {
     
     // Custom query methods
-    List<CActivity> findByStatus(CActivityStatus status);
+    List<CActivity> findByStatus(CProjectItemStatus status);
     
     List<CActivity> findByAssignedTo(CUser user);
     
@@ -453,7 +453,7 @@ public interface IActivityRepository
            "AND a.status = :status ORDER BY a.priority DESC, a.name")
     List<CActivity> findByProjectAndStatus(
         @Param("project") CProject project,
-        @Param("status") CActivityStatus status);
+        @Param("status") CProjectItemStatus status);
     
     @Query("SELECT COUNT(a) FROM CActivity a WHERE a.type = :type")
     long countByType(@Param("type") CActivityType type);
@@ -578,7 +578,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
     public void completeActivity(CActivity activity) {
         Check.notNull(activity, "Activity cannot be null");
         
-        CActivityStatus completedStatus = statusService
+        CProjectItemStatus completedStatus = statusService
             .findCompletedStatus(activity.getProject());
         
         activity.setStatus(completedStatus);

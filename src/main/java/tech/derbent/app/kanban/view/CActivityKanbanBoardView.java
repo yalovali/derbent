@@ -15,10 +15,10 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.domain.CActivityStatus;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -116,7 +116,7 @@ public class CActivityKanbanBoardView extends VerticalLayout implements IProject
 			// Update title with project name
 			titleElement.setText("Activity Kanban Board - " + project.getName());
 			// Get activities grouped by status
-			final Map<CActivityStatus, List<CActivity>> activitiesByStatus = activityService.getActivitiesGroupedByStatus(project);
+			final Map<CProjectItemStatus, List<CActivity>> activitiesByStatus = activityService.getActivitiesGroupedByStatus(project);
 			if (activitiesByStatus.isEmpty()) {
 				showEmptyState("No activities found for this project");
 				return;
@@ -126,8 +126,8 @@ public class CActivityKanbanBoardView extends VerticalLayout implements IProject
 			emptyStateContainer.setVisible(false);
 			kanbanContainer.setVisible(true);
 			// Create column for each activity status
-			for (final Map.Entry<CActivityStatus, List<CActivity>> entry : activitiesByStatus.entrySet()) {
-				final CActivityStatus status = entry.getKey();
+			for (final Map.Entry<CProjectItemStatus, List<CActivity>> entry : activitiesByStatus.entrySet()) {
+				final CProjectItemStatus status = entry.getKey();
 				final List<CActivity> activities = entry.getValue();
 				LOGGER.debug("Creating column for status: {} with {} activities", status.getName(), activities.size());
 				// Create column with drop handler

@@ -24,7 +24,7 @@ All classes are located in: `src/main/java/tech/derbent/api/services/pageservice
 
 #### Type and Status Entities (18 classes)
 11. **CPageServiceActivityPriority.java** - Activity priority configuration
-12. **CPageServiceActivityStatus.java** - Activity status configuration
+12. **CPageServiceProjectItemStatus.java** - Activity status configuration
 13. **CPageServiceActivityType.java** - Activity type configuration
 14. **CPageServiceCommentPriority.java** - Comment priority configuration
 15. **CPageServiceDecisionStatus.java** - Decision status configuration

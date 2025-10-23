@@ -50,7 +50,7 @@ Added automatic validation in `CEnhancedBinder` that runs before binding:
 When validation detects an uninitialized field, it throws an exception with a detailed message:
 
 ```
-Field 'fromStatus' of type 'CActivityStatus' in bean 'CWorkflowStatusRelation' is not initialized 
+Field 'fromStatus' of type 'CProjectItemStatus' in bean 'CWorkflowStatusRelation' is not initialized 
 (lazy-loaded Hibernate proxy). Call entity.initializeAllFields() before passing to binder, or 
 access a property on the entity to trigger initialization.
 ```
@@ -144,7 +144,7 @@ binder.readBean(relation); // ❌ Error: Fields not initialized
 
 **Error Message**:
 ```
-Field 'fromStatus' of type 'CActivityStatus' in bean 'CWorkflowStatusRelation' is not initialized 
+Field 'fromStatus' of type 'CProjectItemStatus' in bean 'CWorkflowStatusRelation' is not initialized 
 (lazy-loaded Hibernate proxy). Call entity.initializeAllFields() before passing to binder, or 
 access a property on the entity to trigger initialization.
 ```
@@ -228,7 +228,7 @@ public void loadData(CUser user) {
 @Test
 public void testUninitializedEntityDetection() {
     CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
-    CActivityStatus status = mock(CActivityStatus.class); // Mock creates uninitialized proxy
+    CProjectItemStatus status = mock(CProjectItemStatus.class); // Mock creates uninitialized proxy
     relation.setFromStatus(status);
     
     CEnhancedBinder<CWorkflowStatusRelation> binder = 

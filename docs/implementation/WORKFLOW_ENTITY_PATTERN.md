@@ -279,7 +279,7 @@ workflowEntityService.save(workflow);
 
 ```java
 public boolean canTransition(CActivity activity, 
-                             CActivityStatus targetStatus, 
+                             CProjectItemStatus targetStatus, 
                              CUser user) {
     CWorkflowEntity workflow = findWorkflowForActivity(activity);
     CUserProjectRole userRole = getUserRoleInProject(user, activity.getProject());

@@ -2,9 +2,9 @@ package tech.derbent.app.workflow.view;
 
 import java.util.List;
 import org.springframework.context.ApplicationContext;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
-import tech.derbent.app.activities.domain.CActivityStatus;
-import tech.derbent.app.activities.service.CActivityStatusService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
@@ -16,16 +16,16 @@ import tech.derbent.base.session.service.ISessionService;
 public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusRelationBase<CWorkflowEntity, CWorkflowStatusRelation> {
 
 	private static final long serialVersionUID = 1L;
-	private final CActivityStatusService statusService;
+	private final CProjectItemStatusService statusService;
 
 	public CComponentWorkflowStatusRelations(final CWorkflowEntityService entityService, ISessionService sessionService,
 			ApplicationContext applicationContext) throws Exception {
 		super("Status Transitions", CWorkflowEntity.class, entityService, sessionService, applicationContext);
-		statusService = applicationContext.getBean(CActivityStatusService.class);
+		statusService = applicationContext.getBean(CProjectItemStatusService.class);
 		initComponent();
 	}
 
-	public List<CActivityStatus> getAvailableStatuses() {
+	public List<CProjectItemStatus> getAvailableStatuses() {
 		final CWorkflowEntity workflow = getCurrentEntity();
 		LOGGER.debug("Getting available statuses for workflow: {}", workflow != null ? workflow.getName() : "null");
 		if (workflow == null) {

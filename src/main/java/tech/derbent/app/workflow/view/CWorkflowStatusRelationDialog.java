@@ -2,11 +2,11 @@ package tech.derbent.app.workflow.view;
 
 import java.util.List;
 import java.util.function.Consumer;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.dialogs.CDBRelationDialog;
-import tech.derbent.app.activities.domain.CActivityStatus;
-import tech.derbent.app.activities.service.CActivityStatusService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
@@ -14,15 +14,15 @@ import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 
 /** Dialog for managing workflow status transitions (Workflow->Status direction). This dialog allows defining status transitions for a specific
  * workflow with role-based permissions. */
-public class CWorkflowStatusRelationDialog extends CDBRelationDialog<CWorkflowStatusRelation, CWorkflowEntity, CActivityStatus> {
+public class CWorkflowStatusRelationDialog extends CDBRelationDialog<CWorkflowStatusRelation, CWorkflowEntity, CProjectItemStatus> {
 
 	private static final long serialVersionUID = 1L;
-	protected final CActivityStatusService statusService;
+	protected final CProjectItemStatusService statusService;
 	protected final CWorkflowEntityService workflowService;
 	protected final CWorkflowStatusRelationService workflowStatusRelationService;
 
 	public CWorkflowStatusRelationDialog(IContentOwner parentContent, final CWorkflowEntityService workflowService,
-			final CActivityStatusService statusService, final CWorkflowStatusRelationService workflowStatusRelationService,
+			final CProjectItemStatusService statusService, final CWorkflowStatusRelationService workflowStatusRelationService,
 			final CWorkflowStatusRelation relation, final CWorkflowEntity workflow, final Consumer<CWorkflowStatusRelation> onSave) throws Exception {
 		super(parentContent, relation != null ? relation : new CWorkflowStatusRelation(), workflow, workflowService, statusService,
 				workflowStatusRelationService, onSave, relation == null);

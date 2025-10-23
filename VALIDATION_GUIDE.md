@@ -137,7 +137,7 @@ public class CActivity extends CEntityOfProject<CActivity> {
     
     @Column(nullable = false)
     @AMetaData(displayName = "Activity Status", required = true)
-    private CActivityStatus activityStatus;
+    private CProjectItemStatus activityStatus;
     
     @Column(nullable = true)  // This can be null
     @AMetaData(displayName = "Description")
@@ -151,14 +151,14 @@ public class CActivity extends CEntityOfProject<CActivity> {
 // Valid entity - all required fields populated
 Activity activity = new Activity();
 activity.setName("Implement validation");
-activity.setActivityStatus(statusNew);
+activity.setProjectItemStatus(statusNew);
 String result = service.checkSaveAllowed(activity);
 // result = null (validation passed)
 
 // Invalid entity - missing status
 Activity activity = new Activity();
 activity.setName("Implement validation");
-// activity.setActivityStatus() - NOT set
+// activity.setProjectItemStatus() - NOT set
 String result = service.checkSaveAllowed(activity);
 // result = "Required field 'Activity Status' cannot be empty."
 
@@ -203,11 +203,11 @@ From status and To status cannot be the same. New -> New
 
 ### 3. Delete Dependency Validation
 
-**Example from CActivityStatusService:**
+**Example from CProjectItemStatusService:**
 
 ```java
 @Override
-public String checkDeleteAllowed(final CActivityStatus entity) {
+public String checkDeleteAllowed(final CProjectItemStatus entity) {
     // 1. Check base validations (nullable, non-deletable flag)
     final String superCheck = super.checkDeleteAllowed(entity);
     if (superCheck != null) {
@@ -215,7 +215,7 @@ public String checkDeleteAllowed(final CActivityStatus entity) {
     }
     
     // 2. Check if any activities are using this status
-    final long usageCount = activityRepository.countByActivityStatus(entity);
+    final long usageCount = activityRepository.countByProjectItemStatus(entity);
     if (usageCount > 0) {
         return String.format(
             "Cannot delete. It is being used by %d activit%s.",
@@ -330,7 +330,7 @@ private void handleDelete() {
 ```java
 @Entity
 @Table(name = "activity_status")
-public class CActivityStatus extends CStatus<CActivityStatus> {
+public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
     
     @Column(name = "name", nullable = false, length = 100)
     @AMetaData(
@@ -437,7 +437,7 @@ All services extending CStatusService also get:
 
 ### Services with Custom Validation
 
-1. **CActivityStatusService** ✅
+1. **CProjectItemStatusService** ✅
    - Checks activity usage before delete
    - Checks workflow usage before delete
 
@@ -570,7 +570,7 @@ The validation implementation successfully addresses all requirements from the i
 ✅ **"Status cannot be in from and to fields"** - Already implemented in CWorkflowStatusRelationService  
 ✅ **"Fields not marked nullable cannot be null"** - Done with validateNullableFields  
 ✅ **"Generic code for it with nice field properties"** - Done using reflection and @AMetaData  
-✅ **"If status in flow it cannot be deleted"** - Already implemented in CActivityStatusService  
+✅ **"If status in flow it cannot be deleted"** - Already implemented in CProjectItemStatusService  
 ✅ **"CRUD functions should use them properly"** - Done in CCrudToolbar  
 ✅ **"String vs Exception decision"** - Decided: use String returns, created CExceptionNotify for other cases
 

@@ -146,7 +146,7 @@ All domain services inherit from `CAbstractService` which follows these principl
 **Services analyzed:** 83 services total
 - ✅ All domain services: CActivityService, CUserService, CProjectService, etc.
 - ✅ All relationship services: CUserProjectSettingsService, etc.
-- ✅ All type services: CActivityTypeService, CActivityStatusService, etc.
+- ✅ All type services: CActivityTypeService, CProjectItemStatusService, etc.
 
 #### Session State Management ✅
 

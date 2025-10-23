@@ -9,27 +9,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.services.CStatusService;
-import tech.derbent.app.activities.domain.CActivityStatus;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.IWorkflowStatusRelationRepository;
 import tech.derbent.base.session.service.ISessionService;
 
-/** CActivityStatusService - Service class for managing CActivityStatus entities. Layer: Service (MVC) Provides business logic for activity status
- * management including CRUD operations, validation, and workflow management. */
+/** CProjectItemStatusService - Service class for managing CProjectItemStatus entities. Layer: Service (MVC) Provides business logic for activity
+ * status management including CRUD operations, validation, and workflow management. */
 @Service
 @Transactional
-public class CActivityStatusService extends CStatusService<CActivityStatus> {
+public class CProjectItemStatusService extends CStatusService<CProjectItemStatus> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectItemStatusService.class);
 	@Autowired
 	private final IActivityRepository activityRepository;
 	@Autowired
 	private final IWorkflowStatusRelationRepository workflowStatusRelationRepository;
 
 	@Autowired
-	public CActivityStatusService(final IActivityStatusRepository repository, final Clock clock, final ISessionService sessionService,
+	public CProjectItemStatusService(final IProjectItemStatusRepository repository, final Clock clock, final ISessionService sessionService,
 			final IActivityRepository activityRepository, final IWorkflowStatusRelationRepository workflowStatusRelationRepository) {
 		super(repository, clock, sessionService);
 		this.activityRepository = activityRepository;
@@ -41,14 +41,14 @@ public class CActivityStatusService extends CStatusService<CActivityStatus> {
 	 * @param entity the activity status entity to check
 	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CActivityStatus entity) {
+	public String checkDeleteAllowed(final CProjectItemStatus entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}
 		try {
 			// Check if any activities are using this status
-			final long usageCount = activityRepository.countByActivityStatus(entity);
+			final long usageCount = activityRepository.countByProjectItemStatus(entity);
 			if (usageCount > 0) {
 				return String.format("Cannot delete. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
 			}
@@ -79,18 +79,18 @@ public class CActivityStatusService extends CStatusService<CActivityStatus> {
 	/** Find the default status for new activities.
 	 * @return Optional containing the default status if found */
 	@Transactional (readOnly = true)
-	public Optional<CActivityStatus> findDefaultStatus(final CProject project) {
-		final Optional<CActivityStatus> status = ((CActivityStatusService) repository).findDefaultStatus(project);
+	public Optional<CProjectItemStatus> findDefaultStatus(final CProject project) {
+		final Optional<CProjectItemStatus> status = ((CProjectItemStatusService) repository).findDefaultStatus(project);
 		return status;
 	}
 
 	@Override
-	protected Class<CActivityStatus> getEntityClass() { return CActivityStatus.class; }
+	protected Class<CProjectItemStatus> getEntityClass() { return CProjectItemStatus.class; }
 
 	/** Initializes a new activity status with default values. Most common fields are initialized by super class.
 	 * @param entity the newly created activity status to initialize */
 	@Override
-	public void initializeNewEntity(final CActivityStatus entity) {
+	public void initializeNewEntity(final CProjectItemStatus entity) {
 		super.initializeNewEntity(entity);
 		setNameOfEntity(entity, "Activity Status");
 	}

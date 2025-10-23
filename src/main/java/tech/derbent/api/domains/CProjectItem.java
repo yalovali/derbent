@@ -1,9 +1,13 @@
 package tech.derbent.api.domains;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {
@@ -15,6 +19,15 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	@Column (name = "parent_type", nullable = true)
 	@AMetaData (displayName = "Parent Type", required = false, readOnly = true, description = "Type of the parent entity", hidden = true, order = 61)
 	private String parentType;
+	// Status and Priority Management
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "cprojectitemstatus_id", nullable = true)
+	@AMetaData (
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30,
+			dataProviderBean = "CProjectItemStatusService", setBackgroundFromColor = true, useIcon = true
+	)
+	protected CProjectItemStatus status;
+	protected CWorkflowEntity workflow;
 
 	/** Default constructor for JPA. */
 	protected CProjectItem() {
@@ -26,8 +39,8 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	}
 
 	public void clearParent() {
-		this.parentType = null;
-		this.parentId = null;
+		parentType = null;
+		parentId = null;
 		updateLastModified();
 	}
 
@@ -47,11 +60,11 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		}
 		final String pType = parent.getClass().getSimpleName();
 		// self-parent koruması: aynı tip + aynı id
-		if ((this.getId() != null) && this.getId().equals(pid) && this.getClass().getSimpleName().equals(pType)) {
+		if ((getId() != null) && getId().equals(pid) && this.getClass().getSimpleName().equals(pType)) {
 			throw new IllegalArgumentException("An item cannot be parent of itself");
 		}
-		this.parentType = pType; // Örn: "CActivity", "CMeeting"
-		this.parentId = pid;
+		parentType = pType; // Örn: "CActivity", "CMeeting"
+		parentId = pid;
 		updateLastModified();
 	}
 

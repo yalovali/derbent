@@ -159,14 +159,14 @@ This implementation compares entities by ID, which works when:
 ### Lazy Loading Issue
 Without initialization:
 - `entity.getFromStatus()` returns `HibernateProxy{id=1, ...}` (uninitialized)
-- ComboBox items: `[CActivityStatus{id=1, name="New"}, ...]` (real objects)
+- ComboBox items: `[CProjectItemStatus{id=1, name="New"}, ...]` (real objects)
 - `proxy.equals(realObject)` may fail due to proxy behavior
 - Result: ComboBox shows blank
 
 With initialization:
 - `entity.initializeAllFields()` calls `fromStatus.getName()` 
 - Triggers Hibernate to load real object
-- `entity.getFromStatus()` returns `CActivityStatus{id=1, name="New"}` (initialized)
+- `entity.getFromStatus()` returns `CProjectItemStatus{id=1, name="New"}` (initialized)
 - ComboBox can match: `realObject.equals(realObject)` succeeds
 - Result: ComboBox shows correct value
 

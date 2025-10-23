@@ -8,7 +8,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
 
 /** CStatus - Abstract base entity for all status types in the system. Layer: Domain (MVC) This class provides common functionality for status
- * entities including name and description. All status types (like CActivityStatus) should inherit from this class. */
+ * entities including name and description. All status types (like CProjectItemStatus) should inherit from this class. */
 @MappedSuperclass
 public abstract class CStatus<EntityType> extends CTypeEntity<EntityType> {
 

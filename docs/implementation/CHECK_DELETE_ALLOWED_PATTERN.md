@@ -15,7 +15,7 @@ CAbstractService<EntityClass>
   │           ├── CTypeEntityService<EntityClass>
   │           │     └── [Type Services: CActivityTypeService, CUserTypeService, etc.]
   │           └── CStatusService<EntityClass>
-  │                 └── [Status Services: CActivityStatusService, CRiskStatusService, etc.]
+  │                 └── [Status Services: CProjectItemStatusService, CRiskStatusService, etc.]
   └── [Other Services: CCompanyService, CUserService, etc.]
 ```
 
@@ -64,7 +64,7 @@ CAbstractService<EntityClass>
 - **Validates**: (calls super, which includes non-deletable check from CTypeEntityService)
 - **Returns**: null (no additional status-specific checks)
 
-#### Child Services (e.g., CActivityTypeService, CActivityStatusService)
+#### Child Services (e.g., CActivityTypeService, CProjectItemStatusService)
 - **Validates**: (calls super), Entity-specific dependency checks (e.g., usage count)
 - **Returns**: Error message with specific usage information
 
@@ -93,17 +93,17 @@ public String checkDeleteAllowed(final CActivityType entity) {
 }
 ```
 
-#### Status Service Example (CActivityStatusService)
+#### Status Service Example (CProjectItemStatusService)
 ```java
 @Override
-public String checkDeleteAllowed(final CActivityStatus entity) {
+public String checkDeleteAllowed(final CProjectItemStatus entity) {
     final String superCheck = super.checkDeleteAllowed(entity);
     if (superCheck != null) {
         return superCheck;
     }
     try {
         // Check if any activities are using this status
-        final long usageCount = activityRepository.countByActivityStatus(entity);
+        final long usageCount = activityRepository.countByProjectItemStatus(entity);
         if (usageCount > 0) {
             return String.format("Cannot delete. It is being used by %d activit%s.", 
                 usageCount, usageCount == 1 ? "y" : "ies");
@@ -185,7 +185,7 @@ When the delete button is clicked, the toolbar:
 - CCommentPriorityService
 
 ### Status Services (extend CStatusService)
-- CActivityStatusService
+- CProjectItemStatusService
 - CRiskStatusService
 - CMeetingStatusService
 - CDecisionStatusService

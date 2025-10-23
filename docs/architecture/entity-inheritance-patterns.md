@@ -272,8 +272,8 @@ public class CActivity extends CProjectItem<CActivity> {
     @JoinColumn(name = "status_id", nullable = true)
     @AMetaData(displayName = "Status", required = false, readOnly = false,
                description = "Current status of the activity",
-               hidden = false, order = 20, dataProviderBean = "CActivityStatusService")
-    private CActivityStatus status;
+               hidden = false, order = 20, dataProviderBean = "CProjectItemStatusService")
+    private CProjectItemStatus status;
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "type_id", nullable = true)
@@ -426,7 +426,7 @@ Status entities track workflow states:
 ```java
 @Entity
 @Table(name = "activity_statuses")
-public class CActivityStatus extends CEntityOfProject<CActivityStatus> {
+public class CProjectItemStatus extends CEntityOfProject<CProjectItemStatus> {
     @Column(nullable = true, length = 20)
     private String color;
     

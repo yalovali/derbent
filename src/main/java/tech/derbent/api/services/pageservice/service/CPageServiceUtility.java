@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceActivity;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityPriority;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityStatus;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectItemStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityType;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceApprovalStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceComment;
@@ -43,7 +43,7 @@ public class CPageServiceUtility {
 
 	private static final List<String> availablePageServices = List.of("CPageServiceActivity", "CPageServiceComment", "CPageServiceCompany",
 			"CPageServiceDecision", "CPageServiceMeeting", "CPageServiceOrder", "CPageServiceProject", "CPageServiceRisk", "CPageServiceUser",
-			"CPageServiceSystemSettings", "CPageServiceActivityPriority", "CPageServiceActivityStatus", "CPageServiceActivityType",
+			"CPageServiceSystemSettings", "CPageServiceActivityPriority", "CPageServiceProjectItemStatus", "CPageServiceActivityType",
 			"CPageServiceCommentPriority", "CPageServiceDecisionStatus", "CPageServiceDecisionType", "CPageServiceMeetingStatus",
 			"CPageServiceMeetingType", "CPageServiceOrderStatus", "CPageServiceOrderType", "CPageServiceOrderApproval", "CPageServiceApprovalStatus",
 			"CPageServiceCurrency", "CPageServiceRiskStatus", "CPageServiceUserCompanyRole", "CPageServiceUserCompanySetting",
@@ -75,8 +75,8 @@ public class CPageServiceUtility {
 			return CPageServiceSystemSettings.class;
 		case "CPageServiceActivityPriority":
 			return CPageServiceActivityPriority.class;
-		case "CPageServiceActivityStatus":
-			return CPageServiceActivityStatus.class;
+		case "CPageServiceProjectItemStatus":
+			return CPageServiceProjectItemStatus.class;
 		case "CPageServiceActivityType":
 			return CPageServiceActivityType.class;
 		case "CPageServiceCommentPriority":

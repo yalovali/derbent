@@ -15,7 +15,7 @@ import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.app.activities.domain.CActivityStatus;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 
 @Entity
@@ -30,9 +30,9 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 	@JoinColumn (name = "from_status_id", nullable = false)
 	@AMetaData (
 			displayName = "From Status", required = true, readOnly = false, description = "The status from which the transition starts",
-			hidden = false, order = 1, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CActivityStatusService"
+			hidden = false, order = 1, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService"
 	)
-	private CActivityStatus fromStatus;
+	private CProjectItemStatus fromStatus;
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (
 			name = "cworkflowstatusrelation_roles", joinColumns = @JoinColumn (name = "cworkflowstatusrelation_id"),
@@ -54,9 +54,9 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 	@JoinColumn (name = "to_status_id", nullable = false)
 	@AMetaData (
 			displayName = "To Status", required = true, readOnly = false, description = "The status to which the transition goes", hidden = false,
-			order = 2, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CActivityStatusService"
+			order = 2, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService"
 	)
-	private CActivityStatus toStatus;
+	private CProjectItemStatus toStatus;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "workflow_id", nullable = false)
 	@AMetaData (
@@ -69,13 +69,13 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 		super(CWorkflowStatusRelation.class);
 	}
 
-	public CActivityStatus getFromStatus() { return fromStatus; }
+	public CProjectItemStatus getFromStatus() { return fromStatus; }
 
 	public List<CUserProjectRole> getRoles() { return roles; }
 
 	public Boolean getStartStatus() { return startStatus; }
 
-	public CActivityStatus getToStatus() { return toStatus; }
+	public CProjectItemStatus getToStatus() { return toStatus; }
 
 	public CWorkflowEntity getWorkflowEntity() { return workflowentity; }
 
@@ -96,13 +96,13 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 		}
 	}
 
-	public void setFromStatus(final CActivityStatus fromStatus) { this.fromStatus = fromStatus; }
+	public void setFromStatus(final CProjectItemStatus fromStatus) { this.fromStatus = fromStatus; }
 
 	public void setRoles(final List<CUserProjectRole> roles) { this.roles = roles != null ? roles : new ArrayList<>(); }
 
 	public void setStartStatus(Boolean startStatus) { this.startStatus = startStatus; }
 
-	public void setToStatus(final CActivityStatus toStatus) { this.toStatus = toStatus; }
+	public void setToStatus(final CProjectItemStatus toStatus) { this.toStatus = toStatus; }
 
 	public void setWorkflowEntity(final CWorkflowEntity workflowentity) { this.workflowentity = workflowentity; }
 

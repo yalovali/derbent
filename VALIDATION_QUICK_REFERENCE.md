@@ -65,7 +65,7 @@ private void handleSave() throws Exception {
 **Domain Class:**
 ```java
 @Entity
-public class CActivityStatus extends CStatus<CActivityStatus> {
+public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
     @Column(nullable = false, length = 100)
     @AMetaData(displayName = "Status Name", required = true)
     private String name;
@@ -83,7 +83,7 @@ public class CActivityStatus extends CStatus<CActivityStatus> {
 **Service (No code needed!):**
 ```java
 @Service
-public class CActivityStatusService extends CStatusService<CActivityStatus> {
+public class CProjectItemStatusService extends CStatusService<CProjectItemStatus> {
     // Automatically validates nullable fields through inheritance
     // checkSaveAllowed() inherited from CAbstractService
 }
@@ -203,7 +203,7 @@ From the original issue:
 | Status cannot be from and to | ✅ Done | CWorkflowStatusRelationService |
 | Required fields validation | ✅ Done | validateNullableFields() |
 | Generic code with field properties | ✅ Done | Uses @AMetaData displayName |
-| Status in flow cannot be deleted | ✅ Done | CActivityStatusService |
+| Status in flow cannot be deleted | ✅ Done | CProjectItemStatusService |
 | CRUD functions use properly | ✅ Done | CCrudToolbar integration |
 | String vs Exception decision | ✅ Done | Chose String returns |
 
@@ -252,7 +252,7 @@ Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 All these services now automatically validate nullable fields:
 
 **Status Services:**
-- CActivityStatusService ✅
+- CProjectItemStatusService ✅
 - CMeetingStatusService ✅
 - CDecisionStatusService ✅
 - COrderStatusService ✅
@@ -276,7 +276,7 @@ All these services now automatically validate nullable fields:
 **CWorkflowStatusRelationService:**
 - ✅ Validates from/to status are different
 
-**CActivityStatusService:**
+**CProjectItemStatusService:**
 - ✅ Checks if status is used by activities before delete
 - ✅ Checks if status is used in workflows before delete
 

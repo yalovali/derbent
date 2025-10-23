@@ -192,7 +192,7 @@ public class CActivityForm extends FormLayout {
     private final Binder<CActivity> binder;
     private TextField nameField;
     private TextArea descriptionField;
-    private ComboBox<CActivityStatus> statusComboBox;
+    private ComboBox<CProjectItemStatus> statusComboBox;
     
     public CActivityForm(CActivityService service) {
         binder = new Binder<>(CActivity.class);
@@ -210,7 +210,7 @@ public class CActivityForm extends FormLayout {
         descriptionField.setMaxLength(2000);
         
         statusComboBox = new ComboBox<>("Status");
-        statusComboBox.setItemLabelGenerator(CActivityStatus::getName);
+        statusComboBox.setItemLabelGenerator(CProjectItemStatus::getName);
     }
     
     private void configureBindings() {
@@ -262,14 +262,14 @@ public class CButton extends Button {
 ```java
 public class ComponentFactory {
     
-    public static ComboBox<CActivityStatus> createStatusComboBox(
-        CActivityStatusService service,
+    public static ComboBox<CProjectItemStatus> createStatusComboBox(
+        CProjectItemStatusService service,
         CProject project) {
         
-        ComboBox<CActivityStatus> comboBox = 
+        ComboBox<CProjectItemStatus> comboBox = 
             new ComboBox<>("Status");
         comboBox.setItems(service.listByProject(project));
-        comboBox.setItemLabelGenerator(CActivityStatus::getName);
+        comboBox.setItemLabelGenerator(CProjectItemStatus::getName);
         comboBox.setRenderer(new ComponentRenderer<>(status -> {
             Span span = new Span(status.getName());
             span.getStyle()

@@ -111,8 +111,8 @@ public abstract class CInitializerServiceBase {
 		// Type/Status entities
 		case "CActivityPriority":
 			return "CPageServiceActivityPriority";
-		case "CActivityStatus":
-			return "CPageServiceActivityStatus";
+		case "CProjectItemStatus":
+			return "CPageServiceProjectItemStatus";
 		case "CActivityType":
 			return "CPageServiceActivityType";
 		case "CCommentPriority":

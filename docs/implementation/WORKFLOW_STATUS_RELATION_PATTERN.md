@@ -1,7 +1,7 @@
 # Workflow Status Relation Pattern
 
 ## Overview
-The Workflow Status Relation pattern manages the many-to-many relationship between workflows and status transitions, with role-based access control. This pattern follows the same structure as the CUserProjectSettings pattern, establishing a relationship between CWorkflowEntity and CActivityStatus entities.
+The Workflow Status Relation pattern manages the many-to-many relationship between workflows and status transitions, with role-based access control. This pattern follows the same structure as the CUserProjectSettings pattern, establishing a relationship between CWorkflowEntity and CProjectItemStatus entities.
 
 ## Purpose
 Define which status transitions are allowed in a workflow, optionally filtered by user roles. For example:
@@ -18,8 +18,8 @@ Define which status transitions are allowed in a workflow, optionally filtered b
 **Key Fields:**
 - `id` (Long): Primary key
 - `workflow` (CWorkflowEntity): The workflow this relation belongs to
-- `fromStatus` (CActivityStatus): Starting status of the transition
-- `toStatus` (CActivityStatus): Target status of the transition
+- `fromStatus` (CProjectItemStatus): Starting status of the transition
+- `toStatus` (CProjectItemStatus): Target status of the transition
 - `role` (CUserProjectRole): Optional role required to perform this transition
 
 **JPA Annotations:**
@@ -89,23 +89,23 @@ All queries use eager fetching with LEFT JOIN FETCH to load related entities:
 // Add a status transition to a workflow
 CWorkflowStatusRelation addStatusTransition(
     CWorkflowEntity workflow,
-    CActivityStatus fromStatus,
-    CActivityStatus toStatus,
+    CProjectItemStatus fromStatus,
+    CProjectItemStatus toStatus,
     CUserProjectRole role);
 
 // Remove a status transition
 void deleteByWorkflowAndStatuses(
     CWorkflowEntity workflow,
-    CActivityStatus fromStatus,
-    CActivityStatus toStatus,
+    CProjectItemStatus fromStatus,
+    CProjectItemStatus toStatus,
     CUserProjectRole role);
 
 // Find all relations for a workflow
 List<CWorkflowStatusRelation> findByWorkflow(CWorkflowEntity workflow);
 
 // Find all relations by status
-List<CWorkflowStatusRelation> findByFromStatus(CActivityStatus fromStatus);
-List<CWorkflowStatusRelation> findByToStatus(CActivityStatus toStatus);
+List<CWorkflowStatusRelation> findByFromStatus(CProjectItemStatus fromStatus);
+List<CWorkflowStatusRelation> findByToStatus(CProjectItemStatus toStatus);
 
 // Find all relations by role
 List<CWorkflowStatusRelation> findByRole(CUserProjectRole role);
@@ -117,8 +117,8 @@ Optional<CWorkflowStatusRelation> findRelationshipWithRole(
 // Update a transition's role
 CWorkflowStatusRelation updateStatusTransition(
     CWorkflowEntity workflow,
-    CActivityStatus fromStatus,
-    CActivityStatus toStatus,
+    CProjectItemStatus fromStatus,
+    CProjectItemStatus toStatus,
     CUserProjectRole oldRole,
     CUserProjectRole newRole);
 ```
@@ -159,7 +159,7 @@ void initialize(CProject project,
 ### CWorkflowStatusRelationDialog
 **Location:** `tech.derbent.app.workflow.view.CWorkflowStatusRelationDialog`
 
-**Extends:** `CDBRelationDialog<CWorkflowStatusRelation, CWorkflowEntity, CActivityStatus>`
+**Extends:** `CDBRelationDialog<CWorkflowStatusRelation, CWorkflowEntity, CProjectItemStatus>`
 
 **Purpose:** Dialog for creating and editing workflow status transitions.
 
@@ -173,7 +173,7 @@ void initialize(CProject project,
 public CWorkflowStatusRelationDialog(
     IContentOwner parentContent,
     CWorkflowEntityService workflowService,
-    CActivityStatusService statusService,
+    CProjectItemStatusService statusService,
     CWorkflowStatusRelationService workflowStatusRelationService,
     CWorkflowStatusRelation relation,
     CWorkflowEntity workflow,
@@ -192,7 +192,7 @@ private CWorkflowStatusRelationService relationService;
 private CWorkflowEntityService workflowService;
 
 @Autowired
-private CActivityStatusService statusService;
+private CProjectItemStatusService statusService;
 
 @Autowired
 private CUserProjectRoleService roleService;
@@ -200,8 +200,8 @@ private CUserProjectRoleService roleService;
 public void createTransition() {
     // Get entities
     CWorkflowEntity workflow = workflowService.findById(workflowId);
-    CActivityStatus fromStatus = statusService.findByName("TODO");
-    CActivityStatus toStatus = statusService.findByName("IN_PROGRESS");
+    CProjectItemStatus fromStatus = statusService.findByName("TODO");
+    CProjectItemStatus toStatus = statusService.findByName("IN_PROGRESS");
     CUserProjectRole role = roleService.findByName("Developer");
     
     // Create the transition
@@ -297,8 +297,8 @@ This implementation directly mirrors the CUserProjectSettings pattern:
 |--------|---------------------|-------------------------|
 | **Purpose** | User-Project membership with roles | Workflow status transitions with roles |
 | **Main Entity 1** | CUser | CWorkflowEntity |
-| **Main Entity 2** | CProject | CActivityStatus (from) |
-| **Additional Entity** | - | CActivityStatus (to) |
+| **Main Entity 2** | CProject | CProjectItemStatus (from) |
+| **Additional Entity** | - | CProjectItemStatus (to) |
 | **Role Entity** | CUserProjectRole | CUserProjectRole |
 | **Repository** | IUserProjectSettingsRepository | IWorkflowStatusRelationRepository |
 | **Service** | CUserProjectSettingsService | CWorkflowStatusRelationService |
@@ -311,7 +311,7 @@ This implementation directly mirrors the CUserProjectSettings pattern:
 1. **Role is Optional:** The `role` field is nullable, allowing transitions that apply to all users
 2. **Lazy Loading:** All relationships use LAZY fetch type with explicit eager loading in queries
 3. **Unique Constraint:** Includes role_id to allow the same transition with different role requirements
-4. **CActivityStatus:** Uses concrete status type rather than abstract CStatus for type safety
+4. **CProjectItemStatus:** Uses concrete status type rather than abstract CStatus for type safety
 5. **Audit Fields:** Inherits created_date and last_modified_date from CEntityDB
 
 ## Testing Considerations
@@ -332,4 +332,4 @@ Potential additions to this pattern:
 2. **Actions:** Define actions to execute during transition (e.g., notifications)
 3. **Validation Rules:** Custom validation before allowing transition
 4. **History Tracking:** Log all status transitions
-5. **Multiple Status Types:** Support different status types beyond CActivityStatus
+5. **Multiple Status Types:** Support different status types beyond CProjectItemStatus

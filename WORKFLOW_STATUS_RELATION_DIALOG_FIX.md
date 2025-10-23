@@ -22,14 +22,14 @@ protected void populateForm() {
     
     // Explicitly refresh ComboBox values
     if (formBuilder != null && getEntity() != null) {
-        ComboBox<CActivityStatus> fromStatusComboBox = 
-            (ComboBox<CActivityStatus>) formBuilder.getComponent("fromStatus");
+        ComboBox<CProjectItemStatus> fromStatusComboBox = 
+            (ComboBox<CProjectItemStatus>) formBuilder.getComponent("fromStatus");
         if (fromStatusComboBox != null && getEntity().getFromStatus() != null) {
             fromStatusComboBox.setValue(getEntity().getFromStatus());
         }
         
-        ComboBox<CActivityStatus> toStatusComboBox = 
-            (ComboBox<CActivityStatus>) formBuilder.getComponent("toStatus");
+        ComboBox<CProjectItemStatus> toStatusComboBox = 
+            (ComboBox<CProjectItemStatus>) formBuilder.getComponent("toStatus");
         if (toStatusComboBox != null && getEntity().getToStatus() != null) {
             toStatusComboBox.setValue(getEntity().getToStatus());
         }

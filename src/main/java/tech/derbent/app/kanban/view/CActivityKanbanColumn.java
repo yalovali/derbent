@@ -13,9 +13,9 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.domain.CActivityStatus;
 import tech.derbent.app.activities.view.CActivityCard;
 
 /** CActivityKanbanColumn - UI component representing a column in the Kanban board. Layer: View (MVC) Displays all activities for a specific activity
@@ -26,7 +26,7 @@ public class CActivityKanbanColumn extends Div {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityKanbanColumn.class);
 	private static final long serialVersionUID = 1L;
 	private List<CActivity> activities;
-	private final CActivityStatus activityStatus;
+	private final CProjectItemStatus activityStatus;
 	private VerticalLayout cardsContainer;
 	private Span countElement;
 	private H3 headerElement;
@@ -35,18 +35,18 @@ public class CActivityKanbanColumn extends Div {
 	/** Constructor for CActivityKanbanColumn.
 	 * @param activityStatus the activity status this column represents
 	 * @param activities     the list of activities for this status */
-	public CActivityKanbanColumn(final CActivityStatus activityStatus, final List<CActivity> activities) {
+	public CActivityKanbanColumn(final CProjectItemStatus activityStatus, final List<CActivity> activities) {
 		this(activityStatus, activities, null);
 	}
 
 	/** Constructor for CActivityKanbanColumn with drop handler.
-	 * @param activityStatus    the activity status this column represents
+	 * @param status    the activity status this column represents
 	 * @param activities        the list of activities for this status
 	 * @param onActivityDropped callback function to handle dropped activities */
-	public CActivityKanbanColumn(final CActivityStatus activityStatus, final List<CActivity> activities,
+	public CActivityKanbanColumn(final CProjectItemStatus status, final List<CActivity> activities,
 			final Consumer<CActivity> onActivityDropped) {
-		Check.notNull(activityStatus, "Activity status cannot be null");
-		this.activityStatus = activityStatus;
+		Check.notNull(status, "Activity status cannot be null");
+		this.activityStatus = status;
 		this.activities = activities != null ? activities : List.of();
 		this.onActivityDropped = onActivityDropped;
 		initializeColumn();
@@ -98,7 +98,7 @@ public class CActivityKanbanColumn extends Div {
 
 	/** Gets the activity status for this column.
 	 * @return the activity status */
-	public CActivityStatus getActivityStatus() { return activityStatus; }
+	public CProjectItemStatus getProjectItemStatus() { return activityStatus; }
 
 	/** Initializes the column components and layout. */
 	private void initializeColumn() {

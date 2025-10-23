@@ -131,7 +131,7 @@ public void assignToUser(CUser user) { }
 // Query methods
 public List<CActivity> findOverdue() { }
 public Optional<CActivity> findByName(String name) { }
-public long countByStatus(CActivityStatus status) { }
+public long countByStatus(CProjectItemStatus status) { }
 ```
 
 ### Packages
@@ -489,7 +489,7 @@ public void completeActivity(CActivity activity) {
     }
     
     // Set completion status
-    CActivityStatus completedStatus = statusService.findCompletedStatus(
+    CProjectItemStatus completedStatus = statusService.findCompletedStatus(
         activity.getProject());
     activity.setStatus(completedStatus);
     

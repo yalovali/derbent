@@ -3,21 +3,21 @@ package tech.derbent.app.activities.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.activities.domain.CActivityStatus;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 
-public class CActivityStatusInitializerService extends CInitializerServiceBase {
+public class CProjectItemStatusInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Activity Status Information";
-	private static final Class<?> clazz = CActivityStatus.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusInitializerService.class);
+	private static final Class<?> clazz = CProjectItemStatus.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectItemStatusInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".2";
 	private static final String menuTitle = MenuTitle_TYPES + ".Activity Statuses";
 	private static final String pageDescription = "Manage activity status definitions for projects";

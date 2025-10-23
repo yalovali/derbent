@@ -148,7 +148,7 @@ selector.addValueChangeListener(event -> {
 
 ```java
 public class CWorkflowStatusRelationDialog extends CDBRelationDialog<
-    CWorkflowStatusRelation, CWorkflowEntity, CActivityStatus> {
+    CWorkflowStatusRelation, CWorkflowEntity, CProjectItemStatus> {
     
     public CWorkflowStatusRelationDialog(
             IContentOwner parentContent,

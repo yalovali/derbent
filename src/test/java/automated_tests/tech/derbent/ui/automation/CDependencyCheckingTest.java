@@ -14,7 +14,7 @@ public class CDependencyCheckingTest extends CBaseUITest {
 	/** Test that verifies activity statuses in use cannot be deleted. This test: 1. Logs in as admin 2. Navigates to Activity Status view 3. Attempts
 	 * to delete a status that is in use 4. Verifies error notification appears */
 	@Test
-	public void testActivityStatusInUseCannotBeDeleted() {
+	public void testProjectItemStatusInUseCannotBeDeleted() {
 		LOGGER.info("=== Testing Activity Status Deletion with Dependencies ===");
 		try {
 			// Step 1: Login

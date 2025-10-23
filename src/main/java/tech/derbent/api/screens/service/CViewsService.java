@@ -133,7 +133,7 @@ public class CViewsService {
 		} else if (entityLineType.contains("Activity Type of")) {
 			return "CActivityType";
 		} else if (entityLineType.contains("Activity Status of")) {
-			return "CActivityStatus";
+			return "CProjectItemStatus";
 		} else if (entityLineType.contains("Activity Priority of")) {
 			return "CActivityPriority";
 		} else if (entityLineType.contains("Parent Activity of")) {
