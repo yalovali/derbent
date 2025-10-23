@@ -1,7 +1,6 @@
 package tech.derbent.api.annotations;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -46,7 +45,6 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
@@ -468,29 +466,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return dualListSelector;
 	}
 
-	private static <EntityClass, DetailClass> CComponentListSelection<EntityClass, DetailClass> createGridListSelector(IContentOwner contentOwner,
-			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
-		Check.notNull(fieldInfo, "FieldInfo for GridListSelector creation");
-		LOGGER.debug("Creating CComponentListSelection for field: {}", fieldInfo.getFieldName());
-		final CComponentListSelection<EntityClass, DetailClass> gridListSelector =
-				new CComponentListSelection<EntityClass, DetailClass>(dataProviderResolver, contentOwner, fieldInfo, fieldInfo.getDisplayName());
-		// Set item label generator based on entity type
-		gridListSelector.setItemLabelGenerator(item -> {
-			if (item instanceof CEntityNamed<?>) {
-				return ((CEntityNamed<?>) item).getName();
-			}
-			if (item instanceof CEntityDB<?>) {
-				return CColorUtils.getDisplayTextFromEntity(item);
-			}
-			if (item instanceof String) {
-				return (String) item;
-			}
-			return "Unknown Item: " + String.valueOf(item);
-		});
-		safeBindComponent(binder, gridListSelector, fieldInfo.getFieldName(), "CComponentListSelection");
-		return gridListSelector;
-	}
-
 	@SuppressWarnings ("unchecked")
 	public static <EntityClass> CEnhancedBinder<EntityClass> createEnhancedBinder(final Class<?> entityClass) {
 		Check.notNull(entityClass, "Entity class for enhanced binder");
@@ -553,6 +528,29 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 		safeBindComponent(binder, numberField, fieldInfo.getFieldName(), "NumberField");
 		return numberField;
+	}
+
+	private static <EntityClass, DetailClass> CComponentListSelection<EntityClass, DetailClass> createGridListSelector(IContentOwner contentOwner,
+			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
+		Check.notNull(fieldInfo, "FieldInfo for GridListSelector creation");
+		LOGGER.debug("Creating CComponentListSelection for field: {}", fieldInfo.getFieldName());
+		final CComponentListSelection<EntityClass, DetailClass> gridListSelector =
+				new CComponentListSelection<EntityClass, DetailClass>(dataProviderResolver, contentOwner, fieldInfo, fieldInfo.getDisplayName());
+		// Set item label generator based on entity type
+		gridListSelector.setItemLabelGenerator(item -> {
+			if (item instanceof CEntityNamed<?>) {
+				return ((CEntityNamed<?>) item).getName();
+			}
+			if (item instanceof CEntityDB<?>) {
+				return CColorUtils.getDisplayTextFromEntity(item);
+			}
+			if (item instanceof String) {
+				return (String) item;
+			}
+			return "Unknown Item: " + String.valueOf(item);
+		});
+		safeBindComponent(binder, gridListSelector, fieldInfo.getFieldName(), "CComponentListSelection");
+		return gridListSelector;
 	}
 
 	private static ComboBox<String> createIconComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
@@ -799,38 +797,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// Sort the list for better user experience
 		iconNames.sort(String::compareTo);
 		return iconNames;
-	}
-
-	/** Invokes a single custom component method.
-	 * @param contentOwner the content owner (page) for context
-	 * @param methodName   the method name to invoke
-	 * @param fieldInfo    field information
-	 * @param binder       the enhanced binder
-	 * @return the custom component or null if method fails
-	 * @throws Exception */
-	private static Component invokeCustomComponentMethodX(IContentOwner contentOwner, final String methodName, final EntityFieldInfo fieldInfo,
-			final CEnhancedBinder<?> binders) throws Exception {
-		try {
-			// contentowner can be null
-			String sourceClassName = fieldInfo.getDataProviderBean();
-			Check.isTrue(applicationContext.containsBean(sourceClassName),
-					"Data provider bean '" + sourceClassName + "' not found for field '" + fieldInfo.getFieldName() + "'");
-			final Object serviceBean = applicationContext.getBean(sourceClassName);
-			Check.notNull(serviceBean, "Service bean '" + sourceClassName + "' for field '" + fieldInfo.getFieldName() + "'");
-			final Method method = serviceBean.getClass().getMethod(methodName);
-			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldInfo.getFieldName() + "'");
-			Object result = method.invoke(serviceBean);
-			Check.notNull(result, "Result of custom component method " + methodName + " for field " + fieldInfo.getFieldName());
-			Check.instanceOf(result, Component.class, "Result of method " + methodName + " is not a Component for field " + fieldInfo.getFieldName());
-			final Component component = (Component) result;
-			if (component instanceof IHasContentOwner) {
-				((IHasContentOwner) component).setContentOwner(contentOwner);
-			}
-			return component;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to invoke custom component method {}: {}", methodName, e.getMessage());
-			throw e;
-		}
 	}
 
 	public static <EntityClass> Component processField(final IContentOwner contentOwner, final CEnhancedBinder<EntityClass> binder,

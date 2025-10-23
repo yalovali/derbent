@@ -1,16 +1,15 @@
 package tech.derbent.app.risks.service;
 
 import java.time.Clock;
-import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CProjectItemService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.risks.domain.CRisk;
-import tech.derbent.app.risks.domain.CRiskStatus;
 import tech.derbent.app.risks.domain.ERiskSeverity;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -18,14 +17,11 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Menu (order = 0, icon = "vaadin:clipboard-check", title = "Settings.Risks")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CRiskService extends CEntityOfProjectService<CRisk> {
-
-	private final CRiskStatusService riskStatusService;
+public class CRiskService extends CProjectItemService<CRisk> {
 
 	CRiskService(final IRiskRepository repository, final Clock clock, final ISessionService sessionService,
-			final CRiskStatusService riskStatusService) {
-		super(repository, clock, sessionService);
-		this.riskStatusService = riskStatusService;
+			final CProjectItemStatusService projectItemStatusService) {
+		super(repository, clock, sessionService, projectItemStatusService);
 	}
 
 	@Override
@@ -45,11 +41,6 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
 		// Initialize risk severity with default value (already set in domain constructor, but ensure it's set)
 		if (entity.getRiskSeverity() == null) {
 			entity.setRiskSeverity(ERiskSeverity.LOW);
-		}
-		// Initialize status - get first available risk status for the project (optional field, don't throw if missing)
-		final List<CRiskStatus> availableStatuses = riskStatusService.listByProject(currentProject);
-		if (!availableStatuses.isEmpty()) {
-			entity.setStatus(availableStatuses.get(0));
 		}
 		// Note: If no status exists, the field will remain null (it's nullable)
 	}

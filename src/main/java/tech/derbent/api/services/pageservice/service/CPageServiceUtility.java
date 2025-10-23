@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceActivity;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityPriority;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectItemStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityType;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceApprovalStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceComment;
@@ -16,20 +15,17 @@ import tech.derbent.api.services.pageservice.implementations.CPageServiceComment
 import tech.derbent.api.services.pageservice.implementations.CPageServiceCompany;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceCurrency;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceDecision;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceDecisionStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceDecisionType;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceGridEntity;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceMeeting;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceMeetingStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceMeetingType;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceOrder;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceOrderApproval;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceOrderStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceOrderType;
 import tech.derbent.api.services.pageservice.implementations.CPageServicePageEntity;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceProject;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectItemStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceRisk;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceRiskStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceSystemSettings;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUser;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanyRole;
@@ -81,16 +77,10 @@ public class CPageServiceUtility {
 			return CPageServiceActivityType.class;
 		case "CPageServiceCommentPriority":
 			return CPageServiceCommentPriority.class;
-		case "CPageServiceDecisionStatus":
-			return CPageServiceDecisionStatus.class;
 		case "CPageServiceDecisionType":
 			return CPageServiceDecisionType.class;
-		case "CPageServiceMeetingStatus":
-			return CPageServiceMeetingStatus.class;
 		case "CPageServiceMeetingType":
 			return CPageServiceMeetingType.class;
-		case "CPageServiceOrderStatus":
-			return CPageServiceOrderStatus.class;
 		case "CPageServiceOrderType":
 			return CPageServiceOrderType.class;
 		case "CPageServiceOrderApproval":
@@ -99,8 +89,6 @@ public class CPageServiceUtility {
 			return CPageServiceApprovalStatus.class;
 		case "CPageServiceCurrency":
 			return CPageServiceCurrency.class;
-		case "CPageServiceRiskStatus":
-			return CPageServiceRiskStatus.class;
 		case "CPageServiceUserCompanyRole":
 			return CPageServiceUserCompanyRole.class;
 		case "CPageServiceUserCompanySetting":

@@ -15,11 +15,8 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
-import tech.derbent.api.interfaces.IKanbanEntity;
-import tech.derbent.api.interfaces.IKanbanStatus;
-import tech.derbent.api.interfaces.IKanbanType;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
@@ -29,7 +26,7 @@ import tech.derbent.base.users.domain.CUser;
 @Table (name = "cmeeting") // table name for the entity as the default is the class name
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
-public class CMeeting extends CEntityOfProject<CMeeting> implements IKanbanEntity {
+public class CMeeting extends CProjectItem<CMeeting> {
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -177,12 +174,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements IKanbanEntit
 	public CUser getResponsible() { return responsible; }
 
 	@Override
-	public CProjectItemStatus getStatus() { return status; }
-
-	@Override
-	public IKanbanType getType() { return meetingType; }
-
-	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships
 		if (meetingType != null) {
@@ -262,13 +253,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements IKanbanEntit
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
 
-	public void setStatus(final CProjectItemStatus status) { this.status = status; }
-
-	// CKanbanEntity implementation methods
 	@Override
-	public void setStatus(final IKanbanStatus status) {
-		if (status instanceof CProjectItemStatus) {
-			setStatus((CProjectItemStatus) status);
-		}
-	}
+	public void setStatus(final CProjectItemStatus status) { this.status = status; }
 }

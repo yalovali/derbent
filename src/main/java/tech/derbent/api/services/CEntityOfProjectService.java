@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
@@ -94,10 +95,11 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
+		final CProject currentProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize risk"));
 		Check.notNull(sessionService, "Session service is required for entity initialization");
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
 		final CUser currentUser = sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user in session"));
-		entity.setProject(activeProject);
+		entity.setProject(currentProject);
 		entity.setCreatedBy(currentUser);
 		entity.setCreatedDate(LocalDateTime.now(clock));
 		entity.setAssignedTo(currentUser);

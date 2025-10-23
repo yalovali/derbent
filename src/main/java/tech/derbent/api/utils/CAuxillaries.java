@@ -30,27 +30,21 @@ import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyInitializerService;
 import tech.derbent.app.companies.service.CCompanyService;
 import tech.derbent.app.decisions.domain.CDecision;
-import tech.derbent.app.decisions.domain.CDecisionStatus;
 import tech.derbent.app.decisions.domain.CDecisionType;
 import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
-import tech.derbent.app.decisions.service.CDecisionStatusService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
 import tech.derbent.app.gannt.view.CProjectGanntView;
 import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.meetings.domain.CMeetingStatus;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.app.meetings.service.CMeetingInitializerService;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.meetings.service.CMeetingStatusInitializerService;
-import tech.derbent.app.meetings.service.CMeetingStatusService;
 import tech.derbent.app.meetings.service.CMeetingTypeInitializerService;
 import tech.derbent.app.meetings.service.CMeetingTypeService;
 import tech.derbent.app.orders.domain.CApprovalStatus;
 import tech.derbent.app.orders.domain.CCurrency;
 import tech.derbent.app.orders.domain.COrder;
-import tech.derbent.app.orders.domain.COrderStatus;
 import tech.derbent.app.orders.domain.COrderType;
 import tech.derbent.app.orders.service.CApprovalStatusInitializerService;
 import tech.derbent.app.orders.service.CApprovalStatusService;
@@ -58,8 +52,6 @@ import tech.derbent.app.orders.service.CCurrencyInitializerService;
 import tech.derbent.app.orders.service.CCurrencyService;
 import tech.derbent.app.orders.service.COrderInitializerService;
 import tech.derbent.app.orders.service.COrderService;
-import tech.derbent.app.orders.service.COrderStatusInitializerService;
-import tech.derbent.app.orders.service.COrderStatusService;
 import tech.derbent.app.orders.service.COrderTypeInitializerService;
 import tech.derbent.app.orders.service.COrderTypeService;
 import tech.derbent.app.page.domain.CPageEntity;
@@ -69,11 +61,8 @@ import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectInitializerService;
 import tech.derbent.app.projects.service.CProjectService;
 import tech.derbent.app.risks.domain.CRisk;
-import tech.derbent.app.risks.domain.CRiskStatus;
 import tech.derbent.app.risks.service.CRiskInitializerService;
 import tech.derbent.app.risks.service.CRiskService;
-import tech.derbent.app.risks.service.CRiskStatusInitializerService;
-import tech.derbent.app.risks.service.CRiskStatusService;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
@@ -203,22 +192,14 @@ public class CAuxillaries {
 			return CActivityPriority.class;
 		case "CMeetingType":
 			return CMeetingType.class;
-		case "CMeetingStatus":
-			return CMeetingStatus.class;
-		case "CRiskStatus":
-			return CRiskStatus.class;
 		case "CProjectGanntView":
 			return CProjectGanntView.class;
 		case "CCommentPriority":
 			return CCommentPriority.class;
 		case "CCurrency":
 			return CCurrency.class;
-		case "CDecisionStatus":
-			return CDecisionStatus.class;
 		case "CDecisionType":
 			return CDecisionType.class;
-		case "COrderStatus":
-			return COrderStatus.class;
 		case "COrderType":
 			return COrderType.class;
 		case "CApprovalStatus":
@@ -269,22 +250,14 @@ public class CAuxillaries {
 			return CActivityPriorityService.class;
 		case "CMeetingType":
 			return CMeetingTypeService.class;
-		case "CMeetingStatus":
-			return CMeetingStatusService.class;
-		case "CRiskStatus":
-			return CRiskStatusService.class;
 		case "CPageEntity":
 			return CPageEntityService.class;
 		case "CCommentPriority":
 			return CCommentPriorityService.class;
 		case "CCurrency":
 			return CCurrencyService.class;
-		case "CDecisionStatus":
-			return CDecisionStatusService.class;
 		case "CDecisionType":
 			return CDecisionTypeService.class;
-		case "COrderStatus":
-			return COrderStatusService.class;
 		case "COrderType":
 			return COrderTypeService.class;
 		case "CApprovalStatus":
@@ -333,10 +306,6 @@ public class CAuxillaries {
 			return CActivityPriorityInitializerService.class;
 		} else if (entityClass == CMeetingType.class) {
 			return CMeetingTypeInitializerService.class;
-		} else if (entityClass == CMeetingStatus.class) {
-			return CMeetingStatusInitializerService.class;
-		} else if (entityClass == CRiskStatus.class) {
-			return CRiskStatusInitializerService.class;
 		} else if (entityClass == CPageEntity.class) {
 			return CPageEntityInitializerService.class;
 		} else if (entityClass == CCommentPriority.class) {
@@ -345,8 +314,6 @@ public class CAuxillaries {
 			return CCurrencyInitializerService.class;
 		} else if (entityClass == CDecisionType.class) {
 			return CDecisionTypeInitializerService.class;
-		} else if (entityClass == COrderStatus.class) {
-			return COrderStatusInitializerService.class;
 		} else if (entityClass == COrderType.class) {
 			return COrderTypeInitializerService.class;
 		} else if (entityClass == CApprovalStatus.class) {
@@ -418,10 +385,6 @@ public class CAuxillaries {
 			return CActivityPriorityService.class;
 		} else if (entityClass == CMeetingType.class) {
 			return CMeetingTypeService.class;
-		} else if (entityClass == CMeetingStatus.class) {
-			return CMeetingStatusService.class;
-		} else if (entityClass == CRiskStatus.class) {
-			return CRiskStatusService.class;
 		} else if (entityClass == CPageEntity.class) {
 			return CPageEntityService.class;
 		} else if (entityClass == CCommentPriority.class) {
@@ -430,8 +393,6 @@ public class CAuxillaries {
 			return CCurrencyService.class;
 		} else if (entityClass == CDecisionType.class) {
 			return CDecisionTypeService.class;
-		} else if (entityClass == COrderStatus.class) {
-			return COrderStatusService.class;
 		} else if (entityClass == COrderType.class) {
 			return COrderTypeService.class;
 		} else if (entityClass == CApprovalStatus.class) {
@@ -481,22 +442,14 @@ public class CAuxillaries {
 			return CActivityPriorityService.class;
 		case "CMeetingTypeService":
 			return CMeetingTypeService.class;
-		case "CMeetingStatusService":
-			return CMeetingStatusService.class;
-		case "CRiskStatusService":
-			return CRiskStatusService.class;
 		case "CPageEntityService":
 			return CPageEntityService.class;
 		case "CCommentPriorityService":
 			return CCommentPriorityService.class;
 		case "CCurrencyService":
 			return CCurrencyService.class;
-		case "CDecisionStatusService":
-			return CDecisionStatusService.class;
 		case "CDecisionTypeService":
 			return CDecisionTypeService.class;
-		case "COrderStatusService":
-			return COrderStatusService.class;
 		case "COrderTypeService":
 			return COrderTypeService.class;
 		case "CApprovalStatusService":

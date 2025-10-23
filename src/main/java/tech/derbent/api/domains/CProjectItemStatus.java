@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.interfaces.IKanbanStatus;
 import tech.derbent.app.projects.domain.CProject;
 
 @Entity
@@ -15,7 +14,7 @@ import tech.derbent.app.projects.domain.CProject;
 		"name", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cprojectitemstatus_id"))
-public class CProjectItemStatus extends CStatus<CProjectItemStatus> implements IKanbanStatus {
+public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:flag";
