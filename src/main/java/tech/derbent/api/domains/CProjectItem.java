@@ -7,6 +7,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {
@@ -26,6 +27,14 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 			dataProviderBean = "CProjectItemStatusService", setBackgroundFromColor = true, useIcon = true
 	)
 	protected CProjectItemStatus status;
+	// Workflow Management
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "workflow_id", nullable = true)
+	@AMetaData (
+			displayName = "Workflow", required = false, readOnly = false, description = "Workflow definition for status transitions", hidden = false,
+			order = 29, dataProviderBean = "CWorkflowEntityService", setBackgroundFromColor = true, useIcon = true
+	)
+	protected CWorkflowEntity workflow;
 
 	/** Default constructor for JPA. */
 	protected CProjectItem() {
@@ -74,4 +83,13 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		this.status = status;
 		updateLastModified();
 	}
+
+	public CWorkflowEntity getWorkflow() { return workflow; }
+
+	public void setWorkflow(final CWorkflowEntity workflow) {
+		this.workflow = workflow;
+		updateLastModified();
+	}
+
+	public CProjectItemStatus getStatus() { return status; }
 }

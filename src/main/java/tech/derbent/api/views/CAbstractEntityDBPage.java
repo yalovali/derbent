@@ -65,11 +65,13 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected CLayoutService layoutService; // Optional injection
 	protected CMasterViewSectionBase<EntityClass> masterViewSection;
 	protected CNotificationService notificationService; // Optional injection
+	protected tech.derbent.app.activities.service.CProjectItemStatusService projectItemStatusService; // Optional injection
 	// Search functionality
 	protected CSearchToolbar searchToolbar;
 	protected ISessionService sessionService;
 	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
+	protected tech.derbent.app.workflow.service.CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
 
 	protected CAbstractEntityDBPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService,
 			final ISessionService sessionService) {
@@ -363,6 +365,13 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		// Set notification service if available
 		if (notificationService != null) {
 			crudToolbar.setNotificationService(notificationService);
+		}
+		// Set workflow services if available (for CProjectItem entities)
+		if (projectItemStatusService != null) {
+			crudToolbar.setProjectItemStatusService(projectItemStatusService);
+		}
+		if (workflowStatusRelationService != null) {
+			crudToolbar.setWorkflowStatusRelationService(workflowStatusRelationService);
 		}
 		// Add update listener to refresh grid on CRUD operations
 		crudToolbar.addUpdateListener(new tech.derbent.api.interfaces.IEntityUpdateListener() {
