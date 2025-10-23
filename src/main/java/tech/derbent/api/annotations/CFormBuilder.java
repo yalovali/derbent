@@ -51,6 +51,7 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CComponentFieldSelection;
 import tech.derbent.api.views.components.CComponentListSelection;
 import tech.derbent.api.views.components.CDiv;
@@ -515,6 +516,20 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return horizontalLayout;
 	}
 
+	public static Component createFieldToolsComponent(EntityFieldInfo fieldInfo) throws Exception {
+		if (fieldInfo == null) {
+			return null;
+		}
+		Class<?> clazz = fieldInfo.getFieldTypeClass();
+		if (!CEntityDB.class.isAssignableFrom(clazz)) {
+			return null;
+		}
+		String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
+		// servicePageEntity
+		CButton navigeToButton = new CButton("", VaadinIcon.ARROW_RIGHT.create());
+		return navigeToButton;
+	}
+
 	private static NumberField createFloatingPointField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		final NumberField numberField = new NumberField();
 		// Set ID for better test automation
@@ -806,7 +821,11 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(fieldInfo, "field");
 			final Component component = createComponentForField(contentOwner, fieldInfo, binder);
 			assignDeterministicComponentId(component, fieldInfo, binder);
+			final Component fieldTools = createFieldToolsComponent(fieldInfo);
 			final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
+			if (fieldTools != null) {
+				horizontalLayout.add(fieldTools);
+			}
 			formLayout.add(horizontalLayout);
 			if (mapHorizontalLayouts != null) {
 				mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);

@@ -565,6 +565,7 @@ public class CDataInitializer {
 				final CActivityType item = activityTypeService.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomFromWebColors(true));
+				item.setWorkflow(workflowEntityService.getRandom(project));
 				activityTypeService.save(item);
 				if (minimal) {
 					return;
@@ -721,6 +722,7 @@ public class CDataInitializer {
 				final CDecisionType item = decisionTypeService.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomColor(true));
+				item.setWorkflow(workflowEntityService.getRandom(project));
 				decisionTypeService.save(item);
 				if (minimal) {
 					return;
@@ -828,6 +830,7 @@ public class CDataInitializer {
 				final CMeetingType meetingType = meetingTypeService.newEntity(typeData[0], project);
 				meetingType.setDescription(typeData[1]);
 				meetingType.setColor(CColorUtils.getRandomColor(true));
+				meetingType.setWorkflow(workflowEntityService.getRandom(project));
 				meetingTypeService.save(meetingType);
 				if (minimal) {
 					return;
@@ -864,6 +867,7 @@ public class CDataInitializer {
 				final COrderType orderType = orderTypeService.newEntity(typeData[0], project);
 				orderType.setDescription(typeData[1]);
 				orderType.setColor(CColorUtils.getRandomColor(true));
+				orderType.setWorkflow(workflowEntityService.getRandom(project));
 				orderTypeService.save(orderType);
 				if (minimal) {
 					return;
@@ -1103,20 +1107,19 @@ public class CDataInitializer {
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
 					// Project-specific type and configuration entities
+					initializeSampleCurrencies(project, minimal);
 					initializeSampleProjectItemStatuses(project, minimal);
 					initializeSampleApprovalStatuses(project, minimal);
-					// types
 					initializeSampleProjectRoles(project, minimal);
+					initializeSampleWorkflowEntities(project, minimal);
+					// types
 					initializeSampleMeetingTypes(project, minimal);
 					initializeSampleDecisionTypes(project, minimal);
 					initializeSampleOrderTypes(project, minimal);
 					initializeSampleActivityTypes(project, minimal);
 					initializeSampleActivityPriorities(project, minimal);
 					initializeSampleCommentPriorities(project, minimal);
-					initializeSampleCurrencies(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
-					initializeSampleWorkflowEntities(project, minimal);
-					// Create sample entities (decisions and meetings with comments)
 					initializeSampleDecisions(project, minimal);
 					initializeSampleMeetings(project, minimal);
 					if (minimal) {
