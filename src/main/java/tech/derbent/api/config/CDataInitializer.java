@@ -74,8 +74,10 @@ import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
+import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.domain.CUser;
@@ -149,6 +151,7 @@ public class CDataInitializer {
 	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserService userService;
 	private final CWorkflowEntityService workflowEntityService;
+	private final CWorkflowStatusRelationService workflowStatusRelationService;
 
 	public CDataInitializer(final ISessionService sessionService) {
 		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
@@ -205,6 +208,8 @@ public class CDataInitializer {
 		Check.notNull(userProjectSettingsService, "UserProjectSettingsService bean not found");
 		Check.notNull(workflowEntityService, "WorkflowEntityService bean not found");
 		Check.notNull(projectItemStatusService, "ProjectItemStatusService bean not found");
+		workflowStatusRelationService = CSpringContext.getBean(CWorkflowStatusRelationService.class);
+		Check.notNull(workflowStatusRelationService, "WorkflowStatusRelationService bean not found");
 		LOGGER.info("All service beans obtained successfully");
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
 		jdbcTemplate = new JdbcTemplate(ds);
@@ -733,16 +738,33 @@ public class CDataInitializer {
 		try {
 			// Get random values from database for dependencies
 			final CMeetingType type1 = meetingTypeService.getRandom(project);
-			final CProjectItemStatus status1 = projectItemStatusService.getRandom(project);
 			final CUser user1 = userService.getRandom();
+			// Get a random workflow and a status from that workflow
+			final CWorkflowEntity workflow1 = workflowEntityService.getRandom(project);
+			CProjectItemStatus status1 = projectItemStatusService.getRandom(project);
+			if (workflow1 != null) {
+				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow1);
+				if (!relations.isEmpty()) {
+					status1 = relations.get(0).getToStatus();
+				}
+			}
 			final CMeetingType type2 = meetingTypeService.getRandom(project);
-			final CProjectItemStatus status2 = projectItemStatusService.getRandom(project);
 			final CUser user2 = userService.getRandom();
+			// Get another random workflow and status
+			final CWorkflowEntity workflow2 = workflowEntityService.getRandom(project);
+			CProjectItemStatus status2 = projectItemStatusService.getRandom(project);
+			if (workflow2 != null) {
+				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow2);
+				if (!relations.isEmpty()) {
+					status2 = relations.get(0).getToStatus();
+				}
+			}
 			// Create first meeting
 			final tech.derbent.app.meetings.domain.CMeeting meeting1 =
 					new tech.derbent.app.meetings.domain.CMeeting("Q1 Planning Session", project, type1);
 			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
 			meeting1.setStatus(status1);
+			meeting1.setWorkflow(workflow1);
 			meeting1.setAssignedTo(user1);
 			meeting1.setResponsible(user2);
 			meeting1.setMeetingDate(java.time.LocalDateTime.now().plusDays(7));
@@ -762,6 +784,7 @@ public class CDataInitializer {
 					new tech.derbent.app.meetings.domain.CMeeting("Technical Architecture Review", project, type2);
 			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
 			meeting2.setStatus(status2);
+			meeting2.setWorkflow(workflow2);
 			meeting2.setAssignedTo(user2);
 			meeting2.setResponsible(user1);
 			meeting2.setMeetingDate(java.time.LocalDateTime.now().plusDays(14));
@@ -920,11 +943,31 @@ public class CDataInitializer {
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleWorkflowEntities(final CProject project, boolean minimal) {
 		try {
+			// Get available statuses for this project
+			final List<CProjectItemStatus> statuses = projectItemStatusService.list(Pageable.unpaged()).getContent();
+			final List<CUserProjectRole> roles = userProjectRoleService.list(Pageable.unpaged()).getContent();
+			if (statuses.isEmpty() || roles.isEmpty()) {
+				LOGGER.warn("No statuses or roles found for project {}. Skipping workflow initialization.", project.getName());
+				return;
+			}
 			// Create a basic workflow for activity status transitions
 			final CWorkflowEntity activityWorkflow = new CWorkflowEntity("Activity Status Workflow", project);
 			activityWorkflow.setDescription("Defines status transitions for activities based on user roles");
 			activityWorkflow.setIsActive(true);
 			workflowEntityService.save(activityWorkflow);
+			// Add status relations to the workflow
+			// Create transitions for each status pair
+			for (int i = 0; i < Math.min(statuses.size() - 1, 3); i++) {
+				final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
+				relation.setWorkflowEntity(activityWorkflow);
+				relation.setFromStatus(statuses.get(i));
+				relation.setToStatus(statuses.get(i + 1));
+				// Add first role to the transition
+				if (!roles.isEmpty()) {
+					relation.getRoles().add(roles.get(0));
+				}
+				workflowStatusRelationService.save(relation);
+			}
 			if (minimal) {
 				return;
 			}
@@ -933,12 +976,34 @@ public class CDataInitializer {
 			meetingWorkflow.setDescription("Defines status transitions for meetings based on user roles");
 			meetingWorkflow.setIsActive(true);
 			workflowEntityService.save(meetingWorkflow);
+			// Add status relations to meeting workflow
+			for (int i = 0; i < Math.min(statuses.size() - 1, 2); i++) {
+				final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
+				relation.setWorkflowEntity(meetingWorkflow);
+				relation.setFromStatus(statuses.get(i));
+				relation.setToStatus(statuses.get(i + 1));
+				if (!roles.isEmpty()) {
+					relation.getRoles().add(roles.get(0));
+				}
+				workflowStatusRelationService.save(relation);
+			}
 			// Create workflow for decision approval process
 			final CWorkflowEntity decisionWorkflow = new CWorkflowEntity("Decision Approval Workflow", project);
 			decisionWorkflow.setDescription("Defines approval workflow for strategic decisions");
 			decisionWorkflow.setIsActive(true);
 			workflowEntityService.save(decisionWorkflow);
-			LOGGER.debug("Created sample workflow entities for project: {}", project.getName());
+			// Add status relations to decision workflow
+			for (int i = 0; i < Math.min(statuses.size() - 1, 2); i++) {
+				final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
+				relation.setWorkflowEntity(decisionWorkflow);
+				relation.setFromStatus(statuses.get(i));
+				relation.setToStatus(statuses.get(i + 1));
+				if (!roles.isEmpty()) {
+					relation.getRoles().add(roles.get(0));
+				}
+				workflowStatusRelationService.save(relation);
+			}
+			LOGGER.debug("Created sample workflow entities with status relations for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample workflow entities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample workflow entities for project: " + project.getName(), e);
