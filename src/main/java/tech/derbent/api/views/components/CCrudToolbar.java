@@ -7,16 +7,26 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import tech.derbent.api.components.CColorAwareComboBox;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CProjectItem;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
+import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
+import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 
 /** Generic CRUD toolbar component that provides comprehensive Create, Read, Update, Delete, and Refresh functionality for any entity type. Includes
  * proper binding integration, validation, error handling, and update notifications.
@@ -33,11 +43,14 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private final CAbstractService<EntityClass> entityService;
 	private Supplier<EntityClass> newEntitySupplier;
 	private CNotificationService notificationService; // Optional injection
+	private CProjectItemStatusService projectItemStatusService; // Optional injection for status
 	private CButton refreshButton;
 	private Consumer<EntityClass> refreshCallback;
 	private CButton saveButton;
 	private Consumer<EntityClass> saveCallback;
+	private ComboBox<CProjectItemStatus> statusComboBox; // Workflow status selector
 	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
+	private CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
 
 	public CCrudToolbar(final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass) {
 		this.entityService = entityService;
@@ -81,7 +94,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		// Refresh Button
 		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> handleRefresh());
 		refreshButton.getElement().setAttribute("title", "Refresh data");
+		// Add basic buttons first
 		add(createButton, saveButton, deleteButton, refreshButton);
+		// Create workflow status combobox if entity is a CProjectItem
+		if (CProjectItem.class.isAssignableFrom(entityClass)) {
+			createWorkflowStatusComboBox();
+		}
 		updateButtonStates();
 	}
 
@@ -308,6 +326,11 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		this.notificationService = notificationService;
 	}
 
+	/** Sets the project item status service for workflow status management. */
+	public void setProjectItemStatusService(final CProjectItemStatusService projectItemStatusService) {
+		this.projectItemStatusService = projectItemStatusService;
+	}
+
 	/** Sets the callback for refresh operations.
 	 * @param refreshCallback callback to execute when refresh is triggered */
 	public void setRefreshCallback(final Consumer<EntityClass> refreshCallback) {
@@ -319,6 +342,11 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @param saveCallback callback to execute when save is triggered */
 	public void setSaveCallback(final Consumer<EntityClass> saveCallback) {
 		this.saveCallback = saveCallback;
+	}
+
+	/** Sets the workflow status relation service for workflow validation. */
+	public void setWorkflowStatusRelationService(final CWorkflowStatusRelationService workflowStatusRelationService) {
+		this.workflowStatusRelationService = workflowStatusRelationService;
 	}
 
 	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
@@ -344,6 +372,125 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		}
 	}
 
+	/** Creates the workflow status combobox for CProjectItem entities. */
+	private void createWorkflowStatusComboBox() {
+		try {
+			statusComboBox = new CColorAwareComboBox<>(CEntityFieldService.createFieldInfo(CProjectItem.class.getDeclaredField("status")));
+			statusComboBox.setLabel("Workflow Status");
+			statusComboBox.setPlaceholder("Select status");
+			statusComboBox.setWidth("250px");
+			statusComboBox.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
+			statusComboBox.setAllowCustomValue(false);
+			statusComboBox.setClearButtonVisible(false);
+			// Add value change listener to handle workflow transitions
+			statusComboBox.addValueChangeListener(event -> {
+				if (event.isFromClient() && event.getValue() != null && currentEntity instanceof CProjectItem) {
+					handleWorkflowStatusChange((CProjectItem<?>) currentEntity, event.getValue());
+				}
+			});
+			add(statusComboBox);
+			LOGGER.debug("Created workflow status combobox for entity: {}", entityClass.getSimpleName());
+		} catch (Exception e) {
+			LOGGER.error("Error creating workflow status combobox", e);
+		}
+	}
+
+	/** Gets the list of valid next statuses for the current entity based on its workflow.
+	 * @param projectItem the project item entity
+	 * @return list of valid next statuses */
+	private List<CProjectItemStatus> getValidNextStatuses(final CProjectItem<?> projectItem) {
+		final List<CProjectItemStatus> validStatuses = new ArrayList<>();
+		if (projectItem == null) {
+			return validStatuses;
+		}
+		final CWorkflowEntity workflow = projectItem.getWorkflow();
+		final CProjectItemStatus currentStatus = projectItem.getStatus();
+		if (workflow == null || workflowStatusRelationService == null) {
+			// No workflow assigned - return all statuses if service available
+			if (projectItemStatusService != null) {
+				try {
+					validStatuses.addAll(projectItemStatusService.findAll());
+				} catch (Exception e) {
+					LOGGER.error("Error loading all statuses", e);
+				}
+			}
+			return validStatuses;
+		}
+		try {
+			// Get workflow relations to find valid next statuses
+			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
+			if (currentStatus != null) {
+				// Find relations where fromStatus matches current status
+				relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
+						.distinct().forEach(validStatuses::add);
+			}
+			// Always include current status
+			if (currentStatus != null && !validStatuses.contains(currentStatus)) {
+				validStatuses.add(0, currentStatus);
+			}
+			// If no valid transitions found, show current status only
+			if (validStatuses.isEmpty() && currentStatus != null) {
+				validStatuses.add(currentStatus);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error loading workflow status relations", e);
+			// Fallback to showing all statuses
+			if (projectItemStatusService != null) {
+				try {
+					validStatuses.addAll(projectItemStatusService.findAll());
+				} catch (Exception ex) {
+					LOGGER.error("Error loading all statuses as fallback", ex);
+				}
+			}
+		}
+		return validStatuses;
+	}
+
+	/** Handles workflow status change, validates transition and saves the entity.
+	 * @param projectItem the project item to update
+	 * @param newStatus   the new status to set */
+	private void handleWorkflowStatusChange(final CProjectItem<?> projectItem, final CProjectItemStatus newStatus) {
+		try {
+			if (projectItem == null || newStatus == null) {
+				return;
+			}
+			final CProjectItemStatus currentStatus = projectItem.getStatus();
+			// If status hasn't changed, do nothing
+			if (currentStatus != null && currentStatus.getId().equals(newStatus.getId())) {
+				return;
+			}
+			// Validate workflow transition
+			final CWorkflowEntity workflow = projectItem.getWorkflow();
+			if (workflow != null && currentStatus != null && workflowStatusRelationService != null) {
+				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
+				final boolean isValidTransition = relations.stream()
+						.anyMatch(r -> r.getFromStatus().getId().equals(currentStatus.getId()) && r.getToStatus().getId().equals(newStatus.getId()));
+				if (!isValidTransition) {
+					showErrorNotification("Invalid workflow transition from '" + currentStatus.getName() + "' to '" + newStatus.getName() + "'");
+					// Reset combobox to current status
+					statusComboBox.setValue(currentStatus);
+					return;
+				}
+			}
+			// Update and save entity
+			projectItem.setStatus(newStatus);
+			try {
+				entityService.save(currentEntity);
+				showSuccessNotification("Status updated to '" + newStatus.getName() + "'");
+				// Notify listeners
+				notifyListenersSaved(currentEntity);
+			} catch (Exception e) {
+				LOGGER.error("Error saving entity after status change", e);
+				showErrorNotification("Failed to update status: " + e.getMessage());
+				// Reset combobox to current status
+				statusComboBox.setValue(currentStatus);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error handling workflow status change", e);
+			showErrorNotification("Error updating status: " + e.getMessage());
+		}
+	}
+
 	/** Updates button enabled/disabled states based on current context. */
 	private void updateButtonStates() {
 		// LOGGER.debug("Updating button states in toolbar for entity.");
@@ -363,6 +510,14 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		}
 		if (refreshButton != null) {
 			refreshButton.setEnabled(canRefresh);
+		}
+		// Update workflow status combobox
+		if (statusComboBox != null && currentEntity instanceof CProjectItem) {
+			final CProjectItem<?> projectItem = (CProjectItem<?>) currentEntity;
+			final List<CProjectItemStatus> validStatuses = getValidNextStatuses(projectItem);
+			statusComboBox.setItems(validStatuses);
+			statusComboBox.setValue(projectItem.getStatus());
+			statusComboBox.setEnabled(hasEntityId && !validStatuses.isEmpty());
 		}
 	}
 }
