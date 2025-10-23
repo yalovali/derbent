@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import com.microsoft.playwright.Locator;
 import tech.derbent.Application;
-import tech.derbent.api.utils.Check;
 
 /** Playwright test to diagnose and verify dialog box component refresh issues. This test specifically checks if ComboBox and other components in
  * relation dialogs properly display values when editing existing entities. */
@@ -17,6 +16,109 @@ import tech.derbent.api.utils.Check;
 public class CDialogRefreshTest extends CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogRefreshTest.class);
+
+	private void createTestStatusTransition() {
+		LOGGER.info("➕ Creating test status transition");
+		try {
+			// Look for Add/New button in the transitions section
+			Locator addButton = page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
+			if (addButton.count() > 0) {
+				addButton.first().click();
+				wait_1000();
+				takeScreenshot("add-transition-dialog");
+				// Select first option in both ComboBoxes (From Status and To Status)
+				Locator comboBoxes = page.locator("vaadin-dialog-overlay[opened] vaadin-combo-box");
+				if (comboBoxes.count() >= 2) {
+					// Select From Status
+					comboBoxes.first().click();
+					wait_500();
+					Locator fromOptions = page.locator("vaadin-combo-box-item");
+					if (fromOptions.count() > 0) {
+						fromOptions.first().click();
+						wait_500();
+					}
+					// Select To Status (different from From Status)
+					comboBoxes.nth(1).click();
+					wait_500();
+					Locator toOptions = page.locator("vaadin-combo-box-item");
+					if (toOptions.count() > 1) {
+						toOptions.nth(1).click(); // Select second option to be different
+						wait_500();
+					}
+				}
+				// Save
+				clickSave();
+				wait_1000();
+			} else {
+				LOGGER.warn("⚠️ Add/New button not found for creating transition");
+			}
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Failed to create test status transition: {}", e.getMessage());
+		}
+	}
+
+	private void createTestWorkflow() {
+		LOGGER.info("➕ Creating test workflow");
+		try {
+			clickNew();
+			wait_1000();
+			fillFirstTextField("Test Workflow " + System.currentTimeMillis());
+			clickSave();
+			wait_1000();
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Failed to create test workflow: {}", e.getMessage());
+		}
+	}
+
+	private Locator findStatusTransitionsSection() {
+		LOGGER.info("🔍 Looking for status transitions section");
+		// Look for tabs or sections that might contain status transitions
+		String[] possibleSelectors = {
+				"vaadin-tab:has-text('Status Transitions')", "vaadin-tab:has-text('Transitions')", "text='Status Transitions'", "text='Transitions'"
+		};
+		for (String selector : possibleSelectors) {
+			Locator element = page.locator(selector);
+			if (element.count() > 0) {
+				LOGGER.info("✅ Found transitions section with selector: {}", selector);
+				element.first().click();
+				wait_1000();
+				return element.first();
+			}
+		}
+		// If no tab found, assume the transitions are already visible
+		LOGGER.info("ℹ️ No transitions tab found, assuming transitions are visible");
+		return page.locator("body").first();
+	}
+
+	private boolean navigateToWorkflows() {
+		LOGGER.info("🧭 Navigating to Workflows view");
+		try {
+			// Try direct route first
+			String[] possibleRoutes = {
+					"workflow", "workflows", "workflow-entity", "workflow-management"
+			};
+			for (String route : possibleRoutes) {
+				try {
+					page.navigate("http://localhost:" + port + "/" + route);
+					wait_2000();
+					if (page.locator("vaadin-grid").count() > 0) {
+						LOGGER.info("✅ Navigated to workflows via route: {}", route);
+						return true;
+					}
+				} catch (Exception e) {
+					LOGGER.debug("⚠️ Route {} failed: {}", route, e.getMessage());
+				}
+			}
+			// Try menu navigation
+			if (navigateToViewByText("Workflow")) {
+				return true;
+			}
+			return false;
+		} catch (Exception e) {
+			LOGGER.error("❌ Failed to navigate to workflows: {}", e.getMessage());
+			return false;
+		}
+	}
 
 	@Test
 	public void testWorkflowStatusRelationDialogRefresh() throws Exception {
@@ -153,108 +255,5 @@ public class CDialogRefreshTest extends CBaseUITest {
 			takeScreenshot("edit-button-not-found");
 		}
 		LOGGER.info("✅ Dialog refresh test completed");
-	}
-
-	private boolean navigateToWorkflows() {
-		LOGGER.info("🧭 Navigating to Workflows view");
-		try {
-			// Try direct route first
-			String[] possibleRoutes = {
-					"workflow", "workflows", "workflow-entity", "workflow-management"
-			};
-			for (String route : possibleRoutes) {
-				try {
-					page.navigate("http://localhost:" + port + "/" + route);
-					wait_2000();
-					if (page.locator("vaadin-grid").count() > 0) {
-						LOGGER.info("✅ Navigated to workflows via route: {}", route);
-						return true;
-					}
-				} catch (Exception e) {
-					LOGGER.debug("⚠️ Route {} failed: {}", route, e.getMessage());
-				}
-			}
-			// Try menu navigation
-			if (navigateToViewByText("Workflow")) {
-				return true;
-			}
-			return false;
-		} catch (Exception e) {
-			LOGGER.error("❌ Failed to navigate to workflows: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	private void createTestWorkflow() {
-		LOGGER.info("➕ Creating test workflow");
-		try {
-			clickNew();
-			wait_1000();
-			fillFirstTextField("Test Workflow " + System.currentTimeMillis());
-			clickSave();
-			wait_1000();
-		} catch (Exception e) {
-			LOGGER.warn("⚠️ Failed to create test workflow: {}", e.getMessage());
-		}
-	}
-
-	private Locator findStatusTransitionsSection() {
-		LOGGER.info("🔍 Looking for status transitions section");
-		// Look for tabs or sections that might contain status transitions
-		String[] possibleSelectors = {
-				"vaadin-tab:has-text('Status Transitions')", "vaadin-tab:has-text('Transitions')", "text='Status Transitions'", "text='Transitions'"
-		};
-		for (String selector : possibleSelectors) {
-			Locator element = page.locator(selector);
-			if (element.count() > 0) {
-				LOGGER.info("✅ Found transitions section with selector: {}", selector);
-				element.first().click();
-				wait_1000();
-				return element.first();
-			}
-		}
-		// If no tab found, assume the transitions are already visible
-		LOGGER.info("ℹ️ No transitions tab found, assuming transitions are visible");
-		return page.locator("body").first();
-	}
-
-	private void createTestStatusTransition() {
-		LOGGER.info("➕ Creating test status transition");
-		try {
-			// Look for Add/New button in the transitions section
-			Locator addButton = page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
-			if (addButton.count() > 0) {
-				addButton.first().click();
-				wait_1000();
-				takeScreenshot("add-transition-dialog");
-				// Select first option in both ComboBoxes (From Status and To Status)
-				Locator comboBoxes = page.locator("vaadin-dialog-overlay[opened] vaadin-combo-box");
-				if (comboBoxes.count() >= 2) {
-					// Select From Status
-					comboBoxes.first().click();
-					wait_500();
-					Locator fromOptions = page.locator("vaadin-combo-box-item");
-					if (fromOptions.count() > 0) {
-						fromOptions.first().click();
-						wait_500();
-					}
-					// Select To Status (different from From Status)
-					comboBoxes.nth(1).click();
-					wait_500();
-					Locator toOptions = page.locator("vaadin-combo-box-item");
-					if (toOptions.count() > 1) {
-						toOptions.nth(1).click(); // Select second option to be different
-						wait_500();
-					}
-				}
-				// Save
-				clickSave();
-				wait_1000();
-			} else {
-				LOGGER.warn("⚠️ Add/New button not found for creating transition");
-			}
-		} catch (Exception e) {
-			LOGGER.warn("⚠️ Failed to create test status transition: {}", e.getMessage());
-		}
 	}
 }

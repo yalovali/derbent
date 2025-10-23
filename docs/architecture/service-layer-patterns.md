@@ -324,7 +324,7 @@ Domain services extend the appropriate base service and add business logic.
 @Service
 @PreAuthorize("isAuthenticated()")
 public class CActivityService extends CEntityOfProjectService<CActivity> 
-    implements IKanbanService<CActivity, CProjectItemStatus> {
+   
     
     private final CActivityPriorityService activityPriorityService;
     private final CProjectItemStatusService activityStatusService;

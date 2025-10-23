@@ -7,7 +7,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {
@@ -27,7 +26,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 			dataProviderBean = "CProjectItemStatusService", setBackgroundFromColor = true, useIcon = true
 	)
 	protected CProjectItemStatus status;
-	protected CWorkflowEntity workflow;
 
 	/** Default constructor for JPA. */
 	protected CProjectItem() {
@@ -71,4 +69,9 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	public void setParentId(final Long parentId) { this.parentId = parentId; }
 
 	public void setParentType(final String parentType) { this.parentType = parentType; }
+
+	public void setStatus(final CProjectItemStatus status) {
+		this.status = status;
+		updateLastModified();
+	}
 }

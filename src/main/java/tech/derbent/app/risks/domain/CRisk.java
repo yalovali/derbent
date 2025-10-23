@@ -5,18 +5,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.app.projects.domain.CProject;
 
 @Entity
 @Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
-public class CRisk extends CEntityOfProject<CRisk> {
+public class CRisk extends CProjectItem<CRisk> {
 
 	public static final String DEFAULT_COLOR = "#003444";
 	public static final String DEFAULT_ICON = "vaadin:cart";
@@ -28,13 +25,6 @@ public class CRisk extends CEntityOfProject<CRisk> {
 			hidden = false, order = 2, useRadioButtons = false
 	)
 	private ERiskSeverity riskSeverity;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "criskstatus_id", nullable = true)
-	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current status of the risk", hidden = false, order = 3,
-			dataProviderBean = "CRiskStatusService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CRiskStatus status;
 
 	/** Default constructor for JPA. */
 	public CRisk() {
@@ -49,18 +39,8 @@ public class CRisk extends CEntityOfProject<CRisk> {
 
 	public ERiskSeverity getRiskSeverity() { return riskSeverity; }
 
-	public CRiskStatus getStatus() { return status; }
-
-	public void setRiskSeverity(final ERiskSeverity riskSeverity) { this.riskSeverity = riskSeverity; }
-
-	public void setStatus(final CRiskStatus status) { this.status = status; }
-
 	@Override
 	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (status != null) {
-			status.getName(); // Trigger status loading
-		}
 		// Parent class relationships (from CEntityOfProject)
 		if (getProject() != null) {
 			getProject().getName(); // Trigger project loading
@@ -72,4 +52,6 @@ public class CRisk extends CEntityOfProject<CRisk> {
 			getCreatedBy().getLogin(); // Trigger creator loading
 		}
 	}
+
+	public void setRiskSeverity(final ERiskSeverity riskSeverity) { this.riskSeverity = riskSeverity; }
 }

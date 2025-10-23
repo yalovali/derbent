@@ -23,9 +23,6 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
-import tech.derbent.api.interfaces.IKanbanEntity;
-import tech.derbent.api.interfaces.IKanbanStatus;
-import tech.derbent.api.interfaces.IKanbanType;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
@@ -33,7 +30,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity {
+public class CActivity extends CProjectItem<CActivity> {
 
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:file-o";
@@ -235,12 +232,6 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 	public LocalDate getStartDate() { return startDate; }
 
 	@Override
-	public CProjectItemStatus getStatus() { return status; }
-
-	@Override
-	public IKanbanType getType() { return activityType; }
-
-	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships
 		if (activityType != null) {
@@ -435,6 +426,7 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 		updateLastModified();
 	}
 
+	@Override
 	public void setStatus(final CProjectItemStatus status) {
 		this.status = status;
 		// Auto-set completion date if status is final
@@ -445,13 +437,5 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 			}
 		}
 		updateLastModified();
-	}
-
-	// CKanbanEntity implementation methods
-	@Override
-	public void setStatus(final IKanbanStatus status) {
-		if (status instanceof CProjectItemStatus) {
-			setStatus((CProjectItemStatus) status);
-		}
 	}
 }

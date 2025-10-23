@@ -3,15 +3,12 @@ package tech.derbent.app.meetings.service;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.interfaces.IKanbanService;
-import tech.derbent.api.services.CEntityOfProjectService;
-import tech.derbent.api.utils.CKanbanUtils;
+import tech.derbent.api.services.CProjectItemService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.meetings.domain.CMeetingStatus;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -19,32 +16,19 @@ import tech.derbent.base.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CMeetingService extends CEntityOfProjectService<CMeeting> implements IKanbanService<CMeeting, CMeetingStatus> {
+public class CMeetingService extends CProjectItemService<CMeeting> {
 
 	private final CMeetingTypeService meetingTypeService;
-	private final CMeetingStatusService meetingStatusService;
 
 	CMeetingService(final IMeetingRepository repository, final Clock clock, final ISessionService sessionService,
-			final CMeetingTypeService meetingTypeService, final CMeetingStatusService meetingStatusService) {
-		super(repository, clock, sessionService);
+			final CMeetingTypeService meetingTypeService, final CProjectItemStatusService projectItemStatusService) {
+		super(repository, clock, sessionService, projectItemStatusService);
 		this.meetingTypeService = meetingTypeService;
-		this.meetingStatusService = meetingStatusService;
 	}
 
 	@Override
 	public String checkDeleteAllowed(final CMeeting entity) {
 		return super.checkDeleteAllowed(entity);
-	}
-
-	@Override
-	public List<CMeetingStatus> getAllStatuses(Long projectId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Map<CMeetingStatus, List<CMeeting>> getEntitiesGroupedByStatus(final Long projectId) {
-		return CKanbanUtils.getEmptyGroupedStatus(this.getClass());
 	}
 
 	@Override
@@ -68,18 +52,5 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 		if (!availableTypes.isEmpty()) {
 			entity.setMeetingType(availableTypes.get(0));
 		}
-		// Note: If no meeting type exists, the field will remain null (it's nullable)
-		// Initialize status - get first available meeting status for the project (optional field, don't throw if missing)
-		final List<CMeetingStatus> availableStatuses = meetingStatusService.listByProject(currentProject);
-		if (!availableStatuses.isEmpty()) {
-			entity.setStatus(availableStatuses.get(0));
-		}
-		// Note: If no status exists, the field will remain null (it's nullable)
-	}
-
-	@Override
-	public CMeeting updateEntityStatus(final CMeeting entity, final CMeetingStatus newStatus) {
-		CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CMeeting::setStatus);
-		return save(entity);
 	}
 }

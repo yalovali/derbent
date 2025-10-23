@@ -4,16 +4,11 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.interfaces.IKanbanService;
-import tech.derbent.api.services.CEntityOfProjectService;
-import tech.derbent.api.services.IEntityOfProjectRepository;
+import tech.derbent.api.services.CProjectItemService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
@@ -24,18 +19,16 @@ import tech.derbent.base.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CActivityService extends CEntityOfProjectService<CActivity> implements IKanbanService<CActivity, CProjectItemStatus> {
+public class CActivityService extends CProjectItemService<CActivity> {
 
 	private final CActivityPriorityService activityPriorityService;
-	private final CProjectItemStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
 
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
-			final CActivityTypeService activityTypeService, final CProjectItemStatusService activityStatusService,
+			final CActivityTypeService activityTypeService, final CProjectItemStatusService projectItemStatusService,
 			final CActivityPriorityService activityPriorityService) {
-		super(repository, clock, sessionService);
+		super(repository, clock, sessionService, projectItemStatusService);
 		this.activityTypeService = activityTypeService;
-		this.activityStatusService = activityStatusService;
 		this.activityPriorityService = activityPriorityService;
 	}
 
@@ -53,29 +46,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity> impleme
 		return noStatus;
 	}
 
-	@Transactional (readOnly = true)
-	public Map<CProjectItemStatus, List<CActivity>> getActivitiesGroupedByStatus(final CProject project) {
-		// Get all activities for the project with type and status loaded
-		final List<CActivity> activities = ((IEntityOfProjectRepository<CActivity>) repository).listByProject(project);
-		// Group by activity status, handling null statuses
-		return activities.stream().collect(Collectors
-				.groupingBy(activity -> activity.getStatus() != null ? activity.getStatus() : createNoStatusInstance(project), Collectors.toList()));
-	}
-
-	@Override
-	public List<CProjectItemStatus> getAllStatuses(Long projectId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	// CKanbanService implementation methods
-	@Override
-	public Map<CProjectItemStatus, List<CActivity>> getEntitiesGroupedByStatus(final Long projectId) {
-		// For now, returning empty as per the original minimal implementation
-		// This would need proper implementation based on project requirements
-		return tech.derbent.api.utils.CKanbanUtils.getEmptyGroupedStatus(this.getClass());
-	}
-
 	@Override
 	protected Class<CActivity> getEntityClass() { return CActivity.class; }
 
@@ -88,10 +58,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity> impleme
 		final List<CActivityType> availableTypes = activityTypeService.listByProject(currentProject);
 		Check.notEmpty(availableTypes, "No activity types available in project " + currentProject.getName() + " - cannot initialize new activity");
 		entity.setActivityType(availableTypes.get(0));
-		final List<CProjectItemStatus> availableStatuses = activityStatusService.listByProject(currentProject);
-		Check.notEmpty(availableStatuses,
-				"No activity statuses available in project " + currentProject.getName() + " - cannot initialize new activity with a status");
-		entity.setStatus(availableStatuses.get(0));
 		final List<CActivityPriority> priorities = activityPriorityService.listByProject(currentProject);
 		Check.notEmpty(priorities, "No activity priorities available in project " + currentProject.getName() + " - cannot initialize new activity");
 		entity.setPriority(priorities.get(0));
@@ -110,11 +76,5 @@ public class CActivityService extends CEntityOfProjectService<CActivity> impleme
 		CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
 		return ((IActivityRepository) repository).listByUser(currentUser);
-	}
-
-	@Override
-	public CActivity updateEntityStatus(final CActivity entity, final CProjectItemStatus newStatus) {
-		tech.derbent.api.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CActivity::setStatus);
-		return save(entity);
 	}
 }

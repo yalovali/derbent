@@ -41,22 +41,16 @@ import tech.derbent.app.decisions.domain.CDecision;
 import tech.derbent.app.decisions.domain.CDecisionType;
 import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
-import tech.derbent.app.decisions.service.CDecisionStatusInitializerService;
-import tech.derbent.app.decisions.service.CDecisionStatusService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
-import tech.derbent.app.meetings.domain.CMeetingStatus;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.app.meetings.service.CMeetingInitializerService;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.meetings.service.CMeetingStatusInitializerService;
-import tech.derbent.app.meetings.service.CMeetingStatusService;
 import tech.derbent.app.meetings.service.CMeetingTypeInitializerService;
 import tech.derbent.app.meetings.service.CMeetingTypeService;
 import tech.derbent.app.orders.domain.CApprovalStatus;
 import tech.derbent.app.orders.domain.CCurrency;
-import tech.derbent.app.orders.domain.COrderStatus;
 import tech.derbent.app.orders.domain.COrderType;
 import tech.derbent.app.orders.service.CApprovalStatusInitializerService;
 import tech.derbent.app.orders.service.CApprovalStatusService;
@@ -64,8 +58,6 @@ import tech.derbent.app.orders.service.CCurrencyInitializerService;
 import tech.derbent.app.orders.service.CCurrencyService;
 import tech.derbent.app.orders.service.COrderInitializerService;
 import tech.derbent.app.orders.service.COrderService;
-import tech.derbent.app.orders.service.COrderStatusInitializerService;
-import tech.derbent.app.orders.service.COrderStatusService;
 import tech.derbent.app.orders.service.COrderTypeInitializerService;
 import tech.derbent.app.orders.service.COrderTypeService;
 import tech.derbent.app.page.service.CPageEntityInitializerService;
@@ -73,11 +65,8 @@ import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectInitializerService;
 import tech.derbent.app.projects.service.CProjectService;
-import tech.derbent.app.risks.domain.CRiskStatus;
 import tech.derbent.app.risks.service.CRiskInitializerService;
 import tech.derbent.app.risks.service.CRiskService;
-import tech.derbent.app.risks.service.CRiskStatusInitializerService;
-import tech.derbent.app.risks.service.CRiskStatusService;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
@@ -137,7 +126,6 @@ public class CDataInitializer {
 	private final CCompanyService companyService;
 	private final CCurrencyService currencyService;
 	private final CDecisionService decisionService;
-	private final CDecisionStatusService decisionStatusService;
 	private final CDecisionTypeService decisionTypeService;
 	@PersistenceContext
 	private EntityManager em;
@@ -145,16 +133,14 @@ public class CDataInitializer {
 	private final CGridEntityService gridEntityService;
 	private final JdbcTemplate jdbcTemplate;
 	private final CMeetingService meetingService;
-	private final CMeetingStatusService meetingStatusService;
 	private final CMeetingTypeService meetingTypeService;
 	private final COrderService orderService;
-	private final COrderStatusService orderStatusService;
 	private final COrderTypeService orderTypeService;
 	private final CPageEntityService pageEntityService;
+	private final CProjectItemStatusService projectItemStatusService;
 	// Service dependencies - injected via constructor
 	private final CProjectService projectService;
 	private final CRiskService riskService;
-	private final CRiskStatusService riskStatusService;
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
 	private final ISessionService sessionService;
@@ -177,14 +163,11 @@ public class CDataInitializer {
 		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
 		orderService = CSpringContext.getBean(COrderService.class);
 		orderTypeService = CSpringContext.getBean(COrderTypeService.class);
-		orderStatusService = CSpringContext.getBean(COrderStatusService.class);
 		companyService = CSpringContext.getBean(CCompanyService.class);
 		commentService = CSpringContext.getBean(CCommentService.class);
 		commentPriorityService = CSpringContext.getBean(CCommentPriorityService.class);
 		meetingService = CSpringContext.getBean(CMeetingService.class);
 		riskService = CSpringContext.getBean(CRiskService.class);
-		meetingStatusService = CSpringContext.getBean(CMeetingStatusService.class);
-		decisionStatusService = CSpringContext.getBean(CDecisionStatusService.class);
 		decisionTypeService = CSpringContext.getBean(CDecisionTypeService.class);
 		activityStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		decisionService = CSpringContext.getBean(CDecisionService.class);
@@ -193,10 +176,10 @@ public class CDataInitializer {
 		screenLinesService = CSpringContext.getBean(CDetailLinesService.class);
 		pageEntityService = CSpringContext.getBean(CPageEntityService.class);
 		ganntViewEntityService = CSpringContext.getBean(CGanntViewEntityService.class);
-		riskStatusService = CSpringContext.getBean(CRiskStatusService.class);
 		userProjectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
 		userCompanyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
+		projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		Check.notNull(activityService, "ActivityService bean not found");
 		Check.notNull(activityPriorityService, "ActivityPriorityService bean not found");
 		Check.notNull(activityStatusService, "ProjectItemStatusService bean not found");
@@ -206,18 +189,14 @@ public class CDataInitializer {
 		Check.notNull(companyService, "CompanyService bean not found");
 		Check.notNull(currencyService, "CurrencyService bean not found");
 		Check.notNull(decisionService, "DecisionService bean not found");
-		Check.notNull(decisionStatusService, "DecisionStatusService bean not found");
 		Check.notNull(decisionTypeService, "DecisionTypeService bean not found");
 		Check.notNull(meetingService, "MeetingService bean not found");
-		Check.notNull(meetingStatusService, "MeetingStatusService bean not found");
 		Check.notNull(meetingTypeService, "MeetingTypeService bean not found");
 		Check.notNull(orderService, "OrderService bean not found");
-		Check.notNull(orderStatusService, "OrderStatusService bean not found");
 		Check.notNull(orderTypeService, "OrderTypeService bean not found");
 		Check.notNull(pageEntityService, "PageEntityService bean not found");
 		Check.notNull(projectService, "ProjectService bean not found");
 		Check.notNull(riskService, "RiskService bean not found");
-		Check.notNull(riskStatusService, "RiskStatusService bean not found");
 		Check.notNull(screenService, "ScreenService bean not found");
 		Check.notNull(screenLinesService, "ScreenLinesService bean not found");
 		Check.notNull(userService, "UserService bean not found");
@@ -225,6 +204,7 @@ public class CDataInitializer {
 		Check.notNull(userCompanyRoleService, "UserCompanyRoleService bean not found");
 		Check.notNull(userProjectSettingsService, "UserProjectSettingsService bean not found");
 		Check.notNull(workflowEntityService, "WorkflowEntityService bean not found");
+		Check.notNull(projectItemStatusService, "ProjectItemStatusService bean not found");
 		LOGGER.info("All service beans obtained successfully");
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
 		jdbcTemplate = new JdbcTemplate(ds);
@@ -265,11 +245,9 @@ public class CDataInitializer {
 			commentService.deleteAllInBatch();
 			commentPriorityService.deleteAllInBatch();
 			meetingService.deleteAllInBatch();
-			meetingStatusService.deleteAllInBatch();
+			projectItemStatusService.deleteAllInBatch();
 			meetingTypeService.deleteAllInBatch();
 			decisionService.deleteAllInBatch();
-			decisionStatusService.deleteAllInBatch();
-			// decisionTypeService.deleteAllInBatch(); // ekleyeceksen
 			activityService.deleteAllInBatch();
 			activityPriorityService.deleteAllInBatch();
 			activityStatusService.deleteAllInBatch();
@@ -279,15 +257,14 @@ public class CDataInitializer {
 			screenService.deleteAllInBatch();
 			currencyService.deleteAllInBatch();
 			orderTypeService.deleteAllInBatch();
-			orderStatusService.deleteAllInBatch();
 			userService.deleteAllInBatch();
 			companyService.deleteAllInBatch();
 			projectService.deleteAllInBatch();
 			pageEntityService.deleteAllInBatch();
 			ganntViewEntityService.deleteAllInBatch();
-			riskStatusService.deleteAllInBatch();
 			userProjectRoleService.deleteAllInBatch();
 			userCompanyRoleService.deleteAllInBatch();
+			projectItemStatusService.deleteAllInBatch();
 			LOGGER.info("Fallback JPA deleteAllInBatch completed.");
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data cleanup", e);
@@ -401,32 +378,6 @@ public class CDataInitializer {
 		companyService.save(manufacturing);
 	}
 
-	private void createMeetingStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
-			final int sortOrder) {
-		final CMeetingStatus status = new CMeetingStatus(name, project);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setFinalStatus(isFinal);
-		status.setSortOrder(sortOrder);
-		meetingStatusService.save(status);
-	}
-
-	/** Create order status entity. */
-	private void createOrderStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
-			final int sortOrder) {
-		try {
-			final COrderStatus status = new COrderStatus(name, project);
-			status.setDescription(description);
-			status.setColor(color);
-			status.setSortOrder(sortOrder);
-			// Note: isFinal parameter is not used as COrderStatus doesn't have this field
-			orderStatusService.save(status);
-		} catch (final Exception e) {
-			LOGGER.error("Error creating order status: {} for project: {}", name, project.getName(), e);
-			throw new RuntimeException("Failed to create order status: " + name, e);
-		}
-	}
-
 	private void createProjectDigitalTransformation(final CCompany company) {
 		final CProject project = new CProject("Digital Transformation Initiative", company);
 		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
@@ -453,15 +404,6 @@ public class CDataInitializer {
 		final CProject project = new CProject("New Product Development", company);
 		project.setDescription("Development of innovative products to expand market reach");
 		projectService.save(project);
-	}
-
-	private void createRiskStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
-			final int sortOrder) {
-		final CRiskStatus status = new CRiskStatus(name, project);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setSortOrder(sortOrder);
-		riskStatusService.save(status);
 	}
 
 	/** Create sample comments for a decision.
@@ -708,7 +650,7 @@ public class CDataInitializer {
 		try {
 			// Get random values from database for dependencies
 			final CDecisionType type1 = decisionTypeService.getRandom(project);
-			final CDecisionStatus status1 = decisionStatusService.getRandom(project);
+			final CProjectItemStatus status1 = activityStatusService.getRandom(project);
 			final CUser user1 = userService.getRandom();
 			// Create first decision
 			final CDecision decision1 = new CDecision("Adopt Cloud-Native Architecture", project);
@@ -728,7 +670,7 @@ public class CDataInitializer {
 			}
 			// Create second decision
 			final CDecisionType type2 = decisionTypeService.getRandom(project);
-			final CDecisionStatus status2 = decisionStatusService.getRandom(project);
+			final CProjectItemStatus status2 = activityStatusService.getRandom(project);
 			final CUser user2 = userService.getRandom();
 			final CDecision decision2 = new CDecision("Implement Agile Methodology", project);
 			decision2.setDescription("Operational decision to transition from waterfall to agile development methodology");
@@ -746,22 +688,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleDecisionStatuses(final CProject project, boolean minimal) {
-		try {
-			createDecisionStatus("Draft", project, "Decision is in draft state", CColorUtils.getRandomColor(true), false, 1);
-			if (minimal) {
-				return;
-			}
-			createDecisionStatus("Under Review", project, "Decision is under review", CColorUtils.getRandomColor(true), false, 2);
-			createDecisionStatus("Approved", project, "Decision has been approved", CColorUtils.getRandomColor(true), true, 3);
-			createDecisionStatus("Implemented", project, "Decision has been implemented", CColorUtils.getRandomColor(true), true, 4);
-			createDecisionStatus("Rejected", project, "Decision has been rejected", CColorUtils.getRandomColor(true), true, 5);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample decision statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample decision statuses for project: " + project.getName(), e);
 		}
 	}
 
@@ -807,10 +733,10 @@ public class CDataInitializer {
 		try {
 			// Get random values from database for dependencies
 			final CMeetingType type1 = meetingTypeService.getRandom(project);
-			final CMeetingStatus status1 = meetingStatusService.getRandom(project);
+			final CProjectItemStatus status1 = projectItemStatusService.getRandom(project);
 			final CUser user1 = userService.getRandom();
 			final CMeetingType type2 = meetingTypeService.getRandom(project);
-			final CMeetingStatus status2 = meetingStatusService.getRandom(project);
+			final CProjectItemStatus status2 = projectItemStatusService.getRandom(project);
 			final CUser user2 = userService.getRandom();
 			// Create first meeting
 			final tech.derbent.app.meetings.domain.CMeeting meeting1 =
@@ -854,22 +780,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleMeetingStatuses(final CProject project, boolean minimal) {
-		try {
-			createMeetingStatus("Scheduled", project, "Meeting is scheduled but not yet started", "#3498db", false, 1);
-			if (minimal) {
-				return;
-			}
-			createMeetingStatus("In Progress", project, "Meeting is currently in progress", "#f39c12", false, 2);
-			createMeetingStatus("Completed", project, "Meeting has been completed successfully", "#27ae60", true, 3);
-			createMeetingStatus("Cancelled", project, "Meeting has been cancelled", "#e74c3c", true, 4);
-			createMeetingStatus("Postponed", project, "Meeting has been postponed to a later date", "#9b59b6", false, 5);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing meeting statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize meeting statuses for project: " + project.getName(), e);
-		}
-	}
-
 	private void initializeSampleMeetingTypes(final CProject project, boolean minimal) {
 		try {
 			final String[][] meetingTypes = {
@@ -903,23 +813,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating meeting types for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize meeting types for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleOrderStatuses(final CProject project, boolean minimal) {
-		try {
-			createOrderStatus("Draft", project, "Order is in draft state", "#95a5a6", false, 1);
-			if (minimal) {
-				return;
-			}
-			createOrderStatus("Submitted", project, "Order has been submitted for approval", "#3498db", false, 2);
-			createOrderStatus("Approved", project, "Order has been approved", "#27ae60", false, 3);
-			createOrderStatus("Processing", project, "Order is being processed", "#f39c12", false, 4);
-			createOrderStatus("Delivered", project, "Order has been delivered", "#2ecc71", true, 5);
-			createOrderStatus("Cancelled", project, "Order has been cancelled", "#e74c3c", true, 6);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing order statuses for project: {} {}", project.getName(), e.getMessage());
-			throw e;
 		}
 	}
 
@@ -1003,22 +896,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating project roles for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize project roles for project: " + project.getName(), e);
-		}
-	}
-
-	/** Creates high priority technical risk. */
-	private void initializeSampleRiskStatuses(final CProject project, boolean minimal) {
-		try {
-			createRiskStatus("Identified", project, "Risk has been identified", CColorUtils.getRandomColor(true), false, 1);
-			if (minimal) {
-				return;
-			}
-			createRiskStatus("Assessed", project, "Risk has been assessed", CColorUtils.getRandomColor(true), false, 2);
-			createRiskStatus("Mitigated", project, "Risk mitigation actions taken", CColorUtils.getRandomColor(true), false, 3);
-			createRiskStatus("Closed", project, "Risk is closed", CColorUtils.getRandomColor(true), true, 4);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing risk statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize risk statuses for project: " + project.getName(), e);
 		}
 	}
 
@@ -1153,23 +1030,16 @@ public class CDataInitializer {
 					CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CCommentPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CCurrencyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CDecisionStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CDecisionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CMeetingStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMeetingTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					COrderStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
 					// Project-specific type and configuration entities
-					initializeSampleMeetingStatuses(project, minimal);
 					initializeSampleProjectItemStatuses(project, minimal);
-					initializeSampleOrderStatuses(project, minimal);
 					initializeSampleApprovalStatuses(project, minimal);
-					initializeSampleRiskStatuses(project, minimal);
 					// types
 					initializeSampleProjectRoles(project, minimal);
 					initializeSampleMeetingTypes(project, minimal);
@@ -1177,9 +1047,6 @@ public class CDataInitializer {
 					initializeSampleOrderTypes(project, minimal);
 					initializeSampleActivityTypes(project, minimal);
 					initializeSampleActivityPriorities(project, minimal);
-					// Removed sample data entity creation methods (activities, meetings, decisions, orders, risks)
-					// to follow minimal sample data pattern
-					initializeSampleDecisionStatuses(project, minimal);
 					initializeSampleCommentPriorities(project, minimal);
 					initializeSampleCurrencies(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);

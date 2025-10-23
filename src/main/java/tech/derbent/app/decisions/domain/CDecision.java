@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 
@@ -42,9 +43,9 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	@JoinColumn (name = "decision_status_id", nullable = true)
 	@AMetaData (
 			displayName = "Decision Status", required = false, readOnly = false, description = "Current status of the decision", hidden = false,
-			order = 4, dataProviderBean = "CDecisionStatusService"
+			order = 4, dataProviderBean = "CProjectItemStatusService"
 	)
-	private CDecisionStatus decisionStatus;
+	private CProjectItemStatus decisionStatus;
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "decisiontype_id", nullable = true)
@@ -98,7 +99,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 
 	public CUser getAccountableUser() { return accountableUser; }
 
-	public CDecisionStatus getDecisionStatus() { return decisionStatus; }
+	public CProjectItemStatus getDecisionStatus() { return decisionStatus; }
 
 	public CDecisionType getDecisionType() { return decisionType; }
 
@@ -142,7 +143,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 		updateLastModified();
 	}
 
-	public void setDecisionStatus(final CDecisionStatus decisionStatus) {
+	public void setDecisionStatus(final CProjectItemStatus decisionStatus) {
 		this.decisionStatus = decisionStatus;
 		updateLastModified();
 	}

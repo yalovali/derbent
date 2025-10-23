@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.interfaces.IKanbanType;
 import tech.derbent.app.projects.domain.CProject;
 
 /** CMeetingType - Domain entity representing meeting types. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project-aware type
@@ -15,7 +14,7 @@ import tech.derbent.app.projects.domain.CProject;
 		"name", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingtype_id"))
-public class CMeetingType extends CTypeEntity<CMeetingType> implements IKanbanType {
+public class CMeetingType extends CTypeEntity<CMeetingType> {
 
 	public static final String DEFAULT_COLOR = "#17a2b8";
 	public static final String DEFAULT_ICON = "vaadin:tag";

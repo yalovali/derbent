@@ -18,6 +18,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
@@ -144,9 +145,9 @@ public class COrder extends CEntityOfProject<COrder> {
 	@JoinColumn (name = "order_status_id", nullable = false)
 	@AMetaData (
 			displayName = "Status", required = true, readOnly = false, description = "Current status of the order", hidden = false, order = 30,
-			dataProviderBean = "COrderStatusService"
+			dataProviderBean = "CProjectItemStatusService"
 	)
-	private COrderStatus status;
+	private CProjectItemStatus status;
 
 	public COrder() {
 		super();
@@ -201,7 +202,7 @@ public class COrder extends CEntityOfProject<COrder> {
 
 	public CUser getResponsible() { return responsible; }
 
-	public COrderStatus getStatus() { return status; }
+	public CProjectItemStatus getStatus() { return status; }
 
 	/** Remove an approval from this order.
 	 * @param approval the approval to remove */
@@ -287,7 +288,7 @@ public class COrder extends CEntityOfProject<COrder> {
 		updateLastModified();
 	}
 
-	public void setStatus(final COrderStatus status) {
+	public void setStatus(final CProjectItemStatus status) {
 		this.status = status;
 		updateLastModified();
 	}
