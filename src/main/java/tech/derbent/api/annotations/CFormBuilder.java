@@ -261,7 +261,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					comboBox.setValue(items.get(0));
 				}
 			}
-			safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox");
+			if (binder != null) {
+				// this is valid
+				safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox");
+			}
 			return comboBox;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create or bind ComboBox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());

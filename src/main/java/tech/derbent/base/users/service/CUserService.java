@@ -26,12 +26,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentUserProjectSettings;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -119,9 +119,8 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUser> findAll() {
-		// Enforce company requirement
 		final CCompany currentCompany = getCurrentCompany();
-		LOGGER.debug("Finding all users for company: {}", currentCompany.getName());
+		// LOGGER.debug("Finding all users for company: {}", currentCompany.getName());
 		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
 	}
 
