@@ -2,15 +2,14 @@ package tech.derbent.app.page.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */
@@ -23,8 +22,8 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 	private static final long serialVersionUID = 1L;
 
 	public CDynamicPageViewWithoutGrid(CEntityDB<?> entity, final CPageEntity pageEntity, final ISessionService sessionService,
-			final CDetailSectionService detailSectionService, final ApplicationContext applicationContext) throws Exception {
-		super(pageEntity, sessionService, detailSectionService, applicationContext);
+			final CDetailSectionService detailSectionService) throws Exception {
+		super(pageEntity, sessionService, detailSectionService);
 		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());
 		initializePage();
 		if (entity != null) {

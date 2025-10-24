@@ -12,13 +12,13 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.interfaces.IPageTitleProvider;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.ui.view.MainLayout;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAbstractPage;
-import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Router for dynamic pages that handles all database-defined page routes. This acts as a router for dynamic project pages. */
@@ -85,11 +85,10 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			// Check if this page has grid and detail sections configured
 			if (currentPageEntity.getGridEntity().getAttributeNone() == false) {
 				LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", currentPageEntity.getPageTitle());
-				page = new CDynamicPageViewWithSections(currentPageEntity, sessionService, detailSectionService, gridEntityService,
-						applicationContext);
+				page = new CDynamicPageViewWithSections(currentPageEntity, sessionService, detailSectionService, gridEntityService);
 			} else {
 				LOGGER.debug("Creating standard dynamic page view for: {}", currentPageEntity.getPageTitle());
-				page = new CDynamicPageViewWithoutGrid(null, currentPageEntity, sessionService, detailSectionService, applicationContext);
+				page = new CDynamicPageViewWithoutGrid(null, currentPageEntity, sessionService, detailSectionService);
 			}
 			Check.notNull(page, "Dynamic page view cannot be null");
 			removeAll();

@@ -12,12 +12,17 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.components.CColorAwareComboBox;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.domains.CStatus;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -33,8 +38,10 @@ import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
  * @param <EntityClass> the entity type this toolbar operates on */
 public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends HorizontalLayout {
 
+	private static CDataProviderResolver dataProviderResolver;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCrudToolbar.class);
 	private static final long serialVersionUID = 1L;
+	final CEnhancedBinder<?> binder;
 	private CButton createButton;
 	private EntityClass currentEntity;
 	private CButton deleteButton;
@@ -52,9 +59,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
 	private CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
 
-	public CCrudToolbar(final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass) {
+	public CCrudToolbar(final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass,
+			final CEnhancedBinder<EntityClass> binder) {
 		this.entityService = entityService;
 		this.entityClass = entityClass;
+		dataProviderResolver = CSpringContext.getBean(CDataProviderResolver.class);
+		this.binder = binder;
 		setSpacing(true);
 		setPadding(true);
 		addClassName("crud-toolbar");
@@ -119,6 +129,9 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 				}
 			});
 			add(statusComboBox);
+			EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(CProjectItem.class.getDeclaredField("status"));
+			CColorAwareComboBox<CStatus> box = new CColorAwareComboBox<CStatus>(this, fieldInfo, binder);
+			add(box);
 			LOGGER.debug("Created workflow status combobox for entity: {}", entityClass.getSimpleName());
 		} catch (Exception e) {
 			LOGGER.error("Error creating workflow status combobox", e);

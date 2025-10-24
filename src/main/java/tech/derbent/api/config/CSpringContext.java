@@ -12,13 +12,6 @@ public class CSpringContext implements ApplicationContextAware {
 
 	private static ApplicationContext applicationContext;
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		/***/
-		Check.notNull(applicationContext, "Application context cannot be null");
-		CSpringContext.applicationContext = applicationContext;
-	}
-
 	public static <T> T getBean(Class<T> type) {
 		Check.notNull(CSpringContext.applicationContext, "Application context is not initialized");
 		T result = CSpringContext.applicationContext.getBean(type);
@@ -27,5 +20,23 @@ public class CSpringContext implements ApplicationContextAware {
 		}
 		Check.notNull(result, "Bean of type " + type.getName() + " not found in application context");
 		return result;
+	}
+
+	@SuppressWarnings ("unchecked")
+	public static <T> T getBean(String beanName) {
+		Check.notNull(CSpringContext.applicationContext, "Application context is not initialized");
+		T result = (T) CSpringContext.applicationContext.getBean(beanName);
+		if (result == null) {
+			LoggerFactory.getLogger(CSpringContext.class).error("Bean of type {} not found in application context", beanName);
+		}
+		Check.notNull(result, "Bean of type " + beanName + " not found in application context");
+		return result;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		/***/
+		Check.notNull(applicationContext, "Application context cannot be null");
+		CSpringContext.applicationContext = applicationContext;
 	}
 }

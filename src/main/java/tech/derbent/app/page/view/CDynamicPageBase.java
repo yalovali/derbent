@@ -1,9 +1,9 @@
 package tech.derbent.app.page.view;
 
 import java.lang.reflect.Field;
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.IPageTitleProvider;
@@ -21,7 +21,6 @@ import tech.derbent.base.session.service.ISessionService;
 public abstract class CDynamicPageBase extends CPageBaseProjectAware implements BeforeEnterObserver, IEntityUpdateListener, IPageTitleProvider {
 
 	private static final long serialVersionUID = 1L;
-	protected final ApplicationContext applicationContext;
 	protected Class<?> currentEntityType = null;
 	protected String currentEntityViewName = null;
 	protected Class<?> entityClass;
@@ -30,10 +29,8 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	protected final CPageEntity pageEntity;
 	protected final CPageService<?> pageService;
 
-	public CDynamicPageBase(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService,
-			ApplicationContext applicationContext) {
+	public CDynamicPageBase(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService) {
 		super(sessionService, detailSectionService);
-		this.applicationContext = applicationContext;
 		this.pageEntity = pageEntity;
 		CPageService<?> pageServiceX = null;
 		try {
@@ -106,7 +103,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			Check.notNull(gridEntity, "Grid entity cannot be null");
 			Check.notBlank(gridEntity.getDataServiceBeanName(), "Data service bean name cannot be blank");
 			// Get the service bean from the application context
-			final Object serviceBean = applicationContext.getBean(gridEntity.getDataServiceBeanName());
+			final Object serviceBean = CSpringContext.getBean(gridEntity.getDataServiceBeanName());
 			Check.notNull(serviceBean, "Service bean not found: " + gridEntity.getDataServiceBeanName());
 			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean is not an instance of CAbstractService: " + serviceBean.getClass());
 			entityService = (CAbstractService<?>) serviceBean;

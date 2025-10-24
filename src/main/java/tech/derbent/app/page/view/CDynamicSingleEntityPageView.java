@@ -3,17 +3,16 @@ package tech.derbent.app.page.view;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CCrudToolbar;
 import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Single entity dynamic page view for displaying pageEntity without grid. This page is used for displaying settings, user's single company, etc.
@@ -31,9 +30,8 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	private boolean enableSaveButton = true;
 
 	public CDynamicSingleEntityPageView(final CPageEntity pageEntity, final ISessionService sessionService,
-			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService,
-			final ApplicationContext applicationContext) {
-		super(pageEntity, sessionService, detailSectionService, gridEntityService, applicationContext);
+			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService) {
+		super(pageEntity, sessionService, detailSectionService, gridEntityService);
 		// Validate that this page entity is configured for single entity display
 		validateSingleEntityConfiguration();
 		LOGGER.debug("Creating single entity dynamic page view for: {}", pageEntity.getPageTitle());

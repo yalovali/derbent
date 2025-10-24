@@ -10,6 +10,10 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
+import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
@@ -17,10 +21,6 @@ import tech.derbent.api.views.components.CComponentDetailsMasterToolbar;
 import tech.derbent.api.views.components.CCrudToolbar;
 import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CVerticalLayout;
-import tech.derbent.api.screens.domain.CGridEntity;
-import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -84,7 +84,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	})
 	protected CCrudToolbar<EntityClass> createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		// Use static factory method to create toolbar
-		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar(entityService, entityClass);
+		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar(entityService, entityClass, typedBinder);
 		toolbar.setCurrentEntity(typedEntity);
 		toolbar.setNewEntitySupplier(this::createNewEntityInstance);
 		toolbar.setRefreshCallback((currentEntity) -> {

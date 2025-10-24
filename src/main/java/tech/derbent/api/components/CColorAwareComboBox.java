@@ -6,17 +6,18 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CEntityLabel;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorAwareComboBox.class);
 	private static final long serialVersionUID = 1L;
 	private Boolean autoContrast = Boolean.TRUE;
@@ -64,6 +65,47 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		initializeComboBox();
 		CAuxillaries.setId(this);
 		updateFromInfo(fieldInfo);
+	}
+
+	@SuppressWarnings ("unchecked")
+	public CColorAwareComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
+			CDataProviderResolver dataProviderResolver) throws Exception {
+		try {
+			entityType = (Class<T>) fieldInfo.getFieldTypeClass();
+			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
+			// LOGGER.debug("Creating CColorAwareComboBox for field: {}", fieldInfo.getFieldName());
+			final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldInfo);
+			configureColorRenderer();
+			List<T> items = null;
+			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
+			items = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
+			Check.notNull(items, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+			if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
+				comboBox.setValue(null);
+			}
+			comboBox.setItems(items);
+			if (!items.isEmpty()) {
+				if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+					// For entity types, try to find by name or toString match
+					final T defaultItem = items.stream().filter(item -> {
+						final String itemDisplay = CColorUtils.getDisplayTextFromEntity(item);
+						return fieldInfo.getDefaultValue().equals(itemDisplay);
+					}).findFirst().orElse(null);
+					if (defaultItem != null) {
+						comboBox.setValue(defaultItem);
+					}
+				} else if (fieldInfo.isAutoSelectFirst()) {
+					comboBox.setValue(items.get(0));
+				}
+			}
+			if (binder != null) {
+				// this is valid
+				binder.bind(this, fieldInfo.getFieldName());
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create or bind ComboBox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
 	}
 
 	/** Configures the enhanced renderer for entities with colors and/or icons. Now uses the new CEntityLabel base class for consistent rendering. */

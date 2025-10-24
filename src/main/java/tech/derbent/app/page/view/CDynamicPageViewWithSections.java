@@ -3,7 +3,6 @@ package tech.derbent.app.page.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import jakarta.annotation.security.PermitAll;
@@ -42,9 +41,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 
 	@Autowired
 	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final ISessionService sessionService,
-			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService,
-			final ApplicationContext applicationContext) {
-		super(pageEntity, sessionService, detailSectionService, applicationContext);
+			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService) {
+		super(pageEntity, sessionService, detailSectionService);
 		this.gridEntityService = gridEntityService;
 		try {
 			initializePage();
@@ -61,7 +59,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 		try {
 			LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
 			// Use static factory method to create toolbar
-			final CCrudToolbar toolbar = new CCrudToolbar(entityService, entityClass);
+			final CCrudToolbar toolbar = new CCrudToolbar(entityService, entityClass, binder);
 			toolbar.setCurrentEntity(null);
 			toolbar.setNewEntitySupplier(() -> {
 				try {
