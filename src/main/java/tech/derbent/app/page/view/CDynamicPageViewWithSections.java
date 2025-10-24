@@ -59,7 +59,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 		try {
 			LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
 			// Use static factory method to create toolbar
-			final CCrudToolbar toolbar = new CCrudToolbar(entityService, entityClass, binder);
+			final CCrudToolbar toolbar = new CCrudToolbar(entityService, entityClass, currentBinder);
 			toolbar.setCurrentEntity(null);
 			toolbar.setNewEntitySupplier(() -> {
 				try {
