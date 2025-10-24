@@ -135,9 +135,17 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		}
 	}
 
+	/** Gets the binder associated with this toolbar.
+	 * @return the binder instance */
+	public CEnhancedBinder<?> getBinder() { return binder; }
+
 	/** Gets the current entity.
 	 * @return the current entity */
 	public EntityClass getCurrentEntity() { return currentEntity; }
+
+	/** Gets the current entity value. This is an alias for getCurrentEntity() to match standard Vaadin component patterns.
+	 * @return the current entity */
+	public EntityClass getValue() { return currentEntity; }
 
 	/** Gets the list of valid next statuses for the current entity based on its workflow.
 	 * @param projectItem the project item entity
@@ -399,9 +407,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			LOGGER.info("Entity deleted successfully: {} with ID: {}", entityClass.getSimpleName(), entityToDelete.getId());
 			// Clear current entity
 			currentEntity = null;
-			// if (binder != null) {
-			// binder.setBean(null);
-			// }
+			// Clear the binder to reset the form
+			if (binder != null) {
+				@SuppressWarnings ("unchecked")
+				final CEnhancedBinder<EntityClass> typedBinder = (CEnhancedBinder<EntityClass>) binder;
+				typedBinder.setBean(null);
+			}
 			updateButtonStates();
 			showSuccessNotification("Entity deleted successfully");
 			// Notify listeners
@@ -434,6 +445,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			dependencyChecker = entityService::checkDeleteAllowed;
 		}
 		updateButtonStates();
+	}
+
+	/** Sets the current entity value. This is an alias for setCurrentEntity() to match standard Vaadin component patterns.
+	 * @param entity the entity to set as current */
+	public void setValue(final EntityClass entity) {
+		setCurrentEntity(entity);
 	}
 
 	/** Sets the dependency checker function that returns error message if entity cannot be deleted.
