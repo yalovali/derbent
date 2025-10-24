@@ -120,6 +120,35 @@ run_comprehensive_test() {
     fi
 }
 
+# Function to run type and status CRUD tests
+run_type_status_test() {
+    echo "🔧 Running Type and Status CRUD Test..."
+    echo "=================================="
+    echo "This test will:"
+    echo "  1. Test complete CRUD operations on Type entities"
+    echo "  2. Test complete CRUD operations on Status entities"
+    echo "  3. Validate toolbar button operations"
+    echo "  4. Verify responses to updates (notifications, grid refresh)"
+    echo "  5. Test validation and error handling"
+    echo ""
+    
+    mkdir -p target/screenshots
+    install_playwright_browsers
+    
+    # Set Playwright environment variables to use cached browser
+    export PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"
+    export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true
+    
+    if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CTypeStatusCrudTest" -Dspring.profiles.active=test -Dplaywright.headless=true; then
+        echo "✅ Type and Status CRUD test completed successfully!"
+        show_screenshots
+    else
+        echo "❌ Type and Status CRUD test failed!"
+        show_screenshots
+        return 1
+    fi
+}
+
 # Function to run all tests
 run_all_tests() {
     echo "🧪 Running All Playwright Tests..."
@@ -131,20 +160,26 @@ run_all_tests() {
     
     local failed=0
     
-    echo "▶️ Test 1/3: Menu Navigation Test"
+    echo "▶️ Test 1/4: Menu Navigation Test"
     if ! run_menu_navigation_test; then
         failed=$((failed + 1))
     fi
     echo ""
     
-    echo "▶️ Test 2/3: Company Login Test"
+    echo "▶️ Test 2/4: Company Login Test"
     if ! run_company_login_test; then
         failed=$((failed + 1))
     fi
     echo ""
     
-    echo "▶️ Test 3/3: Comprehensive Dynamic Views Test"
+    echo "▶️ Test 3/4: Comprehensive Dynamic Views Test"
     if ! run_comprehensive_test; then
+        failed=$((failed + 1))
+    fi
+    echo ""
+    
+    echo "▶️ Test 4/4: Type and Status CRUD Test"
+    if ! run_type_status_test; then
         failed=$((failed + 1))
     fi
     echo ""
@@ -184,6 +219,7 @@ OPTIONS:
     menu            Run the sample data menu navigation test
     login           Run the company-aware login pattern test
     comprehensive   Run comprehensive dynamic views test
+    status-types    Run Type and Status CRUD operations test
     all             Run all Playwright tests
     clean           Clean test artifacts (screenshots, reports)
     install         Install Playwright browsers
@@ -212,6 +248,13 @@ DESCRIPTION:
        - Grid functionality across views
        - Form validation testing
     
+    4. Type and Status CRUD Test
+       - Test complete CRUD operations on Type entities
+       - Test complete CRUD operations on Status entities
+       - Validate toolbar button operations (New, Save, Delete, Refresh)
+       - Verify responses to updates (notifications, grid refresh)
+       - Test validation and error handling
+    
     Screenshots are saved to: target/screenshots/
 
 EXAMPLES:
@@ -219,6 +262,7 @@ EXAMPLES:
     ./run-playwright-tests.sh menu         # Run menu navigation test (explicit)
     ./run-playwright-tests.sh login        # Run company login test
     ./run-playwright-tests.sh comprehensive # Run comprehensive test
+    ./run-playwright-tests.sh status-types # Run Type and Status CRUD test
     ./run-playwright-tests.sh all          # Run all tests
     ./run-playwright-tests.sh clean        # Clean up test artifacts
     ./run-playwright-tests.sh install      # Install Playwright browsers
@@ -236,6 +280,9 @@ case "${1:-menu}" in
         ;;
     comprehensive)
         run_comprehensive_test
+        ;;
+    status-types)
+        run_type_status_test
         ;;
     all)
         run_all_tests
