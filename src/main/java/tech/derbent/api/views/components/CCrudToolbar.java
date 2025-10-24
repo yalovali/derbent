@@ -19,14 +19,12 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
-import tech.derbent.api.domains.CStatus;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -50,6 +48,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private final CAbstractService<EntityClass> entityService;
 	private Supplier<EntityClass> newEntitySupplier;
 	private CNotificationService notificationService; // Optional injection
+	private IContentOwner parentPage;
 	private CProjectItemStatusService projectItemStatusService; // Optional injection for status
 	private CButton refreshButton;
 	private Consumer<EntityClass> refreshCallback;
@@ -59,10 +58,11 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
 	private CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
 
-	public CCrudToolbar(final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass,
+	public CCrudToolbar(IContentOwner parentPage, final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass,
 			final CEnhancedBinder<EntityClass> binder) {
 		this.entityService = entityService;
 		this.entityClass = entityClass;
+		this.parentPage = parentPage;
 		dataProviderResolver = CSpringContext.getBean(CDataProviderResolver.class);
 		this.binder = binder;
 		setSpacing(true);
@@ -116,20 +116,14 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	/** Creates the workflow status combobox for CProjectItem entities. */
 	private void createWorkflowStatusComboBox() {
 		try {
-			statusComboBox = new CColorAwareComboBox<>(CEntityFieldService.createFieldInfo(CProjectItem.class.getDeclaredField("status")));
-			statusComboBox.setPlaceholder("Select status");
-			statusComboBox.setWidth("250px");
-			statusComboBox.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
-			statusComboBox.setAllowCustomValue(false);
-			statusComboBox.setClearButtonVisible(false);
-			// Add value change listener to handle workflow transitions
+			statusComboBox = new CColorAwareComboBox<CProjectItemStatus>(parentPage,
+					CEntityFieldService.createFieldInfo(CProjectItem.class.getDeclaredField("status")), binder, dataProviderResolver);
 			statusComboBox.addValueChangeListener(event -> {
 				if (event.isFromClient() && event.getValue() != null && currentEntity instanceof CProjectItem) {
 					handleWorkflowStatusChange((CProjectItem<?>) currentEntity, event.getValue());
 				}
 			});
 			add(statusComboBox);
-			LOGGER.debug("Created workflow status combobox for entity: {}", entityClass.getSimpleName());
 		} catch (Exception e) {
 			LOGGER.error("Error creating workflow status combobox", e);
 		}
@@ -142,10 +136,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	/** Gets the current entity.
 	 * @return the current entity */
 	public EntityClass getCurrentEntity() { return currentEntity; }
-
-	/** Gets the current entity value. This is an alias for getCurrentEntity() to match standard Vaadin component patterns.
-	 * @return the current entity */
-	public EntityClass getValue() { return currentEntity; }
 
 	/** Gets the list of valid next statuses for the current entity based on its workflow.
 	 * @param projectItem the project item entity
@@ -197,6 +187,10 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		}
 		return validStatuses;
 	}
+
+	/** Gets the current entity value. This is an alias for getCurrentEntity() to match standard Vaadin component patterns.
+	 * @return the current entity */
+	public EntityClass getValue() { return currentEntity; }
 
 	/** Handles the create (new entity) operation. */
 	private void handleCreate() {
@@ -447,12 +441,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		updateButtonStates();
 	}
 
-	/** Sets the current entity value. This is an alias for setCurrentEntity() to match standard Vaadin component patterns.
-	 * @param entity the entity to set as current */
-	public void setValue(final EntityClass entity) {
-		setCurrentEntity(entity);
-	}
-
 	/** Sets the dependency checker function that returns error message if entity cannot be deleted.
 	 * @param dependencyChecker function that returns null if entity can be deleted, or error message if it cannot */
 	public void setDependencyChecker(final Function<EntityClass, String> dependencyChecker) {
@@ -487,6 +475,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @param saveCallback callback to execute when save is triggered */
 	public void setSaveCallback(final Consumer<EntityClass> saveCallback) {
 		this.saveCallback = saveCallback;
+	}
+
+	/** Sets the current entity value. This is an alias for setCurrentEntity() to match standard Vaadin component patterns.
+	 * @param entity the entity to set as current */
+	public void setValue(final EntityClass entity) {
+		setCurrentEntity(entity);
 	}
 
 	/** Sets the workflow status relation service for workflow validation. */

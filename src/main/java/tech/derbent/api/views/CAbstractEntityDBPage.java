@@ -81,7 +81,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.sessionService = sessionService;
 		binder = new CEnhancedBinder<>(entityClass);
 		// Initialize CRUD toolbar
-		crudToolbar = new CCrudToolbar<>(entityService, entityClass, binder);
+		crudToolbar = new CCrudToolbar<>(this, entityService, entityClass, binder);
 		initializeCrudToolbar();
 		createPageContent();
 	}
