@@ -102,4 +102,10 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		Check.notNull(entityService, "Entity service is not initialized");
 		entityService.findAll().stream().findFirst().ifPresent(this::setCurrentEntity);
 	}
+
+	@Override
+	protected void locateItemById(Long pageItemId) {
+		// This view doesn't support locating items by ID since it has no grid/CRUD toolbar
+		throw new UnsupportedOperationException("Locating items by ID not supported in view without grid");
+	}
 }

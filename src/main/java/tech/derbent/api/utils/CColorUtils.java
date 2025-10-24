@@ -253,7 +253,7 @@ public final class CColorUtils {
 	}
 
 	public static String getRouteForView(final Class<? extends CAbstractNamedEntityPage<?>> clazz) {
-		return Optional.ofNullable(clazz.getAnnotation(Route.class)).map(Route::value).filter(s -> !s.isBlank()) // boş string durumunu da kontrol et
+		return Optional.ofNullable(clazz.getAnnotation(Route.class)).map(Route::value).filter(s -> !s.isBlank())
 				.orElseThrow(() -> new IllegalArgumentException("Missing @Route on " + clazz.getSimpleName()));
 	}
 

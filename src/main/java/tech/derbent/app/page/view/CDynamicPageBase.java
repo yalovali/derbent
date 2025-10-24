@@ -124,6 +124,8 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		// TODO Auto-generated method stub
 	}
 
+	protected abstract void locateItemById(Long pageItemId);
+
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})

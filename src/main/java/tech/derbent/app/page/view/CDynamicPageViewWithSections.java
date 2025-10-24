@@ -202,6 +202,27 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	}
 
 	@Override
+	protected void locateItemById(Long pageItemId) {
+		try {
+			if (pageItemId == null) {
+				return;
+			}
+			Check.notNull(pageItemId, "Page item ID cannot be null");
+			LOGGER.debug("Locating item by ID: {}", pageItemId);
+			Check.notNull(grid, "Grid component is not initialized");
+			final CEntityDB<?> entity = entityService.getById(pageItemId).orElse(null);
+			if (entity != null) {
+				grid.selectEntity(entity);
+			} else {
+				LOGGER.warn("No entity found for ID: {}", pageItemId);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error locating item by ID {}: {}", pageItemId, e.getMessage());
+			throw new IllegalStateException("Error locating item by ID " + pageItemId + ": " + e.getMessage());
+		}
+	}
+
+	@Override
 	public void onEntityCreated(final CEntityDB<?> entity) throws Exception {
 		try {
 			LOGGER.debug("Entity created notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");

@@ -145,6 +145,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		if (projectItem == null) {
 			return validStatuses;
 		}
+		validStatuses.add(projectItem.getStatus()); // Always include current status
 		final CWorkflowEntity workflow = projectItem.getWorkflow();
 		final CProjectItemStatus currentStatus = projectItem.getStatus();
 		if (workflow == null || workflowStatusRelationService == null) {
@@ -532,12 +533,19 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			refreshButton.setEnabled(canRefresh);
 		}
 		// Update workflow status combobox
-		if (statusComboBox != null && currentEntity instanceof CProjectItem) {
-			final CProjectItem<?> projectItem = (CProjectItem<?>) currentEntity;
-			final List<CProjectItemStatus> validStatuses = getValidNextStatuses(projectItem);
-			statusComboBox.setItems(validStatuses);
-			statusComboBox.setValue(projectItem.getStatus());
-			statusComboBox.setEnabled(hasEntityId && !validStatuses.isEmpty());
+		if (statusComboBox != null) {
+			boolean enabled = false;
+			if (currentEntity instanceof CProjectItem) {
+				List<CProjectItemStatus> validStatuses = new ArrayList<>();
+				validStatuses = getValidNextStatuses((CProjectItem<?>) currentEntity);
+				statusComboBox.setItems(validStatuses);
+				statusComboBox.setValue(((CProjectItem<?>) currentEntity).getStatus());
+				enabled = true;
+			} else {
+				statusComboBox.setItems(new ArrayList<>());
+				statusComboBox.setValue(null);
+			}
+			statusComboBox.setEnabled(enabled);
 		}
 	}
 }

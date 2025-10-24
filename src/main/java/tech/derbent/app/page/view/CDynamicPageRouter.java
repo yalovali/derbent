@@ -25,7 +25,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Route (value = "cdynamicpagerouter", layout = MainLayout.class)
 @PageTitle ("Project Pages")
 @PermitAll
-public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObserver, HasUrlParameter<Long>, IPageTitleProvider {
+public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObserver, HasUrlParameter<String>, IPageTitleProvider {
 
 	public static final String DEFAULT_COLOR = "#623700";
 	public static final String DEFAULT_ICON = "vaadin:cutlery";
@@ -38,6 +38,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	private final CGridEntityService gridEntityService;
 	private Long pageEntityId = null;
 	private final CPageEntityService pageEntityService;
+	private Long pageItemId = null;
 	private final ISessionService sessionService;
 
 	@Autowired
@@ -59,7 +60,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
 		try {
-			loadSpecificPage(pageEntityId);
+			loadSpecificPage(pageEntityId, pageItemId);
 		} catch (Exception e) {
 			LOGGER.error("Error loading dynamic page for entity ID {}: {}", pageEntityId, e.getMessage());
 			e.printStackTrace();
@@ -71,8 +72,9 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	public String getPageTitle() { return currentPageEntity != null ? currentPageEntity.getPageTitle() : null; }
 
 	/** Load a specific page by entity ID.
+	 * @param pageItemId
 	 * @throws Exception */
-	private void loadSpecificPage(Long pageEntityId) throws Exception {
+	private void loadSpecificPage(Long pageEntityId, Long pageItemId) throws Exception {
 		Check.notNull(pageEntityId, "Page entity ID cannot be null");
 		LOGGER.debug("Loading specific page for entity ID: {}", pageEntityId);
 		currentPageEntity =
@@ -90,6 +92,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 				LOGGER.debug("Creating standard dynamic page view for: {}", currentPageEntity.getPageTitle());
 				page = new CDynamicPageViewWithoutGrid(null, currentPageEntity, sessionService, detailSectionService);
 			}
+			page.locateItemById(pageItemId);
 			Check.notNull(page, "Dynamic page view cannot be null");
 			removeAll();
 			add(page);
@@ -100,8 +103,14 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	}
 
 	@Override
-	public void setParameter(BeforeEvent event, Long parameter) {
-		pageEntityId = parameter;
+	public void setParameter(BeforeEvent event, String parameter) {
+		// format is page:{id}/item:{id}
+		if (parameter.startsWith("page:")) {
+			pageEntityId = Long.parseLong(parameter.substring(5).split("&")[0]);
+			pageItemId = parameter.contains("&item:") ? Long.parseLong(parameter.split("&item:")[1]) : null;
+		} else {
+			LOGGER.warn("Invalid parameter format for CDynamicPageRouter: {}", parameter);
+		}
 	}
 
 	@Override

@@ -247,6 +247,15 @@ public class CWebSessionService implements ISessionService {
 	 * @param newProject The newly selected project */
 	private void notifyProjectChangeListeners(final CProject newProject) {
 		// Use UI.access to safely notify listeners that may be in different UI contexts
+		CProject oldProject = getActiveProject().orElse(null);
+		if (newProject == null && oldProject == null) {
+			LOGGER.debug("notifyProjectChangeListeners called with null project, no action taken");
+			return;
+		}
+		if (newProject != null && oldProject != null && newProject.getId().equals(oldProject.getId())) {
+			LOGGER.debug("notifyProjectChangeListeners called with same project, no action taken");
+			return;
+		}
 		final UI ui = UI.getCurrent();
 		if (ui != null) {
 			ui.access(() -> {
@@ -328,7 +337,10 @@ public class CWebSessionService implements ISessionService {
 		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		if (project == getActiveProject().orElse(null)) {
+		if (project == null && getActiveProject().orElse(null) == null) {
+			return;
+		}
+		if (project != null && getActiveProject().orElse(null) != null && project.getId().equals(getActiveProject().orElse(null).getId())) {
 			LOGGER.debug("setActiveProject called with same project, no action taken");
 			return;
 		}

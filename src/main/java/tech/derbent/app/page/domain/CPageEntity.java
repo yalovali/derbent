@@ -10,9 +10,9 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CProjectItem;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.app.projects.domain.CProject;
 
 @Entity
 @Table (name = "cpageentity", uniqueConstraints = @UniqueConstraint (columnNames = {
@@ -150,7 +150,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	public boolean getRequiresAuthentication() { return requiresAuthentication; }
 
-	public String getRoute() { return "cdynamicpagerouter/" + getId(); }
+	public String getRoute() { return "cdynamicpagerouter/page:" + getId(); }
 
 	@Override
 	public void initializeAllFields() {
