@@ -129,9 +129,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 				}
 			});
 			add(statusComboBox);
-			EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(CProjectItem.class.getDeclaredField("status"));
-			CColorAwareComboBox<CStatus> box = new CColorAwareComboBox<CStatus>(this, fieldInfo, binder);
-			add(box);
 			LOGGER.debug("Created workflow status combobox for entity: {}", entityClass.getSimpleName());
 		} catch (Exception e) {
 			LOGGER.error("Error creating workflow status combobox", e);
