@@ -163,6 +163,9 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	@Override
 	public void setCurrentEntity(final Object entity) {
 		try {
+			if (entity == null) {
+				LOGGER.debug("Setting current entity to null.");
+			}
 			LOGGER.debug("Setting current entity: {}", entity);
 			currentEntity = entity;
 		} catch (final Exception e) {

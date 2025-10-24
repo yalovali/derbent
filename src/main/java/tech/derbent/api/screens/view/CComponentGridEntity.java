@@ -57,6 +57,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridEntity.class);
 	private static final long serialVersionUID = 1L;
+	protected CProject currentProject;
 	private CGrid<?> grid;
 	private CGridEntity gridEntity;
 	private ISessionService sessionService;
@@ -571,6 +572,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public void onProjectChanged(CProject newProject) {
 		LOGGER.debug("Project change notification received in CComponentGridEntity: {}", newProject != null ? newProject.getName() : "null");
 		// Refresh grid data with new project
+		if (currentProject != null && newProject != null && currentProject.getId().equals(newProject.getId())) {
+			return;
+		}
+		currentProject = newProject;
 		if (gridEntity != null) {
 			refreshGridData();
 		}

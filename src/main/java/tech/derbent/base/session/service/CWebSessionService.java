@@ -242,34 +242,6 @@ public class CWebSessionService implements ISessionService {
 		notifyProjectListChanged();
 	}
 
-	/** Notifies all registered project change listeners about a project change. This method safely handles UI access for components that may be in
-	 * different UIs.
-	 * @param newProject The newly selected project */
-	private void notifyProjectChangeListeners(final CProject newProject) {
-		// Use UI.access to safely notify listeners that may be in different UI contexts
-		CProject oldProject = getActiveProject().orElse(null);
-		if (newProject == null && oldProject == null) {
-			LOGGER.debug("notifyProjectChangeListeners called with null project, no action taken");
-			return;
-		}
-		if (newProject != null && oldProject != null && newProject.getId().equals(oldProject.getId())) {
-			LOGGER.debug("notifyProjectChangeListeners called with same project, no action taken");
-			return;
-		}
-		final UI ui = UI.getCurrent();
-		if (ui != null) {
-			ui.access(() -> {
-				getCurrentProjectChangeListeners().forEach(listener -> {
-					try {
-						listener.onProjectChanged(newProject);
-					} catch (final Exception e) {
-						LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
-					}
-				});
-			});
-		}
-	}
-
 	/** Notifies all registered project list change listeners about changes to the project list. This method safely handles UI access for components
 	 * that may be in different UIs. */
 	@Override
@@ -346,7 +318,18 @@ public class CWebSessionService implements ISessionService {
 		}
 		session.setAttribute(ACTIVE_PROJECT_KEY, project);
 		LOGGER.info("Active project set to: {}:{}", project.getId(), project.getName());
-		notifyProjectChangeListeners(project);
+		final UI ui = UI.getCurrent();
+		if (ui != null) {
+			ui.access(() -> {
+				getCurrentProjectChangeListeners().forEach(listener -> {
+					try {
+						listener.onProjectChanged(project);
+					} catch (final Exception e) {
+						LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
+					}
+				});
+			});
+		}
 	}
 
 	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member

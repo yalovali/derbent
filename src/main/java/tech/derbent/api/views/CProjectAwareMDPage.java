@@ -6,12 +6,12 @@ import com.vaadin.flow.component.DetachEvent;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Abstract project-aware MD page that filters entities by the currently active project. Implements CProjectChangeListener to receive immediate
@@ -20,6 +20,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 		implements IProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
+	protected CProject currentProject;
 	protected final ISessionService sessionService;
 
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CEntityNamedService<EntityClass> entityService,
@@ -56,6 +57,11 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	 * @param newProject The newly selected project */
 	@Override
 	public void onProjectChanged(final CProject newProject) {
+		if ((currentProject != null) && (newProject != null) && currentProject.getId().equals(newProject.getId())) {
+			// No change in project
+			return;
+		}
+		currentProject = newProject;
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
 		refreshProjectAwareGrid();
 	}

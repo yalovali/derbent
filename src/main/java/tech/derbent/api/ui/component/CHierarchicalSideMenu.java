@@ -79,8 +79,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			}
 		}
 
-		public Double getOrder() { return order; }
-
 		public Component createComponent() {
 			final HorizontalLayout itemLayout = new HorizontalLayout();
 			itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, Gap.MEDIUM, MENU_ITEM_CLASS);
@@ -131,6 +129,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			return itemLayout;
 		}
 
+		public Double getOrder() { return order; }
+
 		private void handleItemClick(final ClickEvent<HorizontalLayout> event) {
 			if (isNavigation && (targetLevelKey != null)) {
 				// Navigate to sub-level
@@ -142,7 +142,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 					// Remove "dynamic." prefix and navigate
 					String dynamicPath = path.substring("dynamic.".length());
 					// give rest of path as a parameter to dynamicview page
-					String dynamicViewPath = "cdynamicpagerouter/" + dynamicPath;
+					String dynamicViewPath = "cdynamicpagerouter/page:" + dynamicPath;
 					UI.getCurrent().navigate(dynamicViewPath);
 					return;
 				} else {
@@ -279,6 +279,12 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		}
 	}
 
+	Icon createMenuIcon(Icon icon, String iconColor) {
+		CColorUtils.setIconClassSize(icon, IconSize.MEDIUM);
+		icon.getStyle().set("color", iconColor);
+		return icon;
+	}
+
 	/** Get icon color for a dynamic page.
 	 * @param path The dynamic page path (format: "dynamic.{pageId}")
 	 * @return The color code from CPageEntity, or default color if not found */
@@ -332,6 +338,49 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		return (path != null) && path.startsWith("dynamic.");
 	}
 
+	/** Parse hierarchical order from entry order. The order value encodes the hierarchy: - For order 4.1: integer part 4 is parent order, fractional
+	 * part 0.1 represents child order 1 - For order 5.0: top-level item with order 5 - For order 4.12: could represent 4.1.2 (three levels) This
+	 * method extracts the appropriate order component for each hierarchy level.
+	 * @param order      The order from MenuEntry (e.g., 4.1, 5.23)
+	 * @param levelCount Number of hierarchy levels
+	 * @return Array of order values for each level */
+	private Double[] parseHierarchicalOrder(Double order, int levelCount) {
+		Double[] orderComponents = new Double[levelCount];
+		if (order == null) {
+			// Use default order for all levels
+			for (int i = 0; i < levelCount; i++) {
+				orderComponents[i] = 999.0;
+			}
+			return orderComponents;
+		}
+		// Extract integer part (parent order) and fractional part (child orders)
+		int integerPart = (int) Math.floor(order);
+		double fractionalPart = order - integerPart;
+		if (levelCount == 1) {
+			// Single level - use the full order
+			orderComponents[0] = order;
+		} else if (levelCount == 2) {
+			// Two levels - integer part for parent, fractional part for child
+			orderComponents[0] = (double) integerPart;
+			// Fractional part 0.1 represents child order 1, 0.2 represents 2, etc.
+			orderComponents[1] = fractionalPart * 10.0;
+		} else {
+			// Three or more levels - distribute the fractional part
+			// For order 4.123: parent=4, child1=1, child2=2, child3=3
+			orderComponents[0] = (double) integerPart;
+			String fractionalStr = String.format("%.10f", fractionalPart).substring(2); // Remove "0."
+			for (int i = 1; i < levelCount; i++) {
+				if (i - 1 < fractionalStr.length()) {
+					char digit = fractionalStr.charAt(i - 1);
+					orderComponents[i] = (double) Character.getNumericValue(digit);
+				} else {
+					orderComponents[i] = 999.0; // Default for missing components
+				}
+			}
+		}
+		return orderComponents;
+	}
+
 	/** Processes a single menu entry and adds it to the appropriate level.
 	 * @param menuEntry The menu entry to process
 	 * @throws Exception */
@@ -376,49 +425,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		}
 	}
 
-	/** Parse hierarchical order from entry order. The order value encodes the hierarchy: - For order 4.1: integer part 4 is parent order, fractional
-	 * part 0.1 represents child order 1 - For order 5.0: top-level item with order 5 - For order 4.12: could represent 4.1.2 (three levels) This
-	 * method extracts the appropriate order component for each hierarchy level.
-	 * @param order      The order from MenuEntry (e.g., 4.1, 5.23)
-	 * @param levelCount Number of hierarchy levels
-	 * @return Array of order values for each level */
-	private Double[] parseHierarchicalOrder(Double order, int levelCount) {
-		Double[] orderComponents = new Double[levelCount];
-		if (order == null) {
-			// Use default order for all levels
-			for (int i = 0; i < levelCount; i++) {
-				orderComponents[i] = 999.0;
-			}
-			return orderComponents;
-		}
-		// Extract integer part (parent order) and fractional part (child orders)
-		int integerPart = (int) Math.floor(order);
-		double fractionalPart = order - integerPart;
-		if (levelCount == 1) {
-			// Single level - use the full order
-			orderComponents[0] = order;
-		} else if (levelCount == 2) {
-			// Two levels - integer part for parent, fractional part for child
-			orderComponents[0] = (double) integerPart;
-			// Fractional part 0.1 represents child order 1, 0.2 represents 2, etc.
-			orderComponents[1] = fractionalPart * 10.0;
-		} else {
-			// Three or more levels - distribute the fractional part
-			// For order 4.123: parent=4, child1=1, child2=2, child3=3
-			orderComponents[0] = (double) integerPart;
-			String fractionalStr = String.format("%.10f", fractionalPart).substring(2); // Remove "0."
-			for (int i = 1; i < levelCount; i++) {
-				if (i - 1 < fractionalStr.length()) {
-					char digit = fractionalStr.charAt(i - 1);
-					orderComponents[i] = (double) Character.getNumericValue(digit);
-				} else {
-					orderComponents[i] = 999.0; // Default for missing components
-				}
-			}
-		}
-		return orderComponents;
-	}
-
 	/** Refreshes the current level display to update highlighting. */
 	private void refreshCurrentLevel() {
 		if (currentLevel != null) {
@@ -447,12 +453,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		// Store current level reference
 		currentLevel = level;
 		// LOGGER.debug("Menu level '{}' displayed successfully", levelKey);
-	}
-
-	Icon createMenuIcon(Icon icon, String iconColor) {
-		CColorUtils.setIconClassSize(icon, IconSize.MEDIUM);
-		icon.getStyle().set("color", iconColor);
-		return icon;
 	}
 
 	/** Updates the header with appropriate back button and title.
