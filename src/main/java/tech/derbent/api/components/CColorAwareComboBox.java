@@ -74,16 +74,18 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			entityType = (Class<T>) fieldInfo.getFieldTypeClass();
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
 			// LOGGER.debug("Creating CColorAwareComboBox for field: {}", fieldInfo.getFieldName());
-			final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldInfo);
-			configureColorRenderer();
+			// Initialize this instance properly instead of creating a new one
+			initializeComboBox();
+			CAuxillaries.setId(this);
+			updateFromInfo(fieldInfo);
 			List<T> items = null;
 			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
 			items = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
 			Check.notNull(items, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 			if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
-				comboBox.setValue(null);
+				setValue(null);
 			}
-			comboBox.setItems(items);
+			setItems(items);
 			if (!items.isEmpty()) {
 				if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 					// For entity types, try to find by name or toString match
@@ -92,10 +94,10 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 						return fieldInfo.getDefaultValue().equals(itemDisplay);
 					}).findFirst().orElse(null);
 					if (defaultItem != null) {
-						comboBox.setValue(defaultItem);
+						setValue(defaultItem);
 					}
 				} else if (fieldInfo.isAutoSelectFirst()) {
-					comboBox.setValue(items.get(0));
+					setValue(items.get(0));
 				}
 			}
 			if (binder != null) {
