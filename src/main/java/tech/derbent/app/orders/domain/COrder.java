@@ -90,13 +90,13 @@ public class COrder extends CEntityOfProject<COrder> {
 	private String orderNumber;
 	// Order Type and Classification
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "order_type_id", nullable = false)
+	@JoinColumn (name = "entitytype_id", nullable = false)
 	@AMetaData (
 			displayName = "Order Type", required = true, readOnly = false,
 			description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, order = 2,
 			dataProviderBean = "COrderTypeService"
 	)
-	private COrderType orderType;
+	private COrderType entityType;
 	// Provider Information
 	@Column (name = "provider_company_name", nullable = false, length = 200)
 	@Size (max = 200)
@@ -188,7 +188,7 @@ public class COrder extends CEntityOfProject<COrder> {
 	public String getOrderNumber() { return orderNumber; }
 
 	// Getters and setters
-	public COrderType getOrderType() { return orderType; }
+	public COrderType getEntityType() { return entityType; }
 
 	public String getProviderCompanyName() { return providerCompanyName; }
 
@@ -253,8 +253,8 @@ public class COrder extends CEntityOfProject<COrder> {
 		updateLastModified();
 	}
 
-	public void setOrderType(final COrderType orderType) {
-		this.orderType = orderType;
+	public void setEntityType(final COrderType entityType) {
+		this.entityType = entityType;
 		updateLastModified();
 	}
 
@@ -299,8 +299,8 @@ public class COrder extends CEntityOfProject<COrder> {
 		if (currency != null) {
 			currency.getName(); // Trigger currency loading
 		}
-		if (orderType != null) {
-			orderType.getName(); // Trigger order type loading
+		if (entityType != null) {
+			entityType.getName(); // Trigger order type loading
 		}
 		if (requestor != null) {
 			requestor.getLogin(); // Trigger requestor loading

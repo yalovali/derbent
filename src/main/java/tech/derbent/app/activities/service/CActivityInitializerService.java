@@ -36,7 +36,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activityType"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
@@ -76,9 +76,8 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(
-				List.of("name", "activityType", "assignedTo", "createdBy", "startDate", "dueDate", "completionDate", "progressPercentage",
-						"estimatedHours", "actualHours", "remainingHours", "status", "priority", "project", "createdDate", "lastModifiedDate"));
+		grid.setColumnFields(List.of("name", "entityType", "assignedTo", "createdBy", "startDate", "dueDate", "completionDate", "progressPercentage",
+				"estimatedHours", "actualHours", "remainingHours", "status", "priority", "project", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 

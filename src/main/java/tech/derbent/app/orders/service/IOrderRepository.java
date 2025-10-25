@@ -11,7 +11,7 @@ public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 	@Override
 	@Query (
 		"SELECT o FROM COrder o " + "LEFT JOIN FETCH o.project " + "LEFT JOIN FETCH o.assignedTo " + "LEFT JOIN FETCH o.createdBy "
-				+ "LEFT JOIN FETCH o.orderType " + "LEFT JOIN FETCH o.status " + "WHERE o.id = :id"
+				+ "LEFT JOIN FETCH o.entityType " + "LEFT JOIN FETCH o.status " + "WHERE o.id = :id"
 	)
 	Optional<COrder> findById(@Param ("id") Long id);
 }

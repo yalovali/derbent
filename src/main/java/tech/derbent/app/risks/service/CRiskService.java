@@ -46,7 +46,7 @@ public class CRiskService extends CProjectItemService<CRisk> {
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
 		final List<CRiskType> availableTypes = riskTypeService.listByProject(currentProject);
 		Check.notEmpty(availableTypes, "No activity types available in project " + currentProject.getName() + " - cannot initialize new activity");
-		entity.setRiskType(availableTypes.get(0));
+		entity.setEntityType(availableTypes.get(0));
 		entity.setRiskSeverity(ERiskSeverity.LOW);
 	}
 }

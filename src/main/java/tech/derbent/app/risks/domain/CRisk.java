@@ -30,12 +30,12 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	)
 	private ERiskSeverity riskSeverity;
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "crisktype_id", nullable = true)
+	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk", hidden = false, order = 2,
 			dataProviderBean = "CRiskTypeService", setBackgroundFromColor = true, useIcon = true
 	)
-	private CRiskType riskType;
+	private CRiskType entityType;
 
 	/** Default constructor for JPA. */
 	public CRisk() {
@@ -51,7 +51,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	public ERiskSeverity getRiskSeverity() { return riskSeverity; }
 
-	public CRiskType getRiskType() { return riskType; }
+	public CRiskType getEntityType() { return entityType; }
 
 	@Override
 	public void initializeAllFields() {
@@ -75,8 +75,8 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	public void setRiskSeverity(final ERiskSeverity riskSeverity) { this.riskSeverity = riskSeverity; }
 
-	public void setRiskType(CRiskType riskType) {
-		this.riskType = riskType;
+	public void setEntityType(CRiskType entityType) {
+		this.entityType = entityType;
 		updateLastModified();
 	}
 }

@@ -15,16 +15,16 @@ import tech.derbent.base.users.domain.CUser;
 public interface IActivityRepository extends IProjectItemRespository<CActivity> {
 
 	/** Counts the number of activities that use the specified activity type using generic pattern */
-	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.activityType = :type")
-	long countByType(@Param ("activityType") CActivityType type);
+	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :type")
+	long countByType(@Param ("entityType") CActivityType type);
 	@Override
 	@Query (
-		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project LEFT JOIN FETCH a.assignedTo LEFT JOIN FETCH a.createdBy LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.status WHERE a.id = :id"
+		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project LEFT JOIN FETCH a.assignedTo LEFT JOIN FETCH a.createdBy LEFT JOIN FETCH a.entityType LEFT JOIN FETCH a.status WHERE a.id = :id"
 	)
 	Optional<CActivity> findById(@Param ("id") Long id);
 	@Override
 	@Query (
-		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project LEFT JOIN FETCH a.assignedTo LEFT JOIN FETCH a.createdBy LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.status WHERE a.project = :project"
+		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project LEFT JOIN FETCH a.assignedTo LEFT JOIN FETCH a.createdBy LEFT JOIN FETCH a.entityType LEFT JOIN FETCH a.status WHERE a.project = :project"
 	)
 	Page<CActivity> listByProject(@Param ("project") CProject project, Pageable pageable);
 	// find all activities of projects where the user's company owns the project
