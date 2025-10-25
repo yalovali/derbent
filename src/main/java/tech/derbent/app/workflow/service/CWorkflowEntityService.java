@@ -1,6 +1,7 @@
 package tech.derbent.app.workflow.service;
 
 import java.time.Clock;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.utils.Check;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.view.CComponentWorkflowStatusRelations;
 import tech.derbent.base.session.service.ISessionService;
@@ -19,10 +22,12 @@ import tech.derbent.base.session.service.ISessionService;
 public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
+	private final IWorkflowEntityRepository workflowEntityRepository;
 
 	@Autowired
 	public CWorkflowEntityService(final IWorkflowEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+		this.workflowEntityRepository = repository;
 	}
 
 	/** Checks dependencies before allowing workflow entity deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
@@ -60,6 +65,23 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 
 	@Override
 	protected Class<CWorkflowEntity> getEntityClass() { return CWorkflowEntity.class; }
+
+	/** Gets a random workflow entity for a specific project and entity class.
+	 * @param project     the project to filter by
+	 * @param entityClass the entity class to filter by (e.g., CActivity.class, CMeeting.class)
+	 * @return a random workflow matching the criteria, or null if none found */
+	public CWorkflowEntity getRandomByEntityType(final CProject project, final Class<?> entityClass) {
+		Check.notNull(project, "Project cannot be null");
+		Check.notNull(entityClass, "Entity class cannot be null");
+		final String className = entityClass.getName();
+		final List<CWorkflowEntity> workflows = workflowEntityRepository.findByProjectAndTargetEntityClass(project, className);
+		if (workflows.isEmpty()) {
+			LOGGER.debug("No workflows found for project {} and entity class {}", project.getName(), className);
+			return null;
+		}
+		final int randomIndex = (int) (Math.random() * workflows.size());
+		return workflows.get(randomIndex);
+	}
 
 	/** Initializes a new workflow entity with default values.
 	 * @param entity the newly created workflow entity to initialize */

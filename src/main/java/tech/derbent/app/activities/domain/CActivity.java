@@ -37,7 +37,7 @@ import tech.derbent.base.users.domain.CUser;
 public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity> {
 
 	public static final String DEFAULT_COLOR = "#DC143C";
-	public static final String DEFAULT_ICON = "vaadin:file-o";
+	public static final String DEFAULT_ICON = "vaadin:tasks";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 	public final static String VIEW_NAME = "Activities View";
 	// Additional Information
