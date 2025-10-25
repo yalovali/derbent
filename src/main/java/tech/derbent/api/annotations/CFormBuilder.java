@@ -237,8 +237,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
-			// Create navigable combobox with navigation button
-			final CNavigableComboBox<T> navigableComboBox = new CNavigableComboBox<>(contentOwner, fieldInfo, null, dataProviderResolver);
+			// Create navigable combobox with navigation button - it's a CustomField so binding is done on it, not on internal combobox
+			final CNavigableComboBox<T> navigableComboBox = new CNavigableComboBox<>(contentOwner, fieldInfo, dataProviderResolver);
 			// Data provider resolution using CDataProviderResolver
 			List<T> items = null;
 			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
@@ -262,8 +262,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					navigableComboBox.setValue(items.get(0));
 				}
 			}
+			// Bind the CustomField (not the internal combobox)
 			if (binder != null) {
-				// this is valid
 				safeBindComponent(binder, navigableComboBox, fieldInfo.getFieldName(), "NavigableComboBox");
 			}
 			return navigableComboBox;

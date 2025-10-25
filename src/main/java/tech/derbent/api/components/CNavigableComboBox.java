@@ -47,13 +47,13 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		add(layout);
 	}
 
-	/** Constructor for CNavigableComboBox with content owner, field info, binder and data provider resolver.
+	/** Constructor for CNavigableComboBox with content owner, field info and data provider resolver. Note: This is a CustomField, so binding should
+	 * be done on the CNavigableComboBox itself, not on the internal combobox.
 	 * @param contentOwner         the content owner (page) for context
 	 * @param fieldInfo            the field information for the combobox
-	 * @param binder               the enhanced binder for form binding
 	 * @param dataProviderResolver the data provider resolver
 	 * @throws Exception if creation fails */
-	public CNavigableComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
+	public CNavigableComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			tech.derbent.api.annotations.CDataProviderResolver dataProviderResolver) throws Exception {
 		super();
 		this.fieldInfo = fieldInfo;
@@ -61,11 +61,15 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		layout.setSpacing(false);
 		layout.setPadding(false);
 		layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-		// Create the combobox with data provider
+		// Create the combobox with data provider - don't bind it, CustomField handles binding
 		this.comboBox = new CColorAwareComboBox<>(contentOwner, fieldInfo, null, dataProviderResolver);
 		comboBox.setWidthFull();
-		// Add value change listener to update navigation button visibility
-		comboBox.addValueChangeListener(event -> updateNavigationButton());
+		// Add value change listener to update navigation button visibility and propagate changes
+		comboBox.addValueChangeListener(event -> {
+			updateNavigationButton();
+			// Propagate value change to the CustomField
+			updateValue();
+		});
 		layout.add(comboBox);
 		add(layout);
 	}
