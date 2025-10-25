@@ -60,7 +60,6 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		return group;
 	}
 
-	private CProject activeProject;
 	private final AuthenticationContext authenticationContext;
 	private final CLayoutService layoutService;
 	private CButton layoutToggleButton;

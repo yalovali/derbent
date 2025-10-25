@@ -68,7 +68,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		if (projectItem == null) {
 			return validStatuses;
 		}
-		CTypeEntity<CProjectItemStatus> typeEntity = projectItem.getTypeEntity();
+		CTypeEntity<?> typeEntity = projectItem.getTypeEntity();
 		final CWorkflowEntity workflow = projectItem.getWorkflow();
 		Check.notNull(workflow, "Workflow cannot be null for project item: " + projectItem.getId());
 		final CProjectItemStatus currentStatus = projectItem.getStatus();

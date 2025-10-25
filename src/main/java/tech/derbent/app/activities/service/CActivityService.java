@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CProjectItemService;
 import tech.derbent.api.utils.Check;
@@ -35,15 +34,6 @@ public class CActivityService extends CProjectItemService<CActivity> {
 	@Override
 	public String checkDeleteAllowed(final CActivity activity) {
 		return super.checkDeleteAllowed(activity);
-	}
-
-	/** Helper method to create a placeholder CProjectItemStatus for activities without a status.
-	 * @param project
-	 * @return a CProjectItemStatus instance representing "No Status" */
-	private CProjectItemStatus createNoStatusInstance(final CProject project) {
-		final CProjectItemStatus noStatus = new CProjectItemStatus("No Status", project);
-		noStatus.setDescription("Activities without an assigned status");
-		return noStatus;
 	}
 
 	@Override

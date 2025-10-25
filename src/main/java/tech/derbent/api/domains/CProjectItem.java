@@ -32,7 +32,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	// NOTE: This is a transient helper field. Subclasses must define their own concrete @ManyToOne field
 	// and override getTypeEntity()/setTypeEntity() to use it.
 	@Transient
-	private CTypeEntity typeEntity;
+	private CTypeEntity<EntityClass> typeEntity;
 
 	/** Default constructor for JPA. */
 	protected CProjectItem() {
@@ -56,7 +56,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	public CProjectItemStatus getStatus() { return status; }
 
-	public CTypeEntity getTypeEntity() { return typeEntity; }
+	public CTypeEntity<EntityClass> getTypeEntity() { return typeEntity; }
 
 	public CWorkflowEntity getWorkflow() { return (typeEntity != null) ? typeEntity.getWorkflow() : null; }
 
@@ -88,7 +88,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		updateLastModified();
 	}
 
-	public void setTypeEntity(final CTypeEntity typeEntity) {
+	public void setTypeEntity(final CTypeEntity<EntityClass> typeEntity) {
 		this.typeEntity = typeEntity;
 		updateLastModified();
 	}

@@ -49,7 +49,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private Supplier<EntityClass> newEntitySupplier;
 	private CNotificationService notificationService; // Optional injection
 	private IContentOwner parentPage;
-	private CProjectItemStatusService projectItemStatusService; // Optional injection for status
 	private CButton refreshButton;
 	private Consumer<EntityClass> refreshCallback;
 	private CButton saveButton;
@@ -409,9 +408,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	}
 
 	/** Sets the project item status service for workflow status management. */
-	public void setProjectItemStatusService(final CProjectItemStatusService projectItemStatusService) {
-		this.projectItemStatusService = projectItemStatusService;
-	}
+	public void setProjectItemStatusService(final CProjectItemStatusService projectItemStatusService) {}
 
 	/** Sets the callback for refresh operations.
 	 * @param refreshCallback callback to execute when refresh is triggered */

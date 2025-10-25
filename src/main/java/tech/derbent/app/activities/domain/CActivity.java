@@ -37,14 +37,6 @@ public class CActivity extends CProjectItem<CActivity> {
 	public static final String DEFAULT_ICON = "vaadin:file-o";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 	public final static String VIEW_NAME = "Activities View";
-	// Type Management - concrete implementation of parent's typeEntity
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "cactivitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
-			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CActivityType activityType;
 	// Additional Information
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -53,6 +45,14 @@ public class CActivity extends CProjectItem<CActivity> {
 			description = "Criteria that must be met for the activity to be considered complete", hidden = false, order = 70, maxLength = 2000
 	)
 	private String acceptanceCriteria;
+	// Type Management - concrete implementation of parent's typeEntity
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "cactivitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
+			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CActivityType activityType;
 	// Basic Activity Information
 	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
@@ -237,6 +237,9 @@ public class CActivity extends CProjectItem<CActivity> {
 
 	/** Override to provide concrete type entity.
 	 * @return the type entity (activity type) */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
 	@Override
 	public CTypeEntity getTypeEntity() { return activityType; }
 
@@ -333,17 +336,6 @@ public class CActivity extends CProjectItem<CActivity> {
 	 * @param activityType the activity type to set */
 	public void setActivityType(final CActivityType activityType) {
 		this.activityType = activityType;
-		updateLastModified();
-	}
-
-	/** Override to set concrete type entity.
-	 * @param typeEntity the type entity to set */
-	@Override
-	public void setTypeEntity(final CTypeEntity typeEntity) {
-		if (typeEntity != null && !(typeEntity instanceof CActivityType)) {
-			throw new IllegalArgumentException("Type entity must be an instance of CActivityType");
-		}
-		this.activityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}
 
@@ -458,6 +450,18 @@ public class CActivity extends CProjectItem<CActivity> {
 				progressPercentage = 100;
 			}
 		}
+		updateLastModified();
+	}
+
+	/** Override to set concrete type entity.
+	 * @param typeEntity the type entity to set */
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void setTypeEntity(final CTypeEntity typeEntity) {
+		if (typeEntity != null && !(typeEntity instanceof CActivityType)) {
+			throw new IllegalArgumentException("Type entity must be an instance of CActivityType");
+		}
+		this.activityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}
 }

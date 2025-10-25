@@ -536,18 +536,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	/** Handles grid selection changes and fires SelectionChangeEvent */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
 	protected void onSelectionChange(ValueChangeEvent<?> event) {
 		CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
-		// reselect the old one, if new selection is null
-		// if (selectedEntity == null && event.getOldValue() != null) {
-		// SingleSelect rawSelect = grid.asSingleSelect();
-		// rawSelect.setValue(event.getOldValue());
-		// // dont fire event
-		// return;
-		// }
 		fireEvent(new SelectionChangeEvent(this, selectedEntity));
 	}
 

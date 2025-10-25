@@ -17,7 +17,6 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CProjectItem;
-import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.projects.domain.CProject;
@@ -34,14 +33,6 @@ public class CMeeting extends CProjectItem<CMeeting> {
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String VIEW_NAME = "Meetings View";
-	// Type Management - concrete implementation of parent's typeEntity
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "cmeetingtype_id", nullable = true)
-	@AMetaData (
-			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
-			dataProviderBean = "CMeetingTypeService"
-	)
-	private CMeetingType meetingType;
 	@Column (name = "agenda", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -83,6 +74,14 @@ public class CMeeting extends CProjectItem<CMeeting> {
 			order = 4
 	)
 	private LocalDateTime meetingDate;
+	// Type Management - concrete implementation of parent's typeEntity
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "cmeetingtype_id", nullable = true)
+	@AMetaData (
+			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
+			dataProviderBean = "CMeetingTypeService"
+	)
+	private CMeetingType meetingType;
 	@Column (name = "minutes", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -174,6 +173,9 @@ public class CMeeting extends CProjectItem<CMeeting> {
 
 	/** Override to provide concrete type entity.
 	 * @return the type entity (meeting type) */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
 	@Override
 	public CTypeEntity getTypeEntity() { return meetingType; }
 
@@ -251,16 +253,6 @@ public class CMeeting extends CProjectItem<CMeeting> {
 	 * @param meetingType the meeting type to set */
 	public void setMeetingType(final CMeetingType meetingType) { this.meetingType = meetingType; }
 
-	/** Override to set concrete type entity.
-	 * @param typeEntity the type entity to set */
-	@Override
-	public void setTypeEntity(final CTypeEntity typeEntity) {
-		if (typeEntity != null && !(typeEntity instanceof CMeetingType)) {
-			throw new IllegalArgumentException("Type entity must be an instance of CMeetingType");
-		}
-		this.meetingType = (CMeetingType) typeEntity;
-	}
-
 	public void setMinutes(final String minutes) { this.minutes = minutes; }
 
 	public void setParticipants(final Set<CUser> participants) { this.participants = participants != null ? participants : new HashSet<>(); }
@@ -268,4 +260,15 @@ public class CMeeting extends CProjectItem<CMeeting> {
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
+
+	/** Override to set concrete type entity.
+	 * @param typeEntity the type entity to set */
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void setTypeEntity(final CTypeEntity typeEntity) {
+		if (typeEntity != null && !(typeEntity instanceof CMeetingType)) {
+			throw new IllegalArgumentException("Type entity must be an instance of CMeetingType");
+		}
+		this.meetingType = (CMeetingType) typeEntity;
+	}
 }

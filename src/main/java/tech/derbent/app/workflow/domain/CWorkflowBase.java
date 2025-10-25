@@ -3,7 +3,7 @@ package tech.derbent.app.workflow.domain;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.app.projects.domain.CProject;
 
-public abstract class CWorkflowBase<EntityClass extends CWorkflowBase> extends CProjectItem<EntityClass> {
+public abstract class CWorkflowBase<EntityClass extends CWorkflowBase<?>> extends CProjectItem<EntityClass> {
 
 	/** Default constructor for JPA. */
 	protected CWorkflowBase() {
