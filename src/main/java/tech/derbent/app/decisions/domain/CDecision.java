@@ -48,7 +48,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	private CProjectItemStatus decisionStatus;
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "decisiontype_id", nullable = true)
+	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Decision Type", required = false, readOnly = false, description = "Category or type of the decision", hidden = false,
 			order = 2

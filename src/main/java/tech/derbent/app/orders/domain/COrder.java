@@ -90,7 +90,7 @@ public class COrder extends CEntityOfProject<COrder> {
 	private String orderNumber;
 	// Order Type and Classification
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "order_type_id", nullable = false)
+	@JoinColumn (name = "entitytype_id", nullable = false)
 	@AMetaData (
 			displayName = "Order Type", required = true, readOnly = false,
 			description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, order = 2,

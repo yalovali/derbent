@@ -48,7 +48,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	private String acceptanceCriteria;
 	// Type Management - concrete implementation of parent's typeEntity
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "cactivitytype_id", nullable = true)
+	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
 			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
