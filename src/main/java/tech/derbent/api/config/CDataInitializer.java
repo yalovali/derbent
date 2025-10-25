@@ -426,7 +426,7 @@ public class CDataInitializer {
 			final CUser user = userService.getRandom();
 			final CActivity activity = new CActivity("Review Decision: " + decision.getName(), decision.getProject());
 			activity.setDescription("Activity to track review and implementation of decision");
-			activity.setActivityType(activityType);
+			activity.setEntityType(activityType);
 			activity.setAssignedTo(user);
 			// Set initial status from workflow
 			if (activityType != null && activityType.getWorkflow() != null) {
@@ -463,7 +463,7 @@ public class CDataInitializer {
 			final CUser user = userService.getRandom();
 			final CActivity activity = new CActivity("Follow-up: " + meeting.getName(), meeting.getProject());
 			activity.setDescription("Activity to track action items from meeting");
-			activity.setActivityType(activityType);
+			activity.setEntityType(activityType);
 			activity.setAssignedTo(user);
 			// Set initial status from workflow
 			if (activityType != null && activityType.getWorkflow() != null) {
@@ -677,7 +677,7 @@ public class CDataInitializer {
 			// Create first decision
 			final CDecision decision1 = new CDecision("Adopt Cloud-Native Architecture", project);
 			decision1.setDescription("Strategic decision to migrate to cloud-native architecture for improved scalability");
-			decision1.setDecisionType(type1);
+			decision1.setEntityType(type1);
 			decision1.setDecisionStatus(status1);
 			decision1.setAssignedTo(user1);
 			decision1.setAccountableUser(user1);
@@ -696,7 +696,7 @@ public class CDataInitializer {
 			final CUser user2 = userService.getRandom();
 			final CDecision decision2 = new CDecision("Implement Agile Methodology", project);
 			decision2.setDescription("Operational decision to transition from waterfall to agile development methodology");
-			decision2.setDecisionType(type2);
+			decision2.setEntityType(type2);
 			decision2.setDecisionStatus(status2);
 			decision2.setAssignedTo(user2);
 			decision2.setAccountableUser(user1);

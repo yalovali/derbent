@@ -53,7 +53,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 			displayName = "Decision Type", required = false, readOnly = false, description = "Category or type of the decision", hidden = false,
 			order = 2
 	)
-	private CDecisionType decisionType;
+	private CDecisionType entityType;
 	// Cost Estimation
 	@Column (name = "estimated_cost", nullable = true, precision = 19, scale = 2)
 	@DecimalMin (value = "0.0", inclusive = true)
@@ -101,7 +101,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 
 	public CProjectItemStatus getDecisionStatus() { return decisionStatus; }
 
-	public CDecisionType getDecisionType() { return decisionType; }
+	public CDecisionType getEntityType() { return entityType; }
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 
@@ -123,8 +123,8 @@ public class CDecision extends CEntityOfProject<CDecision> {
 		if (decisionStatus != null) {
 			decisionStatus.getName(); // Trigger status loading
 		}
-		if (decisionType != null) {
-			decisionType.getName(); // Trigger type loading
+		if (entityType != null) {
+			entityType.getName(); // Trigger type loading
 		}
 		// Parent class relationships (from CEntityOfProject)
 		if (getProject() != null) {
@@ -148,8 +148,8 @@ public class CDecision extends CEntityOfProject<CDecision> {
 		updateLastModified();
 	}
 
-	public void setDecisionType(final CDecisionType decisionType) {
-		this.decisionType = decisionType;
+	public void setEntityType(final CDecisionType entityType) {
+		this.entityType = entityType;
 		updateLastModified();
 	}
 

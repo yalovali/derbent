@@ -33,7 +33,7 @@ public class COrderInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Classification"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "orderType"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "orderNumber"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Schedule"));
@@ -67,7 +67,7 @@ public class COrderInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "orderType", "status", "orderDate", "requiredDate", "deliveryDate", "providerCompanyName",
+		grid.setColumnFields(List.of("name", "entityType", "status", "orderDate", "requiredDate", "deliveryDate", "providerCompanyName",
 				"estimatedCost", "actualCost", "project"));
 		return grid;
 	}

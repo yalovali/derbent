@@ -54,7 +54,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 		// Initialize decision type - get first available decision type for the project (optional field, don't throw if missing)
 		final List<CDecisionType> availableTypes = decisionTypeService.listByProject(currentProject);
 		if (!availableTypes.isEmpty()) {
-			entity.setDecisionType(availableTypes.get(0));
+			entity.setEntityType(availableTypes.get(0));
 		}
 		// Note: If no decision type exists, the field will remain null (it's nullable)
 		// Initialize status - get first available status for the project (optional field, don't throw if missing)
