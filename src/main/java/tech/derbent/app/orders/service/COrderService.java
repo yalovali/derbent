@@ -74,7 +74,7 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 		entity.setCurrency(availableCurrencies.get(0));
 		final List<COrderType> availableOrderTypes = orderTypeService.listByProject(currentProject);
 		Check.notEmpty(availableOrderTypes, "No order types available for project " + currentProject.getName());
-		entity.setOrderType(availableOrderTypes.get(0));
+		entity.setEntityType(availableOrderTypes.get(0));
 		final List<CProjectItemStatus> availableStatuses = statusService.listByProject(currentProject);
 		Check.notEmpty(availableStatuses, "No statuses available for project " + currentProject.getName());
 		entity.setStatus(availableStatuses.get(0));

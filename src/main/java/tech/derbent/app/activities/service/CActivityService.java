@@ -47,7 +47,7 @@ public class CActivityService extends CProjectItemService<CActivity> {
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
 		final List<CActivityType> availableTypes = activityTypeService.listByProject(currentProject);
 		Check.notEmpty(availableTypes, "No activity types available in project " + currentProject.getName() + " - cannot initialize new activity");
-		entity.setActivityType(availableTypes.get(0));
+		entity.setEntityType(availableTypes.get(0));
 		final List<CActivityPriority> priorities = activityPriorityService.listByProject(currentProject);
 		Check.notEmpty(priorities, "No activity priorities available in project " + currentProject.getName() + " - cannot initialize new activity");
 		entity.setPriority(priorities.get(0));

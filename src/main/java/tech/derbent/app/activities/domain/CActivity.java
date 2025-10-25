@@ -53,7 +53,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
 			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
 	)
-	private CActivityType activityType;
+	private CActivityType entityType;
 	// Basic Activity Information
 	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
@@ -203,7 +203,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	/** Gets the activity type.
 	 * @return the activity type */
-	public CActivityType getActivityType() { return activityType; }
+	public CActivityType getEntityType() { return entityType; }
 
 	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
 	// Getters and Setters with proper logging and null checking
@@ -242,13 +242,13 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			"rawtypes", "unchecked"
 	})
 	@Override
-	public CTypeEntity getTypeEntity() { return activityType; }
+	public CTypeEntity getTypeEntity() { return entityType; }
 
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships
-		if (getActivityType() != null) {
-			getActivityType().getName(); // Trigger activity type loading
+		if (getEntityType() != null) {
+			getEntityType().getName(); // Trigger activity type loading
 		}
 		if (priority != null) {
 			priority.getName(); // Trigger priority loading
@@ -334,9 +334,9 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	/** Sets the activity type.
-	 * @param activityType the activity type to set */
-	public void setActivityType(final CActivityType activityType) {
-		this.activityType = activityType;
+	 * @param entityType the activity type to set */
+	public void setEntityType(final CActivityType entityType) {
+		this.entityType = entityType;
 		updateLastModified();
 	}
 
@@ -462,7 +462,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		if (typeEntity != null && !(typeEntity instanceof CActivityType)) {
 			throw new IllegalArgumentException("Type entity must be an instance of CActivityType");
 		}
-		this.activityType = (CActivityType) typeEntity;
+		this.entityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}
 }
