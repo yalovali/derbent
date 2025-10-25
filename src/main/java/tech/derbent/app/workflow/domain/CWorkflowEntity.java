@@ -121,6 +121,14 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
 	@Override
 	public String toString() {
-		return getName() != null ? getName() : super.toString();
+		if (getName() == null) {
+			return super.toString();
+		}
+		if (targetEntityClass != null && !targetEntityClass.isEmpty()) {
+			// Extract simple class name from fully qualified name
+			final String simpleClassName = targetEntityClass.substring(targetEntityClass.lastIndexOf('.') + 1);
+			return getName() + " [" + simpleClassName + "]";
+		}
+		return getName();
 	}
 }
