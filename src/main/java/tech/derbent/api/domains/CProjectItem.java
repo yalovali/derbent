@@ -58,7 +58,10 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	public CTypeEntity<EntityClass> getTypeEntity() { return typeEntity; }
 
-	public CWorkflowEntity getWorkflow() { return (typeEntity != null) ? typeEntity.getWorkflow() : null; }
+	public CWorkflowEntity getWorkflow() {
+		final CTypeEntity<EntityClass> type = getTypeEntity();
+		return (type != null) ? type.getWorkflow() : null;
+	}
 
 	public void setParent(final CProjectItem<?> parent) {
 		if (parent == null) {
