@@ -318,18 +318,16 @@ public class CWebSessionService implements ISessionService {
 		}
 		session.setAttribute(ACTIVE_PROJECT_KEY, project);
 		LOGGER.info("Active project set to: {}:{}", project.getId(), project.getName());
-		final UI ui = UI.getCurrent();
-		if (ui != null) {
-			ui.access(() -> {
-				getCurrentProjectChangeListeners().forEach(listener -> {
-					try {
-						listener.onProjectChanged(project);
-					} catch (final Exception e) {
-						LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
-					}
-				});
-			});
-		}
+		// Notify listeners directly without ui.access() wrapper
+		// This prevents unnecessary refresh cascades during page navigation
+		// The listeners are already in the same UI context during normal navigation
+		getCurrentProjectChangeListeners().forEach(listener -> {
+			try {
+				listener.onProjectChanged(project);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
+			}
+		});
 	}
 
 	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member
