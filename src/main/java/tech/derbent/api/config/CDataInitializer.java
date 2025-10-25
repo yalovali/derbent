@@ -766,7 +766,6 @@ public class CDataInitializer {
 					new tech.derbent.app.meetings.domain.CMeeting("Q1 Planning Session", project, type1);
 			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
 			meeting1.setStatus(status1);
-			meeting1.setWorkflow(workflow1);
 			meeting1.setAssignedTo(user1);
 			meeting1.setResponsible(user2);
 			meeting1.setMeetingDate(java.time.LocalDateTime.now().plusDays(7));
@@ -786,7 +785,6 @@ public class CDataInitializer {
 					new tech.derbent.app.meetings.domain.CMeeting("Technical Architecture Review", project, type2);
 			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
 			meeting2.setStatus(status2);
-			meeting2.setWorkflow(workflow2);
 			meeting2.setAssignedTo(user2);
 			meeting2.setResponsible(user1);
 			meeting2.setMeetingDate(java.time.LocalDateTime.now().plusDays(14));
