@@ -66,9 +66,10 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		comboBox.setWidthFull();
 		// Add value change listener to update navigation button visibility and propagate changes
 		comboBox.addValueChangeListener(event -> {
-			updateNavigationButton();
-			// Propagate value change to the CustomField
+			// Propagate value change to the CustomField first
 			updateValue();
+			// Then update navigation button visibility
+			updateNavigationButton();
 		});
 		layout.add(comboBox);
 		add(layout);
