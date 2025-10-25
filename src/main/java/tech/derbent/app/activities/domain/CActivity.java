@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -30,6 +31,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
+@AssociationOverride (name = "typeEntity", joinColumns = @JoinColumn (name = "cactivitytype_id"))
 public class CActivity extends CProjectItem<CActivity> {
 
 	public static final String DEFAULT_COLOR = "#DC143C";
@@ -45,13 +47,6 @@ public class CActivity extends CProjectItem<CActivity> {
 	)
 	private String acceptanceCriteria;
 	// Basic Activity Information
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "cactivitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
-			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CActivityType activityType;
 	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
 	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
@@ -198,7 +193,9 @@ public class CActivity extends CProjectItem<CActivity> {
 
 	public String getAcceptanceCriteria() { return acceptanceCriteria; }
 
-	public CActivityType getActivityType() { return activityType; }
+	/** Gets the activity type (convenience method that casts the generic typeEntity).
+	 * @return the activity type */
+	public CActivityType getActivityType() { return (CActivityType) getTypeEntity(); }
 
 	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
 	// Getters and Setters with proper logging and null checking
@@ -234,8 +231,8 @@ public class CActivity extends CProjectItem<CActivity> {
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships
-		if (activityType != null) {
-			activityType.getName(); // Trigger activity type loading
+		if (getActivityType() != null) {
+			getActivityType().getName(); // Trigger activity type loading
 		}
 		if (priority != null) {
 			priority.getName(); // Trigger priority loading
@@ -320,9 +317,10 @@ public class CActivity extends CProjectItem<CActivity> {
 		updateLastModified();
 	}
 
+	/** Sets the activity type (convenience method that delegates to setTypeEntity).
+	 * @param activityType the activity type to set */
 	public void setActivityType(final CActivityType activityType) {
-		this.activityType = activityType;
-		updateLastModified();
+		setTypeEntity(activityType);
 	}
 
 	public void setActualCost(final BigDecimal actualCost) {

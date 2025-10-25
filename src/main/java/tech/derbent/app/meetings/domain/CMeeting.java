@@ -3,6 +3,7 @@ package tech.derbent.app.meetings.domain;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +27,8 @@ import tech.derbent.base.users.domain.CUser;
 @Table (name = "cmeeting") // table name for the entity as the default is the class name
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
+@AssociationOverride (name = "typeEntity", joinColumns = @JoinColumn (name = "cmeetingtype_id"))
+@AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
 public class CMeeting extends CProjectItem<CMeeting> {
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
@@ -72,13 +75,6 @@ public class CMeeting extends CProjectItem<CMeeting> {
 			order = 4
 	)
 	private LocalDateTime meetingDate;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "cmeetingtype_id", nullable = true)
-	@AMetaData (
-			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
-			dataProviderBean = "CMeetingTypeService"
-	)
-	private CMeetingType meetingType;
 	@Column (name = "minutes", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -107,13 +103,6 @@ public class CMeeting extends CProjectItem<CMeeting> {
 			description = "Person responsible for organizing and leading the meeting", hidden = false, order = 10, dataProviderBean = "CUserService"
 	)
 	private CUser responsible;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "meeting_status_id", nullable = true)
-	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current status of the meeting", hidden = false, order = 9,
-			dataProviderBean = "CProjectItemStatusService"
-	)
-	private CProjectItemStatus status;
 
 	/** Default constructor for JPA. */
 	public CMeeting() {
@@ -132,7 +121,7 @@ public class CMeeting extends CProjectItem<CMeeting> {
 	 * @param meetingType the type of the meeting */
 	public CMeeting(final String name, final CProject project, final CMeetingType meetingType) {
 		super(CMeeting.class, name, project);
-		this.meetingType = meetingType;
+		setTypeEntity(meetingType);
 	}
 
 	/** Convenience method to add an attendee to the meeting.
@@ -163,7 +152,9 @@ public class CMeeting extends CProjectItem<CMeeting> {
 
 	public LocalDateTime getMeetingDate() { return meetingDate; }
 
-	public CMeetingType getMeetingType() { return meetingType; }
+	/** Gets the meeting type (convenience method that casts the generic typeEntity).
+	 * @return the meeting type */
+	public CMeetingType getMeetingType() { return (CMeetingType) getTypeEntity(); }
 
 	public String getMinutes() { return minutes; }
 
@@ -176,8 +167,8 @@ public class CMeeting extends CProjectItem<CMeeting> {
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships
-		if (meetingType != null) {
-			meetingType.getName(); // Trigger meeting type loading
+		if (getMeetingType() != null) {
+			getMeetingType().getName(); // Trigger meeting type loading
 		}
 		if (relatedActivity != null) {
 			relatedActivity.getName(); // Trigger related activity loading
@@ -243,7 +234,11 @@ public class CMeeting extends CProjectItem<CMeeting> {
 
 	public void setMeetingDate(final LocalDateTime meetingDate) { this.meetingDate = meetingDate; }
 
-	public void setMeetingType(final CMeetingType meetingType) { this.meetingType = meetingType; }
+	/** Sets the meeting type (convenience method that delegates to setTypeEntity).
+	 * @param meetingType the meeting type to set */
+	public void setMeetingType(final CMeetingType meetingType) {
+		setTypeEntity(meetingType);
+	}
 
 	public void setMinutes(final String minutes) { this.minutes = minutes; }
 
@@ -252,7 +247,4 @@ public class CMeeting extends CProjectItem<CMeeting> {
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
-
-	@Override
-	public void setStatus(final CProjectItemStatus status) { this.status = status; }
 }
