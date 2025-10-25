@@ -159,22 +159,28 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		companyField.setRequiredIndicatorVisible(true);
 		companyField.setId("custom-company-input");
 		companyField.setItemLabelGenerator(company -> company.getName());
+		// Add enter key listener to company field using addEventListener
+		companyField.getElement().addEventListener("keydown", event -> {
+			handleLogin();
+		}).setFilter("event.key === 'Enter'");
 		// Load enabled companies from service
 		// Username field setup
 		usernameField.setWidthFull();
 		usernameField.setRequired(true);
 		usernameField.setRequiredIndicatorVisible(true);
 		usernameField.setId("custom-username-input");
+		// Add enter key listener to username field
+		usernameField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
 		// Password field setup
 		passwordField.setWidthFull();
 		passwordField.setRequired(true);
 		passwordField.setRequiredIndicatorVisible(true);
 		passwordField.setId("custom-password-input");
+		// Add enter key listener to password field
+		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
 		// Add click listener to login button
 		loginButton.addClickListener(e -> handleLogin());
 		loginButton.setMinWidth("120px");
-		// Add enter key listener to password field
-		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
 		// Database reset button setup
 		resetDbButton.addClickListener(e -> {
 			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
