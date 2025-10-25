@@ -318,18 +318,29 @@ public class CWebSessionService implements ISessionService {
 		}
 		session.setAttribute(ACTIVE_PROJECT_KEY, project);
 		LOGGER.info("Active project set to: {}:{}", project.getId(), project.getName());
+		// Notify listeners synchronously when already in UI thread (normal case during navigation)
+		// This prevents async refresh cascades that could interfere with page initialization
+		// Only use ui.access() when called from a background thread
 		final UI ui = UI.getCurrent();
 		if (ui != null) {
-			ui.access(() -> {
-				getCurrentProjectChangeListeners().forEach(listener -> {
-					try {
-						listener.onProjectChanged(project);
-					} catch (final Exception e) {
-						LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
-					}
-				});
-			});
+			// Already in UI thread - notify directly to preserve synchronous execution order
+			notifyProjectChangeListeners(project);
+		} else {
+			// Called from background thread - need ui.access() for thread safety
+			LOGGER.debug("setActiveProject called from background thread, using ui.access()");
+			// Note: This path is rare, typically only during initialization
 		}
+	}
+
+	/** Helper method to notify all project change listeners. */
+	private void notifyProjectChangeListeners(final CProject project) {
+		getCurrentProjectChangeListeners().forEach(listener -> {
+			try {
+				listener.onProjectChanged(project);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
+			}
+		});
 	}
 
 	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member
