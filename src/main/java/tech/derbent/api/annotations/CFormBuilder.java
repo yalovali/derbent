@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationContextAware;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValueAndElement;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -41,6 +42,7 @@ import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CColorAwareComboBox;
 import tech.derbent.api.components.CColorPickerComboBox;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
@@ -58,6 +60,9 @@ import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.api.views.components.CPictureSelector;
 import tech.derbent.api.views.components.CVerticalLayout;
+import tech.derbent.app.page.domain.CPageEntity;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.base.session.service.CWebSessionService;
 
 @org.springframework.stereotype.Component
 public final class CFormBuilder<EntityClass> implements ApplicationContextAware {
@@ -528,7 +533,21 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 		String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
 		// servicePageEntity
+		CPageEntityService service = CSpringContext.getBean(CPageEntityService.class);
+		CWebSessionService session = CSpringContext.getBean(CWebSessionService.class);
+		CPageEntity pageEntity = service.findByNameAndProject(baseViewName, session.getActiveProject().orElseThrow()).orElse(null);
+		Check.notNull(pageEntity, "PageEntity for view name " + baseViewName);
 		CButton navigeToButton = new CButton("", VaadinIcon.ARROW_RIGHT.create());
+		// navigate when clicked:
+		navigeToButton.addClickListener(event -> {
+			try {
+				// TODO String route = pageEntity.getRoute() + "&item:" + valueId;
+				String route = pageEntity.getRoute() + "&item:";
+				UI.getCurrent().navigate(route);
+			} catch (Exception e) {
+				LOGGER.error("Error navigating to entity page '{}': {}", pageEntity.getName(), e.getMessage());
+			}
+		});
 		return navigeToButton;
 	}
 
@@ -823,6 +842,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(fieldInfo, "field");
 			final Component component = createComponentForField(contentOwner, fieldInfo, binder);
 			assignDeterministicComponentId(component, fieldInfo, binder);
+			// send the field info and the component getValue consumer to the field tools creator
 			final Component fieldTools = createFieldToolsComponent(fieldInfo);
 			final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
 			if (fieldTools != null) {
