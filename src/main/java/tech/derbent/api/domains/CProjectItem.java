@@ -7,6 +7,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {
@@ -57,6 +58,10 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	public CProjectItemStatus getStatus() { return status; }
 
+	public CTypeEntity getTypeEntity() { return typeEntity; }
+
+	public CWorkflowEntity getWorkflow() { return (typeEntity != null) ? typeEntity.getWorkflow() : null; }
+
 	public void setParent(final CProjectItem<?> parent) {
 		if (parent == null) {
 			clearParent();
@@ -82,6 +87,11 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	public void setStatus(final CProjectItemStatus status) {
 		this.status = status;
+		updateLastModified();
+	}
+
+	public void setTypeEntity(final CTypeEntity typeEntity) {
+		this.typeEntity = typeEntity;
 		updateLastModified();
 	}
 }
