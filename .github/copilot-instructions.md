@@ -178,6 +178,34 @@ kill $APP_PID
 4. **Workflow Changes**: Step-by-step screenshots of the entire workflow
 5. **Bug Fixes**: Screenshot showing the bug is fixed
 
+**MANDATORY: Test All Major Entity Screens After Each Update**
+After making changes that affect entities, workflows, or UI components, **ALWAYS** test and provide screenshots for ALL major entity screens:
+
+Required Entity Screens to Test:
+1. **Activities Management** (`/cdynamicpagerouter/page:3`)
+   - Test status transitions
+   - Verify initial status is set for new items
+   - Show status combobox populated with workflow transitions
+   
+2. **Meetings Management** (`/cdynamicpagerouter/page:4`)
+   - Test meeting status workflow
+   - Verify meeting type workflows
+   
+3. **Projects Management** (`/cdynamicpagerouter/page:1`)
+   - Test project-level operations
+   
+4. **Users Management** (`/cdynamicpagerouter/page:12`)
+   - Test user operations
+
+**Workflow Testing Requirements:**
+- **ALWAYS** demonstrate status combobox is populated with valid workflow transitions
+- **ALWAYS** show initial status is set when creating new items
+- **ALWAYS** test different entity types (Activities, Meetings, etc.)
+- **ALWAYS** include screenshots in PR description showing:
+  - Initial status being set for new items
+  - Status combobox showing available transitions
+  - Each major entity screen working correctly
+
 ## Build Configuration and Timing
 
 ### Maven Build Phases and Expected Times:
