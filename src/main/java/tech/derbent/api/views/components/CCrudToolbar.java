@@ -137,58 +137,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @return the current entity */
 	public EntityClass getCurrentEntity() { return currentEntity; }
 
-	/** Gets the list of valid next statuses for the current entity based on its workflow.
-	 * @param projectItem the project item entity
-	 * @return list of valid next statuses */
-	private List<CProjectItemStatus> getValidNextStatuses(final CProjectItem<?> projectItem) {
-		final List<CProjectItemStatus> validStatuses = new ArrayList<>();
-		if (projectItem == null) {
-			return validStatuses;
-		}
-		validStatuses.add(projectItem.getStatus()); // Always include current status
-		final CWorkflowEntity workflow = projectItem.getWorkflow();
-		final CProjectItemStatus currentStatus = projectItem.getStatus();
-		if (workflow == null || workflowStatusRelationService == null) {
-			// No workflow assigned - return all statuses if service available
-			if (projectItemStatusService != null) {
-				try {
-					validStatuses.addAll(projectItemStatusService.findAll());
-				} catch (Exception e) {
-					LOGGER.error("Error loading all statuses", e);
-				}
-			}
-			return validStatuses;
-		}
-		try {
-			// Get workflow relations to find valid next statuses
-			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
-			if (currentStatus != null) {
-				// Find relations where fromStatus matches current status
-				relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
-						.distinct().forEach(validStatuses::add);
-			}
-			// Always include current status
-			if (currentStatus != null && !validStatuses.contains(currentStatus)) {
-				validStatuses.add(0, currentStatus);
-			}
-			// If no valid transitions found, show current status only
-			if (validStatuses.isEmpty() && currentStatus != null) {
-				validStatuses.add(currentStatus);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Error loading workflow status relations", e);
-			// Fallback to showing all statuses
-			if (projectItemStatusService != null) {
-				try {
-					validStatuses.addAll(projectItemStatusService.findAll());
-				} catch (Exception ex) {
-					LOGGER.error("Error loading all statuses as fallback", ex);
-				}
-			}
-		}
-		return validStatuses;
-	}
-
 	/** Gets the current entity value. This is an alias for getCurrentEntity() to match standard Vaadin component patterns.
 	 * @return the current entity */
 	public EntityClass getValue() { return currentEntity; }
@@ -537,7 +485,8 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			boolean enabled = false;
 			if (currentEntity instanceof CProjectItem) {
 				List<CProjectItemStatus> validStatuses = new ArrayList<>();
-				validStatuses = getValidNextStatuses((CProjectItem<?>) currentEntity);
+				CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+				validStatuses = statusService.getValidNextStatuses((CProjectItem<?>) currentEntity);
 				statusComboBox.setItems(validStatuses);
 				statusComboBox.setValue(((CProjectItem<?>) currentEntity).getStatus());
 				enabled = true;

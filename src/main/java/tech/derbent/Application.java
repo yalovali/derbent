@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StreamUtils;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
-import tech.derbent.api.components.CTimer;
 
 /** Main application class for the Derbent project management system.
  * <p>
@@ -47,11 +46,8 @@ public class Application implements AppShellConfigurator {
 	 * @param args command line arguments passed to the application */
 	public static void main(final String[] args) {
 		try {
-			CTimer.stamp();
 			final SpringApplication app = new SpringApplication(Application.class);
-			CTimer.print("application created");
 			app.run(args);
-			CTimer.print();
 		} catch (final Throwable e) {
 			if (e.getClass().getName().contains("SilentExitException")) {
 				LOGGER.debug("Spring is restarting the main thread - See spring-boot-devtools");

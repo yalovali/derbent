@@ -8,6 +8,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -53,9 +54,12 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	 * @param fieldInfo            the field information for the combobox
 	 * @param dataProviderResolver the data provider resolver
 	 * @throws Exception if creation fails */
-	public CNavigableComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
-			tech.derbent.api.annotations.CDataProviderResolver dataProviderResolver) throws Exception {
+	public CNavigableComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, CDataProviderResolver dataProviderResolver)
+			throws Exception {
 		super();
+		Check.notNull(contentOwner, "Content owner cannot be null");
+		Check.notNull(fieldInfo, "Field info cannot be null");
+		Check.notNull(dataProviderResolver, "Data provider resolver cannot be null");
 		this.fieldInfo = fieldInfo;
 		this.layout = new HorizontalLayout();
 		layout.setSpacing(false);
@@ -75,12 +79,6 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		add(layout);
 	}
 
-	@Override
-	protected void onAttach(AttachEvent attachEvent) {
-		super.onAttach(attachEvent);
-		updateNavigationButton();
-	}
-
 	/** Creates and returns the navigation button for the current entity value.
 	 * @return the navigation button or null if navigation is not available */
 	private CButton createNavigationButton() {
@@ -94,12 +92,10 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 			if (!CEntityDB.class.isAssignableFrom(clazz)) {
 				return null;
 			}
-			// Get the VIEW_NAME field
 			String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
-			// Get the page entity service and session
+			Check.notNull(baseViewName, "Base view name cannot be null for class: " + clazz.getName());
 			CPageEntityService service = CSpringContext.getBean(CPageEntityService.class);
 			CWebSessionService session = CSpringContext.getBean(CWebSessionService.class);
-			// Find the page entity for this view
 			CPageEntity pageEntity = service.findByNameAndProject(baseViewName, session.getActiveProject().orElseThrow()).orElse(null);
 			if (pageEntity == null) {
 				LOGGER.debug("No page entity found for view name: {}", baseViewName);
@@ -132,14 +128,20 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	public CColorAwareComboBox<T> getComboBox() { return comboBox; }
 
 	@Override
-	protected void setPresentationValue(T newPresentationValue) {
-		comboBox.setValue(newPresentationValue);
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
+		updateNavigationButton();
 	}
 
 	/** Sets the items for the combobox.
 	 * @param items the items to set */
 	public void setItems(List<T> items) {
 		comboBox.setItems(items);
+	}
+
+	@Override
+	protected void setPresentationValue(T newPresentationValue) {
+		comboBox.setValue(newPresentationValue);
 	}
 
 	/** Updates the navigation button visibility based on current value and page availability. */
