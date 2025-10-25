@@ -15,13 +15,13 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CProjectItemStatusInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Activity Status Information";
+	public static final String BASE_PANEL_NAME = "Status Information";
 	private static final Class<?> clazz = CProjectItemStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectItemStatusInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".2";
-	private static final String menuTitle = MenuTitle_TYPES + ".Activity Statuses";
-	private static final String pageDescription = "Manage activity status definitions for projects";
-	private static final String pageTitle = "Activity Status Management";
+	private static final String menuTitle = MenuTitle_TYPES + ".Statuses";
+	private static final String pageDescription = "Manage status definitions for projects";
+	private static final String pageTitle = "Status Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -42,7 +42,7 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating activity status view");
+			LOGGER.error("Error creating status view");
 			throw e;
 		}
 	}

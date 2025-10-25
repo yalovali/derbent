@@ -44,6 +44,7 @@ import tech.derbent.app.decisions.service.CDecisionService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
+import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.app.meetings.service.CMeetingInitializerService;
 import tech.derbent.app.meetings.service.CMeetingService;
@@ -760,8 +761,7 @@ public class CDataInitializer {
 			final CMeetingType type2 = meetingTypeService.getRandom(project);
 			final CUser user2 = userService.getRandom();
 			// Create first meeting
-			final tech.derbent.app.meetings.domain.CMeeting meeting1 =
-					new tech.derbent.app.meetings.domain.CMeeting("Q1 Planning Session", project, type1);
+			final CMeeting meeting1 = new CMeeting("Q1 Planning Session", project, type1);
 			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
 			// Set initial status from workflow
 			if (type1 != null && type1.getWorkflow() != null) {
@@ -785,8 +785,7 @@ public class CDataInitializer {
 				return;
 			}
 			// Create second meeting
-			final tech.derbent.app.meetings.domain.CMeeting meeting2 =
-					new tech.derbent.app.meetings.domain.CMeeting("Technical Architecture Review", project, type2);
+			final CMeeting meeting2 = new CMeeting("Technical Architecture Review", project, type2);
 			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
 			// Set initial status from workflow
 			if (type2 != null && type2.getWorkflow() != null) {

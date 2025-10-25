@@ -9,9 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
-import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.api.services.CStatusService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
@@ -61,19 +60,18 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	protected Class<CProjectItemStatus> getEntityClass() { return CProjectItemStatus.class; }
 
 	/** Gets the list of valid next statuses for the current entity based on its workflow.
-	 * @param projectItem the project item entity
+	 * @param item the project item entity
 	 * @return list of valid next statuses */
-	public List<CProjectItemStatus> getValidNextStatuses(final CProjectItem<?> projectItem) {
+	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
 		final List<CProjectItemStatus> validStatuses = new ArrayList<>();
-		if (projectItem == null) {
+		if (item == null) {
 			return validStatuses;
 		}
-		CTypeEntity<?> typeEntity = projectItem.getTypeEntity();
-		final CWorkflowEntity workflow = projectItem.getWorkflow();
-		Check.notNull(workflow, "Workflow cannot be null for project item: " + projectItem.getId());
-		final CProjectItemStatus currentStatus = projectItem.getStatus();
+		final CWorkflowEntity workflow = item.getWorkflow();
+		Check.notNull(workflow, "Workflow cannot be null for project item");
+		final CProjectItemStatus currentStatus = item.getStatus();
 		if (currentStatus != null) {
-			validStatuses.add(projectItem.getStatus()); // Always include current status
+			validStatuses.add(item.getStatus()); // Always include current status
 		} else {
 			// For new items without a status, return initial statuses from the workflow
 			LOGGER.debug("Getting initial statuses for new project item with workflow: {}", workflow.getName());
@@ -98,7 +96,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 			relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
 					.distinct().filter(r -> !r.getId().equals(currentStatus.getId())).forEach(validStatuses::add);
 		} catch (Exception e) {
-			LOGGER.error("Error retrieving valid next statuses for project item {}: {}", projectItem.getId(), e.getMessage());
+			LOGGER.error("Error retrieving valid next statuses for project item {}: {}", item.toString(), e.getMessage());
 		}
 		return validStatuses;
 	}

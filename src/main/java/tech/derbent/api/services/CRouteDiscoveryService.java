@@ -71,7 +71,6 @@ public class CRouteDiscoveryService {
 		addRouteIfNotExists(routes, "ccommentpriorityview", "Comment Priorities", "Comment Priorities");
 		addRouteIfNotExists(routes, "cmeetingtypeview", "Meeting Types", "Meeting Types");
 		addRouteIfNotExists(routes, "cmeetingstatusview", "Meeting Status", "Meeting Status");
-		addRouteIfNotExists(routes, "cactivitystatusview", "Activity Status", "Activity Status");
 		addRouteIfNotExists(routes, "cactivitytypeview", "Activity Types", "Activity Types");
 		addRouteIfNotExists(routes, "ccurrencyview", "Currencies", "Currencies");
 		addRouteIfNotExists(routes, "cprojectdetailsview", "Project Details", "Project Details");

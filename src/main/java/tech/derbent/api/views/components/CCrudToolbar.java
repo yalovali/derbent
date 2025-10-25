@@ -270,8 +270,8 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			if (currentStatus != null && currentStatus.getId().equals(newStatus.getId())) {
 				return;
 			}
-			// Validate workflow transition
-			final CWorkflowEntity workflow = projectItem.getWorkflow();
+			Check.instanceOf(projectItem, IHasStatusAndWorkflow.class, "Current entity is not a CProjectItem");
+			final CWorkflowEntity workflow = ((IHasStatusAndWorkflow<?>) projectItem).getWorkflow();
 			if (workflow != null && currentStatus != null && workflowStatusRelationService != null) {
 				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
 				final boolean isValidTransition = relations.stream()
@@ -481,10 +481,10 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		// Update workflow status combobox
 		if (statusComboBox != null) {
 			boolean enabled = false;
-			if (currentEntity instanceof CProjectItem) {
+			if (currentEntity instanceof IHasStatusAndWorkflow) {
 				List<CProjectItemStatus> validStatuses = new ArrayList<>();
 				CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-				validStatuses = statusService.getValidNextStatuses((CProjectItem<?>) currentEntity);
+				validStatuses = statusService.getValidNextStatuses((IHasStatusAndWorkflow<?>) currentEntity);
 				statusComboBox.setItems(validStatuses);
 				statusComboBox.setValue(((CProjectItem<?>) currentEntity).getStatus());
 				enabled = true;

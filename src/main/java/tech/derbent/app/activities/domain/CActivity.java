@@ -25,8 +25,10 @@ import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity
@@ -46,14 +48,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			description = "Criteria that must be met for the activity to be considered complete", hidden = false, order = 70, maxLength = 2000
 	)
 	private String acceptanceCriteria;
-	// Type Management - concrete implementation of parent's typeEntity
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
-			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CActivityType entityType;
 	// Basic Activity Information
 	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
@@ -82,6 +76,14 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Column (nullable = true)
 	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false, order = 41)
 	private LocalDate dueDate;
+	// Type Management - concrete implementation of parent's typeEntity
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
+			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CActivityType entityType;
 	// Budget Management
 	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated cost must be positive")
@@ -201,10 +203,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public String getAcceptanceCriteria() { return acceptanceCriteria; }
 
-	/** Gets the activity type.
-	 * @return the activity type */
-	public CActivityType getEntityType() { return entityType; }
-
 	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
 	// Getters and Setters with proper logging and null checking
 
@@ -217,6 +215,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public LocalDate getCompletionDate() { return completionDate; }
 
 	public LocalDate getDueDate() { return dueDate; }
+
+	/** Gets the activity type.
+	 * @return the activity type */
+	@Override
+	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 
@@ -236,13 +239,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public LocalDate getStartDate() { return startDate; }
 
-	/** Override to provide concrete type entity.
-	 * @return the type entity (activity type) */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
 	@Override
-	public CTypeEntity getTypeEntity() { return entityType; }
+	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
+		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
+		return entityType.getWorkflow();
+	}
 
 	@Override
 	public void initializeAllFields() {
@@ -333,13 +334,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		updateLastModified();
 	}
 
-	/** Sets the activity type.
-	 * @param entityType the activity type to set */
-	public void setEntityType(final CActivityType entityType) {
-		this.entityType = entityType;
-		updateLastModified();
-	}
-
 	public void setActualCost(final BigDecimal actualCost) {
 		if ((actualCost != null) && (actualCost.compareTo(BigDecimal.ZERO) < 0)) {
 			LOGGER.warn("setActualCost - Attempting to set negative actual cost: {} for activity id={}", actualCost, getId());
@@ -373,6 +367,23 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public void setDueDate(final LocalDate dueDate) {
 		this.dueDate = dueDate;
+		updateLastModified();
+	}
+
+	/** Sets the activity type.
+	 * @param entityType the activity type to set */
+	public void setEntityType(final CActivityType entityType) {
+		this.entityType = entityType;
+		updateLastModified();
+	}
+
+	/** Override to set concrete type entity.
+	 * @param typeEntity the type entity to set */
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void setEntityType(final CTypeEntity typeEntity) {
+		Check.instanceOf(typeEntity, CActivityType.class, "Type entity must be an instance of CActivityType");
+		this.entityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}
 
@@ -451,18 +462,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 				progressPercentage = 100;
 			}
 		}
-		updateLastModified();
-	}
-
-	/** Override to set concrete type entity.
-	 * @param typeEntity the type entity to set */
-	@SuppressWarnings ("rawtypes")
-	@Override
-	public void setTypeEntity(final CTypeEntity typeEntity) {
-		if (typeEntity != null && !(typeEntity instanceof CActivityType)) {
-			throw new IllegalArgumentException("Type entity must be an instance of CActivityType");
-		}
-		this.entityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}
 }

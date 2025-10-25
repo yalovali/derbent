@@ -5,10 +5,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {
@@ -28,11 +26,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 			dataProviderBean = "CProjectItemStatusService", setBackgroundFromColor = true, useIcon = true
 	)
 	protected CProjectItemStatus status;
-	// if you have a status, you must have a type linked to a workflow to get the status transitions
-	// NOTE: This is a transient helper field. Subclasses must define their own concrete @ManyToOne field
-	// and override getTypeEntity()/setTypeEntity() to use it.
-	@Transient
-	private CTypeEntity<EntityClass> typeEntity;
 
 	/** Default constructor for JPA. */
 	protected CProjectItem() {
@@ -55,13 +48,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	public String getParentType() { return parentType; }
 
 	public CProjectItemStatus getStatus() { return status; }
-
-	public CTypeEntity<EntityClass> getTypeEntity() { return typeEntity; }
-
-	public CWorkflowEntity getWorkflow() {
-		final CTypeEntity<EntityClass> type = getTypeEntity();
-		return (type != null) ? type.getWorkflow() : null;
-	}
 
 	public void setParent(final CProjectItem<?> parent) {
 		if (parent == null) {
@@ -88,11 +74,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	public void setStatus(final CProjectItemStatus status) {
 		this.status = status;
-		updateLastModified();
-	}
-
-	public void setTypeEntity(final CTypeEntity<EntityClass> typeEntity) {
-		this.typeEntity = typeEntity;
 		updateLastModified();
 	}
 }

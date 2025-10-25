@@ -249,7 +249,7 @@ public class CAuxillaries {
 		case "CActivityType":
 			return CActivityTypeService.class;
 		case "CRiskType":
-			return CRiskService.class;
+			return CRiskTypeService.class;
 		case "CProjectItemStatus":
 			return CProjectItemStatusService.class;
 		case "CActivityPriority":

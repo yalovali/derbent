@@ -18,8 +18,11 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.base.users.domain.CUser;
 
 /** CMeeting - Domain entity representing meetings. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association. */
@@ -28,7 +31,7 @@ import tech.derbent.base.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting> {
+public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting> {
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -153,6 +156,14 @@ public class CMeeting extends CProjectItem<CMeeting> {
 
 	public LocalDateTime getEndDate() { return endDate; }
 
+	/** Override to provide concrete type entity.
+	 * @return the type entity (meeting type) */
+	@Override
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	public CTypeEntity getEntityType() { return meetingType; }
+
 	public String getLinkedElement() { return linkedElement; }
 
 	public String getLocation() { return location; }
@@ -171,13 +182,10 @@ public class CMeeting extends CProjectItem<CMeeting> {
 
 	public CUser getResponsible() { return responsible; }
 
-	/** Override to provide concrete type entity.
-	 * @return the type entity (meeting type) */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
 	@Override
-	public CTypeEntity getTypeEntity() { return meetingType; }
+	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
+		return getEntityType() != null ? getEntityType().getWorkflow() : null;
+	}
 
 	@Override
 	public void initializeAllFields() {
@@ -243,6 +251,13 @@ public class CMeeting extends CProjectItem<CMeeting> {
 
 	public void setEndDate(final LocalDateTime endDate) { this.endDate = endDate; }
 
+	@Override
+	public void setEntityType(final CTypeEntity<?> typeEntity) {
+		Check.instanceOf(typeEntity, CMeetingType.class, "Type entity must be an instance of CMeetingType");
+		this.meetingType = (CMeetingType) typeEntity;
+		updateLastModified();
+	}
+
 	public void setLinkedElement(final String linkedElement) { this.linkedElement = linkedElement; }
 
 	public void setLocation(final String location) { this.location = location; }
@@ -260,15 +275,4 @@ public class CMeeting extends CProjectItem<CMeeting> {
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
-
-	/** Override to set concrete type entity.
-	 * @param typeEntity the type entity to set */
-	@SuppressWarnings ("rawtypes")
-	@Override
-	public void setTypeEntity(final CTypeEntity typeEntity) {
-		if (typeEntity != null && !(typeEntity instanceof CMeetingType)) {
-			throw new IllegalArgumentException("Type entity must be an instance of CMeetingType");
-		}
-		this.meetingType = (CMeetingType) typeEntity;
-	}
 }

@@ -1,7 +1,12 @@
 package tech.derbent.api.domains;
+
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
+
 public interface IHasStatusAndWorkflow<EntityClass> {
-	// CProjectItemStatus getStatus();
-	// CTypeEntity<EntityClass> getTypeEntity();
-	// void setStatus(CProjectItemStatus status);
-	// void setTypeEntity(CTypeEntity<EntityClass> typeEntity);
+
+	CTypeEntity<?> getEntityType();
+	CProjectItemStatus getStatus();
+	CWorkflowEntity getWorkflow();
+	void setEntityType(CTypeEntity<?> typeEntity);
+	void setStatus(CProjectItemStatus status);
 }
