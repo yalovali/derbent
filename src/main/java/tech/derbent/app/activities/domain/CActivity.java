@@ -340,6 +340,9 @@ public class CActivity extends CProjectItem<CActivity> {
 	 * @param typeEntity the type entity to set */
 	@Override
 	public void setTypeEntity(final CTypeEntity typeEntity) {
+		if (typeEntity != null && !(typeEntity instanceof CActivityType)) {
+			throw new IllegalArgumentException("Type entity must be an instance of CActivityType");
+		}
 		this.activityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}

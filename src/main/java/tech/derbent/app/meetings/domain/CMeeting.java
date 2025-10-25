@@ -254,7 +254,12 @@ public class CMeeting extends CProjectItem<CMeeting> {
 	/** Override to set concrete type entity.
 	 * @param typeEntity the type entity to set */
 	@Override
-	public void setTypeEntity(final CTypeEntity typeEntity) { this.meetingType = (CMeetingType) typeEntity; }
+	public void setTypeEntity(final CTypeEntity typeEntity) {
+		if (typeEntity != null && !(typeEntity instanceof CMeetingType)) {
+			throw new IllegalArgumentException("Type entity must be an instance of CMeetingType");
+		}
+		this.meetingType = (CMeetingType) typeEntity;
+	}
 
 	public void setMinutes(final String minutes) { this.minutes = minutes; }
 
