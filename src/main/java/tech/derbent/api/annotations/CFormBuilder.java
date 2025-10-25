@@ -42,6 +42,7 @@ import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CColorAwareComboBox;
 import tech.derbent.api.components.CColorPickerComboBox;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.components.CNavigableComboBox;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityDB;
@@ -60,9 +61,6 @@ import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.api.views.components.CPictureSelector;
 import tech.derbent.api.views.components.CVerticalLayout;
-import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.base.session.service.CWebSessionService;
 
 @org.springframework.stereotype.Component
 public final class CFormBuilder<EntityClass> implements ApplicationContextAware {
@@ -235,22 +233,21 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
-	public static <T extends CEntityDB<T>> ComboBox<T> createComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+	public static <T extends CEntityDB<T>> CNavigableComboBox<T> createComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
-			// LOGGER.debug("Creating CColorAwareComboBox for field: {}", fieldInfo.getFieldName());
-			final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldInfo);
-			comboBox.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
+			// Create navigable combobox with navigation button
+			final CNavigableComboBox<T> navigableComboBox = new CNavigableComboBox<>(contentOwner, fieldInfo, null, dataProviderResolver);
 			// Data provider resolution using CDataProviderResolver
 			List<T> items = null;
 			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
 			items = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
 			Check.notNull(items, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 			if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
-				comboBox.setValue(null);
+				navigableComboBox.setValue(null);
 			}
-			comboBox.setItems(items);
+			navigableComboBox.setItems(items);
 			if (!items.isEmpty()) {
 				if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 					// For entity types, try to find by name or toString match
@@ -259,19 +256,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 						return fieldInfo.getDefaultValue().equals(itemDisplay);
 					}).findFirst().orElse(null);
 					if (defaultItem != null) {
-						comboBox.setValue(defaultItem);
+						navigableComboBox.setValue(defaultItem);
 					}
 				} else if (fieldInfo.isAutoSelectFirst()) {
-					comboBox.setValue(items.get(0));
+					navigableComboBox.setValue(items.get(0));
 				}
 			}
 			if (binder != null) {
 				// this is valid
-				safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox");
+				safeBindComponent(binder, navigableComboBox, fieldInfo.getFieldName(), "NavigableComboBox");
 			}
-			return comboBox;
+			return navigableComboBox;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create or bind ComboBox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Failed to create or bind NavigableComboBox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -521,34 +518,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 		horizontalLayout.add(component);
 		return horizontalLayout;
-	}
-
-	public static Component createFieldToolsComponent(EntityFieldInfo fieldInfo) throws Exception {
-		if (fieldInfo == null) {
-			return null;
-		}
-		Class<?> clazz = fieldInfo.getFieldTypeClass();
-		if (!CEntityDB.class.isAssignableFrom(clazz)) {
-			return null;
-		}
-		String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
-		// servicePageEntity
-		CPageEntityService service = CSpringContext.getBean(CPageEntityService.class);
-		CWebSessionService session = CSpringContext.getBean(CWebSessionService.class);
-		CPageEntity pageEntity = service.findByNameAndProject(baseViewName, session.getActiveProject().orElseThrow()).orElse(null);
-		Check.notNull(pageEntity, "PageEntity for view name " + baseViewName);
-		CButton navigeToButton = new CButton("", VaadinIcon.ARROW_RIGHT.create());
-		// navigate when clicked:
-		navigeToButton.addClickListener(event -> {
-			try {
-				// TODO String route = pageEntity.getRoute() + "&item:" + valueId;
-				String route = pageEntity.getRoute() + "&item:";
-				UI.getCurrent().navigate(route);
-			} catch (Exception e) {
-				LOGGER.error("Error navigating to entity page '{}': {}", pageEntity.getName(), e.getMessage());
-			}
-		});
-		return navigeToButton;
 	}
 
 	private static NumberField createFloatingPointField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
@@ -842,12 +811,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(fieldInfo, "field");
 			final Component component = createComponentForField(contentOwner, fieldInfo, binder);
 			assignDeterministicComponentId(component, fieldInfo, binder);
-			// send the field info and the component getValue consumer to the field tools creator
-			final Component fieldTools = createFieldToolsComponent(fieldInfo);
+			// Navigation button is now integrated into CNavigableComboBox
 			final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
-			if (fieldTools != null) {
-				horizontalLayout.add(fieldTools);
-			}
 			formLayout.add(horizontalLayout);
 			if (mapHorizontalLayouts != null) {
 				mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
