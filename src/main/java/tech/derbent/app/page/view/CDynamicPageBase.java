@@ -103,10 +103,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			Check.notNull(gridEntity, "Grid entity cannot be null");
 			Check.notBlank(gridEntity.getDataServiceBeanName(), "Data service bean name cannot be blank");
 			// Get the service bean from the application context
-			final Object serviceBean = CSpringContext.getBean(gridEntity.getDataServiceBeanName());
-			Check.notNull(serviceBean, "Service bean not found: " + gridEntity.getDataServiceBeanName());
-			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean is not an instance of CAbstractService: " + serviceBean.getClass());
-			entityService = (CAbstractService<?>) serviceBean;
+			entityService = CSpringContext.<CAbstractService<?>>getBean(gridEntity.getDataServiceBeanName());
 			// Get the entity class from the detail section
 			final CDetailSection detailSection = pageEntity.getDetailSection();
 			Check.notNull(detailSection, "Detail section cannot be null");

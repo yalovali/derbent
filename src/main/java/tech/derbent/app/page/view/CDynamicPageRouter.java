@@ -32,7 +32,6 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageRouter.class);
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Dynamic Page View";
-	private final ApplicationContext applicationContext;
 	private CPageEntity currentPageEntity = null;
 	private final CDetailSectionService detailSectionService;
 	private final CGridEntityService gridEntityService;
@@ -53,7 +52,6 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 		this.sessionService = sessionService;
 		this.detailSectionService = detailSectionService;
 		this.gridEntityService = gridEntityService;
-		this.applicationContext = applicationContext;
 		LOGGER.info("CDynamicPageRouter initialized with grid and detail section support");
 	}
 

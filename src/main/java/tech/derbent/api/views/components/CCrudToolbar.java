@@ -63,7 +63,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		this.entityService = entityService;
 		this.entityClass = entityClass;
 		this.parentPage = parentPage;
-		dataProviderResolver = CSpringContext.getBean(CDataProviderResolver.class);
+		dataProviderResolver = CSpringContext.<CDataProviderResolver>getBean(CDataProviderResolver.class);
 		this.binder = binder;
 		setSpacing(true);
 		setPadding(true);

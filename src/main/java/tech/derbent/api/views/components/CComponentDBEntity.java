@@ -3,8 +3,8 @@ package tech.derbent.api.views.components;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
@@ -16,7 +16,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		implements IContentOwner, IHasContentOwner {
 
 	private static final long serialVersionUID = 1L;
-	protected final ApplicationContext applicationContext;
 	private final CEnhancedBinder<EntityClass> binder;
 	protected IContentOwner contentOwner = null;
 	private EntityClass currentEntity;
@@ -27,16 +26,12 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	@SuppressWarnings ("unchecked")
-	public CComponentDBEntity(final String title, final Class<EntityClass> entityClass, ApplicationContext applicationContext) {
+	public CComponentDBEntity(final String title, final Class<EntityClass> entityClass) {
 		super(false, true, false); // no padding, with spacing, no margin
-		this.applicationContext = applicationContext;
-		Check.notNull(applicationContext, "Application context cannot be null");
 		this.entityClass = entityClass;
 		Check.notNull(entityClass, "Entity class cannot be null");
 		binder = new CEnhancedBinder<>(entityClass);
-		Check.notNull(binder, "Binder cannot be null");
-		entityService = (CAbstractService<EntityClass>) applicationContext.getBean(CAuxillaries.getServiceClassForEntity(entityClass));
-		Check.notNull(entityService, "Entity service cannot be null for entity: " + entityClass.getSimpleName());
+		entityService = (CAbstractService<EntityClass>) CSpringContext.getBean(CAuxillaries.getServiceClassForEntity(entityClass));
 	}
 
 	public void clearForm() {

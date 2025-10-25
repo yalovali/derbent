@@ -1,7 +1,7 @@
 package tech.derbent.app.workflow.view;
 
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.services.CAbstractService;
@@ -28,12 +28,12 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 	protected final CWorkflowStatusRelationService workflowStatusRelationService;
 
 	public CComponentWorkflowStatusRelationBase(final String title, final Class<MasterClass> entityClass,
-			final CAbstractService<MasterClass> entityService, ISessionService sessionService, final ApplicationContext applicationContext) {
-		super(title, entityClass, CWorkflowStatusRelation.class, entityService, applicationContext.getBean(CWorkflowStatusRelationService.class),
-				sessionService, applicationContext);
-		workflowStatusRelationService = applicationContext.getBean(CWorkflowStatusRelationService.class);
-		statusService = applicationContext.getBean(CProjectItemStatusService.class);
-		roleService = applicationContext.getBean(CUserProjectRoleService.class);
+			final CAbstractService<MasterClass> entityService, ISessionService sessionService) {
+		super(title, entityClass, CWorkflowStatusRelation.class, entityService,
+				CSpringContext.<CWorkflowStatusRelationService>getBean(CWorkflowStatusRelationService.class), sessionService);
+		workflowStatusRelationService = CSpringContext.<CWorkflowStatusRelationService>getBean(CWorkflowStatusRelationService.class);
+		statusService = CSpringContext.<CProjectItemStatusService>getBean(CProjectItemStatusService.class);
+		roleService = CSpringContext.<CUserProjectRoleService>getBean(CUserProjectRoleService.class);
 	}
 
 	@Override

@@ -2,8 +2,6 @@ package tech.derbent.app.projects.service;
 
 import java.time.Clock;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +24,6 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CProjectService extends CEntityNamedService<CProject> {
 
-	@Autowired
-	private ApplicationContext applicationContext;
 	private final ApplicationEventPublisher eventPublisher;
 
 	public CProjectService(final IProjectRepository repository, final Clock clock, final ISessionService sessionService,
@@ -36,9 +32,14 @@ public class CProjectService extends CEntityNamedService<CProject> {
 		this.eventPublisher = eventPublisher;
 	}
 
+	@Override
+	public String checkDeleteAllowed(final CProject project) {
+		return super.checkDeleteAllowed(project);
+	}
+
 	public Component createProjectUserSettingsComponent() {
 		try {
-			CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, sessionService, applicationContext);
+			CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, sessionService);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create project user settings component.");
@@ -90,10 +91,8 @@ public class CProjectService extends CEntityNamedService<CProject> {
 	@Override
 	protected Class<CProject> getEntityClass() { return CProject.class; }
 
-	@Override
-	public String checkDeleteAllowed(final CProject project) {
-		return super.checkDeleteAllowed(project);
-	}
+	@PreAuthorize ("permitAll()")
+	public long getTotalProjectCount() { return repository.count(); }
 
 	@Override
 	public void initializeNewEntity(final CProject entity) {
@@ -105,9 +104,6 @@ public class CProjectService extends CEntityNamedService<CProject> {
 		// Note: CProject extends CEntityNamed, not CEntityOfProject, so it doesn't have project field
 		// The company field is the primary association for projects
 	}
-
-	@PreAuthorize ("permitAll()")
-	public long getTotalProjectCount() { return repository.count(); }
 
 	@Override
 	@Transactional (readOnly = true)

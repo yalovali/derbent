@@ -32,6 +32,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
+import tech.derbent.api.screens.view.CDetailSectionView;
 import tech.derbent.api.services.CRouteDiscoveryService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -40,7 +41,6 @@ import tech.derbent.app.gannt.view.CProjectGanntView;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageMenuIntegrationService;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.api.screens.view.CDetailSectionView;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
@@ -60,6 +60,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		return group;
 	}
 
+	private CProject activeProject;
 	private final AuthenticationContext authenticationContext;
 	private final CLayoutService layoutService;
 	private CButton layoutToggleButton;
@@ -457,6 +458,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 
 	/** Refreshes the project list in the ComboBox. */
 	public void refreshProjectList() {
+		LOGGER.debug("Refreshing project list in toolbar ComboBox");
 		Check.notNull(sessionService, "SessionService must not be null to refresh project list");
 		Check.notNull(projectComboBox, "Project ComboBox must not be null to refresh project list");
 		try {

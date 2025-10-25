@@ -22,6 +22,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.hilla.ApplicationContextProvider;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IProjectChangeListener;
@@ -92,23 +93,15 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private void applySearchFilter(String searchText) {
 		try {
 			String serviceBeanName = gridEntity.getDataServiceBeanName();
-			Check.notNull(serviceBeanName, "Service bean name is not set for search filtering");
 			Check.notBlank(serviceBeanName, "Service bean name is blank for search filtering");
 			// Get the service and entity class
-			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
-			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
-			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean does not extend CAbstractService: " + serviceBeanName);
-			CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
-			Check.notNull(abstractService, "AbstractService is null for search filtering");
-			// Check if service supports project-based filtering
-			Check.instanceOf(abstractService, CEntityOfProjectService.class, "Service does not support project-based filtering: " + serviceBeanName);
-			CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) abstractService;
+			CEntityOfProjectService<?> projectService = CSpringContext.<CEntityOfProjectService<?>>getBean(serviceBeanName);
 			CProject currentProject = sessionService != null
 					? sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found.")) : null;
 			// Get all entities for the current project - note: using raw types due to grid constraints
-			java.util.List allEntities = projectService.listByProject(currentProject, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+			List allEntities = projectService.listByProject(currentProject, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
 			// Filter entities based on search text
-			java.util.List filteredEntities = (java.util.List) allEntities.stream().filter(entity -> {
+			List filteredEntities = (List) allEntities.stream().filter(entity -> {
 				try {
 					return matchesSearchText(entity, searchText);
 				} catch (Exception e) {
@@ -116,7 +109,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					e.printStackTrace();
 					return false;
 				}
-			}).collect(java.util.stream.Collectors.toList());
+			}).collect(Collectors.toList());
 			// Update grid with filtered data
 			grid.setItems(filteredEntities);
 			LOGGER.debug("Applied search filter '{}' - {} results out of {} total", searchText, filteredEntities.size(), allEntities.size());
@@ -353,7 +346,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 			createGridColumns();
 			// Load data from the service
-			loadDataFromService(serviceBeanName, gridEntity.getProject());
+			// loadDataFromService(serviceBeanName, gridEntity.getProject());
+			refreshGridData();
 			this.add(grid);
 		} catch (Exception e) {
 			LOGGER.error("Error creating grid content.");
@@ -412,11 +406,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	private Class<?> getEntityClassFromService(String serviceBeanName) throws Exception {
 		try {
-			Check.notNull(ApplicationContextProvider.getApplicationContext(), "ApplicationContext is not available");
-			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
-			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
-			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean does not extend CAbstractService: " + serviceBeanName);
-			CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
+			CAbstractService<?> abstractService = CSpringContext.<CAbstractService<?>>getBean(serviceBeanName);
 			return getEntityClassFromService(abstractService);
 		} catch (Exception e) {
 			LOGGER.error("Error getting entity class from service {}: {}", serviceBeanName, e.getMessage());
@@ -460,43 +450,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			return brightness > 127; // Threshold for light vs dark
 		} catch (Exception e) {
 			return true; // Default to light on error
-		}
-	}
-
-	/** Loads data from the specified service and populates the grid.
-	 * @param serviceBeanName the name of the service bean to load data from
-	 * @param project         the project to filter data by (if service supports project filtering) */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void loadDataFromService(String serviceBeanName, CProject project) {
-		try {
-			LOGGER.debug("Loading data from service: {} for project: {}", serviceBeanName, project != null ? project.getName() : "null");
-			Check.notNull(serviceBeanName, "Service bean name is null");
-			Check.notBlank(serviceBeanName, "Service bean name is blank");
-			Check.notNull(project, "Project is null");
-			Check.notNull(ApplicationContextProvider.getApplicationContext(), "ApplicationContext is not available");
-			CAbstractService serviceBean = (CAbstractService) ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
-			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
-			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean does not extend CAbstractService: " + serviceBeanName);
-			// Use pageable to get data - limit to first 1000 records for performance
-			PageRequest pageRequest = PageRequest.of(0, 1000);
-			List data;
-			// Check if this is a project-specific service and filter by the gridEntity's project
-			if (serviceBean instanceof CEntityOfProjectService) {
-				CEntityOfProjectService projectService = (CEntityOfProjectService) serviceBean;
-				LOGGER.debug("Using project-specific service to load data for project: {}", project.getName());
-				data = projectService.listByProject(project, pageRequest).getContent();
-			} else {
-				// For non-project services, use regular list method
-				LOGGER.debug("Using regular service to load data (no project filtering)");
-				data = serviceBean.list(pageRequest).getContent();
-			}
-			Check.notNull(data, "Data loaded from service is null");
-			grid.setItems(data);
-		} catch (Exception e) {
-			LOGGER.error("Error loading data from service {}: {}", serviceBeanName, e.getMessage());
-			grid.setItems(Collections.emptyList());
 		}
 	}
 
@@ -570,7 +523,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	@Override
 	public void onProjectChanged(CProject newProject) {
-		LOGGER.debug("Project change notification received in CComponentGridEntity: {}", newProject != null ? newProject.getName() : "null");
+		LOGGER.debug("Project change notification received in CComponentGridEntity: {} old {}", newProject != null ? newProject.getName() : "null",
+				currentProject != null ? currentProject.getName() : "null");
 		// Refresh grid data with new project
 		if (currentProject != null && newProject != null && currentProject.getId().equals(newProject.getId())) {
 			return;
@@ -617,19 +571,35 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return fieldConfigs;
 	}
 
-	/** Public method to refresh the grid */
-	public void refreshGrid() {
-		refreshGridData();
-	}
-
 	/** Refresh grid data based on current project */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
 	public void refreshGridData() {
-		String serviceBeanName = gridEntity.getDataServiceBeanName();
-		Check.notNull(serviceBeanName, "Data service bean name is not set in grid entity");
-		Check.notBlank(serviceBeanName, "Data service bean name is blank in grid entity");
-		Check.notNull(sessionService, "SessionService is not available for grid data refresh");
-		CProject currentProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
-		loadDataFromService(serviceBeanName, currentProject);
+		LOGGER.debug("Refreshing grid data for grid entity: {}", gridEntity != null ? gridEntity.getName() : "null");
+		try {
+			CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
+			Check.notNull(project, "Project is null");
+			CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
+			Check.instanceOf(serviceBean, CAbstractService.class,
+					"Service bean does not extend CAbstractService: " + gridEntity.getDataServiceBeanName());
+			// Use pageable to get data - limit to first 1000 records for performance
+			PageRequest pageRequest = PageRequest.of(0, 1000);
+			List data;
+			// Check if this is a project-specific service and filter by the gridEntity's project
+			if (serviceBean instanceof CEntityOfProjectService) {
+				CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
+				data = projectService.listByProject(project, pageRequest).getContent();
+			} else {
+				// For non-project services, use regular list method
+				data = serviceBean.list(pageRequest).getContent();
+			}
+			Check.notNull(data, "Data loaded from service is null");
+			grid.setItems(data);
+		} catch (Exception e) {
+			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
+			grid.setItems(Collections.emptyList());
+		}
 	}
 
 	/** Scrolls the grid to make the specified entity visible */

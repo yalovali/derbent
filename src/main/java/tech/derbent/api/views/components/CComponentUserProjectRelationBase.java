@@ -1,7 +1,7 @@
 package tech.derbent.api.views.components;
 
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.services.CAbstractService;
@@ -27,12 +27,12 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	protected final CUserProjectSettingsService userProjectSettingsService;
 
 	public CComponentUserProjectRelationBase(final String title, final Class<MasterClass> entityClass,
-			final CAbstractService<MasterClass> entityService, ISessionService sessionService, final ApplicationContext applicationContext) {
-		super(title, entityClass, CUserProjectSettings.class, entityService, applicationContext.getBean(CUserProjectSettingsService.class),
-				sessionService, applicationContext);
-		userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
-		projectService = applicationContext.getBean(CProjectService.class);
-		companyService = applicationContext.getBean(CCompanyService.class);
+			final CAbstractService<MasterClass> entityService, ISessionService sessionService) {
+		super(title, entityClass, CUserProjectSettings.class, entityService,
+				CSpringContext.<CUserProjectSettingsService>getBean(CUserProjectSettingsService.class), sessionService);
+		userProjectSettingsService = CSpringContext.<CUserProjectSettingsService>getBean(CUserProjectSettingsService.class);
+		projectService = CSpringContext.<CProjectService>getBean(CProjectService.class);
+		companyService = CSpringContext.<CCompanyService>getBean(CCompanyService.class);
 	}
 
 	@Override

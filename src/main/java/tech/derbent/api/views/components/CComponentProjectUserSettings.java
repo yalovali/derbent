@@ -1,7 +1,7 @@
 package tech.derbent.api.views.components;
 
 import java.util.List;
-import org.springframework.context.ApplicationContext;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectService;
@@ -19,10 +19,9 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	private static final long serialVersionUID = 1L;
 	private final CUserService userService;
 
-	public CComponentProjectUserSettings(final CProjectService entityService, ISessionService sessionService, ApplicationContext applicationContext)
-			throws Exception {
-		super("User Settings", CProject.class, entityService, sessionService, applicationContext);
-		userService = applicationContext.getBean(CUserService.class);
+	public CComponentProjectUserSettings(final CProjectService entityService, ISessionService sessionService) throws Exception {
+		super("User Settings", CProject.class, entityService, sessionService);
+		userService = CSpringContext.getBean(CUserService.class);
 		initComponent();
 	}
 

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -33,8 +32,8 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	public CComponentRelationPanelBase(final String title, final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
 			final CAbstractService<MasterClass> entityService, final CAbstractEntityRelationService<RelationalClass> relationService,
-			final ISessionService sessionService, final ApplicationContext applicationContext) {
-		super(title, entityClass, relationalClass, sessionService, applicationContext);
+			final ISessionService sessionService) {
+		super(title, entityClass, relationalClass, sessionService);
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
 		Check.notNull(relationService, "Relation service cannot be null - relational component requires a valid relation service");
 		this.relationService = relationService;

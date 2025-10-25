@@ -1,7 +1,7 @@
 package tech.derbent.app.workflow.view;
 
 import java.util.List;
-import org.springframework.context.ApplicationContext;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
@@ -18,10 +18,9 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 	private static final long serialVersionUID = 1L;
 	private final CProjectItemStatusService statusService;
 
-	public CComponentWorkflowStatusRelations(final CWorkflowEntityService entityService, ISessionService sessionService,
-			ApplicationContext applicationContext) throws Exception {
-		super("Status Transitions", CWorkflowEntity.class, entityService, sessionService, applicationContext);
-		statusService = applicationContext.getBean(CProjectItemStatusService.class);
+	public CComponentWorkflowStatusRelations(final CWorkflowEntityService entityService, ISessionService sessionService) throws Exception {
+		super("Status Transitions", CWorkflowEntity.class, entityService, sessionService);
+		statusService = CSpringContext.<CProjectItemStatusService>getBean(CProjectItemStatusService.class);
 		initComponent();
 	}
 

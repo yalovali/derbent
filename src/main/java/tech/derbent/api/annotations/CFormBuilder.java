@@ -67,7 +67,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		<T extends CEntityDB<T>> List<T> getItems(Class<T> entityType);
 	}
 
-	private static ApplicationContext applicationContext;
 	private static CDataProviderResolver dataProviderResolver;
 	protected static final String LabelMinWidth_210PX = "210px";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFormBuilder.class);
@@ -1021,8 +1020,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	@Override
 	public void setApplicationContext(final ApplicationContext context) {
 		try {
-			// Store the application context for String data provider resolution
-			CFormBuilder.applicationContext = context;
 			CFormBuilder.dataProviderResolver = context.getBean(CDataProviderResolver.class);
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to initialize CDataProviderResolver - annotation-based providers will not work: {}", e.getMessage());

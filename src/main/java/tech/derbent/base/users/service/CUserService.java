@@ -8,8 +8,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -41,8 +39,6 @@ import tech.derbent.base.users.domain.CUser;
 public class CUserService extends CEntityNamedService<CUser> implements UserDetailsService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
-	@Autowired
-	private ApplicationContext applicationContext;
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
 
@@ -104,7 +100,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	public Component createUserProjectSettingsComponent() {
 		try {
 			LOGGER.debug("Creating enhanced user project settings component");
-			final CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, sessionService, applicationContext);
+			final CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, sessionService);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create user project settings component.");

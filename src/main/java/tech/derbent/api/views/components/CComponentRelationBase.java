@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.views.grids.CGrid;
@@ -23,8 +22,8 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 	protected ISessionService sessionService;
 
 	public CComponentRelationBase(final String title, final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
-			ISessionService sessionService, ApplicationContext applicationContext) {
-		super(title, entityClass, applicationContext);
+			ISessionService sessionService) {
+		super(title, entityClass);
 		this.relationalClass = relationalClass;
 		this.sessionService = sessionService;
 		grid = new CGrid<>(relationalClass);
