@@ -24,6 +24,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
@@ -31,7 +32,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> {
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity> {
 
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:file-o";

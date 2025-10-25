@@ -19,6 +19,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.screens.service.CEntityFieldService;
@@ -106,7 +107,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		// Add basic buttons first
 		add(createButton, saveButton, deleteButton, refreshButton);
 		// Create workflow status combobox if entity is a CProjectItem
-		if (CProjectItem.class.isAssignableFrom(entityClass)) {
+		if (IHasStatusAndWorkflow.class.isAssignableFrom(entityClass)) {
 			createWorkflowStatusComboBox();
 		}
 		updateButtonStates();
