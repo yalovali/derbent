@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,6 +23,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
@@ -31,13 +31,20 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-@AssociationOverride (name = "typeEntity", joinColumns = @JoinColumn (name = "cactivitytype_id"))
 public class CActivity extends CProjectItem<CActivity> {
 
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:file-o";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 	public final static String VIEW_NAME = "Activities View";
+	// Type Management - concrete implementation of parent's typeEntity
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "cactivitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
+			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CActivityType activityType;
 	// Additional Information
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -193,9 +200,9 @@ public class CActivity extends CProjectItem<CActivity> {
 
 	public String getAcceptanceCriteria() { return acceptanceCriteria; }
 
-	/** Gets the activity type (convenience method that casts the generic typeEntity).
+	/** Gets the activity type.
 	 * @return the activity type */
-	public CActivityType getActivityType() { return (CActivityType) getTypeEntity(); }
+	public CActivityType getActivityType() { return activityType; }
 
 	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
 	// Getters and Setters with proper logging and null checking
@@ -227,6 +234,11 @@ public class CActivity extends CProjectItem<CActivity> {
 	public String getResults() { return results; }
 
 	public LocalDate getStartDate() { return startDate; }
+
+	/** Override to provide concrete type entity.
+	 * @return the type entity (activity type) */
+	@Override
+	public CTypeEntity getTypeEntity() { return activityType; }
 
 	@Override
 	public void initializeAllFields() {
@@ -317,10 +329,19 @@ public class CActivity extends CProjectItem<CActivity> {
 		updateLastModified();
 	}
 
-	/** Sets the activity type (convenience method that delegates to setTypeEntity).
+	/** Sets the activity type.
 	 * @param activityType the activity type to set */
 	public void setActivityType(final CActivityType activityType) {
-		setTypeEntity(activityType);
+		this.activityType = activityType;
+		updateLastModified();
+	}
+
+	/** Override to set concrete type entity.
+	 * @param typeEntity the type entity to set */
+	@Override
+	public void setTypeEntity(final CTypeEntity typeEntity) {
+		this.activityType = (CActivityType) typeEntity;
+		updateLastModified();
 	}
 
 	public void setActualCost(final BigDecimal actualCost) {

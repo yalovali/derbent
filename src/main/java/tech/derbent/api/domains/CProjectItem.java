@@ -5,6 +5,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -28,12 +29,9 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	)
 	protected CProjectItemStatus status;
 	// if you have a status, you must have a type linked to a workflow to get the status transitions
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "ctypeentity_id", nullable = true)
-	@AMetaData (
-			displayName = "Entity Type", required = false, readOnly = false, description = "Type category of the entity", hidden = false, order = 2,
-			dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
-	)
+	// NOTE: This is a transient helper field. Subclasses must define their own concrete @ManyToOne field
+	// and override getTypeEntity()/setTypeEntity() to use it.
+	@Transient
 	private CTypeEntity typeEntity;
 
 	/** Default constructor for JPA. */
