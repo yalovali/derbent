@@ -24,6 +24,15 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		super.initializeNewEntity(entity);
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize risk"));
+		// Get initial statuses based on the entity's workflow
+		if (entity.getWorkflow() != null) {
+			final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(entity);
+			if (!initialStatuses.isEmpty()) {
+				entity.setStatus(initialStatuses.get(0));
+				return;
+			}
+		}
+		// Fallback: use first available status if no workflow or no initial statuses
 		final List<CProjectItemStatus> availableStatuses = projectItemStatusService.listByProject(currentProject);
 		if (!availableStatuses.isEmpty()) {
 			entity.setStatus(availableStatuses.get(0));

@@ -964,6 +964,10 @@ public class CDataInitializer {
 				relation.setWorkflowEntity(activityWorkflow);
 				relation.setFromStatus(statuses.get(i));
 				relation.setToStatus(statuses.get(i + 1));
+				// Mark the first status (Not Started) as initial
+				if (i == 0) {
+					relation.setInitialStatus(true);
+				}
 				// Add first role to the transition
 				if (!roles.isEmpty()) {
 					relation.getRoles().add(roles.get(0));
@@ -984,6 +988,10 @@ public class CDataInitializer {
 				relation.setWorkflowEntity(meetingWorkflow);
 				relation.setFromStatus(statuses.get(i));
 				relation.setToStatus(statuses.get(i + 1));
+				// Mark the first status as initial
+				if (i == 0) {
+					relation.setInitialStatus(true);
+				}
 				if (!roles.isEmpty()) {
 					relation.getRoles().add(roles.get(0));
 				}
@@ -1000,6 +1008,10 @@ public class CDataInitializer {
 				relation.setWorkflowEntity(decisionWorkflow);
 				relation.setFromStatus(statuses.get(i));
 				relation.setToStatus(statuses.get(i + 1));
+				// Mark the first status as initial
+				if (i == 0) {
+					relation.setInitialStatus(true);
+				}
 				if (!roles.isEmpty()) {
 					relation.getRoles().add(roles.get(0));
 				}

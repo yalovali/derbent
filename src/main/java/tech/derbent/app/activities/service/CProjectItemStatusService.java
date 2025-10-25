@@ -75,9 +75,20 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		if (currentStatus != null) {
 			validStatuses.add(projectItem.getStatus()); // Always include current status
 		} else {
-			// todo log warning?
-			LOGGER.warn("Current status is null for project item: {}", projectItem.getId());
-			// set the default status if current status is null ???
+			// For new items without a status, return initial statuses from the workflow
+			LOGGER.debug("Getting initial statuses for new project item with workflow: {}", workflow.getName());
+			try {
+				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
+				// Get statuses from relations marked as initial
+				relations.stream().filter(r -> r.getInitialStatus() != null && r.getInitialStatus()).map(CWorkflowStatusRelation::getToStatus)
+						.distinct().forEach(validStatuses::add);
+				// If no initial statuses found, use the first status in the workflow
+				if (validStatuses.isEmpty() && !relations.isEmpty()) {
+					validStatuses.add(relations.get(0).getFromStatus());
+				}
+			} catch (Exception e) {
+				LOGGER.error("Error retrieving initial statuses for project item: {}", e.getMessage());
+			}
 			return validStatuses;
 		}
 		try {
@@ -85,7 +96,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
 			// Find relations where fromStatus matches current status and exclude current status from valid next statuses
 			relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
-					.distinct().filter(r -> r.getId() == currentStatus.getId()).forEach(validStatuses::add);
+					.distinct().filter(r -> !r.getId().equals(currentStatus.getId())).forEach(validStatuses::add);
 		} catch (Exception e) {
 			LOGGER.error("Error retrieving valid next statuses for project item {}: {}", projectItem.getId(), e.getMessage());
 		}
