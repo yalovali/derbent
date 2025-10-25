@@ -159,7 +159,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		companyField.setRequiredIndicatorVisible(true);
 		companyField.setId("custom-company-input");
 		companyField.setItemLabelGenerator(company -> company.getName());
-		// Add enter key listener to company field using addKeyDownListener
+		// Add enter key listener to company field using addEventListener
 		companyField.getElement().addEventListener("keydown", event -> {
 			handleLogin();
 		}).setFilter("event.key === 'Enter'");
