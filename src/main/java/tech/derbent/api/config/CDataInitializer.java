@@ -417,13 +417,18 @@ public class CDataInitializer {
 		try {
 			// Comments require an activity - create a simple activity related to this decision
 			final CActivityType activityType = activityTypeService.getRandom(decision.getProject());
-			final CProjectItemStatus activityStatus = activityStatusService.getRandom(decision.getProject());
 			final CUser user = userService.getRandom();
 			final CActivity activity = new CActivity("Review Decision: " + decision.getName(), decision.getProject());
 			activity.setDescription("Activity to track review and implementation of decision");
 			activity.setActivityType(activityType);
-			activity.setStatus(activityStatus);
 			activity.setAssignedTo(user);
+			// Set initial status from workflow
+			if (activityType != null && activityType.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity);
+				if (!initialStatuses.isEmpty()) {
+					activity.setStatus(initialStatuses.get(0));
+				}
+			}
 			activityService.save(activity);
 			// Create 2 comments for this activity
 			final CCommentPriority priority1 = commentPriorityService.getRandom(decision.getProject());
@@ -449,13 +454,18 @@ public class CDataInitializer {
 		try {
 			// Comments require an activity - create a simple activity related to this meeting
 			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject());
-			final CProjectItemStatus activityStatus = activityStatusService.getRandom(meeting.getProject());
 			final CUser user = userService.getRandom();
 			final CActivity activity = new CActivity("Follow-up: " + meeting.getName(), meeting.getProject());
 			activity.setDescription("Activity to track action items from meeting");
 			activity.setActivityType(activityType);
-			activity.setStatus(activityStatus);
 			activity.setAssignedTo(user);
+			// Set initial status from workflow
+			if (activityType != null && activityType.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity);
+				if (!initialStatuses.isEmpty()) {
+					activity.setStatus(initialStatuses.get(0));
+				}
+			}
 			activityService.save(activity);
 			// Create 2 comments for this activity
 			final CCommentPriority priority1 = commentPriorityService.getRandom(meeting.getProject());
@@ -741,31 +751,19 @@ public class CDataInitializer {
 			// Get random values from database for dependencies
 			final CMeetingType type1 = meetingTypeService.getRandom(project);
 			final CUser user1 = userService.getRandom();
-			// Get a random workflow and a status from that workflow
-			final CWorkflowEntity workflow1 = workflowEntityService.getRandom(project);
-			CProjectItemStatus status1 = projectItemStatusService.getRandom(project);
-			if (workflow1 != null) {
-				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow1);
-				if (!relations.isEmpty()) {
-					status1 = relations.get(0).getToStatus();
-				}
-			}
 			final CMeetingType type2 = meetingTypeService.getRandom(project);
 			final CUser user2 = userService.getRandom();
-			// Get another random workflow and status
-			final CWorkflowEntity workflow2 = workflowEntityService.getRandom(project);
-			CProjectItemStatus status2 = projectItemStatusService.getRandom(project);
-			if (workflow2 != null) {
-				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow2);
-				if (!relations.isEmpty()) {
-					status2 = relations.get(0).getToStatus();
-				}
-			}
 			// Create first meeting
 			final tech.derbent.app.meetings.domain.CMeeting meeting1 =
 					new tech.derbent.app.meetings.domain.CMeeting("Q1 Planning Session", project, type1);
 			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
-			meeting1.setStatus(status1);
+			// Set initial status from workflow
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting1);
+				if (!initialStatuses.isEmpty()) {
+					meeting1.setStatus(initialStatuses.get(0));
+				}
+			}
 			meeting1.setAssignedTo(user1);
 			meeting1.setResponsible(user2);
 			meeting1.setMeetingDate(java.time.LocalDateTime.now().plusDays(7));
@@ -784,7 +782,13 @@ public class CDataInitializer {
 			final tech.derbent.app.meetings.domain.CMeeting meeting2 =
 					new tech.derbent.app.meetings.domain.CMeeting("Technical Architecture Review", project, type2);
 			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
-			meeting2.setStatus(status2);
+			// Set initial status from workflow
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting2);
+				if (!initialStatuses.isEmpty()) {
+					meeting2.setStatus(initialStatuses.get(0));
+				}
+			}
 			meeting2.setAssignedTo(user2);
 			meeting2.setResponsible(user1);
 			meeting2.setMeetingDate(java.time.LocalDateTime.now().plusDays(14));
