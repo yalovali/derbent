@@ -1,4 +1,4 @@
-package tech.derbent.app.activities.service;
+package tech.derbent.app.risks.service;
 
 import java.time.Clock;
 import org.slf4j.Logger;
@@ -8,8 +8,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CTypeEntityService;
-import tech.derbent.app.activities.domain.CActivityType;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.risks.domain.CRiskType;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
@@ -17,16 +17,16 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CActivityTypeService extends CTypeEntityService<CActivityType> {
+public class CRiskTypeService extends CTypeEntityService<CRiskType> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityTypeService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskTypeService.class);
 	@Autowired
-	private IActivityRepository activityRepository;
+	private IRiskRepository riskRepository;
 
-	public CActivityTypeService(final IActivityTypeRepository repository, final Clock clock, final ISessionService sessionService,
-			final IActivityRepository activityRepository) {
+	public CRiskTypeService(final IRiskTypeRepository repository, final Clock clock, final ISessionService sessionService,
+			final IRiskRepository riskRepository) {
 		super(repository, clock, sessionService);
-		this.activityRepository = activityRepository;
+		this.riskRepository = riskRepository;
 	}
 
 	/** Checks dependencies before allowing activity type deletion. Prevents deletion if the type is being used by any activities. Always calls
@@ -34,14 +34,14 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> {
 	 * @param entity the activity type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CActivityType entity) {
+	public String checkDeleteAllowed(final CRiskType entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}
 		try {
 			// Check if any activities are using this type
-			final long usageCount = activityRepository.countByType(entity);
+			final long usageCount = riskRepository.countByType(entity);
 			if (usageCount > 0) {
 				return String.format("Cannot delete. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
 			}
@@ -53,16 +53,14 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> {
 	}
 
 	@Override
-	protected Class<CActivityType> getEntityClass() { return CActivityType.class; }
+	protected Class<CRiskType> getEntityClass() { return CRiskType.class; }
 
-	/** Initializes a new activity type. Most common fields are initialized by super class.
-	 * @param entity the newly created activity type to initialize */
 	@Override
-	public void initializeNewEntity(final CActivityType entity) {
+	public void initializeNewEntity(final CRiskType entity) {
 		super.initializeNewEntity(entity);
 		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IActivityTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("ActivityType %02d", typeCount + 1);
+		long typeCount = ((IRiskTypeRepository) repository).countByProject(activeProject);
+		String autoName = String.format("RiskType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

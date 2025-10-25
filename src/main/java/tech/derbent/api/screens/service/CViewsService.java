@@ -140,6 +140,8 @@ public class CViewsService {
 			return "CActivity";
 		} else if (entityLineType.contains("Meeting Type of")) {
 			return "CMeetingType";
+		} else if (entityLineType.contains("Risk Type of")) {
+			return "CRiskType";
 		} else if (entityLineType.contains("Meeting Status of")) {
 			return "CMeetingStatus";
 		} else if (entityLineType.contains("Risk Status of")) {

@@ -28,6 +28,7 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));

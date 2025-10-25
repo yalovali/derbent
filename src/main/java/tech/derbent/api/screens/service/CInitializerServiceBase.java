@@ -113,6 +113,8 @@ public abstract class CInitializerServiceBase {
 			return "CPageServiceActivityPriority";
 		case "CProjectItemStatus":
 			return "CPageServiceProjectItemStatus";
+		case "CRiskType":
+			return "CPageServiceRiskType";
 		case "CActivityType":
 			return "CPageServiceActivityType";
 		case "CCommentPriority":

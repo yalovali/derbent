@@ -1,4 +1,4 @@
-package tech.derbent.app.activities.service;
+package tech.derbent.app.risks.service;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -9,19 +9,19 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.app.activities.domain.CActivityType;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.risks.domain.CRiskType;
 
-public class CActivityTypeInitializerService extends CInitializerServiceBase {
+public class CRiskTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Activity Type Information";
-	private static final Class<?> clazz = CActivityType.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityTypeInitializerService.class);
+	public static final String BASE_PANEL_NAME = "Risk Type Information";
+	private static final Class<?> clazz = CRiskType.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".1";
-	private static final String menuTitle = MenuTitle_TYPES + ".Activity Types";
-	private static final String pageDescription = "Manage activity type categories for planning";
-	private static final String pageTitle = "Activity Type Management";
+	private static final String menuTitle = MenuTitle_TYPES + ".Risk Types";
+	private static final String pageDescription = "Manage risk type categories for planning";
+	private static final String pageTitle = "Risk Type Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
@@ -44,7 +44,7 @@ public class CActivityTypeInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating activity type view.");
+			LOGGER.error("Error creating risk type view.");
 			return null;
 		}
 	}

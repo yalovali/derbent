@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.screens.domain.CDetailLines;
 
 /** Service to provide entity field information for screen line configuration. This service uses reflection to extract field information from domain
  * entities. */
@@ -318,6 +318,16 @@ public class CEntityFieldService {
 		}
 	}
 
+	public static String extractEntityTypeFromBeanName(String beanName) {
+		Check.notNull(beanName, "Bean name cannot be null");
+		Check.notBlank(beanName, "Bean name cannot be empty");
+		// Convert service bean name to entity class name
+		// E.g., CActivityService -> CActivity
+		Check.isTrue(beanName.length() > "Service".length(), "Bean name is too short to extract entity type");
+		Check.isTrue(beanName.endsWith("Service"), "Bean name must end with 'Service'");
+		return beanName.substring(0, beanName.length() - "Service".length());
+	}
+
 	private static List<Field> getAllFields(final Class<?> clazz) {
 		final List<Field> fields = new ArrayList<>();
 		// Get fields from current class and all superclasses
@@ -360,22 +370,12 @@ public class CEntityFieldService {
 		return customMethods;
 	}
 
-	public static String extractEntityTypeFromBeanName(String beanName) {
-		Check.notNull(beanName, "Bean name cannot be null");
-		Check.notBlank(beanName, "Bean name cannot be empty");
-		// Convert service bean name to entity class name
-		// E.g., CActivityService -> CActivity
-		Check.isTrue(beanName.length() > "Service".length(), "Bean name is too short to extract entity type");
-		Check.isTrue(beanName.endsWith("Service"), "Bean name must end with 'Service'");
-		return beanName.substring(0, beanName.length() - "Service".length());
-	}
-
 	/** Get data provider beans for reference fields.
 	 * @return list of available data provider bean names */
 	public static List<String> getDataProviderBeans() {
-		return List.of("CActivityService", "CActivityTypeService", "CProjectItemStatusService", "CActivityPriorityService", "CMeetingService",
-				"CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
-				"CProjectService", "CUserService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
+		return List.of("CActivityService", "CActivityTypeService", "CRiskTypeService", "CProjectItemStatusService", "CActivityPriorityService",
+				"CMeetingService", "CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService",
+				"CRiskPriorityService", "CProjectService", "CUserService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
 	}
 
 	public static Field getEntityField(Class<?> type, final String fieldName) throws NoSuchFieldException {

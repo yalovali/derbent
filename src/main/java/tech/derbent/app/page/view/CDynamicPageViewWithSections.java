@@ -11,7 +11,6 @@ import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
-import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentDetailsMasterToolbar;
 import tech.derbent.api.views.components.CCrudToolbar;
@@ -269,9 +268,9 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			refreshGrid();
 			// Reload the entity from database to ensure all lazy-loaded fields are initialized
 			// This prevents BindingException when populating form with entities that have lazy relationships
-			final CAbstractService service = entityService;
-			final CEntityDB<?> reloadedEntity = (CEntityDB<?>) service.getById(entity.getId()).orElse(entity);
-			grid.selectEntity(reloadedEntity);
+			// final CAbstractService service = entityService;
+			// final CEntityDB<?> reloadedEntity = (CEntityDB<?>) service.getById(entity.getId()).orElse(entity);
+			// grid.selectEntity(reloadedEntity);
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity saved notification:" + e.getMessage());
 			throw e;

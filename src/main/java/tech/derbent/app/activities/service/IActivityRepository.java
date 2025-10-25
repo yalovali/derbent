@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.services.IProjectItemRespository;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityType;
@@ -16,11 +15,8 @@ import tech.derbent.base.users.domain.CUser;
 public interface IActivityRepository extends IProjectItemRespository<CActivity> {
 
 	/** Counts the number of activities that use the specified activity type using generic pattern */
-	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.activityType = :activityType")
-	long countByActivityType(@Param ("activityType") CActivityType activityType);
-	/** Counts the number of activities that use the specified activity status using generic pattern */
-	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.status = :status")
-	long countByProjectItemStatus(@Param ("status") CProjectItemStatus status);
+	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.activityType = :type")
+	long countByType(@Param ("activityType") CActivityType type);
 	@Override
 	@Query (
 		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project LEFT JOIN FETCH a.assignedTo LEFT JOIN FETCH a.createdBy LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.status WHERE a.id = :id"

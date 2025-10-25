@@ -21,6 +21,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.hilla.ApplicationContextProvider;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
@@ -59,6 +60,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridEntity.class);
 	private static final long serialVersionUID = 1L;
 	protected CProject currentProject;
+	private boolean enableSelectionChangeListener;
 	private CGrid<?> grid;
 	private CGridEntity gridEntity;
 	private ISessionService sessionService;
@@ -66,6 +68,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public CComponentGridEntity(CGridEntity gridEntity) {
 		super();
 		try {
+			enableSelectionChangeListener = true;
 			this.gridEntity = gridEntity;
 			// Set size to full so the grid can expand properly
 			setSizeFull();
@@ -81,8 +84,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	/** Adds a selection change listener to receive notifications when the grid selection changes */
-	public com.vaadin.flow.shared.Registration
-			addSelectionChangeListener(com.vaadin.flow.component.ComponentEventListener<SelectionChangeEvent> listener) {
+	public Registration addSelectionChangeListener(com.vaadin.flow.component.ComponentEventListener<SelectionChangeEvent> listener) {
 		return addListener(SelectionChangeEvent.class, listener);
 	}
 
@@ -453,6 +455,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
+	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
+
 	/** Checks if an entity matches the search text using reflection
 	 * @throws Exception */
 	private boolean matchesSearchText(Object entity, String searchText) throws Exception {
@@ -537,6 +541,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	/** Handles grid selection changes and fires SelectionChangeEvent */
 	protected void onSelectionChange(ValueChangeEvent<?> event) {
+		if (!enableSelectionChangeListener) {
+			return;
+		}
 		CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
 		fireEvent(new SelectionChangeEvent(this, selectedEntity));
 	}
@@ -568,6 +575,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public void refreshGridData() {
 		LOGGER.debug("Refreshing grid data for grid entity: {}", gridEntity != null ? gridEntity.getName() : "null");
 		try {
+			boolean old_enableSelectionChangeListener = enableSelectionChangeListener;
+			enableSelectionChangeListener = false;
+			// first get the selected item to restore selection later
+			CEntityDB<?> selectedItem = getSelectedItem();
+			//
 			CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
 			Check.notNull(project, "Project is null");
 			CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
@@ -586,6 +598,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			}
 			Check.notNull(data, "Data loaded from service is null");
 			grid.setItems(data);
+			enableSelectionChangeListener = old_enableSelectionChangeListener;
+			selectEntity(selectedItem);
 		} catch (Exception e) {
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
@@ -597,7 +611,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			"unchecked", "rawtypes"
 	})
 	private void scrollToEntity(CEntityDB<?> entity) {
-		if (grid == null || entity == null) {
+		if (entity == null) {
 			return;
 		}
 		try {
@@ -628,18 +642,15 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			"unchecked", "rawtypes"
 	})
 	public void selectEntity(CEntityDB<?> entity) {
-		if (grid != null && entity != null) {
-			try {
-				// Use unchecked cast to work with generic grid constraints
-				CGrid rawGrid = grid;
-				rawGrid.select(entity);
-				// Scroll to the selected entity to make it visible
-				scrollToEntity(entity);
-				LOGGER.debug("Selected entity in grid: {}", entity.getId());
-			} catch (Exception e) {
-				LOGGER.error("Error selecting entity in grid: {}", e.getMessage());
-				throw e;
-			}
+		try {
+			// Use unchecked cast to work with generic grid constraints
+			CGrid rawGrid = grid;
+			rawGrid.select(entity);
+			// Scroll to the selected entity to make it visible
+			scrollToEntity(entity);
+		} catch (Exception e) {
+			LOGGER.error("Error selecting entity in grid: {}", e.getMessage());
+			throw e;
 		}
 	}
 
@@ -692,6 +703,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// No current selection, select first item
 			selectFirstItem();
 		}
+	}
+
+	public void setEnableSelectionChangeListener(boolean enableSelectionChangeListener) {
+		if (this.enableSelectionChangeListener == enableSelectionChangeListener) {
+			LOGGER.debug("Selection change listener already set to {}", enableSelectionChangeListener);
+		}
+		this.enableSelectionChangeListener = enableSelectionChangeListener;
 	}
 
 	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }

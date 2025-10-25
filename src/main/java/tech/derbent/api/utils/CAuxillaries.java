@@ -61,8 +61,10 @@ import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectInitializerService;
 import tech.derbent.app.projects.service.CProjectService;
 import tech.derbent.app.risks.domain.CRisk;
+import tech.derbent.app.risks.domain.CRiskType;
 import tech.derbent.app.risks.service.CRiskInitializerService;
 import tech.derbent.app.risks.service.CRiskService;
+import tech.derbent.app.risks.service.CRiskTypeService;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
@@ -186,6 +188,8 @@ public class CAuxillaries {
 			return CUser.class;
 		case "CActivityType":
 			return CActivityType.class;
+		case "CRiskType":
+			return CRiskType.class;
 		case "CProjectItemStatus":
 			return CProjectItemStatus.class;
 		case "CActivityPriority":
@@ -244,6 +248,8 @@ public class CAuxillaries {
 			return CUserService.class;
 		case "CActivityType":
 			return CActivityTypeService.class;
+		case "CRiskType":
+			return CRiskService.class;
 		case "CProjectItemStatus":
 			return CProjectItemStatusService.class;
 		case "CActivityPriority":
@@ -436,6 +442,8 @@ public class CAuxillaries {
 			return CDecisionService.class;
 		case "CActivityTypeService":
 			return CActivityTypeService.class;
+		case "CRiskTypeService":
+			return CRiskTypeService.class;
 		case "CProjectItemStatusService":
 			return CProjectItemStatusService.class;
 		case "CActivityPriorityService":

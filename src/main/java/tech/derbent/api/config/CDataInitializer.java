@@ -65,8 +65,11 @@ import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectInitializerService;
 import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.app.risks.domain.CRiskType;
 import tech.derbent.app.risks.service.CRiskInitializerService;
 import tech.derbent.app.risks.service.CRiskService;
+import tech.derbent.app.risks.service.CRiskTypeInitializerService;
+import tech.derbent.app.risks.service.CRiskTypeService;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
@@ -143,6 +146,7 @@ public class CDataInitializer {
 	// Service dependencies - injected via constructor
 	private final CProjectService projectService;
 	private final CRiskService riskService;
+	private final CRiskTypeService riskTypeService;
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
 	private final ISessionService sessionService;
@@ -163,6 +167,7 @@ public class CDataInitializer {
 		activityService = CSpringContext.getBean(CActivityService.class);
 		activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 		activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
+		riskTypeService = CSpringContext.getBean(CRiskTypeService.class);
 		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
 		orderService = CSpringContext.getBean(COrderService.class);
 		orderTypeService = CSpringContext.getBean(COrderTypeService.class);
@@ -257,6 +262,7 @@ public class CDataInitializer {
 			activityPriorityService.deleteAllInBatch();
 			activityStatusService.deleteAllInBatch();
 			activityTypeService.deleteAllInBatch();
+			riskTypeService.deleteAllInBatch();
 			riskService.deleteAllInBatch();
 			screenLinesService.deleteAllInBatch();
 			screenService.deleteAllInBatch();
@@ -435,10 +441,10 @@ public class CDataInitializer {
 			final CCommentPriority priority2 = commentPriorityService.getRandom(decision.getProject());
 			final CUser commenter1 = userService.getRandom();
 			final CUser commenter2 = userService.getRandom();
-			final tech.derbent.app.comments.domain.CComment comment1 = new tech.derbent.app.comments.domain.CComment(
+			final CComment comment1 = new tech.derbent.app.comments.domain.CComment(
 					"This decision looks promising. We should prioritize implementation.", activity, commenter1, priority1);
 			commentService.save(comment1);
-			final tech.derbent.app.comments.domain.CComment comment2 = new tech.derbent.app.comments.domain.CComment(
+			final CComment comment2 = new tech.derbent.app.comments.domain.CComment(
 					"Agreed. Let's schedule a follow-up meeting to discuss resource allocation.", activity, commenter2, priority2);
 			commentService.save(comment2);
 			LOGGER.debug("Created sample activity and comments for decision ID: {}", decision.getId());
@@ -928,6 +934,36 @@ public class CDataInitializer {
 		}
 	}
 
+	private void initializeSampleRiskTypes(final CProject project, boolean minimal) {
+		try {
+			final String[][] riskTypes = {
+					{
+							"Technical Risk", "Risks related to technology and implementation"
+					}, {
+							"Operational Risk", "Risks affecting daily operations"
+					}, {
+							"Financial Risk", "Risks impacting financial performance"
+					}, {
+							"Strategic Risk", "Risks associated with strategic decisions"
+					}, {
+							"Compliance Risk", "Risks related to regulatory compliance"
+					}
+			};
+			for (final String[] typeData : riskTypes) {
+				final CRiskType item = riskTypeService.newEntity(typeData[0], project);
+				item.setDescription(typeData[1]);
+				item.setColor(CColorUtils.getRandomFromWebColors(true));
+				riskTypeService.save(item);
+				if (minimal) {
+					return;
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error creating risk types", e);
+			throw e;
+		}
+	}
+
 	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
 	 * @param project2 */
 	private void initializeSampleUserProjectSettings(final CProject project, boolean minimal) {
@@ -1108,6 +1144,7 @@ public class CDataInitializer {
 					CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Type/Status InitializerServices
 					CProjectItemStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CRiskTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CActivityPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -1131,6 +1168,7 @@ public class CDataInitializer {
 					initializeSampleDecisionTypes(project, minimal);
 					initializeSampleOrderTypes(project, minimal);
 					initializeSampleActivityTypes(project, minimal);
+					initializeSampleRiskTypes(project, minimal);
 					initializeSampleActivityPriorities(project, minimal);
 					initializeSampleCommentPriorities(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);

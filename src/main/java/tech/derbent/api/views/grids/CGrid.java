@@ -15,6 +15,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSingleSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
@@ -55,24 +56,17 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			return String.valueOf(ref);
 		}
 	}
-
-	/** Prevents a selected item from being deselected when clicked again. This is important for double-click scenarios where the user might
-	 * accidentally click the grid again after double-clicking, causing the selected item to become null before the dialog opens.
-	 * @param <T>  the entity type
-	 * @param grid the grid to configure */
-	private static <T> void preventDeselection(final Grid<T> grid) {
-		final java.util.concurrent.atomic.AtomicReference<T> lastSelection = new java.util.concurrent.atomic.AtomicReference<>();
-		grid.asSingleSelect().addValueChangeListener(event -> {
-			// If selection is being cleared and we had a previous selection, restore it
-			if (event.getValue() == null && lastSelection.get() != null) {
-				// Restore the previous selection to prevent accidental deselection
-				grid.asSingleSelect().setValue(lastSelection.get());
-			} else {
-				// Update the last selection
-				lastSelection.set(event.getValue());
-			}
-		});
-	}
+	// private static <T> void preventDeselection(final Grid<T> grid) {
+	// final AtomicReference<T> lastSelection = new AtomicReference<>();
+	// grid.asSingleSelect().addValueChangeListener(event -> {
+	// // If selection is being cleared and we had a previous selection, restore it
+	// if (event.getValue() == null && lastSelection.get() != null) {
+	// grid.asSingleSelect().setValue(lastSelection.get());
+	// } else {
+	// lastSelection.set(event.getValue());
+	// }
+	// });
+	// }
 
 	public static <T> void setupGrid(final Grid<T> grid) {
 		Check.notNull(grid, "Grid cannot be null when setting up relational component");
@@ -421,14 +415,13 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			LOGGER.debug("Ensuring selection when data is available");
 			// Only auto-select if no current selection and data is available
 			if (asSingleSelect().getValue() == null) {
-				getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>()).findFirst().ifPresent(entity -> {
+				getDataProvider().fetch(new Query<>()).findFirst().ifPresent(entity -> {
 					LOGGER.debug("Auto-selecting first entity: {}", entity.toString());
 					select(entity);
 				});
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not auto-select first row: {}", e.getMessage());
-			// Don't throw exception - this is a convenience feature
 		}
 	}
 
@@ -442,7 +435,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		setHeightFull();
 		CAuxillaries.setId(this);
 		// Prevent deselection when clicking on already-selected item
-		preventDeselection(this);
+		// preventDeselection(this);
 		// Ensure grid always has a selected row when data is available
 		getDataProvider().addDataProviderListener(e -> {
 			ensureSelectionWhenDataAvailable();
@@ -455,6 +448,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 
 	@Override
 	public void select(final EntityClass entity) {
+		if (entity == null) {
+			LOGGER.debug("Cannot select null entity, skipping.");
+			return;
+		}
 		LOGGER.debug("Selecting entity: {}", entity != null ? entity.toString() : "null");
 		if (entity == getSelectedItems().stream().findFirst().orElse(null)) {
 			// LOGGER.debug("Entity is already selected, skipping.");

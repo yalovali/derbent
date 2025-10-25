@@ -1,13 +1,18 @@
 package tech.derbent.app.risks.service;
 
 import java.time.Clock;
+import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CProjectItemService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.risks.domain.CRisk;
+import tech.derbent.app.risks.domain.CRiskType;
 import tech.derbent.app.risks.domain.ERiskSeverity;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -17,9 +22,12 @@ import tech.derbent.base.session.service.ISessionService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskService extends CProjectItemService<CRisk> {
 
-	CRiskService(final IRiskRepository repository, final Clock clock, final ISessionService sessionService,
+	private final CRiskTypeService riskTypeService;
+
+	CRiskService(final IRiskRepository repository, final Clock clock, final ISessionService sessionService, final CRiskTypeService riskTypeService,
 			final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
+		this.riskTypeService = riskTypeService;
 	}
 
 	@Override
@@ -33,10 +41,12 @@ public class CRiskService extends CProjectItemService<CRisk> {
 	@Override
 	public void initializeNewEntity(final CRisk entity) {
 		super.initializeNewEntity(entity);
-		// Initialize risk severity with default value (already set in domain constructor, but ensure it's set)
-		if (entity.getRiskSeverity() == null) {
-			entity.setRiskSeverity(ERiskSeverity.LOW);
-		}
-		// Note: If no status exists, the field will remain null (it's nullable)
+		// Get current project from session
+		final CProject currentProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
+		final List<CRiskType> availableTypes = riskTypeService.listByProject(currentProject);
+		Check.notEmpty(availableTypes, "No activity types available in project " + currentProject.getName() + " - cannot initialize new activity");
+		entity.setRiskType(availableTypes.get(0));
+		entity.setRiskSeverity(ERiskSeverity.LOW);
 	}
 }

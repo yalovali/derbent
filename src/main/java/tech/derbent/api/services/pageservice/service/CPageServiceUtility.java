@@ -26,6 +26,7 @@ import tech.derbent.api.services.pageservice.implementations.CPageServicePageEnt
 import tech.derbent.api.services.pageservice.implementations.CPageServiceProject;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectItemStatus;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceRisk;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceRiskType;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceSystemSettings;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUser;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanyRole;
@@ -40,10 +41,11 @@ public class CPageServiceUtility {
 	private static final List<String> availablePageServices = List.of("CPageServiceActivity", "CPageServiceComment", "CPageServiceCompany",
 			"CPageServiceDecision", "CPageServiceMeeting", "CPageServiceOrder", "CPageServiceProject", "CPageServiceRisk", "CPageServiceUser",
 			"CPageServiceSystemSettings", "CPageServiceActivityPriority", "CPageServiceProjectItemStatus", "CPageServiceActivityType",
-			"CPageServiceCommentPriority", "CPageServiceDecisionStatus", "CPageServiceDecisionType", "CPageServiceMeetingStatus",
-			"CPageServiceMeetingType", "CPageServiceOrderStatus", "CPageServiceOrderType", "CPageServiceOrderApproval", "CPageServiceApprovalStatus",
-			"CPageServiceCurrency", "CPageServiceRiskStatus", "CPageServiceUserCompanyRole", "CPageServiceUserCompanySetting",
-			"CPageServiceUserProjectRole", "CPageServiceUserProjectSettings", "CPageServicePageEntity", "CPageServiceGridEntity");
+			"CPageServiceRiskType", "CPageServiceCommentPriority", "CPageServiceDecisionStatus", "CPageServiceDecisionType",
+			"CPageServiceMeetingStatus", "CPageServiceMeetingType", "CPageServiceOrderStatus", "CPageServiceOrderType", "CPageServiceOrderApproval",
+			"CPageServiceApprovalStatus", "CPageServiceCurrency", "CPageServiceRiskStatus", "CPageServiceUserCompanyRole",
+			"CPageServiceUserCompanySetting", "CPageServiceUserProjectRole", "CPageServiceUserProjectSettings", "CPageServicePageEntity",
+			"CPageServiceGridEntity");
 	private static Logger LOGGER = LoggerFactory.getLogger(CPageServiceUtility.class);
 
 	public static Class<?> getPageServiceClassByName(String serviceName) {
@@ -75,6 +77,8 @@ public class CPageServiceUtility {
 			return CPageServiceProjectItemStatus.class;
 		case "CPageServiceActivityType":
 			return CPageServiceActivityType.class;
+		case "CPageServiceRiskType":
+			return CPageServiceRiskType.class;
 		case "CPageServiceCommentPriority":
 			return CPageServiceCommentPriority.class;
 		case "CPageServiceDecisionType":
