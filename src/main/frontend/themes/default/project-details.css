@@ -249,7 +249,7 @@
 
 .stat-card vaadin-icon {
     color: var(--lumo-primary-color);
-    font-size: 2rem;
+    font-size: 1.6rem;
     margin-bottom: var(--lumo-space-s);
 }
 
@@ -366,7 +366,7 @@
 }
 
 .dashboard-widget vaadin-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
     margin-bottom: var(--lumo-space-s);
 }
 
@@ -413,7 +413,7 @@
 }
 
 .chart-placeholder vaadin-icon {
-    font-size: 4rem;
+    font-size: 3.2rem;
     color: var(--lumo-contrast-30pct);
 }
 
