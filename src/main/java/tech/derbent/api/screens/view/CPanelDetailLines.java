@@ -44,7 +44,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		grid.addColumn(CDetailLines::getEntityProperty).setHeader("Field Name").setAutoWidth(true);
 		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setHeader("Required").setWidth("80px");
 		grid.addColumn(line -> line.getActive() ? "Active" : "Inactive").setHeader("Status").setWidth("80px");
-		grid.setMinHeight("300px");
+		grid.setMinHeight("250px");
 	}
 
 	private HorizontalLayout createLinesToolbar() {
