@@ -88,12 +88,12 @@ public final class CDataProviderResolver {
 		try {
 			Check.notNull(fieldInfo, "Field info cannot be null");
 			final String beanName = fieldInfo.getDataProviderBean();
-			Check.notBlank(beanName, "Data provider owner or bean name cannot be empty");
-			// Check for "none" sentinel value - indicates field should not have a data provider
-			if ("none".equalsIgnoreCase(beanName.trim())) {
+			// Check for "none" sentinel value first - indicates field should not have a data provider
+			if ((beanName != null) && "none".equalsIgnoreCase(beanName.trim())) {
 				throw new IllegalArgumentException("Data provider bean is set to 'none' for field '" + fieldInfo.getFieldName()
 						+ "' - this field should not use a data provider");
 			}
+			Check.notBlank(beanName, "Data provider owner or bean name cannot be empty");
 			Object paramValue = null;
 			if (!fieldInfo.getDataProviderParamMethod().isEmpty()) {
 				paramValue = resolveParamValue(contentOwner, fieldInfo);

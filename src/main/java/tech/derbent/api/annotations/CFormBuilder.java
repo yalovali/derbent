@@ -358,7 +358,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				}
 			} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
 				// it has a dataprovider or entity type
-				if (fieldInfo.getDataProviderBean().isBlank()) {
+				if (!hasValidDataProvider(fieldInfo.getDataProviderBean())) {
 					fieldInfo.setDataProviderBean(fieldType.getSimpleName() + "Service");
 				}
 				component = createComboBox(contentOwner, fieldInfo, binder);
