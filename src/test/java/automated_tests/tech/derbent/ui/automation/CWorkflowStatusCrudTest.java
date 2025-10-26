@@ -11,11 +11,25 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 
-/** Comprehensive CRUD test suite for entities with workflow status management. This test validates: 1. Activities CRUD operations with workflow
- * status initialization 2. Meetings CRUD operations with workflow status transitions 3. Projects and Users CRUD operations 4. Workflow initial status
- * assignment verification 5. Status ComboBox displays correct workflow transitions Key Focus: - Verify workflow initial status is assigned to new
- * items - Verify status ComboBox shows valid workflow transitions - Test complete CRUD cycle for main entities - Screenshot documentation of all
- * operations */
+/** Comprehensive CRUD test suite for entities with workflow status management.
+ * <p>
+ * This test validates:
+ * <ul>
+ * <li>Activities CRUD operations with workflow status initialization</li>
+ * <li>Meetings CRUD operations with workflow status transitions</li>
+ * <li>Projects and Users CRUD operations</li>
+ * <li>Workflow initial status assignment verification</li>
+ * <li>Status ComboBox displays correct workflow transitions</li>
+ * </ul>
+ * <p>
+ * Key Focus:
+ * <ul>
+ * <li>Verify workflow initial status is assigned to new items</li>
+ * <li>Verify status ComboBox shows valid workflow transitions</li>
+ * <li>Test complete CRUD cycle for main entities</li>
+ * <li>Screenshot documentation of all operations</li>
+ * </ul>
+ */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
