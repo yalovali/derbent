@@ -70,6 +70,14 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	protected static final String LabelMinWidth_210PX = "210px";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFormBuilder.class);
 
+	/** Checks if a field has a valid data provider bean. Returns false if the bean name is null, empty, blank, or "none". The "none" value is used as
+	 * a sentinel to explicitly indicate that a field should not have a data provider.
+	 * @param dataProviderBean the data provider bean name to check
+	 * @return true if the field has a valid data provider bean, false otherwise */
+	private static boolean hasValidDataProvider(final String dataProviderBean) {
+		return (dataProviderBean != null) && !dataProviderBean.trim().isEmpty() && !"none".equalsIgnoreCase(dataProviderBean.trim());
+	}
+
 	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		if ((component == null) || (fieldInfo == null)) {
 			return;
@@ -326,7 +334,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				LOGGER.info("Skipping field 'approvals' as it is handled separately");
 			}
 			// Check if field should be rendered as ComboBox based on metadata
-			final boolean hasDataProvider = (fieldInfo.getDataProviderBean() != null) && !fieldInfo.getDataProviderBean().trim().isEmpty();
+			final boolean hasDataProvider = hasValidDataProvider(fieldInfo.getDataProviderBean());
 			if (hasDataProvider && (fieldType == String.class)) {
 				// gets strings from a method in a spring bean
 				component = createStringComboBox(contentOwner, fieldInfo, binder);
