@@ -7,14 +7,14 @@ import org.slf4j.LoggerFactory;
 
 public class Check {
 
-	/** Default error message for condition checks */
-	private static final String DEFAULT_CONDITION_MESSAGE = "Condition check failed";
-	/** Default error message for null checks */
-	private static final String DEFAULT_NULL_MESSAGE = "Object cannot be null";
-	/** Default error message for empty checks */
-	private static final String DEFAULT_EMPTY_MESSAGE = "Collection cannot be empty";
 	/** Default error message for blank string checks */
 	private static final String DEFAULT_BLANK_MESSAGE = "String cannot be null or blank";
+	/** Default error message for condition checks */
+	private static final String DEFAULT_CONDITION_MESSAGE = "Condition check failed";
+	/** Default error message for empty checks */
+	private static final String DEFAULT_EMPTY_MESSAGE = "Collection cannot be empty";
+	/** Default error message for null checks */
+	private static final String DEFAULT_NULL_MESSAGE = "Object cannot be null";
 	/** Default error message for uninitialized entity checks */
 	private static final String DEFAULT_UNINITIALIZED_MESSAGE = "Entity must be initialized (not a lazy-loaded Hibernate proxy)";
 	private static final Logger LOGGER = LoggerFactory.getLogger(Check.class);
@@ -179,18 +179,6 @@ public class Check {
 				"Object of type " + object.getClass().getSimpleName() + " is not an instance of " + expectedClass.getSimpleName());
 	}
 
-	public static void isNull(final String string) {
-		isNull(string, "Object must be null");
-	}
-
-	public static void isNull(final Object object, final String message) {
-		if (object != null) {
-			final String m = msg(message, "Object must be null");
-			logFail(m);
-			throw new IllegalArgumentException(m);
-		}
-	}
-
 	public static void isBlank(final String string) {
 		isBlank(string, "String must be null or blank");
 	}
@@ -201,6 +189,36 @@ public class Check {
 			logFail(m);
 			throw new IllegalArgumentException(m);
 		}
+	}
+
+	public static void isInitialized(final Object entity) {
+		isInitialized(entity, DEFAULT_UNINITIALIZED_MESSAGE);
+	}
+
+	public static void isInitialized(final Object entity, final String message) {
+		if (entity == null) {
+			return; // Null entities are considered "initialized" (no proxy)
+		}
+		if (!Hibernate.isInitialized(entity)) {
+			final String entityInfo = entity.getClass().getSimpleName();
+			final String def =
+					String.format("Entity '%s' is not initialized. Call initializeAllFields() or access a property before use.", entityInfo);
+			final String m = msg(message, def);
+			logFail(m);
+			throw new IllegalArgumentException(m);
+		}
+	}
+
+	public static void isNull(final Object object, final String message) {
+		if (object != null) {
+			final String m = msg(message, "Object must be null");
+			logFail(m);
+			throw new IllegalArgumentException(m);
+		}
+	}
+
+	public static void isNull(final String string) {
+		isNull(string, "Object must be null");
 	}
 
 	public static void isTrue(final boolean condition, final String message) {
@@ -372,6 +390,19 @@ public class Check {
 		}
 	}
 
+	public static void notEmpty(final byte[] array) {
+		notEmpty(array, DEFAULT_EMPTY_MESSAGE);
+	}
+
+	public static void notEmpty(final byte[] array, final String message) {
+		notNull(array, message);
+		if (array.length == 0) {
+			final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
+			logFail(m);
+			throw new IllegalArgumentException(m);
+		}
+	}
+
 	public static void notEmpty(final Collection<?> object) {
 		notEmpty(object, DEFAULT_EMPTY_MESSAGE);
 	}
@@ -390,19 +421,6 @@ public class Check {
 	}
 
 	public static void notEmpty(final Object[] array, final String message) {
-		notNull(array, message);
-		if (array.length == 0) {
-			final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
-			logFail(m);
-			throw new IllegalArgumentException(m);
-		}
-	}
-
-	public static void notEmpty(final byte[] array) {
-		notEmpty(array, DEFAULT_EMPTY_MESSAGE);
-	}
-
-	public static void notEmpty(final byte[] array, final String message) {
 		notNull(array, message);
 		if (array.length == 0) {
 			final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
@@ -436,7 +454,6 @@ public class Check {
 		}
 	}
 
-	/** Converts FQCN to simple class name safely. */
 	private static String shortClassName(final String fqcn) {
 		final int idx = fqcn.lastIndexOf('.');
 		return ((idx >= 0) && (idx < (fqcn.length() - 1))) ? fqcn.substring(idx + 1) : fqcn;
@@ -446,13 +463,6 @@ public class Check {
 		sizeRange(collection, minSize, maxSize, null);
 	}
 
-	/** Validates that a collection size falls within specified bounds. Performs validation on collection, size parameters, and logical consistency
-	 * before checking size.
-	 * @param collection the collection to validate
-	 * @param minSize    minimum allowed size (inclusive, must be non-negative)
-	 * @param maxSize    maximum allowed size (inclusive, must be non-negative)
-	 * @param message    custom error message, or null for default
-	 * @throws IllegalArgumentException if collection is null, sizes are negative, min > max, or size out of range */
 	public static void sizeRange(final Collection<?> collection, final int minSize, final int maxSize, final String message) {
 		notNull(collection, message);
 		nonNegative(minSize, message);
@@ -461,33 +471,6 @@ public class Check {
 		final int size = collection.size();
 		if ((size < minSize) || (size > maxSize)) {
 			final String def = String.format("Collection size %d is not between %d and %d (inclusive)", size, minSize, maxSize);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
-		}
-	}
-
-	/** Validates that a Hibernate entity is fully initialized (not a lazy-loaded proxy). This check helps prevent bugs where uninitialized
-	 * lazy-loaded entities are used in contexts that require fully loaded objects, such as form binding or ComboBox value matching.
-	 * @param entity the entity to validate
-	 * @throws IllegalArgumentException if entity is an uninitialized Hibernate proxy */
-	public static void isInitialized(final Object entity) {
-		isInitialized(entity, DEFAULT_UNINITIALIZED_MESSAGE);
-	}
-
-	/** Validates that a Hibernate entity is fully initialized (not a lazy-loaded proxy). This check helps prevent bugs where uninitialized
-	 * lazy-loaded entities are used in contexts that require fully loaded objects, such as form binding or ComboBox value matching.
-	 * @param entity  the entity to validate
-	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if entity is an uninitialized Hibernate proxy */
-	public static void isInitialized(final Object entity, final String message) {
-		if (entity == null) {
-			return; // Null entities are considered "initialized" (no proxy)
-		}
-		if (!Hibernate.isInitialized(entity)) {
-			final String entityInfo = entity.getClass().getSimpleName();
-			final String def =
-					String.format("Entity '%s' is not initialized. Call initializeAllFields() or access a property before use.", entityInfo);
 			final String m = msg(message, def);
 			logFail(m);
 			throw new IllegalArgumentException(m);

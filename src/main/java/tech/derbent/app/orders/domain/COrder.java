@@ -17,16 +17,19 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity
 @Table (name = "corder")
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
-public class COrder extends CEntityOfProject<COrder> {
+public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder> {
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:invoice";
@@ -66,6 +69,15 @@ public class COrder extends CEntityOfProject<COrder> {
 			order = 52
 	)
 	private LocalDate deliveryDate;
+	// Order Type and Classification
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = false)
+	@AMetaData (
+			displayName = "Order Type", required = true, readOnly = false,
+			description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, order = 2,
+			dataProviderBean = "COrderTypeService"
+	)
+	private COrderType entityType;
 	@Column (name = "estimated_cost", nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.00", message = "Estimated cost must be positive")
 	@DecimalMax (value = "99999999999.99", message = "Estimated cost cannot exceed 99,999,999,999.99")
@@ -88,15 +100,6 @@ public class COrder extends CEntityOfProject<COrder> {
 			order = 60, maxLength = 50
 	)
 	private String orderNumber;
-	// Order Type and Classification
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = false)
-	@AMetaData (
-			displayName = "Order Type", required = true, readOnly = false,
-			description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, order = 2,
-			dataProviderBean = "COrderTypeService"
-	)
-	private COrderType entityType;
 	// Provider Information
 	@Column (name = "provider_company_name", nullable = false, length = 200)
 	@Size (max = 200)
@@ -181,14 +184,15 @@ public class COrder extends CEntityOfProject<COrder> {
 
 	public LocalDate getDeliveryDate() { return deliveryDate; }
 
+	// Getters and setters
+	@Override
+	public COrderType getEntityType() { return entityType; }
+
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 
 	public LocalDate getOrderDate() { return orderDate; }
 
 	public String getOrderNumber() { return orderNumber; }
-
-	// Getters and setters
-	public COrderType getEntityType() { return entityType; }
 
 	public String getProviderCompanyName() { return providerCompanyName; }
 
@@ -202,7 +206,45 @@ public class COrder extends CEntityOfProject<COrder> {
 
 	public CUser getResponsible() { return responsible; }
 
+	@Override
 	public CProjectItemStatus getStatus() { return status; }
+
+	@Override
+	public CWorkflowEntity getWorkflow() {
+		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
+		return entityType.getWorkflow();
+	}
+
+	@Override
+	public void initializeAllFields() {
+		// Initialize lazy-loaded entity relationships
+		if (currency != null) {
+			currency.getName(); // Trigger currency loading
+		}
+		if (entityType != null) {
+			entityType.getName(); // Trigger order type loading
+		}
+		if (requestor != null) {
+			requestor.getLogin(); // Trigger requestor loading
+		}
+		if (responsible != null) {
+			responsible.getLogin(); // Trigger responsible user loading
+		}
+		if (status != null) {
+			status.getName(); // Trigger status loading
+		}
+		// Parent class relationships (from CEntityOfProject)
+		if (getProject() != null) {
+			getProject().getName(); // Trigger project loading
+		}
+		if (getAssignedTo() != null) {
+			getAssignedTo().getLogin(); // Trigger assigned user loading
+		}
+		if (getCreatedBy() != null) {
+			getCreatedBy().getLogin(); // Trigger creator loading
+		}
+		// Note: approvals collection will be initialized if accessed
+	}
 
 	/** Remove an approval from this order.
 	 * @param approval the approval to remove */
@@ -238,6 +280,13 @@ public class COrder extends CEntityOfProject<COrder> {
 		updateLastModified();
 	}
 
+	@Override
+	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.instanceOf(typeEntity, COrderType.class, "Type entity must be an instance of COrderType");
+		this.entityType = (COrderType) typeEntity;
+		updateLastModified();
+	}
+
 	public void setEstimatedCost(final BigDecimal estimatedCost) {
 		this.estimatedCost = estimatedCost;
 		updateLastModified();
@@ -250,11 +299,6 @@ public class COrder extends CEntityOfProject<COrder> {
 
 	public void setOrderNumber(final String orderNumber) {
 		this.orderNumber = orderNumber;
-		updateLastModified();
-	}
-
-	public void setEntityType(final COrderType entityType) {
-		this.entityType = entityType;
 		updateLastModified();
 	}
 
@@ -288,39 +332,9 @@ public class COrder extends CEntityOfProject<COrder> {
 		updateLastModified();
 	}
 
+	@Override
 	public void setStatus(final CProjectItemStatus status) {
 		this.status = status;
 		updateLastModified();
-	}
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (currency != null) {
-			currency.getName(); // Trigger currency loading
-		}
-		if (entityType != null) {
-			entityType.getName(); // Trigger order type loading
-		}
-		if (requestor != null) {
-			requestor.getLogin(); // Trigger requestor loading
-		}
-		if (responsible != null) {
-			responsible.getLogin(); // Trigger responsible user loading
-		}
-		if (status != null) {
-			status.getName(); // Trigger status loading
-		}
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-		// Note: approvals collection will be initialized if accessed
 	}
 }

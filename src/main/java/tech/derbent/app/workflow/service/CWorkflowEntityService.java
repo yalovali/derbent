@@ -73,12 +73,9 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 	public CWorkflowEntity getRandomByEntityType(final CProject project, final Class<?> entityClass) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(entityClass, "Entity class cannot be null");
-		final String className = entityClass.getName();
+		final String className = entityClass.getSimpleName();
 		final List<CWorkflowEntity> workflows = workflowEntityRepository.findByProjectAndTargetEntityClass(project, className);
-		if (workflows.isEmpty()) {
-			LOGGER.debug("No workflows found for project {} and entity class {}", project.getName(), className);
-			return null;
-		}
+		Check.notEmpty(workflows, "Workflows list cannot be empty for project: " + project.getName() + " and entity class: " + className);
 		final int randomIndex = (int) (Math.random() * workflows.size());
 		return workflows.get(randomIndex);
 	}

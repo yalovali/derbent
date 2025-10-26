@@ -13,9 +13,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.domains.CProjectItem;
+import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.base.users.domain.CUser;
 
 /** CDecision - Domain entity representing project decisions with comprehensive management features. Layer: Domain (MVC) Supports: - Decision type
@@ -24,7 +27,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
-public class CDecision extends CEntityOfProject<CDecision> {
+public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision> {
 
 	public static final String DEFAULT_COLOR = "#e83e8c";
 	public static final String DEFAULT_ICON = "vaadin:gavel";
@@ -38,14 +41,6 @@ public class CDecision extends CEntityOfProject<CDecision> {
 			hidden = false, order = 5, dataProviderBean = "CUserService"
 	)
 	private CUser accountableUser;
-	// Status Management
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "decision_status_id", nullable = true)
-	@AMetaData (
-			displayName = "Decision Status", required = false, readOnly = false, description = "Current status of the decision", hidden = false,
-			order = 4, dataProviderBean = "CProjectItemStatusService"
-	)
-	private CProjectItemStatus decisionStatus;
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -99,8 +94,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 
 	public CUser getAccountableUser() { return accountableUser; }
 
-	public CProjectItemStatus getDecisionStatus() { return decisionStatus; }
-
+	@Override
 	public CDecisionType getEntityType() { return entityType; }
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
@@ -108,6 +102,12 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	public LocalDateTime getImplementationDate() { return implementationDate; }
 
 	public LocalDateTime getReviewDate() { return reviewDate; }
+
+	@Override
+	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
+		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
+		return entityType.getWorkflow();
+	}
 
 	@Override
 	public int hashCode() {
@@ -119,9 +119,6 @@ public class CDecision extends CEntityOfProject<CDecision> {
 		// Initialize lazy-loaded entity relationships
 		if (accountableUser != null) {
 			accountableUser.getLogin(); // Trigger accountable user loading
-		}
-		if (decisionStatus != null) {
-			decisionStatus.getName(); // Trigger status loading
 		}
 		if (entityType != null) {
 			entityType.getName(); // Trigger type loading
@@ -143,13 +140,10 @@ public class CDecision extends CEntityOfProject<CDecision> {
 		updateLastModified();
 	}
 
-	public void setDecisionStatus(final CProjectItemStatus decisionStatus) {
-		this.decisionStatus = decisionStatus;
-		updateLastModified();
-	}
-
-	public void setEntityType(final CDecisionType entityType) {
-		this.entityType = entityType;
+	@Override
+	public void setEntityType(final CTypeEntity<?> typeEntity) {
+		Check.instanceOf(typeEntity, CDecisionType.class, "Type entity must be an instance of CDecisionType");
+		this.entityType = (CDecisionType) typeEntity;
 		updateLastModified();
 	}
 

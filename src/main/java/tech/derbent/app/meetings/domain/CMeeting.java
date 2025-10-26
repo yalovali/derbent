@@ -55,6 +55,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false, order = 5
 	)
 	private LocalDateTime endDate;
+	// Type Management - concrete implementation of parent's typeEntity
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
+			dataProviderBean = "CMeetingTypeService"
+	)
+	private CMeetingType entityType;
 	@Column (name = "linked_element", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
@@ -77,14 +85,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			order = 4
 	)
 	private LocalDateTime meetingDate;
-	// Type Management - concrete implementation of parent's typeEntity
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "cmeetingtype_id", nullable = true)
-	@AMetaData (
-			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
-			dataProviderBean = "CMeetingTypeService"
-	)
-	private CMeetingType meetingType;
 	@Column (name = "minutes", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -131,7 +131,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	 * @param meetingType the type of the meeting */
 	public CMeeting(final String name, final CProject project, final CMeetingType meetingType) {
 		super(CMeeting.class, name, project);
-		this.meetingType = meetingType;
+		this.entityType = meetingType;
 	}
 
 	/** Convenience method to add an attendee to the meeting.
@@ -162,7 +162,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	public CTypeEntity getEntityType() { return meetingType; }
+	public CTypeEntity getEntityType() { return entityType; }
 
 	public String getLinkedElement() { return linkedElement; }
 
@@ -172,7 +172,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	/** Gets the meeting type.
 	 * @return the meeting type */
-	public CMeetingType getMeetingType() { return meetingType; }
+	public CMeetingType getMeetingType() { return entityType; }
 
 	public String getMinutes() { return minutes; }
 
@@ -190,8 +190,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships
-		if (meetingType != null) {
-			meetingType.getName(); // Trigger meeting type loading
+		if (entityType != null) {
+			entityType.getName(); // Trigger meeting type loading
 		}
 		if (relatedActivity != null) {
 			relatedActivity.getName(); // Trigger related activity loading
@@ -254,7 +254,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CMeetingType.class, "Type entity must be an instance of CMeetingType");
-		this.meetingType = (CMeetingType) typeEntity;
+		this.entityType = (CMeetingType) typeEntity;
 		updateLastModified();
 	}
 
@@ -263,10 +263,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setLocation(final String location) { this.location = location; }
 
 	public void setMeetingDate(final LocalDateTime meetingDate) { this.meetingDate = meetingDate; }
-
-	/** Sets the meeting type.
-	 * @param meetingType the meeting type to set */
-	public void setMeetingType(final CMeetingType meetingType) { this.meetingType = meetingType; }
 
 	public void setMinutes(final String minutes) { this.minutes = minutes; }
 

@@ -7,14 +7,13 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.orders.domain.CCurrency;
 import tech.derbent.app.orders.domain.COrder;
-import tech.derbent.app.orders.domain.COrderType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -25,15 +24,15 @@ import tech.derbent.base.users.domain.CUser;
 public class COrderService extends CEntityOfProjectService<COrder> {
 
 	private final CCurrencyService currencyService;
-	private final CProjectItemStatusService statusService;
-	private final COrderTypeService orderTypeService;
+	private final CProjectItemStatusService entityStatusService;
+	private final COrderTypeService entityTypeService;
 
 	COrderService(final IOrderRepository repository, final Clock clock, final ISessionService sessionService, final CCurrencyService currencyService,
 			final COrderTypeService orderTypeService, final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService);
 		this.currencyService = currencyService;
-		this.orderTypeService = orderTypeService;
-		this.statusService = statusService;
+		this.entityTypeService = orderTypeService;
+		this.entityStatusService = statusService;
 	}
 
 	@Override
@@ -63,6 +62,7 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize order"));
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order"));
+		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, entityTypeService, entityStatusService);
 		entity.setActualCost(BigDecimal.ZERO);
 		entity.setEstimatedCost(BigDecimal.ZERO);
 		entity.setOrderDate(LocalDate.now(clock));
@@ -72,11 +72,5 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 		final List<CCurrency> availableCurrencies = currencyService.listByProject(currentProject);
 		Check.notEmpty(availableCurrencies, "No currencies available for project " + currentProject.getName());
 		entity.setCurrency(availableCurrencies.get(0));
-		final List<COrderType> availableOrderTypes = orderTypeService.listByProject(currentProject);
-		Check.notEmpty(availableOrderTypes, "No order types available for project " + currentProject.getName());
-		entity.setEntityType(availableOrderTypes.get(0));
-		final List<CProjectItemStatus> availableStatuses = statusService.listByProject(currentProject);
-		Check.notEmpty(availableStatuses, "No statuses available for project " + currentProject.getName());
-		entity.setStatus(availableStatuses.get(0));
 	}
 }

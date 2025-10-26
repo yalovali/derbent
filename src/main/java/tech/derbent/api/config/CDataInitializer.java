@@ -12,10 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CGridInitializerService;
+import tech.derbent.api.services.CTypeEntityService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
@@ -564,35 +566,20 @@ public class CDataInitializer {
 	}
 
 	private void initializeSampleActivityTypes(final CProject project, boolean minimal) {
-		try {
-			final String[][] activityTypes = {
-					{
-							ACTIVITY_TYPE_DEVELOPMENT, "Software development and coding tasks"
-					}, {
-							ACTIVITY_TYPE_TESTING, "Quality assurance and testing activities"
-					}, {
-							ACTIVITY_TYPE_DESIGN, "UI/UX design and system architecture"
-					}, {
-							ACTIVITY_TYPE_DOCUMENTATION, "Technical writing and documentation"
-					}, {
-							ACTIVITY_TYPE_RESEARCH, "Research and analysis activities"
-					}
-			};
-			for (final String[] typeData : activityTypes) {
-				final CActivityType item = activityTypeService.newEntity(typeData[0], project);
-				item.setDescription(typeData[1]);
-				item.setColor(CColorUtils.getRandomFromWebColors(true));
-				// Assign workflow specific to CActivity
-				item.setWorkflow(workflowEntityService.getRandomByEntityType(project, tech.derbent.app.activities.domain.CActivity.class));
-				activityTypeService.save(item);
-				if (minimal) {
-					return;
+		final String[][] activityTypes = {
+				{
+						ACTIVITY_TYPE_DEVELOPMENT, "Software development and coding tasks"
+				}, {
+						ACTIVITY_TYPE_TESTING, "Quality assurance and testing activities"
+				}, {
+						ACTIVITY_TYPE_DESIGN, "UI/UX design and system architecture"
+				}, {
+						ACTIVITY_TYPE_DOCUMENTATION, "Technical writing and documentation"
+				}, {
+						ACTIVITY_TYPE_RESEARCH, "Research and analysis activities"
 				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating activity types", e);
-			throw e;
-		}
+		};
+		initializeType(activityTypes, activityTypeService, project, minimal);
 	}
 
 	private void initializeSampleApprovalStatuses(final CProject project, boolean minimal) {
@@ -680,7 +667,7 @@ public class CDataInitializer {
 			final CDecision decision1 = new CDecision("Adopt Cloud-Native Architecture", project);
 			decision1.setDescription("Strategic decision to migrate to cloud-native architecture for improved scalability");
 			decision1.setEntityType(type1);
-			decision1.setDecisionStatus(status1);
+			decision1.setStatus(status1);
 			decision1.setAssignedTo(user1);
 			decision1.setAccountableUser(user1);
 			decision1.setEstimatedCost(new java.math.BigDecimal("50000.00"));
@@ -699,7 +686,7 @@ public class CDataInitializer {
 			final CDecision decision2 = new CDecision("Implement Agile Methodology", project);
 			decision2.setDescription("Operational decision to transition from waterfall to agile development methodology");
 			decision2.setEntityType(type2);
-			decision2.setDecisionStatus(status2);
+			decision2.setStatus(status2);
 			decision2.setAssignedTo(user2);
 			decision2.setAccountableUser(user1);
 			decision2.setEstimatedCost(new java.math.BigDecimal("25000.00"));
@@ -716,42 +703,26 @@ public class CDataInitializer {
 	}
 
 	private void initializeSampleDecisionTypes(final CProject project, boolean minimal) {
-		try {
-			final String[][] decisionTypes = {
-					{
-							"Strategic", "High-level strategic decisions affecting organization direction"
-					}, {
-							"Tactical", "Mid-level tactical decisions for project execution"
-					}, {
-							"Operational", "Day-to-day operational decisions"
-					}, {
-							"Technical", "Technology and implementation related decisions"
-					}, {
-							"Budget", "Financial and budgeting decisions"
-					}, {
-							"Resource", "Human resource and allocation decisions"
-					}, {
-							"Timeline", "Schedule and milestone related decisions"
-					}, {
-							"Quality", "Quality assurance and standards decisions"
-					}
-			};
-			for (final String[] typeData : decisionTypes) {
-				final CDecisionType item = decisionTypeService.newEntity(typeData[0], project);
-				item.setDescription(typeData[1]);
-				item.setColor(CColorUtils.getRandomColor(true));
-				// Note: Decisions don't have their own workflow - they are standalone entities
-				// So we don't assign workflow to decision types
-				item.setWorkflow(null);
-				decisionTypeService.save(item);
-				if (minimal) {
-					return;
+		final String[][] decisionTypes = {
+				{
+						"Strategic", "High-level strategic decisions affecting organization direction"
+				}, {
+						"Tactical", "Mid-level tactical decisions for project execution"
+				}, {
+						"Operational", "Day-to-day operational decisions"
+				}, {
+						"Technical", "Technology and implementation related decisions"
+				}, {
+						"Budget", "Financial and budgeting decisions"
+				}, {
+						"Resource", "Human resource and allocation decisions"
+				}, {
+						"Timeline", "Schedule and milestone related decisions"
+				}, {
+						"Quality", "Quality assurance and standards decisions"
 				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating decision types for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize decision types for project: " + project.getName(), e);
-		}
+		};
+		initializeType(decisionTypes, decisionTypeService, project, minimal);
 	}
 
 	/** Initialize 2 sample meetings per project with all fields populated.
@@ -816,79 +787,49 @@ public class CDataInitializer {
 	}
 
 	private void initializeSampleMeetingTypes(final CProject project, boolean minimal) {
-		try {
-			final String[][] meetingTypes = {
-					{
-							"Daily Standup", "Daily team synchronization meetings"
-					}, {
-							"Sprint Planning", "Sprint planning and estimation meetings"
-					}, {
-							"Sprint Review", "Sprint review and demonstration meetings"
-					}, {
-							"Sprint Retrospective", "Sprint retrospective and improvement meetings"
-					}, {
-							"Project Review", "Project review and status meetings"
-					}, {
-							"Technical Review", "Technical design and code review meetings"
-					}, {
-							"Stakeholder Meeting", "Meetings with project stakeholders"
-					}, {
-							"Training Session", "Training and knowledge sharing sessions"
-					}
-			};
-			for (final String[] typeData : meetingTypes) {
-				final CMeetingType meetingType = meetingTypeService.newEntity(typeData[0], project);
-				meetingType.setDescription(typeData[1]);
-				meetingType.setColor(CColorUtils.getRandomColor(true));
-				// Assign workflow specific to CMeeting
-				meetingType.setWorkflow(workflowEntityService.getRandomByEntityType(project, tech.derbent.app.meetings.domain.CMeeting.class));
-				meetingTypeService.save(meetingType);
-				if (minimal) {
-					return;
+		final String[][] meetingTypes = {
+				{
+						"Daily Standup", "Daily team synchronization meetings"
+				}, {
+						"Sprint Planning", "Sprint planning and estimation meetings"
+				}, {
+						"Sprint Review", "Sprint review and demonstration meetings"
+				}, {
+						"Sprint Retrospective", "Sprint retrospective and improvement meetings"
+				}, {
+						"Project Review", "Project review and status meetings"
+				}, {
+						"Technical Review", "Technical design and code review meetings"
+				}, {
+						"Stakeholder Meeting", "Meetings with project stakeholders"
+				}, {
+						"Training Session", "Training and knowledge sharing sessions"
 				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating meeting types for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize meeting types for project: " + project.getName(), e);
-		}
+		};
+		initializeType(meetingTypes, meetingTypeService, project, minimal);
 	}
 
 	private void initializeSampleOrderTypes(final CProject project, boolean minimal) {
-		try {
-			final String[][] orderTypes = {
-					{
-							"Hardware", "Hardware procurement orders"
-					}, {
-							"Software", "Software licensing and subscription orders"
-					}, {
-							"Service", "Professional services and consulting orders"
-					}, {
-							"Training", "Training and certification orders"
-					}, {
-							"Maintenance", "Maintenance and support service orders"
-					}, {
-							"Infrastructure", "Infrastructure and hosting service orders"
-					}, {
-							"Equipment", "Equipment rental and leasing orders"
-					}, {
-							"Supplies", "Office supplies and materials orders"
-					}
-			};
-			for (final String[] typeData : orderTypes) {
-				final COrderType orderType = orderTypeService.newEntity(typeData[0], project);
-				orderType.setDescription(typeData[1]);
-				orderType.setColor(CColorUtils.getRandomColor(true));
-				// Assign workflow specific to COrder
-				orderType.setWorkflow(workflowEntityService.getRandomByEntityType(project, tech.derbent.app.orders.domain.COrder.class));
-				orderTypeService.save(orderType);
-				if (minimal) {
-					return;
+		final String[][] orderTypes = {
+				{
+						"Hardware", "Hardware procurement orders"
+				}, {
+						"Software", "Software licensing and subscription orders"
+				}, {
+						"Service", "Professional services and consulting orders"
+				}, {
+						"Training", "Training and certification orders"
+				}, {
+						"Maintenance", "Maintenance and support service orders"
+				}, {
+						"Infrastructure", "Infrastructure and hosting service orders"
+				}, {
+						"Equipment", "Equipment rental and leasing orders"
+				}, {
+						"Supplies", "Office supplies and materials orders"
 				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating order types for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize order types for project: " + project.getName(), e);
-		}
+		};
+		initializeType(orderTypes, orderTypeService, project, minimal);
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
@@ -939,33 +880,20 @@ public class CDataInitializer {
 	}
 
 	private void initializeSampleRiskTypes(final CProject project, boolean minimal) {
-		try {
-			final String[][] riskTypes = {
-					{
-							"Technical Risk", "Risks related to technology and implementation"
-					}, {
-							"Operational Risk", "Risks affecting daily operations"
-					}, {
-							"Financial Risk", "Risks impacting financial performance"
-					}, {
-							"Strategic Risk", "Risks associated with strategic decisions"
-					}, {
-							"Compliance Risk", "Risks related to regulatory compliance"
-					}
-			};
-			for (final String[] typeData : riskTypes) {
-				final CRiskType item = riskTypeService.newEntity(typeData[0], project);
-				item.setDescription(typeData[1]);
-				item.setColor(CColorUtils.getRandomFromWebColors(true));
-				riskTypeService.save(item);
-				if (minimal) {
-					return;
+		final String[][] riskTypes = {
+				{
+						"Technical Risk", "Risks related to technology and implementation"
+				}, {
+						"Operational Risk", "Risks affecting daily operations"
+				}, {
+						"Financial Risk", "Risks impacting financial performance"
+				}, {
+						"Strategic Risk", "Risks associated with strategic decisions"
+				}, {
+						"Compliance Risk", "Risks related to regulatory compliance"
 				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating risk types", e);
-			throw e;
-		}
+		};
+		initializeType(riskTypes, riskTypeService, project, minimal);
 	}
 
 	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
@@ -984,6 +912,35 @@ public class CDataInitializer {
 		}
 	}
 
+	private void initializeSampleWorkflow(String name, CProject project, Class<?> targetClass, final List<CProjectItemStatus> statuses,
+			final List<CUserProjectRole> roles) {
+		if (statuses.isEmpty() || roles.isEmpty()) {
+			LOGGER.warn("No statuses or roles found for project {}. Skipping workflow initialization.", project.getName());
+			return;
+		}
+		final CWorkflowEntity activityWorkflow = new CWorkflowEntity(name, project);
+		activityWorkflow.setDescription("Defines status transitions for activities based on user roles");
+		activityWorkflow.setIsActive(true);
+		activityWorkflow.setTargetEntityClass(targetClass.getSimpleName());
+		workflowEntityService.save(activityWorkflow);
+		// Add status relations to the activity workflow
+		for (int i = 0; i < Math.min(statuses.size() - 1, 3); i++) {
+			final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
+			relation.setWorkflowEntity(activityWorkflow);
+			relation.setFromStatus(statuses.get(i));
+			relation.setToStatus(statuses.get(i + 1));
+			// Mark the first status (Not Started) as initial
+			if (i == 0) {
+				relation.setInitialStatus(true);
+			}
+			// Add first role to the transition
+			if (!roles.isEmpty()) {
+				relation.getRoles().add(roles.get(0));
+			}
+			workflowStatusRelationService.save(relation);
+		}
+	}
+
 	/** Initialize sample workflow entities to demonstrate workflow management.
 	 * @param project the project to create workflow entities for
 	 * @param minimal whether to create minimal sample data */
@@ -992,81 +949,35 @@ public class CDataInitializer {
 			// Get available statuses for this project
 			final List<CProjectItemStatus> statuses = projectItemStatusService.list(Pageable.unpaged()).getContent();
 			final List<CUserProjectRole> roles = userProjectRoleService.list(Pageable.unpaged()).getContent();
-			if (statuses.isEmpty() || roles.isEmpty()) {
-				LOGGER.warn("No statuses or roles found for project {}. Skipping workflow initialization.", project.getName());
-				return;
-			}
-			// Create workflow for CActivity
-			final CWorkflowEntity activityWorkflow = new CWorkflowEntity("Activity Status Workflow", project);
-			activityWorkflow.setDescription("Defines status transitions for activities based on user roles");
-			activityWorkflow.setIsActive(true);
-			activityWorkflow.setTargetEntityClass("tech.derbent.app.activities.domain.CActivity");
-			workflowEntityService.save(activityWorkflow);
-			// Add status relations to the activity workflow
-			for (int i = 0; i < Math.min(statuses.size() - 1, 3); i++) {
-				final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
-				relation.setWorkflowEntity(activityWorkflow);
-				relation.setFromStatus(statuses.get(i));
-				relation.setToStatus(statuses.get(i + 1));
-				// Mark the first status (Not Started) as initial
-				if (i == 0) {
-					relation.setInitialStatus(true);
-				}
-				// Add first role to the transition
-				if (!roles.isEmpty()) {
-					relation.getRoles().add(roles.get(0));
-				}
-				workflowStatusRelationService.save(relation);
-			}
-			if (minimal) {
-				return;
-			}
-			// Create workflow for CMeeting
-			final CWorkflowEntity meetingWorkflow = new CWorkflowEntity("Meeting Status Workflow", project);
-			meetingWorkflow.setDescription("Defines status transitions for meetings based on user roles");
-			meetingWorkflow.setIsActive(true);
-			meetingWorkflow.setTargetEntityClass("tech.derbent.app.meetings.domain.CMeeting");
-			workflowEntityService.save(meetingWorkflow);
-			// Add status relations to meeting workflow
-			for (int i = 0; i < Math.min(statuses.size() - 1, 2); i++) {
-				final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
-				relation.setWorkflowEntity(meetingWorkflow);
-				relation.setFromStatus(statuses.get(i));
-				relation.setToStatus(statuses.get(i + 1));
-				// Mark the first status as initial
-				if (i == 0) {
-					relation.setInitialStatus(true);
-				}
-				if (!roles.isEmpty()) {
-					relation.getRoles().add(roles.get(0));
-				}
-				workflowStatusRelationService.save(relation);
-			}
-			// Create workflow for COrder
-			final CWorkflowEntity orderWorkflow = new CWorkflowEntity("Order Status Workflow", project);
-			orderWorkflow.setDescription("Defines status transitions for orders based on user roles");
-			orderWorkflow.setIsActive(true);
-			orderWorkflow.setTargetEntityClass("tech.derbent.app.orders.domain.COrder");
-			workflowEntityService.save(orderWorkflow);
-			// Add status relations to order workflow
-			for (int i = 0; i < Math.min(statuses.size() - 1, 2); i++) {
-				final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
-				relation.setWorkflowEntity(orderWorkflow);
-				relation.setFromStatus(statuses.get(i));
-				relation.setToStatus(statuses.get(i + 1));
-				// Mark the first status as initial
-				if (i == 0) {
-					relation.setInitialStatus(true);
-				}
-				if (!roles.isEmpty()) {
-					relation.getRoles().add(roles.get(0));
-				}
-				workflowStatusRelationService.save(relation);
-			}
+			initializeSampleWorkflow("Activity Status Workflow", project, CActivityType.class, statuses, roles);
+			initializeSampleWorkflow("Decision Status Workflow", project, CDecisionType.class, statuses, roles);
+			initializeSampleWorkflow("Meeting Status Workflow", project, CMeetingType.class, statuses, roles);
+			initializeSampleWorkflow("Risk Status Workflow", project, CRiskType.class, statuses, roles);
+			initializeSampleWorkflow("Project Status Workflow", project, COrderType.class, statuses, roles);
 			LOGGER.debug("Created sample workflow entities with status relations for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample workflow entities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample workflow entities for project: " + project.getName(), e);
+		}
+	}
+
+	@SuppressWarnings ("unchecked")
+	private <EntityClass extends CTypeEntity<EntityClass>> void initializeType(final String[][] nameAndDescription,
+			CTypeEntityService<EntityClass> typeService, final CProject project, boolean minimal) {
+		try {
+			for (final String[] typeData : nameAndDescription) {
+				final CTypeEntity<EntityClass> item = typeService.newEntity(typeData[0], project);
+				item.setDescription(typeData[1]);
+				item.setColor(CColorUtils.getRandomColor(true));
+				item.setWorkflow(workflowEntityService.getRandomByEntityType(project, item.getClass()));
+				typeService.save((EntityClass) item);
+				if (minimal) {
+					return;
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error creating types for project: {} {}", project.getName(), e.getMessage());
+			throw e;
 		}
 	}
 

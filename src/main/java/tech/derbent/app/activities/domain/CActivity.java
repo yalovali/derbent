@@ -370,18 +370,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		updateLastModified();
 	}
 
-	/** Sets the activity type.
-	 * @param entityType the activity type to set */
-	public void setEntityType(final CActivityType entityType) {
-		this.entityType = entityType;
-		updateLastModified();
-	}
-
 	/** Override to set concrete type entity.
 	 * @param typeEntity the type entity to set */
-	@SuppressWarnings ("rawtypes")
 	@Override
-	public void setEntityType(final CTypeEntity typeEntity) {
+	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CActivityType.class, "Type entity must be an instance of CActivityType");
 		this.entityType = (CActivityType) typeEntity;
 		updateLastModified();

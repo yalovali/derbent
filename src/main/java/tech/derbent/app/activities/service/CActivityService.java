@@ -6,12 +6,12 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CProjectItemService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
-import tech.derbent.app.activities.domain.CActivityType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -21,13 +21,13 @@ import tech.derbent.base.users.domain.CUser;
 public class CActivityService extends CProjectItemService<CActivity> {
 
 	private final CActivityPriorityService activityPriorityService;
-	private final CActivityTypeService activityTypeService;
+	private final CActivityTypeService entityTypeService;
 
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
 			final CActivityTypeService activityTypeService, final CProjectItemStatusService projectItemStatusService,
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, projectItemStatusService);
-		this.activityTypeService = activityTypeService;
+		this.entityTypeService = activityTypeService;
 		this.activityPriorityService = activityPriorityService;
 	}
 
@@ -45,9 +45,7 @@ public class CActivityService extends CProjectItemService<CActivity> {
 		// Get current project from session
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
-		final List<CActivityType> availableTypes = activityTypeService.listByProject(currentProject);
-		Check.notEmpty(availableTypes, "No activity types available in project " + currentProject.getName() + " - cannot initialize new activity");
-		entity.setEntityType(availableTypes.get(0));
+		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
 		final List<CActivityPriority> priorities = activityPriorityService.listByProject(currentProject);
 		Check.notEmpty(priorities, "No activity priorities available in project " + currentProject.getName() + " - cannot initialize new activity");
 		entity.setPriority(priorities.get(0));

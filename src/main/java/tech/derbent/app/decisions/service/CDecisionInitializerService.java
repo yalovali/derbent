@@ -3,25 +3,25 @@ package tech.derbent.app.decisions.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.decisions.domain.CDecision;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.decisions.domain.CDecision;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 
 public class CDecisionInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Decisions Information";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionInitializerService.class);
 	private static final Class<?> clazz = CDecision.class;
-	private static final String menuTitle = MenuTitle_PROJECT + ".Decisions";
-	private static final String pageTitle = "Decision Management";
-	private static final String pageDescription = "Decision tracking and accountability";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".3";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Decisions";
+	private static final String pageDescription = "Decision tracking and accountability";
+	private static final String pageTitle = "Decision Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -42,7 +42,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "decisionStatus"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "implementationDate"));
 			scr.debug_printScreenInformation();
 			return scr;
@@ -54,7 +54,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "description", "project", "entityType", "decisionStatus", "accountableUser", "assignedTo", "createdBy",
+		grid.setColumnFields(List.of("name", "description", "project", "entityType", "status", "accountableUser", "assignedTo", "createdBy",
 				"createdDate", "implementationDate"));
 		return grid;
 	}

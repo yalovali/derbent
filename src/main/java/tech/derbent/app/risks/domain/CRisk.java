@@ -59,7 +59,8 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	@Override
 	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
-		return null;
+		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
+		return entityType.getWorkflow();
 	}
 
 	@Override

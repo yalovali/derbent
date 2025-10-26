@@ -3,15 +3,15 @@ package tech.derbent.app.meetings.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.meetings.domain.CMeeting;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 
 public class CMeetingInitializerService extends CInitializerServiceBase {
 
@@ -30,7 +30,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "meetingType"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "meetingDate"));
@@ -63,7 +63,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "name", "description", "meetingType", "project", "meetingDate", "endDate", "createdBy", "createdDate",
+		grid.setColumnFields(List.of("id", "name", "description", "entityType", "project", "meetingDate", "endDate", "createdBy", "createdDate",
 				"status", "location"));
 		return grid;
 	}
