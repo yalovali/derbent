@@ -582,7 +582,8 @@ public class CDataInitializer {
 				final CActivityType item = activityTypeService.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomFromWebColors(true));
-				item.setWorkflow(workflowEntityService.getRandom(project));
+				// Assign workflow specific to CActivity
+				item.setWorkflow(workflowEntityService.getRandomByEntityType(project, tech.derbent.app.activities.domain.CActivity.class));
 				activityTypeService.save(item);
 				if (minimal) {
 					return;
@@ -739,7 +740,9 @@ public class CDataInitializer {
 				final CDecisionType item = decisionTypeService.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomColor(true));
-				item.setWorkflow(workflowEntityService.getRandom(project));
+				// Note: Decisions don't have their own workflow - they are standalone entities
+				// So we don't assign workflow to decision types
+				item.setWorkflow(null);
 				decisionTypeService.save(item);
 				if (minimal) {
 					return;
@@ -837,7 +840,8 @@ public class CDataInitializer {
 				final CMeetingType meetingType = meetingTypeService.newEntity(typeData[0], project);
 				meetingType.setDescription(typeData[1]);
 				meetingType.setColor(CColorUtils.getRandomColor(true));
-				meetingType.setWorkflow(workflowEntityService.getRandom(project));
+				// Assign workflow specific to CMeeting
+				meetingType.setWorkflow(workflowEntityService.getRandomByEntityType(project, tech.derbent.app.meetings.domain.CMeeting.class));
 				meetingTypeService.save(meetingType);
 				if (minimal) {
 					return;
@@ -874,7 +878,8 @@ public class CDataInitializer {
 				final COrderType orderType = orderTypeService.newEntity(typeData[0], project);
 				orderType.setDescription(typeData[1]);
 				orderType.setColor(CColorUtils.getRandomColor(true));
-				orderType.setWorkflow(workflowEntityService.getRandom(project));
+				// Assign workflow specific to COrder
+				orderType.setWorkflow(workflowEntityService.getRandomByEntityType(project, tech.derbent.app.orders.domain.COrder.class));
 				orderTypeService.save(orderType);
 				if (minimal) {
 					return;
@@ -991,13 +996,13 @@ public class CDataInitializer {
 				LOGGER.warn("No statuses or roles found for project {}. Skipping workflow initialization.", project.getName());
 				return;
 			}
-			// Create a basic workflow for activity status transitions
+			// Create workflow for CActivity
 			final CWorkflowEntity activityWorkflow = new CWorkflowEntity("Activity Status Workflow", project);
 			activityWorkflow.setDescription("Defines status transitions for activities based on user roles");
 			activityWorkflow.setIsActive(true);
+			activityWorkflow.setTargetEntityClass("tech.derbent.app.activities.domain.CActivity");
 			workflowEntityService.save(activityWorkflow);
-			// Add status relations to the workflow
-			// Create transitions for each status pair
+			// Add status relations to the activity workflow
 			for (int i = 0; i < Math.min(statuses.size() - 1, 3); i++) {
 				final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
 				relation.setWorkflowEntity(activityWorkflow);
@@ -1016,10 +1021,11 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			// Create workflow for meeting status transitions
+			// Create workflow for CMeeting
 			final CWorkflowEntity meetingWorkflow = new CWorkflowEntity("Meeting Status Workflow", project);
 			meetingWorkflow.setDescription("Defines status transitions for meetings based on user roles");
 			meetingWorkflow.setIsActive(true);
+			meetingWorkflow.setTargetEntityClass("tech.derbent.app.meetings.domain.CMeeting");
 			workflowEntityService.save(meetingWorkflow);
 			// Add status relations to meeting workflow
 			for (int i = 0; i < Math.min(statuses.size() - 1, 2); i++) {
@@ -1036,15 +1042,16 @@ public class CDataInitializer {
 				}
 				workflowStatusRelationService.save(relation);
 			}
-			// Create workflow for decision approval process
-			final CWorkflowEntity decisionWorkflow = new CWorkflowEntity("Decision Approval Workflow", project);
-			decisionWorkflow.setDescription("Defines approval workflow for strategic decisions");
-			decisionWorkflow.setIsActive(true);
-			workflowEntityService.save(decisionWorkflow);
-			// Add status relations to decision workflow
+			// Create workflow for COrder
+			final CWorkflowEntity orderWorkflow = new CWorkflowEntity("Order Status Workflow", project);
+			orderWorkflow.setDescription("Defines status transitions for orders based on user roles");
+			orderWorkflow.setIsActive(true);
+			orderWorkflow.setTargetEntityClass("tech.derbent.app.orders.domain.COrder");
+			workflowEntityService.save(orderWorkflow);
+			// Add status relations to order workflow
 			for (int i = 0; i < Math.min(statuses.size() - 1, 2); i++) {
 				final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
-				relation.setWorkflowEntity(decisionWorkflow);
+				relation.setWorkflowEntity(orderWorkflow);
 				relation.setFromStatus(statuses.get(i));
 				relation.setToStatus(statuses.get(i + 1));
 				// Mark the first status as initial

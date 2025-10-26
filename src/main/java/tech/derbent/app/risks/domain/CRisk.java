@@ -23,7 +23,7 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
 public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk> {
 
 	public static final String DEFAULT_COLOR = "#003444";
-	public static final String DEFAULT_ICON = "vaadin:cart";
+	public static final String DEFAULT_ICON = "vaadin:warning";
 	public static final String VIEW_NAME = "Risks View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

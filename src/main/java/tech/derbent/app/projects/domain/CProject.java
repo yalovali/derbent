@@ -32,7 +32,7 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 public class CProject extends CEntityNamed<CProject> implements ISearchable {
 
 	public static final String DEFAULT_COLOR = "#905300";
-	public static final String DEFAULT_ICON = "vaadin:credit-card";
+	public static final String DEFAULT_ICON = "vaadin:folder-open";
 	public static final String VIEW_NAME = "Projects View";
 	// Many projects can belong to one company
 	@AMetaData (
