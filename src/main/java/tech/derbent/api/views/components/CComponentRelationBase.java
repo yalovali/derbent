@@ -54,7 +54,7 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 	}
 
 	protected void setupGrid(Grid<RelationalClass> grid) {
-		grid.setHeight("300px");
+		grid.setHeight("250px");
 		add(grid);
 	}
 
