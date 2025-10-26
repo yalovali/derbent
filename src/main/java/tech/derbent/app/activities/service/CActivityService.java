@@ -42,22 +42,29 @@ public class CActivityService extends CProjectItemService<CActivity> {
 	@Override
 	public void initializeNewEntity(final CActivity entity) {
 		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new activity entity");
 		// Get current project from session
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
+		// Initialize workflow-based status and type
 		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
+		// Initialize activity-specific fields with sensible defaults
 		final List<CActivityPriority> priorities = activityPriorityService.listByProject(currentProject);
 		Check.notEmpty(priorities, "No activity priorities available in project " + currentProject.getName() + " - cannot initialize new activity");
 		entity.setPriority(priorities.get(0));
+		LOGGER.debug("Assigned default priority: {}", priorities.get(0).getName());
+		// Budget tracking defaults
 		entity.setActualCost(BigDecimal.ZERO);
 		entity.setEstimatedCost(BigDecimal.ZERO);
+		entity.setHourlyRate(BigDecimal.ZERO);
+		// Time tracking defaults
 		entity.setActualHours(BigDecimal.ZERO);
+		entity.setProgressPercentage(0);
+		// Date defaults: start today, due in 7 days
 		entity.setStartDate(LocalDate.now(clock));
 		entity.setDueDate(LocalDate.now(clock).plusDays(7));
 		entity.setCompletionDate(null); // Not completed yet
-		entity.setHourlyRate(BigDecimal.ZERO);
-		entity.setProgressPercentage(0);
-		entity.setStartDate(LocalDate.now(clock));
+		LOGGER.debug("Activity initialization complete with default values");
 	}
 
 	public List<CActivity> listByUser() {

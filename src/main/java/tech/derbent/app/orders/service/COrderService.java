@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import tech.derbent.base.users.domain.CUser;
 @Transactional (readOnly = true)
 public class COrderService extends CEntityOfProjectService<COrder> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(COrderService.class);
 	private final CCurrencyService currencyService;
 	private final CProjectItemStatusService entityStatusService;
 	private final COrderTypeService entityTypeService;
@@ -58,19 +61,24 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 	@Override
 	public void initializeNewEntity(final COrder entity) {
 		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new order entity");
 		final CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize order"));
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order"));
+		// Initialize workflow-based status and type
 		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, entityTypeService, entityStatusService);
+		// Initialize order-specific fields with sensible defaults
 		entity.setActualCost(BigDecimal.ZERO);
 		entity.setEstimatedCost(BigDecimal.ZERO);
-		entity.setOrderDate(LocalDate.now(clock));
+		entity.setOrderDate(LocalDate.now(clock)); // Default: today
 		entity.setRequiredDate(LocalDate.now(clock).plusDays(7)); // Default required date one week from now
 		entity.setRequestor(currentUser);
 		entity.setResponsible(currentUser);
+		// Set default currency
 		final List<CCurrency> availableCurrencies = currencyService.listByProject(currentProject);
 		Check.notEmpty(availableCurrencies, "No currencies available for project " + currentProject.getName());
 		entity.setCurrency(availableCurrencies.get(0));
+		LOGGER.debug("Order initialization complete with requestor: {}, currency: {}", currentUser.getName(), availableCurrencies.get(0).getName());
 	}
 }
