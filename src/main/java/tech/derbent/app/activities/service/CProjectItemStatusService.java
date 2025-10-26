@@ -59,7 +59,48 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	@Override
 	protected Class<CProjectItemStatus> getEntityClass() { return CProjectItemStatus.class; }
 
+	/** Gets the initial/default status from a workflow.
+	 * <p>
+	 * This method retrieves the workflow's designated initial status, which is the status that should be assigned to new entities. The initial status
+	 * is defined in the workflow's status relations where CWorkflowStatusRelation.initialStatus = true.
+	 * @param workflow the workflow entity to get initial status from
+	 * @return Optional containing the initial status if found, empty otherwise */
+	public Optional<CProjectItemStatus> getInitialStatusFromWorkflow(final CWorkflowEntity workflow) {
+		if (workflow == null) {
+			LOGGER.debug("Workflow is null, cannot get initial status");
+			return Optional.empty();
+		}
+		try {
+			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
+			LOGGER.debug("Found {} status relations for workflow: {}", relations.size(), workflow.getName());
+			// Get statuses from relations marked as initial
+			final Optional<CProjectItemStatus> initialStatus = relations.stream().filter(r -> r.getInitialStatus() != null && r.getInitialStatus())
+					.map(CWorkflowStatusRelation::getToStatus).distinct().findFirst();
+			if (initialStatus.isPresent()) {
+				LOGGER.debug("Found initial status: {} for workflow: {}", initialStatus.get().getName(), workflow.getName());
+				return initialStatus;
+			}
+			// If no initial statuses found, use the first fromStatus in the workflow as fallback
+			if (!relations.isEmpty()) {
+				final CProjectItemStatus fallbackStatus = relations.get(0).getFromStatus();
+				LOGGER.debug("No explicit initial status found, using first fromStatus as fallback: {} for workflow: {}", fallbackStatus.getName(),
+						workflow.getName());
+				return Optional.of(fallbackStatus);
+			}
+			LOGGER.warn("No status relations found for workflow: {}", workflow.getName());
+		} catch (Exception e) {
+			LOGGER.error("Error retrieving initial status for workflow {}: {}", workflow.getName(), e.getMessage());
+		}
+		return Optional.empty();
+	}
+
 	/** Gets the list of valid next statuses for the current entity based on its workflow.
+	 * <p>
+	 * This method handles two scenarios:
+	 * <ul>
+	 * <li>For existing entities with a status: Returns current status + valid next statuses from workflow transitions</li>
+	 * <li>For new entities without a status: Returns the workflow's initial status (marked in status relations)</li>
+	 * </ul>
 	 * @param item the project item entity
 	 * @return list of valid next statuses */
 	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
@@ -75,18 +116,8 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		} else {
 			// For new items without a status, return initial statuses from the workflow
 			LOGGER.debug("Getting initial statuses for new project item with workflow: {}", workflow.getName());
-			try {
-				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
-				// Get statuses from relations marked as initial
-				relations.stream().filter(r -> r.getInitialStatus() != null && r.getInitialStatus()).map(CWorkflowStatusRelation::getToStatus)
-						.distinct().forEach(validStatuses::add);
-				// If no initial statuses found, use the first status in the workflow
-				if (validStatuses.isEmpty() && !relations.isEmpty()) {
-					validStatuses.add(relations.get(0).getFromStatus());
-				}
-			} catch (Exception e) {
-				LOGGER.error("Error retrieving initial statuses for project item: {}", e.getMessage());
-			}
+			final Optional<CProjectItemStatus> initialStatus = getInitialStatusFromWorkflow(workflow);
+			initialStatus.ifPresent(validStatuses::add);
 			return validStatuses;
 		}
 		try {

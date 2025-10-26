@@ -2,6 +2,8 @@ package tech.derbent.app.decisions.service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
@@ -19,6 +21,7 @@ import tech.derbent.base.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionService.class);
 	private final CProjectItemStatusService entityStatusService;
 	private final CDecisionTypeService entityTypeService;
 
@@ -40,13 +43,16 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 	@Override
 	public void initializeNewEntity(final CDecision entity) {
 		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new decision entity");
 		final CUser currentUser = sessionService.getActiveUser()
 				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize decision"));
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize decision"));
+		// Initialize workflow-based status and type
 		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, entityTypeService, entityStatusService);
+		// Initialize decision-specific fields with sensible defaults
 		entity.setEstimatedCost(BigDecimal.ZERO);
-		// Initialize accountable user with current user
-		entity.setAccountableUser(currentUser);
+		entity.setAccountableUser(currentUser); // Default accountable user is creator
+		LOGGER.debug("Decision initialization complete with accountable user: {}", currentUser.getName());
 	}
 }

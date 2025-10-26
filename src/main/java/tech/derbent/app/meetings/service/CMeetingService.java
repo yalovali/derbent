@@ -2,6 +2,8 @@ package tech.derbent.app.meetings.service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
@@ -9,6 +11,7 @@ import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CProjectItemService;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.meetings.domain.CMeeting;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -16,6 +19,7 @@ import tech.derbent.base.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CProjectItemService<CMeeting> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
 	private final CMeetingTypeService meetingTypeService;
 
 	CMeetingService(final IMeetingRepository repository, final Clock clock, final ISessionService sessionService,
@@ -35,11 +39,18 @@ public class CMeetingService extends CProjectItemService<CMeeting> {
 	@Override
 	public void initializeNewEntity(final CMeeting entity) {
 		super.initializeNewEntity(entity);
-		IHasStatusAndWorkflow.initializeNewEntity(entity, sessionService.getActiveProject().get(), meetingTypeService, projectItemStatusService);
+		LOGGER.debug("Initializing new meeting entity");
+		// Get current project and user from session
+		final CProject currentProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize meeting"));
 		final CUser currentUser = sessionService.getActiveUser()
 				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize meeting"));
-		entity.setMeetingDate(LocalDateTime.now(clock));
-		entity.setEndDate(LocalDateTime.now(clock).plusHours(1));
+		// Initialize workflow-based status and type
+		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, meetingTypeService, projectItemStatusService);
+		// Initialize meeting-specific fields with sensible defaults
+		entity.setMeetingDate(LocalDateTime.now(clock)); // Default: now
+		entity.setEndDate(LocalDateTime.now(clock).plusHours(1)); // Default: 1 hour duration
 		entity.setResponsible(currentUser);
+		LOGGER.debug("Meeting initialization complete with default start time and responsible user: {}", currentUser.getName());
 	}
 }
