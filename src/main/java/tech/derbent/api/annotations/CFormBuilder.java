@@ -423,6 +423,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(fieldInfo, "FieldInfo for custom component creation");
 			Check.notNull(fieldInfo.getCreateComponentMethod(), "CreateComponentMethod for custom component creation");
 			Check.notNull(fieldInfo.getDataProviderBean(), "DataProviderBean for custom component creation");
+			Check.isTrue(hasValidDataProvider(fieldInfo.getDataProviderBean()),
+					"DataProviderBean cannot be 'none' for custom component creation - field: " + fieldInfo.getFieldName());
 			// Check.notNull(contentOwner, "ContentOwner for custom component creation");
 			// use first method only
 			final String methodName = fieldInfo.getCreateComponentMethod().split(",")[0].trim();
