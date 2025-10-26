@@ -35,13 +35,6 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 
 	Logger LOGGER = LoggerFactory.getLogger(IHasStatusAndWorkflow.class);
 
-	/** Gets the initial/default status from the entity's workflow.
-	 * <p>
-	 * This method retrieves the workflow's designated initial status, which is the status that should be assigned to new entities when they are
-	 * created. The initial status is defined in the workflow's status relations where CWorkflowStatusRelation.initialStatus = true.
-	 * @param entity                   the entity to get initial status for
-	 * @param projectItemStatusService the service to resolve initial statuses
-	 * @return Optional containing the initial status if found, empty otherwise */
 	static Optional<CProjectItemStatus> getInitialStatus(IHasStatusAndWorkflow<?> entity, CProjectItemStatusService projectItemStatusService) {
 		if (entity == null || entity.getWorkflow() == null) {
 			return Optional.empty();
@@ -55,20 +48,6 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 		return Optional.empty();
 	}
 
-	/** Initializes a new entity with default values based on workflow and project configuration.
-	 * <p>
-	 * Initialization Process:
-	 * <ol>
-	 * <li>Validates required parameters (project, entity, typeService)</li>
-	 * <li>Assigns the first available entity type from the project</li>
-	 * <li>Attempts to assign workflow's initial status (marked in workflow status relations)</li>
-	 * <li>Falls back to first available project status if workflow is not configured or has no initial status</li>
-	 * </ol>
-	 * @param entity                   the entity to initialize
-	 * @param currentProject           the project context for initialization
-	 * @param typeService              service to get available entity types
-	 * @param projectItemStatusService service to resolve statuses and workflow initial statuses
-	 * @throws IllegalArgumentException if required parameters are null or empty */
 	static void initializeNewEntity(IHasStatusAndWorkflow<?> entity, CProject currentProject, CTypeEntityService<?> typeService,
 			CProjectItemStatusService projectItemStatusService) {
 		Check.notNull(currentProject, "currentProject cannot be null");

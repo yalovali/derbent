@@ -105,7 +105,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			// LOGGER.debug("Creating master section with grid entity");
 			Check.notNull(pageEntity.getGridEntity(), "Grid entity cannot be null");
 			// Create the grid component using the configured grid entity
-			grid = new CComponentGridEntity(pageEntity.getGridEntity());
+			grid = new CComponentGridEntity(pageEntity.getGridEntity(), sessionService);
 			// Listen for selection changes from the grid
 			grid.addSelectionChangeListener(event -> {
 				try {

@@ -22,7 +22,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.hilla.ApplicationContextProvider;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
@@ -65,21 +64,19 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private CGridEntity gridEntity;
 	private ISessionService sessionService;
 
-	public CComponentGridEntity(CGridEntity gridEntity) {
+	public CComponentGridEntity(CGridEntity gridEntity, ISessionService sessionService) {
 		super();
 		try {
-			enableSelectionChangeListener = true;
+			this.sessionService = sessionService;
 			this.gridEntity = gridEntity;
-			// Set size to full so the grid can expand properly
+			Check.notNull(sessionService, "SessionService is required for CComponentGridEntity");
+			Check.notNull(gridEntity, "GridEntity configuration is required for CComponentGridEntity");
+			enableSelectionChangeListener = true;
 			setSizeFull();
-			// Get session service for project change notifications
-			if (ApplicationContextProvider.getApplicationContext() != null) {
-				sessionService = ApplicationContextProvider.getApplicationContext().getBean(ISessionService.class);
-			}
 			createContent();
 		} catch (Exception e) {
 			LOGGER.error("Error initializing CComponentGridEntity: {}", e.getMessage());
-			add(new Div("Error initializing grid component: " + e.getMessage()));
+			throw e;
 		}
 	}
 

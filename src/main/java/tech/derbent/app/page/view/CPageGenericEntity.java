@@ -125,7 +125,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 				.findByNameAndProject(viewName,
 						sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")))
 				.orElse(null);
-		grid = new CComponentGridEntity(gridEntity);
+		grid = new CComponentGridEntity(gridEntity, sessionService);
 		// Listen for selection changes from the grid
 		grid.addSelectionChangeListener(event -> {
 			try {
