@@ -15,6 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */
 @PermitAll
 public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
+
 	public static final String DEFAULT_COLOR = "#4b2900";
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithoutGrid.class);

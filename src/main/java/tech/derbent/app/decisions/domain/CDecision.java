@@ -29,6 +29,7 @@ import tech.derbent.base.users.domain.CUser;
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
 public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision>, IGanttDisplayable {
+
 	public static final String DEFAULT_COLOR = "#e83e8c";
 	public static final String DEFAULT_ICON = "vaadin:gavel";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
@@ -94,6 +95,11 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	public CUser getAccountableUser() { return accountableUser; }
 
+	/** Gets the icon for Gantt chart display.
+	 * @return the decision icon identifier */
+	@Override
+	public String getIcon() { return DEFAULT_ICON; }
+
 	@Override
 	public CDecisionType getEntityType() { return entityType; }
 
@@ -101,7 +107,22 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	public LocalDateTime getImplementationDate() { return implementationDate; }
 
+	/** Gets the start date for Gantt chart display. For decisions, this is the implementation date.
+	 * @return the implementation date as LocalDate, or null if not set */
+	@Override
+	public java.time.LocalDate getStartDate() { return implementationDate != null ? implementationDate.toLocalDate() : null; }
+
 	public LocalDateTime getReviewDate() { return reviewDate; }
+
+	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
+	 * @return the review date as LocalDate, or null if not set */
+	@Override
+	public java.time.LocalDate getEndDate() { return reviewDate != null ? reviewDate.toLocalDate() : null; }
+
+	/** Gets the responsible user for Gantt chart display. For decisions, this is the accountable user.
+	 * @return the accountable user */
+	@Override
+	public CUser getResponsible() { return accountableUser; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
