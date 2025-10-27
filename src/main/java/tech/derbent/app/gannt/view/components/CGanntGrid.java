@@ -27,18 +27,20 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 
 	private void createColumns() {
 		addShortTextColumn(CGanttItem::getEntityType, "Type", "entityType");
-		// addShortTextColumn(CGanttItem::getDisplayName, "Title", "displayName");
+		// Title column with hierarchical indentation based on hierarchy level
+		addColumn(item -> {
+			final StringBuilder title = new StringBuilder();
+			// Add indentation based on hierarchy level (2 spaces per level)
+			for (int i = 0; i < item.getHierarchyLevel(); i++) {
+				title.append("  ");
+			}
+			title.append(item.getEntity().getName());
+			return title.toString();
+		}).setHeader("Title").setKey("title").setFlexGrow(3).setSortable(false);
 		addShortTextColumn(CGanttItem::getResponsibleName, "Responsible", "responsible");
 		addDateColumn(CGanttItem::getStartDate, "Start", "startDate");
 		addDateColumn(CGanttItem::getEndDate, "End", "endDate");
 		addIntegerColumn(item -> (int) item.getDurationDays(), "Duration (d)", "durationDays");
-		addIntegerColumn(CGanttItem::getHierarchyLevel, "Level", "hierarchyLevel");
-		addShortTextColumn(item -> {
-			if (item.hasParent()) {
-				return item.getParentType() + "#" + item.getParentId();
-			}
-			return "";
-		}, "Parent", "parent");
 		addLongTextColumn(CGanttItem::getDescription, "Description", "description");
 	}
 

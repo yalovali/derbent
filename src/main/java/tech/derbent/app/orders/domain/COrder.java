@@ -21,7 +21,6 @@ import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
-import tech.derbent.api.interfaces.IGanttDisplayable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -30,7 +29,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "corder")
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
-public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder>, IGanttDisplayable {
+public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder> {
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:invoice";
