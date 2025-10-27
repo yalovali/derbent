@@ -15,6 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 
 public class CUserInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "User Information";
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);

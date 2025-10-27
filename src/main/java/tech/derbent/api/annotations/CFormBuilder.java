@@ -707,6 +707,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			item.setMaxLength(fieldInfo.getMaxLength());
 		}
 		item.setWidthFull();
+		item.setMinWidth("200px");
+		item.setMaxWidth("800px");
 		item.setMinHeight("100px");
 		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
@@ -734,6 +736,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			item.setMaxLength(fieldInfo.getMaxLength());
 		}
 		item.setWidthFull();
+		item.setMinWidth("200px");
+		item.setMaxWidth("800px");
 		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
@@ -760,6 +764,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			item.setMaxLength(fieldInfo.getMaxLength());
 		}
 		item.setWidthFull();
+		item.setMinWidth("200px");
+		item.setMaxWidth("800px");
 		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			item.setValue(fieldInfo.getDefaultValue());
 		}
@@ -894,9 +900,14 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			final HasSize hasSize = (HasSize) component;
 			if (width.trim().isEmpty()) {
+				// Set full width with min and max constraints for better responsiveness
 				hasSize.setWidthFull();
+				hasSize.setMinWidth("200px");
+				hasSize.setMaxWidth("800px");
 			} else {
+				// Use specified width but still add min width for usability
 				hasSize.setWidth(width);
+				hasSize.setMinWidth("150px");
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to set component width '{}': {}", width, e.getMessage());
