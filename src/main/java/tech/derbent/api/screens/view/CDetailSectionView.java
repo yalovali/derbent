@@ -7,13 +7,13 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.views.grids.CGrid;
-import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cdetailsectionview")
@@ -21,7 +21,6 @@ import tech.derbent.base.session.service.ISessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Setup.UI.Detail Sections")
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
-
 	public static final String DEFAULT_COLOR = "#00141b";
 	public static final String DEFAULT_ICON = "vaadin:clipboard";
 	private static final long serialVersionUID = 1L;
@@ -67,6 +66,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 		addAccordionPanel(new CPanelDetailSectionBasicInfo(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
 		addAccordionPanel(new CPanelDetailLines(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService, screenLinesService,
 				entityFieldService, viewsService));
-		addAccordionPanel(new CPanelDetailSectionPreview(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
+		addAccordionPanel(
+				new CPanelDetailSectionPreview(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService, sessionService));
 	}
 }

@@ -37,7 +37,6 @@ import tech.derbent.base.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CUserService extends CEntityNamedService<CUser> implements UserDetailsService {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
@@ -204,6 +203,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			user.setLastname("");
 			user.setEmail("");
 			user.setPhone("");
+			user.setAttributeDisplaySectionsAsTabs(true);
 			user.setPassword(""); // Empty - user must set password
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing new user: {}", e.getMessage());

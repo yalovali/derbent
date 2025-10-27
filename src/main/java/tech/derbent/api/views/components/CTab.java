@@ -8,7 +8,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 /** CAccordion - Enhanced base class for accordion components. Layer: View (MVC) Provides common accordion functionality with standardized styling and
  * behavior. */
-public class CAccordion extends Accordion implements IFormContainerComponent {
+public class CTab extends Accordion implements IFormContainerComponent {
 	private static final long serialVersionUID = 1L;
 	private final String accordionTitle;
 	private final VerticalLayout baseLayout = new VerticalLayout();
@@ -16,7 +16,7 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 
 	/** Constructor for CAccordion.
 	 * @param title the title of the accordion panel */
-	public CAccordion(final String title) {
+	public CTab(final String title) {
 		super();
 		// LOGGER.debug("Creating CAccordion with title: {}", title);
 		accordionTitle = title;

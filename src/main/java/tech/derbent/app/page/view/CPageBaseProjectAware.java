@@ -21,12 +21,11 @@ import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
-
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
 	private Object currentEntity; // Field to store current entity
-	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
+	protected final CDetailsBuilder detailsBuilder;
 	protected CLayoutService layoutService;
 	private IContentOwner parentContent;
 	private final CDetailSectionService screenService;
@@ -37,6 +36,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		super();
 		this.screenService = screenService;
 		this.sessionService = sessionService;
+		this.detailsBuilder = new CDetailsBuilder(sessionService);
 		baseDetailsLayout.setSizeFull();
 	}
 

@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContextAware;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.tabs.TabSheet;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.PersistenceUtil;
 import tech.derbent.api.annotations.CFormBuilder;
@@ -22,33 +23,38 @@ import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
-
 	private static ApplicationContext applicationContext;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
 
 	public static ApplicationContext getApplicationContext() { return applicationContext; }
 
-	private static Component processLine(final int counter, final CDetailSection screen, final CDetailLines line) {
+	private static Component processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CUser user) {
 		Check.notNull(line, "Line cannot be null");
 		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
-			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption());
+			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
 			return sectionPanel;
 		}
 		return null;
 	}
 
+	private final ISessionService sessionService;
 	CFormBuilder<?> formBuilder = null;
 	private HasComponents formLayout = null;
 	private final Map<String, CPanelDetails> mapSectionPanels;
+	private TabSheet tabsOfForm;
 
-	public CDetailsBuilder() {
+	public CDetailsBuilder(final ISessionService sessionService) {
+		Check.notNull(sessionService, "Session service cannot be null");
+		this.sessionService = sessionService;
 		mapSectionPanels = new HashMap<>();
 	}
 
-	public HasComponents buildDetails(IContentOwner contentOwner, CDetailSection screen, final CEnhancedBinder<?> binder,
+	public HasComponents buildDetails(final IContentOwner contentOwner, CDetailSection screen, final CEnhancedBinder<?> binder,
 			final HasComponents detailsLayout) throws Exception {
 		Check.notNull(screen, "Screen cannot be null");
 		Check.notNull(binder, "Binder cannot be null");
@@ -75,7 +81,15 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		//
 		CPanelDetails currentSection = null;
 		final int counter = 0;
+		final CUser user = sessionService.getActiveUser().orElseThrow();
 		// screen.getScreenLines().size(); // Ensure lines are loaded
+		if (user.getAttributeDisplaySectionsAsTabs()) {
+			// LOGGER.debug("User '{}' prefers sections as tabs.", user.getUsername());
+			tabsOfForm = new TabSheet();
+			formLayout.add(tabsOfForm);
+		} else {
+			// LOGGER.debug("User '{}' prefers sections as accordion.", user.getUsername());
+		}
 		final List<CDetailLines> lines = screen.getScreenLines();
 		for (final CDetailLines line : lines) {
 			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
@@ -86,13 +100,17 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				currentSection.processLine(contentOwner, counter, screen, line, formBuilder);
 				continue;
 			}
-			final Component component = processLine(counter, screen, line);
+			final Component component = processLine(counter, screen, line, user);
 			if (component instanceof CPanelDetails) {
-				formLayout.add(component);
+				if (user.getAttributeDisplaySectionsAsTabs()) {
+					tabsOfForm.add(line.getSectionName(), component);
+				} else {
+					formLayout.add(component);
+				}
 				currentSection = (CPanelDetails) component;
 				mapSectionPanels.put(currentSection.getName(), currentSection);
 			} else {
-				LOGGER.debug("First create a section!");
+				LOGGER.error("First create a section!");
 			}
 		}
 		return formLayout;
@@ -124,7 +142,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		CDetailsBuilder.applicationContext = context;
 	}
 
-	public void setCurrentEntity(Object entity) {
+	public void setCurrentEntity(final Object entity) {
 		Check.notNull(formBuilder, "Form builder cannot be null, first initialize it");
 		formBuilder.setCurrentEntity(entity);
 	}

@@ -14,14 +14,14 @@ import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.ISearchable;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.roles.domain.CUserCompanyRole;
 
 @Entity
 @Table (name = "cuser", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
@@ -29,7 +29,6 @@ import tech.derbent.app.activities.domain.CActivity;
 })) // Using quoted identifier to ensure exact case matching in
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInfoGenerator {
-
 	public static final String DEFAULT_COLOR = "#00546d";
 	public static final String DEFAULT_ICON = "vaadin:user";
 	public static final int MAX_LENGTH_NAME = 255;
@@ -102,14 +101,20 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			order = 20, createComponentMethod = "createUserProjectSettingsComponent"
 	)
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
+	@Column (name = "attribute_display_sections_as_tabs", nullable = true)
+	@AMetaData (
+			displayName = "Display Sections As Tabs", required = false, readOnly = false, defaultValue = "true",
+			description = "Whether to display user interface sections as tabs", hidden = false, order = 50
+	)
+	private Boolean attributeDisplaySectionsAsTabs;
 
 	/** Default constructor for JPA. */
 	public CUser() {
 		super();
 	}
 
-	public CUser(final String username, final String password, final String name, final String email, CCompany company,
-			CUserCompanyRole companyRole) {
+	public CUser(final String username, final String password, final String name, final String email, final CCompany company,
+			final CUserCompanyRole companyRole) {
 		super(CUser.class, name);
 		login = username;
 		this.email = email;
@@ -138,6 +143,8 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	}
 
 	public List<CActivity> getActivities() { return activities; }
+
+	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
 
 	@Override
 	public Class<?> getClassName() { // TODO Auto-generated method stub
@@ -226,9 +233,13 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		}
 	}
 
-	public void setActivities(List<CActivity> activities) { this.activities = activities; }
+	public void setActivities(final List<CActivity> activities) { this.activities = activities; }
 
-	public void setCompany(final CCompany company, CUserCompanyRole companyRole) {
+	public void setAttributeDisplaySectionsAsTabs(final Boolean attributeDisplaySectionsAsTabs) {
+		this.attributeDisplaySectionsAsTabs = attributeDisplaySectionsAsTabs;
+	}
+
+	public void setCompany(final CCompany company, final CUserCompanyRole companyRole) {
 		this.company = company;
 		this.companyRole = companyRole;
 	}

@@ -4,24 +4,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
-import tech.derbent.api.services.CEntityNamedService;
-import tech.derbent.api.services.CDetailsBuilder;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.services.CDetailsBuilder;
+import tech.derbent.api.services.CEntityNamedService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
 		implements ILayoutChangeListener {
-
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CAbstractNamedEntityPage.class);
 	private static final long serialVersionUID = 1L;
-	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
+	protected final CDetailsBuilder detailsBuilder;
 	protected final CDetailSectionService screenService;
 
 	protected CAbstractNamedEntityPage(final Class<EntityClass> entityClass, final CEntityNamedService<EntityClass> entityService,
 			final ISessionService sessionService, final CDetailSectionService screenService) {
 		super(entityClass, entityService, sessionService);
+		detailsBuilder = new CDetailsBuilder(sessionService);
 		this.screenService = screenService;
 	}
 
