@@ -4,17 +4,21 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAbstractEntityDBPage;
+import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.view.components.CGanntGrid;
 import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -40,12 +44,12 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	private final CActivityService activityService;
 	private CGanntGrid ganttGrid;
 	private final CMeetingService meetingService;
-	private final tech.derbent.app.page.service.CPageEntityService pageEntityService;
+	private final CPageEntityService pageEntityService;
 	private final ISessionService sessionService;
 
 	public CMasterViewSectionGannt(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page,
 			final ISessionService sessionService, final CActivityService activityService, final CMeetingService meetingService,
-			final tech.derbent.app.page.service.CPageEntityService pageEntityService) {
+			final CPageEntityService pageEntityService) {
 		super(entityClass, page);
 		this.sessionService = sessionService;
 		this.activityService = activityService;
@@ -53,6 +57,11 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		this.pageEntityService = pageEntityService;
 		LOGGER.debug("Initializing CMasterViewSectionGannt for entity: {}", entityClass.getSimpleName());
 		createMasterView();
+	}
+
+	protected Component createGridToolbar() {
+		CDiv toolbar = new CDiv("Gannt Chart Toolbar");
+		return toolbar;
 	}
 
 	@Override
@@ -100,38 +109,31 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 
 	@Override
 	public void refreshMasterView() {
-		LOGGER.debug("Refreshing Gantt chart master view");
-		// Get current project from session (with null safety)
-		CProject currentProject = null;
 		try {
-			if (sessionService != null) {
-				currentProject = sessionService.getActiveProject().orElse(null);
+			LOGGER.debug("Refreshing Gantt chart master view");
+			// Get current project from session (with null safety)
+			CProject currentProject = null;
+			currentProject = sessionService.getActiveProject().orElse(null);
+			Check.notNull(sessionService, "Session service is not available");
+			Check.notNull(currentProject, "No active project in session");
+			removeAll();
+			// if (ganttGrid != null) {
+			// remove(ganttGrid);
+			// ganttGrid = null;
+			// }
+			// Check if required services are available
+			Check.notNull(activityService, "Activity service is not available");
+			Check.notNull(meetingService, "Meeting service is not available");
+			// Create and display new Gantt grid for current project
+			Component toolbar = createGridToolbar();
+			if (toolbar != null) {
+				add(toolbar);
 			}
-		} catch (final Exception e) {
-			LOGGER.error("Error getting active project from session", e);
-		}
-		// Remove existing grid if present
-		if (ganttGrid != null) {
-			remove(ganttGrid);
-			ganttGrid = null;
-		}
-		if (currentProject == null) {
-			LOGGER.debug("No active project, showing empty Gantt chart");
-			return;
-		}
-		// Check if required services are available
-		if (activityService == null || meetingService == null) {
-			LOGGER.warn("Required services not available for Gantt chart (activityService: {}, meetingService: {})", activityService != null,
-					meetingService != null);
-			return;
-		}
-		// Create and display new Gantt grid for current project
-		try {
 			ganttGrid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
 			add(ganttGrid);
-			LOGGER.debug("Created Gantt grid for project: {} with click navigation enabled", currentProject.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error creating Gantt grid for project: {}", currentProject.getName(), e);
+			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());
+			throw e;
 		}
 	}
 

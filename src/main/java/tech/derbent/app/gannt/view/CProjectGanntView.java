@@ -6,23 +6,23 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseGannt;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cprojectganntview")
 @PageTitle ("Project Gannt View")
-@Menu (order = 3.1001, icon = "class:tech.derbent.app.gannt.domain.CGanntViewEntity", title = "Project.Project Gannt Chart")
+@Menu (order = 3.1001, icon = "class:tech.derbent.app.gannt.view.CProjectGanntView", title = "Project.Project Gannt Chart")
 @PermitAll
 public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
-	public static final String DEFAULT_COLOR = "#fd7e14";
-	public static final String DEFAULT_ICON = "vaadin:timeline";
+	public static final String DEFAULT_COLOR = "#31701F";
+	public static final String DEFAULT_ICON = "vaadin:progressbar";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "GanntEntity View";
 	private final String ENTITY_ID_FIELD = "ganntview_id";

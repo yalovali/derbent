@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -39,8 +40,16 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		createMasterView();
 	}
 
+	protected Component createGridToolbar() {
+		return null;
+	}
+
 	@Override
 	public void createMasterView() {
+		Component toolbar = createGridToolbar();
+		if (toolbar != null) {
+			add(toolbar);
+		}
 		grid = new CGrid<>(entityClass);
 		grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 		page.createGridForEntity(grid);

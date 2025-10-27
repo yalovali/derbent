@@ -147,7 +147,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			hidden = false, order = 72, maxLength = 2000
 	)
 	private String results;
-	// Date Management
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
@@ -252,6 +251,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public String getResults() { return results; }
 
+	@Override
 	public LocalDate getStartDate() { return startDate; }
 
 	@Override

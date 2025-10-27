@@ -2,6 +2,7 @@ package tech.derbent.api.config;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
@@ -558,44 +559,42 @@ public class CDataInitializer {
 			final CActivityPriority priority1 = activityPriorityService.getRandom(project);
 			final CUser user1 = userService.getRandom();
 			// Create parent activity
-			final CActivity parentActivity = new CActivity("Phase 1: Planning and Analysis", project);
-			parentActivity.setDescription("Initial planning phase covering requirements and architecture design");
-			parentActivity.setEntityType(type1);
-			parentActivity.setPriority(priority1);
-			parentActivity.setAssignedTo(user1);
-			parentActivity.setStartDate(java.time.LocalDate.now());
-			parentActivity.setDueDate(java.time.LocalDate.now().plusDays(30));
+			final CActivity activity1 = new CActivity("Phase 1: Planning and Analysis", project);
+			activity1.setDescription("Initial planning phase covering requirements and architecture design");
+			activity1.setEntityType(type1);
+			activity1.setPriority(priority1);
+			activity1.setAssignedTo(user1);
+			activity1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
+			activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 150)));
 			// Set initial status from workflow
 			if (type1 != null && type1.getWorkflow() != null) {
-				final java.util.List<tech.derbent.api.domains.CProjectItemStatus> initialStatuses =
-						projectItemStatusService.getValidNextStatuses(parentActivity);
+				final java.util.List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity1);
 				if (!initialStatuses.isEmpty()) {
-					parentActivity.setStatus(initialStatuses.get(0));
+					activity1.setStatus(initialStatuses.get(0));
 				}
 			}
-			activityService.save(parentActivity);
+			activityService.save(activity1);
 			// Create child activity 1
 			final CActivityType type2 = activityTypeService.getRandom(project);
 			final CActivityPriority priority2 = activityPriorityService.getRandom(project);
 			final CUser user2 = userService.getRandom();
-			final CActivity childActivity1 = new CActivity("Requirements Gathering", project);
-			childActivity1.setDescription("Collect and document business requirements");
-			childActivity1.setEntityType(type2);
-			childActivity1.setPriority(priority2);
-			childActivity1.setAssignedTo(user2);
-			childActivity1.setStartDate(java.time.LocalDate.now());
-			childActivity1.setDueDate(java.time.LocalDate.now().plusDays(14));
+			final CActivity activity2 = new CActivity("Requirements Gathering", project);
+			activity2.setDescription("Collect and document business requirements");
+			activity2.setEntityType(type2);
+			activity2.setPriority(priority2);
+			activity2.setAssignedTo(user2);
+			activity2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
+			activity2.setDueDate(activity2.getStartDate().plusDays((long) (Math.random() * 50)));
 			// Set parent relationship
-			childActivity1.setParent(parentActivity);
+			activity2.setParent(activity1);
 			// Set initial status from workflow
 			if (type2 != null && type2.getWorkflow() != null) {
-				final java.util.List<tech.derbent.api.domains.CProjectItemStatus> initialStatuses =
-						projectItemStatusService.getValidNextStatuses(childActivity1);
+				final java.util.List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity2);
 				if (!initialStatuses.isEmpty()) {
-					childActivity1.setStatus(initialStatuses.get(0));
+					activity2.setStatus(initialStatuses.get(0));
 				}
 			}
-			activityService.save(childActivity1);
+			activityService.save(activity2);
 			if (minimal) {
 				return;
 			}
@@ -603,24 +602,23 @@ public class CDataInitializer {
 			final CActivityType type3 = activityTypeService.getRandom(project);
 			final CActivityPriority priority3 = activityPriorityService.getRandom(project);
 			final CUser user3 = userService.getRandom();
-			final CActivity childActivity2 = new CActivity("System Architecture Design", project);
-			childActivity2.setDescription("Design system architecture and component interactions");
-			childActivity2.setEntityType(type3);
-			childActivity2.setPriority(priority3);
-			childActivity2.setAssignedTo(user3);
-			childActivity2.setStartDate(java.time.LocalDate.now().plusDays(7));
-			childActivity2.setDueDate(java.time.LocalDate.now().plusDays(21));
+			final CActivity activity3 = new CActivity("System Architecture Design", project);
+			activity3.setDescription("Design system architecture and component interactions");
+			activity3.setEntityType(type3);
+			activity3.setPriority(priority3);
+			activity3.setAssignedTo(user3);
+			activity3.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 50)));
+			activity3.setDueDate(activity3.getStartDate().plusDays((long) (Math.random() * 50)));
 			// Set parent relationship
-			childActivity2.setParent(parentActivity);
+			activity3.setParent(activity1);
 			// Set initial status from workflow
 			if (type3 != null && type3.getWorkflow() != null) {
-				final java.util.List<tech.derbent.api.domains.CProjectItemStatus> initialStatuses =
-						projectItemStatusService.getValidNextStatuses(childActivity2);
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity3);
 				if (!initialStatuses.isEmpty()) {
-					childActivity2.setStatus(initialStatuses.get(0));
+					activity3.setStatus(initialStatuses.get(0));
 				}
 			}
-			activityService.save(childActivity2);
+			activityService.save(activity3);
 			LOGGER.debug("Created sample activities with parent-child relationships for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
@@ -826,8 +824,8 @@ public class CDataInitializer {
 			}
 			meeting1.setAssignedTo(user1);
 			meeting1.setResponsible(user2);
-			meeting1.setMeetingDate(java.time.LocalDateTime.now().plusDays(7));
-			meeting1.setEndDate(java.time.LocalDateTime.now().plusDays(7).plusHours(2));
+			meeting1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
+			meeting1.setEndDate(meeting1.getStartDate().plusDays((int) (Math.random() * 3)));
 			meeting1.setLocation("Conference Room A / Virtual");
 			meeting1.setAgenda("1. Review Q4 achievements\n2. Discuss Q1 objectives\n3. Resource allocation\n4. Budget planning");
 			meeting1.addParticipant(user1);
@@ -850,8 +848,8 @@ public class CDataInitializer {
 			}
 			meeting2.setAssignedTo(user2);
 			meeting2.setResponsible(user1);
-			meeting2.setMeetingDate(java.time.LocalDateTime.now().plusDays(14));
-			meeting2.setEndDate(java.time.LocalDateTime.now().plusDays(14).plusHours(3));
+			meeting2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 150)));
+			meeting2.setEndDate(meeting2.getStartDate().plusDays((int) (Math.random() * 2)));
 			meeting2.setLocation("Engineering Lab / Teams");
 			meeting2.setAgenda(
 					"1. Architecture proposal presentation\n2. Security considerations\n3. Scalability discussion\n4. Technology stack decisions");
@@ -873,8 +871,8 @@ public class CDataInitializer {
 			}
 			meeting3.setAssignedTo(user1);
 			meeting3.setResponsible(user2);
-			meeting3.setMeetingDate(java.time.LocalDateTime.now().plusDays(21));
-			meeting3.setEndDate(java.time.LocalDateTime.now().plusDays(21).plusHours(1));
+			meeting3.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
+			meeting3.setEndDate(meeting2.getStartDate().plusDays((int) (Math.random() * 2)));
 			meeting3.setLocation("Conference Room B / Virtual");
 			meeting3.setAgenda("1. Review action items from Q1 Planning\n2. Progress updates\n3. Blockers and challenges");
 			meeting3.addParticipant(user1);

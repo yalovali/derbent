@@ -54,28 +54,26 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 		public CMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path,
 				final String targetLevelKey, final boolean isNavigation, final Double order) throws Exception {
-			this.name = name;
-			this.order = order != null ? order : 999.0; // Default order if not specified
-			if (iconName.startsWith("class:")) {
-				// get icon from class
-				try {
+			try {
+				this.name = name;
+				this.order = order != null ? order : 9999.0; // Default order if not specified
+				if (iconName.startsWith("class:")) {
 					this.iconName = CColorUtils.getStaticIconFilename(iconName.replace("class:", ""));
-				} catch (Exception e) {
-					LOGGER.warn("Check route information for icon retrieval. Probably missing Class path or function.");
-					throw e;
+				} else {
+					this.iconName = iconName;
 				}
-			} else {
-				// get icon directly
-				this.iconName = iconName;
-			}
-			this.path = path;
-			this.targetLevelKey = targetLevelKey;
-			this.isNavigation = isNavigation;
-			// get icon color - use CPageEntity color for dynamic pages, otherwise use class color
-			if (isDynamicPagePath(path)) {
-				iconColor = getDynamicPageIconColor(path);
-			} else {
-				iconColor = CColorUtils.getStaticIconColorCode(clazz.getName());
+				this.path = path;
+				this.targetLevelKey = targetLevelKey;
+				this.isNavigation = isNavigation;
+				// get icon color - use CPageEntity color for dynamic pages, otherwise use class color
+				if (isDynamicPagePath(path)) {
+					iconColor = getDynamicPageIconColor(path);
+				} else {
+					iconColor = CColorUtils.getStaticIconColorCode(clazz.getName());
+				}
+			} catch (Exception e) {
+				LOGGER.warn("Check route information for icon retrieval. Probably missing Class path or function.");
+				throw e;
 			}
 		}
 

@@ -1,7 +1,8 @@
 package tech.derbent.app.meetings.service;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,16 +41,16 @@ public class CMeetingService extends CProjectItemService<CMeeting> {
 	public void initializeNewEntity(final CMeeting entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new meeting entity");
-		// Get current project and user from session
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize meeting"));
 		final CUser currentUser = sessionService.getActiveUser()
 				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize meeting"));
-		// Initialize workflow-based status and type
 		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, meetingTypeService, projectItemStatusService);
-		// Initialize meeting-specific fields with sensible defaults
-		entity.setMeetingDate(LocalDateTime.now(clock)); // Default: now
-		entity.setEndDate(LocalDateTime.now(clock).plusHours(1)); // Default: 1 hour duration
+		entity.setLocation("To be decided");
+		entity.setStartDate(LocalDate.now(clock)); // Default: now
+		entity.setStartTime(LocalTime.of(12, 00)); // Default: 10 AM
+		entity.setEndDate(LocalDate.now(clock)); // Default: 1 hour duration
+		entity.setStartTime(entity.getStartTime().plusHours(2));
 		entity.setResponsible(currentUser);
 		LOGGER.debug("Meeting initialization complete with default start time and responsible user: {}", currentUser.getName());
 	}

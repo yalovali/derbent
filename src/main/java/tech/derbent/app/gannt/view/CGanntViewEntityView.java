@@ -7,21 +7,21 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
-import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cganntviewentityview")
 @PageTitle ("Gannt Views Master Detail")
-@Menu (order = 1.5, icon = "class:tech.derbent.app.gannt.view.CGanntViewEntityView", title = "Setup.UI.GanntViews")
+@Menu (order = 1.5, icon = "class:tech.derbent.app.gannt.view.CGanntViewEntityView", title = "Project.Gannt Entity View")
 @PermitAll
 public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity> {
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
-	public static final String DEFAULT_ICON = "vaadin:timeline";
+	public static final String DEFAULT_ICON = "vaadin:chart-timeline";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Gannt View Entity Settings View";
 	private final String ENTITY_ID_FIELD = "screen_id";

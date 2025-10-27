@@ -1,6 +1,7 @@
 package tech.derbent.app.decisions.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,34 +95,34 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	public CUser getAccountableUser() { return accountableUser; }
 
-	/** Gets the icon for Gantt chart display.
-	 * @return the decision icon identifier */
+	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
+	 * @return the review date as LocalDate, or null if not set */
 	@Override
-	public String getIcon() { return DEFAULT_ICON; }
+	public LocalDate getEndDate() { return reviewDate != null ? reviewDate.toLocalDate() : null; }
 
 	@Override
 	public CDecisionType getEntityType() { return entityType; }
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 
+	/** Gets the icon for Gantt chart display.
+	 * @return the decision icon identifier */
+	@Override
+	public String getIcon() { return DEFAULT_ICON; }
+
 	public LocalDateTime getImplementationDate() { return implementationDate; }
-
-	/** Gets the start date for Gantt chart display. For decisions, this is the implementation date.
-	 * @return the implementation date as LocalDate, or null if not set */
-	@Override
-	public java.time.LocalDate getStartDate() { return implementationDate != null ? implementationDate.toLocalDate() : null; }
-
-	public LocalDateTime getReviewDate() { return reviewDate; }
-
-	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
-	 * @return the review date as LocalDate, or null if not set */
-	@Override
-	public java.time.LocalDate getEndDate() { return reviewDate != null ? reviewDate.toLocalDate() : null; }
 
 	/** Gets the responsible user for Gantt chart display. For decisions, this is the accountable user.
 	 * @return the accountable user */
 	@Override
 	public CUser getResponsible() { return accountableUser; }
+
+	public LocalDateTime getReviewDate() { return reviewDate; }
+
+	/** Gets the start date for Gantt chart display. For decisions, this is the implementation date.
+	 * @return the implementation date as LocalDate, or null if not set */
+	@Override
+	public LocalDate getStartDate() { return implementationDate != null ? implementationDate.toLocalDate() : null; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub

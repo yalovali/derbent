@@ -1,6 +1,7 @@
 package tech.derbent.app.meetings.domain;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.AssociationOverride;
@@ -54,7 +55,13 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@AMetaData (
 			displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false, order = 5
 	)
-	private LocalDateTime endDate;
+	private LocalDate endDate;
+	@Column (name = "endTime", nullable = true)
+	@AMetaData (
+			displayName = "End Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false,
+			order = 4
+	)
+	private LocalTime endTime;
 	// Type Management - concrete implementation of parent's typeEntity
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -79,12 +86,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String location;
-	@Column (name = "meeting_date", nullable = true)
-	@AMetaData (
-			displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false,
-			order = 4
-	)
-	private LocalDateTime meetingDate;
 	@Column (name = "minutes", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -113,6 +114,18 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			description = "Person responsible for organizing and leading the meeting", hidden = false, order = 10, dataProviderBean = "CUserService"
 	)
 	private CUser responsible;
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
+			hidden = false, order = 40
+	)
+	private LocalDate startDate;
+	@Column (name = "startTime", nullable = true)
+	@AMetaData (
+			displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false,
+			order = 4
+	)
+	private LocalTime startTime;
 
 	/** Default constructor for JPA. */
 	public CMeeting() {
@@ -154,38 +167,24 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
-	/** Gets the end date and time of the meeting.
-	 * @return the end date time */
-	public LocalDateTime getEndDateTime() { return endDate; }
-
-	/** Gets the end date for Gantt chart display. Converts LocalDateTime to LocalDate.
-	 * @return the end date as LocalDate, or null if not set */
 	@Override
-	public java.time.LocalDate getEndDate() { return endDate != null ? endDate.toLocalDate() : null; }
+	public LocalDate getEndDate() { return endDate; }
 
-	/** Override to provide concrete type entity.
-	 * @return the type entity (meeting type) */
+	public LocalTime getEndTime() { return endTime; }
+
 	@Override
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
 	public CTypeEntity getEntityType() { return entityType; }
 
+	@Override
+	public String getIcon() { return DEFAULT_ICON; }
+
 	public String getLinkedElement() { return linkedElement; }
 
 	public String getLocation() { return location; }
 
-	/** Gets the meeting start date and time.
-	 * @return the meeting date time */
-	public LocalDateTime getMeetingDateTime() { return meetingDate; }
-
-	/** Gets the start date for Gantt chart display. Converts LocalDateTime to LocalDate.
-	 * @return the start date as LocalDate, or null if not set */
-	@Override
-	public java.time.LocalDate getStartDate() { return meetingDate != null ? meetingDate.toLocalDate() : null; }
-
-	/** Gets the meeting type.
-	 * @return the meeting type */
 	public CMeetingType getMeetingType() { return entityType; }
 
 	public String getMinutes() { return minutes; }
@@ -194,12 +193,13 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public CActivity getRelatedActivity() { return relatedActivity; }
 
-	/** Gets the icon for Gantt chart display.
-	 * @return the meeting icon identifier */
 	@Override
-	public String getIcon() { return DEFAULT_ICON; }
-
 	public CUser getResponsible() { return responsible; }
+
+	@Override
+	public LocalDate getStartDate() { return startDate; }
+
+	public LocalTime getStartTime() { return startTime; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
@@ -268,7 +268,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
 
-	public void setEndDate(final LocalDateTime endDate) { this.endDate = endDate; }
+	public void setEndDate(final LocalDate endDate) { this.endDate = endDate; }
+
+	public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+
+	public void setEntityType(CMeetingType entityType) { this.entityType = entityType; }
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
@@ -281,8 +285,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setLocation(final String location) { this.location = location; }
 
-	public void setMeetingDate(final LocalDateTime meetingDate) { this.meetingDate = meetingDate; }
-
 	public void setMinutes(final String minutes) { this.minutes = minutes; }
 
 	public void setParticipants(final Set<CUser> participants) { this.participants = participants != null ? participants : new HashSet<>(); }
@@ -290,4 +292,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
+
+	public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+	public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
 }
