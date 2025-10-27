@@ -54,7 +54,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "description", "project", "entityType", "status", "accountableUser", "assignedTo", "createdBy",
+		grid.setColumnFields(List.of("id","name", "description", "project", "entityType", "status", "accountableUser", "assignedTo", "createdBy",
 				"createdDate", "implementationDate"));
 		return grid;
 	}

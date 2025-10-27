@@ -25,6 +25,7 @@ import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.interfaces.IGanttDisplayable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.projects.domain.CProject;
@@ -34,8 +35,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity> {
-
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanttDisplayable {
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:tasks";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);

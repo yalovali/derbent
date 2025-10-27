@@ -19,6 +19,7 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.interfaces.IGanttDisplayable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.projects.domain.CProject;
@@ -31,8 +32,7 @@ import tech.derbent.base.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting> {
-
+public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanttDisplayable {
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String VIEW_NAME = "Meetings View";

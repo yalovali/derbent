@@ -4,14 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.interfaces.IGanttDisplayable;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.base.users.domain.CUser;
 
 /** CGanttItem - Data transfer object for Gantt chart representation of project entities. This class wraps project entities to provide a unified
  * interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity properties. */
 public class CGanttItem extends CEntityDB<CGanttItem> {
-
 	private final LocalDate endDate;
 	private final CEntityOfProject<?> entity;
 	private final String entityType;
@@ -51,10 +49,6 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param entity The entity to extract from
 	 * @return The end date or null */
 	private LocalDate extractEndDate(final CEntityOfProject<?> entity) {
-		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttEndDate();
-		}
 		// Fallback to reflection for backward compatibility
 		try {
 			// Try dueDate first (for activities)
@@ -80,12 +74,8 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The parent ID or null
 	 * @throws Exception */
 	private Long extractParentId(final CEntityOfProject<?> entity) throws Exception {
-		// First try the interface approach
-		if (entity instanceof IGanttDisplayable) {
-			return ((IGanttDisplayable) entity).getGanttParentId();
-		}
 		// Fallback to reflection for backward compatibility
-		Object result = CAuxillaries.invokeMethod(entity, "getParentId");
+		final Object result = CAuxillaries.invokeMethod(entity, "getParentId");
 		return result instanceof Long ? (Long) result : null;
 	}
 
@@ -94,12 +84,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The parent type or null
 	 * @throws Exception */
 	private String extractParentType(final CEntityOfProject<?> entity) throws Exception {
-		// First try the interface approach
-		if (entity instanceof IGanttDisplayable) {
-			return ((IGanttDisplayable) entity).getGanttParentType();
-		}
-		// Fallback to reflection for backward compatibility
-		Object result = CAuxillaries.invokeMethod(entity, "getParentType");
+		final Object result = CAuxillaries.invokeMethod(entity, "getParentType");
 		return result instanceof String ? (String) result : null;
 	}
 
@@ -107,11 +92,6 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param entity The entity to extract from
 	 * @return The start date or null */
 	private LocalDate extractStartDate(final CEntityOfProject<?> entity) {
-		// First try the interface approach
-		if (entity instanceof IGanttDisplayable) {
-			return ((IGanttDisplayable) entity).getGanttStartDate();
-		}
-		// Fallback to reflection for backward compatibility
 		try {
 			// Try startDate first (for activities)
 			Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity, "getStartDate");
@@ -134,13 +114,9 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	/** Get the entity color code for visual representation using interface or fallback to reflection.
 	 * @return The color code string */
 	public String getColorCode() {
-		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttColorCode();
-		}
 		// Fallback to reflection for backward compatibility
 		try {
-			Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity.getClass(), "getEntityColorCode");
+			final Object result = CAuxillaries.invokeMethod(entity.getClass(), "getEntityColorCode");
 			if (result instanceof String) {
 				return (String) result;
 			}

@@ -76,7 +76,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "entityType", "assignedTo", "createdBy", "startDate", "dueDate", "completionDate", "progressPercentage",
+		grid.setColumnFields(List.of("id","name", "entityType", "assignedTo", "createdBy", "startDate", "dueDate", "completionDate", "progressPercentage",
 				"estimatedHours", "actualHours", "remainingHours", "status", "priority", "project", "createdDate", "lastModifiedDate"));
 		return grid;
 	}

@@ -16,6 +16,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.interfaces.IGanttDisplayable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -27,8 +28,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
-public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision> {
-
+public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision>, IGanttDisplayable {
 	public static final String DEFAULT_COLOR = "#e83e8c";
 	public static final String DEFAULT_ICON = "vaadin:gavel";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);

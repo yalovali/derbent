@@ -67,7 +67,7 @@ public class COrderInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "entityType", "status", "orderDate", "requiredDate", "deliveryDate", "providerCompanyName",
+		grid.setColumnFields(List.of("id","name", "entityType", "status", "orderDate", "requiredDate", "deliveryDate", "providerCompanyName",
 				"estimatedCost", "actualCost", "project"));
 		return grid;
 	}
