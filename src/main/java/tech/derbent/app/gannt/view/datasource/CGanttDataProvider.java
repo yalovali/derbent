@@ -37,19 +37,12 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 
 	@Override
 	protected Stream<CGanttItem> fetchFromBackEnd(final Query<CGanttItem, Void> query) {
-		List<CGanttItem> allItems;
-		try {
-			allItems = loadItems();
-			return allItems.stream().skip(query.getOffset()).limit(query.getLimit());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return Stream.empty();
+		final List<CGanttItem> allItems = loadItems();
+		return allItems.stream().skip(query.getOffset()).limit(query.getLimit());
 	}
 
-	/** Merge activities and meetings into CGanttItems.
-	 * @throws Exception */
-	private List<CGanttItem> loadItems() throws Exception {
+	/** Merge activities and meetings into CGanttItems. */
+	private List<CGanttItem> loadItems() {
 		LOGGER.debug("Loading Gantt items for project: {} (ID: {})", project.getName(), project.getId());
 		final List<CGanttItem> items = new ArrayList<>();
 		// --- Activities ---
@@ -69,12 +62,6 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 
 	@Override
 	protected int sizeInBackEnd(final Query<CGanttItem, Void> query) {
-		try {
-			return loadItems().size();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return 0;
+		return loadItems().size();
 	}
 }

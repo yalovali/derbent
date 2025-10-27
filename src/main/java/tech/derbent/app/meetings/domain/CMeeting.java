@@ -19,7 +19,6 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
-import tech.derbent.api.interfaces.IGanttDisplayable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.projects.domain.CProject;
@@ -32,7 +31,8 @@ import tech.derbent.base.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanttDisplayable {
+public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting> {
+
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String VIEW_NAME = "Meetings View";
@@ -154,7 +154,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
-	public LocalDateTime getEndDate() { return endDate; }
+	/** Gets the end date and time of the meeting.
+	 * @return the end date time */
+	public LocalDateTime getEndDateTime() { return endDate; }
+
+	/** Gets the end date for Gantt chart display. Converts LocalDateTime to LocalDate.
+	 * @return the end date as LocalDate, or null if not set */
+	@Override
+	public java.time.LocalDate getEndDate() { return endDate != null ? endDate.toLocalDate() : null; }
 
 	/** Override to provide concrete type entity.
 	 * @return the type entity (meeting type) */
@@ -168,7 +175,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public String getLocation() { return location; }
 
-	public LocalDateTime getMeetingDate() { return meetingDate; }
+	/** Gets the meeting start date and time.
+	 * @return the meeting date time */
+	public LocalDateTime getMeetingDateTime() { return meetingDate; }
+
+	/** Gets the start date for Gantt chart display. Converts LocalDateTime to LocalDate.
+	 * @return the start date as LocalDate, or null if not set */
+	@Override
+	public java.time.LocalDate getStartDate() { return meetingDate != null ? meetingDate.toLocalDate() : null; }
 
 	/** Gets the meeting type.
 	 * @return the meeting type */
@@ -179,6 +193,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Set<CUser> getParticipants() { return participants == null ? new HashSet<>() : new HashSet<>(participants); }
 
 	public CActivity getRelatedActivity() { return relatedActivity; }
+
+	/** Gets the icon for Gantt chart display.
+	 * @return the meeting icon identifier */
+	@Override
+	public String getIcon() { return DEFAULT_ICON; }
 
 	public CUser getResponsible() { return responsible; }
 

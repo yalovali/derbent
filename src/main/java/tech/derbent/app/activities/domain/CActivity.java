@@ -25,7 +25,6 @@ import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
-import tech.derbent.api.interfaces.IGanttDisplayable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.projects.domain.CProject;
@@ -35,7 +34,8 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanttDisplayable {
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity> {
+
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:tasks";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
@@ -216,6 +216,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public LocalDate getDueDate() { return dueDate; }
 
+	/** Gets the end date for Gantt chart display (same as due date for activities).
+	 * @return the due date */
+	@Override
+	public LocalDate getEndDate() { return dueDate; }
+
 	/** Gets the activity type.
 	 * @return the activity type */
 	@Override
@@ -227,6 +232,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public BigDecimal getHourlyRate() { return hourlyRate; }
 
+	/** Gets the icon for Gantt chart display.
+	 * @return the activity icon identifier */
+	@Override
+	public String getIcon() { return DEFAULT_ICON; }
+
 	public String getNotes() { return notes; }
 
 	public CActivityPriority getPriority() { return priority; }
@@ -234,6 +244,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public Integer getProgressPercentage() { return progressPercentage != null ? progressPercentage : 0; }
 
 	public BigDecimal getRemainingHours() { return remainingHours; }
+
+	/** Gets the responsible user for Gantt chart display (same as assigned user).
+	 * @return the assigned user */
+	@Override
+	public CUser getResponsible() { return getAssignedTo(); }
 
 	public String getResults() { return results; }
 

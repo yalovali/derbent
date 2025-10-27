@@ -40,14 +40,17 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	private final CActivityService activityService;
 	private CGanntGrid ganttGrid;
 	private final CMeetingService meetingService;
+	private final tech.derbent.app.page.service.CPageEntityService pageEntityService;
 	private final ISessionService sessionService;
 
 	public CMasterViewSectionGannt(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page,
-			final ISessionService sessionService, final CActivityService activityService, final CMeetingService meetingService) {
+			final ISessionService sessionService, final CActivityService activityService, final CMeetingService meetingService,
+			final tech.derbent.app.page.service.CPageEntityService pageEntityService) {
 		super(entityClass, page);
 		this.sessionService = sessionService;
 		this.activityService = activityService;
 		this.meetingService = meetingService;
+		this.pageEntityService = pageEntityService;
 		LOGGER.debug("Initializing CMasterViewSectionGannt for entity: {}", entityClass.getSimpleName());
 		createMasterView();
 	}
@@ -124,9 +127,9 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		}
 		// Create and display new Gantt grid for current project
 		try {
-			ganttGrid = new CGanntGrid(currentProject, activityService, meetingService);
+			ganttGrid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
 			add(ganttGrid);
-			LOGGER.debug("Created Gantt grid for project: {}", currentProject.getName());
+			LOGGER.debug("Created Gantt grid for project: {} with click navigation enabled", currentProject.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", currentProject.getName(), e);
 		}

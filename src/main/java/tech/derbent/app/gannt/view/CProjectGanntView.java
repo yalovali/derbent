@@ -28,8 +28,9 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	private final String ENTITY_ID_FIELD = "ganntview_id";
 
 	protected CProjectGanntView(final CGanntViewEntityService entityService, final ISessionService sessionService,
-			final CDetailSectionService screenService, final CActivityService activityService, final CMeetingService meetingService) {
-		super(CGanntViewEntity.class, entityService, sessionService, screenService, activityService, meetingService);
+			final CDetailSectionService screenService, final CActivityService activityService, final CMeetingService meetingService,
+			final tech.derbent.app.page.service.CPageEntityService pageEntityService) {
+		super(CGanntViewEntity.class, entityService, sessionService, screenService, activityService, meetingService, pageEntityService);
 		final CGanntViewEntity viewEntity =
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
 		setCurrentEntity(viewEntity);

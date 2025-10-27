@@ -548,6 +548,86 @@ public class CDataInitializer {
 		LOGGER.info("Created 2 admin users for company {}", company.getName());
 	}
 
+	/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
+	 * @param project the project to create activities for
+	 * @param minimal whether to create minimal sample data */
+	private void initializeSampleActivities(final CProject project, boolean minimal) {
+		try {
+			// Get random values from database for dependencies
+			final CActivityType type1 = activityTypeService.getRandom(project);
+			final CActivityPriority priority1 = activityPriorityService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			// Create parent activity
+			final CActivity parentActivity = new CActivity("Phase 1: Planning and Analysis", project);
+			parentActivity.setDescription("Initial planning phase covering requirements and architecture design");
+			parentActivity.setEntityType(type1);
+			parentActivity.setPriority(priority1);
+			parentActivity.setAssignedTo(user1);
+			parentActivity.setStartDate(java.time.LocalDate.now());
+			parentActivity.setDueDate(java.time.LocalDate.now().plusDays(30));
+			// Set initial status from workflow
+			if (type1 != null && type1.getWorkflow() != null) {
+				final java.util.List<tech.derbent.api.domains.CProjectItemStatus> initialStatuses =
+						projectItemStatusService.getValidNextStatuses(parentActivity);
+				if (!initialStatuses.isEmpty()) {
+					parentActivity.setStatus(initialStatuses.get(0));
+				}
+			}
+			activityService.save(parentActivity);
+			// Create child activity 1
+			final CActivityType type2 = activityTypeService.getRandom(project);
+			final CActivityPriority priority2 = activityPriorityService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final CActivity childActivity1 = new CActivity("Requirements Gathering", project);
+			childActivity1.setDescription("Collect and document business requirements");
+			childActivity1.setEntityType(type2);
+			childActivity1.setPriority(priority2);
+			childActivity1.setAssignedTo(user2);
+			childActivity1.setStartDate(java.time.LocalDate.now());
+			childActivity1.setDueDate(java.time.LocalDate.now().plusDays(14));
+			// Set parent relationship
+			childActivity1.setParent(parentActivity);
+			// Set initial status from workflow
+			if (type2 != null && type2.getWorkflow() != null) {
+				final java.util.List<tech.derbent.api.domains.CProjectItemStatus> initialStatuses =
+						projectItemStatusService.getValidNextStatuses(childActivity1);
+				if (!initialStatuses.isEmpty()) {
+					childActivity1.setStatus(initialStatuses.get(0));
+				}
+			}
+			activityService.save(childActivity1);
+			if (minimal) {
+				return;
+			}
+			// Create child activity 2
+			final CActivityType type3 = activityTypeService.getRandom(project);
+			final CActivityPriority priority3 = activityPriorityService.getRandom(project);
+			final CUser user3 = userService.getRandom();
+			final CActivity childActivity2 = new CActivity("System Architecture Design", project);
+			childActivity2.setDescription("Design system architecture and component interactions");
+			childActivity2.setEntityType(type3);
+			childActivity2.setPriority(priority3);
+			childActivity2.setAssignedTo(user3);
+			childActivity2.setStartDate(java.time.LocalDate.now().plusDays(7));
+			childActivity2.setDueDate(java.time.LocalDate.now().plusDays(21));
+			// Set parent relationship
+			childActivity2.setParent(parentActivity);
+			// Set initial status from workflow
+			if (type3 != null && type3.getWorkflow() != null) {
+				final java.util.List<tech.derbent.api.domains.CProjectItemStatus> initialStatuses =
+						projectItemStatusService.getValidNextStatuses(childActivity2);
+				if (!initialStatuses.isEmpty()) {
+					childActivity2.setStatus(initialStatuses.get(0));
+				}
+			}
+			activityService.save(childActivity2);
+			LOGGER.debug("Created sample activities with parent-child relationships for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
+		}
+	}
+
 	private void initializeSampleActivityPriorities(final CProject project, boolean minimal) {
 		try {
 			createActivityPriority(project, "Critical", "Critical priority - immediate attention required", CColorUtils.getRandomColor(true), 1,
@@ -780,6 +860,29 @@ public class CDataInitializer {
 			meetingService.save(meeting2);
 			// Create second meeting comments
 			createSampleCommentsForMeeting(meeting2, minimal);
+			// Create third meeting as a child of the first meeting (follow-up meeting)
+			final CMeetingType type3 = meetingTypeService.getRandom(project);
+			final CMeeting meeting3 = new CMeeting("Q1 Planning Follow-up", project, type3);
+			meeting3.setDescription("Follow-up meeting to review action items from Q1 Planning Session");
+			// Set initial status from workflow
+			if (type3 != null && type3.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting3);
+				if (!initialStatuses.isEmpty()) {
+					meeting3.setStatus(initialStatuses.get(0));
+				}
+			}
+			meeting3.setAssignedTo(user1);
+			meeting3.setResponsible(user2);
+			meeting3.setMeetingDate(java.time.LocalDateTime.now().plusDays(21));
+			meeting3.setEndDate(java.time.LocalDateTime.now().plusDays(21).plusHours(1));
+			meeting3.setLocation("Conference Room B / Virtual");
+			meeting3.setAgenda("1. Review action items from Q1 Planning\n2. Progress updates\n3. Blockers and challenges");
+			meeting3.addParticipant(user1);
+			meeting3.addParticipant(user2);
+			// Set parent relationship to first meeting
+			meeting3.setParent(meeting1);
+			meetingService.save(meeting3);
+			LOGGER.debug("Created 3 sample meetings with parent-child relationship for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
@@ -1091,6 +1194,7 @@ public class CDataInitializer {
 					initializeSampleUserProjectSettings(project, minimal);
 					initializeSampleDecisions(project, minimal);
 					initializeSampleMeetings(project, minimal);
+					initializeSampleActivities(project, minimal);
 					if (minimal) {
 						break;
 					}

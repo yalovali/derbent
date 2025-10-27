@@ -1,17 +1,17 @@
 package tech.derbent.app.gannt.domain;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.base.users.domain.CUser;
 
-/** CGanttItem - Data transfer object for Gantt chart representation of project entities. This class wraps project entities to provide a unified
- * interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity properties. */
+/** CGanttItem - Data transfer object for Gantt chart representation of project items. This class wraps project items (CActivity, CMeeting, CDecision,
+ * COrder) to provide a unified interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity
+ * properties through the CProjectItem base class. */
 public class CGanttItem extends CEntityDB<CGanttItem> {
+
 	private final LocalDate endDate;
-	private final CEntityOfProject<?> entity;
+	private final CProjectItem<?> entity;
 	private final String entityType;
 	private final int hierarchyLevel;
 	private final Long parentId;
@@ -19,96 +19,28 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	private final LocalDate startDate;
 
 	/** Constructor for CGanttItem.
-	 * @param entity The project entity to wrap
-	 * @throws Exception */
-	public CGanttItem(final CEntityOfProject<?> entity) throws Exception {
+	 * @param entity The project item to wrap */
+	public CGanttItem(final CProjectItem<?> entity) {
 		this.entity = entity;
 		entityType = entity.getClass().getSimpleName();
-		startDate = extractStartDate(entity);
-		endDate = extractEndDate(entity);
-		parentId = extractParentId(entity);
-		parentType = extractParentType(entity);
+		startDate = entity.getStartDate();
+		endDate = entity.getEndDate();
+		parentId = entity.getParentId();
+		parentType = entity.getParentType();
 		hierarchyLevel = 0; // Will be calculated by hierarchy service
 	}
 
 	/** Constructor with hierarchy level.
-	 * @param entity         The project entity to wrap
-	 * @param hierarchyLevel The level in the hierarchy (0 = top level)
-	 * @throws Exception */
-	public CGanttItem(final CEntityOfProject<?> entity, final int hierarchyLevel) throws Exception {
+	 * @param entity         The project item to wrap
+	 * @param hierarchyLevel The level in the hierarchy (0 = top level) */
+	public CGanttItem(final CProjectItem<?> entity, final int hierarchyLevel) {
 		this.entity = entity;
 		entityType = entity.getClass().getSimpleName();
-		startDate = extractStartDate(entity);
-		endDate = extractEndDate(entity);
-		parentId = extractParentId(entity);
-		parentType = extractParentType(entity);
+		startDate = entity.getStartDate();
+		endDate = entity.getEndDate();
+		parentId = entity.getParentId();
+		parentType = entity.getParentType();
 		this.hierarchyLevel = hierarchyLevel;
-	}
-
-	/** Extract end date from entity using interface or fallback to reflection.
-	 * @param entity The entity to extract from
-	 * @return The end date or null */
-	private LocalDate extractEndDate(final CEntityOfProject<?> entity) {
-		// Fallback to reflection for backward compatibility
-		try {
-			// Try dueDate first (for activities)
-			Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity, "getDueDate");
-			if (result instanceof LocalDate) {
-				return (LocalDate) result;
-			}
-			// Try endDate (for meetings)
-			result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity, "getEndDate");
-			if (result instanceof LocalDate) {
-				return (LocalDate) result;
-			} else if (result instanceof LocalDateTime) {
-				return ((LocalDateTime) result).toLocalDate();
-			}
-		} catch (final Exception e) {
-			// Ignore reflection errors
-		}
-		return null;
-	}
-
-	/** Extract parent ID from entity using interface or fallback to reflection.
-	 * @param entity The entity to extract from
-	 * @return The parent ID or null
-	 * @throws Exception */
-	private Long extractParentId(final CEntityOfProject<?> entity) throws Exception {
-		// Fallback to reflection for backward compatibility
-		final Object result = CAuxillaries.invokeMethod(entity, "getParentId");
-		return result instanceof Long ? (Long) result : null;
-	}
-
-	/** Extract parent type from entity using interface or fallback to reflection.
-	 * @param entity The entity to extract from
-	 * @return The parent type or null
-	 * @throws Exception */
-	private String extractParentType(final CEntityOfProject<?> entity) throws Exception {
-		final Object result = CAuxillaries.invokeMethod(entity, "getParentType");
-		return result instanceof String ? (String) result : null;
-	}
-
-	/** Extract start date from entity using interface or fallback to reflection.
-	 * @param entity The entity to extract from
-	 * @return The start date or null */
-	private LocalDate extractStartDate(final CEntityOfProject<?> entity) {
-		try {
-			// Try startDate first (for activities)
-			Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity, "getStartDate");
-			if (result instanceof LocalDate) {
-				return (LocalDate) result;
-			}
-			// Try meetingDate (for meetings)
-			result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity, "getMeetingDate");
-			if (result instanceof LocalDate) {
-				return (LocalDate) result;
-			} else if (result instanceof LocalDateTime) {
-				return ((LocalDateTime) result).toLocalDate();
-			}
-		} catch (final Exception e) {
-			// Ignore reflection errors
-		}
-		return null;
 	}
 
 	/** Get the entity color code for visual representation using interface or fallback to reflection.
@@ -116,7 +48,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	public String getColorCode() {
 		// Fallback to reflection for backward compatibility
 		try {
-			final Object result = CAuxillaries.invokeMethod(entity.getClass(), "getEntityColorCode");
+			final Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity.getClass(), "getEntityColorCode");
 			if (result instanceof String) {
 				return (String) result;
 			}
@@ -149,8 +81,8 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	public LocalDate getEndDate() { return endDate; }
 
 	/** Get the wrapped entity.
-	 * @return The project entity */
-	public CEntityOfProject<?> getEntity() { return entity; }
+	 * @return The project item */
+	public CProjectItem<?> getEntity() { return entity; }
 
 	/** Get the entity ID.
 	 * @return The entity ID */
@@ -164,16 +96,9 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The hierarchy level */
 	public int getHierarchyLevel() { return hierarchyLevel; }
 
-	/** Get the icon filename for the entity.
-	 * @return The icon filename */
-	public String getIconFilename() {
-		try {
-			final java.lang.reflect.Method method = entity.getClass().getMethod("getIconFilename");
-			return (String) method.invoke(null);
-		} catch (final Exception e) {
-			return "vaadin:question"; // Default icon
-		}
-	}
+	/** Get the icon identifier for the entity.
+	 * @return The icon identifier */
+	public String getIcon() { return entity.getIcon(); }
 
 	/** Get the parent entity ID.
 	 * @return The parent ID or null */
@@ -183,14 +108,9 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The parent type or null */
 	public String getParentType() { return parentType; }
 
-	/** Get the responsible user (assigned to).
+	/** Get the responsible user.
 	 * @return The responsible user or null */
-	public CUser getResponsible() {
-		if (entity.getAssignedTo() != null) {
-			return entity.getAssignedTo();
-		}
-		return null;
-	}
+	public CUser getResponsible() { return entity.getResponsible(); }
 
 	/** Get the responsible user name.
 	 * @return The responsible user name or "Unassigned" */

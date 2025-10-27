@@ -21,7 +21,6 @@ import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
-import tech.derbent.api.interfaces.IGanttDisplayable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -30,7 +29,8 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "corder")
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
-public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder>, IGanttDisplayable {
+public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder> {
+
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:invoice";
 	public static final String VIEW_NAME = "Orders View";
@@ -184,13 +184,28 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	public LocalDate getDeliveryDate() { return deliveryDate; }
 
+	/** Gets the end date for Gantt chart display. For orders, this is the delivery date.
+	 * @return the delivery date */
+	@Override
+	public LocalDate getEndDate() { return deliveryDate; }
+
 	// Getters and setters
 	@Override
 	public COrderType getEntityType() { return entityType; }
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 
+	/** Gets the icon for Gantt chart display.
+	 * @return the order icon identifier */
+	@Override
+	public String getIcon() { return DEFAULT_ICON; }
+
 	public LocalDate getOrderDate() { return orderDate; }
+
+	/** Gets the start date for Gantt chart display. For orders, this is the order date.
+	 * @return the order date */
+	@Override
+	public LocalDate getStartDate() { return orderDate; }
 
 	public String getOrderNumber() { return orderNumber; }
 

@@ -70,7 +70,8 @@ public class CUserInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id","name", "lastname", "login", "email", "phone", "projectSettings", "active", "createdDate", "lastModifiedDate"));
+		grid.setColumnFields(
+				List.of("id", "name", "lastname", "login", "email", "phone", "projectSettings", "active", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 

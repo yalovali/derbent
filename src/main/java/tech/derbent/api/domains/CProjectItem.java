@@ -1,5 +1,6 @@
 package tech.derbent.api.domains;
 
+import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -7,7 +8,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.base.users.domain.CUser;
 
+/** CProjectItem - Base class for project items that can be displayed in Gantt charts. Provides hierarchical structure support and Gantt-specific
+ * abstract methods for date handling, visual representation, and user assignments. All subclasses must implement the abstract Gantt methods. */
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {
 
@@ -76,4 +80,27 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		this.status = status;
 		updateLastModified();
 	}
+	// ========================================================================
+	// Gantt Chart Display Methods - Override in subclasses that need Gantt display
+	// ========================================================================
+
+	/** Get the end date for Gantt chart display. Subclasses should override this to return the appropriate end date field (e.g., dueDate for
+	 * activities, endDate for meetings, reviewDate for decisions). Default implementation returns null.
+	 * @return the end date as LocalDate, or null if not set */
+	public LocalDate getEndDate() { return null; }
+
+	/** Get the icon identifier for Gantt chart display. Subclasses should override this to return their specific icon (e.g., "vaadin:tasks" for
+	 * activities). Default implementation returns a generic icon.
+	 * @return the icon identifier */
+	public String getIcon() { return "vaadin:file"; }
+
+	/** Get the user responsible for this item in Gantt chart display. Subclasses should override this to return the appropriate user field (e.g.,
+	 * assignedTo for activities, responsible for meetings, accountableUser for decisions). Default implementation returns the assignedTo user.
+	 * @return the responsible user, or null if not assigned */
+	public CUser getResponsible() { return getAssignedTo(); }
+
+	/** Get the start date for Gantt chart display. Subclasses should override this to return the appropriate start date field (e.g., startDate for
+	 * activities, meetingDate for meetings, implementationDate for decisions). Default implementation returns null.
+	 * @return the start date as LocalDate, or null if not set */
+	public LocalDate getStartDate() { return null; }
 }
