@@ -21,6 +21,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Setup.UI.Detail Sections")
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
+
 	public static final String DEFAULT_COLOR = "#00141b";
 	public static final String DEFAULT_ICON = "vaadin:clipboard";
 	private static final long serialVersionUID = 1L;

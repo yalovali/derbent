@@ -21,6 +21,7 @@ import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
+
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding

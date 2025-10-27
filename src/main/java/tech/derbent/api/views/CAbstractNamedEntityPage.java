@@ -13,6 +13,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
 		implements ILayoutChangeListener {
+
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CAbstractNamedEntityPage.class);
 	private static final long serialVersionUID = 1L;
 	protected final CDetailsBuilder detailsBuilder;

@@ -18,6 +18,7 @@ import tech.derbent.api.views.components.IFormContainerComponent;
 import tech.derbent.base.users.domain.CUser;
 
 public class CPanelDetails extends CDiv {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelDetails.class);
 	private static final long serialVersionUID = 1L;
 	private final String name;

@@ -28,6 +28,7 @@ import tech.derbent.base.users.domain.CUser;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
+
 	private static ApplicationContext applicationContext;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
 

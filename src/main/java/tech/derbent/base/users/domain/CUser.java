@@ -29,6 +29,7 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 })) // Using quoted identifier to ensure exact case matching in
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInfoGenerator {
+
 	public static final String DEFAULT_COLOR = "#00546d";
 	public static final String DEFAULT_ICON = "vaadin:user";
 	public static final int MAX_LENGTH_NAME = 255;

@@ -15,6 +15,7 @@ import tech.derbent.api.views.components.CDiv;
 import tech.derbent.base.session.service.ISessionService;
 
 public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
+
 	private static final long serialVersionUID = 1L;
 	CDiv divPreview;
 	private final ISessionService sessionService;
