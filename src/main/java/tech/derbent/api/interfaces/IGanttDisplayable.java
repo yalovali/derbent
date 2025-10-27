@@ -5,10 +5,18 @@ import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.base.users.domain.CUser;
 
 /** IGanttDisplayable - Interface for entities that can be displayed in Gantt charts. Provides standardized access to properties for Gantt chart
- * visualization without using reflection. All implementing classes should use consistent method names: - getStartDate(): Returns the start date of
- * the item - getEndDate(): Returns the end date/due date of the item - getIcon(): Returns the icon identifier for visual representation -
- * getResponsible(): Returns the user responsible for the item - getParent(): Returns the parent item for hierarchy - setParent(): Sets the parent
- * item for hierarchy Layer: Interface (MVC) */
+ * visualization without using reflection. All implementing classes should use consistent method names:
+ * <ul>
+ * <li>getStartDate(): Returns the start date of the item</li>
+ * <li>getEndDate(): Returns the end date/due date of the item</li>
+ * <li>getIcon(): Returns the icon identifier for visual representation</li>
+ * <li>getResponsible(): Returns the user responsible for the item</li>
+ * <li>getParentId(): Returns the parent item ID for hierarchy</li>
+ * <li>getParentType(): Returns the parent item type for hierarchy</li>
+ * <li>setParent(): Sets the parent item for hierarchy</li>
+ * <li>clearParent(): Clears the parent relationship</li>
+ * </ul>
+ * Layer: Interface (MVC) */
 public interface IGanttDisplayable {
 
 	/** Clear the parent relationship for this item. */
