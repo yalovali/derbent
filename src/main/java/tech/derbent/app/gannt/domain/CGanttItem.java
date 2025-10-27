@@ -126,6 +126,40 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The start date */
 	public LocalDate getStartDate() { return startDate; }
 
+	/** Get the progress percentage of the task.
+	 * @return Progress percentage (0-100), or 0 if not available */
+	public int getProgressPercentage() {
+		// Try to get progress from entity if it has a progress field
+		try {
+			final Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity.getClass(), "getProgress");
+			if (result instanceof Integer) {
+				return (Integer) result;
+			}
+			if (result instanceof Double) {
+				return ((Double) result).intValue();
+			}
+		} catch (final Exception e) {
+			// Ignore - entity doesn't have progress field
+		}
+		// Default: calculate based on dates (if task is past due date, 100%, if past start, estimate 50%)
+		if (hasDates()) {
+			final LocalDate now = LocalDate.now();
+			if (now.isAfter(endDate)) {
+				return 100; // Task is past end date
+			}
+			if (now.isBefore(startDate)) {
+				return 0; // Task hasn't started
+			}
+			// Task is in progress - estimate based on time elapsed
+			final long totalDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
+			final long elapsedDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, now);
+			if (totalDays > 0) {
+				return (int) ((elapsedDays * 100) / totalDays);
+			}
+		}
+		return 0;
+	}
+
 	/** Check if dates are available for timeline display.
 	 * @return true if both start and end dates are available */
 	public boolean hasDates() {

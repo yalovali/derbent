@@ -1,7 +1,11 @@
 package tech.derbent.app.gannt.view.components;
 
+import java.time.LocalDate;
+import java.util.List;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.app.activities.service.CActivityService;
@@ -11,12 +15,16 @@ import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
-/** CGanntGrid - Gantt items displayed in a unified grid with navigation to entity pages. */
+/** CGanntGrid - Gantt items displayed in a unified grid with navigation to entity pages and visual timeline bars. */
+@CssImport ("./themes/default/gantt-timeline.css")
 public class CGanntGrid extends CGrid<CGanttItem> {
 
 	private static final long serialVersionUID = 1L;
+	private static final int TIMELINE_WIDTH_PIXELS = 400; // Width for timeline column
 	private final CGanttDataProvider dataProvider;
+	private LocalDate timelineEnd;
 	private final CPageEntityService pageEntityService;
+	private LocalDate timelineStart;
 
 	public CGanntGrid(final CProject project, final CActivityService activityService, final CMeetingService meetingService,
 			final CPageEntityService pageEntityService) {
@@ -33,7 +41,9 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 	}
 
 	private void createColumns() {
-		addShortTextColumn(CGanttItem::getEntityType, "Type", "entityType");
+		// Calculate timeline range from all items
+		calculateTimelineRange();
+		addShortTextColumn(CGanttItem::getEntityType, "Type", "entityType").setWidth("80px").setFlexGrow(0);
 		// Title column with hierarchical indentation based on hierarchy level
 		addColumn(item -> {
 			final StringBuilder title = new StringBuilder();
@@ -43,12 +53,39 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 			}
 			title.append(item.getEntity().getName());
 			return title.toString();
-		}).setHeader("Title").setKey("title").setFlexGrow(3).setSortable(false);
-		addShortTextColumn(CGanttItem::getResponsibleName, "Responsible", "responsible");
-		addDateColumn(CGanttItem::getStartDate, "Start", "startDate");
-		addDateColumn(CGanttItem::getEndDate, "End", "endDate");
-		addIntegerColumn(item -> (int) item.getDurationDays(), "Duration (d)", "durationDays");
-		addLongTextColumn(CGanttItem::getDescription, "Description", "description");
+		}).setHeader("Title").setKey("title").setWidth("200px").setFlexGrow(0).setSortable(false);
+		addShortTextColumn(CGanttItem::getResponsibleName, "Responsible", "responsible").setWidth("120px").setFlexGrow(0);
+		// Timeline visual bar column - colorful, responsive, with proper scaling
+		addColumn(new ComponentRenderer<>(item -> new CGanttTimelineBar(item, timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS)))
+				.setHeader("Timeline").setKey("timeline").setWidth("450px").setFlexGrow(1).setSortable(false);
+		addDateColumn(CGanttItem::getStartDate, "Start", "startDate").setWidth("100px").setFlexGrow(0);
+		addDateColumn(CGanttItem::getEndDate, "End", "endDate").setWidth("100px").setFlexGrow(0);
+		addIntegerColumn(item -> (int) item.getDurationDays(), "Duration (d)", "durationDays").setWidth("100px").setFlexGrow(0);
+		addLongTextColumn(CGanttItem::getDescription, "Description", "description").setWidth("200px");
+	}
+
+	/** Calculate the overall timeline range from all items to properly scale the bars. */
+	private void calculateTimelineRange() {
+		final List<CGanttItem> allItems = dataProvider.fetch(new com.vaadin.flow.data.provider.Query<>()).toList();
+		timelineStart = null;
+		timelineEnd = null;
+		for (final CGanttItem item : allItems) {
+			if (item.hasDates()) {
+				final LocalDate itemStart = item.getStartDate();
+				final LocalDate itemEnd = item.getEndDate();
+				if (timelineStart == null || itemStart.isBefore(timelineStart)) {
+					timelineStart = itemStart;
+				}
+				if (timelineEnd == null || itemEnd.isAfter(timelineEnd)) {
+					timelineEnd = itemEnd;
+				}
+			}
+		}
+		// Add padding to timeline range for better visualization
+		if (timelineStart != null && timelineEnd != null) {
+			timelineStart = timelineStart.minusDays(7); // Add 1 week before
+			timelineEnd = timelineEnd.plusDays(7); // Add 1 week after
+		}
 	}
 
 	/** Public refresh hook. */
