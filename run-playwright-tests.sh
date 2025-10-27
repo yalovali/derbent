@@ -149,6 +149,35 @@ run_type_status_test() {
     fi
 }
 
+# Function to run button functionality test
+run_button_functionality_test() {
+    echo "🔘 Running Button Functionality Test..."
+    echo "=================================="
+    echo "This test will:"
+    echo "  1. Navigate to all pages systematically"
+    echo "  2. Test New button presence and responsiveness"
+    echo "  3. Test Save button functionality"
+    echo "  4. Test Delete button functionality"
+    echo "  5. Verify all buttons are working correctly"
+    echo ""
+    
+    mkdir -p target/screenshots
+    install_playwright_browsers
+    
+    # Set Playwright environment variables to use cached browser
+    export PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"
+    export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true
+    
+    if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CButtonFunctionalityTest" -Dspring.profiles.active=test -Dplaywright.headless=true; then
+        echo "✅ Button functionality test completed successfully!"
+        show_screenshots
+    else
+        echo "❌ Button functionality test failed!"
+        show_screenshots
+        return 1
+    fi
+}
+
 # Function to run all tests
 run_all_tests() {
     echo "🧪 Running All Playwright Tests..."
@@ -160,26 +189,32 @@ run_all_tests() {
     
     local failed=0
     
-    echo "▶️ Test 1/4: Menu Navigation Test"
+    echo "▶️ Test 1/5: Menu Navigation Test"
     if ! run_menu_navigation_test; then
         failed=$((failed + 1))
     fi
     echo ""
     
-    echo "▶️ Test 2/4: Company Login Test"
+    echo "▶️ Test 2/5: Company Login Test"
     if ! run_company_login_test; then
         failed=$((failed + 1))
     fi
     echo ""
     
-    echo "▶️ Test 3/4: Comprehensive Dynamic Views Test"
+    echo "▶️ Test 3/5: Comprehensive Dynamic Views Test"
     if ! run_comprehensive_test; then
         failed=$((failed + 1))
     fi
     echo ""
     
-    echo "▶️ Test 4/4: Type and Status CRUD Test"
+    echo "▶️ Test 4/5: Type and Status CRUD Test"
     if ! run_type_status_test; then
+        failed=$((failed + 1))
+    fi
+    echo ""
+    
+    echo "▶️ Test 5/5: Button Functionality Test"
+    if ! run_button_functionality_test; then
         failed=$((failed + 1))
     fi
     echo ""
@@ -220,6 +255,7 @@ OPTIONS:
     login           Run the company-aware login pattern test
     comprehensive   Run comprehensive dynamic views test
     status-types    Run Type and Status CRUD operations test
+    buttons         Run button functionality test across all pages
     all             Run all Playwright tests
     clean           Clean test artifacts (screenshots, reports)
     install         Install Playwright browsers
@@ -255,6 +291,13 @@ DESCRIPTION:
        - Verify responses to updates (notifications, grid refresh)
        - Test validation and error handling
     
+    5. Button Functionality Test
+       - Navigate to all pages systematically
+       - Test New button presence and responsiveness on each page
+       - Test Save button functionality after form fills
+       - Test Delete button functionality with data selection
+       - Verify all buttons are working correctly across the application
+    
     Screenshots are saved to: target/screenshots/
 
 EXAMPLES:
@@ -263,6 +306,7 @@ EXAMPLES:
     ./run-playwright-tests.sh login        # Run company login test
     ./run-playwright-tests.sh comprehensive # Run comprehensive test
     ./run-playwright-tests.sh status-types # Run Type and Status CRUD test
+    ./run-playwright-tests.sh buttons      # Run button functionality test
     ./run-playwright-tests.sh all          # Run all tests
     ./run-playwright-tests.sh clean        # Clean up test artifacts
     ./run-playwright-tests.sh install      # Install Playwright browsers
@@ -283,6 +327,9 @@ case "${1:-menu}" in
         ;;
     status-types)
         run_type_status_test
+        ;;
+    buttons)
+        run_button_functionality_test
         ;;
     all)
         run_all_tests
