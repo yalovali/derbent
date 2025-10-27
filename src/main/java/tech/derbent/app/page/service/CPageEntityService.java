@@ -40,6 +40,21 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> {
 		return List.of();
 	}
 
+	/** Find page by entity class name. This is used to navigate to entity-specific pages from generic contexts like Gantt charts.
+	 * @param entityClassName the simple class name of the entity (e.g., "CActivity", "CMeeting")
+	 * @return Optional containing the page entity if found */
+	public Optional<CPageEntity> findByEntityClass(String entityClassName) {
+		Check.notBlank(entityClassName, "Entity class name cannot be blank");
+		// Map entity class name to service bean name (e.g., CActivity -> CActivityService)
+		final String serviceBeanName = entityClassName + "Service";
+		return findAll().stream().filter(page -> {
+			if (page.getGridEntity() != null && page.getGridEntity().getDataServiceBeanName() != null) {
+				return page.getGridEntity().getDataServiceBeanName().equals(serviceBeanName);
+			}
+			return false;
+		}).findFirst();
+	}
+
 	/** Find page by route. */
 	public Optional<CPageEntity> findByRoute(String route) {
 		Check.notBlank(route, "Route cannot be blank");
