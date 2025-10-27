@@ -742,7 +742,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
 			} catch (final Exception e) {
-				LOGGER.error("Failed to set default value '{}' for text area '{}': {}", fieldInfo.getDefaultValue(), fieldInfo.getFieldName(),
+				LOGGER.error("Failed to set default value '{}' for text field '{}': {}", fieldInfo.getDefaultValue(), fieldInfo.getFieldName(),
 						e.getMessage());
 			}
 		}
