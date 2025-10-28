@@ -44,12 +44,20 @@ public class VaadinConfig {
 	}
 
 	/** Ensures that the frontend directory structure exists to prevent JAR resource extraction errors on Windows. This is particularly important for
-	 * StoredObject components which may have issues with path handling during resource extraction. */
+	 * StoredObject components which may have issues with path handling during resource extraction. Note: This method is designed for development
+	 * environments where the source directory exists. In production (JAR deployments), Vaadin handles resources differently and this method will
+	 * silently skip directory creation. */
 	private void ensureFrontendDirectories() {
 		try {
-			// Get the project base directory
+			// Get the project base directory - only works in development when running from source
 			String userDir = System.getProperty("user.dir");
 			Path frontendPath = Paths.get(userDir, "src", "main", "frontend");
+			// Only proceed if we're running from source (development mode)
+			Path srcPath = Paths.get(userDir, "src");
+			if (!Files.exists(srcPath)) {
+				LOGGER.debug("Not running from source directory, skipping frontend directory creation");
+				return;
+			}
 			Path generatedPath = frontendPath.resolve("generated");
 			Path jarResourcesPath = generatedPath.resolve("jar-resources");
 			// Create directories if they don't exist
