@@ -33,9 +33,11 @@ public class CChartTestView extends Main {
 	CVerticalLayout myLayout = new CVerticalLayout();
 
 	public CChartTestView() {
-		add(new Div("This is a custom login view"));
 		add(myLayout);
+		myLayout.setSizeFull();
+		myLayout.add(new Div("start of chart area"));
 		sample1();
+		myLayout.add(new Div("end of chart area"));
 	}
 
 	private void sample1() {
