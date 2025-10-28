@@ -33,7 +33,10 @@ import tech.derbent.api.views.components.CVerticalLayout;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CChartTestView extends Main {
 
+	public static final String DEFAULT_COLOR = "#00495f";
+	public static final String DEFAULT_ICON = "vaadin:calendar";
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "System Settings View";
 	CVerticalLayout myLayout = new CVerticalLayout();
 
 	public CChartTestView() {
@@ -48,24 +51,6 @@ public class CChartTestView extends Main {
 		simpleBarChart();
 		simpleLineChart();
 		simpleGanttChart();
-	}
-
-	private void simplePieChart() {
-		myLayout.add(new H2("1. Simple Pie Chart"));
-		// Creating a chart display area
-		SOChart soChart = new SOChart();
-		soChart.setSize("800px", "400px");
-		// Define data
-		CategoryData labels = new CategoryData("Banana", "Apple", "Orange", "Grapes");
-		Data data = new Data(25, 40, 20, 30);
-		// Create a simple pie chart
-		PieChart pieChart = new PieChart(labels, data);
-		// Add title
-		Title title = new Title("Fruit Sales Distribution");
-		// Add components to chart
-		soChart.add(pieChart, title);
-		// Add to layout
-		myLayout.add(soChart);
 	}
 
 	private void simpleBarChart() {
@@ -86,28 +71,6 @@ public class CChartTestView extends Main {
 		toolbox.addButton(new Toolbox.Download());
 		// Add components to chart
 		soChart.add(barChart, title, toolbox);
-		// Add to layout
-		myLayout.add(soChart);
-	}
-
-	private void simpleLineChart() {
-		myLayout.add(new H2("3. Simple Line Chart"));
-		// Creating a chart display area
-		SOChart soChart = new SOChart();
-		soChart.setSize("800px", "400px");
-		// Define data
-		CategoryData labels = new CategoryData("Jan", "Feb", "Mar", "Apr", "May", "Jun");
-		Data data = new Data(30, 45, 38, 52, 48, 60);
-		// Create line chart with coordinate system
-		LineChart lineChart = new LineChart(labels, data);
-		RectangularCoordinate rc = new RectangularCoordinate(new XAxis(DataType.CATEGORY), new YAxis(DataType.NUMBER));
-		lineChart.plotOn(rc);
-		// Add title and toolbox
-		Title title = new Title("Monthly Growth");
-		Toolbox toolbox = new Toolbox();
-		toolbox.addButton(new Toolbox.Download(), new Toolbox.Zoom());
-		// Add components to chart
-		soChart.add(lineChart, title, toolbox);
 		// Add to layout
 		myLayout.add(soChart);
 	}
@@ -143,7 +106,49 @@ public class CChartTestView extends Main {
 		Toolbox toolbox = new Toolbox();
 		toolbox.addButton(new Toolbox.Download());
 		// Add components to chart
-		soChart.add(ganttChart, title, toolbox);
+		soChart.add(ganttChart);
+		soChart.add(title);
+		soChart.add(toolbox);
+		// Add to layout
+		myLayout.add(soChart);
+	}
+
+	private void simpleLineChart() {
+		myLayout.add(new H2("3. Simple Line Chart"));
+		// Creating a chart display area
+		SOChart soChart = new SOChart();
+		soChart.setSize("800px", "400px");
+		// Define data
+		CategoryData labels = new CategoryData("Jan", "Feb", "Mar", "Apr", "May", "Jun");
+		Data data = new Data(30, 45, 38, 52, 48, 60);
+		// Create line chart with coordinate system
+		LineChart lineChart = new LineChart(labels, data);
+		RectangularCoordinate rc = new RectangularCoordinate(new XAxis(DataType.CATEGORY), new YAxis(DataType.NUMBER));
+		lineChart.plotOn(rc);
+		// Add title and toolbox
+		Title title = new Title("Monthly Growth");
+		Toolbox toolbox = new Toolbox();
+		toolbox.addButton(new Toolbox.Download(), new Toolbox.Zoom());
+		// Add components to chart
+		soChart.add(lineChart, title, toolbox);
+		// Add to layout
+		myLayout.add(soChart);
+	}
+
+	private void simplePieChart() {
+		myLayout.add(new H2("1. Simple Pie Chart"));
+		// Creating a chart display area
+		SOChart soChart = new SOChart();
+		soChart.setSize("800px", "400px");
+		// Define data
+		CategoryData labels = new CategoryData("Banana", "Apple", "Orange", "Grapes");
+		Data data = new Data(25, 40, 20, 30);
+		// Create a simple pie chart
+		PieChart pieChart = new PieChart(labels, data);
+		// Add title
+		Title title = new Title("Fruit Sales Distribution");
+		// Add components to chart
+		soChart.add(pieChart, title);
 		// Add to layout
 		myLayout.add(soChart);
 	}

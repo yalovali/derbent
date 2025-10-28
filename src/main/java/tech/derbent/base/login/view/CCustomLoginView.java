@@ -46,6 +46,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
 	private static final long serialVersionUID = 1L;
+	private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_UPDATE_COLOR));
 	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
 	private final CCompanyService companyService;
 	private final Div errorMessage = new Div();
@@ -53,7 +54,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final Button resetDbMinimalButton = new CButton("DB Min", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
-	private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_VIEW_COLOR));
 	private final ISessionService sessionService;
 	private final TextField usernameField = new TextField();
 
