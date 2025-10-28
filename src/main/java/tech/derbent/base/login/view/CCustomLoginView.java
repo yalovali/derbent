@@ -53,6 +53,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final Button resetDbMinimalButton = new CButton("DB Min", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_VIEW_COLOR));
 	private final ISessionService sessionService;
 	private final TextField usernameField = new TextField();
 
@@ -216,6 +217,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 					}, "Vazgeç", evt -> {});
 			dialog.open();
 		});
+		// Chart test button setup
+		chartTestButton.addClickListener(e -> {
+			getUI().ifPresent(ui -> ui.navigate("chart"));
+		});
+		chartTestButton.setMinWidth("120px");
 		// Error message display
 		errorMessage.setId("custom-error-message");
 		errorMessage.addClassNames(LumoUtility.TextColor.ERROR, LumoUtility.TextAlignment.RIGHT, LumoUtility.FontSize.SMALL);
@@ -234,7 +240,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		final HorizontalLayout buttonsLayout = new CHorizontalLayout();
 		buttonsLayout.setAlignItems(Alignment.CENTER);
 		//
-		buttonsLayout.add(passwordHint, resetDbMinimalButton, resetDbButton);
+		buttonsLayout.add(passwordHint, resetDbMinimalButton, resetDbButton, chartTestButton);
 		final HorizontalLayout loginButtonLayout = new CHorizontalLayout();
 		loginButtonLayout.setAlignItems(Alignment.END);
 		loginButtonLayout.add(new CDiv(), loginButton);
