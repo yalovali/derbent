@@ -20,7 +20,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 
 	protected CGridViewBaseGannt(final Class<EntityClass> entityClass, final CEntityOfProjectService<EntityClass> entityService,
 			final ISessionService sessionService, final CDetailSectionService screenService, final CActivityService activityService,
-			final CMeetingService meetingService, final CPageEntityService pageEntityService) {
+			final CMeetingService meetingService, final CPageEntityService pageEntityService) throws Exception {
 		super(entityClass, entityService, sessionService, screenService);
 		this.activityService = activityService;
 		this.meetingService = meetingService;
@@ -34,7 +34,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 
 	// override this to create a Gannt chart
 	@Override
-	protected void createMasterComponent() {
+	protected void createMasterComponent() throws Exception {
 		// Pass required dependencies to CMasterViewSectionGannt constructor with page entity service for navigation
 		masterViewSection =
 				new CMasterViewSectionGannt<EntityClass>(entityClass, this, sessionService, activityService, meetingService, pageEntityService);

@@ -1,6 +1,7 @@
 package tech.derbent.app.gannt.view;
 
 import java.time.LocalDateTime;
+import com.storedobject.chart.ChartException;
 import com.storedobject.chart.Color;
 import com.storedobject.chart.GanttChart;
 import com.storedobject.chart.Project;
@@ -8,7 +9,7 @@ import com.storedobject.chart.SOChart;
 
 public class CSOGanntChart {
 
-	public static SOChart createGanttChart() {
+	public static SOChart createGanttChart() throws ChartException, Exception {
 		// Define a chart component
 		SOChart soChart = new SOChart();
 		soChart.setSize("900px", "500px");

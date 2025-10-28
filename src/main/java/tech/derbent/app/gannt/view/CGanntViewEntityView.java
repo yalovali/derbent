@@ -27,7 +27,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 	private final String ENTITY_ID_FIELD = "screen_id";
 
 	protected CGanntViewEntityView(final CGanntViewEntityService entityService, final ISessionService sessionService,
-			final CDetailSectionService screenService) {
+			final CDetailSectionService screenService) throws Exception {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService);
 		// TODO Auto-generated constructor stub
 	}

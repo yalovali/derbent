@@ -33,7 +33,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 
 	public CDetailSectionView(final CDetailSectionService entityService, final ISessionService sessionService,
 			final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService,
-			final CDetailSectionService screenService) {
+			final CDetailSectionService screenService) throws Exception {
 		super(CDetailSection.class, entityService, sessionService, screenService);
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;

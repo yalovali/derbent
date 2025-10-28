@@ -24,7 +24,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	protected final ISessionService sessionService;
 
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CEntityNamedService<EntityClass> entityService,
-			final ISessionService sessionService, final CDetailSectionService screenService) {
+			final ISessionService sessionService, final CDetailSectionService screenService) throws Exception {
 		super(entityClass, entityService, sessionService, screenService);
 		this.sessionService = sessionService;
 		// Now that sessionService is set, we can populate the grid
@@ -54,9 +54,10 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	}
 
 	/** Implementation of CProjectChangeListener interface. Called when the active project changes via the SessionService.
-	 * @param newProject The newly selected project */
+	 * @param newProject The newly selected project
+	 * @throws Exception */
 	@Override
-	public void onProjectChanged(final CProject newProject) {
+	public void onProjectChanged(final CProject newProject) throws Exception {
 		if ((currentProject != null) && (newProject != null) && currentProject.getId().equals(newProject.getId())) {
 			// No change in project
 			return;
@@ -66,8 +67,9 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 		refreshProjectAwareGrid();
 	}
 
-	/** Refreshes the grid with project-aware data. */
-	protected void refreshProjectAwareGrid() {
+	/** Refreshes the grid with project-aware data.
+	 * @throws Exception */
+	protected void refreshProjectAwareGrid() throws Exception {
 		LOGGER.debug("Refreshing project-aware grid");
 		if ((sessionService == null) || (masterViewSection == null)) {
 			// Not fully initialized yet

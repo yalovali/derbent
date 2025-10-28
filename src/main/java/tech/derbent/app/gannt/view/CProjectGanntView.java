@@ -29,7 +29,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	protected CProjectGanntView(final CGanntViewEntityService entityService, final ISessionService sessionService,
 			final CDetailSectionService screenService, final CActivityService activityService, final CMeetingService meetingService,
-			final tech.derbent.app.page.service.CPageEntityService pageEntityService) {
+			final tech.derbent.app.page.service.CPageEntityService pageEntityService) throws Exception {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService, activityService, meetingService, pageEntityService);
 		final CGanntViewEntity viewEntity =
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);

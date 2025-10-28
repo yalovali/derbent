@@ -213,15 +213,20 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	public abstract void createGridForEntity(final CGrid<EntityClass> grid);
 
-	protected void createGridLayout() {
+	protected void createGridLayout() throws Exception {
 		masterViewSection = new CMasterViewSectionGrid<EntityClass>(entityClass, this);
 		masterViewSection.addSelectionChangeListener(this::onSelectionChanged);
 		// Create search toolbar if entity supports searching
 		if (ISearchable.class.isAssignableFrom(entityClass)) {
 			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
 			searchToolbar.addSearchListener(event -> {
-				currentSearchText = event.getSearchText();
-				refreshGrid();
+				try {
+					currentSearchText = event.getSearchText();
+					refreshGrid();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			});
 		}
 		masterViewSection.setDataProvider(getMasterQuery());
@@ -243,7 +248,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		updateMasterComponent();
 	}
 
-	protected abstract void createMasterComponent();
+	protected abstract void createMasterComponent() throws Exception;
 
 	protected EntityClass createNewEntity() {
 		return entityService.newEntity();
@@ -309,7 +314,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		crudToolbar.setNewEntitySupplier(this::createNewEntity);
 		// Set refresh callback
 		crudToolbar.setRefreshCallback(e -> {
-			refreshGrid();
+			try {
+				refreshGrid();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		});
 		// Set save callback with binder validation
 		crudToolbar.setSaveCallback(entity -> {
@@ -516,7 +526,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 	}
 
-	protected void refreshGrid() {
+	protected void refreshGrid() throws Exception {
 		LOGGER.info("Refreshing grid for {}", getClass().getSimpleName());
 		// Store the currently selected entity ID to preserve selection after refresh
 		final EntityClass selectedEntity = masterViewSection.getSelectedItem();
@@ -620,8 +630,13 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		if (ISearchable.class.isAssignableFrom(entityClass)) {
 			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
 			searchToolbar.addSearchListener(event -> {
-				currentSearchText = event.getSearchText();
-				refreshGrid();
+				try {
+					currentSearchText = event.getSearchText();
+					refreshGrid();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			});
 		}
 		masterViewSection.setDataProvider(getMasterQuery());

@@ -31,12 +31,12 @@ public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<Entit
 		return addListener(SelectionChangeEvent.class, (ComponentEventListener) listener);
 	}
 
-	public abstract void createMasterView();
+	public abstract void createMasterView() throws Exception;
 	// Additional methods and properties can be added here
 	public abstract EntityClass getSelectedItem();
-	public abstract void refreshMasterView();
+	public abstract void refreshMasterView() throws Exception;
 	public abstract void select(EntityClass object);
 	public abstract void selectLastOrFirst(EntityClass orElse);
-	public abstract void setDataProvider(CallbackDataProvider<EntityClass, Void> masterQuery);
-	public abstract void setItems(List<EntityClass> filteredMeetings);
+	public abstract void setDataProvider(CallbackDataProvider<EntityClass, Void> masterQuery) throws Exception;
+	public abstract void setItems(List<EntityClass> filteredMeetings) throws Exception;
 }

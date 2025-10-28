@@ -3,6 +3,7 @@ package tech.derbent.base.login.view;
 import java.time.LocalDateTime;
 import com.storedobject.chart.BarChart;
 import com.storedobject.chart.CategoryData;
+import com.storedobject.chart.ChartException;
 import com.storedobject.chart.Color;
 import com.storedobject.chart.Data;
 import com.storedobject.chart.DataType;
@@ -40,20 +41,25 @@ public class CChartTestView extends Main {
 	CVerticalLayout myLayout = new CVerticalLayout();
 
 	public CChartTestView() {
-		setSizeFull();
-		add(myLayout);
-		myLayout.setSizeFull();
-		myLayout.setSpacing(true);
-		myLayout.setPadding(true);
-		myLayout.add(new H2("SOChart Test Examples"));
-		myLayout.add(new Div("Simple chart examples using SO-Charts library for Vaadin"));
-		simplePieChart();
-		simpleBarChart();
-		simpleLineChart();
-		simpleGanttChart();
+		try {
+			setSizeFull();
+			add(myLayout);
+			myLayout.setSizeFull();
+			myLayout.setSpacing(true);
+			myLayout.setPadding(true);
+			myLayout.add(new H2("SOChart Test Examples"));
+			myLayout.add(new Div("Simple chart examples using SO-Charts library for Vaadin"));
+			simplePieChart();
+			simpleBarChart();
+			simpleLineChart();
+			simpleGanttChart();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	private void simpleBarChart() {
+	private void simpleBarChart() throws ChartException, Exception {
 		myLayout.add(new H2("2. Simple Bar Chart"));
 		// Creating a chart display area
 		SOChart soChart = new SOChart();
@@ -77,7 +83,7 @@ public class CChartTestView extends Main {
 		myLayout.add(soChart);
 	}
 
-	private void simpleGanttChart() {
+	private void simpleGanttChart() throws ChartException, Exception {
 		myLayout.add(new H2("4. Simple Gantt Chart"));
 		// Creating a chart display area
 		SOChart soChart = new SOChart();
@@ -117,7 +123,7 @@ public class CChartTestView extends Main {
 		myLayout.add(soChart);
 	}
 
-	private void simpleLineChart() {
+	private void simpleLineChart() throws ChartException, Exception {
 		myLayout.add(new H2("3. Simple Line Chart"));
 		// Creating a chart display area
 		SOChart soChart = new SOChart();
@@ -141,7 +147,7 @@ public class CChartTestView extends Main {
 		myLayout.add(soChart);
 	}
 
-	private void simplePieChart() {
+	private void simplePieChart() throws ChartException, Exception {
 		myLayout.add(new H2("1. Simple Pie Chart"));
 		// Creating a chart display area
 		SOChart soChart = new SOChart();

@@ -53,7 +53,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 
 	public CMasterViewSectionGannt(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page,
 			final ISessionService sessionService, final CActivityService activityService, final CMeetingService meetingService,
-			final CPageEntityService pageEntityService) {
+			final CPageEntityService pageEntityService) throws Exception {
 		super(entityClass, page);
 		this.sessionService = sessionService;
 		this.activityService = activityService;
@@ -69,7 +69,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	}
 
 	@Override
-	public void createMasterView() {
+	public void createMasterView() throws Exception {
 		LOGGER.debug("Creating Gantt chart master view");
 		refreshMasterView();
 	}
@@ -97,9 +97,10 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	}
 
 	/** Implementation of CProjectChangeListener interface. Called when the active project changes via the SessionService.
-	 * @param newProject The newly selected project */
+	 * @param newProject The newly selected project
+	 * @throws Exception */
 	@Override
-	public void onProjectChanged(final CProject newProject) {
+	public void onProjectChanged(final CProject newProject) throws Exception {
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
 		refreshMasterView();
 	}
@@ -112,7 +113,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	}
 
 	@Override
-	public void refreshMasterView() {
+	public void refreshMasterView() throws Exception {
 		try {
 			LOGGER.debug("Refreshing Gantt chart master view");
 			// Get current project from session (with null safety)
@@ -160,14 +161,14 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	}
 
 	@Override
-	public void setDataProvider(final CallbackDataProvider<EntityClass, Void> masterQuery) {
+	public void setDataProvider(final CallbackDataProvider<EntityClass, Void> masterQuery) throws Exception {
 		LOGGER.debug("Setting data provider for Gantt chart");
 		// Gantt chart loads its own data through the service, so this is not used
 		refreshMasterView();
 	}
 
 	@Override
-	public void setItems(final List<EntityClass> filteredMeetings) {
+	public void setItems(final List<EntityClass> filteredMeetings) throws Exception {
 		LOGGER.debug("Setting items with {} items for Gantt chart", filteredMeetings != null ? filteredMeetings.size() : 0);
 		// Gantt chart loads its own data through the service, so this is not used
 		refreshMasterView();
