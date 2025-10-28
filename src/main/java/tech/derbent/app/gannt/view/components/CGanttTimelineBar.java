@@ -7,14 +7,14 @@ import com.vaadin.flow.component.html.Span;
 import tech.derbent.app.gannt.domain.CGanttItem;
 
 /** CGanttTimelineBar - Visual timeline bar component for Gantt items. Displays colorful, responsive bars with progress indicators, task owners, and
- * hover effects. Bars are scaled proportionally to the timeline range. */
+ * hover effects. Bars are scaled proportionally to the timeline range and synchronized with the timeline header for proper alignment. */
 public class CGanttTimelineBar extends Div {
 
 	private static final long serialVersionUID = 1L;
 
 	public CGanttTimelineBar(final CGanttItem item, final LocalDate timelineStart, final LocalDate timelineEnd, final int totalWidth) {
 		addClassName("gantt-timeline-bar-container");
-		if (!item.hasDates() || timelineStart == null || timelineEnd == null) {
+		if (!item.hasDates() || (timelineStart == null) || (timelineEnd == null)) {
 			// No dates available, show empty placeholder
 			addClassName("no-dates");
 			return;
@@ -32,7 +32,7 @@ public class CGanttTimelineBar extends Div {
 		// Calculate percentages for positioning
 		final double leftPercent = (startOffset * 100.0) / totalDays;
 		final double widthPercent = (itemDuration * 100.0) / totalDays;
-		// Create the timeline bar
+		// Create the timeline bar with enhanced Gantt chart styling
 		final Div bar = new Div();
 		bar.addClassName("gantt-timeline-bar");
 		// Apply color from entity
@@ -40,16 +40,23 @@ public class CGanttTimelineBar extends Div {
 		bar.getStyle().set("background-color", color);
 		bar.getStyle().set("left", String.format("%.2f%%", leftPercent));
 		bar.getStyle().set("width", String.format("%.2f%%", widthPercent));
+		// Add start and end markers for better visual distinction
+		final Div startMarker = new Div();
+		startMarker.addClassName("gantt-bar-start-marker");
+		bar.add(startMarker);
+		final Div endMarker = new Div();
+		endMarker.addClassName("gantt-bar-end-marker");
+		bar.add(endMarker);
 		// Add task information to the bar
 		final Span taskInfo = new Span();
 		taskInfo.addClassName("gantt-task-info");
 		// Show task name, owner, and progress
-		final int progress = 3;// item.getProgressPercentage();
+		final int progress = item.getProgressPercentage();
 		final String displayText = String.format("%s (%s) - %d%%", item.getEntity().getName(), item.getResponsibleName(), progress);
 		taskInfo.setText(displayText);
 		bar.add(taskInfo);
 		// Add progress indicator overlay
-		if (progress > 0 && progress < 100) {
+		if ((progress > 0) && (progress < 100)) {
 			final Div progressOverlay = new Div();
 			progressOverlay.addClassName("gantt-progress-overlay");
 			progressOverlay.getStyle().set("width", progress + "%");
