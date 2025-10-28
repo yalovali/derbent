@@ -71,6 +71,8 @@ public class CChartTestView extends Main {
 		toolbox.addButton(new Toolbox.Download());
 		// Add components to chart
 		soChart.add(barChart, title, toolbox);
+		// Update chart to trigger rendering
+		soChart.update();
 		// Add to layout
 		myLayout.add(soChart);
 	}
@@ -109,6 +111,8 @@ public class CChartTestView extends Main {
 		soChart.add(ganttChart);
 		soChart.add(title);
 		soChart.add(toolbox);
+		// Update chart to trigger rendering
+		soChart.update();
 		// Add to layout
 		myLayout.add(soChart);
 	}
@@ -131,6 +135,8 @@ public class CChartTestView extends Main {
 		toolbox.addButton(new Toolbox.Download(), new Toolbox.Zoom());
 		// Add components to chart
 		soChart.add(lineChart, title, toolbox);
+		// Update chart to trigger rendering
+		soChart.update();
 		// Add to layout
 		myLayout.add(soChart);
 	}
@@ -149,6 +155,8 @@ public class CChartTestView extends Main {
 		Title title = new Title("Fruit Sales Distribution");
 		// Add components to chart
 		soChart.add(pieChart, title);
+		// Update chart to trigger rendering
+		soChart.update();
 		// Add to layout
 		myLayout.add(soChart);
 	}

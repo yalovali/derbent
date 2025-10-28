@@ -38,6 +38,8 @@ public class CSOGanntChart {
 		// Add the Gantt Chart to our chart component
 		soChart.add(gc);
 		soChart.setSizeFull();
+		// Update chart to trigger rendering
+		soChart.update();
 		return soChart;
 	}
 }
