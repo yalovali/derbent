@@ -1,11 +1,15 @@
 package tech.derbent.base.login.view;
 
+import java.time.LocalDateTime;
 import com.storedobject.chart.BarChart;
 import com.storedobject.chart.CategoryData;
+import com.storedobject.chart.Color;
 import com.storedobject.chart.Data;
 import com.storedobject.chart.DataType;
+import com.storedobject.chart.GanttChart;
 import com.storedobject.chart.LineChart;
 import com.storedobject.chart.PieChart;
+import com.storedobject.chart.Project;
 import com.storedobject.chart.RectangularCoordinate;
 import com.storedobject.chart.SOChart;
 import com.storedobject.chart.Title;
@@ -43,6 +47,7 @@ public class CChartTestView extends Main {
 		simplePieChart();
 		simpleBarChart();
 		simpleLineChart();
+		simpleGanttChart();
 	}
 
 	private void simplePieChart() {
@@ -103,6 +108,42 @@ public class CChartTestView extends Main {
 		toolbox.addButton(new Toolbox.Download(), new Toolbox.Zoom());
 		// Add components to chart
 		soChart.add(lineChart, title, toolbox);
+		// Add to layout
+		myLayout.add(soChart);
+	}
+
+	private void simpleGanttChart() {
+		myLayout.add(new H2("4. Simple Gantt Chart"));
+		// Creating a chart display area
+		SOChart soChart = new SOChart();
+		soChart.setSize("800px", "400px");
+		// Create a project with tasks
+		Project project = new Project();
+		project.setStart(LocalDateTime.now().minusDays(7));
+		// Development phase
+		Project.TaskGroup development = project.createTaskGroup("Development");
+		Project.Task design = development.createTask("Design", 3);
+		Project.Task coding = development.createTask("Implementation", 5);
+		Project.Task testing = development.createTask("Testing", 4);
+		coding.setCompleted(60); // 60% complete
+		testing.setCompleted(20); // 20% complete
+		project.dependsOn(coding, design);
+		project.dependsOn(testing, coding);
+		// Deployment phase
+		Project.TaskGroup deployment = project.createTaskGroup("Deployment");
+		Project.Task staging = deployment.createTask("Staging", 2);
+		Project.Task production = deployment.createTask("Production", 1);
+		production.setColor(new Color("green"));
+		project.dependsOn(staging, testing);
+		project.dependsOn(production, staging);
+		// Create Gantt chart
+		GanttChart ganttChart = new GanttChart(project);
+		// Add title and toolbox
+		Title title = new Title("Project Timeline");
+		Toolbox toolbox = new Toolbox();
+		toolbox.addButton(new Toolbox.Download());
+		// Add components to chart
+		soChart.add(ganttChart, title, toolbox);
 		// Add to layout
 		myLayout.add(soChart);
 	}
