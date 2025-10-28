@@ -4,9 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-/** Vaadin configuration to prevent Atmosphere JSR356AsyncSupport initialization issues. This configuration sets system properties that prevent
- * Atmosphere from attempting to initialize problematic WebSocket support and eliminates "Websocket protocol not supported" messages. */
+/** Vaadin configuration to prevent Atmosphere JSR356AsyncSupport initialization issues and handle frontend resource extraction. This configuration
+ * sets system properties that prevent Atmosphere from attempting to initialize problematic WebSocket support and eliminates "Websocket protocol not
+ * supported" messages. It also ensures proper frontend directory structure for JAR resource extraction. */
 @Configuration
 public class VaadinConfig {
 
@@ -35,5 +39,43 @@ public class VaadinConfig {
 		LOGGER.debug("Atmosphere system properties: JSR356={}, blocking={}, autoDetect={}",
 				System.getProperty("org.atmosphere.container.JSR356AsyncSupport.force"), System.getProperty("org.atmosphere.useBlocking"),
 				System.getProperty("org.atmosphere.cpr.AtmosphereFramework.autoDetectHandlers"));
+		// Ensure frontend directories exist to prevent JAR resource extraction errors
+		ensureFrontendDirectories();
+	}
+
+	/** Ensures that the frontend directory structure exists to prevent JAR resource extraction errors on Windows. This is particularly important for
+	 * StoredObject components which may have issues with path handling during resource extraction. Note: This method is designed for development
+	 * environments where the source directory exists. In production (JAR deployments), Vaadin handles resources differently and this method will
+	 * silently skip directory creation. */
+	private void ensureFrontendDirectories() {
+		try {
+			// Get the project base directory - only works in development when running from source
+			String userDir = System.getProperty("user.dir");
+			Path frontendPath = Paths.get(userDir, "src", "main", "frontend");
+			// Only proceed if we're running from source (development mode)
+			Path srcPath = Paths.get(userDir, "src");
+			if (!Files.exists(srcPath)) {
+				LOGGER.debug("Not running from source directory, skipping frontend directory creation");
+				return;
+			}
+			Path generatedPath = frontendPath.resolve("generated");
+			Path jarResourcesPath = generatedPath.resolve("jar-resources");
+			// Create directories if they don't exist
+			if (!Files.exists(frontendPath)) {
+				Files.createDirectories(frontendPath);
+				LOGGER.info("Created frontend directory: {}", frontendPath);
+			}
+			if (!Files.exists(generatedPath)) {
+				Files.createDirectories(generatedPath);
+				LOGGER.info("Created generated directory: {}", generatedPath);
+			}
+			if (!Files.exists(jarResourcesPath)) {
+				Files.createDirectories(jarResourcesPath);
+				LOGGER.info("Created jar-resources directory: {}", jarResourcesPath);
+			}
+			LOGGER.debug("Frontend directory structure verified at: {}", frontendPath);
+		} catch (Exception e) {
+			LOGGER.warn("Could not create frontend directories (this is not critical): {}", e.getMessage());
+		}
 	}
 }
