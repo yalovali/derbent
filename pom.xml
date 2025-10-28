@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>org.vaadin.addons.so</groupId>
 			<artifactId>so-components</artifactId>
-			<version>14.0.4</version>
+			<version>14.0.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.vaadin.addons.so</groupId>

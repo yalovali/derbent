@@ -3,6 +3,9 @@ package tech.derbent.app.gannt.view;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.storedobject.chart.CategoryData;
+import com.storedobject.chart.Data;
+import com.storedobject.chart.PieChart;
 import com.storedobject.chart.SOChart;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -127,8 +130,14 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			}
 			ganttGrid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
 			add(ganttGrid);
-			SOChart ganttChart = CSOGanntChart.createGanttChart();
-			add(ganttChart);
+			add(new CDiv("Gantt chart for project: " + currentProject.getName()));
+			SOChart soChart = new SOChart();
+			soChart.setSize("600px", "400px");
+			CategoryData labels = new CategoryData("Banana", "Apple", "Orange", "Grapes");
+			Data data = new Data(25, 40, 20, 30);
+			soChart.add(new PieChart(labels, data));
+			add(soChart);
+			add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());
 			throw e;

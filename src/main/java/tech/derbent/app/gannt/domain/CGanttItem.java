@@ -3,6 +3,8 @@ package tech.derbent.app.gannt.domain;
 import java.time.LocalDate;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CProjectItem;
+import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.base.users.domain.CUser;
 
 /** CGanttItem - Data transfer object for Gantt chart representation of project items. This class wraps project items (CActivity, CMeeting, CDecision,
@@ -48,7 +50,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	public String getColorCode() {
 		// Fallback to reflection for backward compatibility
 		try {
-			final Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity.getClass(), "getEntityColorCode");
+			final Object result = CColorUtils.getStaticIconColorCode(entity.getClass());
 			if (result instanceof String) {
 				return (String) result;
 			}
@@ -108,30 +110,12 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The parent type or null */
 	public String getParentType() { return parentType; }
 
-	/** Get the responsible user.
-	 * @return The responsible user or null */
-	public CUser getResponsible() { return entity.getResponsible(); }
-
-	/** Get the responsible user name.
-	 * @return The responsible user name or "Unassigned" */
-	public String getResponsibleName() {
-		final CUser responsible = getResponsible();
-		if (responsible != null) {
-			return responsible.getName();
-		}
-		return "Unassigned";
-	}
-
-	/** Get the start date.
-	 * @return The start date */
-	public LocalDate getStartDate() { return startDate; }
-
 	/** Get the progress percentage of the task.
 	 * @return Progress percentage (0-100), or 0 if not available */
 	public int getProgressPercentage() {
 		// Try to get progress from entity if it has a progress field
 		try {
-			final Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity.getClass(), "getProgress");
+			final Object result = CAuxillaries.invokeMethod(entity.getClass(), "getProgress");
 			if (result instanceof Integer) {
 				return (Integer) result;
 			}
@@ -159,6 +143,24 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 		}
 		return 0;
 	}
+
+	/** Get the responsible user.
+	 * @return The responsible user or null */
+	public CUser getResponsible() { return entity.getResponsible(); }
+
+	/** Get the responsible user name.
+	 * @return The responsible user name or "Unassigned" */
+	public String getResponsibleName() {
+		final CUser responsible = getResponsible();
+		if (responsible != null) {
+			return responsible.getName();
+		}
+		return "Unassigned";
+	}
+
+	/** Get the start date.
+	 * @return The start date */
+	public LocalDate getStartDate() { return startDate; }
 
 	/** Check if dates are available for timeline display.
 	 * @return true if both start and end dates are available */

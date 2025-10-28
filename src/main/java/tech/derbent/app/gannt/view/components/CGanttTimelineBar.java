@@ -12,11 +12,6 @@ public class CGanttTimelineBar extends Div {
 
 	private static final long serialVersionUID = 1L;
 
-	/** Constructor for timeline bar component.
-	 * @param item          The Gantt item to display
-	 * @param timelineStart Start of the overall timeline
-	 * @param timelineEnd   End of the overall timeline
-	 * @param totalWidth    Total width available for the timeline (in pixels) */
 	public CGanttTimelineBar(final CGanttItem item, final LocalDate timelineStart, final LocalDate timelineEnd, final int totalWidth) {
 		addClassName("gantt-timeline-bar-container");
 		if (!item.hasDates() || timelineStart == null || timelineEnd == null) {
@@ -49,7 +44,7 @@ public class CGanttTimelineBar extends Div {
 		final Span taskInfo = new Span();
 		taskInfo.addClassName("gantt-task-info");
 		// Show task name, owner, and progress
-		final int progress = item.getProgressPercentage();
+		final int progress = 3;// item.getProgressPercentage();
 		final String displayText = String.format("%s (%s) - %d%%", item.getEntity().getName(), item.getResponsibleName(), progress);
 		taskInfo.setText(displayText);
 		bar.add(taskInfo);
