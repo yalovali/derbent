@@ -3,6 +3,7 @@ package tech.derbent.app.gannt.view;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.storedobject.chart.SOChart;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -116,14 +117,9 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			currentProject = sessionService.getActiveProject().orElse(null);
 			Check.notNull(sessionService, "Session service is not available");
 			Check.notNull(currentProject, "No active project in session");
-			removeAll();
-			// if (ganttGrid != null) {
-			// remove(ganttGrid);
-			// ganttGrid = null;
-			// }
-			// Check if required services are available
 			Check.notNull(activityService, "Activity service is not available");
 			Check.notNull(meetingService, "Meeting service is not available");
+			removeAll();
 			// Create and display new Gantt grid for current project
 			Component toolbar = createGridToolbar();
 			if (toolbar != null) {
@@ -131,6 +127,8 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			}
 			ganttGrid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
 			add(ganttGrid);
+			SOChart ganttChart = CSOGanntChart.createGanttChart();
+			add(ganttChart);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());
 			throw e;

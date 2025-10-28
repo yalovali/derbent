@@ -6,10 +6,10 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.views.CAbstractEntityDBPage;
-import tech.derbent.api.views.components.CDiv;
+import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.api.views.grids.CMasterViewSectionGrid.SelectionChangeEvent;
 
-public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<EntityClass>> extends CDiv {
+public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout {
 
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
