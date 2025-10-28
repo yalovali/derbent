@@ -136,6 +136,8 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			CategoryData labels = new CategoryData("Banana", "Apple", "Orange", "Grapes");
 			Data data = new Data(25, 40, 20, 30);
 			soChart.add(new PieChart(labels, data));
+			// Update chart to trigger rendering
+			soChart.update();
 			add(soChart);
 			add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
