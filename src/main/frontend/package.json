@@ -1,0 +1,14 @@
+{
+  "name": "derbent-frontend",
+  "version": "1.0.0",
+  "description": "Frontend dependencies for Derbent project management application",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yalovali/derbent"
+  },
+  "dependencies": {
+    "lit": "^3.0.0"
+  },
+  "devDependencies": {}
+}

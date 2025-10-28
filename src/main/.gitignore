@@ -1,1 +1,3 @@
-/frontend/
+/frontend/*
+# Allow package.json for custom npm dependencies
+!/frontend/package.json
