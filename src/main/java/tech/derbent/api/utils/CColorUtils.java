@@ -24,7 +24,6 @@ import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.base.users.domain.CUser;
 
 public final class CColorUtils {
-
 	/** Color for Cancel buttons */
 	public static final String CRUD_CANCEL_COLOR = "#6c757d";
 	/** Icon for Cancel buttons */
@@ -71,8 +70,8 @@ public final class CColorUtils {
 	public static String Symbol_BoxChecked = "☒";
 	public static String Symbol_BoxUnchecked = "☐";
 
-	public static Span createStyledHeader(String text, String color) {
-		Span header = new Span(text);
+	public static Span createStyledHeader(final String text, final String color) {
+		final Span header = new Span(text);
 		header.getStyle().set("color", color);
 		header.getStyle().set("font-weight", "bold");
 		header.getStyle().set("font-size", "14px");
@@ -95,29 +94,29 @@ public final class CColorUtils {
 		return icon;
 	}
 
-	public static void debugStyleOfComponent(Component component) {
+	public static void debugStyleOfComponent(final Component component) {
 		if (component == null) {
 			LOGGER.debug("Component is null, cannot debug style");
 			return;
 		}
 		LOGGER.debug("Debugging styles for component of type {}:", component.getClass().getSimpleName());
 		component.getElement().getAttributeNames().forEach(attr -> {
-			String value = component.getElement().getAttribute(attr);
+			final String value = component.getElement().getAttribute(attr);
 			LOGGER.debug("  Attribute: {} = {}", attr, value);
 		});
 		component.getElement().getStyle().getNames().forEach(style -> {
-			String value = component.getElement().getStyle().get(style);
+			final String value = component.getElement().getStyle().get(style);
 			LOGGER.debug("  Style: {} = {}", style, value);
 		});
 	}
 
 	/** Helper to calculate brightness (0 = dark, 1 = bright) */
-	private static double getBrightness(String hex) {
-		int r = Integer.parseInt(hex.substring(1, 3), 16);
-		int g = Integer.parseInt(hex.substring(3, 5), 16);
-		int b = Integer.parseInt(hex.substring(5, 7), 16);
+	private static double getBrightness(final String hex) {
+		final int r = Integer.parseInt(hex.substring(1, 3), 16);
+		final int g = Integer.parseInt(hex.substring(3, 5), 16);
+		final int b = Integer.parseInt(hex.substring(5, 7), 16);
 		// relative luminance formula (per W3C)
-		return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
+		return ((0.2126 * r) + (0.7152 * g) + (0.0722 * b)) / 255.0;
 	}
 
 	public static String getColorFromEntity(final CEntity<?> entity) throws Exception {
@@ -208,38 +207,38 @@ public final class CColorUtils {
 	}
 
 	public static Icon getIconForEntity(final CEntityDB<?> entity) throws Exception {
-		Icon icon = new Icon(getStaticIconFilename(entity.getClass().getName()));
+		final Icon icon = new Icon(getStaticIconFilename(entity.getClass().getName()));
 		return styleIcon(icon);
 	}
 
 	public static Icon getIconForViewClass(final CAbstractNamedEntityPage<?> view) throws Exception {
-		Icon icon = new Icon(getStaticIconFilename(view.getClass().getName()));
+		final Icon icon = new Icon(getStaticIconFilename(view.getClass().getName()));
 		return styleIcon(icon);
 	}
 
 	public static Icon getIconForViewClass(final Class<? extends CAbstractNamedEntityPage<?>> clazz) throws Exception {
-		Icon icon = new Icon(getStaticIconFilename(clazz));
+		final Icon icon = new Icon(getStaticIconFilename(clazz));
 		return styleIcon(icon);
 	}
 
-	public static String getRandomColor(boolean dark) {
+	public static String getRandomColor(final boolean dark) {
 		String color;
 		double brightness;
 		do {
 			color = String.format("#%06x", (int) (Math.random() * 0xFFFFFF));
 			brightness = getBrightness(color);
-		} while (dark ? brightness > 0.3 : brightness <= 1); // dark < 0.5, light >= 0.5
+		} while (dark && (dark ? brightness > 0.3 : brightness <= 1)); // dark < 0.5, light >= 0.5
 		return color;
 	}
 
-	public static String getRandomFromWebColors(boolean dark) {
+	public static String getRandomFromWebColors(final boolean dark) {
 		final List<String> colors = getWebColors();
 		// Filter colors based on brightness
 		List<String> filtered = new ArrayList<>();
 		if (dark) {
-			for (String hex : colors) {
-				double brightness = getBrightness(hex);
-				if (dark && brightness < 0.7) { // dark colors
+			for (final String hex : colors) {
+				final double brightness = getBrightness(hex);
+				if (dark && (brightness < 0.7)) { // dark colors
 					filtered.add(hex);
 				}
 			}
@@ -248,7 +247,7 @@ public final class CColorUtils {
 		if (filtered.isEmpty()) {
 			filtered = colors;
 		}
-		int index = (int) (Math.random() * filtered.size());
+		final int index = (int) (Math.random() * filtered.size());
 		return filtered.get(index);
 	}
 
@@ -260,7 +259,7 @@ public final class CColorUtils {
 	public static String getStaticIconColorCode(final Class<?> clazz) throws Exception {
 		try {
 			return getStaticStringValue(clazz, "DEFAULT_COLOR");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error getting static icon filename for class {}: {}", clazz.getSimpleName(), e.getMessage());
 			throw e;
 		}
@@ -277,7 +276,7 @@ public final class CColorUtils {
 	public static String getStaticIconFilename(final Class<?> clazz) throws Exception {
 		try {
 			return getStaticStringValue(clazz, "DEFAULT_ICON");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error getting static icon filename for class {}: {}", clazz.getSimpleName(), e.getMessage());
 			throw e;
 		}
@@ -295,7 +294,7 @@ public final class CColorUtils {
 		try {
 			final Field field = clazz.getDeclaredField(fieldName);
 			return field.get(null).toString();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error getting static string value for field {} in class {}: {}", fieldName, clazz.getSimpleName(), e.getMessage());
 			throw e;
 		}
@@ -378,7 +377,7 @@ public final class CColorUtils {
 		}
 	}
 
-	public static Icon setIconClassSize(Icon icon, String iconSizeClass) {
+	public static Icon setIconClassSize(final Icon icon, final String iconSizeClass) {
 		if (icon == null) {
 			return null;
 		}

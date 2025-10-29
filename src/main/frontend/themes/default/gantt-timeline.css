@@ -1,242 +1,29 @@
-/* Gantt Timeline Bar Styles */
-
-/* Timeline Header Styles */
 .gantt-timeline-header {
-    position: relative;
-    height: 60px;
-    width: 100%;
-    min-width: 200px;
-    background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-    border-bottom: 2px solid #dee2e6;
-    border-radius: 4px 4px 0 0;
-    overflow: hidden;
-    display: flex;
-    align-items: stretch;
-}
-
-.gantt-timeline-header.no-timeline {
-    background: transparent;
-    border: none;
-}
-
-.gantt-timeline-marker {
-    position: absolute;
-    height: 100%;
-    border-right: 1px solid #dee2e6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    transition: background-color 0.2s ease;
-}
-
-.gantt-timeline-marker:hover {
-    background-color: rgba(0, 123, 255, 0.05);
-}
-
-.gantt-timeline-year-marker {
-    background-color: rgba(0, 123, 255, 0.08);
-    border-right: 2px solid #007bff;
-    font-weight: 600;
-}
-
-.gantt-timeline-week-marker {
-    background-color: rgba(108, 117, 125, 0.03);
-    border-right: 1px dashed #adb5bd;
-}
-
-.gantt-timeline-label {
-    font-size: 11px;
-    font-weight: 500;
-    color: #495057;
-    text-align: center;
-    padding: 0 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    user-select: none;
-}
-
-.gantt-timeline-year-marker .gantt-timeline-label {
-    color: #007bff;
-    font-weight: 600;
+    font-family: Arial, sans-serif;
     font-size: 12px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ccc;
+    overflow: hidden;
 }
 
-.gantt-timeline-week-marker .gantt-timeline-label {
-    font-size: 10px;
-    color: #6c757d;
-}
 
-/* Timeline Bar Container */
-.gantt-timeline-bar-container {
-    position: relative;
-    height: 40px;
-    width: 100%;
-    min-width: 200px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    overflow: visible;
-}
 
-.gantt-timeline-bar-container.no-dates {
-    background-color: transparent;
-}
-
-.gantt-timeline-bar {
+/* WEEK LINES */
+.gantt-timeline-header > div[title^="Week of"] {
     position: absolute;
-    height: 32px;
-    top: 4px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    overflow: visible;
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
-    min-width: 30px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #dcdcdc;
+    z-index: 1;
 }
 
-/* Gantt chart task bar start marker */
-.gantt-bar-start-marker {
+/* TODAY MARKER */
+.gantt-today-marker {
+    background-color: red !important;
+    width: 2px;
     position: absolute;
-    left: -2px;
-    top: -2px;
-    width: 8px;
-    height: calc(100% + 4px);
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 8px 0 0 8px;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-right: none;
-    z-index: 2;
-}
-
-/* Gantt chart task bar end marker */
-.gantt-bar-end-marker {
-    position: absolute;
-    right: -2px;
-    top: -2px;
-    width: 8px;
-    height: calc(100% + 4px);
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 0 8px 8px 0;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-left: none;
-    z-index: 2;
-}
-
-.gantt-timeline-bar.hoverable:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    top: 0;
+    bottom: 0;
     z-index: 10;
-    filter: brightness(1.15);
-    border-color: rgba(255, 255, 255, 0.6);
-}
-
-.gantt-timeline-bar.hoverable:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.gantt-task-info {
-    color: white;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    user-select: none;
-}
-
-/* Responsive sizing for narrow bars */
-.gantt-timeline-bar[style*="width: 0."] .gantt-task-info,
-.gantt-timeline-bar[style*="width: 1."] .gantt-task-info {
-    display: none;
-}
-
-/* Animation for bar appearance */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: scaleX(0);
-    }
-    to {
-        opacity: 1;
-        transform: scaleX(1);
-    }
-}
-
-.gantt-timeline-bar {
-    animation: slideIn 0.4s ease-out;
-    transform-origin: left center;
-}
-
-/* Pulse animation on hover for better interactivity */
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.8;
-    }
-}
-
-.gantt-timeline-bar.hoverable:hover {
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-/* Grid integration - make timeline column wider and allow overflow for markers */
-vaadin-grid-cell-content:has(.gantt-timeline-bar-container),
-vaadin-grid-cell-content:has(.gantt-timeline-header) {
-    overflow: visible !important;
-}
-
-/* Ensure timeline header aligns with the grid column */
-vaadin-grid-cell-content:has(.gantt-timeline-header) {
-    padding: 0 !important;
-}
-
-.gantt-timeline-header {
-    margin: 0;
-}
-
-/* Colorful status indicators - updated for enhanced Gantt appearance */
-.gantt-timeline-bar::before {
-    content: '';
-    position: absolute;
-    left: 6px;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 2px;
-    z-index: 1;
-}
-
-.gantt-timeline-bar::after {
-    content: '';
-    position: absolute;
-    right: 6px;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 2px;
-    z-index: 1;
-}
-
-/* Progress overlay */
-.gantt-progress-overlay {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.2);
-    border-right: 2px solid rgba(255, 255, 255, 0.5);
-    transition: width 0.3s ease;
-    pointer-events: none;
-    border-radius: 6px 0 0 6px;
 }

@@ -20,9 +20,8 @@ import tech.derbent.app.projects.domain.CProject;
 /** CGanntGrid - Gantt items displayed in a unified grid with navigation to entity pages and visual timeline bars. */
 @CssImport ("./themes/default/gantt-timeline.css")
 public class CGanntGrid extends CGrid<CGanttItem> {
-
 	private static final long serialVersionUID = 1L;
-	private static final int TIMELINE_WIDTH_PIXELS = 600; // Width for timeline column
+	private static final int TIMELINE_WIDTH_PIXELS = 800; // Width for timeline column
 	private final CGanttDataProvider dataProvider;
 	private final CPageEntityService pageEntityService;
 	private LocalDate timelineEnd;
@@ -51,16 +50,16 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 			if (item.hasDates()) {
 				final LocalDate itemStart = item.getStartDate();
 				final LocalDate itemEnd = item.getEndDate();
-				if (timelineStart == null || itemStart.isBefore(timelineStart)) {
+				if ((timelineStart == null) || itemStart.isBefore(timelineStart)) {
 					timelineStart = itemStart;
 				}
-				if (timelineEnd == null || itemEnd.isAfter(timelineEnd)) {
+				if ((timelineEnd == null) || itemEnd.isAfter(timelineEnd)) {
 					timelineEnd = itemEnd;
 				}
 			}
 		}
 		// Add padding to timeline range for better visualization
-		if (timelineStart != null && timelineEnd != null) {
+		if ((timelineStart != null) && (timelineEnd != null)) {
 			timelineStart = timelineStart.minusDays(7); // Add 1 week before
 			timelineEnd = timelineEnd.plusDays(7); // Add 1 week after
 		}
@@ -88,7 +87,7 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 		addLongTextColumn(CGanttItem::getDescription, "Description", "description").setWidth("200px");
 		// Timeline column with custom header showing timeline markers
 		final Renderer<CGanttItem> timelineRenderer = new ComponentRenderer<>(item -> {
-			Div wrapper = new Div();
+			final Div wrapper = new Div();
 			wrapper.setWidth(TIMELINE_WIDTH_PIXELS + "px");
 			wrapper.getStyle().set("position", "relative");
 			wrapper.getStyle().set("border", "1px dashed lightgray");
