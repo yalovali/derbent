@@ -6,6 +6,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.app.activities.service.CActivityService;
@@ -84,8 +85,11 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 		addDateColumn(CGanttItem::getEndDate, "End", "endDate").setWidth("100px").setFlexGrow(0);
 		addIntegerColumn(item -> (int) item.getDurationDays(), "Duration (d)", "durationDays").setWidth("100px").setFlexGrow(0);
 		addLongTextColumn(CGanttItem::getDescription, "Description", "description").setWidth("200px");
-		addColumn(new ComponentRenderer<>(item -> new CGanttTimelineBar(item, timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS)))
-				.setHeader("Timeline").setKey("timeline").setWidth("450px").setFlexGrow(1).setSortable(false);
+		// Timeline column with custom header showing timeline markers
+		final Renderer<CGanttItem> timelineRenderer =
+				new ComponentRenderer<>(item -> new CGanttTimelineBar(item, timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS));
+		final CGanttTimelineHeader timelineHeader = new CGanttTimelineHeader(timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS);
+		addColumn(timelineRenderer).setHeader(timelineHeader).setKey("timeline").setWidth("450px").setFlexGrow(1).setSortable(false);
 	}
 
 	/** Public refresh hook. */
