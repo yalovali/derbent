@@ -5,6 +5,7 @@ import java.util.List;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import tech.derbent.api.utils.Check;
@@ -21,7 +22,7 @@ import tech.derbent.app.projects.domain.CProject;
 public class CGanntGrid extends CGrid<CGanttItem> {
 
 	private static final long serialVersionUID = 1L;
-	private static final int TIMELINE_WIDTH_PIXELS = 400; // Width for timeline column
+	private static final int TIMELINE_WIDTH_PIXELS = 600; // Width for timeline column
 	private final CGanttDataProvider dataProvider;
 	private final CPageEntityService pageEntityService;
 	private LocalDate timelineEnd;
@@ -86,10 +87,17 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 		addIntegerColumn(item -> (int) item.getDurationDays(), "Duration (d)", "durationDays").setWidth("100px").setFlexGrow(0);
 		addLongTextColumn(CGanttItem::getDescription, "Description", "description").setWidth("200px");
 		// Timeline column with custom header showing timeline markers
-		final Renderer<CGanttItem> timelineRenderer =
-				new ComponentRenderer<>(item -> new CGanttTimelineBar(item, timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS));
+		final Renderer<CGanttItem> timelineRenderer = new ComponentRenderer<>(item -> {
+			Div wrapper = new Div();
+			wrapper.setWidth(TIMELINE_WIDTH_PIXELS + "px");
+			wrapper.getStyle().set("position", "relative");
+			wrapper.getStyle().set("border", "1px dashed lightgray");
+			wrapper.add(new CGanttTimelineBar(item, timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS));
+			return wrapper;
+		});
+		;
 		final CGanttTimelineHeader timelineHeader = new CGanttTimelineHeader(timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS);
-		addColumn(timelineRenderer).setHeader(timelineHeader).setKey("timeline").setWidth("450px").setFlexGrow(1).setSortable(false);
+		addColumn(timelineRenderer).setHeader(timelineHeader).setKey("timeline").setFlexGrow(1).setSortable(false);
 	}
 
 	/** Public refresh hook. */
