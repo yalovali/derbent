@@ -1,6 +1,7 @@
 package tech.derbent.app.gannt.view.components;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
@@ -11,13 +12,11 @@ import com.vaadin.flow.component.html.Span;
 @Tag ("div")
 public class CGanttTimelineHeader extends Div {
 
-	private static final String FONT_SIZE = "10px";
-	private static final int HEADER_HEIGHT_PX = 60;
-	private static final int LAYER_HEIGHT = 20;
-	private static final String LINE_COLOR = "#ddd";
 	private static final long serialVersionUID = 1L;
 	private final LinkedHashMap<LocalDate, Integer> dateToPixelMap = new LinkedHashMap<>();
 	private final LocalDate endDate;
+	private boolean showQuarters = true;
+	private boolean showWeeks = true;
 	private final LocalDate startDate;
 	private final int totalWidth;
 
@@ -27,81 +26,59 @@ public class CGanttTimelineHeader extends Div {
 		this.totalWidth = totalWidth;
 		addClassName("gantt-timeline-header");
 		setWidth(totalWidth + "px");
-		setHeight(HEADER_HEIGHT_PX + "px");
+		setHeight("80px");
 		getStyle().set("position", "relative");
 		renderTimeline();
 	}
 
 	public LinkedHashMap<LocalDate, Integer> getDateToPixelMap() { return dateToPixelMap; }
 
-	private void renderLayer(LocalDate start, LocalDate end, long totalDays, ChronoUnit unit, int top, String pattern) {
-		LocalDate current = start;
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-		while (!current.isAfter(end)) {
-			LocalDate next = current.plus(1, unit);
+	private void renderMonthMarkers(long totalDays, Div container) {
+		LocalDate current = startDate.withDayOfMonth(1);
+		while (!current.isAfter(endDate)) {
+			YearMonth ym = YearMonth.from(current);
+			LocalDate monthEnd = ym.atEndOfMonth();
 			LocalDate visibleStart = current.isBefore(startDate) ? startDate : current;
-			LocalDate visibleEnd = next.minusDays(1).isAfter(endDate) ? endDate : next.minusDays(1);
+			LocalDate visibleEnd = monthEnd.isAfter(endDate) ? endDate : monthEnd;
 			long offset = ChronoUnit.DAYS.between(startDate, visibleStart);
 			long duration = ChronoUnit.DAYS.between(visibleStart, visibleEnd) + 1;
 			int left = (int) ((offset * totalWidth) / (double) totalDays);
 			int width = (int) ((duration * totalWidth) / (double) totalDays);
-			String label = formatter.format(current);
 			Div marker = new Div();
-			marker.addClassName("gantt-time-marker");
+			marker.addClassName("gantt-timeline-month");
 			marker.getStyle().set("position", "absolute");
-			marker.getStyle().set("top", top + "px");
 			marker.getStyle().set("left", left + "px");
 			marker.getStyle().set("width", width + "px");
-			marker.getStyle().set("height", LAYER_HEIGHT + "px");
-			marker.getStyle().set("border-right", "1px solid " + LINE_COLOR);
-			marker.getStyle().set("box-sizing", "border-box");
-			Span labelSpan = new Span(label);
-			labelSpan.getStyle().set("font-size", FONT_SIZE);
-			labelSpan.getStyle().set("line-height", LAYER_HEIGHT + "px");
-			labelSpan.getStyle().set("display", "inline-block");
-			labelSpan.getStyle().set("padding-left", "4px");
-			marker.add(labelSpan);
-			add(marker);
-			current = next;
+			marker.getStyle().set("height", "26px");
+			Span label = new Span(ym.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+			label.getStyle().set("font-size", "10px");
+			label.getStyle().set("padding-left", "4px");
+			marker.add(label);
+			container.add(marker);
+			current = current.plusMonths(1);
 		}
 	}
 
-	private void renderQuarters(LocalDate start, LocalDate end, long totalDays, int topOffset) {
-		LocalDate current = start.withDayOfMonth(1);
-		while (!current.isAfter(end)) {
-			int year = current.getYear();
-			int month = current.getMonthValue();
-			int quarter = ((month - 1) / 3) + 1;
-			LocalDate quarterStart = LocalDate.of(year, ((quarter - 1) * 3) + 1, 1);
-			LocalDate quarterEnd = quarterStart.plusMonths(3).minusDays(1);
-			if (quarterEnd.isBefore(start)) {
-				current = quarterEnd.plusDays(1);
-				continue;
-			}
-			LocalDate visibleStart = quarterStart.isBefore(startDate) ? startDate : quarterStart;
+	private void renderQuarterMarkers(long totalDays, Div container) {
+		LocalDate current = startDate.withMonth(((startDate.getMonthValue() - 1) / 3) * 3 + 1).withDayOfMonth(1);
+		while (!current.isAfter(endDate)) {
+			int quarter = ((current.getMonthValue() - 1) / 3) + 1;
+			LocalDate quarterEnd = current.plusMonths(3).minusDays(1);
+			LocalDate visibleStart = current.isBefore(startDate) ? startDate : current;
 			LocalDate visibleEnd = quarterEnd.isAfter(endDate) ? endDate : quarterEnd;
 			long offset = ChronoUnit.DAYS.between(startDate, visibleStart);
 			long duration = ChronoUnit.DAYS.between(visibleStart, visibleEnd) + 1;
 			int left = (int) ((offset * totalWidth) / (double) totalDays);
 			int width = (int) ((duration * totalWidth) / (double) totalDays);
-			String label = "Q" + quarter + " " + year;
-			Div marker = new Div();
-			marker.addClassName("gantt-time-marker");
-			marker.getStyle().set("position", "absolute");
-			marker.getStyle().set("top", topOffset + "px");
-			marker.getStyle().set("left", left + "px");
-			marker.getStyle().set("width", width + "px");
-			marker.getStyle().set("height", LAYER_HEIGHT + "px");
-			marker.getStyle().set("border-right", "1px solid " + LINE_COLOR);
-			marker.getStyle().set("box-sizing", "border-box");
-			Span labelSpan = new Span(label);
-			labelSpan.getStyle().set("font-size", FONT_SIZE);
-			labelSpan.getStyle().set("line-height", LAYER_HEIGHT + "px");
-			labelSpan.getStyle().set("display", "inline-block");
-			labelSpan.getStyle().set("padding-left", "4px");
-			marker.add(labelSpan);
-			add(marker);
-			current = quarterEnd.plusDays(1);
+			Div labelDiv = new Div();
+			labelDiv.addClassName("gantt-timeline-quarter");
+			labelDiv.getStyle().set("position", "absolute");
+			labelDiv.getStyle().set("left", left + "px");
+			labelDiv.getStyle().set("width", width + "px");
+			labelDiv.getStyle().set("height", "28px");
+			labelDiv.setText("Q" + quarter + " " + current.getYear());
+			container.add(labelDiv);
+			current = current.plusMonths(3);
 		}
 	}
 
@@ -115,9 +92,35 @@ public class CGanttTimelineHeader extends Div {
 			int pixel = (int) ((i * totalWidth) / (double) totalDays);
 			dateToPixelMap.put(current, pixel);
 		}
-		renderLayer(startDate, endDate, totalDays, ChronoUnit.YEARS, 0, "yyyy");
-		renderLayer(startDate, endDate, totalDays, ChronoUnit.MONTHS, LAYER_HEIGHT, "LLL yyyy");
-		renderQuarters(startDate, endDate, totalDays, LAYER_HEIGHT * 2);
+		Div yearContainer = new Div();
+		yearContainer.addClassName("gantt-timeline-year-container");
+		yearContainer.getStyle().set("position", "absolute");
+		yearContainer.getStyle().set("top", "0");
+		yearContainer.getStyle().set("height", "26px");
+		yearContainer.getStyle().set("width", totalWidth + "px");
+		add(yearContainer);
+		renderYearMarkers(totalDays, yearContainer);
+		if (showQuarters) {
+			Div quarterContainer = new Div();
+			quarterContainer.addClassName("gantt-timeline-quarter-container");
+			quarterContainer.getStyle().set("position", "absolute");
+			quarterContainer.getStyle().set("top", "26px");
+			quarterContainer.getStyle().set("height", "28px");
+			quarterContainer.getStyle().set("width", totalWidth + "px");
+			add(quarterContainer);
+			renderQuarterMarkers(totalDays, quarterContainer);
+		}
+		Div monthContainer = new Div();
+		monthContainer.addClassName("gantt-timeline-month-container");
+		monthContainer.getStyle().set("position", "absolute");
+		monthContainer.getStyle().set("top", "54px");
+		monthContainer.getStyle().set("height", "26px");
+		monthContainer.getStyle().set("width", totalWidth + "px");
+		add(monthContainer);
+		renderMonthMarkers(totalDays, monthContainer);
+		if (showWeeks) {
+			renderWeekLines(totalDays);
+		}
 		renderTodayMarker();
 	}
 
@@ -135,6 +138,47 @@ public class CGanttTimelineHeader extends Div {
 			todayLine.getStyle().set("z-index", "10");
 			todayLine.addClassName("gantt-today-marker");
 			add(todayLine);
+		}
+	}
+
+	private void renderWeekLines(long totalDays) {
+		LocalDate current = startDate;
+		while (!current.isAfter(endDate)) {
+			int left = (int) ((ChronoUnit.DAYS.between(startDate, current) * totalWidth) / (double) totalDays);
+			Div line = new Div();
+			line.getStyle().set("position", "absolute");
+			line.getStyle().set("left", left + "px");
+			line.getStyle().set("top", "0");
+			line.getStyle().set("bottom", "0");
+			line.getStyle().set("width", "1px");
+			line.getStyle().set("background", "#dcdcdc");
+			line.getStyle().set("z-index", "1");
+			line.getElement().setProperty("title", "Week of " + current);
+			add(line);
+			current = current.plusWeeks(1);
+		}
+	}
+
+	private void renderYearMarkers(long totalDays, Div container) {
+		LocalDate current = LocalDate.of(startDate.getYear(), 1, 1);
+		while (!current.isAfter(endDate)) {
+			LocalDate yearEnd = current.plusYears(1).minusDays(1);
+			LocalDate visibleStart = current.isBefore(startDate) ? startDate : current;
+			LocalDate visibleEnd = yearEnd.isAfter(endDate) ? endDate : yearEnd;
+			long offset = ChronoUnit.DAYS.between(startDate, visibleStart);
+			long duration = ChronoUnit.DAYS.between(visibleStart, visibleEnd) + 1;
+			int left = (int) ((offset * totalWidth) / (double) totalDays);
+			int width = (int) ((duration * totalWidth) / (double) totalDays);
+			Div marker = new Div();
+			marker.addClassName("gantt-timeline-year");
+			marker.getStyle().set("position", "absolute");
+			marker.getStyle().set("left", left + "px");
+			marker.getStyle().set("width", width + "px");
+			marker.getStyle().set("height", "26px");
+			Span label = new Span(String.valueOf(current.getYear()));
+			marker.add(label);
+			container.add(marker);
+			current = current.plusYears(1);
 		}
 	}
 }
