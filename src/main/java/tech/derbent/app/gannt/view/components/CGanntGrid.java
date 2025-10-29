@@ -5,10 +5,10 @@ import java.util.List;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanttItem;
@@ -20,6 +20,7 @@ import tech.derbent.app.projects.domain.CProject;
 /** CGanntGrid - Gantt items displayed in a unified grid with navigation to entity pages and visual timeline bars. */
 @CssImport ("./themes/default/gantt-timeline.css")
 public class CGanntGrid extends CGrid<CGanttItem> {
+
 	private static final long serialVersionUID = 1L;
 	private static final int TIMELINE_WIDTH_PIXELS = 800; // Width for timeline column
 	private final CGanttDataProvider dataProvider;
@@ -87,10 +88,10 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 		addLongTextColumn(CGanttItem::getDescription, "Description", "description").setWidth("200px");
 		// Timeline column with custom header showing timeline markers
 		final Renderer<CGanttItem> timelineRenderer = new ComponentRenderer<>(item -> {
-			final Div wrapper = new Div();
+			final CDiv wrapper = new CDiv();
 			wrapper.setWidth(TIMELINE_WIDTH_PIXELS + "px");
-			wrapper.getStyle().set("position", "relative");
-			wrapper.getStyle().set("border", "1px dashed lightgray");
+			wrapper.setHeight("10px");
+			// wrapper.getStyle().set("border", "1px dashed lightgray");
 			wrapper.add(new CGanttTimelineBar(item, timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS));
 			return wrapper;
 		});

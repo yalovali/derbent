@@ -14,6 +14,7 @@ import tech.derbent.api.views.components.CVerticalLayout;
 
 @Tag ("div")
 public class CGanttTimelineHeader extends CVerticalLayout {
+
 	private static final long serialVersionUID = 1L;
 	private final LinkedHashMap<LocalDate, Integer> dateToPixelMap = new LinkedHashMap<>();
 	private final LocalDate endDate;
@@ -27,7 +28,7 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		this.totalWidth = totalWidth;
 		addClassName("gantt-timeline-header");
 		setWidth(totalWidth + "px");
-		setHeight("80px");
+		// setHeight("80px");
 		renderTimeline();
 	}
 
