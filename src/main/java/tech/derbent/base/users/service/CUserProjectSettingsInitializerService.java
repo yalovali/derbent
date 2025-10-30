@@ -63,15 +63,15 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final boolean showInQuickToolbarParam)
-			throws Exception {
-		Check.notNull(project, "project cannot be null");
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
-	}
+        public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+                        final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+                        throws Exception {
+                Check.notNull(project, "project cannot be null");
+                final CDetailSection detailSection = createBasicView(project);
+                final CGridEntity grid = createGridEntity(project);
+                initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+                                pageDescription, showInQuickToolbar, menuOrder);
+        }
 
 	private CUserProjectSettingsInitializerService() {}
 }
