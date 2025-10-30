@@ -24,7 +24,12 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 
 	public CGanttTimelineHeader(final LocalDate startDate, final LocalDate endDate, final int totalWidth) {
 		this.startDate = startDate;
-		this.endDate = endDate;
+		if (startDate.isAfter(endDate)) {
+			// throw new IllegalArgumentException("startDate must be before or equal to endDate");
+			this.endDate = startDate;
+		} else {
+			this.endDate = endDate;
+		}
 		this.totalWidth = totalWidth;
 		addClassName("gantt-timeline-header");
 		setWidth(totalWidth + "px");
