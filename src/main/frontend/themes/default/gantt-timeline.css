@@ -1,86 +1,39 @@
 .gantt-timeline-header {
-    font-family: var(--lumo-font-family);
-    font-size: 12px;
-    background-color: var(--lumo-base-color);
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    border-top: 1px solid var(--lumo-contrast-10pct);
-    box-shadow: inset 0 -1px 0 var(--lumo-contrast-10pct);
-    overflow: hidden;
+  background: #f8f9fb;
+  border-bottom: 1px solid #ccc;
 }
 
-.gantt-timeline-controls {
-    padding: 4px 8px;
-    gap: 8px;
-    background: linear-gradient(180deg, var(--lumo-shade-5pct), transparent);
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
+.gantt-time-marker {
+  border-right: 1px solid #ddd;
+  background-color: #f5f5f5;
 }
 
-.gantt-timeline-control-button {
-    min-width: 32px;
-    height: 28px;
-    border-radius: 6px;
-    border: 1px solid var(--lumo-contrast-20pct);
-    background-color: var(--lumo-base-color);
-    box-shadow: var(--lumo-box-shadow-xs);
+.gantt-time-marker span {
+  font-size: 10px;
+  white-space: nowrap;
+  display: inline-block;
+  padding-left: 4px;
+  line-height: 20px;
+} 
+
+.gantt-today-marker {
+  z-index: 10;
+  background-color: red;
 }
 
-.gantt-timeline-control-button:hover {
-    background-color: var(--lumo-contrast-5pct);
+.gantt-grid-lines {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 0; 
 }
 
-.gantt-timeline-scale-select {
-    min-width: 140px;
-}
-
-.gantt-timeline-summary {
-    margin-left: auto;
-    font-weight: 600;
-    color: var(--lumo-contrast-80pct);
-}
-
-.gantt-timeline-wrapper {
-    padding: 4px 0;
-}
-
-.gantt-timeline-row {
-    display: flex;
-    align-items: stretch;
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-    min-height: 28px;
-}
-
-.gantt-timeline-row:last-of-type {
-    border-bottom: none;
-}
-
-.gantt-timeline-marker {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    box-sizing: border-box;
-    background-color: var(--lumo-contrast-5pct);
-    color: var(--lumo-contrast-90pct);
-    text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.05em;
-}
-
-.gantt-timeline-row-quarter .gantt-timeline-marker,
-.gantt-timeline-row-year .gantt-timeline-marker {
-    font-weight: 600;
-    background-color: var(--lumo-primary-color-10pct);
-}
-
-.gantt-timeline-row-week .gantt-timeline-marker {
-    font-size: 10px;
-    text-transform: none;
-    background-color: var(--lumo-contrast-2pct);
-}
-
-.gantt-timeline-today-marker {
-    background-color: var(--lumo-error-color) !important;
-    width: 3px;
-    border-radius: 2px;
-    box-shadow: 0 0 4px var(--lumo-error-color);
+.gantt-grid-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: #ddd;
 }

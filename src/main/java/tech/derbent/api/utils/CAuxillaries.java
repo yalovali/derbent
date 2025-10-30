@@ -35,8 +35,6 @@ import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
-import tech.derbent.app.gannt.domain.CGanntViewEntity;
-import tech.derbent.app.gannt.service.CGanntInitializerService;
 import tech.derbent.app.gannt.view.CProjectGanntView;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.domain.CMeetingType;
@@ -47,13 +45,11 @@ import tech.derbent.app.meetings.service.CMeetingTypeService;
 import tech.derbent.app.orders.domain.CApprovalStatus;
 import tech.derbent.app.orders.domain.CCurrency;
 import tech.derbent.app.orders.domain.COrder;
-import tech.derbent.app.orders.domain.COrderApproval;
 import tech.derbent.app.orders.domain.COrderType;
 import tech.derbent.app.orders.service.CApprovalStatusInitializerService;
 import tech.derbent.app.orders.service.CApprovalStatusService;
 import tech.derbent.app.orders.service.CCurrencyInitializerService;
 import tech.derbent.app.orders.service.CCurrencyService;
-import tech.derbent.app.orders.service.COrderApprovalInitializerService;
 import tech.derbent.app.orders.service.COrderInitializerService;
 import tech.derbent.app.orders.service.COrderService;
 import tech.derbent.app.orders.service.COrderTypeInitializerService;
@@ -76,19 +72,12 @@ import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
-import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
-import tech.derbent.app.workflow.service.CWorkflowStatusRelationInitializerService;
 import tech.derbent.base.setup.domain.CSystemSettings;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.domain.CUserCompanySetting;
-import tech.derbent.base.users.domain.CUserProjectSettings;
-import tech.derbent.base.users.service.CUserCompanySettingInitializerService;
 import tech.derbent.base.users.service.CUserInitializerService;
-import tech.derbent.base.users.service.CUserProjectSettingsInitializerService;
 import tech.derbent.base.users.service.CUserService;
 
 public class CAuxillaries {
@@ -323,45 +312,35 @@ public class CAuxillaries {
 			return CActivityPriorityInitializerService.class;
 		} else if (entityClass == CMeetingType.class) {
 			return CMeetingTypeInitializerService.class;
-                } else if (entityClass == CPageEntity.class) {
-                        return CPageEntityInitializerService.class;
-                } else if (entityClass == CCommentPriority.class) {
-                        return CCommentPriorityInitializerService.class;
-                } else if (entityClass == CCurrency.class) {
-                        return CCurrencyInitializerService.class;
-                } else if (entityClass == CDecisionType.class) {
-                        return CDecisionTypeInitializerService.class;
-                } else if (entityClass == COrderType.class) {
-                        return COrderTypeInitializerService.class;
-                } else if (entityClass == COrderApproval.class) {
-                        return COrderApprovalInitializerService.class;
-                } else if (entityClass == CApprovalStatus.class) {
-                        return CApprovalStatusInitializerService.class;
-                } else if (entityClass == CDetailSection.class) {
-                        return CDetailSectionService.class;
-                } else if (entityClass == CGridEntity.class) {
-                        return CGridEntityService.class;
-                } else if (entityClass == CSystemSettings.class) {
-                        return CSystemSettingsInitializerService.class;
-                } else if (entityClass == CUserProjectRole.class) {
-                        return CUserProjectRoleInitializerService.class;
-                } else if (entityClass == CUserCompanyRole.class) {
-                        return CUserCompanyRoleInitializerService.class;
-                } else if (entityClass == CUserProjectSettings.class) {
-                        return CUserProjectSettingsInitializerService.class;
-                } else if (entityClass == CUserCompanySetting.class) {
-                        return CUserCompanySettingInitializerService.class;
-                } else if (entityClass == CWorkflowEntity.class) {
-                        return CWorkflowEntityInitializerService.class;
-                } else if (entityClass == CWorkflowStatusRelation.class) {
-                        return CWorkflowStatusRelationInitializerService.class;
-                } else if (entityClass == CGanntViewEntity.class) {
-                        return CGanntInitializerService.class;
-                } else {
-                        LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
-                        throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
-                }
-        }
+		} else if (entityClass == CPageEntity.class) {
+			return CPageEntityInitializerService.class;
+		} else if (entityClass == CCommentPriority.class) {
+			return CCommentPriorityInitializerService.class;
+		} else if (entityClass == CCurrency.class) {
+			return CCurrencyInitializerService.class;
+		} else if (entityClass == CDecisionType.class) {
+			return CDecisionTypeInitializerService.class;
+		} else if (entityClass == COrderType.class) {
+			return COrderTypeInitializerService.class;
+		} else if (entityClass == CApprovalStatus.class) {
+			return CApprovalStatusInitializerService.class;
+		} else if (entityClass == CDetailSection.class) {
+			return CDetailSectionService.class;
+		} else if (entityClass == CGridEntity.class) {
+			return CGridEntityService.class;
+		} else if (entityClass == CSystemSettings.class) {
+			return CSystemSettingsInitializerService.class;
+		} else if (entityClass == CUserProjectRole.class) {
+			return CUserProjectRoleInitializerService.class;
+		} else if (entityClass == CUserCompanyRole.class) {
+			return CUserCompanyRoleInitializerService.class;
+		} else if (entityClass == CWorkflowEntity.class) {
+			return CWorkflowEntityService.class;
+		} else {
+			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
+			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
+		}
+	}
 
 	public static Class<?> getInitializerService(final String entityType) {
 		Check.notBlank(entityType, "Entity type must not be empty");
@@ -530,7 +509,6 @@ public class CAuxillaries {
 			if (method != null) {
 				return method.invoke(target, args);
 			}
-			// Try with no parameters if parameter matching failed
 			method = getMethod(target.getClass(), methodName);
 			Check.notNull(method, "Method " + methodName + " not found in class " + target.getClass().getName());
 			return method.invoke(target);

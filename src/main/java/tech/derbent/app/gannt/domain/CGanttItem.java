@@ -115,7 +115,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	public int getProgressPercentage() {
 		// Try to get progress from entity if it has a progress field
 		try {
-			final Object result = CAuxillaries.invokeMethod(entity.getClass(), "getProgress");
+			final Object result = CAuxillaries.invokeMethod(entity.getClass(), "getProgressPercentage");
 			if (result instanceof Integer) {
 				return (Integer) result;
 			}
