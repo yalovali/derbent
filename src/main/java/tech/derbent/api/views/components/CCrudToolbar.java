@@ -58,6 +58,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
 	private CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
 
+	/** Creates a fully configured CRUD toolbar with all callbacks and services automatically set up from the parent page.
+	 * This constructor consolidates all toolbar configuration in one place, eliminating the need for scattered setter calls.
+	 * @param parentPage   the content owner (page) that provides context and callbacks
+	 * @param entityService the service for CRUD operations on the entity
+	 * @param entityClass  the entity class type
+	 * @param binder       the data binder for form validation */
 	public CCrudToolbar(IContentOwner parentPage, final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass,
 			final CEnhancedBinder<EntityClass> binder) {
 		this.entityService = entityService;
@@ -65,14 +71,65 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		this.parentPage = parentPage;
 		dataProviderResolver = CSpringContext.<CDataProviderResolver>getBean(CDataProviderResolver.class);
 		this.binder = binder;
+		
+		// Configure toolbar appearance
 		setSpacing(true);
 		setPadding(true);
 		addClassName("crud-toolbar");
-		setWidthFull(); // Make toolbar take full width
-		// Automatically set dependency checker from service if it implements IDependencyChecker
-		dependencyChecker = entityService::checkDeleteAllowed;
+		setWidthFull();
+		
+		// Automatically configure all callbacks and services from parent page
+		configureFromParentPage();
+		
+		// Create UI components
 		createToolbarButtons();
+		
 		LOGGER.debug("Created CCrudToolbar for entity: {}", entityClass.getSimpleName());
+	}
+	
+	/** Configures all callbacks and services by extracting them from the parent page.
+	 * This method consolidates all configuration that was previously scattered across multiple setter calls. */
+	private void configureFromParentPage() {
+		// Set dependency checker from service
+		dependencyChecker = entityService::checkDeleteAllowed;
+		
+		// Set new entity supplier from parent page
+		newEntitySupplier = () -> {
+			try {
+				@SuppressWarnings("unchecked")
+				EntityClass newEntity = (EntityClass) parentPage.createNewEntityInstance();
+				return newEntity;
+			} catch (Exception e) {
+				LOGGER.error("Error creating new entity instance", e);
+				return null;
+			}
+		};
+		
+		// Set refresh callback that reloads entity from database
+		refreshCallback = (currentEntity) -> {
+			try {
+				if (currentEntity != null && currentEntity.getId() != null) {
+					EntityClass reloadedEntity = entityService.getById(currentEntity.getId()).orElse(null);
+					if (reloadedEntity != null) {
+						parentPage.onEntityRefreshed(reloadedEntity);
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.error("Error refreshing entity: {}", e.getMessage());
+			}
+		};
+		
+		// Set save callback with binder validation - will be set later when needed
+		// (save logic needs special handling for validation, kept in handleSave)
+		
+		// Get optional services from parent page
+		notificationService = parentPage.getNotificationService();
+		workflowStatusRelationService = parentPage.getWorkflowStatusRelationService();
+		
+		// Add parent page as update listener if it implements IEntityUpdateListener
+		if (parentPage instanceof IEntityUpdateListener) {
+			addUpdateListener((IEntityUpdateListener) parentPage);
+		}
 	}
 
 	/** Adds an update listener to be notified of CRUD operations.
@@ -390,35 +447,64 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		updateButtonStates();
 	}
 
-	/** Sets the dependency checker function that returns error message if entity cannot be deleted.
+	/** Configures button visibility for customized toolbar layouts.
+	 * @param showCreate  whether to show the Create button
+	 * @param showSave    whether to show the Save button
+	 * @param showDelete  whether to show the Delete button
+	 * @param showRefresh whether to show the Refresh button */
+	public void configureButtonVisibility(boolean showCreate, boolean showSave, boolean showDelete, boolean showRefresh) {
+		if (createButton != null) {
+			createButton.setVisible(showCreate);
+		}
+		if (saveButton != null) {
+			saveButton.setVisible(showSave);
+		}
+		if (deleteButton != null) {
+			deleteButton.setVisible(showDelete);
+		}
+		if (refreshButton != null) {
+			refreshButton.setVisible(showRefresh);
+		}
+	}
+	
+	/** OPTIONAL CONFIGURATOR: Sets the dependency checker function that returns error message if entity cannot be deleted.
+	 * By default, uses entityService::checkDeleteAllowed. Only use this to override the default behavior.
 	 * @param dependencyChecker function that returns null if entity can be deleted, or error message if it cannot */
 	public void setDependencyChecker(final Function<EntityClass, String> dependencyChecker) {
 		this.dependencyChecker = dependencyChecker;
 	}
 
-	/** Sets the supplier for creating new entity instances.
+	/** OPTIONAL CONFIGURATOR: Sets the supplier for creating new entity instances.
+	 * By default, uses parentPage::createNewEntityInstance. Only use this to override the default behavior.
 	 * @param newEntitySupplier supplier that creates new entity instances */
 	public void setNewEntitySupplier(final Supplier<EntityClass> newEntitySupplier) {
 		this.newEntitySupplier = newEntitySupplier;
 		updateButtonStates();
 	}
 
-	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
+	/** OPTIONAL CONFIGURATOR: Sets the notification service.
+	 * By default, uses parentPage.getNotificationService(). Only use this to override the default behavior.
+	 * @param notificationService the notification service to use */
 	public void setNotificationService(final CNotificationService notificationService) {
 		this.notificationService = notificationService;
 	}
 
-	/** Sets the project item status service for workflow status management. */
+	/** OPTIONAL CONFIGURATOR: Sets the project item status service for workflow status management.
+	 * This method is deprecated and no longer needed as workflow services are obtained from parent page.
+	 * @deprecated No longer needed - workflow services are automatically configured from parent page */
+	@Deprecated
 	public void setProjectItemStatusService(final CProjectItemStatusService projectItemStatusService) {}
 
-	/** Sets the callback for refresh operations.
+	/** OPTIONAL CONFIGURATOR: Sets the callback for refresh operations.
+	 * By default, reloads entity from database and calls parentPage.onEntityRefreshed(). Only use this to override.
 	 * @param refreshCallback callback to execute when refresh is triggered */
 	public void setRefreshCallback(final Consumer<EntityClass> refreshCallback) {
 		this.refreshCallback = refreshCallback;
 		updateButtonStates();
 	}
 
-	/** Sets the callback for save operations. This allows custom save logic with binder validation.
+	/** OPTIONAL CONFIGURATOR: Sets the callback for save operations. This allows custom save logic with binder validation.
+	 * By default, uses standard save logic with entityService. Only use this to override the default behavior.
 	 * @param saveCallback callback to execute when save is triggered */
 	public void setSaveCallback(final Consumer<EntityClass> saveCallback) {
 		this.saveCallback = saveCallback;
@@ -430,7 +516,9 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		setCurrentEntity(entity);
 	}
 
-	/** Sets the workflow status relation service for workflow validation. */
+	/** OPTIONAL CONFIGURATOR: Sets the workflow status relation service for workflow validation.
+	 * By default, uses parentPage.getWorkflowStatusRelationService(). Only use this to override the default behavior.
+	 * @param workflowStatusRelationService the workflow status relation service to use */
 	public void setWorkflowStatusRelationService(final CWorkflowStatusRelationService workflowStatusRelationService) {
 		this.workflowStatusRelationService = workflowStatusRelationService;
 	}

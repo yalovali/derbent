@@ -56,19 +56,11 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	protected CCrudToolbar<?> createCrudToolbar(IContentOwner parentPage, Class<?> entityClass, CEnhancedBinder<?> currentBinder) {
 		// Create the base toolbar using parent implementation
 		CCrudToolbar<?> toolbar = super.createCrudToolbar(this, currentEntityType, currentBinder);
-		// Configure button visibility based on our settings
+		// Configure button visibility based on our settings using the new API
 		if (toolbar != null) {
-			try {
-				// Access private button fields and set visibility
-				setButtonVisibility(toolbar, "createButton", enableNewButton);
-				setButtonVisibility(toolbar, "deleteButton", enableDeleteButton);
-				setButtonVisibility(toolbar, "saveButton", enableSaveButton);
-				setButtonVisibility(toolbar, "refreshButton", enableReloadButton);
-				LOGGER.debug("CRUD toolbar buttons configured for single entity view - Delete: {}, New: {}, Save: {}, Reload: {}", enableDeleteButton,
-						enableNewButton, enableSaveButton, enableReloadButton);
-			} catch (Exception e) {
-				LOGGER.warn("Could not configure toolbar button visibility: {}", e.getMessage());
-			}
+			toolbar.configureButtonVisibility(enableNewButton, enableSaveButton, enableDeleteButton, enableReloadButton);
+			LOGGER.debug("CRUD toolbar buttons configured for single entity view - Delete: {}, New: {}, Save: {}, Reload: {}", enableDeleteButton,
+					enableNewButton, enableSaveButton, enableReloadButton);
 		}
 		return toolbar;
 	}
@@ -145,20 +137,6 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 			populateForm();
 		} catch (Exception e) {
 			LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
-		}
-	}
-
-	/** Helper method to set button visibility using reflection */
-	private void setButtonVisibility(CCrudToolbar<?> toolbar, String buttonFieldName, boolean visible) {
-		try {
-			java.lang.reflect.Field field = CCrudToolbar.class.getDeclaredField(buttonFieldName);
-			field.setAccessible(true);
-			Object button = field.get(toolbar);
-			if (button != null && button instanceof com.vaadin.flow.component.Component) {
-				((com.vaadin.flow.component.Component) button).setVisible(visible);
-			}
-		} catch (Exception e) {
-			LOGGER.warn("Could not set visibility for button {}: {}", buttonFieldName, e.getMessage());
 		}
 	}
 

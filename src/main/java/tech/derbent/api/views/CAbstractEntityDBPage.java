@@ -49,7 +49,7 @@ import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
-		implements ILayoutChangeListener, IContentOwner {
+		implements ILayoutChangeListener, IContentOwner, IEntityUpdateListener {
 
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
@@ -77,9 +77,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityService = entityService;
 		this.sessionService = sessionService;
 		binder = new CEnhancedBinder<>(entityClass);
-		// Initialize CRUD toolbar
+		// Initialize CRUD toolbar - all configuration now happens in constructor
 		crudToolbar = new CCrudToolbar<>(this, entityService, entityClass, binder);
-		initializeCrudToolbar();
+		// Set custom save callback with validation logic specific to this page type
+		configureCrudToolbarSaveCallback();
 		createPageContent();
 	}
 
@@ -278,6 +279,14 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	@Override
 	public CAbstractService<EntityClass> getEntityService() { return entityService; }
+	
+	@Override
+	public CNotificationService getNotificationService() { return notificationService; }
+	
+	@Override
+	public tech.derbent.app.workflow.service.CWorkflowStatusRelationService getWorkflowStatusRelationService() {
+		return workflowStatusRelationService;
+	}
 
 	protected CallbackDataProvider<EntityClass, Void> getMasterQuery() {
 		return new CallbackDataProvider<>(query -> {
@@ -308,19 +317,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		return searchToolbar;
 	}
 
-	/** Initializes the CRUD toolbar with necessary callbacks and listeners. */
-	private void initializeCrudToolbar() {
-		// Set new entity supplier
-		crudToolbar.setNewEntitySupplier(this::createNewEntity);
-		// Set refresh callback
-		crudToolbar.setRefreshCallback(e -> {
-			try {
-				refreshGrid();
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		});
+	/** Configures the CRUD toolbar with custom save callback that includes validation and error handling.
+	 * This method sets up the save logic specific to CAbstractEntityDBPage which includes pre-save events,
+	 * binder validation, entity validation, and proper error handling. */
+	private void configureCrudToolbarSaveCallback() {
 		// Set save callback with binder validation
 		crudToolbar.setSaveCallback(entity -> {
 			try {
@@ -370,60 +370,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					e.printStackTrace();
 				}
 				throw new RuntimeException("Unexpected error during save operation", exception);
-			}
-		});
-		// Set notification service if available
-		if (notificationService != null) {
-			crudToolbar.setNotificationService(notificationService);
-		}
-		// Set workflow services if available (for CProjectItem entities)
-		if (projectItemStatusService != null) {
-			crudToolbar.setProjectItemStatusService(projectItemStatusService);
-		}
-		if (workflowStatusRelationService != null) {
-			crudToolbar.setWorkflowStatusRelationService(workflowStatusRelationService);
-		}
-		// Add update listener to refresh grid on CRUD operations
-		crudToolbar.addUpdateListener(new tech.derbent.api.interfaces.IEntityUpdateListener() {
-
-			@Override
-			public void onEntityCreated(final tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
-				LOGGER.debug("Entity created, populating form");
-				@SuppressWarnings ("unchecked")
-				final EntityClass newEntity = (EntityClass) entity;
-				setCurrentEntity(newEntity);
-				populateForm();
-			}
-
-			@Override
-			public void onEntityDeleted(final tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
-				LOGGER.debug("Entity deleted, refreshing grid");
-				masterViewSection.selectLastOrFirst(null);
-				refreshGrid();
-				// Show success notification
-				if (notificationService != null) {
-					notificationService.showDeleteSuccess();
-				} else {
-					showNotification("Item deleted successfully");
-				}
-			}
-
-			@Override
-			public void onEntitySaved(final tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
-				LOGGER.debug("Entity saved, refreshing grid");
-				refreshGrid();
-				// Update current entity with saved version
-				@SuppressWarnings ("unchecked")
-				final EntityClass savedEntity = (EntityClass) entity;
-				setCurrentEntity(savedEntity);
-				populateForm();
-				// Show success notification
-				if (notificationService != null) {
-					notificationService.showSaveSuccess();
-				} else {
-					showNotification("Data saved successfully");
-				}
-				navigateToClass();
 			}
 		});
 	}
@@ -659,5 +605,46 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	 * @throws IllegalArgumentException if validation fails */
 	protected void validateEntityForSave(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null for validation");
+	}
+	
+	// Implementation of IEntityUpdateListener interface
+	@Override
+	public void onEntityCreated(final CEntityDB<?> entity) throws Exception {
+		LOGGER.debug("Entity created, populating form");
+		@SuppressWarnings ("unchecked")
+		final EntityClass newEntity = (EntityClass) entity;
+		setCurrentEntity(newEntity);
+		populateForm();
+	}
+
+	@Override
+	public void onEntityDeleted(final CEntityDB<?> entity) throws Exception {
+		LOGGER.debug("Entity deleted, refreshing grid");
+		masterViewSection.selectLastOrFirst(null);
+		refreshGrid();
+		// Show success notification
+		if (notificationService != null) {
+			notificationService.showDeleteSuccess();
+		} else {
+			showNotification("Item deleted successfully");
+		}
+	}
+
+	@Override
+	public void onEntitySaved(final CEntityDB<?> entity) throws Exception {
+		LOGGER.debug("Entity saved, refreshing grid");
+		refreshGrid();
+		// Update current entity with saved version
+		@SuppressWarnings ("unchecked")
+		final EntityClass savedEntity = (EntityClass) entity;
+		setCurrentEntity(savedEntity);
+		populateForm();
+		// Show success notification
+		if (notificationService != null) {
+			notificationService.showSaveSuccess();
+		} else {
+			showNotification("Data saved successfully");
+		}
+		navigateToClass();
 	}
 }

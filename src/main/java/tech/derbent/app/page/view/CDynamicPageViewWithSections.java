@@ -34,6 +34,12 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
 
+	/** Creates a fully configured CRUD toolbar using the simplified constructor approach.
+	 * All callbacks and services are automatically configured from the parentPage.
+	 * @param parentPage   the content owner providing context
+	 * @param entityClass  the entity class type
+	 * @param currentBinder the data binder
+	 * @return a fully configured CCrudToolbar instance */
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
@@ -41,34 +47,9 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			throws Exception {
 		try {
 			LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
-			// Use static factory method to create toolbar
+			// Create toolbar - all configuration happens automatically in constructor
 			final CCrudToolbar toolbar = new CCrudToolbar(parentPage, parentPage.getEntityService(), entityClass, currentBinder);
 			toolbar.setCurrentEntity(null);
-			toolbar.setNewEntitySupplier(() -> {
-				try {
-					return parentPage.createNewEntityInstance();
-				} catch (final Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return toolbar;
-			});
-			toolbar.setRefreshCallback((currentEntity) -> {
-				// refreshGrid();
-				if ((currentEntity != null) && (((CEntityDB<?>) currentEntity).getId() != null)) {
-					try {
-						final CEntityDB<?> reloadedEntity =
-								parentPage.getEntityService().getById(((CEntityDB<?>) currentEntity).getId()).orElse(null);
-						parentPage.setCurrentEntity(reloadedEntity);
-						parentPage.populateForm();
-					} catch (final Exception e) {
-						LOGGER.error("Error reloading entity: {}", e.getMessage());
-					}
-				}
-			});
-			if (parentPage instanceof IEntityUpdateListener) {
-				toolbar.addUpdateListener((IEntityUpdateListener) parentPage);
-			}
 			return toolbar;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating CRUD toolbar:" + e.getMessage());
