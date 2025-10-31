@@ -76,6 +76,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	/** Creates a new CCrudToolbar instance for the given entity type and binder.
+	 * All configuration is now done automatically in the CCrudToolbar constructor.
 	 * @param typedBinder the properly typed binder for the entity
 	 * @param typedEntity the current entity instance
 	 * @return a configured CCrudToolbar instance */
@@ -83,25 +84,10 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			"rawtypes", "unchecked"
 	})
 	protected CCrudToolbar<EntityClass> createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
-		// Use static factory method to create toolbar
+		// Create toolbar - all configuration happens in constructor automatically
 		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar(this, entityService, entityClass, typedBinder);
 		toolbar.setCurrentEntity(typedEntity);
-		toolbar.setNewEntitySupplier(this::createNewEntityInstance);
-		toolbar.setRefreshCallback((currentEntity) -> {
-			try {
-				refreshGrid();
-				if (currentEntity != null && currentEntity.getId() != null) {
-					EntityClass reloadedEntity = entityService.getById(currentEntity.getId()).orElse(null);
-					if (reloadedEntity != null) {
-						populateEntityDetails(reloadedEntity);
-					}
-				}
-			} catch (Exception e) {
-				LOGGER.error("Error reloading entity: {}", e.getMessage());
-				e.printStackTrace();
-			}
-		});
-		toolbar.addUpdateListener(this);
+		// Allow subclasses to customize toolbar if needed
 		configureCrudToolbar(toolbar);
 		return toolbar;
 	}
