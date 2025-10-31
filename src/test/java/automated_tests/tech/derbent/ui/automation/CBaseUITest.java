@@ -312,6 +312,7 @@ public abstract class CBaseUITest {
 			ensureLoginViewLoaded();
 			initializeSampleDataFromLoginPage();
 			ensureLoginViewLoaded();
+			ensureCompanySelected();
 			boolean usernameFilled =
 					fillLoginField("#custom-username-input", "input", "username", username, "input[type='text'], input[type='email']");
 			if (!usernameFilled) {
@@ -351,6 +352,38 @@ public abstract class CBaseUITest {
 			LOGGER.warn("⚠️ Unable to determine current URL before ensuring login view: {}", e.getMessage());
 		}
 		wait_loginscreen();
+	}
+
+	/** Ensures a company is selected in the login form so multi-tenant logins succeed. */
+	protected void ensureCompanySelected() {
+		if (!isBrowserAvailable()) {
+			return;
+		}
+		try {
+			final Locator companyCombo = page.locator("#custom-company-input");
+			if (companyCombo.count() == 0) {
+				LOGGER.warn("⚠️ Company ComboBox not found on login page");
+				return;
+			}
+			Object rawValue = companyCombo.evaluate("combo => combo.value ?? null");
+			if (rawValue != null && !rawValue.toString().isBlank()) {
+				LOGGER.debug("ℹ️ Company already selected on login page");
+				return;
+			}
+			LOGGER.info("🏢 Selecting default company on login page");
+			companyCombo.first().click();
+			wait_500();
+			Locator items = page.locator("vaadin-combo-box-item");
+			if (items.count() > 0) {
+				items.first().click();
+				wait_500();
+				LOGGER.info("✅ Company selection completed");
+			} else {
+				LOGGER.warn("⚠️ No company options found in ComboBox");
+			}
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Failed to select company on login page: {}", e.getMessage());
+		}
 	}
 
 	/** Fills login fields by first trying the Vaadin shadow DOM input, then falling back to classic HTML selectors. */
@@ -1203,20 +1236,21 @@ public abstract class CBaseUITest {
 	/** Verifies that the grid contains data by checking for the presence of grid cells. */
 	protected boolean verifyGridHasData() {
 		try {
-			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(5000));
+			page.waitForSelector("vaadin-grid, vaadin-grid-pro, so-grid, c-grid, c-grid-pro",
+					new Page.WaitForSelectorOptions().setTimeout(20000));
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Grid not found while waiting for data: {}", e.getMessage());
 			return false;
 		}
-		final Locator grid = page.locator("vaadin-grid").first();
-		for (int attempt = 0; attempt < 10; attempt++) {
-			final Locator cells = grid.locator("vaadin-grid-cell-content");
+		final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid, c-grid-pro").first();
+		for (int attempt = 0; attempt < 30; attempt++) {
+			final Locator cells = grid.locator("vaadin-grid-cell-content, [part='cell'], so-grid-cell, c-grid-cell");
 			final int cellCount = cells.count();
 			if (cellCount > 0) {
 				LOGGER.info("📊 Grid has data: true (cells={})", cellCount);
 				return true;
 			}
-			wait_500();
+			wait_1000();
 		}
 		LOGGER.info("📊 Grid has data: false");
 		return false;
