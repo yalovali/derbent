@@ -56,8 +56,11 @@
 }
 
 .gantt-timeline-control-button vaadin-icon {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  min-height: 10px;
+  line-height: 10px;
 }
 
 .gantt-timeline-controls {
