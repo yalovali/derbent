@@ -22,12 +22,15 @@ import tech.derbent.app.projects.domain.CProject;
 public class CGanntGrid extends CGrid<CGanttItem> {
 
 	private static final long serialVersionUID = 1L;
-	private static final int TIMELINE_WIDTH_PIXELS = 800; // Width for timeline column
+	private static final int DEFAULT_TIMELINE_WIDTH_PIXELS = 800; // Default width for timeline column
+	private static final int MIN_TIMELINE_WIDTH_PIXELS = 400; // Minimum width
+	private static final int MAX_TIMELINE_WIDTH_PIXELS = 1600; // Maximum width
         private final CGanttDataProvider dataProvider;
         private final CPageEntityService pageEntityService;
         private CGanttTimelineHeader timelineHeader;
         private LocalDate timelineEnd;
         private LocalDate timelineStart;
+	private int timelineWidthPixels = DEFAULT_TIMELINE_WIDTH_PIXELS;
 
         public CGanntGrid(final CProject project, final CActivityService activityService, final CMeetingService meetingService,
                         final CPageEntityService pageEntityService) {
@@ -94,20 +97,31 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 		// Timeline column with custom header showing timeline markers
                 final Renderer<CGanttItem> timelineRenderer = new ComponentRenderer<>(item -> {
                         final CDiv wrapper = new CDiv();
-                        wrapper.setWidth(TIMELINE_WIDTH_PIXELS + "px");
+                        wrapper.setWidth(timelineWidthPixels + "px");
                         wrapper.setHeight("10px");
                         // wrapper.getStyle().set("border", "1px dashed lightgray");
-                        wrapper.add(new CGanttTimelineBar(item, timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS));
+                        wrapper.add(new CGanttTimelineBar(item, timelineStart, timelineEnd, timelineWidthPixels));
                         return wrapper;
                 });
-                timelineHeader = new CGanttTimelineHeader(timelineStart, timelineEnd, TIMELINE_WIDTH_PIXELS,
-                                range -> updateTimelineRange(range));
+                timelineHeader = new CGanttTimelineHeader(timelineStart, timelineEnd, timelineWidthPixels,
+                                range -> updateTimelineRange(range), this::setTimelineWidth);
                 addColumn(timelineRenderer).setHeader(timelineHeader).setKey("timeline").setFlexGrow(1).setSortable(false);
         }
 
 	/** Public refresh hook. */
 	public void refresh() {
 		dataProvider.refreshAll();
+	}
+
+	/** Set the timeline column width and refresh the view.
+	 * @param widthPixels The new width in pixels */
+	public void setTimelineWidth(final int widthPixels) {
+		if ((widthPixels >= MIN_TIMELINE_WIDTH_PIXELS) && (widthPixels <= MAX_TIMELINE_WIDTH_PIXELS)) {
+			timelineWidthPixels = widthPixels;
+			// Recreate columns to apply new width
+			getColumns().forEach(this::removeColumn);
+			createColumns();
+		}
 	}
 
 	/** Setup click navigation to appropriate entity page based on item type. */

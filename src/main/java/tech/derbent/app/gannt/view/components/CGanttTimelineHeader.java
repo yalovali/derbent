@@ -42,9 +42,16 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		void onTimelineRangeChange(CGanttTimelineRange range);
 	}
 
+	@FunctionalInterface
+	public interface IGanttWidthChangeListener {
+
+		void onWidthChange(int newWidth);
+	}
+
 	private static final long MIN_DURATION_DAYS = 7;
 	private static final long serialVersionUID = 1L;
 	private final IGanttTimelineChangeListener changeListener;
+	private final IGanttWidthChangeListener widthChangeListener;
 	private final CHorizontalLayout controlBar = new CHorizontalLayout();
 	private CTimelineScale currentScale = CTimelineScale.AUTO;
 	private final LinkedHashMap<LocalDate, Integer> dateToPixelMap = new LinkedHashMap<>();
@@ -59,7 +66,7 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 	private final Span windowSummary = new Span();
 
 	public CGanttTimelineHeader(final LocalDate startDate, final LocalDate endDate, final int totalWidth,
-			final IGanttTimelineChangeListener changeListener) {
+			final IGanttTimelineChangeListener changeListener, final IGanttWidthChangeListener widthChangeListener) {
 		Check.notNull(startDate, "startDate cannot be null");
 		Check.notNull(endDate, "endDate cannot be null");
 		Check.isTrue(!startDate.isAfter(endDate), "startDate must be before or equal to endDate");
@@ -69,6 +76,7 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		fullRangeEnd = endDate;
 		this.totalWidth = totalWidth;
 		this.changeListener = changeListener;
+		this.widthChangeListener = widthChangeListener;
 		addClassName("gantt-timeline-header");
 		setWidth(totalWidth + "px");
 		// setHeightUndefined();
@@ -127,6 +135,9 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		final CButton zoomIn = createControlButton("vaadin:search-plus", "Zoom in", () -> zoom(0.7));
 		final CButton zoomOut = createControlButton("vaadin:search-minus", "Zoom out", () -> zoom(1.5));
 		final CButton reset = createControlButton("vaadin:refresh", "Reset to full range", () -> applyRange(fullRangeStart, fullRangeEnd, true));
+		final CButton focusMiddle = createControlButton("vaadin:crosshairs", "Focus to middle of timeline", () -> focusToMiddle());
+		final CButton increaseWidth = createControlButton("vaadin:expand", "Increase timeline width", () -> adjustWidth(100));
+		final CButton decreaseWidth = createControlButton("vaadin:compress", "Decrease timeline width", () -> adjustWidth(-100));
 		scaleSelector.setItems(CTimelineScale.values());
 		scaleSelector.setValue(currentScale);
 		scaleSelector.setItemLabelGenerator(CTimelineScale::getLabel);
@@ -137,7 +148,7 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		scaleSelector.addClassName("gantt-timeline-scale-select");
 		windowSummary.addClassName("gantt-timeline-summary");
 		updateWindowSummary();
-		controlBar.add(scrollBack, scrollForward, zoomIn, zoomOut, reset, scaleSelector, windowSummary);
+		controlBar.add(scrollBack, scrollForward, zoomIn, zoomOut, reset, focusMiddle, decreaseWidth, increaseWidth, scaleSelector, windowSummary);
 	}
 
 	private void configureTimelineWrapper() {
@@ -345,5 +356,27 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		LocalDate newStart = center.minusDays(halfWindow);
 		LocalDate newEnd = newStart.plusDays(newDuration - 1);
 		applyRange(newStart, newEnd, true);
+	}
+
+	/** Focus to the middle of the current full timeline range. */
+	private void focusToMiddle() {
+		final long fullDuration = ChronoUnit.DAYS.between(fullRangeStart, fullRangeEnd) + 1;
+		final LocalDate middleDate = fullRangeStart.plusDays(fullDuration / 2);
+		// Create a window around the middle date
+		final long windowSize = Math.max(MIN_DURATION_DAYS, fullDuration / 4);
+		final long halfWindow = windowSize / 2;
+		final LocalDate newStart = middleDate.minusDays(halfWindow);
+		final LocalDate newEnd = middleDate.plusDays(halfWindow);
+		applyRange(newStart, newEnd, true);
+	}
+
+	/** Adjust the width of the timeline display.
+	 * @param deltaPixels The change in pixels (positive to increase, negative to decrease) */
+	private void adjustWidth(final int deltaPixels) {
+		if (widthChangeListener != null) {
+			// Calculate new width (constrained to reasonable bounds)
+			final int newWidth = Math.max(400, Math.min(1600, totalWidth + deltaPixels));
+			widthChangeListener.onWidthChange(newWidth);
+		}
 	}
 }

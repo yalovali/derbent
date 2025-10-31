@@ -1,6 +1,8 @@
 .gantt-timeline-header {
   background: #f8f9fb;
-  border-bottom: 0px solid #ccc;
+  border: 2px solid #c5c9cf;
+  border-radius: 4px;
+  padding: 2px;
 }
 
 .gantt-time-marker {
@@ -75,42 +77,57 @@
 }
 
 .gantt-timeline-scale-select {
-  font-size: 8px;
-  min-height: 10px;
-  --lumo-field-size: 10px;
-  --lumo-text-field-size: 10px
+  font-size: 9px;
+  min-height: 18px;
+  height: 18px;
+  --lumo-field-size: 18px;
+  --lumo-text-field-size: 18px;
 }
 
 .gantt-timeline-scale-select::part(input-field) {
-  min-height: 10px;
-  padding: 1px 4px;
-  font-size: 8px;
+  min-height: 18px;
+  height: 18px;
+  padding: 2px 4px;
+  font-size: 9px;
 }
 .gantt-timeline-scale-select vaadin-select-value-button {
-  font-size: 8px; 
-  padding:0px; 
+  font-size: 9px;
+  padding: 1px 2px;
+  min-height: 18px;
 }
 
 .gantt-timeline-scale-select vaadin-select-item {
-  font-size: 8px;
-  padding:0px; 
+  font-size: 9px;
+  padding: 2px 4px;
+  min-height: 20px;
 }
 .gantt-timeline-scale-select::part(value),
 .gantt-timeline-scale-select::part(toggle-button),
-.gantt-timeline-scale-select::part(label),
+.gantml-timeline-scale-select::part(label),
 .gantt-timeline-scale-select::part(helper-text) {
-  font-size: 8px;
-  line-height: 1;
+  font-size: 9px;
+  line-height: 1.2;
 }
 
 .gantt-timeline-scale-select::part(toggle-button) {
   padding: 0;
-  width: 18px;
-  min-width: 10px;
+  width: 20px;
+  min-width: 16px;
 }
 
 .gantt-timeline-scale-select::part(items) {
-  font-size: 8px;
+  font-size: 9px;
+}
+
+/* Override Vaadin's default dropdown item styling */
+vaadin-select-overlay::part(overlay) {
+  font-size: 9px;
+}
+
+vaadin-select-overlay vaadin-item {
+  font-size: 9px !important;
+  min-height: 20px;
+  padding: 2px 8px;
 }
 
 .gantt-timeline-summary {
