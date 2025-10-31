@@ -9,11 +9,11 @@
 }
 
 .gantt-time-marker span {
-  font-size: 10px;
+  font-size: 9px;
   white-space: nowrap;
   display: inline-block;
-  padding-left: 4px;
-  line-height: 20px;
+  padding-left: 3px;
+  line-height: 16px;
 } 
 
 .gantt-today-marker {
@@ -39,17 +39,56 @@
 }
 
 .gantt-timeline-control-button {
-	background-color: #e7e7e7;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-	height: 30px;
+  background-color: #e7e7e7;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-size: 11px;
 }
-	
-.gantt-timeline-controls{
+
+.gantt-timeline-control-button vaadin-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.gantt-timeline-controls {
+  padding: 4px 8px;
+  gap: 6px;
+}
+
+.gantt-timeline-scale-select {
+  font-size: 11px;
+  min-height: 20px;
+}
+
+.gantt-timeline-scale-select::part(input-field) {
+  min-height: 20px;
+  padding: 2px 6px;
+}
+
+.gantt-timeline-summary {
+  font-size: 11px;
+  line-height: 20px;
+  padding: 0 6px;
+}
+
+.gantt-timeline-row {
+  min-height: 18px;
+  height: 18px;
+}
+
+.gantt-timeline-marker {
+  min-height: 18px;
+  height: 18px;
+  font-size: 9px;
+  line-height: 18px;
+  padding: 0 3px;
 }
