@@ -144,17 +144,17 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	/** Creates a new entity instance.
-	 * @return a new entity instance of type EntityClass */
+	 * @return a new entity instance of type EntityClass
+	 * @throws Exception */
 	@Override
 	@SuppressWarnings ("unchecked")
-	protected <T extends CEntityDB<T>> T createNewEntity() {
+	protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
 		return (T) createNewEntityInstance();
 	}
 
 	/** Creates a new entity instance of the specific entity type.
 	 * @return a new entity instance of type EntityClass */
-	protected abstract EntityClass createNewEntityInstance();
-
+	// protected abstract EntityClass createNewEntityInstance();
 	private void createPageContent() {
 		baseDetailsLayout = CFlexLayout.forEntityPage();
 		createMasterSection();

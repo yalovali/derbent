@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
@@ -30,6 +33,49 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	public static final String DEFAULT_ICON = "vaadin:database";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
+
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public static CCrudToolbar<?> createCrudToolbar(IContentOwner parentPage, Class<?> entityClass, CEnhancedBinder<?> currentBinder)
+			throws Exception {
+		try {
+			LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
+			// Use static factory method to create toolbar
+			final CCrudToolbar toolbar = new CCrudToolbar(parentPage, parentPage.getEntityService(), entityClass, currentBinder);
+			toolbar.setCurrentEntity(null);
+			toolbar.setNewEntitySupplier(() -> {
+				try {
+					return parentPage.createNewEntityInstance();
+				} catch (final Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return toolbar;
+			});
+			toolbar.setRefreshCallback((currentEntity) -> {
+				// refreshGrid();
+				if ((currentEntity != null) && (((CEntityDB<?>) currentEntity).getId() != null)) {
+					try {
+						final CEntityDB<?> reloadedEntity =
+								parentPage.getEntityService().getById(((CEntityDB<?>) currentEntity).getId()).orElse(null);
+						parentPage.setCurrentEntity(reloadedEntity);
+						parentPage.populateForm();
+					} catch (final Exception e) {
+						LOGGER.error("Error reloading entity: {}", e.getMessage());
+					}
+				}
+			});
+			if (parentPage instanceof IEntityUpdateListener) {
+				toolbar.addUpdateListener((IEntityUpdateListener) parentPage);
+			}
+			return toolbar;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating CRUD toolbar:" + e.getMessage());
+			throw e;
+		}
+	}
+
 	private CCrudToolbar<?> crudToolbar;
 	// State tracking for performance optimization
 	protected CComponentGridEntity grid;
@@ -48,44 +94,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 		} catch (Exception e) {
 			LOGGER.error("Failed to initialize dynamic page view with sections for: {}: {}", pageEntity.getPageTitle(), e.getMessage());
 			e.printStackTrace();
-		}
-	}
-
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	protected CCrudToolbar<?> createCrudToolbar() {
-		try {
-			LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
-			// Use static factory method to create toolbar
-			final CCrudToolbar toolbar = new CCrudToolbar(this, entityService, entityClass, currentBinder);
-			toolbar.setCurrentEntity(null);
-			toolbar.setNewEntitySupplier(() -> {
-				try {
-					return createNewEntityInstance();
-				} catch (final Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return toolbar;
-			});
-			toolbar.setRefreshCallback((currentEntity) -> {
-				refreshGrid();
-				if ((currentEntity != null) && (((CEntityDB<?>) currentEntity).getId() != null)) {
-					try {
-						final CEntityDB<?> reloadedEntity = entityService.getById(((CEntityDB<?>) currentEntity).getId()).orElse(null);
-						setCurrentEntity(reloadedEntity);
-						populateForm();
-					} catch (final Exception e) {
-						LOGGER.error("Error reloading entity: {}", e.getMessage());
-					}
-				}
-			});
-			toolbar.addUpdateListener(this);
-			return toolbar;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating CRUD toolbar:" + e.getMessage());
-			throw e;
 		}
 	}
 
@@ -166,7 +174,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 		}
 	}
 
-	protected CEntityDB<?> createNewEntityInstance() throws Exception {
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
 		return createNewEntity();
 	}
 

@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.utils.Check;
@@ -51,9 +53,9 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	}
 
 	@Override
-	protected CCrudToolbar<?> createCrudToolbar() {
+	protected CCrudToolbar<?> createCrudToolbar(IContentOwner parentPage, Class<?> entityClass, CEnhancedBinder<?> currentBinder) {
 		// Create the base toolbar using parent implementation
-		CCrudToolbar<?> toolbar = super.createCrudToolbar();
+		CCrudToolbar<?> toolbar = super.createCrudToolbar(this, currentEntityType, currentBinder);
 		// Configure button visibility based on our settings
 		if (toolbar != null) {
 			try {

@@ -46,5 +46,11 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	}
 
 	@Override
+	public CEntityDB<?> createNewEntityInstance() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 }

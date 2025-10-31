@@ -58,7 +58,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected CCrudToolbar<EntityClass> crudToolbar;
 	private EntityClass currentEntity;
 	protected String currentSearchText = "";
-	// private final VerticalLayout baseDetailsLayout = new VerticalLayout();
 	private final Div detailsTabLayout = new Div();
 	protected final Class<EntityClass> entityClass;
 	protected final CAbstractService<EntityClass> entityService;
@@ -66,10 +65,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected CMasterViewSectionBase<EntityClass> masterViewSection;
 	protected CNotificationService notificationService; // Optional injection
 	protected tech.derbent.app.activities.service.CProjectItemStatusService projectItemStatusService; // Optional injection
-	// Search functionality
 	protected CSearchToolbar searchToolbar;
 	protected ISessionService sessionService;
-	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
 	protected tech.derbent.app.workflow.service.CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
 
@@ -278,6 +275,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected abstract String getEntityRouteIdField();
 	// protected abstract CallbackDataProvider<EntityClass, Void> getMasterQuery();
+
+	@Override
+	public CAbstractService<EntityClass> getEntityService() { return entityService; }
 
 	protected CallbackDataProvider<EntityClass, Void> getMasterQuery() {
 		return new CallbackDataProvider<>(query -> {

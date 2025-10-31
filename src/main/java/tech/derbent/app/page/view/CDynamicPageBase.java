@@ -24,7 +24,6 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	protected Class<?> currentEntityType = null;
 	protected String currentEntityViewName = null;
 	protected Class<?> entityClass;
-	// Services for dynamic entity management
 	protected CAbstractService<?> entityService;
 	protected final CPageEntity pageEntity;
 	protected final CPageService<?> pageService;
