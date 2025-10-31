@@ -25,3 +25,4 @@ profile-pictures/
 *.class
 .mv
 .m2
+.codex/

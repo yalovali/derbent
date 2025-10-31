@@ -33,7 +33,7 @@ import tech.derbent.app.projects.domain.CProject;
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
  * authentication workflows - Navigation between views using ID-based selectors - CRUD operations testing - Form validation and ComboBox testing -
  * Grid interactions and data verification - Screenshot capture for debugging - Cross-view data consistency testing */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles ("test")
 public abstract class CBaseUITest {
 
@@ -66,7 +66,7 @@ public abstract class CBaseUITest {
 	protected Page page;
 	private Playwright playwright;
 	@LocalServerPort
-	protected int port = 8080;
+	protected int port = 8081;
 	/** Status and type view classes */
 	protected Class<?>[] statusAndTypeViewClasses = {};
 	/** Legacy property for backward compatibility */

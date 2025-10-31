@@ -1,6 +1,6 @@
 .gantt-timeline-header {
   background: #f8f9fb;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 0px solid #ccc;
 }
 
 .gantt-time-marker {
@@ -38,9 +38,14 @@
   background-color: #ddd;
 }
 
+.gantt-timeline-control-button focused {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--lumo-primary-color-50pct);
+}
+
 .gantt-timeline-control-button {
-  background-color: #e7e7e7;
-  border: 1px solid #ccc;
+  background-color: transparent;
+  border: 0px solid #ccc;
   border-radius: 3px;
   --lumo-button-size: 22px;
   width: var(--lumo-button-size);
@@ -56,48 +61,56 @@
 }
 
 .gantt-timeline-control-button vaadin-icon {
-  width: 10px;
-  height: 10px;
-  min-width: 10px;
-  min-height: 10px;
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  min-height: 8px;
   line-height: 10px;
 }
 
 .gantt-timeline-controls {
-  padding: 2px 6px;
-  gap: 4px;
-  min-height: 24px;
+  padding: 0px 2px;
+  gap: 1px;
+  min-height: 12px;
 }
 
 .gantt-timeline-scale-select {
-  font-size: 10px;
-  min-height: 18px;
-  --lumo-field-size: 22px;
-  --lumo-text-field-size: var(--lumo-button-size);
+  font-size: 8px;
+  min-height: 10px;
+  --lumo-field-size: 10px;
+  --lumo-text-field-size: 10px
 }
 
 .gantt-timeline-scale-select::part(input-field) {
-  min-height: 18px;
+  min-height: 10px;
   padding: 1px 4px;
-  font-size: 10px;
+  font-size: 8px;
+}
+.gantt-timeline-scale-select vaadin-select-value-button {
+  font-size: 8px; 
+  padding:0px; 
 }
 
+.gantt-timeline-scale-select vaadin-select-item {
+  font-size: 8px;
+  padding:0px; 
+}
 .gantt-timeline-scale-select::part(value),
 .gantt-timeline-scale-select::part(toggle-button),
 .gantt-timeline-scale-select::part(label),
 .gantt-timeline-scale-select::part(helper-text) {
-  font-size: 10px;
-  line-height: 1.2;
+  font-size: 8px;
+  line-height: 1;
 }
 
 .gantt-timeline-scale-select::part(toggle-button) {
   padding: 0;
   width: 18px;
-  min-width: 18px;
+  min-width: 10px;
 }
 
 .gantt-timeline-scale-select::part(items) {
-  font-size: 10px;
+  font-size: 8px;
 }
 
 .gantt-timeline-summary {
