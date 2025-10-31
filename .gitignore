@@ -23,3 +23,5 @@ javac.*.args
 profile-pictures/
 /docs.zip
 *.class
+.mv
+.m2
