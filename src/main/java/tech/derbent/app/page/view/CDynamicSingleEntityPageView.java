@@ -52,6 +52,9 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 		LOGGER.debug("CRUD toolbar configured - Delete: {}, New: {}, Save: {}, Reload: {}", enableDelete, enableNew, enableSave, enableReload);
 	}
 
+	/** Hook method for customizing the CRUD toolbar after creation.
+	 * Configures button visibility based on the enableXxxButton flags set via setCrudToolbarButtonConfig().
+	 * @param toolbar the toolbar to configure */
 	@Override
 	protected void configureCrudToolbar(final CCrudToolbar<?> toolbar) {
 		// Configure button visibility based on our settings using the new API
