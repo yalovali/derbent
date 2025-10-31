@@ -34,29 +34,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
 
-	/** Creates a fully configured CRUD toolbar using the simplified constructor approach.
-	 * All callbacks and services are automatically configured from the parentPage.
-	 * @param parentPage   the content owner providing context
-	 * @param entityClass  the entity class type
-	 * @param currentBinder the data binder
-	 * @return a fully configured CCrudToolbar instance */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public static CCrudToolbar<?> createCrudToolbar(IContentOwner parentPage, Class<?> entityClass, CEnhancedBinder<?> currentBinder)
-			throws Exception {
-		try {
-			LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
-			// Create toolbar - all configuration happens automatically in constructor
-			final CCrudToolbar toolbar = new CCrudToolbar(parentPage, parentPage.getEntityService(), entityClass, currentBinder);
-			toolbar.setCurrentEntity(null);
-			return toolbar;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating CRUD toolbar:" + e.getMessage());
-			throw e;
-		}
-	}
-
 	private CCrudToolbar<?> crudToolbar;
 	// State tracking for performance optimization
 	protected CComponentGridEntity grid;
@@ -181,7 +158,11 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			add(splitLayout);
 			createMasterSection();
 			createDetailsSection();
-			crudToolbar = createCrudToolbar();
+			// Create toolbar directly using CCrudToolbar constructor - all configuration happens automatically
+			crudToolbar = new CCrudToolbar<>(this, getEntityService(), currentEntityType, currentBinder);
+			crudToolbar.setCurrentEntity(null);
+			// Allow subclasses to customize toolbar
+			configureCrudToolbar(crudToolbar);
 			splitBottomLayout.addComponentAsFirst(crudToolbar);
 			grid.selectNextItem();
 		} catch (final Exception e) {
