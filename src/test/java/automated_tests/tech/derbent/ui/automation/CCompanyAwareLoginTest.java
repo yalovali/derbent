@@ -13,10 +13,10 @@ import com.microsoft.playwright.Locator;
  * docs/implementation/COMPANY_LOGIN_PATTERN.md. The test verifies: 1. Sample data initialization creates multiple companies 2. Company selection
  * dropdown is populated correctly 3. Login works with username@companyId pattern 4. Multi-tenant isolation is maintained 5. Authentication flow
  * completes successfully */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080"
+		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=0"
 })
 @DisplayName ("🔐 Company-Aware Login Pattern Test")
 public class CCompanyAwareLoginTest extends CBaseUITest {

@@ -12,10 +12,10 @@ import org.springframework.test.context.TestPropertySource;
 
 /** Simple Playwright test that demonstrates headless browser operation, login, and screenshot capture. This test focuses on core functionality
  * without requiring full navigation menu to be present. */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080"
+		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=0"
 })
 @DisplayName ("📸 Simple Login Screenshot Test")
 public class CSimpleLoginScreenshotTest extends CBaseUITest {

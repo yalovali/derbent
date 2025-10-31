@@ -11,7 +11,7 @@ import tech.derbent.Application;
 
 /** Playwright test to diagnose and verify dialog box component refresh issues. This test specifically checks if ComboBox and other components in
  * relation dialogs properly display values when editing existing entities. */
-@SpringBootTest (classes = Application.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest (classes = Application.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles ("test")
 public class CDialogRefreshTest extends CBaseUITest {
 

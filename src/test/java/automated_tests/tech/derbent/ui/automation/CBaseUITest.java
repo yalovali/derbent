@@ -33,7 +33,7 @@ import tech.derbent.app.projects.domain.CProject;
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
  * authentication workflows - Navigation between views using ID-based selectors - CRUD operations testing - Form validation and ComboBox testing -
  * Grid interactions and data verification - Screenshot capture for debugging - Cross-view data consistency testing */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles ("test")
 public abstract class CBaseUITest {
 
@@ -416,15 +416,31 @@ public abstract class CBaseUITest {
 			}
 			try {
 				wait_loginscreen();
-				final Locator resetButton =
-						page.locator("vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), [id*='reset']");
-				if (resetButton.count() == 0) {
-					LOGGER.info("ℹ️ 'Reset Database' button not present on login view; assuming sample data is available");
-					SAMPLE_DATA_INITIALIZED.compareAndSet(false, true);
-					return;
+					final Locator minimalButton = page.locator(
+							"vaadin-button:has-text('DB Min'), button:has-text('DB Min'), vaadin-button[id*='db-min'], button[id*='db-min'], vaadin-button[title*='Minimum'], button[title*='Minimum']");
+					final Locator fullButton = page.locator(
+							"vaadin-button:has-text('DB Full'), button:has-text('DB Full'), vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), vaadin-button[id*='reset'], button[id*='reset']");
+					final Locator targetButton = minimalButton.count() > 0 ? minimalButton.first()
+							: (fullButton.count() > 0 ? fullButton.first() : null);
+					if (targetButton == null) {
+						LOGGER.info("ℹ️ 'Reset Database' button not present on login view; assuming sample data is available");
+						SAMPLE_DATA_INITIALIZED.compareAndSet(false, true);
+						return;
+					}
+					LOGGER.info("📥 Loading sample data via login screen button ({})",
+							minimalButton.count() > 0 ? "DB Min" : "DB Full");
+					Locator button = targetButton;
+					try {
+						button.scrollIntoViewIfNeeded();
+					} catch (PlaywrightException scrollError) {
+						LOGGER.debug("ℹ️ Unable to scroll reset button into view: {}", scrollError.getMessage());
+					}
+				try {
+					button.click();
+				} catch (PlaywrightException clickError) {
+					LOGGER.debug("ℹ️ Retry reset button click with force due to: {}", clickError.getMessage());
+					button.click(new Locator.ClickOptions().setForce(true));
 				}
-				LOGGER.info("📥 Loading sample data via login screen button");
-				resetButton.first().click();
 				wait_500();
 				acceptConfirmDialogIfPresent();
 				closeInformationDialogIfPresent();
@@ -684,8 +700,12 @@ public abstract class CBaseUITest {
 			// Determine headless mode setting first
 			boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
 			LOGGER.info("🎭 Browser mode: {}", headless ? "HEADLESS" : "VISIBLE");
+			List<String> launchArguments = new ArrayList<>(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"));
+			if (!headless) {
+				launchArguments.add("--start-maximized");
+			}
 			BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions().setHeadless(headless)
-					.setArgs(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"));
+					.setArgs(launchArguments);
 			// Check if chromium is available in Playwright cache
 			String playwrightCache = System.getProperty("user.home") + "/.cache/ms-playwright/chromium-1091/chrome";
 			java.io.File cachedChromium = new java.io.File(playwrightCache);
@@ -722,7 +742,11 @@ public abstract class CBaseUITest {
 					}
 				}
 			}
-			context = browser.newContext();
+			final Browser.NewContextOptions contextOptions = new Browser.NewContextOptions();
+			if (!headless) {
+				contextOptions.setViewportSize(null); // allow the browser window to control size when visible
+			}
+			context = browser.newContext(contextOptions);
 			page = context.newPage();
 			page.navigate("http://localhost:" + port + "/login");
 			LOGGER.info("✅ Test environment setup complete - navigated to http://localhost:{}/login", port);
@@ -1408,9 +1432,13 @@ public abstract class CBaseUITest {
 	/** Attempts to resolve the fully-qualified entity class for a given entity type string. */
 	protected Optional<Class<?>> resolveEntityClass(String entityType) {
 		String baseName = entityType.startsWith("C") ? entityType.substring(1) : entityType;
+		String pluralSegment = baseName.toLowerCase() + "s";
+		String singularSegment = baseName.toLowerCase();
 		String[] candidateClasses = {
-				"tech.derbent." + baseName.toLowerCase() + "s.domain." + entityType,
-				"tech.derbent." + baseName.toLowerCase() + ".domain." + entityType, "tech.derbent.api.domain." + entityType
+				"tech.derbent." + pluralSegment + ".domain." + entityType, "tech.derbent." + singularSegment + ".domain." + entityType,
+				"tech.derbent.app." + pluralSegment + ".domain." + entityType, "tech.derbent.app." + singularSegment + ".domain." + entityType,
+				"tech.derbent.base." + pluralSegment + ".domain." + entityType, "tech.derbent.base." + singularSegment + ".domain." + entityType,
+				"tech.derbent.api.domain." + entityType
 		};
 		for (String fqcn : candidateClasses) {
 			try {

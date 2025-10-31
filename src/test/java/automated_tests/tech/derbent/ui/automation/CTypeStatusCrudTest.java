@@ -12,10 +12,10 @@ import com.microsoft.playwright.Locator;
  * (CActivityType, CMeetingType, CDecisionType, COrderType) 2. Complete CRUD operations on Status entities (CProjectItemStatus, CApprovalStatus) 3.
  * Toolbar button operations (New, Save, Delete, Refresh) 4. Response to updates (notifications, grid refresh, entity selection) 5. Validation and
  * error handling 6. Entity dependency checking and non-deletable protection */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080"
+		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=0"
 })
 public class CTypeStatusCrudTest extends CBaseUITest {
 

@@ -12,10 +12,10 @@ import org.springframework.test.context.TestPropertySource;
 
 /** Playwright journey test that explicitly reloads sample data, logs in, and captures screenshots while visiting every menu entity. Demonstrates the
  * full happy-path flow requested by product owners: initialize database samples, authenticate, and verify navigation coverage. */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080"
+		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=0"
 })
 @DisplayName ("🚀 Sample Data Menu Navigation Journey")
 public class CSampleDataMenuNavigationTest extends CBaseUITest {

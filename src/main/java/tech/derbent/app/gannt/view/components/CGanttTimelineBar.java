@@ -39,7 +39,9 @@ public class CGanttTimelineBar extends CHorizontalLayout {
 		if (visibleEnd.isBefore(timelineStart) || visibleStart.isAfter(timelineEnd)) {
 			return;
 		}
-		final Div bar = new Div();
+		final CHorizontalLayout barLayout = new CHorizontalLayout();
+		final CDiv bar = new CDiv();
+		barLayout.add(bar);
 		final long startOffset = ChronoUnit.DAYS.between(timelineStart, visibleStart);
 		final long visibleDuration = ChronoUnit.DAYS.between(visibleStart, visibleEnd) + 1;
 		final int leftPx = Math.max(0, (int) Math.round((startOffset * totalWidth) / (double) totalDays));
@@ -48,44 +50,56 @@ public class CGanttTimelineBar extends CHorizontalLayout {
 		if ((leftPx + widthPx) > totalWidth) {
 			widthPx = Math.max(2, totalWidth - leftPx);
 		}
-		bar.getStyle().set("position", "absolute");
-		bar.getStyle().set("left", leftPx + "px");
+		barLayout.getStyle().remove("white-space");
+		barLayout.getStyle().remove("overflow");
+		barLayout.getStyle().remove("text-overflow");
+		barLayout.setSizeUndefined();
+		barLayout.getStyle().set("position", "absolute");
+		barLayout.getStyle().set("left", leftPx + "px");
+		barLayout.setMargin(false);
+		barLayout.setPadding(false);
+		barLayout.setSpacing(true);
+		barLayout.setWidthFull();
+		barLayout.setHeightFull();
 		bar.getStyle().set("width", widthPx + "px");
 		formatBar(item, bar);
 		final int progress = item.getProgressPercentage();
-		createDisplayText(item, leftPx, widthPx, progress, totalWidth);
+		createDisplayText(barLayout, item, leftPx + widthPx, progress, totalWidth);
 		formatProgress(bar, progress);
 		createToolTip(item, visibleStart, visibleEnd, bar, progress);
-		add(bar);
+		add(barLayout);
 	}
 
-	private void createDisplayText(final CGanttItem item, final int leftPx, final int widthPx, final int progress, final int totalWidth) {
+	private void createDisplayText(CHorizontalLayout barLayout, final CGanttItem item, final int startPx, final int progress, final int totalWidth) {
 		final String displayText = String.format("%s (%s) - %d%%", item.getEntity().getName(), item.getResponsibleName(), progress);
 		final CDiv label = new CDiv(displayText);
 		label.setText(displayText);
-		label.getStyle().set("position", "absolute");
-		final int safeLeft = Math.min(leftPx + 5, Math.max(0, totalWidth - widthPx));
-		label.getStyle().set("left", safeLeft + "px");
-		label.getStyle().set("top", "5px");
+		// to right left space is:
+		int safeLeft = totalWidth - (startPx + 10);
+		if (safeLeft < 0) {
+			safeLeft = 0;
+		}
+		// label.getStyle().set("left", safeLeft + "px");
+		// label.getStyle().set("top", "5px");
 		label.getStyle().set("z-index", "1");
 		label.getStyle().set("background", "transparent");
 		label.getStyle().set("color", "#000"); // or use contrasting color
 		label.getStyle().set("font-size", "12px");
 		label.getStyle().set("white-space", "nowrap");
-		label.getStyle().set("max-width", widthPx + "px");
+		label.getStyle().set("max-width", safeLeft + "px");
 		label.getStyle().set("overflow", "hidden");
 		label.getStyle().set("text-overflow", "ellipsis");
 		label.setSizeUndefined();
-		add(label);
+		barLayout.add(label);
 	}
 
-	private void createToolTip(final CGanttItem item, final LocalDate itemStart, final LocalDate itemEnd, final Div bar, final int progress) {
+	private void createToolTip(final CGanttItem item, final LocalDate itemStart, final LocalDate itemEnd, final CDiv bar, final int progress) {
 		final String tooltip = String.format("%s\n%s\nProgress: %d%%\nDuration: %d days\nStart: %s\nEnd: %s", item.getEntity().getName(),
 				item.getResponsibleName(), progress, item.getDurationDays(), itemStart, itemEnd);
 		bar.getElement().setAttribute("title", tooltip);
 	}
 
-	private void formatBar(final CGanttItem item, final Div bar) {
+	private void formatBar(final CGanttItem item, final CDiv bar) {
 		bar.getStyle().set("height", "90%");
 		bar.getStyle().set("display", "flex");
 		bar.getStyle().set("align-items", "center");
@@ -105,7 +119,7 @@ public class CGanttTimelineBar extends CHorizontalLayout {
 		bar.setHeight("90%");
 	}
 
-	private void formatProgress(final Div bar, final int progress) {
+	private void formatProgress(final CDiv bar, final int progress) {
 		// Progress overlay
 		if ((progress > 0) && (progress < 100)) {
 			final Div progressOverlay = new Div();

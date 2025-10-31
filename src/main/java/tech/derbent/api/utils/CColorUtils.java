@@ -24,6 +24,7 @@ import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.base.users.domain.CUser;
 
 public final class CColorUtils {
+
 	/** Color for Cancel buttons */
 	public static final String CRUD_CANCEL_COLOR = "#6c757d";
 	/** Icon for Cancel buttons */
@@ -82,7 +83,7 @@ public final class CColorUtils {
 	public static Icon createStyledIcon(final String iconString) {
 		Check.notBlank(iconString, "Icon string cannot be null or blank");
 		final Icon icon = styleIcon(new Icon(iconString));
-		icon.addClassNames(IconSize.MEDIUM);
+		icon.addClassNames(IconSize.SMALL);
 		return icon;
 	}
 

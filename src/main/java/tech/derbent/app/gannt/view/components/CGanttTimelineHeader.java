@@ -71,6 +71,7 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		this.changeListener = changeListener;
 		addClassName("gantt-timeline-header");
 		setWidth(totalWidth + "px");
+		// setHeightUndefined();
 		setPadding(false);
 		setSpacing(false);
 		configureControlBar();

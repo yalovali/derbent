@@ -14,10 +14,10 @@ import com.microsoft.playwright.Locator;
 /** Comprehensive test suite for all dynamic views and windows. This test validates: 1. Complete navigation coverage of all menu items 2. Dynamic page
  * loading for all views 3. Critical dynamic entity routes (CProject, CUser, etc.) 4. CRUD operations on key entity types 5. Grid functionality across
  * views 6. Form validation and interaction 7. Multi-view data consistency */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080"
+		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=0"
 })
 @DisplayName ("🚀 Comprehensive Dynamic Views Navigation Test")
 public class CComprehensiveDynamicViewsTest extends CBaseUITest {

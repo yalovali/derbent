@@ -37,3 +37,19 @@
   width: 1px;
   background-color: #ddd;
 }
+
+.gantt-timeline-control-button {
+	background-color: #e7e7e7;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+	height: 30px;
+}
+	
+.gantt-timeline-controls{
+}

@@ -14,10 +14,10 @@ import com.microsoft.playwright.Locator;
 /** Comprehensive test suite for testing New, Save, and Delete button functionality across all pages. This test validates: 1. Button presence and
  * visibility 2. Button responsiveness (clickability) 3. Button functionality (actual operations) 4. Form interactions with buttons 5. Grid
  * interactions with buttons 6. Error handling and validation */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080"
+		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=0"
 })
 @DisplayName ("🔘 Comprehensive Button Functionality Test")
 public class CButtonFunctionalityTest extends CBaseUITest {
