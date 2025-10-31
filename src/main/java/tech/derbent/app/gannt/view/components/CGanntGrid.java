@@ -18,7 +18,7 @@ import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
 /** CGanntGrid - Gantt items displayed in a unified grid with navigation to entity pages and visual timeline bars. */
-@CssImport ("./themes/default/gantt-timeline.css")
+@CssImport ("./themes/default/gantt.css")
 public class CGanntGrid extends CGrid<CGanttItem> {
 
 	private static final long serialVersionUID = 1L;

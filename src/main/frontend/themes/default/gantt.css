@@ -42,53 +42,56 @@
   background-color: #e7e7e7;
   border: 1px solid #ccc;
   border-radius: 3px;
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  min-height: 20px;
+  --lumo-button-size: 22px;
+  width: var(--lumo-button-size);
+  height: var(--lumo-button-size);
+  min-width: var(--lumo-button-size);
+  min-height: var(--lumo-button-size);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .gantt-timeline-control-button vaadin-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 
 .gantt-timeline-controls {
-  padding: 4px 8px;
-  gap: 6px;
+  padding: 2px 6px;
+  gap: 4px;
+  min-height: 24px;
 }
 
 .gantt-timeline-scale-select {
-  font-size: 11px;
-  min-height: 20px;
+  font-size: 10px;
+  min-height: 18px;
+  --lumo-field-size: 22px;
 }
 
 .gantt-timeline-scale-select::part(input-field) {
-  min-height: 20px;
-  padding: 2px 6px;
+  min-height: 18px;
+  padding: 1px 4px;
 }
 
 .gantt-timeline-summary {
-  font-size: 11px;
-  line-height: 20px;
-  padding: 0 6px;
+  font-size: 10px;
+  line-height: var(--lumo-button-size);
+  padding: 0 4px;
 }
 
 .gantt-timeline-row {
-  min-height: 18px;
-  height: 18px;
+  min-height: 14px;
+  height: 14px;
 }
 
 .gantt-timeline-marker {
-  min-height: 18px;
-  height: 18px;
+  min-height: 14px;
+  height: 14px;
   font-size: 9px;
-  line-height: 18px;
-  padding: 0 3px;
+  line-height: 14px;
+  padding: 0 2px;
 }

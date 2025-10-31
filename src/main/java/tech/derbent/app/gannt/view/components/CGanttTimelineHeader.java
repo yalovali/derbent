@@ -119,7 +119,9 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		controlBar.addClassName("gantt-timeline-controls");
 		controlBar.setWidthFull();
 		controlBar.setAlignItems(Alignment.CENTER);
-		controlBar.setSpacing(true);
+		controlBar.setMargin(false);
+		controlBar.setPadding(false);
+		controlBar.setSpacing(false);
 		final CButton scrollBack = createControlButton("vaadin:angle-left", "Scroll left", () -> scroll(-1));
 		final CButton scrollForward = createControlButton("vaadin:angle-right", "Scroll right", () -> scroll(1));
 		final CButton zoomIn = createControlButton("vaadin:search-plus", "Zoom in", () -> zoom(0.7));
