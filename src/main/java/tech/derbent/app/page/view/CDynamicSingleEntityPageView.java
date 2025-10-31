@@ -44,7 +44,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	 * @param enableNew    Enable/disable new button
 	 * @param enableSave   Enable/disable save button
 	 * @param enableReload Enable/disable reload/cancel button */
-	public void configureCrudToolbar(boolean enableDelete, boolean enableNew, boolean enableSave, boolean enableReload) {
+	public void setCrudToolbarButtonConfig(boolean enableDelete, boolean enableNew, boolean enableSave, boolean enableReload) {
 		enableDeleteButton = enableDelete;
 		enableNewButton = enableNew;
 		enableSaveButton = enableSave;
@@ -52,17 +52,17 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 		LOGGER.debug("CRUD toolbar configured - Delete: {}, New: {}, Save: {}, Reload: {}", enableDelete, enableNew, enableSave, enableReload);
 	}
 
+	/** Hook method for customizing the CRUD toolbar after creation.
+	 * Configures button visibility based on the enableXxxButton flags set via setCrudToolbarButtonConfig().
+	 * @param toolbar the toolbar to configure */
 	@Override
-	protected CCrudToolbar<?> createCrudToolbar(IContentOwner parentPage, Class<?> entityClass, CEnhancedBinder<?> currentBinder) {
-		// Create the base toolbar using parent implementation
-		CCrudToolbar<?> toolbar = super.createCrudToolbar(this, currentEntityType, currentBinder);
+	protected void configureCrudToolbar(final CCrudToolbar<?> toolbar) {
 		// Configure button visibility based on our settings using the new API
 		if (toolbar != null) {
 			toolbar.configureButtonVisibility(enableNewButton, enableSaveButton, enableDeleteButton, enableReloadButton);
 			LOGGER.debug("CRUD toolbar buttons configured for single entity view - Delete: {}, New: {}, Save: {}, Reload: {}", enableDeleteButton,
 					enableNewButton, enableSaveButton, enableReloadButton);
 		}
-		return toolbar;
 	}
 
 	/** Create only the details section in full view (no grid) */
