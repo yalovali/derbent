@@ -33,7 +33,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageGenericEntity.class);
 	private static final long serialVersionUID = 1L;
 	// Current state
-	protected CCrudToolbar<EntityClass> crudToolbar;
+	protected CCrudToolbar crudToolbar;
 	private Class<?> currentEntityType = null;
 	// State tracking for performance optimization
 	private String currentEntityViewName = null;
@@ -71,21 +71,21 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		currentEntityType = null;
 	}
 
-	CCrudToolbar<EntityClass> createCrudToolbar() {
+	CCrudToolbar createCrudToolbar() {
 		return crudToolbar;
 	}
 
 	/** Creates a new CCrudToolbar instance for the given entity type and binder. All configuration is now done automatically in the CCrudToolbar
-	 * constructor.
+	 * constructor. The entity type is determined dynamically when an entity is set.
 	 * @param typedBinder the properly typed binder for the entity
 	 * @param typedEntity the current entity instance
 	 * @return a configured CCrudToolbar instance */
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	protected CCrudToolbar<EntityClass> createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
+	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		// Create toolbar - all configuration happens in constructor automatically
-		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar(this, entityService, entityClass, typedBinder);
+		CCrudToolbar toolbar = new CCrudToolbar(this, entityService, typedBinder);
 		toolbar.setCurrentEntity(typedEntity);
 		// Allow subclasses to customize toolbar if needed
 		configureCrudToolbar(toolbar);

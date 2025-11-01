@@ -30,7 +30,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	public static final String DEFAULT_ICON = "vaadin:database";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
-	private CCrudToolbar<?> crudToolbar;
+	private CCrudToolbar crudToolbar;
 	// State tracking for performance optimization
 	protected CComponentGridEntity grid;
 	private final CGridEntityService gridEntityService;
@@ -155,7 +155,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			createMasterSection();
 			createDetailsSection();
 			// Create toolbar directly using CCrudToolbar constructor - all configuration happens automatically
-			crudToolbar = new CCrudToolbar(this, getEntityService(), currentEntityType, currentBinder);
+			crudToolbar = new CCrudToolbar(this, getEntityService(), currentBinder);
 			crudToolbar.setCurrentEntity(null);
 			// Allow subclasses to customize toolbar
 			configureCrudToolbar(crudToolbar);

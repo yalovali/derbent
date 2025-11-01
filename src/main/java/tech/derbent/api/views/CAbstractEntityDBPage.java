@@ -56,7 +56,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	private CFlexLayout baseDetailsLayout;
 	private final CEnhancedBinder<EntityClass> binder;
-	protected CCrudToolbar<EntityClass> crudToolbar;
+	protected CCrudToolbar crudToolbar;
 	private EntityClass currentEntity;
 	protected String currentSearchText = "";
 	private final Div detailsTabLayout = new Div();
@@ -79,7 +79,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.sessionService = sessionService;
 		binder = new CEnhancedBinder<>(entityClass);
 		// Initialize CRUD toolbar - all configuration now happens in constructor
-		crudToolbar = new CCrudToolbar<>(this, entityService, entityClass, binder);
+		crudToolbar = new CCrudToolbar(this, entityService, binder);
 		// Set custom save callback with validation logic specific to this page type
 		configureCrudToolbarSaveCallback();
 		createPageContent();

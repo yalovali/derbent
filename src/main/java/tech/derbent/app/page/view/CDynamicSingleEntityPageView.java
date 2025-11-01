@@ -56,7 +56,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	 * Configures button visibility based on the enableXxxButton flags set via setCrudToolbarButtonConfig().
 	 * @param toolbar the toolbar to configure */
 	@Override
-	protected void configureCrudToolbar(final CCrudToolbar<?> toolbar) {
+	protected void configureCrudToolbar(final CCrudToolbar toolbar) {
 		// Configure button visibility based on our settings using the new API
 		if (toolbar != null) {
 			toolbar.configureButtonVisibility(enableNewButton, enableSaveButton, enableDeleteButton, enableReloadButton);
