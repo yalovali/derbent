@@ -198,7 +198,9 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 | **[🎨 View Layer Patterns](docs/architecture/view-layer-patterns.md)** | UI component and Vaadin patterns | Frontend Developers |
 | **[📝 Coding Standards](docs/architecture/coding-standards.md)** | C-prefix convention and best practices | All Developers |
 | **[🔐 Company Login Pattern](docs/implementation/COMPANY_LOGIN_PATTERN.md)** | Multi-tenant authentication implementation | Backend/Security |
-| **[🎭 Playwright Test Guide](docs/implementation/PLAYWRIGHT_TEST_GUIDE.md)** | Comprehensive UI testing framework | QA/Test Engineers |
+| **[🔷 Selenium Testing Guide](SELENIUM_TESTING_GUIDE.md)** | Selenium WebDriver UI automation | QA/Test Engineers |
+| **[🤖 Copilot Selenium Guide](COPILOT_SELENIUM_GUIDE.md)** | AI-powered Selenium test generation | QA/Test Engineers |
+| **[🎭 Playwright Test Guide](docs/implementation/PLAYWRIGHT_TEST_GUIDE.md)** | Playwright UI testing framework | QA/Test Engineers |
 | **[🔍 Database Query Debugging](docs/DATABASE_QUERY_DEBUGGING.md)** | SQL query monitoring and debugging guide | Backend Developers |
 
 <div align="center">
@@ -577,11 +579,26 @@ public class CButton extends Button {
 <tr>
 <td width="33%">
 
-#### **🎭 Playwright UI Automation**
-- **Visual Testing**: Screenshot comparison
-- **Page Object Model**: Maintainable test architecture
-- **Cross-browser**: Chrome, Firefox, Safari support
-- **CI/CD Integration**: Headless execution ready
+#### **🎭 UI Automation Testing**
+- **🔷 Selenium WebDriver**: Industry-standard browser automation
+- **🎯 Playwright**: Advanced UI testing framework
+- **🤖 Copilot-Optimized**: Selenium tests designed for AI generation
+- **📸 Screenshot Testing**: Visual documentation of test runs
+- **🔄 Dual Framework**: Choose the best tool for each test
+
+**Run Selenium Tests:**
+```bash
+# Headless mode (CI/CD)
+./run-selenium-tests.sh
+
+# Visible browser (debugging)
+./run-selenium-tests.sh --visible
+```
+
+**Run Playwright Tests:**
+```bash
+./run-playwright-tests.sh mock
+```
 
 </td>
 <td width="33%">
@@ -591,15 +608,17 @@ public class CButton extends Button {
 - **Service Layer**: Business logic validation
 - **Repository Testing**: Data access verification
 - **Spring Boot Test**: Application context testing
+- **H2 In-Memory**: Fast test database
 
 </td>
 <td width="33%">
 
 #### **📊 Quality Metrics**
-- **Test Coverage**: Service and utility layers
-- **Code Quality**: Spotless formatting
+- **Test Coverage**: Comprehensive UI and unit tests
+- **Code Quality**: Consistent formatting
 - **Architecture Tests**: ArchUnit validation
 - **Performance**: Load testing ready
+- **Documentation**: Inline and external docs
 
 </td>
 </tr>
