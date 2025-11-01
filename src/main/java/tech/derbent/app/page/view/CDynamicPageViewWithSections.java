@@ -6,11 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
@@ -33,7 +30,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	public static final String DEFAULT_ICON = "vaadin:database";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
-
 	private CCrudToolbar<?> crudToolbar;
 	// State tracking for performance optimization
 	protected CComponentGridEntity grid;
@@ -159,7 +155,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			createMasterSection();
 			createDetailsSection();
 			// Create toolbar directly using CCrudToolbar constructor - all configuration happens automatically
-			crudToolbar = new CCrudToolbar<>(this, getEntityService(), currentEntityType, currentBinder);
+			crudToolbar = new CCrudToolbar(this, getEntityService(), currentEntityType, currentBinder);
 			crudToolbar.setCurrentEntity(null);
 			// Allow subclasses to customize toolbar
 			configureCrudToolbar(crudToolbar);
@@ -264,7 +260,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	}
 
 	/** Refresh the grid to show updated data. */
-	private void refreshGrid() {
+	@Override
+	public void refreshGrid() {
 		grid.refreshGridData();
 	}
 
@@ -278,7 +275,9 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 					crudToolbar.setCurrentEntity(null);
 				}
 			} else {
-				crudToolbar.setCurrentEntity(entity);
+				if (crudToolbar != null) {
+					crudToolbar.setCurrentEntity(entity);
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error setting current entity in toolbar:" + e.getMessage());
