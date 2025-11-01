@@ -556,7 +556,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	@SuppressWarnings ("unchecked")
 	public void setCurrentEntity(final Object entity) {
 		// LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
-		currentEntity = (EntityClass) entity;
+		currentEntity = (CEntityDB<?>) entity;
 		// Automatically set dependency checker from service when entity changes
 		if (entityService != null) {
 			dependencyChecker = entityService::checkDeleteAllowed;
