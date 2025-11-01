@@ -20,7 +20,6 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.services.CAbstractService;
@@ -84,7 +83,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	private Function<?, String> dependencyChecker;
 	private CNotificationService notificationService; // Optional injection
 	private CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
-	private IContentOwner parentPage; // Optional parent page reference
 	
 	// Listeners
 	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
@@ -115,54 +113,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	 * @return a new CCrudToolbar instance */
 	public static CCrudToolbar create(final CEnhancedBinder<?> binder) {
 		return new CCrudToolbar(binder);
-	}
-
-	/** @deprecated Use minimal constructor {@link #CCrudToolbar(CEnhancedBinder)} and configure via setters.
-	 * Legacy constructor for backward compatibility with IContentOwner pattern. */
-	@Deprecated
-	public CCrudToolbar(IContentOwner parentPage, final CEnhancedBinder<?> binder) {
-		this(binder);
-		this.parentPage = parentPage;
-		
-		// Auto-configure from parent page
-		if (parentPage != null) {
-			this.entityService = parentPage.getEntityService();
-			this.notificationService = parentPage.getNotificationService();
-			this.workflowStatusRelationService = parentPage.getWorkflowStatusRelationService();
-			
-			// Set up new entity supplier
-			this.newEntitySupplier = () -> {
-				try {
-					return parentPage.createNewEntityInstance();
-				} catch (Exception e) {
-					LOGGER.error("Error creating new entity", e);
-					return null;
-				}
-			};
-			
-			// Set up refresh callback
-			this.refreshCallback = (currentEntity) -> {
-				try {
-					if (currentEntity != null && ((CEntityDB<?>) currentEntity).getId() != null) {
-						CEntityDB<?> reloadedEntity = ((CAbstractService<CEntityDB<?>>) entityService)
-								.getById(((CEntityDB<?>) currentEntity).getId()).orElse(null);
-						if (reloadedEntity != null) {
-							parentPage.onEntityRefreshed(reloadedEntity);
-						}
-					}
-				} catch (Exception e) {
-					LOGGER.error("Error refreshing entity: {}", e.getMessage());
-				}
-			};
-			
-			// Set dependency checker from service
-			if (entityService != null) {
-				this.dependencyChecker = entityService::checkDeleteAllowed;
-			}
-		}
-		
-		updateButtonStates();
-		LOGGER.debug("Created CCrudToolbar with IContentOwner configuration (deprecated)");
 	}
 
 	/** Adds an update listener to be notified of CRUD operations.
@@ -274,7 +224,7 @@ public class CCrudToolbar extends HorizontalLayout {
 				return;
 			}
 			
-			statusComboBox = new CColorAwareComboBox<CProjectItemStatus>(parentPage,
+			statusComboBox = new CColorAwareComboBox<CProjectItemStatus>(null,
 					CEntityFieldService.createFieldInfo(CProjectItem.class.getDeclaredField("status")), binder, dataProviderResolver);
 			statusComboBox.addValueChangeListener(event -> {
 				if (event.isFromClient() && event.getValue() != null && currentEntity instanceof CProjectItem) {
@@ -571,29 +521,20 @@ public class CCrudToolbar extends HorizontalLayout {
 		this.dependencyChecker = dependencyChecker;
 	}
 
-	/** OPTIONAL CONFIGURATOR: Sets the supplier for creating new entity instances. By default, uses parentPage::createNewEntityInstance. Only use
-	 * this to override the default behavior.
+	/** OPTIONAL CONFIGURATOR: Sets the supplier for creating new entity instances.
 	 * @param newEntitySupplier supplier that creates new entity instances */
 	public void setNewEntitySupplier(final Supplier<?> newEntitySupplier) {
 		this.newEntitySupplier = newEntitySupplier;
 		updateButtonStates();
 	}
 
-	/** OPTIONAL CONFIGURATOR: Sets the notification service. By default, uses parentPage.getNotificationService(). Only use this to override the
-	 * default behavior.
+	/** OPTIONAL CONFIGURATOR: Sets the notification service for user messages.
 	 * @param notificationService the notification service to use */
 	public void setNotificationService(final CNotificationService notificationService) {
 		this.notificationService = notificationService;
 	}
 
-	/** OPTIONAL CONFIGURATOR: Sets the project item status service for workflow status management. This method is deprecated and no longer needed as
-	 * workflow services are obtained from parent page.
-	 * @deprecated No longer needed - workflow services are automatically configured from parent page */
-	@Deprecated
-	public void setProjectItemStatusService(final CProjectItemStatusService projectItemStatusService) {}
-
-	/** OPTIONAL CONFIGURATOR: Sets the callback for refresh operations. By default, reloads entity from database and calls
-	 * parentPage.onEntityRefreshed(). Only use this to override.
+	/** OPTIONAL CONFIGURATOR: Sets the callback for refresh operations.
 	 * @param refreshCallback callback to execute when refresh is triggered */
 	public void setRefreshCallback(final Consumer<?> refreshCallback) {
 		this.refreshCallback = refreshCallback;
@@ -613,8 +554,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		setCurrentEntity(entity);
 	}
 
-	/** OPTIONAL CONFIGURATOR: Sets the workflow status relation service for workflow validation. By default, uses
-	 * parentPage.getWorkflowStatusRelationService(). Only use this to override the default behavior.
+	/** OPTIONAL CONFIGURATOR: Sets the workflow status relation service for workflow validation.
 	 * @param workflowStatusRelationService the workflow status relation service to use */
 	public void setWorkflowStatusRelationService(final CWorkflowStatusRelationService workflowStatusRelationService) {
 		this.workflowStatusRelationService = workflowStatusRelationService;

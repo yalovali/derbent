@@ -154,8 +154,31 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			add(splitLayout);
 			createMasterSection();
 			createDetailsSection();
-			// Create toolbar using deprecated constructor for backward compatibility
-			crudToolbar = new CCrudToolbar(this, currentBinder);
+			// Create toolbar with minimal constructor and configure
+			crudToolbar = CCrudToolbar.create(currentBinder);
+			crudToolbar.setEntityService(getEntityService());
+			crudToolbar.setNotificationService(getNotificationService());
+			crudToolbar.setWorkflowStatusRelationService(getWorkflowStatusRelationService());
+			crudToolbar.setNewEntitySupplier(() -> {
+				try {
+					return createNewEntityInstance();
+				} catch (Exception e) {
+					LOGGER.error("Error creating new entity", e);
+					return null;
+				}
+			});
+			crudToolbar.setRefreshCallback(entity -> {
+				try {
+					if (entity != null && ((CEntityDB<?>) entity).getId() != null) {
+						CEntityDB<?> reloaded = getEntityService().getById(((CEntityDB<?>) entity).getId()).orElse(null);
+						if (reloaded != null) {
+							onEntityRefreshed(reloaded);
+						}
+					}
+				} catch (Exception e) {
+					LOGGER.error("Error refreshing entity: {}", e.getMessage());
+				}
+			});
 			crudToolbar.setCurrentEntity(null);
 			// Allow subclasses to customize toolbar
 			configureCrudToolbar(crudToolbar);

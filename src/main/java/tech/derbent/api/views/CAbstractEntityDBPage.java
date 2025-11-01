@@ -78,8 +78,32 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityService = entityService;
 		this.sessionService = sessionService;
 		binder = new CEnhancedBinder<>(entityClass);
-		// Initialize CRUD toolbar - use deprecated constructor for backward compatibility
-		crudToolbar = new CCrudToolbar(this, binder);
+		// Initialize CRUD toolbar with minimal constructor and configure
+		crudToolbar = CCrudToolbar.create(binder);
+		crudToolbar.setEntityService(entityService);
+		crudToolbar.setEntityClass(entityClass);
+		crudToolbar.setNotificationService(notificationService);
+		crudToolbar.setWorkflowStatusRelationService(workflowStatusRelationService);
+		crudToolbar.setNewEntitySupplier(() -> {
+			try {
+				return createNewEntityInstance();
+			} catch (Exception e) {
+				LOGGER.error("Error creating new entity", e);
+				return null;
+			}
+		});
+		crudToolbar.setRefreshCallback(entity -> {
+			try {
+				if (entity != null && ((CEntityDB<?>) entity).getId() != null) {
+					EntityClass reloaded = entityService.getById(((CEntityDB<?>) entity).getId()).orElse(null);
+					if (reloaded != null) {
+						onEntityRefreshed(reloaded);
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.error("Error refreshing entity: {}", e.getMessage());
+			}
+		});
 		// Set custom save callback with validation logic specific to this page type
 		configureCrudToolbarSaveCallback();
 		createPageContent();
