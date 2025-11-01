@@ -78,8 +78,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityService = entityService;
 		this.sessionService = sessionService;
 		binder = new CEnhancedBinder<>(entityClass);
-		// Initialize CRUD toolbar - all configuration now happens in constructor
-		crudToolbar = new CCrudToolbar(this, entityService, binder);
+		// Initialize CRUD toolbar - use deprecated constructor for backward compatibility
+		crudToolbar = new CCrudToolbar(this, binder);
 		// Set custom save callback with validation logic specific to this page type
 		configureCrudToolbarSaveCallback();
 		createPageContent();

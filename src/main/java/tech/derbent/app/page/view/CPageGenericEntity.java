@@ -84,8 +84,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			"rawtypes", "unchecked"
 	})
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
-		// Create toolbar - all configuration happens in constructor automatically
-		CCrudToolbar toolbar = new CCrudToolbar(this, entityService, typedBinder);
+		// Create toolbar using deprecated constructor for backward compatibility
+		CCrudToolbar toolbar = new CCrudToolbar(this, typedBinder);
 		toolbar.setCurrentEntity(typedEntity);
 		// Allow subclasses to customize toolbar if needed
 		configureCrudToolbar(toolbar);

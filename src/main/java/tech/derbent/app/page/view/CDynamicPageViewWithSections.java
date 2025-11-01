@@ -154,8 +154,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			add(splitLayout);
 			createMasterSection();
 			createDetailsSection();
-			// Create toolbar directly using CCrudToolbar constructor - all configuration happens automatically
-			crudToolbar = new CCrudToolbar(this, getEntityService(), currentBinder);
+			// Create toolbar using deprecated constructor for backward compatibility
+			crudToolbar = new CCrudToolbar(this, currentBinder);
 			crudToolbar.setCurrentEntity(null);
 			// Allow subclasses to customize toolbar
 			configureCrudToolbar(crudToolbar);
