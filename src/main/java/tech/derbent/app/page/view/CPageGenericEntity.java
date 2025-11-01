@@ -75,8 +75,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		return crudToolbar;
 	}
 
-	/** Creates a new CCrudToolbar instance for the given entity type and binder. All configuration is now done automatically in the CCrudToolbar
-	 * constructor. The entity type is determined dynamically when an entity is set.
+	/** Creates a new CCrudToolbar instance for the given entity type and binder. All configuration is now done via setters
+	 * after construction. The entity type is determined dynamically when an entity is set.
 	 * @param typedBinder the properly typed binder for the entity
 	 * @param typedEntity the current entity instance
 	 * @return a configured CCrudToolbar instance */
@@ -84,8 +84,32 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			"rawtypes", "unchecked"
 	})
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
-		// Create toolbar - all configuration happens in constructor automatically
-		CCrudToolbar toolbar = new CCrudToolbar(this, entityService, typedBinder);
+		// Create toolbar with minimal constructor and configure
+		CCrudToolbar toolbar = CCrudToolbar.create(typedBinder);
+		toolbar.setEntityService(entityService);
+		toolbar.setEntityClass(entityClass);
+		toolbar.setNotificationService(getNotificationService());
+		toolbar.setWorkflowStatusRelationService(getWorkflowStatusRelationService());
+		toolbar.setNewEntitySupplier(() -> {
+			try {
+				return createNewEntityInstance();
+			} catch (Exception e) {
+				LOGGER.error("Error creating new entity", e);
+				return null;
+			}
+		});
+		toolbar.setRefreshCallback(entity -> {
+			try {
+				if (entity != null && ((CEntityDB<?>) entity).getId() != null) {
+					EntityClass reloaded = entityService.getById(((CEntityDB<?>) entity).getId()).orElse(null);
+					if (reloaded != null) {
+						onEntityRefreshed(reloaded);
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.error("Error refreshing entity: {}", e.getMessage());
+			}
+		});
 		toolbar.setCurrentEntity(typedEntity);
 		// Allow subclasses to customize toolbar if needed
 		configureCrudToolbar(toolbar);
