@@ -2,6 +2,7 @@ package tech.derbent.app.workflow.view;
 
 import java.util.List;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
@@ -22,6 +23,12 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 		super("Status Transitions", CWorkflowEntity.class, entityService, sessionService);
 		statusService = CSpringContext.<CProjectItemStatusService>getBean(CProjectItemStatusService.class);
 		initComponent();
+	}
+
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public List<CProjectItemStatus> getAvailableStatuses() {

@@ -29,6 +29,12 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 	}
 
 	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	protected void createPanelContent() throws Exception {
 		super.createPanelContent();
 		// Add any specific content for the preview panel here if needed

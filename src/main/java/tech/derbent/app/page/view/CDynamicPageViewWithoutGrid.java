@@ -55,6 +55,12 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		throw new UnsupportedOperationException("Entity creation not supported in view without grid");
 	}
 
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/** Create page footer with metadata. */
 	private void createPageFooter() {
 		final Div footer = new Div();

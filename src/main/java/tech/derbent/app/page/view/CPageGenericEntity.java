@@ -75,8 +75,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		return crudToolbar;
 	}
 
-	/** Creates a new CCrudToolbar instance for the given entity type and binder.
-	 * All configuration is now done automatically in the CCrudToolbar constructor.
+	/** Creates a new CCrudToolbar instance for the given entity type and binder. All configuration is now done automatically in the CCrudToolbar
+	 * constructor.
 	 * @param typedBinder the properly typed binder for the entity
 	 * @param typedEntity the current entity instance
 	 * @return a configured CCrudToolbar instance */
@@ -250,7 +250,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Refreshes the grid to show updated data
 	 * @throws Exception */
-	protected void refreshGrid() throws Exception {
+	@Override
+	public void refreshGrid() throws Exception {
 		Check.notNull(grid, "Grid component is not initialized");
 		try {
 			// Use reflection to call the private refreshGridData method

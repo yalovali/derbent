@@ -8,15 +8,16 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.ui.notifications.CNotifications;
-import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
+import tech.derbent.api.ui.notifications.CNotifications;
+import tech.derbent.api.views.grids.CGrid;
 
 public class CPanelDetailLines extends CPanelDetailSectionBase {
 
@@ -111,6 +112,12 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		});
 		toolbar.add(addButton, deleteButton, moveUpButton, moveDownButton);
 		return toolbar;
+	}
+
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private void createScreenLinesLayout() {

@@ -2,6 +2,7 @@ package tech.derbent.api.views.components;
 
 import java.util.List;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectService;
@@ -23,6 +24,12 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 		super("Project Settings", CUser.class, entityService, sessionService);
 		projectService = CSpringContext.getBean(CProjectService.class);
 		initComponent();
+	}
+
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public List<CProject> getAvailableProjects() {

@@ -42,6 +42,12 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 	}
 
 	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
 		return null;
 	}

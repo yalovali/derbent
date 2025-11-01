@@ -2,6 +2,7 @@ package tech.derbent.api.screens.view;
 
 import java.util.List;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -14,6 +15,12 @@ public class CPanelDetailSectionBasicInfo extends CPanelDetailSectionBase {
 			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService) throws Exception {
 		super("Basic Information", parentContent, beanValidationBinder, entityService);
 		initPanel();
+	}
+
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

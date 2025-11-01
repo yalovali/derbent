@@ -27,6 +27,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	private CButton addButton;
 	private CButton deleteButton;
 	private CButton editButton;
+	protected CAbstractService<MasterClass> entityService;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CAbstractEntityRelationService<RelationalClass> relationService;
 
@@ -37,6 +38,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
 		Check.notNull(relationService, "Relation service cannot be null - relational component requires a valid relation service");
 		this.relationService = relationService;
+		this.entityService = entityService;
 		setupButtons();
 		closePanel();
 	}
@@ -111,6 +113,9 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	protected abstract String getDeleteConfirmationMessage(RelationalClass selected);
 	/** Gets display text for various field types - subclasses must implement. */
 	protected abstract String getDisplayText(RelationalClass settings, String fieldType);
+
+	@Override
+	public CAbstractService<MasterClass> getEntityService() { return entityService; }
 
 	@Override
 	public void initPanel() throws Exception {

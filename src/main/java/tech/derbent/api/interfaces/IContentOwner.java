@@ -36,7 +36,7 @@ public interface IContentOwner {
 	void populateForm() throws Exception;
 
 	/** Called after grid data has been refreshed. Default implementation does nothing. Override to implement grid refresh logic if applicable. */
-	protected default void refreshGrid() throws Exception {
+	default void refreshGrid() throws Exception {
 		// Default: no grid to refresh
 	}
 

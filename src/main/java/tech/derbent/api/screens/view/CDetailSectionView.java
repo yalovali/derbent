@@ -60,6 +60,12 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	}
 
 	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
