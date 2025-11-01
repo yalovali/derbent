@@ -82,7 +82,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	}
 
 	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
-	protected void configureCrudToolbar(final CCrudToolbar<?> toolbar) {
+	protected void configureCrudToolbar(final CCrudToolbar toolbar) {
 		// Default implementation does nothing - subclasses can override to add specific configuration
 	}
 
