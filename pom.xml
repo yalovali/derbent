@@ -28,10 +28,12 @@
             <id>vaadin-directory</id>
             <url>https://maven.vaadin.com/vaadin-addons</url>
         </repository>
+        <!-- 	
         <repository>
             <id>so-maven</id>
             <url>https://storedobject.com/maven</url>
         </repository>
+        -->
     </repositories>
 
     <dependencyManagement>
