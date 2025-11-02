@@ -148,8 +148,8 @@
 
 </div>
 
-- ☕ **Java 17+** - Latest LTS version recommended
-- 📦 **Maven 3.8+** - Build and dependency management
+- ☕ **Java 21+** - Required for StoredObject libraries
+- 📦 **Maven 3.9+** - Build and dependency management
 - 🐘 **PostgreSQL** (recommended) or 🗃️ **H2** for development
 
 ### ⚡ **Lightning Fast Setup**
@@ -161,11 +161,16 @@ git clone https://github.com/SebnemC/derbent.git
 # 📂 Navigate to project directory
 cd derbent
 
+# 📦 Install StoredObject libraries (required - run once)
+./install-so-libraries.sh
+
 # 🚀 Launch with H2 database (development mode)
-mvn spring-boot:run -Dspring.profiles.active=h2
+mvn spring-boot:run -Dspring.profiles.active=h2-local-development
 
 # 🌟 Open your browser to: http://localhost:8080
 ```
+
+> **📝 Note**: The StoredObject libraries (so-components, so-charts, so-helper) are included in the `lib/` folder and must be installed to your local Maven repository before building. The `install-so-libraries.sh` script handles this automatically.
 
 ### 🎯 **First Login Experience**
 

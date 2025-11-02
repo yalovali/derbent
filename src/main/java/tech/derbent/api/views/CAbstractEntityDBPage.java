@@ -153,11 +153,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					return;
 				}
 				// Write form data to entity
-				getBinder().writeBean(entity);
+				getBinder().writeBean((EntityClass) entity);
 				// Validate entity before saving
-				validateEntityForSave(entity);
+				validateEntityForSave((EntityClass) entity);
 				// Save entity
-				final EntityClass savedEntity = entityService.save(entity);
+				final EntityClass savedEntity = entityService.save((EntityClass) entity);
 				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 				// Update current entity with saved version (includes generated ID)
 				setCurrentEntity(savedEntity);
