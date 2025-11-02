@@ -26,3 +26,6 @@ profile-pictures/
 .mv
 .m2
 .codex/
+
+# Exclude playwright-java.jar (available via Maven)
+playwright-java.jar

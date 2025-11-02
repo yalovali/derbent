@@ -5,6 +5,10 @@
 
 set -e
 
+# Setup Java 21 environment
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/setup-java-env.sh"
+
 echo "🚀 Comprehensive Playwright Test Runner"
 echo "========================================"
 echo ""

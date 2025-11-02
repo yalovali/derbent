@@ -1,14 +1,28 @@
 # Derbent Project Management Application
-Derbent is a Java Spring Boot + Vaadin collaborative project management application inspired by Jira and ProjeQtOr, targeting small to medium-sized offices. Built with Java 17, Spring Boot 3.5, Vaadin 24.8, and Playwright-based UI testing infrastructure.
+Derbent is a Java Spring Boot + Vaadin collaborative project management application inspired by Jira and ProjeQtOr, targeting small to medium-sized offices. Built with Java 21, Spring Boot 3.5, Vaadin 24.8, and Playwright-based UI testing infrastructure.
 
 **ALWAYS reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
 
 ## Working Effectively
 
+### Environment Setup (CRITICAL)
+```bash
+# ALWAYS source the Java environment setup first
+source ./setup-java-env.sh
+
+# This ensures Java 21 is used (REQUIRED by pom.xml)
+# The script automatically configures JAVA_HOME and PATH
+
+# Quick verification of environment (recommended on first use)
+./verify-environment.sh
+# This checks Java 21, Maven, SO libraries, and compilation
+```
+
 ### Bootstrap, Build, and Test the Repository
 ```bash
-# Prerequisites: Java 17+ and Maven 3.9+ are required
-java -version    # Should show Java 17+
+# Prerequisites: Java 21 and Maven 3.9+ are required
+source ./setup-java-env.sh  # Sets up Java 21
+java -version    # Should show Java 21
 mvn -version     # Should show Maven 3.9+
 
 # Clean and compile (NEVER CANCEL: takes 15+ seconds after first build)
@@ -30,7 +44,8 @@ mvn spotless:check
 
 ### Run the Application
 ```bash
-# ALWAYS apply formatting first before running
+# ALWAYS source Java environment and apply formatting first
+source ./setup-java-env.sh
 mvn spotless:apply
 
 # Start the application (NEVER CANCEL: takes 15+ seconds)
@@ -52,6 +67,7 @@ mvn spring-boot:run -Ph2-local-development
 ./run-playwright-tests.sh mock
 # TIMEOUT: Set 5+ minutes. Expected time: 37-40 seconds
 # Generates screenshots in target/screenshots/
+# NOTE: Script automatically sets up Java 21 environment
 
 # Run comprehensive Playwright tests (NEVER CANCEL: takes 2+ minutes)
 ./run-playwright-tests.sh comprehensive
@@ -74,14 +90,16 @@ mvn spring-boot:run -Ph2-local-development
 #### 1. Build and Format Validation
 ```bash
 # CRITICAL: Always run these in sequence before committing
-mvn spotless:apply                    # Fix formatting issues
-mvn spotless:check                    # Verify formatting is correct
-mvn clean compile                     # Full build (NEVER CANCEL: 12-15 seconds)
+source ./setup-java-env.sh             # Setup Java 21 (REQUIRED)
+mvn spotless:apply                     # Fix formatting issues
+mvn spotless:check                     # Verify formatting is correct
+mvn clean compile                      # Full build (NEVER CANCEL: 12-15 seconds)
 ```
 
 #### 2. Application Startup Validation  
 ```bash
 # Start application and verify it loads (use H2 profile for development)
+source ./setup-java-env.sh
 mvn spring-boot:run -Dspring.profiles.active=h2 &
 APP_PID=$!
 
@@ -373,7 +391,7 @@ grep -r "Notification\.show\|new.*Dialog.*\.open()" src/main/java --include="*.j
 ## Technology Stack Reference
 
 ### Core Technologies
-- **Java 17** - Programming language
+- **Java 21** - Programming language (REQUIRED - configured via setup-java-env.sh)
 - **Spring Boot 3.5** - Application framework  
 - **Vaadin Flow 24.8** - UI framework
 - **Hibernate/JPA** - Data persistence
