@@ -144,7 +144,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		crudToolbar.setSaveCallback(entity -> {
 			try {
 				// Ensure we have an entity to save
-				LOGGER.debug("Save callback invoked, current entity: {}", entity != null ? entity.getId() : "null");
+				LOGGER.debug("Save callback invoked, current entity: {}", entity != null ? ((CEntityDB<?>) entity).getId() : "null");
 				if (entity == null) {
 					LOGGER.warn("No current entity for save operation");
 					return;
@@ -153,7 +153,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					return;
 				}
 				// Write form data to entity
-				getBinder().writeBean(entity);
+				getBinder().writeBean((EntityClass) entity);
 				// Validate entity before saving
 				validateEntityForSave(entity);
 				// Save entity
