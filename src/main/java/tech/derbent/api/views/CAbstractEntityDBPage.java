@@ -153,7 +153,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					return;
 				}
 				// Write form data to entity
-				getBinder().writeBean((EntityClass) entity);
+				getBinder().writeBean(entity);
 				// Validate entity before saving
 				validateEntityForSave(entity);
 				// Save entity
