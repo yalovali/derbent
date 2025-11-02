@@ -633,6 +633,19 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
 	public void setNotificationService(final CNotificationService notificationService) {
 		this.notificationService = notificationService;
+		// Update toolbar with the injected notification service
+		if (crudToolbar != null) {
+			crudToolbar.setNotificationService(notificationService);
+		}
+	}
+
+	/** Sets the workflow status relation service. This is typically called via dependency injection or manually after construction. */
+	public void setWorkflowStatusRelationService(final tech.derbent.app.workflow.service.CWorkflowStatusRelationService workflowStatusRelationService) {
+		this.workflowStatusRelationService = workflowStatusRelationService;
+		// Update toolbar with the injected workflow service
+		if (crudToolbar != null) {
+			crudToolbar.setWorkflowStatusRelationService(workflowStatusRelationService);
+		}
 	}
 
 	@Override
