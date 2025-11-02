@@ -12,6 +12,10 @@ source ./setup-java-env.sh
 
 # This ensures Java 21 is used (REQUIRED by pom.xml)
 # The script automatically configures JAVA_HOME and PATH
+
+# Quick verification of environment (recommended on first use)
+./verify-environment.sh
+# This checks Java 21, Maven, SO libraries, and compilation
 ```
 
 ### Bootstrap, Build, and Test the Repository
