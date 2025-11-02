@@ -3,42 +3,35 @@ package tech.derbent.base.users.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.utils.Check;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUserCompanySetting;
 
 /** Initializes UI configuration for {@link CUserCompanySetting}. Creates default grid and detail views to manage company memberships. */
 public final class CUserCompanySettingInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Company Membership";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = CUserCompanySetting.class;
-	private static final String menuTitle = "Relations.Company Memberships";
-	private static final String pageTitle = "Company Membership Management";
-	private static final String pageDescription = "Manage user memberships and roles within companies";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingInitializerService.class);
 	private static final String menuOrder = "1.1";
+	private static final String menuTitle = "Relations.Company Memberships";
+	private static final String pageDescription = "Manage user memberships and roles within companies";
+	private static final String pageTitle = "Company Membership Management";
 	private static final boolean showInQuickToolbar = false;
-
-	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {
-		try {
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, fieldName));
-		} catch (final NoSuchFieldException ex) {
-			LOGGER.debug("Skipping optional field {} for {}", fieldName, ENTITY_CLASS.getSimpleName());
-		}
-	}
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "id"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "user"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "role"));
@@ -49,8 +42,6 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 			detailSection.addScreenLine(CDetailLinesService.createSection("Administration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "grantedByUserId"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			addOptionalField(detailSection, "createdDate");
-			addOptionalField(detailSection, "lastModifiedDate");
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "id"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
@@ -66,15 +57,14 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 		return grid;
 	}
 
-        public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-                        final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
-                        throws Exception {
-                Check.notNull(project, "project cannot be null");
-                final CDetailSection detailSection = createBasicView(project);
-                final CGridEntity grid = createGridEntity(project);
-                initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-                                pageDescription, showInQuickToolbar, menuOrder);
-        }
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		Check.notNull(project, "project cannot be null");
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
+	}
 
 	private CUserCompanySettingInitializerService() {}
 }

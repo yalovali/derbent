@@ -155,7 +155,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			createMasterSection();
 			createDetailsSection();
 			// Create toolbar with minimal constructor and configure
-			crudToolbar = CCrudToolbar.create(currentBinder);
+			crudToolbar = new CCrudToolbar();
 			crudToolbar.setEntityService(getEntityService());
 			crudToolbar.setNotificationService(getNotificationService());
 			crudToolbar.setWorkflowStatusRelationService(getWorkflowStatusRelationService());

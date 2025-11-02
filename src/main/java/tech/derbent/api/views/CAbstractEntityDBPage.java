@@ -79,32 +79,81 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.sessionService = sessionService;
 		binder = new CEnhancedBinder<>(entityClass);
 		// Initialize CRUD toolbar with minimal constructor and configure
-		crudToolbar = CCrudToolbar.create(binder);
-		crudToolbar.setEntityService(entityService);
-		crudToolbar.setEntityClass(entityClass);
-		crudToolbar.setNotificationService(notificationService);
-		crudToolbar.setWorkflowStatusRelationService(workflowStatusRelationService);
-		crudToolbar.setNewEntitySupplier(() -> {
+		crudToolbar = new CCrudToolbar();
+		// Wire toolbar actions using view-level Runnable callbacks
+		crudToolbar.setCreateAction(() -> {
 			try {
-				return createNewEntityInstance();
-			} catch (Exception e) {
+				final EntityClass newEntity = createNewEntity();
+				setCurrentEntity(newEntity);
+				populateForm();
+			} catch (final Exception e) {
 				LOGGER.error("Error creating new entity", e);
-				return null;
+				showErrorNotification("Failed to create new entity");
 			}
 		});
-		crudToolbar.setRefreshCallback(entity -> {
+
+		crudToolbar.setRefreshAction(() -> {
 			try {
-				if (entity != null && ((CEntityDB<?>) entity).getId() != null) {
-					EntityClass reloaded = entityService.getById(((CEntityDB<?>) entity).getId()).orElse(null);
+				final EntityClass current = getCurrentEntity();
+				if (current != null && current.getId() != null) {
+					final EntityClass reloaded = entityService.getById(current.getId()).orElse(null);
 					if (reloaded != null) {
-						onEntityRefreshed(reloaded);
+						setCurrentEntity(reloaded);
+						populateForm();
 					}
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error("Error refreshing entity: {}", e.getMessage());
+				showErrorNotification("Failed to refresh entity");
 			}
 		});
-		// Set custom save callback with validation logic specific to this page type
+
+		crudToolbar.setDeleteAction(() -> {
+			try {
+				final EntityClass current = getCurrentEntity();
+				if (current == null) {
+					if (notificationService != null) {
+						notificationService.showWarning("Please select an item to delete.");
+					} else {
+						showNotification("Please select an item to delete.");
+					}
+					return;
+				}
+				// Use notification service to confirm deletion if available
+				if (notificationService != null) {
+					try {
+						notificationService.showConfirmationDialog("Delete selected item?", () -> {
+							try {
+								entityService.delete(current.getId());
+								refreshGrid();
+								notificationService.showDeleteSuccess();
+							} catch (final Exception ex) {
+								LOGGER.error("Error deleting entity", ex);
+								showErrorNotification("Failed to delete item");
+							}
+						});
+					} catch (final Exception e) {
+						LOGGER.error("Error showing confirmation dialog", e);
+						showErrorNotification("Failed to delete item");
+					}
+				} else {
+					// fallback: delete immediately
+					try {
+						entityService.delete(current.getId());
+						refreshGrid();
+						showNotification("Item deleted successfully");
+					} catch (final Exception ex) {
+						LOGGER.error("Error deleting entity", ex);
+						showErrorNotification("Failed to delete item");
+					}
+				}
+			} catch (final Exception e) {
+				LOGGER.error("Unexpected error during delete action", e);
+				showErrorNotification("Failed to delete item");
+			}
+		});
+
+		// Configure save action via helper
 		configureCrudToolbarSaveCallback();
 		createPageContent();
 	}
@@ -141,11 +190,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	 * to CAbstractEntityDBPage which includes pre-save events, binder validation, entity validation, and proper error handling. */
 	@SuppressWarnings ("unchecked")
 	private void configureCrudToolbarSaveCallback() {
-		// Set save callback with binder validation
-		crudToolbar.setSaveCallback(entity -> {
+		// Configure save action that operates on the currentEntity
+		crudToolbar.setSaveAction(() -> {
 			try {
-				// Ensure we have an entity to save
-				LOGGER.debug("Save callback invoked, current entity: {}", entity != null ? ((CEntityDB<?>) entity).getId() : "null");
+				final EntityClass entity = getCurrentEntity();
+				LOGGER.debug("Save action invoked, current entity: {}", entity != null ? entity.getId() : "null");
 				if (entity == null) {
 					LOGGER.warn("No current entity for save operation");
 					return;
@@ -154,16 +203,22 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					return;
 				}
 				// Write form data to entity
-				getBinder().writeBean((EntityClass) entity);
+				getBinder().writeBean(entity);
 				// Validate entity before saving
-				validateEntityForSave((EntityClass) entity);
+				validateEntityForSave(entity);
 				// Save entity
-				final EntityClass savedEntity = entityService.save((EntityClass) entity);
+				final EntityClass savedEntity = entityService.save(entity);
 				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 				// Update current entity with saved version (includes generated ID)
 				setCurrentEntity(savedEntity);
-				// Notify listeners through toolbar
-				// (toolbar will call notifyListenersSaved which triggers our listener below)
+				populateForm();
+				// Show success notification
+				if (notificationService != null) {
+					notificationService.showSaveSuccess();
+				} else {
+					showNotification("Data saved successfully");
+				}
+				navigateToClass();
 			} catch (final ObjectOptimisticLockingFailureException exception) {
 				LOGGER.error("Optimistic locking failure during save", exception);
 				if (notificationService != null) {
@@ -174,21 +229,15 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				throw new RuntimeException("Optimistic locking failure during save", exception);
 			} catch (final ValidationException validationException) {
 				LOGGER.error("Validation error during save", validationException);
-				try {
-					new CWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.").open();
-				} catch (final Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if (notificationService != null) {
+					notificationService.showWarning("Failed to save the data. Please check that all required fields are filled and values are valid.");
+				} else {
+					showErrorNotification("Failed to save the data. Please check that all required fields are filled and values are valid.");
 				}
 				throw new RuntimeException("Validation error during save", validationException);
 			} catch (final Exception exception) {
 				LOGGER.error("Unexpected error during save operation", exception);
-				try {
-					new CWarningDialog("An unexpected error occurred while saving. Please try again.").open();
-				} catch (final Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				showErrorNotification("An unexpected error occurred while saving. Please try again.");
 				throw new RuntimeException("Unexpected error during save operation", exception);
 			}
 		});

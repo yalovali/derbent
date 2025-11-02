@@ -35,6 +35,8 @@ import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
+import tech.derbent.app.gannt.domain.CGanntViewEntity;
+import tech.derbent.app.gannt.service.CGanntViewEntityService;
 import tech.derbent.app.gannt.view.CProjectGanntView;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.domain.CMeetingType;
@@ -45,11 +47,13 @@ import tech.derbent.app.meetings.service.CMeetingTypeService;
 import tech.derbent.app.orders.domain.CApprovalStatus;
 import tech.derbent.app.orders.domain.CCurrency;
 import tech.derbent.app.orders.domain.COrder;
+import tech.derbent.app.orders.domain.COrderApproval;
 import tech.derbent.app.orders.domain.COrderType;
 import tech.derbent.app.orders.service.CApprovalStatusInitializerService;
 import tech.derbent.app.orders.service.CApprovalStatusService;
 import tech.derbent.app.orders.service.CCurrencyInitializerService;
 import tech.derbent.app.orders.service.CCurrencyService;
+import tech.derbent.app.orders.service.COrderApprovalService;
 import tech.derbent.app.orders.service.COrderInitializerService;
 import tech.derbent.app.orders.service.COrderService;
 import tech.derbent.app.orders.service.COrderTypeInitializerService;
@@ -72,12 +76,18 @@ import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
+import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.setup.domain.CSystemSettings;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.domain.CUserCompanySetting;
+import tech.derbent.base.users.domain.CUserProjectSettings;
+import tech.derbent.base.users.service.CUserCompanySettingsService;
 import tech.derbent.base.users.service.CUserInitializerService;
+import tech.derbent.base.users.service.CUserProjectSettingsService;
 import tech.derbent.base.users.service.CUserService;
 
 public class CAuxillaries {
@@ -220,7 +230,10 @@ public class CAuxillaries {
 			return CUserCompanyRole.class;
 		case "CWorkflowEntity":
 			return CWorkflowEntity.class;
-		// ... add
+		case "CUserCompanySetting":
+			return CUserCompanySetting.class;
+		case "CGanntViewEntity":
+			return CGanntViewEntity.class;
 		default:
 			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update (CAuxillaries.java:234)");
 			throw new IllegalArgumentException("Unknown entity type: " + simpleName);
@@ -280,7 +293,16 @@ public class CAuxillaries {
 			return CUserCompanyRoleService.class;
 		case "CWorkflowEntity":
 			return CWorkflowEntityService.class;
-		// ... add more as needed ...
+		case "CWorkflowStatusRelation":
+			return CWorkflowEntityService.class;
+		case "COrderApproval":
+			return COrderApprovalService.class;
+		case "CUserProjectSettings":
+			return CUserProjectSettingsService.class;
+		case "CUserCompanySetting":
+			return CUserCompanySettingsService.class;
+		case "CGanntViewEntity":
+			return CGanntViewEntityService.class;
 		default:
 			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + simpleName);
@@ -336,6 +358,16 @@ public class CAuxillaries {
 			return CUserCompanyRoleInitializerService.class;
 		} else if (entityClass == CWorkflowEntity.class) {
 			return CWorkflowEntityService.class;
+		} else if (entityClass == CWorkflowStatusRelation.class) {
+			return CWorkflowStatusRelationService.class;
+		} else if (entityClass == COrderApproval.class) {
+			return COrderApprovalService.class;
+		} else if (entityClass == CUserProjectSettings.class) {
+			return CUserProjectSettingsService.class;
+		} else if (entityClass == CUserCompanySetting.class) {
+			return CUserCompanySettingsService.class;
+		} else if (entityClass == CGanntViewEntity.class) {
+			return CGanntViewEntityService.class;
 		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
@@ -415,6 +447,16 @@ public class CAuxillaries {
 			return CUserCompanyRoleService.class;
 		} else if (entityClass == CWorkflowEntity.class) {
 			return CWorkflowEntityService.class;
+		} else if (entityClass == CWorkflowStatusRelation.class) {
+			return CWorkflowEntityService.class;
+		} else if (entityClass == COrderApproval.class) {
+			return COrderApprovalService.class;
+		} else if (entityClass == CUserProjectSettings.class) {
+			return CUserProjectSettingsService.class;
+		} else if (entityClass == CUserCompanySetting.class) {
+			return CUserCompanySettingsService.class;
+		} else if (entityClass == CGanntViewEntity.class) {
+			return CGanntViewEntityService.class;
 		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
@@ -474,6 +516,16 @@ public class CAuxillaries {
 			return CUserCompanyRoleService.class;
 		case "CWorkflowEntityService":
 			return CWorkflowEntityService.class;
+		case "CWorkflowStatusRelationService":
+			return CWorkflowStatusRelationService.class;
+		case "COrderApprovalService":
+			return COrderApprovalService.class;
+		case "CUserProjectSettingsService":
+			return CUserProjectSettingsService.class;
+		case "CUserCompanySettingsService":
+			return CUserCompanySettingsService.class;
+		case "CGanntViewEntityService":
+			return CGanntViewEntityService.class;
 		default:
 			LOGGER.error("Unknown service type: " + simpleName + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown service type: " + simpleName);

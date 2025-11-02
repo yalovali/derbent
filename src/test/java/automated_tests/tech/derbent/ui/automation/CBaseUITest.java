@@ -310,9 +310,27 @@ public abstract class CBaseUITest {
 		try {
 			LOGGER.info("🔐 Attempting login with username: {}", username);
 			ensureLoginViewLoaded();
-			initializeSampleDataFromLoginPage();
-			ensureLoginViewLoaded();
-			ensureCompanySelected();
+
+			// If company is empty on the login page, ensure sample data is initialized first.
+			try {
+				final Locator companyCombo = page.locator("#custom-company-input");
+				boolean companyPresent = false;
+				if (companyCombo.count() > 0) {
+					Object raw = companyCombo.evaluate("combo => combo.value ?? null");
+					companyPresent = (raw != null && !raw.toString().isBlank());
+				}
+				if (!companyPresent) {
+					LOGGER.info("🏢 Company not selected on login page - ensuring sample data is initialized before login");
+					initializeSampleDataFromLoginPage();
+					ensureLoginViewLoaded();
+					ensureCompanySelected();
+				} else {
+					LOGGER.debug("ℹ️ Company already selected on login page, skipping DB initialization");
+				}
+			} catch (final Exception e) {
+				LOGGER.warn("⚠️ Could not determine company selection state: {}. Proceeding with login flow.", e.getMessage());
+			}
+
 			boolean usernameFilled =
 					fillLoginField("#custom-username-input", "input", "username", username, "input[type='text'], input[type='email']");
 			if (!usernameFilled) {

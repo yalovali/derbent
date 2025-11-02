@@ -1,125 +1,54 @@
 package tech.derbent.api.views.components;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.components.CColorAwareComboBox;
-import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
-import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.services.CAbstractService;
-import tech.derbent.api.ui.dialogs.CConfirmationDialog;
-import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
-import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 
-/** Generic CRUD toolbar component that provides comprehensive Create, Read, Update, Delete, and Refresh functionality for any entity type.
- * <p>
- * <b>NEW USAGE PATTERN (Recommended):</b> Create with minimal constructor and configure after:
- *
- * <pre>
- * // Create toolbar with just a binder
- * CCrudToolbar toolbar = CCrudToolbar.create(binder);
- * // Configure as needed
- * toolbar.setEntityService(entityService);
- * toolbar.setNewEntitySupplier(() -&gt; createNewEntity());
- * toolbar.setRefreshCallback(entity -&gt; refreshForm(entity));
- * toolbar.setNotificationService(notificationService);
- * // Toolbar is visible with disabled buttons until configured
- * // For dynamic entity types (e.g., Gantt charts):
- * toolbar.reconfigureForEntityType(newEntityClass, newEntityService);
- * </pre>
- * <p>
- * <b>Legacy usage patterns still supported:</b> - IContentOwner-based constructor (deprecated) - Functional interface constructor (deprecated)
- * <p>
- * The toolbar can now be reconfigured at runtime to support different entity types, which is essential for pages like Gantt charts where the selected
- * item type changes.
- * @param <EntityClass> the entity type this toolbar operates on */
 public class CCrudToolbar extends HorizontalLayout {
 
-	private static CDataProviderResolver dataProviderResolver;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCrudToolbar.class);
 	private static final long serialVersionUID = 1L;
-
-	/** Static factory method for creating a CCrudToolbar with minimal configuration. This is the recommended way to create a toolbar.
-	 * @param binder the data binder for form validation
-	 * @return a new CCrudToolbar instance */
-	public static CCrudToolbar create(final CEnhancedBinder<?> binder) {
-		return new CCrudToolbar(binder);
-	}
-
-	// Core components
-	private final CEnhancedBinder<?> binder;
+	// Simple action callbacks (view-level only)
+	private Runnable createAction;
+	// Core buttons
 	private CButton createButton;
-	// State
-	private CEntityDB<?> currentEntity;
+	// Current entity reference for updating toolbar state
+	private Object currentEntity;
+	private Runnable deleteAction;
 	private CButton deleteButton;
-	private Function<?, String> dependencyChecker;
-	private Class<?> entityClass; // Now mutable to support entity type changes
-	// Configuration (all can be set after construction)
-	private CAbstractService<?> entityService;
-	private Supplier<?> newEntitySupplier;
-	private CNotificationService notificationService; // Optional injection
+	private Runnable refreshAction;
 	private CButton refreshButton;
-	private Consumer<?> refreshCallback;
+	private Runnable saveAction;
 	private CButton saveButton;
-	private Consumer<?> saveCallback;
 	private ComboBox<CProjectItemStatus> statusComboBox; // Workflow status selector
-	// Listeners
-	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
-	private CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
+	// Supplier to provide available statuses for the current context (set by the page)
+	private Supplier<List<CProjectItemStatus>> statusProvider;
 
-	/** Minimal constructor - creates toolbar with just a binder. All other configuration is done via setters. The toolbar will be visible with
-	 * disabled buttons until properly configured.
-	 * @param binder the data binder for form validation */
-	public CCrudToolbar(final CEnhancedBinder<?> binder) {
-		Check.notNull(binder, "Binder cannot be null");
-		this.binder = binder;
-		dataProviderResolver = CSpringContext.getBean(CDataProviderResolver.class);
-		// Configure toolbar appearance
+	/** Minimal constructor - creates toolbar with buttons. All behavior is provided via setters. */
+	public CCrudToolbar() {
 		setSpacing(true);
 		setPadding(true);
 		addClassName("crud-toolbar");
 		setWidthFull();
-		// Create UI components (buttons will be disabled until configured)
 		createToolbarButtons();
-		LOGGER.debug("Created CCrudToolbar with minimal configuration");
+		LOGGER.debug("Created CCrudToolbar as view-only component");
 	}
 
-	/** Adds an update listener to be notified of CRUD operations.
-	 * @param listener the listener to add */
-	public void addUpdateListener(final IEntityUpdateListener listener) {
-		if (listener != null && !updateListeners.contains(listener)) {
-			updateListeners.add(listener);
-		}
-	}
-
-	/** Configures button visibility for customized toolbar layouts.
-	 * @param showCreate  whether to show the Create button
-	 * @param showSave    whether to show the Save button
-	 * @param showDelete  whether to show the Delete button
-	 * @param showRefresh whether to show the Refresh button */
-	public void configureButtonVisibility(boolean showCreate, boolean showSave, boolean showDelete, boolean showRefresh) {
+	/** Configure visibility of toolbar buttons. This replaces previous per-entity logic and provides a simple view-level way for pages to show/hide
+	 * buttons. */
+	public void configureButtonVisibility(final boolean showNew, final boolean showSave, final boolean showDelete, final boolean showRefresh) {
 		if (createButton != null) {
-			createButton.setVisible(showCreate);
+			createButton.setVisible(showNew);
 		}
 		if (saveButton != null) {
 			saveButton.setVisible(showSave);
@@ -132,42 +61,105 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	/** Creates all the CRUD toolbar buttons. */
+	/** Creates the CRUD toolbar buttons and wires them to simple Runnable callbacks. */
 	private void createToolbarButtons() {
-		createButton = CButton.createNewButton("New", e -> handleCreate());
+		createButton = CButton.createNewButton("New", e -> {
+			if (createAction != null) {
+				try {
+					createAction.run();
+				} catch (Exception ex) {
+					LOGGER.error("Error executing create action", ex);
+				}
+			}
+		});
 		createButton.getElement().setAttribute("title", "Create new entity");
 		saveButton = CButton.createSaveButton("Save", e -> {
-			try {
-				handleSave();
-			} catch (Exception e1) {
-				e1.printStackTrace();
+			if (saveAction != null) {
+				try {
+					saveAction.run();
+				} catch (Exception ex) {
+					LOGGER.error("Error executing save action", ex);
+				}
 			}
 		});
 		saveButton.getElement().setAttribute("title", "Save current entity");
-		deleteButton = CButton.createDeleteButton("Delete", e -> handleDelete());
+		deleteButton = CButton.createDeleteButton("Delete", e -> {
+			if (deleteAction != null) {
+				try {
+					deleteAction.run();
+				} catch (Exception ex) {
+					LOGGER.error("Error executing delete action", ex);
+				}
+			}
+		});
 		deleteButton.getElement().setAttribute("title", "Delete current entity");
-		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> handleRefresh());
+		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> {
+			if (refreshAction != null) {
+				try {
+					refreshAction.run();
+				} catch (Exception ex) {
+					LOGGER.error("Error executing refresh action", ex);
+				}
+			}
+		});
 		refreshButton.getElement().setAttribute("title", "Refresh data");
 		add(createButton, saveButton, deleteButton, refreshButton);
-		// Create workflow status combobox if entity is a CProjectItem
-		// if (IHasStatusAndWorkflow.class.isAssignableFrom(entityClass)) {
-		createWorkflowStatusComboBox();
-		// }
 		updateButtonStates();
 	}
 
-	/** Creates the workflow status combobox for CProjectItem entities. */
+	/** Creates the workflow status combobox for CProjectItem entities. This method is safe to call repeatedly; it will replace any existing combobox. */
 	private void createWorkflowStatusComboBox() {
 		try {
-			// Only create if we have a valid entity class that supports workflow
-			if (entityClass == null || !IHasStatusAndWorkflow.class.isAssignableFrom(entityClass)) {
+			// Remove existing combobox if present
+			if (statusComboBox != null) {
+				remove(statusComboBox);
+				statusComboBox = null;
+			}
+			// Guard: need an entity that supports status and a status provider to populate items
+			if (currentEntity == null) {
 				return;
 			}
-			statusComboBox = new CColorAwareComboBox<CProjectItemStatus>(null,
-					CEntityFieldService.createFieldInfo(CProjectItem.class.getDeclaredField("status")), binder, dataProviderResolver);
+			if (!(currentEntity instanceof IHasStatusAndWorkflow)) {
+				return;
+			}
+			if (!(currentEntity instanceof CProjectItem)) {
+				// We only support CProjectItem status editing in toolbar for now
+				return;
+			}
+			final CProjectItem<?> projectItem = (CProjectItem<?>) currentEntity;
+			final List<CProjectItemStatus> statuses = (statusProvider != null) ? statusProvider.get() : null;
+			statusComboBox = new ComboBox<>();
+			statusComboBox.setItemLabelGenerator(s -> s != null ? s.toString() : "");
+			statusComboBox.setWidth("220px");
+			statusComboBox.setClearButtonVisible(false);
+			if (statuses != null) {
+				statusComboBox.setItems(statuses);
+			}
+			// Set current value if available
+			if (projectItem.getStatus() != null) {
+				statusComboBox.setValue(projectItem.getStatus());
+			}
 			statusComboBox.addValueChangeListener(event -> {
-				if (event.isFromClient() && event.getValue() != null && currentEntity instanceof CProjectItem) {
-					handleWorkflowStatusChange((CProjectItem<?>) currentEntity, event.getValue());
+				if (event.isFromClient() && event.getValue() != null) {
+					try {
+						projectItem.setStatus(event.getValue());
+						// Trigger save action if page provided one; otherwise trigger refresh
+						if (saveAction != null) {
+							try {
+								saveAction.run();
+							} catch (Exception ex) {
+								LOGGER.error("Error executing saveAction after status change", ex);
+							}
+						} else if (refreshAction != null) {
+							try {
+								refreshAction.run();
+							} catch (Exception ex) {
+								LOGGER.error("Error executing refreshAction after status change", ex);
+							}
+						}
+					} catch (Exception e) {
+						LOGGER.error("Error handling workflow status change", e);
+					}
 				}
 			});
 			add(statusComboBox);
@@ -176,461 +168,95 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	/** Gets the binder associated with this toolbar.
-	 * @return the binder instance */
-	public CEnhancedBinder<?> getBinder() { return binder; }
+	// Expose buttons if the caller needs direct access
+	public CButton getCreateButton() { return createButton; }
 
-	/** Gets the current entity.
-	 * @return the current entity */
-	public CEntityDB<?> getCurrentEntity() { return currentEntity; }
+	public Object getCurrentEntity() { return this.currentEntity; }
 
-	/** Gets the current entity value. This is an alias for getCurrentEntity() to match standard Vaadin component patterns.
-	 * @return the current entity */
-	public CEntityDB<?> getValue() { return currentEntity; }
+	public CButton getDeleteButton() { return deleteButton; }
 
-	/** Handles the create (new entity) operation. */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void handleCreate() {
-		try {
-			LOGGER.debug("Handling create operation for entity");
-			Check.notNull(newEntitySupplier, "New entity supplier is not set");
-			// Create new entity
-			Object newEntity = entityClass.cast(newEntitySupplier.get());
-			Check.notNull(newEntity, "New entity supplier returned null");
-			// Initialize the new entity with default values from session and available data
-			try {
-				final CAbstractService service = entityService;
-				service.initializeNewEntity((CEntityDB) newEntity);
-				LOGGER.debug("Initialized new entity with default values");
-			} catch (IllegalStateException e) {
-				// If initialization fails due to missing required data, show specific error
-				LOGGER.error("Failed to initialize new entity: {}", e.getMessage());
-				showErrorNotification("Cannot create new entity: " + e.getMessage());
-				return;
-			}
-			// Set as current entity and bind to form
-			setCurrentEntity(newEntity);
-			showSuccessNotification("New entity created. Fill in the details and click Save.");
-			// Notify listeners that a new entity was created
-			notifyListenersCreated(newEntity);
-		} catch (Exception exception) {
-			LOGGER.error("Error during create operation for entity", exception);
-			if (notificationService != null) {
-				notificationService.showCreateError();
-			} else {
-				showErrorNotification("An error occurred while creating new entity. Please try again.");
-			}
-		}
-	}
+	public CButton getRefreshButton() { return refreshButton; }
 
-	/** Handles the delete operation with confirmation dialog and proper error handling. */
-	@SuppressWarnings ("unchecked")
-	private void handleDelete() {
-		try {
-			Check.notNull(entityService, "Entity service cannot be null");
-			Check.notNull(currentEntity, "Current entity cannot be null");
-			LOGGER.debug("Handling delete operation for entity : {}", currentEntity.getClass().getSimpleName());
-			if (currentEntity == null || currentEntity.getId() == null) {
-				showErrorNotification("Cannot delete: No entity selected or entity not saved yet.");
-				return;
-			}
-			Check.notNull(dependencyChecker, "Dependency checker function is not set");
-			String dependencyError = ((Function<Object, String>) dependencyChecker).apply(currentEntity);
-			if (dependencyError != null) {
-				showErrorNotification(dependencyError);
-				return;
-			}
-			// Show confirmation dialog
-			CConfirmationDialog confirmDialog = new CConfirmationDialog(
-					"Are you sure you want to delete this " + currentEntity.getClass().getSimpleName() + "?", this::performDelete);
-			confirmDialog.open();
-		} catch (Exception exception) {
-			LOGGER.error("Error during delete operation for entity: {}", currentEntity != null ? currentEntity.getClass().getSimpleName() : "null",
-					exception);
-			if (notificationService != null) {
-				notificationService.showDeleteError();
-			} else {
-				showErrorNotification("An error occurred while attempting to delete the entity. Please try again.");
-			}
-		}
-	}
+	public CButton getSaveButton() { return saveButton; }
 
-	/** Handles the refresh operation. */
-	@SuppressWarnings ("unchecked")
-	private void handleRefresh() {
-		try {
-			LOGGER.debug("Handling refresh operation for entity: {}", currentEntity != null ? currentEntity.getClass().getSimpleName() : "null");
-			Check.notNull(refreshCallback, "Refresh callback is not set");
-			((Consumer<Object>) refreshCallback).accept(currentEntity);
-			showSuccessNotification("Data refreshed successfully");
-		} catch (Exception exception) {
-			LOGGER.error("Error during refresh operation for entity: {}", currentEntity != null ? currentEntity.getClass().getSimpleName() : "null",
-					exception);
-			if (notificationService != null) {
-				notificationService.showError("Refresh failed");
-			} else {
-				showErrorNotification("An error occurred while attempting to refresh the entity. Please try again.");
-			}
-		}
-	}
-
-	/** Handles the save (update) operation with proper validation, error handling, and notifications.
-	 * @throws Exception */
-	@SuppressWarnings ("unchecked")
-	private void handleSave() throws Exception {
-		try {
-			Check.notNull(entityService, "Entity service cannot be null");
-			Check.notNull(currentEntity, "Current entity cannot be null");
-			LOGGER.debug("Attempting to save entity: {}", currentEntity.getClass().getSimpleName());
-			if (currentEntity == null) {
-				showErrorNotification("Cannot save: No entity selected.");
-				return;
-			}
-			// Check if save is allowed (validation)
-			@SuppressWarnings ({
-					"rawtypes"
-			})
-			final String saveError = ((CAbstractService) entityService).checkSaveAllowed(currentEntity);
-			if (saveError != null) {
-				showErrorNotification(saveError);
-				return;
-			}
-			// Use custom save callback if provided (for integration with binder validation)
-			if (saveCallback != null) {
-				((Consumer<Object>) saveCallback).accept(currentEntity);
-			} else {
-				// Default save behavior
-				@SuppressWarnings ({
-						"rawtypes"
-				})
-				final Object savedEntity = ((CAbstractService) entityService).save(currentEntity);
-				currentEntity = (CEntityDB<?>) savedEntity;
-				updateButtonStates();
-				showSuccessNotification("Data saved successfully");
-				// Notify listeners
-				notifyListenersSaved(savedEntity);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Error during save operation for entity: {}", currentEntity != null ? currentEntity.getClass().getSimpleName() : "null", e);
-			if (notificationService != null) {
-				notificationService.showSaveError();
-			} else {
-				showErrorNotification("An error occurred while attempting to save the entity. Please try again.");
-			}
-			throw e;
-		}
-	}
-
-	/** Handles workflow status change, validates transition and saves the entity.
-	 * @param projectItem the project item to update
-	 * @param newStatus   the new status to set */
-	@SuppressWarnings ("unchecked")
-	private void handleWorkflowStatusChange(final CProjectItem<?> projectItem, final CProjectItemStatus newStatus) {
-		try {
-			if (projectItem == null || newStatus == null) {
-				return;
-			}
-			final CProjectItemStatus currentStatus = projectItem.getStatus();
-			// If status hasn't changed, do nothing
-			if (currentStatus != null && currentStatus.getId().equals(newStatus.getId())) {
-				return;
-			}
-			Check.instanceOf(projectItem, IHasStatusAndWorkflow.class, "Current entity is not a CProjectItem");
-			final CWorkflowEntity workflow = ((IHasStatusAndWorkflow<?>) projectItem).getWorkflow();
-			if (workflow != null && currentStatus != null && workflowStatusRelationService != null) {
-				final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
-				final boolean isValidTransition = relations.stream()
-						.anyMatch(r -> r.getFromStatus().getId().equals(currentStatus.getId()) && r.getToStatus().getId().equals(newStatus.getId()));
-				if (!isValidTransition) {
-					showErrorNotification("Invalid workflow transition from '" + currentStatus.getName() + "' to '" + newStatus.getName() + "'");
-					// Reset combobox to current status
-					statusComboBox.setValue(currentStatus);
-					return;
-				}
-			}
-			// Update and save entity
-			projectItem.setStatus(newStatus);
-			try {
-				@SuppressWarnings ({
-						"rawtypes"
-				})
-				final CEntityDB<?> savedEntity = ((CAbstractService) entityService).save(currentEntity);
-				showSuccessNotification("Status updated to '" + newStatus.getName() + "'");
-				// Notify listeners
-				notifyListenersSaved(currentEntity);
-			} catch (Exception e) {
-				LOGGER.error("Error saving entity after status change", e);
-				showErrorNotification("Failed to update status: " + e.getMessage());
-				// Reset combobox to current status
-				statusComboBox.setValue(currentStatus);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Error handling workflow status change", e);
-			showErrorNotification("Error updating status: " + e.getMessage());
-		}
-	}
-
-	/** Notifies all listeners that an entity was created. */
-	private void notifyListenersCreated(final Object entity) {
-		if (currentEntity != null) {
-			LOGGER.debug("Notifying listeners of entity creation: {}", currentEntity.getClass().getSimpleName());
-		}
-		updateListeners.forEach(listener -> {
-			try {
-				listener.onEntityCreated((CEntityDB<?>) entity);
-			} catch (final Exception e) {
-				LOGGER.error("Error notifying listener of entity creation", e);
-				e.printStackTrace();
-			}
-		});
-	}
-
-	/** Notifies all listeners that an entity was deleted. */
-	private void notifyListenersDeleted(final Object entity) {
-		if (currentEntity != null) {
-			LOGGER.debug("Notifying listeners of entity deletion: {}", currentEntity.getClass().getSimpleName());
-		}
-		updateListeners.forEach(listener -> {
-			try {
-				listener.onEntityDeleted((CEntityDB<?>) entity);
-			} catch (final Exception e) {
-				LOGGER.error("Error notifying listener of entity deletion", e);
-				e.printStackTrace();
-			}
-		});
-	}
-
-	/** Notifies all listeners that an entity was saved. */
-	private void notifyListenersSaved(final Object entity) {
-		if (currentEntity != null) {
-			LOGGER.debug("Notifying listeners of entity save: {}", currentEntity.getClass().getSimpleName());
-		}
-		updateListeners.forEach(listener -> {
-			try {
-				listener.onEntitySaved((CEntityDB<?>) entity);
-			} catch (final Exception e) {
-				LOGGER.error("Error notifying listener of entity save", e);
-				e.printStackTrace();
-			}
-		});
-	}
-
-	/** Performs the actual delete operation after confirmation. */
-	@SuppressWarnings ("unchecked")
-	private void performDelete() {
-		try {
-			LOGGER.debug("Performing delete operation for entity: {}", currentEntity.getClass().getSimpleName());
-			CEntityDB<?> entityToDelete = currentEntity;
-			@SuppressWarnings ({
-					"rawtypes"
-			})
-			final CAbstractService service = entityService;
-			service.delete(currentEntity);
-			LOGGER.info("Entity deleted successfully: {} with ID: {}", currentEntity.getClass().getSimpleName(), entityToDelete.getId());
-			// Clear current entity
-			currentEntity = null;
-			// Clear the binder to reset the form
-			if (binder != null) {
-				((CEnhancedBinder<CEntityDB<?>>) binder).setBean(null);
-			}
-			updateButtonStates();
-			showSuccessNotification("Entity deleted successfully");
-			// Notify listeners
-			notifyListenersDeleted(entityToDelete);
-		} catch (final Exception e) {
-			LOGGER.error("Error during delete operation for entity: {}", currentEntity != null ? currentEntity.getClass().getSimpleName() : "null",
-					e);
-			if (notificationService != null) {
-				notificationService.showDeleteError();
-			} else {
-				showErrorNotification("An error occurred while deleting the entity. Please try again.");
-			}
-			throw e;
-		}
-	}
-
-	/** Reconfigures the toolbar for a different entity type and service. This is essential for pages like Gantt charts where the entity type changes
-	 * based on user selection.
-	 * @param newEntityClass   the new entity class type
-	 * @param newEntityService the new entity service */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public void reconfigureForEntityType(Class<?> newEntityClass, CAbstractService<?> newEntityService) {
-		LOGGER.debug("Reconfiguring toolbar for entity type: {}", newEntityClass != null ? newEntityClass.getSimpleName() : "null");
-		this.entityClass = newEntityClass;
-		this.entityService = newEntityService;
-		// Update dependency checker from new service
-		if (newEntityService != null) {
-			@SuppressWarnings ({})
-			final CAbstractService service = newEntityService;
-			this.dependencyChecker = entity -> service.checkDeleteAllowed((CEntityDB) entity);
-		} else {
-			this.dependencyChecker = null;
-		}
-		// Recreate status combobox if needed
-		if (statusComboBox != null) {
-			remove(statusComboBox);
-			statusComboBox = null;
-		}
-		// Only create status combobox if entity type supports it
-		if (newEntityClass != null && IHasStatusAndWorkflow.class.isAssignableFrom(newEntityClass)) {
-			createWorkflowStatusComboBox();
-		}
+	// Callback setters
+	public void setCreateAction(final Runnable createAction) {
+		this.createAction = createAction;
 		updateButtonStates();
 	}
 
-	/** Removes an update listener.
-	 * @param listener the listener to remove */
-	public void removeUpdateListener(final IEntityUpdateListener listener) {
-		updateListeners.remove(listener);
-	}
-
-	/** Updates the current entity and refreshes button states.
-	 * @param entity the current entity */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
+	// Allow the page to inform toolbar about the currently selected entity so the toolbar can update its UI state
 	public void setCurrentEntity(final Object entity) {
-		// LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
-		currentEntity = (CEntityDB<?>) entity;
-		// Automatically set dependency checker from service when entity changes
-		if (entityService != null) {
-			@SuppressWarnings ({})
-			final CAbstractService service = entityService;
-			dependencyChecker = e -> service.checkDeleteAllowed((CEntityDB) e);
-		}
+		this.currentEntity = entity;
+		updateButtonStates();
+		// Recreate workflow status combobox when entity changes
+		createWorkflowStatusComboBox();
+	}
+
+	public void setDeleteAction(final Runnable deleteAction) {
+		this.deleteAction = deleteAction;
 		updateButtonStates();
 	}
 
-	/** OPTIONAL CONFIGURATOR: Sets the dependency checker function that returns error message if entity cannot be deleted. By default, uses
-	 * entityService::checkDeleteAllowed. Only use this to override the default behavior.
-	 * @param dependencyChecker function that returns null if entity can be deleted, or error message if it cannot */
-	public void setDependencyChecker(final Function<?, String> dependencyChecker) {
-		this.dependencyChecker = dependencyChecker;
+	public void setEntityClass(final Class<?> entityClass) {
+		// no-op: toolbar is now view-only
+	}
+	// Backwards-compatible no-op setters to avoid editing many callers when toolbar was made view-only
+	// These methods accept the same types as before but intentionally do nothing. They preserve compile
+	// compatibility while keeping the toolbar free of business logic.
+
+	public void setEntityService(final tech.derbent.api.services.CAbstractService<?> service) {
+		// no-op: toolbar is now view-only
 	}
 
-	/** Sets the entity class type. Used in conjunction with setEntityService for dynamic entity type changes.
-	 * @param entityClass the entity class type */
-	public void setEntityClass(Class<?> entityClass) {
-		this.entityClass = entityClass;
+	public void setNewEntitySupplier(final Supplier<?> supplier) {
+		// no-op: toolbar is now view-only
+	}
+
+	public void setNotificationService(final tech.derbent.api.ui.notifications.CNotificationService notificationService) {
+		// no-op: toolbar is now view-only
+	}
+
+	public void setRefreshAction(final Runnable refreshAction) {
+		this.refreshAction = refreshAction;
 		updateButtonStates();
 	}
 
-	/** Sets the entity service for CRUD operations.
-	 * @param entityService the entity service */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public void setEntityService(CAbstractService<?> entityService) {
-		this.entityService = entityService;
-		if (entityService != null) {
-			@SuppressWarnings ({})
-			final CAbstractService service = entityService;
-			this.dependencyChecker = entity -> service.checkDeleteAllowed((CEntityDB) entity);
-		}
+	public void setRefreshCallback(final Consumer<Object> refreshCallback) {
+		// no-op: toolbar is now view-only
+	}
+
+	public void setSaveAction(final Runnable saveAction) {
+		this.saveAction = saveAction;
 		updateButtonStates();
 	}
 
-	/** OPTIONAL CONFIGURATOR: Sets the supplier for creating new entity instances.
-	 * @param newEntitySupplier supplier that creates new entity instances */
-	public void setNewEntitySupplier(final Supplier<?> newEntitySupplier) {
-		this.newEntitySupplier = newEntitySupplier;
-		updateButtonStates();
+	public void setWorkflowStatusRelationService(final tech.derbent.app.workflow.service.CWorkflowStatusRelationService svc) {
+		// no-op: toolbar is now view-only
 	}
 
-	/** OPTIONAL CONFIGURATOR: Sets the notification service for user messages.
-	 * @param notificationService the notification service to use */
-	public void setNotificationService(final CNotificationService notificationService) {
-		this.notificationService = notificationService;
-	}
-
-	/** OPTIONAL CONFIGURATOR: Sets the callback for refresh operations.
-	 * @param refreshCallback callback to execute when refresh is triggered */
-	public void setRefreshCallback(final Consumer<?> refreshCallback) {
-		this.refreshCallback = refreshCallback;
-		updateButtonStates();
-	}
-
-	/** OPTIONAL CONFIGURATOR: Sets the callback for save operations. This allows custom save logic with binder validation. By default, uses standard
-	 * save logic with entityService. Only use this to override the default behavior.
-	 * @param saveCallback callback to execute when save is triggered */
-	public void setSaveCallback(final Consumer<?> saveCallback) {
-		this.saveCallback = saveCallback;
-	}
-
-	/** Sets the current entity value. This is an alias for setCurrentEntity() to match standard Vaadin component patterns.
-	 * @param entity the entity to set as current */
-	public void setValue(final Object entity) {
-		setCurrentEntity(entity);
-	}
-
-	/** OPTIONAL CONFIGURATOR: Sets the workflow status relation service for workflow validation.
-	 * @param workflowStatusRelationService the workflow status relation service to use */
-	public void setWorkflowStatusRelationService(final CWorkflowStatusRelationService workflowStatusRelationService) {
-		this.workflowStatusRelationService = workflowStatusRelationService;
-	}
-
-	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
-	private void showErrorNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showError(message);
-		} else {
-			// Fallback to direct Vaadin call if service not injected
-			final Notification notification = Notification.show(message);
-			notification.setPosition(Notification.Position.MIDDLE);
-			notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-		}
-	}
-
-	/** Shows a success notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
-	private void showSuccessNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showSuccess(message);
-		} else {
-			// Fallback to direct Vaadin call if service not injected
-			final Notification notification = Notification.show(message);
-			notification.setPosition(Notification.Position.BOTTOM_START);
-		}
-	}
-
-	/** Updates button enabled/disabled states based on current context. */
+	/** Update enabled state of toolbar buttons based on whether callbacks are provided and current entity presence. */
 	private void updateButtonStates() {
-		// LOGGER.debug("Updating button states in toolbar for entity.");
-		boolean hasEntity = (currentEntity != null);
-		boolean hasEntityId = hasEntity && (currentEntity.getId() != null);
-		boolean canCreate = (newEntitySupplier != null);
-		boolean canRefresh = (refreshCallback != null);
-		boolean canSave = hasEntity && (saveCallback != null || entityService != null);
 		if (createButton != null) {
-			createButton.setEnabled(canCreate);
+			createButton.setEnabled(createAction != null);
 		}
+		// Save/Delete/Refresh require both a callback and a selected/current entity to be enabled
+		final boolean hasEntity = currentEntity != null;
 		if (saveButton != null) {
-			saveButton.setEnabled(canSave);
+			saveButton.setEnabled(saveAction != null && hasEntity);
 		}
 		if (deleteButton != null) {
-			deleteButton.setEnabled(hasEntityId);
+			deleteButton.setEnabled(deleteAction != null && hasEntity);
 		}
 		if (refreshButton != null) {
-			refreshButton.setEnabled(canRefresh);
+			refreshButton.setEnabled(refreshAction != null && hasEntity);
 		}
-		// Update workflow status combobox
-		if (statusComboBox != null) {
-			boolean enabled = false;
-			if (currentEntity instanceof IHasStatusAndWorkflow) {
-				List<CProjectItemStatus> validStatuses = new ArrayList<>();
-				CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-				validStatuses = statusService.getValidNextStatuses((IHasStatusAndWorkflow<?>) currentEntity);
-				statusComboBox.setItems(validStatuses);
-				statusComboBox.setValue(((CProjectItem<?>) currentEntity).getStatus());
-				enabled = true;
-			} else {
-				statusComboBox.setItems(new ArrayList<>());
-				statusComboBox.setValue(null);
-			}
-			statusComboBox.setEnabled(enabled);
-		}
+	}
+
+	/** Allows the page to provide available statuses for the workflow combobox. */
+	public void setStatusProvider(final Supplier<List<CProjectItemStatus>> statusProvider) {
+		this.statusProvider = statusProvider;
+		// Recreate combobox to refresh available items
+		createWorkflowStatusComboBox();
 	}
 }

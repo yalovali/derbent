@@ -26,29 +26,19 @@ public final class CWorkflowStatusRelationInitializerService extends CInitialize
 	private static final String pageTitle = "Workflow Status Transition Management";
 	private static final boolean showInQuickToolbar = false;
 
-	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {
-		try {
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, fieldName));
-		} catch (final NoSuchFieldException ex) {
-			LOGGER.debug("Skipping optional field {} for {}", fieldName, ENTITY_CLASS.getSimpleName());
-		}
-	}
-
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "id"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "workflowentity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "fromStatus"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "toStatus"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "role"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "roles"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			addOptionalField(detailSection, "createdDate");
-			addOptionalField(detailSection, "lastModifiedDate");
-			addOptionalField(detailSection, "id");
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -59,19 +49,18 @@ public final class CWorkflowStatusRelationInitializerService extends CInitialize
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "workflowentity", "fromStatus", "toStatus", "role", "active"));
+		grid.setColumnFields(List.of("id", "workflowentity", "fromStatus", "toStatus", "roles", "active"));
 		return grid;
 	}
 
-        public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-                        final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
-                        throws Exception {
-                Check.notNull(project, "project cannot be null");
-                final CDetailSection detailSection = createBasicView(project);
-                final CGridEntity grid = createGridEntity(project);
-                initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-                                pageDescription, showInQuickToolbar, menuOrder);
-        }
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		Check.notNull(project, "project cannot be null");
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
+	}
 
 	private CWorkflowStatusRelationInitializerService() {}
 }

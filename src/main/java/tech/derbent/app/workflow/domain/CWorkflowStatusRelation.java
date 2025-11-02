@@ -25,6 +25,8 @@ import tech.derbent.app.roles.domain.CUserProjectRole;
 @AttributeOverride (name = "id", column = @Column (name = "cworkflowstatusrelation_id"))
 public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> {
 
+	public static final String DEFAULT_COLOR = "#DC143C";
+	public static final String DEFAULT_ICON = "vaadin:tasks";
 	public static final String VIEW_NAME = "Workflow Status Relations View";
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "from_status_id", nullable = false)
@@ -33,6 +35,13 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 			hidden = false, order = 1, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService"
 	)
 	private CProjectItemStatus fromStatus;
+	// Field to indicate if this is an initial status (used when creating new items)
+	@Column (name = "is_initial_status", nullable = false)
+	@AMetaData (
+			displayName = "Is Initial Status", required = false, readOnly = false, defaultValue = "false",
+			description = "Indicates if this status is an initial/start status for new items", hidden = false, order = 5
+	)
+	private Boolean initialStatus = Boolean.FALSE;
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (
 			name = "cworkflowstatusrelation_roles", joinColumns = @JoinColumn (name = "cworkflowstatusrelation_id"),
@@ -44,13 +53,6 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserProjectRoleService", useGridSelection = true
 	)
 	private List<CUserProjectRole> roles = new ArrayList<>();
-	// Field to indicate if this is an initial status (used when creating new items)
-	@Column (name = "is_initial_status", nullable = false)
-	@AMetaData (
-			displayName = "Is Initial Status", required = false, readOnly = false, defaultValue = "false",
-			description = "Indicates if this status is an initial/start status for new items", hidden = false, order = 5
-	)
-	private Boolean initialStatus = Boolean.FALSE;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "to_status_id", nullable = false)
 	@AMetaData (
@@ -72,9 +74,9 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public CProjectItemStatus getFromStatus() { return fromStatus; }
 
-	public List<CUserProjectRole> getRoles() { return roles; }
-
 	public Boolean getInitialStatus() { return initialStatus != null ? initialStatus : Boolean.FALSE; }
+
+	public List<CUserProjectRole> getRoles() { return roles; }
 
 	public CProjectItemStatus getToStatus() { return toStatus; }
 
@@ -99,9 +101,9 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public void setFromStatus(final CProjectItemStatus fromStatus) { this.fromStatus = fromStatus; }
 
-	public void setRoles(final List<CUserProjectRole> roles) { this.roles = roles != null ? roles : new ArrayList<>(); }
-
 	public void setInitialStatus(Boolean initialStatus) { this.initialStatus = initialStatus != null ? initialStatus : Boolean.FALSE; }
+
+	public void setRoles(final List<CUserProjectRole> roles) { this.roles = roles != null ? roles : new ArrayList<>(); }
 
 	public void setToStatus(final CProjectItemStatus toStatus) { this.toStatus = toStatus; }
 

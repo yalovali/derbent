@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -14,6 +11,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 
 public class CActivityInitializerService extends CInitializerServiceBase {
 
@@ -32,6 +32,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			scr.addScreenLine(CDetailLinesService.createSection(CActivityInitializerService.BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			/******************/
@@ -64,7 +65,6 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.debug_printScreenInformation();
 			return scr;

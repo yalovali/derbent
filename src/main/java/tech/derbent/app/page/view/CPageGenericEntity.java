@@ -83,7 +83,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	@SuppressWarnings ({})
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		// Create toolbar with minimal constructor and configure
-		CCrudToolbar toolbar = CCrudToolbar.create(typedBinder);
+		CCrudToolbar toolbar = new CCrudToolbar();
 		toolbar.setEntityService(entityService);
 		toolbar.setEntityClass(entityClass);
 		toolbar.setNotificationService(getNotificationService());

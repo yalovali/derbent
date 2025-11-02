@@ -2,6 +2,8 @@ package tech.derbent.base.users.domain;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +16,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CAbstractEntityRelationship;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
 
@@ -26,6 +29,9 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 @AttributeOverride (name = "id", column = @Column (name = "cusercompanysetting_id"))
 public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompanySetting> {
 
+	public static final String DEFAULT_COLOR = "#DC143C";
+	public static final String DEFAULT_ICON = "vaadin:tasks";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 	public static final String VIEW_NAME = "User Company Settings View";
 
 	// Static helper methods for bidirectional relationship management
