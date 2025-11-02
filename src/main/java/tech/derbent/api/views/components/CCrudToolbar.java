@@ -189,6 +189,9 @@ public class CCrudToolbar extends HorizontalLayout {
 	public CEntityDB<?> getValue() { return currentEntity; }
 
 	/** Handles the create (new entity) operation. */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	private void handleCreate() {
 		try {
 			LOGGER.debug("Handling create operation for entity");
@@ -198,7 +201,6 @@ public class CCrudToolbar extends HorizontalLayout {
 			Check.notNull(newEntity, "New entity supplier returned null");
 			// Initialize the new entity with default values from session and available data
 			try {
-				@SuppressWarnings({"unchecked", "rawtypes"})
 				final CAbstractService service = entityService;
 				service.initializeNewEntity((CEntityDB) newEntity);
 				LOGGER.debug("Initialized new entity with default values");
@@ -287,7 +289,9 @@ public class CCrudToolbar extends HorizontalLayout {
 				return;
 			}
 			// Check if save is allowed (validation)
-			@SuppressWarnings({"unchecked", "rawtypes"})
+			@SuppressWarnings ({
+					"rawtypes"
+			})
 			final String saveError = ((CAbstractService) entityService).checkSaveAllowed(currentEntity);
 			if (saveError != null) {
 				showErrorNotification(saveError);
@@ -298,7 +302,9 @@ public class CCrudToolbar extends HorizontalLayout {
 				((Consumer<Object>) saveCallback).accept(currentEntity);
 			} else {
 				// Default save behavior
-				@SuppressWarnings({"unchecked", "rawtypes"})
+				@SuppressWarnings ({
+						"rawtypes"
+				})
 				final Object savedEntity = ((CAbstractService) entityService).save(currentEntity);
 				currentEntity = (CEntityDB<?>) savedEntity;
 				updateButtonStates();
@@ -347,7 +353,9 @@ public class CCrudToolbar extends HorizontalLayout {
 			// Update and save entity
 			projectItem.setStatus(newStatus);
 			try {
-				@SuppressWarnings({"unchecked", "rawtypes"})
+				@SuppressWarnings ({
+						"rawtypes"
+				})
 				final CEntityDB<?> savedEntity = ((CAbstractService) entityService).save(currentEntity);
 				showSuccessNotification("Status updated to '" + newStatus.getName() + "'");
 				// Notify listeners
@@ -365,7 +373,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	}
 
 	/** Notifies all listeners that an entity was created. */
-	@SuppressWarnings ("unchecked")
 	private void notifyListenersCreated(final Object entity) {
 		if (currentEntity != null) {
 			LOGGER.debug("Notifying listeners of entity creation: {}", currentEntity.getClass().getSimpleName());
@@ -381,7 +388,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	}
 
 	/** Notifies all listeners that an entity was deleted. */
-	@SuppressWarnings ("unchecked")
 	private void notifyListenersDeleted(final Object entity) {
 		if (currentEntity != null) {
 			LOGGER.debug("Notifying listeners of entity deletion: {}", currentEntity.getClass().getSimpleName());
@@ -397,7 +403,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	}
 
 	/** Notifies all listeners that an entity was saved. */
-	@SuppressWarnings ("unchecked")
 	private void notifyListenersSaved(final Object entity) {
 		if (currentEntity != null) {
 			LOGGER.debug("Notifying listeners of entity save: {}", currentEntity.getClass().getSimpleName());
@@ -418,7 +423,9 @@ public class CCrudToolbar extends HorizontalLayout {
 		try {
 			LOGGER.debug("Performing delete operation for entity: {}", currentEntity.getClass().getSimpleName());
 			CEntityDB<?> entityToDelete = currentEntity;
-			@SuppressWarnings({"unchecked", "rawtypes"})
+			@SuppressWarnings ({
+					"rawtypes"
+			})
 			final CAbstractService service = entityService;
 			service.delete(currentEntity);
 			LOGGER.info("Entity deleted successfully: {} with ID: {}", currentEntity.getClass().getSimpleName(), entityToDelete.getId());
@@ -448,14 +455,16 @@ public class CCrudToolbar extends HorizontalLayout {
 	 * based on user selection.
 	 * @param newEntityClass   the new entity class type
 	 * @param newEntityService the new entity service */
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	public void reconfigureForEntityType(Class<?> newEntityClass, CAbstractService<?> newEntityService) {
 		LOGGER.debug("Reconfiguring toolbar for entity type: {}", newEntityClass != null ? newEntityClass.getSimpleName() : "null");
 		this.entityClass = newEntityClass;
 		this.entityService = newEntityService;
 		// Update dependency checker from new service
 		if (newEntityService != null) {
-			@SuppressWarnings({"unchecked", "rawtypes"})
+			@SuppressWarnings ({})
 			final CAbstractService service = newEntityService;
 			this.dependencyChecker = entity -> service.checkDeleteAllowed((CEntityDB) entity);
 		} else {
@@ -481,13 +490,15 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	/** Updates the current entity and refreshes button states.
 	 * @param entity the current entity */
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	public void setCurrentEntity(final Object entity) {
 		// LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
 		currentEntity = (CEntityDB<?>) entity;
 		// Automatically set dependency checker from service when entity changes
 		if (entityService != null) {
-			@SuppressWarnings({"unchecked", "rawtypes"})
+			@SuppressWarnings ({})
 			final CAbstractService service = entityService;
 			dependencyChecker = e -> service.checkDeleteAllowed((CEntityDB) e);
 		}
@@ -510,10 +521,13 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	/** Sets the entity service for CRUD operations.
 	 * @param entityService the entity service */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	public void setEntityService(CAbstractService<?> entityService) {
 		this.entityService = entityService;
 		if (entityService != null) {
-			@SuppressWarnings({"unchecked", "rawtypes"})
+			@SuppressWarnings ({})
 			final CAbstractService service = entityService;
 			this.dependencyChecker = entity -> service.checkDeleteAllowed((CEntityDB) entity);
 		}

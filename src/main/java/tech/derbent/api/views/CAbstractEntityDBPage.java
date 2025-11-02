@@ -139,6 +139,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	/** Configures the CRUD toolbar with custom save callback that includes validation and error handling. This method sets up the save logic specific
 	 * to CAbstractEntityDBPage which includes pre-save events, binder validation, entity validation, and proper error handling. */
+	@SuppressWarnings ("unchecked")
 	private void configureCrudToolbarSaveCallback() {
 		// Set save callback with binder validation
 		crudToolbar.setSaveCallback(entity -> {

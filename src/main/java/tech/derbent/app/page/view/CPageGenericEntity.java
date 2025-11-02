@@ -75,14 +75,12 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		return crudToolbar;
 	}
 
-	/** Creates a new CCrudToolbar instance for the given entity type and binder. All configuration is now done via setters
-	 * after construction. The entity type is determined dynamically when an entity is set.
+	/** Creates a new CCrudToolbar instance for the given entity type and binder. All configuration is now done via setters after construction. The
+	 * entity type is determined dynamically when an entity is set.
 	 * @param typedBinder the properly typed binder for the entity
 	 * @param typedEntity the current entity instance
 	 * @return a configured CCrudToolbar instance */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings ({})
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		// Create toolbar with minimal constructor and configure
 		CCrudToolbar toolbar = CCrudToolbar.create(typedBinder);

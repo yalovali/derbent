@@ -5,9 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.utils.Check;
@@ -39,21 +37,8 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 		LOGGER.debug("Creating single entity dynamic page view for: {}", pageEntity.getPageTitle());
 	}
 
-	/** Configure CRUD toolbar buttons.
-	 * @param enableDelete Enable/disable delete button
-	 * @param enableNew    Enable/disable new button
-	 * @param enableSave   Enable/disable save button
-	 * @param enableReload Enable/disable reload/cancel button */
-	public void setCrudToolbarButtonConfig(boolean enableDelete, boolean enableNew, boolean enableSave, boolean enableReload) {
-		enableDeleteButton = enableDelete;
-		enableNewButton = enableNew;
-		enableSaveButton = enableSave;
-		enableReloadButton = enableReload;
-		LOGGER.debug("CRUD toolbar configured - Delete: {}, New: {}, Save: {}, Reload: {}", enableDelete, enableNew, enableSave, enableReload);
-	}
-
-	/** Hook method for customizing the CRUD toolbar after creation.
-	 * Configures button visibility based on the enableXxxButton flags set via setCrudToolbarButtonConfig().
+	/** Hook method for customizing the CRUD toolbar after creation. Configures button visibility based on the enableXxxButton flags set via
+	 * setCrudToolbarButtonConfig().
 	 * @param toolbar the toolbar to configure */
 	@Override
 	protected void configureCrudToolbar(final CCrudToolbar toolbar) {
@@ -138,6 +123,19 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 		} catch (Exception e) {
 			LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
 		}
+	}
+
+	/** Configure CRUD toolbar buttons.
+	 * @param enableDelete Enable/disable delete button
+	 * @param enableNew    Enable/disable new button
+	 * @param enableSave   Enable/disable save button
+	 * @param enableReload Enable/disable reload/cancel button */
+	public void setCrudToolbarButtonConfig(boolean enableDelete, boolean enableNew, boolean enableSave, boolean enableReload) {
+		enableDeleteButton = enableDelete;
+		enableNewButton = enableNew;
+		enableSaveButton = enableSave;
+		enableReloadButton = enableReload;
+		LOGGER.debug("CRUD toolbar configured - Delete: {}, New: {}, Save: {}, Reload: {}", enableDelete, enableNew, enableSave, enableReload);
 	}
 
 	/** Validates that the page entity is properly configured for single entity display. Throws exception if
