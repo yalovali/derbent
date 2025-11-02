@@ -27,6 +27,5 @@ profile-pictures/
 .m2
 .codex/
 
-# Local library installations - install with install-so-libraries.sh
-lib/
+# Exclude playwright-java.jar (available via Maven)
 playwright-java.jar
