@@ -50,7 +50,8 @@
 
     <dependencies>
 
-        <!-- StoredObject Addons -->
+        <!-- StoredObject Addons - TEMPORARILY DISABLED DUE TO NETWORK ISSUES -->
+        <!--
         <dependency>
             <groupId>org.vaadin.addons.so</groupId>
             <artifactId>so-components</artifactId>
@@ -86,6 +87,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        -->
 
         <!-- Vaadin Boot Starter (Reflections ≠ plugin override yapılmadan gelmesin) -->
         <dependency>

@@ -156,12 +156,15 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				if (!onBeforeSaveEvent()) {
 					return;
 				}
+				// Cast entity to proper type
+				@SuppressWarnings("unchecked")
+				EntityClass typedEntity = (EntityClass) entity;
 				// Write form data to entity
-				getBinder().writeBean(entity);
+				getBinder().writeBean(typedEntity);
 				// Validate entity before saving
-				validateEntityForSave(entity);
+				validateEntityForSave(typedEntity);
 				// Save entity
-				final EntityClass savedEntity = entityService.save(entity);
+				final EntityClass savedEntity = entityService.save(typedEntity);
 				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 				// Update current entity with saved version (includes generated ID)
 				setCurrentEntity(savedEntity);
@@ -210,8 +213,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					LOGGER.warn("No entity to delete");
 					return;
 				}
+				// Cast entity to proper type
+				@SuppressWarnings("unchecked")
+				EntityClass typedEntity = (EntityClass) entity;
 				// Delete entity
-				entityService.delete((EntityClass) entity);
+				entityService.delete(typedEntity);
 				LOGGER.info("Entity deleted successfully");
 				// Notify success
 				if (notificationService != null) {
@@ -234,8 +240,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				if (entity == null) {
 					return "No entity to validate";
 				}
+				// Cast entity to proper type
+				@SuppressWarnings("unchecked")
+				EntityClass typedEntity = (EntityClass) entity;
 				// Use entity service to check if save is allowed
-				return entityService.checkSaveAllowed((EntityClass) entity);
+				return entityService.checkSaveAllowed(typedEntity);
 			} catch (final Exception exception) {
 				LOGGER.error("Error validating entity for save", exception);
 				return "Validation error: " + exception.getMessage();

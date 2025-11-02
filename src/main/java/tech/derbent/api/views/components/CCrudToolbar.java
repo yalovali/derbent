@@ -189,6 +189,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	public CEntityDB<?> getValue() { return currentEntity; }
 
 	/** Handles the create (new entity) operation. */
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void handleCreate() {
 		try {
 			LOGGER.debug("Handling create operation for entity");
@@ -198,8 +199,10 @@ public class CCrudToolbar extends HorizontalLayout {
 			Check.notNull(newEntity, "New entity supplier returned null");
 			// Initialize the new entity with default values from session and available data
 			try {
-				entityService.initializeNewEntity(entityClass.cast(newEntity));
-				LOGGER.debug("Initialized new entity with default values");
+				if (entityService != null) {
+					((CAbstractService) entityService).initializeNewEntity((CEntityDB) newEntity);
+					LOGGER.debug("Initialized new entity with default values");
+				}
 			} catch (IllegalStateException e) {
 				// If initialization fails due to missing required data, show specific error
 				LOGGER.error("Failed to initialize new entity: {}", e.getMessage());
@@ -440,14 +443,14 @@ public class CCrudToolbar extends HorizontalLayout {
 	 * based on user selection.
 	 * @param newEntityClass   the new entity class type
 	 * @param newEntityService the new entity service */
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ({"unchecked", "rawtypes"})
 	public void reconfigureForEntityType(Class<?> newEntityClass, CAbstractService<?> newEntityService) {
 		LOGGER.debug("Reconfiguring toolbar for entity type: {}", newEntityClass != null ? newEntityClass.getSimpleName() : "null");
 		this.entityClass = newEntityClass;
 		this.entityService = newEntityService;
 		// Update dependency checker from new service
 		if (newEntityService != null) {
-			this.dependencyChecker = newEntityService::checkDeleteAllowed;
+			this.dependencyChecker = entity -> ((CAbstractService) newEntityService).checkDeleteAllowed((CEntityDB) entity);
 		} else {
 			this.dependencyChecker = null;
 		}
@@ -471,13 +474,13 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	/** Updates the current entity and refreshes button states.
 	 * @param entity the current entity */
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ({"unchecked", "rawtypes"})
 	public void setCurrentEntity(final Object entity) {
 		// LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
 		currentEntity = (CEntityDB<?>) entity;
 		// Automatically set dependency checker from service when entity changes
 		if (entityService != null) {
-			dependencyChecker = entityService::checkDeleteAllowed;
+			dependencyChecker = e -> ((CAbstractService) entityService).checkDeleteAllowed((CEntityDB) e);
 		}
 		updateButtonStates();
 	}
@@ -498,10 +501,11 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	/** Sets the entity service for CRUD operations.
 	 * @param entityService the entity service */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void setEntityService(CAbstractService<?> entityService) {
 		this.entityService = entityService;
 		if (entityService != null) {
-			this.dependencyChecker = entityService::checkDeleteAllowed;
+			this.dependencyChecker = entity -> ((CAbstractService) entityService).checkDeleteAllowed((CEntityDB) entity);
 		}
 		updateButtonStates();
 	}
