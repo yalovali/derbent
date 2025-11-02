@@ -135,3 +135,40 @@ mvn exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install
 ## Summary
 
 All scripts and configurations have been updated to ensure Java 21 is used consistently. The environment setup is now automatic via `setup-java-env.sh`, making it easier to work in different environments including GitHub Copilot workspace.
+
+## Playwright Test Verification
+
+### Test Execution Verified ✅
+
+The Playwright test suite has been verified to work in the sandbox environment:
+
+```bash
+./run-playwright-tests.sh menu
+```
+
+**Test Results:**
+- ✅ Java 21 environment automatically configured
+- ✅ SO libraries loaded successfully
+- ✅ Database initialization (H2 in-memory) working
+- ✅ Login flow functional
+- ✅ Menu navigation operational
+- ✅ Screenshots generated in `target/screenshots/`
+
+### What the Tests Validate
+
+1. **DB Initialization**: Creates sample data including users, companies, projects
+2. **Login Flow**: Authenticates with admin credentials
+3. **CRUD Operations**: Tests create, read, update, delete on entities
+4. **Menu Navigation**: Walks through all menu items systematically
+5. **UI Screenshots**: Captures visual state at each step
+
+### Generated Artifacts
+
+Screenshots are saved to `target/screenshots/` showing:
+- Login screen state
+- Post-login dashboard
+- Navigation through menus
+- Entity management pages
+- Form interactions
+
+All tests run with Java 21 (automatically configured) and use H2 database for isolation.
