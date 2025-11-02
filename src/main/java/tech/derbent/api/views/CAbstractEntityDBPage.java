@@ -106,6 +106,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		});
 		// Set custom save callback with validation logic specific to this page type
 		configureCrudToolbarSaveCallback();
+		// Set delete callback
+		configureCrudToolbarDeleteCallback();
+		// Set save validation callback
+		configureCrudToolbarSaveValidationCallback();
 		createPageContent();
 	}
 
@@ -161,6 +165,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 				// Update current entity with saved version (includes generated ID)
 				setCurrentEntity(savedEntity);
+				// Notify success
+				if (notificationService != null) {
+					notificationService.showSaveSuccess();
+				}
 				// Notify listeners through toolbar
 				// (toolbar will call notifyListenersSaved which triggers our listener below)
 			} catch (final ObjectOptimisticLockingFailureException exception) {
@@ -189,6 +197,48 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					e.printStackTrace();
 				}
 				throw new RuntimeException("Unexpected error during save operation", exception);
+			}
+		});
+	}
+
+	/** Configures the CRUD toolbar with custom delete callback. */
+	private void configureCrudToolbarDeleteCallback() {
+		crudToolbar.setDeleteCallback(entity -> {
+			try {
+				LOGGER.debug("Delete callback invoked, deleting entity: {}", entity != null ? ((CEntityDB<?>) entity).getId() : "null");
+				if (entity == null) {
+					LOGGER.warn("No entity to delete");
+					return;
+				}
+				// Delete entity
+				entityService.delete((EntityClass) entity);
+				LOGGER.info("Entity deleted successfully");
+				// Notify success
+				if (notificationService != null) {
+					notificationService.showDeleteSuccess();
+				}
+			} catch (final Exception exception) {
+				LOGGER.error("Error deleting entity", exception);
+				if (notificationService != null) {
+					notificationService.showDeleteError();
+				}
+				throw new RuntimeException("Error deleting entity", exception);
+			}
+		});
+	}
+
+	/** Configures the CRUD toolbar with save validation callback. */
+	private void configureCrudToolbarSaveValidationCallback() {
+		crudToolbar.setSaveValidationCallback(entity -> {
+			try {
+				if (entity == null) {
+					return "No entity to validate";
+				}
+				// Use entity service to check if save is allowed
+				return entityService.checkSaveAllowed((EntityClass) entity);
+			} catch (final Exception exception) {
+				LOGGER.error("Error validating entity for save", exception);
+				return "Validation error: " + exception.getMessage();
 			}
 		});
 	}

@@ -110,6 +110,65 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 				LOGGER.error("Error refreshing entity: {}", e.getMessage());
 			}
 		});
+		// Set save callback
+		toolbar.setSaveCallback(entity -> {
+			try {
+				LOGGER.debug("Save callback invoked for entity: {}", entity != null ? ((CEntityDB<?>) entity).getId() : "null");
+				if (entity == null) {
+					LOGGER.warn("No entity to save");
+					return;
+				}
+				// Save entity
+				EntityClass savedEntity = entityService.save((EntityClass) entity);
+				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
+				// Notify success
+				if (getNotificationService() != null) {
+					getNotificationService().showSaveSuccess();
+				}
+			} catch (Exception e) {
+				LOGGER.error("Error saving entity", e);
+				if (getNotificationService() != null) {
+					getNotificationService().showSaveError();
+				}
+				throw new RuntimeException("Error saving entity", e);
+			}
+		});
+		// Set delete callback
+		toolbar.setDeleteCallback(entity -> {
+			try {
+				LOGGER.debug("Delete callback invoked for entity: {}", entity != null ? ((CEntityDB<?>) entity).getId() : "null");
+				if (entity == null) {
+					LOGGER.warn("No entity to delete");
+					return;
+				}
+				// Delete entity
+				entityService.delete((EntityClass) entity);
+				LOGGER.info("Entity deleted successfully");
+				// Notify success
+				if (getNotificationService() != null) {
+					getNotificationService().showDeleteSuccess();
+				}
+			} catch (Exception e) {
+				LOGGER.error("Error deleting entity", e);
+				if (getNotificationService() != null) {
+					getNotificationService().showDeleteError();
+				}
+				throw new RuntimeException("Error deleting entity", e);
+			}
+		});
+		// Set save validation callback
+		toolbar.setSaveValidationCallback(entity -> {
+			try {
+				if (entity == null) {
+					return "No entity to validate";
+				}
+				// Use entity service to check if save is allowed
+				return entityService.checkSaveAllowed((EntityClass) entity);
+			} catch (Exception e) {
+				LOGGER.error("Error validating entity for save", e);
+				return "Validation error: " + e.getMessage();
+			}
+		});
 		toolbar.setCurrentEntity(typedEntity);
 		// Allow subclasses to customize toolbar if needed
 		configureCrudToolbar(toolbar);

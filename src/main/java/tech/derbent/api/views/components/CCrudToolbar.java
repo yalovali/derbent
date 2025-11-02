@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.components.CColorAwareComboBox;
@@ -82,6 +80,8 @@ public class CCrudToolbar extends HorizontalLayout {
 	private Consumer<?> refreshCallback;
 	private CButton saveButton;
 	private Consumer<?> saveCallback;
+	private Consumer<?> deleteCallback;
+	private Function<?, String> saveValidationCallback;
 	private ComboBox<CProjectItemStatus> statusComboBox; // Workflow status selector
 	// Listeners
 	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
@@ -225,7 +225,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	@SuppressWarnings ("unchecked")
 	private void handleDelete() {
 		try {
-			Check.notNull(entityService, "Entity service cannot be null");
 			Check.notNull(currentEntity, "Current entity cannot be null");
 			LOGGER.debug("Handling delete operation for entity : {}", currentEntity.getClass().getSimpleName());
 			if (currentEntity == null || currentEntity.getId() == null) {
@@ -277,31 +276,23 @@ public class CCrudToolbar extends HorizontalLayout {
 	@SuppressWarnings ("unchecked")
 	private void handleSave() throws Exception {
 		try {
-			Check.notNull(entityService, "Entity service cannot be null");
+			Check.notNull(saveCallback, "Save callback is not set");
 			Check.notNull(currentEntity, "Current entity cannot be null");
 			LOGGER.debug("Attempting to save entity: {}", currentEntity.getClass().getSimpleName());
 			if (currentEntity == null) {
 				showErrorNotification("Cannot save: No entity selected.");
 				return;
 			}
-			// Check if save is allowed (validation)
-			final String saveError = ((CAbstractService<? extends CEntityDB<?>>) entityService).checkSaveAllowed(currentEntity);
-			if (saveError != null) {
-				showErrorNotification(saveError);
-				return;
+			// Check if save is allowed (validation) using callback if provided
+			if (saveValidationCallback != null) {
+				final String saveError = ((Function<Object, String>) saveValidationCallback).apply(currentEntity);
+				if (saveError != null) {
+					showErrorNotification(saveError);
+					return;
+				}
 			}
-			// Use custom save callback if provided (for integration with binder validation)
-			if (saveCallback != null) {
-				((Consumer<Object>) saveCallback).accept(currentEntity);
-			} else {
-				// Default save behavior
-				final Object savedEntity = ((CAbstractService<? extends CEntityDB<?>>) entityService).save(currentEntity);
-				currentEntity = (CEntityDB<?>) savedEntity;
-				updateButtonStates();
-				showSuccessNotification("Data saved successfully");
-				// Notify listeners
-				notifyListenersSaved(savedEntity);
-			}
+			// Use save callback (required - no default save behavior)
+			((Consumer<Object>) saveCallback).accept(currentEntity);
 		} catch (Exception e) {
 			LOGGER.error("Error during save operation for entity: {}", currentEntity != null ? currentEntity.getClass().getSimpleName() : "null", e);
 			if (notificationService != null) {
@@ -313,7 +304,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	/** Handles workflow status change, validates transition and saves the entity.
+	/** Handles workflow status change, validates transition and delegates to save callback.
 	 * @param projectItem the project item to update
 	 * @param newStatus   the new status to set */
 	@SuppressWarnings ("unchecked")
@@ -340,13 +331,19 @@ public class CCrudToolbar extends HorizontalLayout {
 					return;
 				}
 			}
-			// Update and save entity
+			// Update status and delegate to save callback
 			projectItem.setStatus(newStatus);
 			try {
-				((CAbstractService<? extends CEntityDB<?>>) entityService).save(currentEntity);
-				showSuccessNotification("Status updated to '" + newStatus.getName() + "'");
-				// Notify listeners
-				notifyListenersSaved(currentEntity);
+				if (saveCallback != null) {
+					((Consumer<Object>) saveCallback).accept(currentEntity);
+					showSuccessNotification("Status updated to '" + newStatus.getName() + "'");
+					// Notify listeners
+					notifyListenersSaved(currentEntity);
+				} else {
+					LOGGER.warn("Save callback not set, cannot save status change");
+					showErrorNotification("Cannot save status change: save callback not configured");
+					statusComboBox.setValue(currentStatus);
+				}
 			} catch (Exception e) {
 				LOGGER.error("Error saving entity after status change", e);
 				showErrorNotification("Failed to update status: " + e.getMessage());
@@ -411,10 +408,12 @@ public class CCrudToolbar extends HorizontalLayout {
 	@SuppressWarnings ("unchecked")
 	private void performDelete() {
 		try {
+			Check.notNull(deleteCallback, "Delete callback is not set");
 			LOGGER.debug("Performing delete operation for entity: {}", currentEntity.getClass().getSimpleName());
 			CEntityDB<?> entityToDelete = currentEntity;
-			((CAbstractService<? extends CEntityDB<?>>) entityService).delete(currentEntity);
-			LOGGER.info("Entity deleted successfully: {} with ID: {}", currentEntity.getClass().getSimpleName(), entityToDelete.getId());
+			// Use delete callback (required - no default delete behavior)
+			((Consumer<Object>) deleteCallback).accept(currentEntity);
+			LOGGER.info("Entity deleted successfully: {} with ID: {}", entityToDelete.getClass().getSimpleName(), entityToDelete.getId());
 			// Clear current entity
 			currentEntity = null;
 			// Clear the binder to reset the form
@@ -534,6 +533,19 @@ public class CCrudToolbar extends HorizontalLayout {
 		this.saveCallback = saveCallback;
 	}
 
+	/** OPTIONAL CONFIGURATOR: Sets the callback for delete operations. This allows custom delete logic.
+	 * @param deleteCallback callback to execute when delete is confirmed */
+	public void setDeleteCallback(final Consumer<?> deleteCallback) {
+		this.deleteCallback = deleteCallback;
+	}
+
+	/** OPTIONAL CONFIGURATOR: Sets the validation callback for save operations. This allows custom validation before save.
+	 * Returns null if validation passes, or an error message if validation fails.
+	 * @param saveValidationCallback callback that returns null if save is allowed, or error message if not */
+	public void setSaveValidationCallback(final Function<?, String> saveValidationCallback) {
+		this.saveValidationCallback = saveValidationCallback;
+	}
+
 	/** Sets the current entity value. This is an alias for setCurrentEntity() to match standard Vaadin component patterns.
 	 * @param entity the entity to set as current */
 	public void setValue(final Object entity) {
@@ -546,26 +558,21 @@ public class CCrudToolbar extends HorizontalLayout {
 		this.workflowStatusRelationService = workflowStatusRelationService;
 	}
 
-	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
+	/** Shows an error notification. Uses CNotificationService if available. */
 	private void showErrorNotification(final String message) {
 		if (notificationService != null) {
 			notificationService.showError(message);
 		} else {
-			// Fallback to direct Vaadin call if service not injected
-			final Notification notification = Notification.show(message);
-			notification.setPosition(Notification.Position.MIDDLE);
-			notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			LOGGER.warn("Notification service not set, cannot show error message: {}", message);
 		}
 	}
 
-	/** Shows a success notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
+	/** Shows a success notification. Uses CNotificationService if available. */
 	private void showSuccessNotification(final String message) {
 		if (notificationService != null) {
 			notificationService.showSuccess(message);
 		} else {
-			// Fallback to direct Vaadin call if service not injected
-			final Notification notification = Notification.show(message);
-			notification.setPosition(Notification.Position.BOTTOM_START);
+			LOGGER.warn("Notification service not set, cannot show success message: {}", message);
 		}
 	}
 
@@ -576,7 +583,8 @@ public class CCrudToolbar extends HorizontalLayout {
 		boolean hasEntityId = hasEntity && (currentEntity.getId() != null);
 		boolean canCreate = (newEntitySupplier != null);
 		boolean canRefresh = (refreshCallback != null);
-		boolean canSave = hasEntity && (saveCallback != null || entityService != null);
+		boolean canSave = hasEntity && (saveCallback != null);
+		boolean canDelete = hasEntityId && (deleteCallback != null);
 		if (createButton != null) {
 			createButton.setEnabled(canCreate);
 		}
@@ -584,7 +592,7 @@ public class CCrudToolbar extends HorizontalLayout {
 			saveButton.setEnabled(canSave);
 		}
 		if (deleteButton != null) {
-			deleteButton.setEnabled(hasEntityId);
+			deleteButton.setEnabled(canDelete);
 		}
 		if (refreshButton != null) {
 			refreshButton.setEnabled(canRefresh);
