@@ -161,6 +161,9 @@ git clone https://github.com/SebnemC/derbent.git
 # 📂 Navigate to project directory
 cd derbent
 
+# ⚙️ Setup Java 21 environment (REQUIRED - run first)
+source ./setup-java-env.sh
+
 # 📦 Install StoredObject libraries (required - run once)
 ./install-so-libraries.sh
 
@@ -170,7 +173,10 @@ mvn spring-boot:run -Dspring.profiles.active=h2-local-development
 # 🌟 Open your browser to: http://localhost:8080
 ```
 
-> **📝 Note**: The StoredObject libraries (so-components, so-charts, so-helper) are included in the `lib/` folder and must be installed to your local Maven repository before building. The `install-so-libraries.sh` script handles this automatically.
+> **📝 Note**: 
+> - **Java 21 is required** - Use `setup-java-env.sh` to configure the environment automatically
+> - The StoredObject libraries (so-components, so-charts, so-helper) are installed via `install-so-libraries.sh`
+> - For GitHub Copilot workspace: The environment is automatically configured via `.github/copilot-instructions.md`
 
 ### 🎯 **First Login Experience**
 

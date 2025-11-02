@@ -26,3 +26,7 @@ profile-pictures/
 .mv
 .m2
 .codex/
+
+# Local library installations - install with install-so-libraries.sh
+lib/
+playwright-java.jar
