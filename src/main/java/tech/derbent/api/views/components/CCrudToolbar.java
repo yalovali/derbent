@@ -116,8 +116,8 @@ public class CCrudToolbar extends HorizontalLayout {
 		updateButtonStates();
 	}
 
-	/** Creates the workflow status combobox for CProjectItem entities. This method is safe to call repeatedly; it will replace any existing
-	 * combobox. */
+	/** Creates the workflow status combobox for CProjectItem entities using standard Vaadin ComboBox. This method is safe to call repeatedly; it
+	 * will replace any existing combobox. */
 	private void createWorkflowStatusComboBox() {
 		try {
 			// Remove existing combobox if present
@@ -136,18 +136,22 @@ public class CCrudToolbar extends HorizontalLayout {
 				// We only support CProjectItem status editing in toolbar for now
 				return;
 			}
-			Check.notNull(statusProvider, "Status provider must be set to create workflow combobox in toolbar");
-			Check.notNull(statusProvider.get(), "Status provider must supply non-null list of statuses for workflow combobox");
+			// Check if status provider is set before proceeding
+			if (statusProvider == null) {
+				LOGGER.debug("Status provider not set, cannot create workflow combobox");
+				return;
+			}
+			final List<CProjectItemStatus> statuses = statusProvider.get();
+			if (statuses == null || statuses.isEmpty()) {
+				LOGGER.debug("No statuses available from provider, cannot create workflow combobox");
+				return;
+			}
 			final CProjectItem<?> projectItem = (CProjectItem<?>) currentEntity;
-			final List<CProjectItemStatus> statuses = (statusProvider != null) ? statusProvider.get() : null;
-			Check.notNull(statuses, "Status provider must supply non-null list of statuses for workflow combobox");
 			statusComboBox = new ComboBox<>();
 			statusComboBox.setItemLabelGenerator(s -> s != null ? s.toString() : "");
 			statusComboBox.setWidth("220px");
 			statusComboBox.setClearButtonVisible(false);
-			if (statuses != null) {
-				statusComboBox.setItems(statuses);
-			}
+			statusComboBox.setItems(statuses);
 			// Set current value if available
 			if (projectItem.getStatus() != null) {
 				statusComboBox.setValue(projectItem.getStatus());
@@ -156,6 +160,7 @@ public class CCrudToolbar extends HorizontalLayout {
 				if (event.isFromClient() && event.getValue() != null) {
 					try {
 						projectItem.setStatus(event.getValue());
+						LOGGER.debug("Status changed to: {}", event.getValue());
 						// Trigger save action if page provided one; otherwise trigger refresh
 						if (saveAction != null) {
 							try {
@@ -176,30 +181,81 @@ public class CCrudToolbar extends HorizontalLayout {
 				}
 			});
 			add(statusComboBox);
+			LOGGER.debug("Created workflow status combobox 1 with standard ComboBox");
 		} catch (Exception e) {
 			LOGGER.error("Error creating workflow status combobox", e);
 		}
 	}
 
-	/** Creates the workflow status combobox for entities that support workflow. Called dynamically when an entity with workflow is set. */
+	/** Creates the workflow status combobox for entities that support workflow using CColorAwareComboBox. Called dynamically when an entity with
+	 * workflow is set. This version recreates the combobox each time to ensure proper value updates. */
 	private void createWorkflowStatusComboBox2() {
 		try {
-			// Only create if not already created
+			// Remove existing combobox if present
 			if (statusComboBox2 != null) {
+				remove(statusComboBox2);
+				statusComboBox2 = null;
+			}
+			// Guard: need an entity that supports status and a status provider to populate items
+			if (currentEntity == null) {
 				return;
 			}
+			if (!(currentEntity instanceof IHasStatusAndWorkflow)) {
+				return;
+			}
+			if (!(currentEntity instanceof CProjectItem)) {
+				// We only support CProjectItem status editing in toolbar for now
+				return;
+			}
+			if (statusProvider == null) {
+				LOGGER.debug("Status provider not set, cannot create workflow combobox 2");
+				return;
+			}
+			final List<CProjectItemStatus> statuses = statusProvider.get();
+			if (statuses == null || statuses.isEmpty()) {
+				LOGGER.debug("No statuses available from provider, cannot create workflow combobox 2");
+				return;
+			}
+			final CProjectItem<?> projectItem = (CProjectItem<?>) currentEntity;
+			// Create CColorAwareComboBox with null for contentOwner and binder (not using binding here)
 			statusComboBox2 = new CColorAwareComboBox<CProjectItemStatus>(null,
 					CEntityFieldService.createFieldInfo(CProjectItem.class.getDeclaredField("status")), null, dataProviderResolver);
+			statusComboBox2.setWidth("220px");
+			statusComboBox2.setClearButtonVisible(false);
+			statusComboBox2.setItems(statuses);
+			// Set current value if available
+			if (projectItem.getStatus() != null) {
+				statusComboBox2.setValue(projectItem.getStatus());
+			}
 			statusComboBox2.addValueChangeListener(event -> {
 				if (event.isFromClient() && event.getValue() != null && currentEntity instanceof CProjectItem) {
-					handleWorkflowStatusChange((CProjectItem<?>) currentEntity, event.getValue());
+					try {
+						final CProjectItem<?> item = (CProjectItem<?>) currentEntity;
+						item.setStatus(event.getValue());
+						LOGGER.debug("Status changed to: {}", event.getValue());
+						// Trigger save action if page provided one; otherwise trigger refresh
+						if (saveAction != null) {
+							try {
+								saveAction.run();
+							} catch (Exception ex) {
+								LOGGER.error("Error executing saveAction after status change", ex);
+							}
+						} else if (refreshAction != null) {
+							try {
+								refreshAction.run();
+							} catch (Exception ex) {
+								LOGGER.error("Error executing refreshAction after status change", ex);
+							}
+						}
+					} catch (Exception e) {
+						LOGGER.error("Error handling workflow status change", e);
+					}
 				}
 			});
-			statusComboBox2.setEnabled(false); // Will be enabled in updateButtonStates() when appropriate
 			add(statusComboBox2);
-			LOGGER.debug("Created workflow status combobox dynamically");
+			LOGGER.debug("Created workflow status combobox 2 with CColorAwareComboBox");
 		} catch (Exception e) {
-			LOGGER.error("Error creating workflow status combobox", e);
+			LOGGER.error("Error creating workflow status combobox 2", e);
 		}
 	}
 
@@ -213,24 +269,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	public CButton getRefreshButton() { return refreshButton; }
 
 	public CButton getSaveButton() { return saveButton; }
-
-	private void handleWorkflowStatusChange(final CProjectItem<?> projectItem, final CProjectItemStatus newStatus) {
-		try {
-			if (projectItem == null || newStatus == null) {
-				return;
-			}
-			final CProjectItemStatus currentStatus = projectItem.getStatus();
-			// If status hasn't changed, do nothing
-			if (currentStatus != null && currentStatus.getId().equals(newStatus.getId())) {
-				return;
-			}
-			Check.instanceOf(projectItem, IHasStatusAndWorkflow.class, "Current entity is not a CProjectItem");
-			// TODO future: validate status transition via workflow service
-		} catch (Exception e) {
-			LOGGER.error("Error handling workflow status change", e);
-			notificationService.showError("Error updating status: " + e.getMessage());
-		}
-	}
 
 	// Callback setters
 	public void setCreateAction(final Runnable createAction) {
@@ -285,11 +323,15 @@ public class CCrudToolbar extends HorizontalLayout {
 		updateButtonStates();
 	}
 
-	/** Allows the page to provide available statuses for the workflow combobox. */
+	/** Allows the page to provide available statuses for the workflow combobox. This should be set BEFORE calling setCurrentEntity for proper
+	 * initialization. */
 	public void setStatusProvider(final Supplier<List<CProjectItemStatus>> statusProvider) {
 		this.statusProvider = statusProvider;
-		// Recreate combobox to refresh available items
-		createWorkflowStatusComboBox();
+		// Recreate both comboboxes to refresh available items if entity is already set
+		if (currentEntity != null) {
+			createWorkflowStatusComboBox();
+			createWorkflowStatusComboBox2();
+		}
 	}
 
 	public void setWorkflowStatusRelationService(final tech.derbent.app.workflow.service.CWorkflowStatusRelationService svc) {
