@@ -63,24 +63,32 @@ mvn spring-boot:run -Ph2-local-development
 
 ### Testing Infrastructure  
 ```bash
+# IMPORTANT: Before running any tests, ensure SO libraries are installed
+# Run once after cloning the repository:
+./install-so-libraries.sh
+
 # Run Playwright UI automation tests with screenshots (NEVER CANCEL: takes 37+ seconds)
-./run-playwright-tests.sh mock
+./run-playwright-tests.sh menu
 # TIMEOUT: Set 5+ minutes. Expected time: 37-40 seconds
 # Generates screenshots in target/screenshots/
 # NOTE: Script automatically sets up Java 21 environment
+# NOTE: Tests automatically initialize sample data if company combobox is empty
 
 # Run comprehensive Playwright tests (NEVER CANCEL: takes 2+ minutes)
 ./run-playwright-tests.sh comprehensive
 # TIMEOUT: Set 10+ minutes. Expected time: 2-5 minutes
 
 # Run specific Playwright test categories
-./run-playwright-tests.sh status-types    # Status and type views
-./run-playwright-tests.sh main-views      # Main business views  
-./run-playwright-tests.sh admin-views     # Administrative views
-./run-playwright-tests.sh kanban-views    # Kanban board views
+./run-playwright-tests.sh login         # Company login test
+./run-playwright-tests.sh status-types  # Status and type views
+./run-playwright-tests.sh buttons       # Button functionality test
+./run-playwright-tests.sh all           # Run all tests
 
 # Clean test artifacts
 ./run-playwright-tests.sh clean
+
+# For detailed testing guidelines and patterns, see:
+# docs/development/copilot-guidelines.md
 ```
 
 ## Validation
@@ -116,13 +124,20 @@ kill $APP_PID
 
 #### 3. UI Automation Validation
 ```bash
+# IMPORTANT: Ensure SO libraries are installed first
+./install-so-libraries.sh  # Run once after cloning
+
 # ALWAYS test UI changes with Playwright screenshots
-./run-playwright-tests.sh mock
+./run-playwright-tests.sh menu
 # Expected: Screenshots generated successfully in 37-40 seconds
 # Check target/screenshots/ for generated images
+# Tests automatically initialize DB if company combobox is empty
 
 # For specific UI changes, run targeted tests
-./run-playwright-tests.sh [category]  # See categories above
+./run-playwright-tests.sh [category]  # See categories in Testing Infrastructure section
+
+# For complete testing guidelines, workflows, and patterns, refer to:
+# docs/development/copilot-guidelines.md
 ```
 
 #### 4. Manual Validation Scenarios
@@ -367,7 +382,7 @@ mvn spring-boot:run -Dspring.profiles.active=h2 | grep -E "(ERROR|WARN|DEBUG)"
 # URL: jdbc:h2:mem:testdb, User: sa, Password: (empty)
 
 # Check test failures
-./run-playwright-tests.sh mock 2>&1 | grep -A 5 -B 5 "FAILURE\|ERROR"
+./run-playwright-tests.sh menu 2>&1 | grep -A 5 -B 5 "FAILURE\|ERROR"
 
 # Generate test reports with screenshots
 ./run-playwright-tests.sh all
@@ -385,7 +400,10 @@ mvn clean compile      # Full build verification (NEVER CANCEL: 12-15 seconds)
 grep -r "Notification\.show\|new.*Dialog.*\.open()" src/main/java --include="*.java" | grep -v "CNotificationService.java"
 
 # Optional quality checks:
-./run-playwright-tests.sh mock  # UI validation (37-40 seconds)
+./run-playwright-tests.sh menu  # UI validation (37-40 seconds)
+
+# For complete testing guidelines, workflows, and patterns:
+# See docs/development/copilot-guidelines.md
 ```
 
 ## Technology Stack Reference

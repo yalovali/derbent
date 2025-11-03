@@ -311,7 +311,8 @@ public abstract class CBaseUITest {
 			LOGGER.info("🔐 Attempting login with username: {}", username);
 			ensureLoginViewLoaded();
 
-			// If company is empty on the login page, ensure sample data is initialized first.
+			// CRITICAL: If company is empty on the login page, ensure sample data is initialized first.
+			// This addresses the requirement: "at initial db, if combobox of company is empty you should initialize db"
 			try {
 				final Locator companyCombo = page.locator("#custom-company-input");
 				boolean companyPresent = false;
@@ -320,7 +321,7 @@ public abstract class CBaseUITest {
 					companyPresent = (raw != null && !raw.toString().isBlank());
 				}
 				if (!companyPresent) {
-					LOGGER.info("🏢 Company not selected on login page - ensuring sample data is initialized before login");
+					LOGGER.info("🏢 Company combobox is empty - initializing sample data as required");
 					initializeSampleDataFromLoginPage();
 					ensureLoginViewLoaded();
 					ensureCompanySelected();
@@ -517,7 +518,8 @@ public abstract class CBaseUITest {
 
 	/** Accepts the confirmation dialog that appears when reloading sample data. */
 	private void acceptConfirmDialogIfPresent() {
-		for (int attempt = 0; attempt < 10; attempt++) {
+		final int maxAttempts = 5; // Reduced from 10 to 5 attempts (2.5 seconds max)
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
 			final Locator overlay = page.locator("vaadin-confirm-dialog-overlay[opened]");
 			if (overlay.count() > 0) {
 				final Locator confirmButton =
@@ -531,12 +533,13 @@ public abstract class CBaseUITest {
 			}
 			wait_500();
 		}
-		LOGGER.warn("⚠️ Confirmation dialog not detected after requesting sample data reload");
+		LOGGER.warn("⚠️ Confirmation dialog not detected after {} attempts ({} seconds)", maxAttempts, maxAttempts * 0.5);
 	}
 
 	/** Closes the informational dialog that appears after sample data reload completion. */
 	private void closeInformationDialogIfPresent() {
-		for (int attempt = 0; attempt < 10; attempt++) {
+		final int maxAttempts = 5; // Reduced from 10 to 5 attempts (2.5 seconds max)
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
 			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
 			if (overlay.count() == 0) {
 				wait_500();
@@ -551,18 +554,19 @@ public abstract class CBaseUITest {
 			}
 			wait_500();
 		}
-		LOGGER.warn("⚠️ Information dialog did not present an OK button to dismiss");
+		LOGGER.warn("⚠️ Information dialog did not present an OK button to dismiss after {} attempts ({} seconds)", maxAttempts, maxAttempts * 0.5);
 	}
 
 	/** Waits for the specified Vaadin overlay selector to disappear. */
 	private void waitForOverlayToClose(String overlaySelector) {
-		for (int attempt = 0; attempt < 20; attempt++) {
+		final int maxAttempts = 10; // 5 seconds max wait
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
 			if (page.locator(overlaySelector).count() == 0) {
 				return;
 			}
 			wait_500();
 		}
-		LOGGER.warn("⚠️ Overlay {} still present after waiting", overlaySelector);
+		LOGGER.warn("⚠️ Overlay {} still present after waiting {} seconds", overlaySelector, maxAttempts * 0.5);
 	}
 
 	/** Visits all menu items silently to ensure dynamic entries are initialized. */
@@ -946,18 +950,22 @@ public abstract class CBaseUITest {
 				".hierarchical-menu-item, vaadin-side-nav-item, vaadin-tabs vaadin-tab, nav a[href], .nav-item a[href], a[href].menu-link, a[href].side-nav-link";
 		int totalItems = 0;
 		try {
-			page.waitForSelector(menuSelector, new Page.WaitForSelectorOptions().setTimeout(20000));
+			// Reduced timeout from 20000 to 10000 (10 seconds) for faster fail
+			page.waitForSelector(menuSelector, new Page.WaitForSelectorOptions().setTimeout(10000));
 			totalItems = page.locator(menuSelector).count();
 		} catch (Exception waitError) {
 			if (!allowEmpty) {
-				throw new AssertionError("No navigation items found to exercise", waitError);
+				String errorMsg = "No navigation items found within 10 seconds - test failing fast. " +
+						"Ensure sample data is loaded and company is selected at login. Error: " + waitError.getMessage();
+				LOGGER.error("❌ {}", errorMsg);
+				throw new AssertionError(errorMsg, waitError);
 			}
-			LOGGER.warn("⚠️ Navigation items not found within timeout: {}", waitError.getMessage());
+			LOGGER.warn("⚠️ Navigation items not found within 10 seconds: {}", waitError.getMessage());
 			return 0;
 		}
 		LOGGER.info("📋 Found {} menu entries to visit", totalItems);
 		if ((totalItems == 0) && !allowEmpty) {
-			throw new AssertionError("No navigation items found to exercise");
+			throw new AssertionError("No navigation items found to exercise - failing fast");
 		}
 		final Set<String> visitedLabels = new HashSet<>();
 		for (int i = 0; i < totalItems; i++) {

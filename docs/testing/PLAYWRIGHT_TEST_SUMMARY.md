@@ -3,16 +3,45 @@
 ## Summary
 Successfully configured and ran Playwright tests in headless mode with screenshot capture capabilities. Tests now run reliably without browser download failures.
 
+## Important Prerequisites
+
+### 1. Install SO Libraries (Required)
+Before running any Playwright tests, you must install the StoredObject libraries:
+```bash
+./install-so-libraries.sh
+```
+This installs the required SO libraries from the `lib/` folder to your local Maven repository.
+
+### 2. Database Initialization
+Tests automatically initialize sample data if the company combobox is empty during login. The `CBaseUITest` class handles this through the `initializeSampleDataFromLoginPage()` method.
+
+### 3. Timeout Configuration
+Tests use reasonable timeouts to avoid hanging:
+- Login screen wait: 15 seconds
+- Post-login wait: 15 seconds  
+- Element selectors: 5 seconds
+- Menu navigation: 20 seconds
+
+If a timeout expires, the test will exit with a clear error message instead of hanging indefinitely.
+
 ## Test Execution
 ```bash
-# Run tests using the updated script with automatic environment configuration
+# STEP 1: Install SO libraries (required - run once after cloning)
+./install-so-libraries.sh
+
+# STEP 2: Run tests using the updated script with automatic environment configuration
 ./run-playwright-tests.sh menu
 
 # Or run specific test manually
 PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true \
-mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CSimpleLoginScreenshotTest" \
+mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CSampleDataMenuNavigationTest" \
 -Dspring.profiles.active=test -Dplaywright.headless=true
 ```
+
+## For Complete Testing Guidelines
+For comprehensive testing guidelines, patterns, and best practices, refer to:
+- **[Copilot Development Guidelines](../development/copilot-guidelines.md)** - Complete guide for AI-assisted development and testing patterns
+- **GitHub Copilot Instructions**: `.github/copilot-instructions.md` - Quick reference for all tasks
 
 ## Changes Made
 
