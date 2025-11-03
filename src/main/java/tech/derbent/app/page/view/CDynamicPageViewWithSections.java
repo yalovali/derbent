@@ -179,7 +179,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 					LOGGER.error("Error refreshing entity: {}", e.getMessage());
 				}
 			});
-			crudToolbar.setCurrentEntity(null);
+			// crudToolbar.setCurrentEntity(null);
 			// Allow subclasses to customize toolbar
 			configureCrudToolbar(crudToolbar);
 			splitBottomLayout.addComponentAsFirst(crudToolbar);
@@ -291,6 +291,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	/** Reloads entity values into existing components without rebuilding the UI */
 	@Override
 	public void setCurrentEntity(final Object entity) {
+		LOGGER.debug("Setting current entity in dynamic page view with sections: {}", entity);
 		try {
 			super.setCurrentEntity(entity);
 			if (entity == null) {
