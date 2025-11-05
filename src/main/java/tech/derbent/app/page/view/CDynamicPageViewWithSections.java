@@ -239,6 +239,15 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			Check.notNull(grid, "Grid component is not initialized");
 			Check.notNull(entity, "Saved entity cannot be null");
 			refreshGrid();
+			// Select the saved entity in the grid to maintain selection after save
+			// Only select if not already selected to avoid triggering selection change loop
+			final CEntityDB<?> currentSelection = grid.getSelectedItem();
+			if (currentSelection == null || !entity.getId().equals(currentSelection.getId())) {
+				grid.selectEntity(entity);
+				LOGGER.debug("Selected saved entity in grid: {}", entity.getId());
+			} else {
+				LOGGER.debug("Entity already selected in grid, skipping selection to avoid loop");
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity saved notification:" + e.getMessage());
 			throw e;

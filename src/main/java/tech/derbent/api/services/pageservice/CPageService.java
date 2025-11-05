@@ -106,8 +106,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 			// Update current entity with saved version (includes generated ID)
 			setCurrentEntity(savedEntity);
-			// Refresh grid and form
-			view.refreshGrid();
+			// Notify view that entity was saved (triggers grid refresh and selection)
+			view.onEntitySaved(savedEntity);
+			// Populate form with saved entity
 			view.populateForm();
 			// Show success notification
 			getNotificationService().showSaveSuccess();
