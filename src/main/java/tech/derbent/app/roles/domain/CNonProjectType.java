@@ -14,11 +14,6 @@ import tech.derbent.app.companies.domain.CCompany;
 @MappedSuperclass
 public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityClass> {
 
-	// Many risks belong to one project
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "company_id", nullable = false)
-	@AMetaData (displayName = "Company", required = true, readOnly = true, description = "Company of this entity", hidden = false, order = 10)
-	private CCompany company;
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "true",
@@ -32,6 +27,11 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7
 	)
 	private String color = "#4A90E2";
+	// Many risks belong to one project
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "company_id", nullable = false)
+	@AMetaData (displayName = "Company", required = true, readOnly = true, description = "Company of this entity", hidden = false, order = 10)
+	private CCompany company;
 	@Column (name = "sort_order", nullable = false)
 	@NotNull
 	@AMetaData (

@@ -10,7 +10,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
-	Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
+	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
 	final protected CDynamicPageBase view;
 
 	public CPageService(CDynamicPageBase view) {

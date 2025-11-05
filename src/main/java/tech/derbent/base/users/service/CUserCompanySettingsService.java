@@ -49,16 +49,16 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	// Implementation of abstract methods
 	@Override
-	protected CUserCompanySetting createRelationshipInstance(final Long userId, final Long companyId) {
+	protected CUserCompanySetting createRelationshipInstance(final Long userId, final Long company_id) {
 		throw new UnsupportedOperationException("Use addUserToCompany(CUser, CCompany, String, String) method instead");
 	}
 
 	/** Delete all company settings for a company. Used for cleanup operations.
-	 * @param companyId the company ID */
+	 * @param company_id the company ID */
 	@Transactional (readOnly = false)
-	public void deleteAllByCompanyId(final Long companyId) {
-		Check.notNull(companyId, "Company ID cannot be null");
-		repository.deleteByCompanyId(companyId);
+	public void deleteAllByCompanyId(final Long company_id) {
+		Check.notNull(company_id, "Company ID cannot be null");
+		repository.deleteByCompanyId(company_id);
 	}
 
 	/** Delete all company settings for a user. Used for cleanup operations.
@@ -81,8 +81,8 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	@Override
 	@Transactional (readOnly = true)
-	public List<CUserCompanySetting> findByChildEntityId(final Long companyId) {
-		return repository.findByCompanyId(companyId);
+	public List<CUserCompanySetting> findByChildEntityId(final Long company_id) {
+		return repository.findByCompany_Id(company_id);
 	}
 
 	/** Find user company settings by company */
@@ -107,8 +107,8 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	@Override
 	@Transactional (readOnly = true)
-	public Optional<CUserCompanySetting> findRelationship(final Long userId, final Long companyId) {
-		return repository.findByUserIdAndCompanyId(userId, companyId);
+	public Optional<CUserCompanySetting> findRelationship(final Long userId, final Long company_id) {
+		return repository.findByUserIdAndCompanyId(userId, company_id);
 	}
 
 	/** Find the single company setting for a user. Returns the first setting if multiple exist. This is used for single company setting scenarios.
@@ -137,8 +137,8 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	@Override
 	@Transactional (readOnly = true)
-	public boolean relationshipExists(final Long userId, final Long companyId) {
-		return repository.existsByUserIdAndCompanyId(userId, companyId);
+	public boolean relationshipExists(final Long userId, final Long company_id) {
+		return repository.existsByUserIdAndCompanyId(userId, company_id);
 	}
 
 	@Override

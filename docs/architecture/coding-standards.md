@@ -810,7 +810,7 @@ public class CActivityService extends CAbstractService<CActivity> {
     public List<CActivity> findAll() {
         // ✅ GOOD: Get company from session each time method is called
         CCompany currentCompany = getCurrentCompany();
-        return repository.findByCompanyId(currentCompany.getId());
+        return repository.findByCompany_Id(currentCompany.getId());
     }
     
     private CCompany getCurrentCompany() {
@@ -836,7 +836,7 @@ public class CBadService {
     
     public List<CActivity> findAll() {
         // ❌ WRONG: Will return wrong company for other users
-        return repository.findByCompanyId(cachedCompany.getId());
+        return repository.findByCompany_Id(cachedCompany.getId());
     }
 }
 ```

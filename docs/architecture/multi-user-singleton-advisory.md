@@ -54,7 +54,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
     @Override
     public List<CActivity> findAll() {
         final CCompany currentCompany = getCurrentCompany();
-        return repository.findByCompanyId(currentCompany.getId());
+        return repository.findByCompany_Id(currentCompany.getId());
     }
 }
 ```
@@ -279,7 +279,7 @@ public class CGoodContextService extends CAbstractService<CEntity> {
         Check.notNull(currentCompany, "No active company in session");
         
         // ✅ GOOD: Filter by company to ensure data isolation
-        return repository.findByCompanyId(currentCompany.getId());
+        return repository.findByCompany_Id(currentCompany.getId());
     }
     
     private CCompany getCurrentCompany() {

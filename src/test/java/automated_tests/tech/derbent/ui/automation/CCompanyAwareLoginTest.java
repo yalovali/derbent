@@ -9,9 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 
-/** Comprehensive test for the company-aware login pattern. This test validates the username@companyId authentication mechanism that is documented in
+/** Comprehensive test for the company-aware login pattern. This test validates the username@company_id authentication mechanism that is documented in
  * docs/implementation/COMPANY_LOGIN_PATTERN.md. The test verifies: 1. Sample data initialization creates multiple companies 2. Company selection
- * dropdown is populated correctly 3. Login works with username@companyId pattern 4. Multi-tenant isolation is maintained 5. Authentication flow
+ * dropdown is populated correctly 3. Login works with username@company_id pattern 4. Multi-tenant isolation is maintained 5. Authentication flow
  * completes successfully */
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
@@ -232,23 +232,23 @@ public class CCompanyAwareLoginTest extends CBaseUITest {
 	}
 
 	@Test
-	@DisplayName ("✅ Test username@companyId format validation")
+	@DisplayName ("✅ Test username@company_id format validation")
 	void testUsernameFormatValidation() {
 		LOGGER.info("🔐 Starting username format validation test...");
 		try {
-			// This test validates that the username@companyId pattern works correctly
+			// This test validates that the username@company_id pattern works correctly
 			// The pattern is created by CCustomLoginView.handleLogin():
 			// username = username + "@" + company.getId();
 			ensureLoginViewLoaded();
 			initializeSampleDataFromLoginPage();
 			ensureLoginViewLoaded();
-			// Login normally (this internally creates username@companyId)
+			// Login normally (this internally creates username@company_id)
 			loginToApplication("admin", "test123");
 			// Verify successful authentication
 			if (page.url().contains("/login")) {
-				throw new AssertionError("Username@companyId format validation failed - still on login page");
+				throw new AssertionError("Username@company_id format validation failed - still on login page");
 			}
-			LOGGER.info("✅ Username@companyId format validated successfully");
+			LOGGER.info("✅ Username@company_id format validated successfully");
 			takeScreenshot("username-format-validated", false);
 		} catch (Exception e) {
 			LOGGER.error("❌ Username format validation test failed: {}", e.getMessage());

@@ -168,7 +168,7 @@ protected void loginToApplication(String username, String password) {
 4. **Form Submission**
    - ✅ Login button triggers form submission
    - ✅ Form posts to `/login` endpoint
-   - ✅ Username sent as `username@companyId` format
+   - ✅ Username sent as `username@company_id` format
    - ✅ Spring Security processes authentication
 
 5. **Post-Login Verification**

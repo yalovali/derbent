@@ -17,9 +17,9 @@ public interface IProjectRepository extends IAbstractNamedRepository<CProject>, 
 	)
 	List<CProject> findNotAssignedToUser(@Param ("userId") Long userId);
 	@Override
-	@Query ("SELECT p FROM CProject p LEFT JOIN FETCH company WHERE p.company.id = :companyId")
-	List<CProject> findByCompanyId(@Param ("companyId") Long companyId);
+	@Query ("SELECT p FROM CProject p LEFT JOIN FETCH company WHERE p.company.id = :company_id")
+	List<CProject> findByCompany_Id(@Param ("company_id") Long company_id);
 	@Override
-	@Query ("SELECT p FROM CProject p LEFT JOIN FETCH company WHERE p.company.id = :companyId")
-	Page<CProject> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
+	@Query ("SELECT p FROM CProject p LEFT JOIN FETCH company WHERE p.company.id = :company_id")
+	Page<CProject> findByCompany_Id(@Param ("company_id") Long company_id, Pageable pageable);
 }

@@ -9,7 +9,7 @@
 📚 **[COMPANY_LOGIN_PATTERN.md](COMPANY_LOGIN_PATTERN.md)** - Simple, working implementation
 
 **Current Implementation:**
-- ✅ Username concatenation: `username@companyId`
+- ✅ Username concatenation: `username@company_id`
 - ✅ Standard Spring Security filters
 - ✅ Simple split logic in `CUserService.loadUserByUsername()`
 - ✅ No custom tokens or authentication providers needed
@@ -42,7 +42,7 @@ This document provides a detailed call hierarchy showing how the authentication 
 │  └─ Creates HTML form with:                                            │
 │     ├─ username                                                         │
 │     ├─ password                                                         │
-│     ├─ companyId  ← NEW: Selected company ID                          │
+│     ├─ company_id  ← NEW: Selected company ID                          │
 │     └─ redirect                                                         │
 │                                                                         │
 │  JavaScript: form.submit() → POST /login                               │
@@ -64,9 +64,9 @@ This document provides a detailed call hierarchy showing how the authentication 
 │  2. CCompanyAwareAuthenticationFilter.attemptAuthentication()          │
 │     ├─ Extracts username from request                                  │
 │     ├─ Extracts password from request                                  │
-│     ├─ Extracts companyId from request  ← NEW                         │
+│     ├─ Extracts company_id from request  ← NEW                         │
 │     ├─ Creates CCompanyAwareAuthenticationToken                        │
-│     │  └─ Token contains: (username, password, companyId)              │
+│     │  └─ Token contains: (username, password, company_id)              │
 │     └─ Delegates to AuthenticationManager.authenticate()               │
 └────────────────────────────────┬───────────────────────────────────────┘
                                  │
@@ -86,30 +86,30 @@ This document provides a detailed call hierarchy showing how the authentication 
 │  4. CCompanyAwareAuthenticationProvider.authenticate()                 │
 │     ├─ Extracts username from token                                    │
 │     ├─ Extracts password from token                                    │
-│     ├─ Extracts companyId from token  ← NEW                           │
+│     ├─ Extracts company_id from token  ← NEW                           │
 │     │                                                                   │
 │     ├─ Calls CUserService.loadUserByUsernameAndCompany()              │
-│     │  └─ Parameters: (username, companyId)  ← NEW                    │
+│     │  └─ Parameters: (username, company_id)  ← NEW                    │
 │     │                                                                   │
 │     ├─ Validates password using PasswordEncoder.matches()              │
 │     │  ├─ Compares submitted password with stored BCrypt hash          │
 │     │  └─ Throws BadCredentialsException if mismatch                   │
 │     │                                                                   │
 │     └─ Returns authenticated CCompanyAwareAuthenticationToken          │
-│        └─ Token contains: (username, password, companyId, authorities) │
+│        └─ Token contains: (username, password, company_id, authorities) │
 └────────────────────────────────┬───────────────────────────────────────┘
                                  │
                                  ↓
 ┌────────────────────────────────────────────────────────────────────────┐
 │                    USER SERVICE LAYER                                   │
 │                                                                         │
-│  5. CUserService.loadUserByUsernameAndCompany(username, companyId)    │
+│  5. CUserService.loadUserByUsernameAndCompany(username, company_id)    │
 │     ├─ Logs authentication attempt                                     │
-│     ├─ Validates companyId is not null                                 │
+│     ├─ Validates company_id is not null                                 │
 │     │  └─ Falls back to session-based lookup if null                   │
 │     │                                                                   │
-│     ├─ Calls IUserRepository.findByUsername(companyId, username)       │
-│     │  └─ Parameters: (companyId, username)  ← Both required          │
+│     ├─ Calls IUserRepository.findByUsername(company_id, username)       │
+│     │  └─ Parameters: (company_id, username)  ← Both required          │
 │     │                                                                   │
 │     ├─ Throws UsernameNotFoundException if user not found              │
 │     │                                                                   │
@@ -131,7 +131,7 @@ This document provides a detailed call hierarchy showing how the authentication 
 ┌────────────────────────────────────────────────────────────────────────┐
 │                   JPA REPOSITORY LAYER                                  │
 │                                                                         │
-│  6. IUserRepository.findByUsername(companyId, username)                │
+│  6. IUserRepository.findByUsername(company_id, username)                │
 │     └─ JPQL Query:                                                      │
 │        SELECT u FROM CUser u                                            │
 │        LEFT JOIN FETCH u.userType                                       │
@@ -241,7 +241,7 @@ Login Form → Spring Security → loadUserByUsername(username)
 
 ### After (Working)
 ```
-Login Form → Custom Filter → Custom Provider → loadUserByUsernameAndCompany(username, companyId)
+Login Form → Custom Filter → Custom Provider → loadUserByUsernameAndCompany(username, company_id)
                                                                       ↓
                                                             Repository Query
                                                                       ↓

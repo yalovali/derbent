@@ -162,7 +162,7 @@ public class CWebSessionService implements ISessionService {
 		if (currentCompany != null) {
 			LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 			// change this to findByUserId if you want to filter by user as well
-			return projectRepository.findByCompanyId(currentCompany.getId());
+			return projectRepository.findByCompany_Id(currentCompany.getId());
 		}
 		// Fallback to all projects if no company context
 		LOGGER.debug("No company context, returning all projects");

@@ -171,7 +171,7 @@ public class CUserService {
     public List<CUser> findByCompany() {
         // ✅ GOOD: Get context from session each time
         CCompany company = sessionService.getCurrentCompany();
-        return repository.findByCompanyId(company.getId());
+        return repository.findByCompany_Id(company.getId());
     }
 }
 ```

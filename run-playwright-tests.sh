@@ -96,7 +96,7 @@ run_company_login_test() {
     echo "=================================="
     echo "This test will:"
     echo "  1. Validate company selection dropdown"
-    echo "  2. Test username@companyId pattern"
+    echo "  2. Test username@company_id pattern"
     echo "  3. Verify multi-tenant isolation"
     echo "  4. Test login with multiple companies"
     echo ""
@@ -311,7 +311,7 @@ DESCRIPTION:
     
     2. Company Login Test
        - Validate company selection dropdown
-       - Test username@companyId authentication pattern
+       - Test username@company_id authentication pattern
        - Verify multi-tenant login isolation
        - Test login with multiple companies
     

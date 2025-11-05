@@ -78,7 +78,7 @@ This report documents the comprehensive execution of all Playwright automated UI
 
 #### Test: `CCompanyAwareLoginTest.testUsernameFormatValidation`
 - **Status:** ❌ FAILED
-- **Description:** Tests username@companyId format validation
+- **Description:** Tests username@company_id format validation
 - **Screenshots:** None (test failed before screenshot phase)
 
 **Result:** 1 out of 3 company-aware login tests passed. The multiple company login functionality works, but company selection dropdown and username format validation need investigation.

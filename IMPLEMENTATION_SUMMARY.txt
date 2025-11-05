@@ -48,7 +48,7 @@ CUserService.java:
 - findAll() filters by company
 
 IProjectRepository.java:
-- Added: Page<CProject> findByCompanyId(Long, Pageable)
+- Added: Page<CProject> findByCompany_Id(Long, Pageable)
 
 CProject.java:
 - @OnDelete(action = OnDeleteAction.CASCADE) on company field
