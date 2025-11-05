@@ -59,25 +59,26 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 
 	@Override
 	@Transactional
-	public EntityClass newEntity() {
+	public EntityClass newEntity() throws Exception {
 		return newEntity("New " + getEntityClass().getSimpleName());
 	}
 
 	@SuppressWarnings ("unchecked")
 	@Transactional
-	public EntityClass newEntity(final String name) {
-		if ("fail".equals(name)) {
-			throw new RuntimeException("This is for testing the error handler");
-		}
-		Check.notBlank(name, "Name cannot be null or empty");
+	public EntityClass newEntity(final String name) throws Exception {
 		try {
+			if ("fail".equals(name)) {
+				throw new RuntimeException("This is for testing the error handler");
+			}
+			Check.notBlank(name, "Name cannot be null or empty");
 			// Get constructor that takes a String parameter and invoke it with the name
 			final Object instance = getEntityClass().getDeclaredConstructor(String.class).newInstance(name.trim());
 			Check.notNull(instance, "Failed to create instance of " + getEntityClass().getName());
 			Check.instanceOf(instance, getEntityClass(), "Created object is not instance of " + getEntityClass().getName());
 			return ((EntityClass) instance);
 		} catch (final Exception e) {
-			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
+			LOGGER.error("Error creating new entity instance of {}: {}", getEntityClass().getName(), e.getMessage());
+			throw e;
 		}
 	}
 

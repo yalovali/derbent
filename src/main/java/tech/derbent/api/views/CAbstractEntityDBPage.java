@@ -380,7 +380,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected abstract void createMasterComponent() throws Exception;
 
-	protected EntityClass createNewEntity() {
+	protected EntityClass createNewEntity() throws Exception {
 		return entityService.newEntity();
 	}
 

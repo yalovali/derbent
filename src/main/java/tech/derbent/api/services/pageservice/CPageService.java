@@ -29,6 +29,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			getNotificationService().showSuccess("New " + getEntityClass().getSimpleName() + " created. Fill in the details and click Save.");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating new entity instance for type: {} - {}", getEntityClass().getSimpleName(), e.getMessage());
+			LOGGER.error("exception:", e);
 			getNotificationService().showError("Error creating new entity: " + e.getMessage());
 		}
 	}
@@ -98,7 +99,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 			// Write form data to entity using binder
 			if (view.getBinder() != null) {
-				view.getBinder().writeBean((CEntityDB<?>) entity);
+				view.getBinder().writeBean(entity);
 			}
 			// Save entity
 			final EntityClass savedEntity = getEntityService().save(entity);
@@ -125,9 +126,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	public void bind() {}
 
 	@SuppressWarnings ("unchecked")
-	private EntityClass getCurrentEntity() {
-		return (EntityClass) view.getCurrentEntity();
-	}
+	private EntityClass getCurrentEntity() { return (EntityClass) view.getCurrentEntity(); }
 
 	protected Class<?> getEntityClass() { return view.getEntityClass(); }
 
