@@ -198,6 +198,10 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			// Get current company from session
 			final CCompany currentCompany = sessionService.getCurrentCompany();
 			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
+			// Set company on user - this is essential for the user to appear in the grid
+			// Note: Company role is set to null initially, can be set by user later
+			user.setCompany(currentCompany, null);
+			// Generate auto name based on existing users in company
 			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
 			final String autoName = String.format("User%02d", existingUsers.size() + 1);
 			user.setName(autoName);
