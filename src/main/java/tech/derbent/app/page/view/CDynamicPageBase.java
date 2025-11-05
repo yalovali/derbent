@@ -55,13 +55,19 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	}
 
 	/** Clear entity details and reset state. */
-	protected void clearEntityDetails() {
+	public void clearEntityDetails() {
 		if (baseDetailsLayout != null) {
 			baseDetailsLayout.removeAll();
 		}
 		currentBinder = null;
 		currentEntityViewName = null;
 		currentEntityType = null;
+	}
+
+	/** Select the first item in grid. Subclasses with grids should override this. */
+	public void selectFirstInGrid() {
+		// Default implementation - subclasses with grids should override
+		LOGGER.debug("selectFirstInGrid called on base class (no-op)");
 	}
 
 	public Class<?> getEntityClass() { return entityClass; }

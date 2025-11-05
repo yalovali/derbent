@@ -20,6 +20,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	public void actionCreate() {
 		try {
 			LOGGER.debug("Create action triggered for entity type: {}", getEntityClass().getSimpleName());
+			// Store current entity before creating new one (for cancel/refresh operations)
+			view.setPreviousEntityBeforeNew(getCurrentEntity());
 			// Create and initialize new entity using service
 			final EntityClass newEntity = getEntityService().newEntity();
 			getEntityService().initializeNewEntity(newEntity);
@@ -49,9 +51,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 					LOGGER.info("Entity deleted successfully with ID: {}", entity.getId());
 					// Clear current entity
 					setCurrentEntity(null);
-					// Refresh grid and form
-					view.refreshGrid();
-					view.populateForm();
+					// Notify view (triggers grid refresh, select next item, and form update)
+					view.onEntityDeleted(entity);
 					// Show success notification
 					getNotificationService().showDeleteSuccess();
 				} catch (final Exception ex) {
@@ -69,6 +70,35 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		try {
 			final EntityClass entity = getCurrentEntity();
 			LOGGER.debug("Refresh action triggered for entity: {}", entity != null ? entity.getId() : "null");
+			
+			// Check if current entity is a new unsaved entity (no ID)
+			if (entity != null && entity.getId() == null) {
+				LOGGER.debug("Current entity is unsaved (new). Discarding and restoring previous selection.");
+				// Discard the new entity and restore previous selection
+				final Object previousEntity = view.getPreviousEntityBeforeNew();
+				if (previousEntity != null && previousEntity instanceof CEntityDB<?>) {
+					final CEntityDB<?> prevEntityDB = (CEntityDB<?>) previousEntity;
+					if (prevEntityDB.getId() != null) {
+						// Reload previous entity from database
+						final CEntityDB<?> reloaded = getEntityService().getById(prevEntityDB.getId()).orElse(null);
+						if (reloaded != null) {
+							setCurrentEntity((EntityClass) reloaded);
+							view.onEntityRefreshed(reloaded);
+							getNotificationService().showInfo("Unsaved changes discarded. Previous item restored.");
+							LOGGER.info("Restored previous entity with ID: {}", reloaded.getId());
+							return;
+						}
+					}
+				}
+				// If no previous entity, just select first item in grid
+				setCurrentEntity(null);
+				view.clearEntityDetails();
+				view.selectFirstInGrid();
+				getNotificationService().showInfo("Unsaved entity discarded.");
+				return;
+			}
+			
+			// Normal refresh for existing entities
 			if (entity == null || entity.getId() == null) {
 				getNotificationService().showWarning("Please select an item to refresh.");
 				return;
@@ -104,6 +134,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			// Save entity
 			final EntityClass savedEntity = getEntityService().save(entity);
 			LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
+			// Clear previous entity tracking since new entity is now saved
+			view.setPreviousEntityBeforeNew(null);
 			// Update current entity with saved version (includes generated ID)
 			setCurrentEntity(savedEntity);
 			// Notify view that entity was saved (triggers grid refresh and selection)

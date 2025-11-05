@@ -290,6 +290,18 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 		grid.refreshGridData();
 	}
 
+	/** Select the first item in the grid. Used after discarding unsaved new entities. */
+	public void selectFirstInGrid() {
+		if (grid != null) {
+			try {
+				grid.selectFirstItem();
+				LOGGER.debug("Selected first item in grid");
+			} catch (final Exception e) {
+				LOGGER.error("Error selecting first item in grid: {}", e.getMessage(), e);
+			}
+		}
+	}
+
 	/** Reloads entity values into existing components without rebuilding the UI */
 	@Override
 	public void setCurrentEntity(final Object entity) {
