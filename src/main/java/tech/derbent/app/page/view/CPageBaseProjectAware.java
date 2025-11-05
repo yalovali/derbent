@@ -98,6 +98,9 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	/** Get the current binder for data binding operations */
 	protected CEnhancedBinder<CEntityDB<?>> getCurrentBinder() { return currentBinder; }
 
+	/** Get the current binder for data binding operations (public access for PageService pattern) */
+	public CEnhancedBinder<CEntityDB<?>> getBinder() { return currentBinder; }
+
 	@Override
 	public Object getCurrentEntity() { return currentEntity; }
 
