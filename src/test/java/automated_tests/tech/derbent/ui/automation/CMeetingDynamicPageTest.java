@@ -20,7 +20,7 @@ import com.microsoft.playwright.Locator;
 })
 public class CMeetingDynamicPageTest extends CBaseUITest {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingDynamicPageTest.java);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingDynamicPageTest.class);
 
 	@Test
 	public void testMeetingGridSelectionPopulatesForm() {
