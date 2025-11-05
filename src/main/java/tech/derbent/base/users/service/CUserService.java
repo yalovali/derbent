@@ -189,8 +189,9 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
 	public void initializeNewEntity(final CUser user) {
-		super.initializeNewEntity(user);
+		LOGGER.debug("Initializing new user entity");
 		try {
+			super.initializeNewEntity(user);
 			LOGGER.debug("Initializing new user entity with default values");
 			Check.notNull(user, "User cannot be null");
 			Check.notNull(sessionService, "Session service is required for user initialization");
@@ -203,7 +204,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			user.setLogin(autoName.toLowerCase());
 			user.setLastname("");
 			user.setEmail("");
-			user.setPhone("");
+			user.setPhone("1234567");
 			user.setAttributeDisplaySectionsAsTabs(true);
 			user.setPassword(""); // Empty - user must set password
 		} catch (final Exception e) {
