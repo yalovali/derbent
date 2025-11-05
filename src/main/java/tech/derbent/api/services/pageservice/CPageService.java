@@ -2,14 +2,11 @@ package tech.derbent.api.services.pageservice;
 
 import org.slf4j.Logger;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.view.CDynamicPageBase;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
@@ -20,32 +17,14 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		this.view = view;
 	}
 
-	@SuppressWarnings ("unchecked")
 	public void actionCreate() {
 		try {
 			LOGGER.debug("Create action triggered for entity type: {}", getEntityClass().getSimpleName());
-			// Create new instance using reflection
-			final EntityClass newEntity = (EntityClass) getEntityClass().getDeclaredConstructor().newInstance();
-			// Set project if the entity supports it (check for CEntityOfProject)
-			if (newEntity instanceof CEntityOfProject) {
-				((CEntityOfProject<?>) newEntity).setProject(getSessionService().getActiveProject().orElse(null));
-			}
-			// Special handling for CUser entities - create project association through CUserProjectSettings
-			else if (newEntity instanceof CUser) {
-				final CProject activeProject = getSessionService().getActiveProject().orElse(null);
-				if (activeProject != null) {
-					final CUser user = (CUser) newEntity;
-					// Initialize project settings list to establish project context for display
-					if (user.getProjectSettings() == null) {
-						user.setProjectSettings(new java.util.ArrayList<>());
-					}
-					// Note: The actual CUserProjectSettings creation will be handled when the user is saved
-					// This just ensures the user has the project context for dynamic page display
-					LOGGER.debug("CUser entity created in context of project: {}", activeProject.getName());
-				}
-			}
+			// Create and initialize new entity using service
+			final EntityClass newEntity = getEntityService().newEntity();
+			getEntityService().initializeNewEntity(newEntity);
+			// Set current entity and populate form
 			setCurrentEntity(newEntity);
-			// Populate form to display the new entity
 			view.populateForm();
 			getNotificationService().showSuccess("New " + getEntityClass().getSimpleName() + " created. Fill in the details and click Save.");
 		} catch (final Exception e) {
