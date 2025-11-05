@@ -257,14 +257,21 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 				populateForm();
 			} else {
 				setCurrentEntity(selectedEntity);
+				// Rebuild details if VIEW_NAME changed or not yet built
 				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
-					rebuildEntityDetails(selectedEntity.getClass());
+					try {
+						rebuildEntityDetails(selectedEntity.getClass());
+					} catch (final Exception rebuildException) {
+						LOGGER.error("Error rebuilding entity details, will attempt to populate with current binder: {}", rebuildException.getMessage());
+						// Don't throw - try to populate with existing binder
+					}
 				}
+				// Always attempt to populate form, even if rebuild failed
 				populateForm();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity selection:" + e.getMessage());
-			throw e;
+			LOGGER.error("Error handling entity selection: {}", e.getMessage(), e);
+			// Don't rethrow - this prevents the UI from breaking completely
 		}
 	}
 
