@@ -50,7 +50,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 					getEntityService().delete(entity.getId());
 					LOGGER.info("Entity deleted successfully with ID: {}", entity.getId());
 					// Clear current entity
-					setCurrentEntity(null);
+					// setCurrentEntity(null);
 					// Notify view (triggers grid refresh, select next item, and form update)
 					view.onEntityDeleted(entity);
 					// Show success notification
@@ -70,7 +70,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		try {
 			final EntityClass entity = getCurrentEntity();
 			LOGGER.debug("Refresh action triggered for entity: {}", entity != null ? entity.getId() : "null");
-			
 			// Check if current entity is a new unsaved entity (no ID)
 			if (entity != null && entity.getId() == null) {
 				LOGGER.debug("Current entity is unsaved (new). Discarding and restoring previous selection.");
@@ -97,7 +96,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				getNotificationService().showInfo("Unsaved entity discarded.");
 				return;
 			}
-			
 			// Normal refresh for existing entities
 			if (entity == null || entity.getId() == null) {
 				getNotificationService().showWarning("Please select an item to refresh.");
