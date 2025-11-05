@@ -105,6 +105,22 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		entity.setAssignedTo(currentUser);
 	}
 
+	/** Override to generate unique name based on project-specific entity count. Pattern: "EntitySimpleName##" where ## is zero-padded number within
+	 * project (e.g., "Activity01", "Meeting02").
+	 * @return unique entity name for the current project */
+	@Override
+	protected String generateUniqueName() {
+		try {
+			final CProject currentProject = sessionService.getActiveProject()
+					.orElseThrow(() -> new CInitializationException("No active project in session - cannot generate unique name"));
+			final long existingCount = countByProject(currentProject);
+			return String.format("%s%02d", getEntityClass().getSimpleName(), existingCount + 1);
+		} catch (final Exception e) {
+			LOGGER.warn("Error generating unique name for project entity, falling back to base class: {}", e.getMessage());
+			return super.generateUniqueName();
+		}
+	}
+
 	@Override
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {

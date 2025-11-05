@@ -184,7 +184,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	}
 
 	/** Initializes a new user entity with default values based on current session and available data. Sets: - Company from current session - User
-	 * type (first available) - Company role (first available) - Auto-generated name and login - Enabled status - Default password prompt
+	 * type (first available) - Company role (first available) - Auto-generated unique name and login - Enabled status - Default password prompt
 	 * @param user the newly created user to initialize
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
@@ -201,11 +201,9 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			// Set company on user - this is essential for the user to appear in the grid
 			// Note: Company role is set to null initially, can be set by user later
 			user.setCompany(currentCompany, null);
-			// Generate auto name based on existing users in company
-			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
-			final String autoName = String.format("User%02d", existingUsers.size() + 1);
-			user.setName(autoName);
-			user.setLogin(autoName.toLowerCase());
+			// Generate unique name based on existing users in company (override base class behavior)
+			user.setName(generateUniqueName());
+			user.setLogin(user.getName().toLowerCase());
 			user.setLastname("");
 			user.setEmail("");
 			user.setPhone("1234567");
@@ -214,6 +212,20 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing new user: {}", e.getMessage());
 			throw e;
+		}
+	}
+
+	/** Override to generate unique name based on company-specific user count. Pattern: "User##" where ## is zero-padded number within company.
+	 * @return unique user name for the current company */
+	@Override
+	protected String generateUniqueName() {
+		try {
+			final CCompany currentCompany = sessionService.getCurrentCompany();
+			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
+			return String.format("User%02d", existingUsers.size() + 1);
+		} catch (final Exception e) {
+			LOGGER.warn("Error generating unique user name, falling back to base class: {}", e.getMessage());
+			return super.generateUniqueName();
 		}
 	}
 

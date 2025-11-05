@@ -9,4 +9,5 @@ public interface ICompanyEntityRepositoryBase<EntityClass> {
 
 	List<EntityClass> findByCompanyId(@Param ("companyId") Long companyId);
 	Page<EntityClass> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
+	long countByCompanyId(@Param ("companyId") Long companyId);
 }
