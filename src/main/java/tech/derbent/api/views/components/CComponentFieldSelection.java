@@ -190,7 +190,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	public List<DetailEntity> getValue() { return new ArrayList<>(selectedItems); }
 
 	private void initializeUI(String availableTitle, String selectedTitle) {
-		LOGGER.debug("Initializing field selection UI with titles: '{}' and '{}'", availableTitle, selectedTitle);
+		// LOGGER.debug("Initializing field selection UI with titles: '{}' and '{}'", availableTitle, selectedTitle);
 		Check.notBlank(availableTitle, "Available title cannot be null or blank");
 		Check.notBlank(selectedTitle, "Selected title cannot be null or blank");
 		setSpacing(true);

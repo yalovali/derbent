@@ -28,24 +28,19 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	protected final CPageEntity pageEntity;
 	protected final CPageService<?> pageService;
 
-	public CDynamicPageBase(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService) {
+	public CDynamicPageBase(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService) throws Exception {
 		super(sessionService, detailSectionService);
+		Check.notNull(pageEntity, "Page entity cannot be null");
 		this.pageEntity = pageEntity;
-		CPageService<?> pageServiceX = null;
-		try {
-			pageServiceX = getPageService();
-		} catch (Exception e) {
-			LOGGER.error("Failed to initialize page service for dynamic page: {}", e.getMessage());
-			e.printStackTrace();
-		}
-		pageService = pageServiceX;
+		this.pageService = getPageService();
+		Check.notNull(this.pageService, "Page service cannot be null for dynamic page: " + pageEntity.getPageTitle());
 	}
 
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		LOGGER.debug("Before enter event for dynamic page: {}", pageEntity.getPageTitle());
 		// Security check
-		if (pageEntity.getRequiresAuthentication() && sessionService.getActiveUser().isEmpty()) {
+		if (pageEntity.getRequiresAuthentication() && getSessionService().getActiveUser().isEmpty()) {
 			event.rerouteToError(IllegalAccessException.class, "Authentication required");
 			return;
 		}
@@ -71,21 +66,24 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 
 	public Class<?> getEntityClass() { return entityClass; }
 
+	@Override
 	public CAbstractService<?> getEntityService() { return entityService; }
 
 	/** Get the page entity this view represents. */
 	public CPageEntity getPageEntity() { return pageEntity; }
 
-	public CPageService<?> getPageService() throws Exception {
+	public CPageService<?> getPageService() {
 		// this creates a page service instance per page. this may be memory inefficient.
 		try {
+			Check.notNull(pageEntity, "Page entity cannot be null");
 			Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
 			var constructor = clazz.getDeclaredConstructor(CDynamicPageBase.class);
 			CPageService<?> page = (CPageService<?>) constructor.newInstance(this);
+			Check.notNull(page, "Page service instance cannot be null for page: " + pageEntity.getPageTitle());
 			return page;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to get CPageService bean: {}", e.getMessage());
-			throw e;
+			return null;
 		}
 	}
 

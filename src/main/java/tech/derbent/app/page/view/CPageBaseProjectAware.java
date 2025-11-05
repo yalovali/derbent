@@ -30,7 +30,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	protected CLayoutService layoutService;
 	private IContentOwner parentContent;
 	private final CDetailSectionService screenService;
-	protected final ISessionService sessionService;
+	private final ISessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();
 
 	protected CPageBaseProjectAware(final ISessionService sessionService, final CDetailSectionService screenService) {
@@ -63,7 +63,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		try {
 			detailsLayout.removeAll();
 			final CDetailSection screen = screenService.findByNameAndProject(
-					sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")),
+					getSessionService().getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")),
 					baseViewName);
 			Check.notNull(screen, "Screen not found: " + baseViewName);
 			// Only create binder if not already set for this entity type or if no current binder exists
@@ -118,7 +118,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	protected void onAttach(final AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
 		// Register this component to receive project change notifications
-		sessionService.addProjectChangeListener(this);
+		getSessionService().addProjectChangeListener(this);
 	}
 
 	/** Called when the component is detached from the UI. Unregisters the project change listener to prevent memory leaks. */
@@ -126,7 +126,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	protected void onDetach(final DetachEvent detachEvent) {
 		super.onDetach(detachEvent);
 		// Unregister this component to prevent memory leaks
-		sessionService.removeProjectChangeListener(this);
+		getSessionService().removeProjectChangeListener(this);
 	}
 
 	/** Implementation of CProjectChangeListener interface. Called when the active project changes via the SessionService.
@@ -178,5 +178,9 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	@Override
 	protected void setupToolbar() {
 		LOGGER.debug("Setting up toolbar in Sample Page");
+	}
+
+	public ISessionService getSessionService() {
+		return sessionService;
 	}
 }

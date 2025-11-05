@@ -30,7 +30,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	private boolean enableSaveButton = true;
 
 	public CDynamicSingleEntityPageView(final CPageEntity pageEntity, final ISessionService sessionService,
-			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService) {
+			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService) throws Exception {
 		super(pageEntity, sessionService, detailSectionService, gridEntityService);
 		// Validate that this page entity is configured for single entity display
 		validateSingleEntityConfiguration();

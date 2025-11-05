@@ -3,7 +3,6 @@ package tech.derbent.api.services.pageservice.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceActivity;
@@ -113,12 +112,8 @@ public class CPageServiceUtility {
 		}
 	}
 
-	@Autowired
-	private final CViewsService viewsService;
-
 	public CPageServiceUtility(CViewsService viewsService) {
 		super();
-		this.viewsService = viewsService;
 	}
 
 	public List<String> getPageServiceList() { return CPageServiceUtility.availablePageServices; }

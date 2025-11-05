@@ -3,7 +3,6 @@ package tech.derbent.app.page.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.BeforeEvent;
@@ -42,12 +41,11 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 
 	@Autowired
 	public CDynamicPageRouter(CPageEntityService pageEntityService, ISessionService sessionService, CDetailSectionService detailSectionService,
-			CGridEntityService gridEntityService, ApplicationContext applicationContext) {
+			CGridEntityService gridEntityService) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
 		Check.notNull(detailSectionService, "CDetailSectionService cannot be null");
 		Check.notNull(gridEntityService, "CGridEntityService cannot be null");
-		Check.notNull(applicationContext, "ApplicationContext cannot be null");
 		this.pageEntityService = pageEntityService;
 		this.sessionService = sessionService;
 		this.detailSectionService = detailSectionService;

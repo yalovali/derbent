@@ -180,9 +180,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		// Create and configure grid
 		CGridEntity gridEntity = gridEntityService
 				.findByNameAndProject(viewName,
-						sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")))
+						getSessionService().getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")))
 				.orElse(null);
-		grid = new CComponentGridEntity(gridEntity, sessionService);
+		grid = new CComponentGridEntity(gridEntity, getSessionService());
 		// Listen for selection changes from the grid
 		grid.addSelectionChangeListener(event -> {
 			try {
@@ -373,7 +373,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	/** Updates the split layout orientation based on the current layout mode */
 	private void updateLayoutOrientation() {
 		Check.notNull(splitLayout, "Split layout is not initialized");
-		Check.notNull(sessionService, "Session service is not initialized");
+		Check.notNull(getSessionService(), "Session service is not initialized");
 		// If layout service is not available yet (during bean construction), use default vertical layout
 		if (layoutService == null) {
 			LOGGER.debug("Layout service not yet available, using default vertical orientation for {}", getClass().getSimpleName());

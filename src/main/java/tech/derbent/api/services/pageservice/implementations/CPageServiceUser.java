@@ -18,7 +18,7 @@ public class CPageServiceUser extends CPageServiceDynamicPage<CUser> {
 
 	@Override
 	public void actionCreate() {
-		// TODO Auto-generated method stub
+		super.actionCreate();
 	}
 
 	@Override

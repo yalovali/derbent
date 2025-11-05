@@ -41,7 +41,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 
 	@Autowired
 	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final ISessionService sessionService,
-			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService) {
+			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService) throws Exception {
 		super(pageEntity, sessionService, detailSectionService);
 		this.gridEntityService = gridEntityService;
 		try {
@@ -50,36 +50,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			LOGGER.error("Failed to initialize dynamic page view with sections for: {}: {}", pageEntity.getPageTitle(), e.getMessage());
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void actionCreate() {
-		Check.notNull(pageService, "Page service is not initialized");
-		pageService.actionCreate();
-	}
-
-	@Override
-	public void actionDelete() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void actionRefresh() {
-		try {
-			if (getCurrentEntity() != null && ((CEntityDB<?>) getCurrentEntity()).getId() != null) {
-				CEntityDB<?> reloaded = getEntityService().getById(((CEntityDB<?>) getCurrentEntity()).getId()).orElse(null);
-				if (reloaded != null) {
-					onEntityRefreshed(reloaded);
-				}
-			}
-		} catch (Exception e) {
-			LOGGER.error("Error refreshing entity: {}", e.getMessage());
-		}
-	}
-
-	@Override
-	public void actionSave() {
-		// TODO Auto-generated method stub
 	}
 
 	/** Create the details section. */
@@ -98,7 +68,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			// LOGGER.debug("Creating master section with grid entity");
 			Check.notNull(pageEntity.getGridEntity(), "Grid entity cannot be null");
 			// Create the grid component using the configured grid entity
-			grid = new CComponentGridEntity(pageEntity.getGridEntity(), sessionService);
+			grid = new CComponentGridEntity(pageEntity.getGridEntity(), getSessionService());
 			// Listen for selection changes from the grid
 			grid.addSelectionChangeListener(event -> {
 				try {
@@ -136,11 +106,11 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			final T newEntity = (T) entityClass.getDeclaredConstructor().newInstance();
 			// Set project if the entity supports it (check for CEntityOfProject)
 			if (newEntity instanceof CEntityOfProject) {
-				((CEntityOfProject<?>) newEntity).setProject(sessionService.getActiveProject().orElse(null));
+				((CEntityOfProject<?>) newEntity).setProject(getSessionService().getActiveProject().orElse(null));
 			}
 			// Special handling for CUser entities - create project association through CUserProjectSettings
 			else if (newEntity instanceof CUser) {
-				final CProject activeProject = sessionService.getActiveProject().orElse(null);
+				final CProject activeProject = getSessionService().getActiveProject().orElse(null);
 				if (activeProject != null) {
 					final CUser user = (CUser) newEntity;
 					// Initialize project settings list to establish project context for display

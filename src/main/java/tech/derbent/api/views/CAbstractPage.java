@@ -5,12 +5,15 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.interfaces.IPageTitleProvider;
+import tech.derbent.api.ui.notifications.CNotificationService;
 
 public abstract class CAbstractPage extends Main implements BeforeEnterObserver, IPageTitleProvider {
 
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	protected CNotificationService notificationService;
 
 	public CAbstractPage() {
 		super();
@@ -22,7 +25,10 @@ public abstract class CAbstractPage extends Main implements BeforeEnterObserver,
 				LumoUtility.Width.FULL);
 		initPage();
 		setupToolbar();
+		notificationService = CSpringContext.<CNotificationService>getBean(CNotificationService.class);
 	};
+
+	public CNotificationService getNotificationService() { return notificationService; }
 
 	/** Initializes the page with necessary components and layout. */
 	protected void initPage() {}

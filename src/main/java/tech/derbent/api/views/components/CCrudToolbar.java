@@ -47,22 +47,22 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	public void actionCreate() {
 		LOGGER.debug("Create action triggered from toolbar");
-		pageBase.actionCreate();
+		pageBase.getPageService().actionCreate();
 	}
 
 	public void actionDelete() {
 		LOGGER.debug("Delete action triggered from toolbar");
-		pageBase.actionDelete();
+		pageBase.getPageService().actionDelete();
 	}
 
 	public void actionRefresh() {
 		LOGGER.debug("Refresh action triggered from toolbar");
-		pageBase.actionRefresh();
+		pageBase.getPageService().actionRefresh();
 	}
 
 	public void actionSave() {
 		LOGGER.debug("Save action triggered from toolbar");
-		pageBase.actionSave();
+		pageBase.getPageService().actionSave();
 	}
 
 	/** Configure visibility of toolbar buttons. This replaces previous per-entity logic and provides a simple view-level way for pages to show/hide
