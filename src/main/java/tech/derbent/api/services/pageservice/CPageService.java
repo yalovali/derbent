@@ -13,6 +13,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		this.view = view;
 	}
 
+	public abstract void actionCreate();
+
 	public void bind() {}
 
 	protected Class<?> getEntityClass() {

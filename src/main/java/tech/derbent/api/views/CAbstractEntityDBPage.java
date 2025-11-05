@@ -80,118 +80,86 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		binder = new CEnhancedBinder<>(entityClass);
 		// Initialize CRUD toolbar with minimal constructor and configure
 		crudToolbar = new CCrudToolbar();
-		// Wire toolbar actions using view-level Runnable callbacks
-		crudToolbar.setCreateAction(() -> {
-			try {
-				final EntityClass newEntity = createNewEntity();
-				setCurrentEntity(newEntity);
-				populateForm();
-			} catch (final Exception e) {
-				LOGGER.error("Error creating new entity", e);
-				showErrorNotification("Failed to create new entity");
-			}
-		});
-
-		crudToolbar.setRefreshAction(() -> {
-			try {
-				final EntityClass current = getCurrentEntity();
-				if (current != null && current.getId() != null) {
-					final EntityClass reloaded = entityService.getById(current.getId()).orElse(null);
-					if (reloaded != null) {
-						setCurrentEntity(reloaded);
-						populateForm();
-					}
-				}
-			} catch (final Exception e) {
-				LOGGER.error("Error refreshing entity: {}", e.getMessage());
-				showErrorNotification("Failed to refresh entity");
-			}
-		});
-
-		crudToolbar.setDeleteAction(() -> {
-			try {
-				final EntityClass current = getCurrentEntity();
-				if (current == null) {
-					if (notificationService != null) {
-						notificationService.showWarning("Please select an item to delete.");
-					} else {
-						showNotification("Please select an item to delete.");
-					}
-					return;
-				}
-				// Use notification service to confirm deletion if available
-				if (notificationService != null) {
-					try {
-						notificationService.showConfirmationDialog("Delete selected item?", () -> {
-							try {
-								entityService.delete(current.getId());
-								refreshGrid();
-								notificationService.showDeleteSuccess();
-							} catch (final Exception ex) {
-								LOGGER.error("Error deleting entity", ex);
-								showErrorNotification("Failed to delete item");
-							}
-						});
-					} catch (final Exception e) {
-						LOGGER.error("Error showing confirmation dialog", e);
-						showErrorNotification("Failed to delete item");
-					}
-				} else {
-					// fallback: delete immediately
-					try {
-						entityService.delete(current.getId());
-						refreshGrid();
-						showNotification("Item deleted successfully");
-					} catch (final Exception ex) {
-						LOGGER.error("Error deleting entity", ex);
-						showErrorNotification("Failed to delete item");
-					}
-				}
-			} catch (final Exception e) {
-				LOGGER.error("Unexpected error during delete action", e);
-				showErrorNotification("Failed to delete item");
-			}
-		});
-
-		// Configure save action via helper
 		configureCrudToolbarSaveCallback();
 		createPageContent();
 	}
 
-	// for details view
-	protected void addAccordionPanel(final CAccordionDBEntity<EntityClass> accordion) {
-		AccordionList.add(accordion);
-		getBaseDetailsLayout().add(accordion);
+	public EntityClass actionCreate() {
+		try {
+			final EntityClass newEntity = createNewEntity();
+			setCurrentEntity(newEntity);
+			populateForm();
+			return newEntity;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating new entity", e);
+			showErrorNotification("Failed to create new entity");
+		}
+		return null;
 	}
 
-	// this method is called before the page is entered
-	@Override
-	public void beforeEnter(final BeforeEnterEvent event) {
-		LOGGER.debug("beforeEnter called for {}", getClass().getSimpleName());
-		if (masterViewSection == null) {
-			LOGGER.warn("Grid is null, cannot populate form");
-			return;
-		}
-		Optional<EntityClass> lastEntity = null;
-		final Optional<Long> entityID = event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
-		if (entityID.isPresent()) {
-			lastEntity = entityService.getById(entityID.get());
-			if (lastEntity.isEmpty()) {
-				LOGGER.warn("Entity with ID {} not found in database", entityID.get());
+	public void actionDelete() {
+		try {
+			final EntityClass current = getCurrentEntity();
+			if (current == null) {
+				if (notificationService != null) {
+					notificationService.showWarning("Please select an item to delete.");
+				} else {
+					showNotification("Please select an item to delete.");
+				}
+				return;
 			}
-		} else {
-			lastEntity = entityService.getById(sessionService.getActiveId(entityClass.getSimpleName()));
+			// Use notification service to confirm deletion if available
+			if (notificationService != null) {
+				try {
+					notificationService.showConfirmationDialog("Delete selected item?", () -> {
+						try {
+							entityService.delete(current.getId());
+							refreshGrid();
+							notificationService.showDeleteSuccess();
+						} catch (final Exception ex) {
+							LOGGER.error("Error deleting entity", ex);
+							showErrorNotification("Failed to delete item");
+						}
+					});
+				} catch (final Exception e) {
+					LOGGER.error("Error showing confirmation dialog", e);
+					showErrorNotification("Failed to delete item");
+				}
+			} else {
+				// fallback: delete immediately
+				try {
+					entityService.delete(current.getId());
+					refreshGrid();
+					showNotification("Item deleted successfully");
+				} catch (final Exception ex) {
+					LOGGER.error("Error deleting entity", ex);
+					showErrorNotification("Failed to delete item");
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Unexpected error during delete action", e);
+			showErrorNotification("Failed to delete item");
 		}
-		// populateForm(null);
-		masterViewSection.selectLastOrFirst(lastEntity.orElse(null));
 	}
 
-	/** Configures the CRUD toolbar with custom save callback that includes validation and error handling. This method sets up the save logic specific
-	 * to CAbstractEntityDBPage which includes pre-save events, binder validation, entity validation, and proper error handling. */
-	@SuppressWarnings ("unchecked")
-	private void configureCrudToolbarSaveCallback() {
-		// Configure save action that operates on the currentEntity
-		crudToolbar.setSaveAction(() -> {
+	public void actionRefresh() {
+		try {
+			final EntityClass current = getCurrentEntity();
+			if (current != null && current.getId() != null) {
+				final EntityClass reloaded = entityService.getById(current.getId()).orElse(null);
+				if (reloaded != null) {
+					setCurrentEntity(reloaded);
+					populateForm();
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing entity: {}", e.getMessage());
+			showErrorNotification("Failed to refresh entity");
+		}
+	}
+
+	public void actionSave() {
+		{
 			try {
 				final EntityClass entity = getCurrentEntity();
 				LOGGER.debug("Save action invoked, current entity: {}", entity != null ? entity.getId() : "null");
@@ -230,7 +198,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			} catch (final ValidationException validationException) {
 				LOGGER.error("Validation error during save", validationException);
 				if (notificationService != null) {
-					notificationService.showWarning("Failed to save the data. Please check that all required fields are filled and values are valid.");
+					notificationService
+							.showWarning("Failed to save the data. Please check that all required fields are filled and values are valid.");
 				} else {
 					showErrorNotification("Failed to save the data. Please check that all required fields are filled and values are valid.");
 				}
@@ -240,8 +209,40 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				showErrorNotification("An unexpected error occurred while saving. Please try again.");
 				throw new RuntimeException("Unexpected error during save operation", exception);
 			}
-		});
+		}
 	}
+
+	// for details view
+	protected void addAccordionPanel(final CAccordionDBEntity<EntityClass> accordion) {
+		AccordionList.add(accordion);
+		getBaseDetailsLayout().add(accordion);
+	}
+
+	// this method is called before the page is entered
+	@Override
+	public void beforeEnter(final BeforeEnterEvent event) {
+		LOGGER.debug("beforeEnter called for {}", getClass().getSimpleName());
+		if (masterViewSection == null) {
+			LOGGER.warn("Grid is null, cannot populate form");
+			return;
+		}
+		Optional<EntityClass> lastEntity = null;
+		final Optional<Long> entityID = event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
+		if (entityID.isPresent()) {
+			lastEntity = entityService.getById(entityID.get());
+			if (lastEntity.isEmpty()) {
+				LOGGER.warn("Entity with ID {} not found in database", entityID.get());
+			}
+		} else {
+			lastEntity = entityService.getById(sessionService.getActiveId(entityClass.getSimpleName()));
+		}
+		// populateForm(null);
+		masterViewSection.selectLastOrFirst(lastEntity.orElse(null));
+	}
+
+	/** Configures the CRUD toolbar with custom save callback that includes validation and error handling. This method sets up the save logic specific
+	 * to CAbstractEntityDBPage which includes pre-save events, binder validation, entity validation, and proper error handling. */
+	private void configureCrudToolbarSaveCallback() {}
 
 	protected void createButtonLayout(final Div layout) {
 		LOGGER.debug("createButtonLayout called - default save/delete/cancel buttons are now in details tab");

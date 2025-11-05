@@ -56,6 +56,62 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		createPageContent();
 	}
 
+	public EntityClass actionCreate() {
+		try {
+			final EntityClass newEntity = createNewEntityInstance();
+			populateEntityDetails(newEntity);
+			return newEntity;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating new entity", e);
+		}
+		return null;
+	}
+
+	public void actionDelete() {
+		// try {
+		// if (typedEntity == null || typedEntity.getId() == null) {
+		// LOGGER.warn("No entity to delete");
+		// return;
+		// }
+		// // Delete and notify
+		// entityService.delete(typedEntity.getId());
+		// onEntityDeleted(typedEntity);
+		// } catch (final Exception e) {
+		// LOGGER.error("Error deleting entity", e);
+		// }
+	}
+
+	public void actionRefresh() {
+		try {
+			if (getCurrentEntity() != null && ((CEntityDB<?>) getCurrentEntity()).getId() != null) {
+				EntityClass reloaded = entityService.getById(((CEntityDB<?>) getCurrentEntity()).getId()).orElse(null);
+				if (reloaded != null) {
+					populateEntityDetails(reloaded);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error refreshing entity: {}", e.getMessage());
+		}
+	}
+
+	public void actionSave() {
+		// try {
+		// if (getCurrentEntity() == null) {
+		// LOGGER.warn("No entity to save");
+		// return;
+		// }
+		// // Write form data to entity
+		// typedBinder.writeBean(getCurrentEntity());
+		// // Save entity
+		// final EntityClass savedEntity = entityService.save(getCurrentEntity());
+		// LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
+		// // Notify listeners and refresh
+		// onEntitySaved(savedEntity);
+		// } catch (final Exception e) {
+		// LOGGER.error("Error saving entity", e);
+		// }
+	}
+
 	/** Checks if existing components can be reused for the given entity view */
 	private boolean canReuseExistingComponents(String entityViewName, Class<?> entityType) {
 		return currentEntityViewName != null && currentEntityType != null && currentEntityViewName.equals(entityViewName)
@@ -84,69 +140,13 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		// Create toolbar with minimal constructor and configure
 		CCrudToolbar toolbar = new CCrudToolbar();
-		// Wire action callbacks for CRUD operations
-		// Create action: Create a new entity and populate the form
-		toolbar.setCreateAction(() -> {
-			try {
-				final EntityClass newEntity = createNewEntityInstance();
-				populateEntityDetails((CEntityDB<?>) newEntity);
-			} catch (final Exception e) {
-				LOGGER.error("Error creating new entity", e);
-			}
-		});
-		// Save action: Save the current entity via binder and service
-		toolbar.setSaveAction(() -> {
-			try {
-				if (typedEntity == null) {
-					LOGGER.warn("No entity to save");
-					return;
-				}
-				// Write form data to entity
-				typedBinder.writeBean(typedEntity);
-				// Save entity
-				final EntityClass savedEntity = entityService.save(typedEntity);
-				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
-				// Notify listeners and refresh
-				onEntitySaved(savedEntity);
-			} catch (final Exception e) {
-				LOGGER.error("Error saving entity", e);
-			}
-		});
-		// Delete action: Delete the current entity
-		toolbar.setDeleteAction(() -> {
-			try {
-				if (typedEntity == null || typedEntity.getId() == null) {
-					LOGGER.warn("No entity to delete");
-					return;
-				}
-				// Delete and notify
-				entityService.delete(typedEntity.getId());
-				onEntityDeleted(typedEntity);
-			} catch (final Exception e) {
-				LOGGER.error("Error deleting entity", e);
-			}
-		});
-		// Refresh action: Reload the current entity from the database
-		toolbar.setRefreshAction(() -> {
-			try {
-				if (typedEntity != null && typedEntity.getId() != null) {
-					EntityClass reloaded = entityService.getById(typedEntity.getId()).orElse(null);
-					if (reloaded != null) {
-						populateEntityDetails((CEntityDB<?>) reloaded);
-					}
-				}
-			} catch (Exception e) {
-				LOGGER.error("Error refreshing entity: {}", e.getMessage());
-			}
-		});
-		// Set status provider if entity supports workflow
 		if (typedEntity instanceof tech.derbent.api.domains.IHasStatusAndWorkflow) {
 			toolbar.setStatusProvider(() -> {
 				try {
 					// Try to get statuses from available services
 					// This is a best-effort approach that works with available infrastructure
-					tech.derbent.app.activities.service.CProjectItemStatusService statusService = tech.derbent.api.config.CSpringContext
-							.getBean(tech.derbent.app.activities.service.CProjectItemStatusService.class);
+					tech.derbent.app.activities.service.CProjectItemStatusService statusService =
+							tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.activities.service.CProjectItemStatusService.class);
 					if (statusService != null) {
 						return statusService.findAll();
 					}
@@ -212,7 +212,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	/** Creates a new entity instance of the specific entity type.
 	 * @return a new entity instance of type EntityClass
 	 * @throws Exception if entity creation fails */
+	@Override
 	public abstract EntityClass createNewEntityInstance() throws Exception;
+
 	private void createPageContent() {
 		baseDetailsLayout = CFlexLayout.forEntityPage();
 		createMasterSection();

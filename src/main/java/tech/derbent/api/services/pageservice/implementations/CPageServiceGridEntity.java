@@ -2,10 +2,10 @@ package tech.derbent.api.services.pageservice.implementations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.view.CDynamicPageBase;
-import tech.derbent.api.screens.domain.CGridEntity;
 
 public class CPageServiceGridEntity extends CPageServiceDynamicPage<CGridEntity> {
 
@@ -14,6 +14,11 @@ public class CPageServiceGridEntity extends CPageServiceDynamicPage<CGridEntity>
 
 	public CPageServiceGridEntity(CDynamicPageBase view) {
 		super(view);
+	}
+
+	@Override
+	public void actionCreate() {
+		// TODO Auto-generated method stub
 	}
 
 	@Override

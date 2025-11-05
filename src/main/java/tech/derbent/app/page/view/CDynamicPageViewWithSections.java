@@ -16,6 +16,7 @@ import tech.derbent.api.views.components.CComponentDetailsMasterToolbar;
 import tech.derbent.api.views.components.CCrudToolbar;
 import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CVerticalLayout;
+import tech.derbent.api.views.components.ICrudToolbarOwnerPage;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -24,7 +25,7 @@ import tech.derbent.base.users.domain.CUser;
 /** Enhanced dynamic page view that supports grid and detail sections for database-defined pages. This view displays content stored in CPageEntity
  * instances with configurable grid and detail sections. */
 @PermitAll
-public class CDynamicPageViewWithSections extends CDynamicPageBase {
+public class CDynamicPageViewWithSections extends CDynamicPageBase implements ICrudToolbarOwnerPage {
 
 	public static final String DEFAULT_COLOR = "#341b00";
 	public static final String DEFAULT_ICON = "vaadin:database";
@@ -49,6 +50,36 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			LOGGER.error("Failed to initialize dynamic page view with sections for: {}: {}", pageEntity.getPageTitle(), e.getMessage());
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void actionCreate() {
+		Check.notNull(pageService, "Page service is not initialized");
+		pageService.actionCreate();
+	}
+
+	@Override
+	public void actionDelete() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void actionRefresh() {
+		try {
+			if (getCurrentEntity() != null && ((CEntityDB<?>) getCurrentEntity()).getId() != null) {
+				CEntityDB<?> reloaded = getEntityService().getById(((CEntityDB<?>) getCurrentEntity()).getId()).orElse(null);
+				if (reloaded != null) {
+					onEntityRefreshed(reloaded);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error refreshing entity: {}", e.getMessage());
+		}
+	}
+
+	@Override
+	public void actionSave() {
+		// TODO Auto-generated method stub
 	}
 
 	/** Create the details section. */
@@ -136,8 +167,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	@Override
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 
-	/** Initialize the page layout and content.
-	 * @throws Exception */
 	@Override
 	protected void initializePage() throws Exception {
 		try {
@@ -156,6 +185,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			createDetailsSection();
 			// Create toolbar with minimal constructor and configure
 			crudToolbar = new CCrudToolbar();
+			crudToolbar.setPageBase(this);
 			crudToolbar.setEntityService(getEntityService());
 			crudToolbar.setNotificationService(getNotificationService());
 			crudToolbar.setWorkflowStatusRelationService(getWorkflowStatusRelationService());
@@ -167,20 +197,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 					return null;
 				}
 			});
-			crudToolbar.setRefreshCallback(entity -> {
-				try {
-					if (entity != null && ((CEntityDB<?>) entity).getId() != null) {
-						CEntityDB<?> reloaded = getEntityService().getById(((CEntityDB<?>) entity).getId()).orElse(null);
-						if (reloaded != null) {
-							onEntityRefreshed(reloaded);
-						}
-					}
-				} catch (Exception e) {
-					LOGGER.error("Error refreshing entity: {}", e.getMessage());
-				}
-			});
-			// crudToolbar.setCurrentEntity(null);
-			// Allow subclasses to customize toolbar
 			configureCrudToolbar(crudToolbar);
 			splitBottomLayout.addComponentAsFirst(crudToolbar);
 			grid.selectNextItem();
