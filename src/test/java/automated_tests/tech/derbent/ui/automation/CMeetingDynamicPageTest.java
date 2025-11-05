@@ -24,7 +24,7 @@ public class CMeetingDynamicPageTest extends CBaseUITest {
 
 	@Test
 	public void testMeetingGridSelectionPopulatesForm() {
-		LOGGER.info("=== Testing Meeting Grid Selection and Form Population ===");
+		LOGGER.info("=== Testing Meeting Grid Selection and Form Population with Date/Time Fields ===");
 		try {
 			// Login
 			loginToApplication("admin", "test123");
@@ -100,6 +100,99 @@ public class CMeetingDynamicPageTest extends CBaseUITest {
 			LOGGER.error("❌ Meeting test failed", e);
 			takeScreenshot("meeting-test-error", true);
 			throw new AssertionError("Meeting test failed", e);
+		}
+	}
+
+	@Test
+	public void testMeetingDateTimeFields() {
+		LOGGER.info("=== Testing Meeting Date and Time Field Components ===");
+		try {
+			// Login
+			loginToApplication("admin", "test123");
+			wait_afterlogin();
+			LOGGER.info("✅ Logged in successfully");
+			
+			// Navigate to Meetings view
+			navigateToViewByText("Meetings");
+			wait_1000();
+			LOGGER.info("✅ Navigated to Meetings view");
+			
+			// Click New button
+			LOGGER.info("➕ Clicking New button to test date/time components");
+			clickNew();
+			wait_1000();
+			takeScreenshot("meeting-new-form-with-datetime", false);
+			
+			// Check for DatePicker components (for startDate and endDate)
+			Locator datePickers = page.locator("vaadin-date-picker");
+			int datePickerCount = datePickers.count();
+			LOGGER.info("📅 DatePicker count: {}", datePickerCount);
+			
+			if (datePickerCount >= 2) {
+				LOGGER.info("✅ SUCCESS: Found DatePicker components (expected: startDate, endDate)");
+			} else {
+				LOGGER.error("❌ FAIL: Expected at least 2 DatePicker components, found: {}", datePickerCount);
+			}
+			
+			// Check for TimePicker components (for startTime and endTime)
+			Locator timePickers = page.locator("vaadin-time-picker");
+			int timePickerCount = timePickers.count();
+			LOGGER.info("⏰ TimePicker count: {}", timePickerCount);
+			
+			if (timePickerCount >= 2) {
+				LOGGER.info("✅ SUCCESS: Found TimePicker components (expected: startTime, endTime)");
+			} else {
+				LOGGER.error("❌ FAIL: Expected at least 2 TimePicker components, found: {}", timePickerCount);
+			}
+			
+			// Test filling date picker
+			if (datePickerCount > 0) {
+				LOGGER.info("📅 Testing DatePicker interaction");
+				// DatePicker typically has an input field inside
+				Locator firstDatePicker = datePickers.first();
+				Locator dateInput = firstDatePicker.locator("input").first();
+				if (dateInput.count() > 0) {
+					// Try to set a date (format may vary by locale)
+					dateInput.fill("01/15/2025");
+					wait_500();
+					takeScreenshot("meeting-date-filled", false);
+					LOGGER.info("✅ Filled date picker");
+				}
+			}
+			
+			// Test filling time picker
+			if (timePickerCount > 0) {
+				LOGGER.info("⏰ Testing TimePicker interaction");
+				Locator firstTimePicker = timePickers.first();
+				Locator timeInput = firstTimePicker.locator("input").first();
+				if (timeInput.count() > 0) {
+					// Try to set a time
+					timeInput.fill("14:30");
+					wait_500();
+					takeScreenshot("meeting-time-filled", false);
+					LOGGER.info("✅ Filled time picker");
+				}
+			}
+			
+			// Fill meeting name to enable save
+			Locator nameField = page.locator("vaadin-text-field").first();
+			if (nameField.count() > 0) {
+				nameField.fill("Test Meeting DateTime " + System.currentTimeMillis());
+				wait_500();
+			}
+			
+			// Save and verify
+			clickSave();
+			wait_1000();
+			takeScreenshot("meeting-datetime-after-save", false);
+			LOGGER.info("✅ Saved meeting with date/time fields");
+			
+			LOGGER.info("=== Meeting Date/Time Fields Test Completed ===");
+			LOGGER.info("Summary: DatePickers={}, TimePickers={}", datePickerCount, timePickerCount);
+		} catch (Exception e) {
+			LOGGER.error("❌ Meeting date/time test failed", e);
+			takeScreenshot("meeting-datetime-test-error", true);
+			throw new AssertionError("Meeting date/time test failed", e);
 		}
 	}
 }

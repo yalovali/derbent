@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,6 +27,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -378,6 +380,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				component = createFloatingPointField(fieldInfo, binder);
 			} else if (fieldType == LocalDate.class) {
 				component = createDatePicker(fieldInfo, binder);
+			} else if (fieldType == LocalTime.class) {
+				component = createTimePicker(fieldInfo, binder);
 			} else if ((fieldType == LocalDateTime.class) || (fieldType == Instant.class)) {
 				component = createDateTimePicker(fieldInfo, binder);
 			} else if (fieldType.isEnum()) {
@@ -437,6 +441,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CAuxillaries.setId(datePicker);
 		safeBindComponent(binder, datePicker, fieldInfo.getFieldName(), "DatePicker");
 		return datePicker;
+	}
+
+	private static TimePicker createTimePicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+		final TimePicker timePicker = new TimePicker();
+		CAuxillaries.setId(timePicker);
+		safeBindComponent(binder, timePicker, fieldInfo.getFieldName(), "TimePicker");
+		return timePicker;
 	}
 
 	private static DateTimePicker createDateTimePicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
