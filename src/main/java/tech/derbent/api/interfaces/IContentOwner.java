@@ -3,12 +3,8 @@ package tech.derbent.api.interfaces;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 
-/** Interface for content owners (like pages) that can provide context-specific data for content resource resolvers such as comboboxes in forms. This
- * allows FormBuilder to access methods on the current page/context owner instead of just service beans, enabling context-aware data providers.
- * Enhanced to support better access to parent container data and context, and to provide callbacks for CRUD toolbar operations.
- * @author Derbent Framework
- * @since 1.0 */
 public interface IContentOwner {
 
 	public CEntityDB<?> createNewEntityInstance() throws Exception;
@@ -22,7 +18,7 @@ public interface IContentOwner {
 
 	/** Get the workflow status relation service. Optional - may return null.
 	 * @return workflow status relation service or null if not available */
-	default tech.derbent.app.workflow.service.CWorkflowStatusRelationService getWorkflowStatusRelationService() {
+	default CWorkflowStatusRelationService getWorkflowStatusRelationService() {
 		return null;
 	}
 

@@ -78,10 +78,10 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		try {
 			final CProject currentProject = sessionService.getActiveProject()
 					.orElseThrow(() -> new CInitializationException("No active project in session - cannot generate unique name"));
-			final long existingCount = countByProject(currentProject);
-			return String.format("%s%02d", getEntityClass().getSimpleName(), existingCount + 1);
+			final List<EntityClass> existingUsers = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(currentProject);
+			return getUniqueNameFromList(getEntityClass().getSimpleName().replace("C", ""), existingUsers);
 		} catch (final Exception e) {
-			LOGGER.warn("Error generating unique name for project entity, falling back to base class: {}", e.getMessage());
+			LOGGER.warn("Error generating unique user name, falling back to base class: {}", e.getMessage());
 			return super.generateUniqueName();
 		}
 	}

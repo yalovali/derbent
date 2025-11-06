@@ -178,9 +178,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected void createMasterSection() {
 		// Create and configure grid
-		CGridEntity gridEntity = gridEntityService
-				.findByNameAndProject(viewName,
-						getSessionService().getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")))
+		CGridEntity gridEntity = gridEntityService.findByNameAndProject(viewName,
+				getSessionService().getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")))
 				.orElse(null);
 		grid = new CComponentGridEntity(gridEntity, getSessionService());
 		// Listen for selection changes from the grid
@@ -244,9 +243,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	public void onEntityDeleted(CEntityDB<?> entity) throws Exception {
 		LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 		refreshGrid();
-		// Clear the details section since the entity no longer exists
 		getBaseDetailsLayout().removeAll();
-		// Try to select the next item in the grid or the first item if no next item
 		grid.selectNextItem();
 	}
 

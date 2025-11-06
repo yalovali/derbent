@@ -1,6 +1,7 @@
 package tech.derbent.api.services;
 
 import java.time.Clock;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,18 +33,6 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 		return null; // No dependencies found by default
 	}
 
-	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
-	@Override
-	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() { return Map.of("name", e -> e.getName(), "id", e -> e.getId()); }
-
-	@Override
-	public void initializeNewEntity(final EntityClass entity) {
-		super.initializeNewEntity(entity);
-		entity.setDescription("");
-		// Generate unique name automatically to avoid name conflicts
-		entity.setName(generateUniqueName());
-	}
-
 	/** Generates a unique name for new entities based on existing entities count. Child classes can override this method for custom name generation
 	 * patterns. Default pattern: "EntitySimpleName##" where ## is a zero-padded number (e.g., "Activity01", "Meeting02")
 	 * @return a unique name string */
@@ -57,6 +46,25 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 			LOGGER.warn("Error generating unique name, falling back to generic name: {}", e.getMessage());
 			return "New " + getEntityClass().getSimpleName();
 		}
+	}
+
+	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
+	@Override
+	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() { return Map.of("name", e -> e.getName(), "id", e -> e.getId()); }
+
+	public String getUniqueNameFromList(String prefix, List<EntityClass> existingEntities) {
+		//
+		int maxNumber = existingEntities.stream().map(EntityClass::getName).filter(name -> name.matches(prefix + "(\\d{2})"))
+				.mapToInt(name -> Integer.parseInt(name.replaceAll(prefix, ""))).max().orElse(0);
+		return String.format(prefix + "%02d", (maxNumber + 1));
+	}
+
+	@Override
+	public void initializeNewEntity(final EntityClass entity) {
+		super.initializeNewEntity(entity);
+		entity.setDescription("");
+		// Generate unique name automatically to avoid name conflicts
+		entity.setName(generateUniqueName());
 	}
 
 	@Transactional (readOnly = true)

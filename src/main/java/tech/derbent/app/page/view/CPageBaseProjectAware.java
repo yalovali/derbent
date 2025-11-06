@@ -26,7 +26,6 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
 	private Object currentEntity; // Field to store current entity
-	private Object previousEntityBeforeNew; // Track entity before "New" was clicked, for refresh/cancel
 	protected final CDetailsBuilder detailsBuilder;
 	protected CLayoutService layoutService;
 	private IContentOwner parentContent;
@@ -38,7 +37,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		super();
 		this.screenService = screenService;
 		this.sessionService = sessionService;
-		this.detailsBuilder = new CDetailsBuilder(sessionService);
+		detailsBuilder = new CDetailsBuilder(sessionService);
 		baseDetailsLayout.setSizeFull();
 	}
 
@@ -93,14 +92,16 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 
+	/** Get the current binder for data binding operations (public access for PageService pattern) */
+	public CEnhancedBinder<CEntityDB<?>> getBinder() {
+		return currentBinder;
+	}
+
 	@Override
 	public IContentOwner getContentOwner() { return parentContent; }
 
 	/** Get the current binder for data binding operations */
 	protected CEnhancedBinder<CEntityDB<?>> getCurrentBinder() { return currentBinder; }
-
-	/** Get the current binder for data binding operations (public access for PageService pattern) */
-	public CEnhancedBinder<CEntityDB<?>> getBinder() { return currentBinder; }
 
 	@Override
 	public Object getCurrentEntity() { return currentEntity; }
@@ -117,6 +118,8 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		}
 		return null;
 	}
+
+	public ISessionService getSessionService() { return sessionService; }
 
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
@@ -179,22 +182,8 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		}
 	}
 
-	/** Get the entity that was selected before "New" button was clicked. Used for refresh/cancel operations. */
-	public Object getPreviousEntityBeforeNew() {
-		return previousEntityBeforeNew;
-	}
-
-	/** Set the entity that was selected before "New" button was clicked. Called by actionCreate(). */
-	public void setPreviousEntityBeforeNew(final Object entity) {
-		this.previousEntityBeforeNew = entity;
-	}
-
 	@Override
 	protected void setupToolbar() {
 		LOGGER.debug("Setting up toolbar in Sample Page");
-	}
-
-	public ISessionService getSessionService() {
-		return sessionService;
 	}
 }

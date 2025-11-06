@@ -2,11 +2,9 @@ package tech.derbent.app.page.view;
 
 import java.lang.reflect.Field;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
-import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -18,7 +16,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 
-public abstract class CDynamicPageBase extends CPageBaseProjectAware implements BeforeEnterObserver, IEntityUpdateListener, IPageTitleProvider {
+public abstract class CDynamicPageBase extends CPageBaseProjectAware implements IEntityUpdateListener {
 
 	private static final long serialVersionUID = 1L;
 	protected Class<?> currentEntityType = null;
@@ -32,8 +30,8 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		super(sessionService, detailSectionService);
 		Check.notNull(pageEntity, "Page entity cannot be null");
 		this.pageEntity = pageEntity;
-		this.pageService = getPageService();
-		Check.notNull(this.pageService, "Page service cannot be null for dynamic page: " + pageEntity.getPageTitle());
+		pageService = getPageService();
+		Check.notNull(pageService, "Page service cannot be null for dynamic page: " + pageEntity.getPageTitle());
 	}
 
 	@Override
@@ -62,12 +60,6 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		currentBinder = null;
 		currentEntityViewName = null;
 		currentEntityType = null;
-	}
-
-	/** Select the first item in grid. Subclasses with grids should override this. */
-	public void selectFirstInGrid() {
-		// Default implementation - subclasses with grids should override
-		LOGGER.debug("selectFirstInGrid called on base class (no-op)");
 	}
 
 	public Class<?> getEntityClass() { return entityClass; }
@@ -141,6 +133,12 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			LOGGER.error("Error rebuilding entity details for view '{}': {}", clazz.getField("VIEW_NAME"), e.getMessage());
 			throw e;
 		}
+	}
+
+	/** Select the first item in grid. Subclasses with grids should override this. */
+	public void selectFirstInGrid() {
+		// Default implementation - subclasses with grids should override
+		LOGGER.debug("selectFirstInGrid called on base class (no-op)");
 	}
 
 	@Override

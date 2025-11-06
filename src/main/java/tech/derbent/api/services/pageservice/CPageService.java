@@ -11,24 +11,21 @@ import tech.derbent.base.session.service.ISessionService;
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
+	private EntityClass previousEntity;
 	final protected CDynamicPageBase view;
 
 	public CPageService(CDynamicPageBase view) {
 		this.view = view;
+		setPreviousEntity(null);
 	}
 
 	public void actionCreate() {
 		try {
 			LOGGER.debug("Create action triggered for entity type: {}", getEntityClass().getSimpleName());
-			// Store current entity before creating new one (for cancel/refresh operations)
-			view.setPreviousEntityBeforeNew(getCurrentEntity());
-			// Create and initialize new entity using service
+			setPreviousEntity(getCurrentEntity());
 			final EntityClass newEntity = getEntityService().newEntity();
 			getEntityService().initializeNewEntity(newEntity);
-			// Set current entity and populate form
-			setCurrentEntity(newEntity);
-			view.populateForm();
-			getNotificationService().showSuccess("New " + getEntityClass().getSimpleName() + " created. Fill in the details and click Save.");
+			view.onEntityCreated(newEntity);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating new entity instance for type: {} - {}", getEntityClass().getSimpleName(), e.getMessage());
 			LOGGER.error("exception:", e);
@@ -49,12 +46,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				try {
 					getEntityService().delete(entity.getId());
 					LOGGER.info("Entity deleted successfully with ID: {}", entity.getId());
-					// Clear current entity
-					// setCurrentEntity(null);
-					// Notify view (triggers grid refresh, select next item, and form update)
 					view.onEntityDeleted(entity);
-					// Show success notification
-					getNotificationService().showDeleteSuccess();
 				} catch (final Exception ex) {
 					LOGGER.error("Error deleting entity with ID: {}", entity.getId(), ex);
 					getNotificationService().showDeleteError();
@@ -66,50 +58,41 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
+	@SuppressWarnings ("unchecked")
 	public void actionRefresh() {
 		try {
 			final EntityClass entity = getCurrentEntity();
 			LOGGER.debug("Refresh action triggered for entity: {}", entity != null ? entity.getId() : "null");
 			// Check if current entity is a new unsaved entity (no ID)
 			if (entity != null && entity.getId() == null) {
-				LOGGER.debug("Current entity is unsaved (new). Discarding and restoring previous selection.");
 				// Discard the new entity and restore previous selection
-				final Object previousEntity = view.getPreviousEntityBeforeNew();
-				if (previousEntity != null && previousEntity instanceof CEntityDB<?>) {
-					final CEntityDB<?> prevEntityDB = (CEntityDB<?>) previousEntity;
-					if (prevEntityDB.getId() != null) {
-						// Reload previous entity from database
-						final CEntityDB<?> reloaded = getEntityService().getById(prevEntityDB.getId()).orElse(null);
-						if (reloaded != null) {
-							setCurrentEntity((EntityClass) reloaded);
-							view.onEntityRefreshed(reloaded);
-							getNotificationService().showInfo("Unsaved changes discarded. Previous item restored.");
-							LOGGER.info("Restored previous entity with ID: {}", reloaded.getId());
-							return;
-						}
+				if (previousEntity != null) {
+					final CEntityDB<?> reloaded = getEntityService().getById(previousEntity.getId()).orElse(null);
+					if (reloaded != null) {
+						setCurrentEntity((EntityClass) reloaded);
+						view.onEntityRefreshed(reloaded);
+					} else {
+						// previous entity no longer exists, clear selection
+						view.selectFirstInGrid();
 					}
+				} else {
+					view.selectFirstInGrid();
 				}
-				// If no previous entity, just select first item in grid
-				setCurrentEntity(null);
-				view.clearEntityDetails();
-				view.selectFirstInGrid();
-				getNotificationService().showInfo("Unsaved entity discarded.");
+				getNotificationService().showInfo("Entity reloaded.");
 				return;
 			}
 			// Normal refresh for existing entities
-			if (entity == null || entity.getId() == null) {
-				getNotificationService().showWarning("Please select an item to refresh.");
+			if (entity == null) {
+				view.selectFirstInGrid();
 				return;
 			}
 			final CEntityDB<?> reloaded = getEntityService().getById(entity.getId()).orElse(null);
 			if (reloaded != null) {
 				view.onEntityRefreshed(reloaded);
-				getNotificationService().showInfo("Entity refreshed successfully");
-				LOGGER.info("Entity refreshed successfully with ID: {}", reloaded.getId());
 			} else {
-				getNotificationService().showWarning("Entity not found. It may have been deleted.");
-				LOGGER.warn("Entity with ID {} not found during refresh", entity.getId());
+				view.selectFirstInGrid();
 			}
+			getNotificationService().showInfo("Entity reloaded.");
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing entity: {}", e.getMessage(), e);
 			getNotificationService().showError("Failed to refresh entity: " + e.getMessage());
@@ -125,29 +108,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				getNotificationService().showWarning("No entity selected for save");
 				return;
 			}
-			// Write form data to entity using binder
 			if (view.getBinder() != null) {
 				view.getBinder().writeBean(entity);
 			}
-			// Save entity
 			final EntityClass savedEntity = getEntityService().save(entity);
 			LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
-			// Clear previous entity tracking since new entity is now saved
-			view.setPreviousEntityBeforeNew(null);
-			// Update current entity with saved version (includes generated ID)
 			setCurrentEntity(savedEntity);
-			// Notify view that entity was saved (triggers grid refresh and selection)
 			view.onEntitySaved(savedEntity);
-			// Populate form with saved entity
 			view.populateForm();
-			// Show success notification
 			getNotificationService().showSaveSuccess();
-		} catch (final org.springframework.orm.ObjectOptimisticLockingFailureException exception) {
-			LOGGER.error("Optimistic locking failure during save", exception);
-			getNotificationService().showOptimisticLockingError();
-		} catch (final com.vaadin.flow.data.binder.ValidationException validationException) {
-			LOGGER.error("Validation error during save", validationException);
-			getNotificationService().showWarning("Failed to save the data. Please check that all required fields are filled and values are valid.");
 		} catch (final Exception exception) {
 			LOGGER.error("Unexpected error during save operation", exception);
 			getNotificationService().showError("An unexpected error occurred while saving: " + exception.getMessage());
@@ -169,9 +138,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	protected CNotificationService getNotificationService() { return view.getNotificationService(); }
 
+	public EntityClass getPreviousEntity() { return previousEntity; }
+
 	protected ISessionService getSessionService() { return view.getSessionService(); }
 
 	protected void setCurrentEntity(EntityClass entity) {
 		view.setCurrentEntity(entity);
 	}
+
+	public void setPreviousEntity(EntityClass previousEntity) { this.previousEntity = previousEntity; }
 }

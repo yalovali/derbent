@@ -134,7 +134,8 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		try {
 			final CCompany currentCompany = sessionService.getCurrentCompany();
 			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompany_Id(currentCompany.getId());
-			return String.format("User%02d", existingUsers.size() + 1);
+			String prefix = "User";
+			return getUniqueNameFromList(prefix, existingUsers);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique user name, falling back to base class: {}", e.getMessage());
 			return super.generateUniqueName();
@@ -209,14 +210,9 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			LOGGER.debug("Initializing new user entity with default values");
 			Check.notNull(user, "User cannot be null");
 			Check.notNull(sessionService, "Session service is required for user initialization");
-			// Get current company from session
 			final CCompany currentCompany = sessionService.getCurrentCompany();
 			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
-			// Set company on user - this is essential for the user to appear in the grid
-			// Note: Company role is set to null initially, can be set by user later
 			user.setCompany(currentCompany, null);
-			// Generate unique name based on existing users in company (override base class behavior)
-			user.setName(generateUniqueName());
 			user.setLogin(user.getName().toLowerCase());
 			user.setLastname("");
 			user.setEmail("");

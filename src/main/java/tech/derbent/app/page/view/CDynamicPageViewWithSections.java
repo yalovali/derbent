@@ -210,6 +210,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			// Set the current entity and populate form
 			setCurrentEntity(entity);
 			populateForm();
+			getNotificationService().showSuccess("New " + getEntityClass().getSimpleName() + " created. Fill in the details and click Save.");
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity created notification:" + e.getMessage());
 			throw e;
@@ -226,6 +227,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			refreshGrid();
 			clearEntityDetails();
 			grid.selectNextItem();
+			getNotificationService().showDeleteSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity deleted notification:" + e.getMessage());
 			throw e;
@@ -271,7 +273,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 					try {
 						rebuildEntityDetails(selectedEntity.getClass());
 					} catch (final Exception rebuildException) {
-						LOGGER.error("Error rebuilding entity details, will attempt to populate with current binder: {}", rebuildException.getMessage());
+						LOGGER.error("Error rebuilding entity details, will attempt to populate with current binder: {}",
+								rebuildException.getMessage());
 						// Don't throw - try to populate with existing binder
 					}
 				}
@@ -291,6 +294,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 	}
 
 	/** Select the first item in the grid. Used after discarding unsaved new entities. */
+	@Override
 	public void selectFirstInGrid() {
 		if (grid != null) {
 			try {
