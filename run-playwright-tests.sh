@@ -12,24 +12,7 @@ source "$SCRIPT_DIR/setup-java-env.sh"
 echo "🚀 Derbent Playwright UI Test Automation Runner"
 echo "==============================================="
 
-# Function to check if SO libraries are installed
-check_so_libraries() {
-    local so_dir="$HOME/.m2/repository/org/vaadin/addons/so"
-    if [ ! -d "$so_dir/so-components/14.0.7" ] || \
-       [ ! -d "$so_dir/so-charts/5.0.3" ] || \
-       [ ! -d "$so_dir/so-helper/5.0.1" ]; then
-        echo "⚠️  SO libraries not found in Maven repository"
-        echo "📦 Installing SO libraries (required for building)..."
-        ./install-so-libraries.sh
-        if [ $? -ne 0 ]; then
-            echo "❌ Failed to install SO libraries"
-            echo "Please run: ./install-so-libraries.sh manually"
-            exit 1
-        fi
-    else
-        echo "✅ SO libraries are installed"
-    fi
-}
+
 
 # Function to install Playwright browsers
 install_playwright_browsers() {
@@ -50,9 +33,6 @@ run_menu_navigation_test() {
     echo "  5. Generate screenshots for each step"
     echo "  6. Fail fast on timeout (10s for menu detection)"
     echo ""
-    
-    # Check SO libraries first
-    check_so_libraries
     
     # Create screenshots directory
     mkdir -p target/screenshots
@@ -101,7 +81,6 @@ run_company_login_test() {
     echo "  4. Test login with multiple companies"
     echo ""
     
-    check_so_libraries
     mkdir -p target/screenshots
     install_playwright_browsers
     
@@ -131,7 +110,6 @@ run_comprehensive_test() {
     echo "  5. Test form validation"
     echo ""
     
-    check_so_libraries
     mkdir -p target/screenshots
     install_playwright_browsers
     
@@ -161,7 +139,6 @@ run_type_status_test() {
     echo "  5. Test validation and error handling"
     echo ""
     
-    check_so_libraries
     mkdir -p target/screenshots
     install_playwright_browsers
     
@@ -191,7 +168,6 @@ run_button_functionality_test() {
     echo "  5. Verify all buttons are working correctly"
     echo ""
     
-    check_so_libraries
     mkdir -p target/screenshots
     install_playwright_browsers
     
@@ -215,8 +191,6 @@ run_all_tests() {
     echo "=================================="
     echo ""
     
-    # Check SO libraries once at the start
-    check_so_libraries
     mkdir -p target/screenshots
     install_playwright_browsers
     
@@ -295,7 +269,6 @@ OPTIONS:
     help            Show this help message
 
 DESCRIPTION:
-    This script automatically checks and installs SO libraries before running tests.
     Tests automatically initialize sample data if company combobox is empty.
     All tests use improved timeouts with fail-fast behavior.
     
