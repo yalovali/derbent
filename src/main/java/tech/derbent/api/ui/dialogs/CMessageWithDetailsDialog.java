@@ -29,8 +29,7 @@ public final class CMessageWithDetailsDialog extends CDialog {
 
 	/** Constructor for displaying a message with exception details.
 	 * @param message The user-friendly message to display
-	 * @param exception The exception whose details can be expanded
-	 * @throws Exception */
+	 * @param exception The exception whose details can be expanded */
 	public CMessageWithDetailsDialog(final String message, final Exception exception) {
 		super();
 		Check.notBlank(message, "Message cannot be empty");
