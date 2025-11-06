@@ -128,4 +128,13 @@ public final class CNotifications {
 	public static void showValidationWarning(final String fieldName) {
 		showWarning("Please check the " + fieldName + " field and try again.");
 	}
+
+	/** Shows a message with expandable exception details */
+	public static void showMessageWithDetails(final String message, final Exception exception) {
+		Check.notBlank(message, "Message cannot be empty");
+		Check.notNull(exception, "Exception cannot be null");
+		LOGGER.error("Static message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
+		// For now, just log. In future versions, this could use other approaches.
+		// Users should inject CNotificationService directly for full functionality.
+	}
 }
