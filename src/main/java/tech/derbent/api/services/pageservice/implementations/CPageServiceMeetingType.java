@@ -17,11 +17,6 @@ public class CPageServiceMeetingType extends CPageServiceDynamicPage<CMeetingTyp
 	}
 
 	@Override
-	public void actionCreate() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public void bind() {
 		try {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CMeetingType.class.getSimpleName());

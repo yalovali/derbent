@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ICompanyEntityRepositoryBase<EntityClass> {
 
-	List<EntityClass> findByCompanyId(@Param ("companyId") Long companyId);
-	Page<EntityClass> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
+	long countByCompany_Id(@Param ("company_id") Long company_id);
+	List<EntityClass> findByCompany_Id(@Param ("company_id") Long company_id);
+	Page<EntityClass> findByCompany_Id(@Param ("company_id") Long company_id, Pageable pageable);
 }

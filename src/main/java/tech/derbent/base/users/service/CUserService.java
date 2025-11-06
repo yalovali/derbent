@@ -60,7 +60,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			}
 			Check.notNull(entity.getCompany(), "User company cannot be null");
 			// Rule 1: Check if this is the last user in the company
-			final List<CUser> companyUsers = ((IUserRepository) repository).findByCompanyId(entity.getCompany().getId());
+			final List<CUser> companyUsers = ((IUserRepository) repository).findByCompany_Id(entity.getCompany().getId());
 			if (companyUsers.size() == 1) {
 				return "Cannot delete the last user in the company. At least one user must remain.";
 			}
@@ -117,14 +117,28 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	public List<CUser> findAll() {
 		final CCompany currentCompany = getCurrentCompany();
 		// LOGGER.debug("Finding all users for company: {}", currentCompany.getName());
-		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
+		return ((IUserRepository) repository).findByCompany_Id(currentCompany.getId());
 	}
 
 	/** Finds a user by login username.
 	 * @param login the login username
 	 * @return the CUser if found, null otherwise */
-	public CUser findByLogin(final String login, final Long companyId) {
-		return ((IUserRepository) repository).findByUsername(companyId, login).orElse(null);
+	public CUser findByLogin(final String login, final Long company_id) {
+		return ((IUserRepository) repository).findByUsername(company_id, login).orElse(null);
+	}
+
+	/** Override to generate unique name based on company-specific user count. Pattern: "User##" where ## is zero-padded number within company.
+	 * @return unique user name for the current company */
+	@Override
+	protected String generateUniqueName() {
+		try {
+			final CCompany currentCompany = sessionService.getCurrentCompany();
+			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompany_Id(currentCompany.getId());
+			return String.format("User%02d", existingUsers.size() + 1);
+		} catch (final Exception e) {
+			LOGGER.warn("Error generating unique user name, falling back to base class: {}", e.getMessage());
+			return super.generateUniqueName();
+		}
 	}
 
 	/** Converts comma-separated role string to Spring Security authorities. Roles are prefixed with "ROLE_" as per Spring Security convention.
@@ -146,17 +160,17 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
-	public List<CUser> getAvailableUsersForCompany(final Long companyId) {
-		Check.notNull(companyId, "ID must not be null");
-		return ((IUserRepository) repository).findNotAssignedToCompany(companyId);
+	public List<CUser> getAvailableUsersForCompany(final Long company_id) {
+		Check.notNull(company_id, "ID must not be null");
+		return ((IUserRepository) repository).findNotAssignedToCompany(company_id);
 	}
 
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
-	public List<CUser> getAvailableUsersForProject(final Long companyId, final Long projectId) {
+	public List<CUser> getAvailableUsersForProject(final Long company_id, final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
-		Check.notNull(companyId, "Company ID must not be null");
-		return ((IUserRepository) repository).findNotAssignedToProject(companyId, projectId);
+		Check.notNull(company_id, "Company ID must not be null");
+		return ((IUserRepository) repository).findNotAssignedToProject(company_id, projectId);
 	}
 
 	/** Gets the current company from session, throwing exception if not available.
@@ -173,7 +187,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	protected Class<CUser> getEntityClass() { return CUser.class; }
 
 	public CUser getRandomByCompany(final CCompany company) {
-		final List<CUser> users = ((IUserRepository) repository).findByCompanyId(company.getId());
+		final List<CUser> users = ((IUserRepository) repository).findByCompany_Id(company.getId());
 		if (!users.isEmpty()) {
 			final int randomIndex = (int) (Math.random() * users.size());
 			return users.get(randomIndex);
@@ -184,26 +198,29 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	}
 
 	/** Initializes a new user entity with default values based on current session and available data. Sets: - Company from current session - User
-	 * type (first available) - Company role (first available) - Auto-generated name and login - Enabled status - Default password prompt
+	 * type (first available) - Company role (first available) - Auto-generated unique name and login - Enabled status - Default password prompt
 	 * @param user the newly created user to initialize
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
 	public void initializeNewEntity(final CUser user) {
-		super.initializeNewEntity(user);
+		LOGGER.debug("Initializing new user entity");
 		try {
+			super.initializeNewEntity(user);
 			LOGGER.debug("Initializing new user entity with default values");
 			Check.notNull(user, "User cannot be null");
 			Check.notNull(sessionService, "Session service is required for user initialization");
 			// Get current company from session
 			final CCompany currentCompany = sessionService.getCurrentCompany();
 			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
-			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
-			final String autoName = String.format("User%02d", existingUsers.size() + 1);
-			user.setName(autoName);
-			user.setLogin(autoName.toLowerCase());
+			// Set company on user - this is essential for the user to appear in the grid
+			// Note: Company role is set to null initially, can be set by user later
+			user.setCompany(currentCompany, null);
+			// Generate unique name based on existing users in company (override base class behavior)
+			user.setName(generateUniqueName());
+			user.setLogin(user.getName().toLowerCase());
 			user.setLastname("");
 			user.setEmail("");
-			user.setPhone("");
+			user.setPhone("1234567");
 			user.setAttributeDisplaySectionsAsTabs(true);
 			user.setPassword(""); // Empty - user must set password
 		} catch (final Exception e) {
@@ -219,7 +236,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	public Page<CUser> list(final Pageable pageable) {
 		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Listing users for company: {}", currentCompany.getName());
-		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
+		return ((IUserRepository) repository).findByCompany_Id(currentCompany.getId(), pageable);
 	}
 
 	/** Lists users by project using the CUserProjectSettings relationship. This method allows CUserService to work with dynamic pages that expect
@@ -269,14 +286,14 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			final String[] parts = username.split("@");
 			Check.isTrue(parts.length == 2, "Username must be in the format username@company_id");
 			final String login = parts[0];
-			Long companyId;
+			Long company_id;
 			try {
-				companyId = Long.parseLong(parts[1]);
+				company_id = Long.parseLong(parts[1]);
 			} catch (final NumberFormatException e) {
 				LOGGER.warn("Invalid company ID in username: {}", parts[1]);
 				throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
 			}
-			final CUser loginUser = ((IUserRepository) repository).findByUsername(companyId, login).orElseThrow(() -> {
+			final CUser loginUser = ((IUserRepository) repository).findByUsername(company_id, login).orElseThrow(() -> {
 				LOGGER.warn("User not found with username: {}", username);
 				return new UsernameNotFoundException("User not found with username: " + username);
 			});

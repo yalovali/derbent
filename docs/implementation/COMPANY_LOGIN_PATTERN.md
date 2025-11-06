@@ -17,7 +17,7 @@ The Derbent application implements a **simple and elegant** multi-tenant authent
 
 ### The Simple Username Format Pattern
 
-The solution uses a **username concatenation pattern**: `username@companyId`
+The solution uses a **username concatenation pattern**: `username@company_id`
 
 This elegant approach requires only minimal changes to Spring Security's standard authentication flow.
 
@@ -55,8 +55,8 @@ This elegant approach requires only minimal changes to Spring Security's standar
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 4. CUserService.loadUserByUsername("admin@1")                      │
 │    - Splits username by "@" delimiter                               │
-│    - Extracts: login="admin", companyId=1                          │
-│    - Queries: repository.findByUsername(companyId, login)          │
+│    - Extracts: login="admin", company_id=1                          │
+│    - Queries: repository.findByUsername(company_id, login)          │
 │    - Returns UserDetails with original username "admin@1"          │
 └────────────────────────────┬────────────────────────────────────────┘
                              │
@@ -136,9 +136,9 @@ public UserDetails loadUserByUsername(final String username)
     Check.isTrue(parts.length == 2, "Username must be in format username@company_id");
     
     String login = parts[0];          // Extract "admin"
-    Long companyId;
+    Long company_id;
     try {
-        companyId = Long.parseLong(parts[1]);  // Extract "1"
+        company_id = Long.parseLong(parts[1]);  // Extract "1"
     } catch (NumberFormatException e) {
         LOGGER.warn("Invalid company ID in username: {}", parts[1]);
         throw new UsernameNotFoundException("Invalid company ID: " + parts[1]);
@@ -146,7 +146,7 @@ public UserDetails loadUserByUsername(final String username)
     
     // Query database with company context
     final CUser loginUser = ((IUserRepository) repository)
-        .findByUsername(companyId, login)
+        .findByUsername(company_id, login)
         .orElseThrow(() -> {
             LOGGER.warn("User not found with username: {}", username);
             return new UsernameNotFoundException("User not found: " + username);
@@ -187,7 +187,7 @@ public UserDetails loadUserByUsername(final String username)
     "WHERE u.login = :username AND u.company.id = :CompanyId"
 )
 Optional<CUser> findByUsername(
-    @Param("CompanyId") Long companyId,
+    @Param("CompanyId") Long company_id,
     @Param("username") String username
 );
 ```

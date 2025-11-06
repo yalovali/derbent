@@ -4,13 +4,29 @@
 
 The PageService pattern binds utility classes to dynamic page entities at runtime. When a page is loaded from the database, the system creates an instance of the corresponding PageService class and connects it to enable custom business logic and user code extensions.
 
+**Key Feature**: PageService provides complete CRUD (Create, Read, Update, Delete) operations that integrate seamlessly with the view layer, binder, and notification system.
+
 ## Architecture
 
 ### Core Classes
 
-1. **CPageService** - Base abstract class for all page services
+1. **CPageService** - Base abstract class for all page services with complete CRUD implementation
 2. **CPageServiceDynamicPage** - Intermediate abstract class extending CPageService
 3. **CPageServiceUtility** - Service that maps page service names to their implementation classes
+
+### CRUD Operations Flow
+
+The PageService pattern implements the following flow:
+
+```
+CCrudToolbar → ICrudToolbarOwnerPage (CDynamicPageViewWithSections) → CPageService → View Updates
+```
+
+1. **User clicks button** in CCrudToolbar (New, Save, Delete, Refresh)
+2. **Toolbar calls** `pageBase.getPageService().actionXXX()`
+3. **PageService executes** business logic (create entity, save, delete, refresh)
+4. **PageService updates view** via `view.populateForm()` and `view.refreshGrid()`
+5. **User sees results** with notifications and updated UI
 
 ### Implementation Classes
 
@@ -196,6 +212,136 @@ case "CYourEntity":
 3. **Extensibility** - Easy to add custom logic without modifying core view classes
 4. **Type Safety** - Generic typing ensures correct entity-service matching
 5. **Consistency** - All entities follow the same pattern
+6. **Complete CRUD** - Full create, read, update, delete operations with proper error handling
+7. **Binder Integration** - Seamlessly integrates with Vaadin binders for form data binding
+
+## CRUD Operations
+
+### actionCreate()
+
+Creates a new entity instance and prepares the form for data entry:
+
+```java
+public void actionCreate() {
+    // 1. Create new entity using reflection
+    final EntityClass newEntity = getEntityClass().getDeclaredConstructor().newInstance();
+    
+    // 2. Set project context if applicable
+    if (newEntity instanceof CEntityOfProject) {
+        ((CEntityOfProject<?>) newEntity).setProject(activeProject);
+    }
+    
+    // 3. Set current entity
+    setCurrentEntity(newEntity);
+    
+    // 4. Populate form to display the new entity
+    view.populateForm();
+    
+    // 5. Show success notification
+    getNotificationService().showSuccess("New entity created...");
+}
+```
+
+**Key Features:**
+- Automatic project context setting
+- Special handling for CUser entities
+- **Calls `view.populateForm()`** to refresh form fields (fixes issue where form wasn't updated)
+- Shows user-friendly notifications
+
+### actionSave()
+
+Saves the current entity with validation and error handling:
+
+```java
+public void actionSave() {
+    // 1. Get current entity
+    final EntityClass entity = getCurrentEntity();
+    
+    // 2. Write form data to entity using binder
+    if (view.getBinder() != null) {
+        view.getBinder().writeBean(entity);
+    }
+    
+    // 3. Save entity via service
+    final EntityClass savedEntity = getEntityService().save(entity);
+    
+    // 4. Update current entity with saved version
+    setCurrentEntity(savedEntity);
+    
+    // 5. Refresh grid and form
+    view.refreshGrid();
+    view.populateForm();
+    
+    // 6. Show success notification
+    getNotificationService().showSaveSuccess();
+}
+```
+
+**Key Features:**
+- Uses `view.getBinder().writeBean()` to write form data to entity
+- Handles optimistic locking exceptions
+- Handles validation exceptions with user-friendly messages
+- Refreshes both grid and form after save
+- Updates entity with generated ID for new entities
+
+### actionDelete()
+
+Deletes the current entity with confirmation:
+
+```java
+public void actionDelete() {
+    // 1. Get current entity
+    final EntityClass entity = getCurrentEntity();
+    
+    // 2. Show confirmation dialog
+    getNotificationService().showConfirmationDialog("Delete selected item?", () -> {
+        // 3. Delete entity
+        getEntityService().delete(entity.getId());
+        
+        // 4. Clear current entity
+        setCurrentEntity(null);
+        
+        // 5. Refresh grid and form
+        view.refreshGrid();
+        view.populateForm();
+        
+        // 6. Show success notification
+        getNotificationService().showDeleteSuccess();
+    });
+}
+```
+
+**Key Features:**
+- Shows confirmation dialog before deleting
+- Clears current selection after delete
+- Refreshes grid to remove deleted item
+- Proper error handling with user notifications
+
+### actionRefresh()
+
+Reloads the current entity from the database:
+
+```java
+public void actionRefresh() {
+    // 1. Get current entity
+    final EntityClass entity = getCurrentEntity();
+    
+    // 2. Reload from database
+    final CEntityDB<?> reloaded = getEntityService().getById(entity.getId()).orElse(null);
+    
+    // 3. Update view with reloaded entity
+    if (reloaded != null) {
+        view.onEntityRefreshed(reloaded);
+        getNotificationService().showInfo("Entity refreshed successfully");
+    }
+}
+```
+
+**Key Features:**
+- Discards unsaved form changes
+- Reloads fresh data from database
+- Updates form with refreshed data via `onEntityRefreshed()`
+- Warns if entity was deleted
 
 ## Pattern Structure
 
@@ -212,6 +358,74 @@ Each implementation:
 - Takes CDynamicPageBase view in constructor
 - Implements bind() method with custom logic
 - Has access to view, entity service, and entity class via inherited methods
+- **Inherits all CRUD operations from base class** - no need to override unless custom behavior needed
+
+## View Integration
+
+The PageService accesses the view through these key methods:
+
+```java
+// Get current entity
+view.getCurrentEntity()
+
+// Set current entity
+view.setCurrentEntity(entity)
+
+// Refresh form fields
+view.populateForm()
+
+// Refresh grid data
+view.refreshGrid()
+
+// Handle entity refresh
+view.onEntityRefreshed(entity)
+
+// Get the binder for form data
+view.getBinder()
+
+// Get services
+view.getEntityService()
+view.getSessionService()
+view.getNotificationService()
+```
+
+## Simple Pattern Guidelines
+
+1. **View Layer** (CDynamicPageViewWithSections, CDynamicPageBase)
+   - Manages UI components (grids, forms, layouts)
+   - Delegates CRUD actions to PageService
+   - Updates UI when notified by PageService
+
+2. **PageService Layer** (CPageService, implementations)
+   - Handles CRUD business logic
+   - Accesses view through simple getter methods
+   - Uses binder to read/write form data
+   - Calls view methods to update UI
+
+3. **Service Layer** (CAbstractService, entity services)
+   - Pure data manipulation
+   - No UI dependencies
+   - Database operations only
+
+## Binder Integration
+
+The PageService uses the view's binder to read and write form data:
+
+```java
+// Write form data to entity (in actionSave)
+if (view.getBinder() != null) {
+    view.getBinder().writeBean(entity);
+}
+
+// Read entity data to form (handled by view.populateForm)
+view.populateForm(); // This calls binder.setBean(entity) internally
+```
+
+The binder ensures:
+- Form validation before save
+- Automatic field-to-property mapping
+- Type-safe data binding
+- Validation error messages
 
 ## Future Enhancements
 

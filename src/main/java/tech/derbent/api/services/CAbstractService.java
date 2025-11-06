@@ -116,69 +116,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return null;
 	}
 
-	/** Validates that all required (non-nullable) fields are populated. Uses reflection to check @Column(nullable=false) annotations and
-	 * corresponding field values.
-	 * @param entity the entity to validate
-	 * @return null if all required fields are populated, or an error message listing the missing fields */
-	protected String validateNullableFields(final EntityClass entity) {
-		if (entity == null) {
-			return "Entity cannot be null";
-		}
-		final List<String> missingFields = new ArrayList<>();
-		// Get all fields including inherited ones
-		Class<?> currentClass = entity.getClass();
-		while ((currentClass != null) && (currentClass != Object.class)) {
-			for (final Field field : currentClass.getDeclaredFields()) {
-				try {
-					// Check if field has @Column annotation with nullable=false
-					final Column columnAnnotation = field.getAnnotation(Column.class);
-					if ((columnAnnotation != null) && !columnAnnotation.nullable()) {
-						// Make field accessible to read its value
-						field.setAccessible(true);
-						final Object value = field.get(entity);
-						if (value == null) {
-							// Get display name from @AMetaData if available
-							final AMetaData metaData = field.getAnnotation(AMetaData.class);
-							final String displayName = (metaData != null) ? metaData.displayName() : formatFieldName(field.getName());
-							missingFields.add(displayName);
-						}
-					}
-				} catch (final IllegalAccessException e) {
-					LOGGER.warn("Could not access field {} for validation", field.getName(), e);
-				}
-			}
-			currentClass = currentClass.getSuperclass();
-		}
-		if (!missingFields.isEmpty()) {
-			if (missingFields.size() == 1) {
-				return String.format("Required field '%s' cannot be empty.", missingFields.get(0));
-			} else {
-				return String.format("Required fields cannot be empty: %s", String.join(", ", missingFields));
-			}
-		}
-		return null;
-	}
-
-	/** Formats a Java field name into a human-readable display name. Converts camelCase to Title Case with spaces.
-	 * @param fieldName the field name to format
-	 * @return formatted display name */
-	private String formatFieldName(final String fieldName) {
-		if ((fieldName == null) || fieldName.isEmpty()) {
-			return fieldName;
-		}
-		// Split camelCase into words
-		final StringBuilder result = new StringBuilder();
-		result.append(Character.toUpperCase(fieldName.charAt(0)));
-		for (int i = 1; i < fieldName.length(); i++) {
-			final char c = fieldName.charAt(i);
-			if (Character.isUpperCase(c)) {
-				result.append(' ');
-			}
-			result.append(c);
-		}
-		return result.toString();
-	}
-
 	public long count() {
 		// LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
 		return repository.count();
@@ -244,6 +181,26 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	@PreAuthorize ("permitAll()")
 	public List<EntityClass> findAll() {
 		return repository.findAll();
+	}
+
+	/** Formats a Java field name into a human-readable display name. Converts camelCase to Title Case with spaces.
+	 * @param fieldName the field name to format
+	 * @return formatted display name */
+	private String formatFieldName(final String fieldName) {
+		if ((fieldName == null) || fieldName.isEmpty()) {
+			return fieldName;
+		}
+		// Split camelCase into words
+		final StringBuilder result = new StringBuilder();
+		result.append(Character.toUpperCase(fieldName.charAt(0)));
+		for (int i = 1; i < fieldName.length(); i++) {
+			final char c = fieldName.charAt(i);
+			if (Character.isUpperCase(c)) {
+				result.append(' ');
+			}
+			result.append(c);
+		}
+		return result.toString();
 	}
 
 	@Transactional (readOnly = true)
@@ -345,7 +302,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
-	public EntityClass newEntity() {
+	public EntityClass newEntity() throws Exception {
 		try {
 			// Get constructor that takes a String parameter and invoke it with the name
 			final Object instance = getEntityClass().getDeclaredConstructor().newInstance();
@@ -378,5 +335,48 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	protected void validateEntity(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
 		// Add more validation logic in subclasses if needed
+	}
+
+	/** Validates that all required (non-nullable) fields are populated. Uses reflection to check @Column(nullable=false) annotations and
+	 * corresponding field values.
+	 * @param entity the entity to validate
+	 * @return null if all required fields are populated, or an error message listing the missing fields */
+	protected String validateNullableFields(final EntityClass entity) {
+		if (entity == null) {
+			return "Entity cannot be null";
+		}
+		final List<String> missingFields = new ArrayList<>();
+		// Get all fields including inherited ones
+		Class<?> currentClass = entity.getClass();
+		while ((currentClass != null) && (currentClass != Object.class)) {
+			for (final Field field : currentClass.getDeclaredFields()) {
+				try {
+					// Check if field has @Column annotation with nullable=false
+					final Column columnAnnotation = field.getAnnotation(Column.class);
+					if ((columnAnnotation != null) && !columnAnnotation.nullable()) {
+						// Make field accessible to read its value
+						field.setAccessible(true);
+						final Object value = field.get(entity);
+						if (value == null) {
+							// Get display name from @AMetaData if available
+							final AMetaData metaData = field.getAnnotation(AMetaData.class);
+							final String displayName = (metaData != null) ? metaData.displayName() : formatFieldName(field.getName());
+							missingFields.add(displayName);
+						}
+					}
+				} catch (final IllegalAccessException e) {
+					LOGGER.warn("Could not access field {} for validation", field.getName(), e);
+				}
+			}
+			currentClass = currentClass.getSuperclass();
+		}
+		if (!missingFields.isEmpty()) {
+			if (missingFields.size() == 1) {
+				return String.format("Required field '%s' cannot be empty.", missingFields.get(0));
+			} else {
+				return String.format("Required fields cannot be empty: %s", String.join(", ", missingFields));
+			}
+		}
+		return null;
 	}
 }

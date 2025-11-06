@@ -27,18 +27,18 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 			description = "Whether this role has admin privileges in the company", hidden = false, order = 10
 	)
 	private Boolean isAdmin = Boolean.FALSE;
-	@Column (name = "is_user", nullable = false)
-	@AMetaData (
-			displayName = "Is User", required = true, readOnly = false, defaultValue = "true",
-			description = "Whether this role has standard user privileges", hidden = false, order = 11
-	)
-	private Boolean isUser = Boolean.TRUE;
 	@Column (name = "is_guest", nullable = false)
 	@AMetaData (
 			displayName = "Is Guest", required = true, readOnly = false, defaultValue = "false",
 			description = "Whether this role has guest-level privileges", hidden = false, order = 12
 	)
 	private Boolean isGuest = Boolean.FALSE;
+	@Column (name = "is_user", nullable = false)
+	@AMetaData (
+			displayName = "Is User", required = true, readOnly = false, defaultValue = "true",
+			description = "Whether this role has standard user privileges", hidden = false, order = 11
+	)
+	private Boolean isUser = Boolean.TRUE;
 
 	// Constructors
 	public CUserCompanyRole() {
@@ -52,28 +52,9 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 	// Boolean attribute getters and setters
 	public Boolean getIsAdmin() { return isAdmin; }
 
-	public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin != null ? isAdmin : Boolean.FALSE; }
-
-	public Boolean getIsUser() { return isUser; }
-
-	public void setIsUser(Boolean isUser) { this.isUser = isUser != null ? isUser : Boolean.TRUE; }
-
 	public Boolean getIsGuest() { return isGuest; }
 
-	public void setIsGuest(Boolean isGuest) { this.isGuest = isGuest != null ? isGuest : Boolean.FALSE; }
-
-	// Convenience boolean methods
-	public boolean isAdmin() { return Boolean.TRUE.equals(isAdmin); }
-
-	public boolean isUser() { return Boolean.TRUE.equals(isUser); }
-
-	public boolean isGuest() { return Boolean.TRUE.equals(isGuest); }
-
-	@Override
-	public String toString() {
-		return String.format("%s{id=%d, name='%s', isAdmin=%s, isUser=%s, isGuest=%s}", getClass().getSimpleName(), getId(), getName(), isAdmin,
-				isUser, isGuest);
-	}
+	public Boolean getIsUser() { return isUser; }
 
 	@Override
 	public void initializeAllFields() {
@@ -81,5 +62,24 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 		if (getCompany() != null) {
 			getCompany().getName(); // Trigger company loading
 		}
+	}
+
+	// Convenience boolean methods
+	public boolean isAdmin() { return Boolean.TRUE.equals(isAdmin); }
+
+	public boolean isGuest() { return Boolean.TRUE.equals(isGuest); }
+
+	public boolean isUser() { return Boolean.TRUE.equals(isUser); }
+
+	public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin != null ? isAdmin : Boolean.FALSE; }
+
+	public void setIsGuest(Boolean isGuest) { this.isGuest = isGuest != null ? isGuest : Boolean.FALSE; }
+
+	public void setIsUser(Boolean isUser) { this.isUser = isUser != null ? isUser : Boolean.TRUE; }
+
+	@Override
+	public String toString() {
+		return String.format("%s{id=%d, name='%s', isAdmin=%s, isUser=%s, isGuest=%s}", getClass().getSimpleName(), getId(), getName(), isAdmin,
+				isUser, isGuest);
 	}
 }

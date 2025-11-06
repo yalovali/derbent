@@ -46,7 +46,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
 	private static final long serialVersionUID = 1L;
-	private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_UPDATE_COLOR));
+	// private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_UPDATE_COLOR));
 	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
 	private final CCompanyService companyService;
 	private final Div errorMessage = new Div();
@@ -218,10 +218,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			dialog.open();
 		});
 		// Chart test button setup
-		chartTestButton.addClickListener(e -> {
-			getUI().ifPresent(ui -> ui.navigate("chart"));
-		});
-		chartTestButton.setMinWidth("120px");
+		// chartTestButton.addClickListener(e -> { getUI().ifPresent(ui -> ui.navigate("chart"));});
+		// chartTestButton.setMinWidth("120px");
 		// Error message display
 		errorMessage.setId("custom-error-message");
 		errorMessage.addClassNames(LumoUtility.TextColor.ERROR, LumoUtility.TextAlignment.RIGHT, LumoUtility.FontSize.SMALL);
@@ -240,7 +238,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		final HorizontalLayout buttonsLayout = new CHorizontalLayout();
 		buttonsLayout.setAlignItems(Alignment.CENTER);
 		//
-		buttonsLayout.add(passwordHint, resetDbMinimalButton, resetDbButton, chartTestButton);
+		buttonsLayout.add(passwordHint, resetDbMinimalButton, resetDbButton/* , chartTestButton */);
 		final HorizontalLayout loginButtonLayout = new CHorizontalLayout();
 		loginButtonLayout.setAlignItems(Alignment.END);
 		loginButtonLayout.add(new CDiv(), loginButton);

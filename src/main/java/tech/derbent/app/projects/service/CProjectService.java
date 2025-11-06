@@ -63,7 +63,7 @@ public class CProjectService extends CEntityNamedService<CProject> {
 	@PreAuthorize ("permitAll()")
 	public List<CProject> findAll() {
 		Check.notNull(repository, "Repository must not be null");
-		return ((IProjectRepository) repository).findByCompanyId(getCurrentCompany().getId());
+		return ((IProjectRepository) repository).findByCompany_Id(getCurrentCompany().getId());
 	}
 
 	@PreAuthorize ("permitAll()")
@@ -71,7 +71,7 @@ public class CProjectService extends CEntityNamedService<CProject> {
 		Check.notNull(repository, "Repository must not be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		CCompany company = getCurrentCompany();
-		return ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
+		return ((IProjectRepository) repository).findByCompany_Id(company.getId(), safePage);
 	}
 
 	@Transactional (readOnly = true)
@@ -101,8 +101,24 @@ public class CProjectService extends CEntityNamedService<CProject> {
 		final CCompany currentCompany = getCurrentCompany();
 		// Initialize company with current company
 		entity.setCompany(currentCompany);
+		// Name is set by base class generateUniqueName() which is overridden below
 		// Note: CProject extends CEntityNamed, not CEntityOfProject, so it doesn't have project field
 		// The company field is the primary association for projects
+	}
+
+	/** Override to generate unique name based on company-specific project count. Pattern: "Project##" where ## is zero-padded number within company
+	 * (e.g., "Project01", "Project02").
+	 * @return unique project name for the current company */
+	@Override
+	protected String generateUniqueName() {
+		try {
+			final CCompany currentCompany = getCurrentCompany();
+			final long existingCount = ((IProjectRepository) repository).countByCompany_Id(currentCompany.getId());
+			return String.format("Project%02d", existingCount + 1);
+		} catch (final Exception e) {
+			LOGGER.warn("Error generating unique project name, falling back to base class: {}", e.getMessage());
+			return super.generateUniqueName();
+		}
 	}
 
 	@Override
@@ -110,7 +126,7 @@ public class CProjectService extends CEntityNamedService<CProject> {
 	public Page<CProject> list(final Pageable pageable) {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		CCompany company = getCurrentCompany();
-		final Page<CProject> entities = ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
+		final Page<CProject> entities = ((IProjectRepository) repository).findByCompany_Id(company.getId(), safePage);
 		return entities;
 	}
 

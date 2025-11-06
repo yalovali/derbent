@@ -39,7 +39,7 @@ public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<
 	}
 
 	@Override
-	protected EntityClass createNewEntity() {
+	protected EntityClass createNewEntity() throws Exception {
 		final String name = "New Item";
 		return ((CEntityNamedService<EntityClass>) entityService).newEntity(name);
 	}

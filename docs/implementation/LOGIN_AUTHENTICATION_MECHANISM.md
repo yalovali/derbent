@@ -9,7 +9,7 @@
 📚 **[COMPANY_LOGIN_PATTERN.md](COMPANY_LOGIN_PATTERN.md)** - Complete working implementation guide
 
 **Current Implementation:**
-- ✅ Simple username concatenation pattern (`username@companyId`)
+- ✅ Simple username concatenation pattern (`username@company_id`)
 - ✅ Standard Spring Security components
 - ✅ No custom authentication tokens or filters
 - ✅ Working perfectly in production
@@ -41,7 +41,7 @@ The Derbent application implements a multi-tenant authentication system where us
 │  (Vaadin UI Component)      │  - Company dropdown (ComboBox<CCompany>)
 │                             │  - Username field
 └──────────────┬──────────────┘  - Password field
-               │ submits form with companyId
+               │ submits form with company_id
                ↓
 ┌─────────────────────────────┐
 │  Spring Security            │
@@ -51,7 +51,7 @@ The Derbent application implements a multi-tenant authentication system where us
                ↓
 ┌─────────────────────────────┐
 │ CCompanyAwareAuth           │  Custom filter
-│ enticationFilter            │  - Extracts companyId from form
+│ enticationFilter            │  - Extracts company_id from form
 │ extends                     │  - Creates CCompanyAwareAuthenticationToken
 │ UsernamePasswordAuth        │
 │ enticationFilter            │
@@ -61,7 +61,7 @@ The Derbent application implements a multi-tenant authentication system where us
 ┌─────────────────────────────┐
 │ CCompanyAwareAuth           │  Custom authentication token
 │ enticationToken             │  - Extends UsernamePasswordAuthenticationToken
-│ extends                     │  - Carries companyId field
+│ extends                     │  - Carries company_id field
 │ UsernamePasswordAuth        │
 │ enticationToken             │
 └──────────────┬──────────────┘
@@ -77,14 +77,14 @@ The Derbent application implements a multi-tenant authentication system where us
                ↓
 ┌─────────────────────────────┐
 │  CUserService               │  @Service implements UserDetailsService
-│  implements                 │  - loadUserByUsernameAndCompany(username, companyId)
+│  implements                 │  - loadUserByUsernameAndCompany(username, company_id)
 │  UserDetailsService         │  - Queries database with company context
 └──────────────┬──────────────┘  - Returns UserDetails
                │ queries
                ↓
 ┌─────────────────────────────┐
 │  IUserRepository            │  JPA Repository
-│  extends                    │  - findByUsername(companyId, username)
+│  extends                    │  - findByUsername(company_id, username)
 │  IAbstractNamedRepository   │
 └─────────────────────────────┘
 ```
@@ -117,7 +117,7 @@ The Derbent application implements a multi-tenant authentication system where us
    {
      username: "admin",
      password: "test123",
-     companyId: "1",  // Selected company ID
+     company_id: "1",  // Selected company ID
      redirect: "home"  // Post-login redirect
    }
    ```
@@ -128,13 +128,13 @@ The Derbent application implements a multi-tenant authentication system where us
    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
        String username = obtainUsername(request);
        String password = obtainPassword(request);
-       String companyIdStr = request.getParameter(COMPANY_ID_PARAMETER);  // "companyId"
+       String companyIdStr = request.getParameter(COMPANY_ID_PARAMETER);  // "company_id"
        
-       Long companyId = Long.parseLong(companyIdStr);
+       Long company_id = Long.parseLong(companyIdStr);
        
        // Create company-aware token
        CCompanyAwareAuthenticationToken authRequest = 
-           new CCompanyAwareAuthenticationToken(username, password, companyId);
+           new CCompanyAwareAuthenticationToken(username, password, company_id);
        
        return this.getAuthenticationManager().authenticate(authRequest);
    }
@@ -148,10 +148,10 @@ The Derbent application implements a multi-tenant authentication system where us
        String password = authentication.getCredentials().toString();
        
        // Extract company ID from custom token
-       Long companyId = ((CCompanyAwareAuthenticationToken) authentication).getCompanyId();
+       Long company_id = ((CCompanyAwareAuthenticationToken) authentication).getCompanyId();
        
        // Load user with company context
-       UserDetails userDetails = userService.loadUserByUsernameAndCompany(username, companyId);
+       UserDetails userDetails = userService.loadUserByUsernameAndCompany(username, company_id);
        
        // Validate password
        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
@@ -162,7 +162,7 @@ The Derbent application implements a multi-tenant authentication system where us
        return new CCompanyAwareAuthenticationToken(
            userDetails.getUsername(),
            userDetails.getPassword(),
-           companyId,
+           company_id,
            userDetails.getAuthorities()
        );
    }
@@ -171,9 +171,9 @@ The Derbent application implements a multi-tenant authentication system where us
 5. **User Service** (`CUserService`)
    ```java
    @PreAuthorize("permitAll()")
-   public UserDetails loadUserByUsernameAndCompany(String username, Long companyId) {
+   public UserDetails loadUserByUsernameAndCompany(String username, Long company_id) {
        // Query database with company context
-       CUser loginUser = repository.findByUsername(companyId, username)
+       CUser loginUser = repository.findByUsername(company_id, username)
            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
        
        // Convert to Spring Security UserDetails
@@ -195,7 +195,7 @@ The Derbent application implements a multi-tenant authentication system where us
        "WHERE u.login = :username AND u.company.id = :CompanyId"
    )
    Optional<CUser> findByUsername(
-       @Param("CompanyId") Long companyId,
+       @Param("CompanyId") Long company_id,
        @Param("username") String username
    );
    ```
@@ -210,7 +210,7 @@ The Derbent application implements a multi-tenant authentication system where us
 ### 1. Custom Authentication Token
 **Why**: Standard `UsernamePasswordAuthenticationToken` doesn't support additional context like company ID.
 
-**Solution**: `CCompanyAwareAuthenticationToken` extends the standard token and adds a `companyId` field.
+**Solution**: `CCompanyAwareAuthenticationToken` extends the standard token and adds a `company_id` field.
 
 ### 2. Custom Authentication Filter
 **Why**: Need to extract company ID from the login form and create custom authentication tokens.
@@ -235,7 +235,7 @@ private PasswordEncoder passwordEncoder;
 ### 5. Backward Compatibility
 The original `loadUserByUsername(String username)` method is retained for backward compatibility, but it requires an active session with company context.
 
-The new `loadUserByUsernameAndCompany(String username, Long companyId)` method is used during authentication when session doesn't exist yet.
+The new `loadUserByUsernameAndCompany(String username, Long company_id)` method is used during authentication when session doesn't exist yet.
 
 ## Security Considerations
 

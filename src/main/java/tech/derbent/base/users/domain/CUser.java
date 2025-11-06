@@ -41,6 +41,12 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			hidden = true, order = 100, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "listByUser"
 	)
 	private List<CActivity> activities;
+	@Column (name = "attribute_display_sections_as_tabs", nullable = true)
+	@AMetaData (
+			displayName = "Display Sections As Tabs", required = false, readOnly = false, defaultValue = "true",
+			description = "Whether to display user interface sections as tabs", hidden = false, order = 50
+	)
+	private Boolean attributeDisplaySectionsAsTabs;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_id", nullable = true)
 	@AMetaData (
@@ -102,16 +108,14 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			order = 20, createComponentMethod = "createUserProjectSettingsComponent"
 	)
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
-	@Column (name = "attribute_display_sections_as_tabs", nullable = true)
-	@AMetaData (
-			displayName = "Display Sections As Tabs", required = false, readOnly = false, defaultValue = "true",
-			description = "Whether to display user interface sections as tabs", hidden = false, order = 50
-	)
-	private Boolean attributeDisplaySectionsAsTabs;
 
 	/** Default constructor for JPA. */
 	public CUser() {
 		super();
+	}
+
+	public CUser(final String name) {
+		super(CUser.class, name);
 	}
 
 	public CUser(final String username, final String password, final String name, final String email, final CCompany company,

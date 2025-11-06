@@ -239,6 +239,15 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			Check.notNull(grid, "Grid component is not initialized");
 			Check.notNull(entity, "Saved entity cannot be null");
 			refreshGrid();
+			// Select the saved entity in the grid to maintain selection after save
+			// Only select if not already selected to avoid triggering selection change loop
+			final CEntityDB<?> currentSelection = grid.getSelectedItem();
+			if (currentSelection == null || !entity.getId().equals(currentSelection.getId())) {
+				grid.selectEntity(entity);
+				LOGGER.debug("Selected saved entity in grid: {}", entity.getId());
+			} else {
+				LOGGER.debug("Entity already selected in grid, skipping selection to avoid loop");
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity saved notification:" + e.getMessage());
 			throw e;
@@ -257,14 +266,21 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 				populateForm();
 			} else {
 				setCurrentEntity(selectedEntity);
+				// Rebuild details if VIEW_NAME changed or not yet built
 				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
-					rebuildEntityDetails(selectedEntity.getClass());
+					try {
+						rebuildEntityDetails(selectedEntity.getClass());
+					} catch (final Exception rebuildException) {
+						LOGGER.error("Error rebuilding entity details, will attempt to populate with current binder: {}", rebuildException.getMessage());
+						// Don't throw - try to populate with existing binder
+					}
 				}
+				// Always attempt to populate form, even if rebuild failed
 				populateForm();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity selection:" + e.getMessage());
-			throw e;
+			LOGGER.error("Error handling entity selection: {}", e.getMessage(), e);
+			// Don't rethrow - this prevents the UI from breaking completely
 		}
 	}
 
@@ -272,6 +288,18 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 	@Override
 	public void refreshGrid() {
 		grid.refreshGridData();
+	}
+
+	/** Select the first item in the grid. Used after discarding unsaved new entities. */
+	public void selectFirstInGrid() {
+		if (grid != null) {
+			try {
+				grid.selectFirstItem();
+				LOGGER.debug("Selected first item in grid");
+			} catch (final Exception e) {
+				LOGGER.error("Error selecting first item in grid: {}", e.getMessage(), e);
+			}
+		}
 	}
 
 	/** Reloads entity values into existing components without rebuilding the UI */

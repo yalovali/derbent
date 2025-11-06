@@ -22,14 +22,14 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.user.id = :userId")
 	List<CUserCompanySetting> findByUserId(@Param ("userId") Long userId);
 	/** Count users for a specific company using generic pattern */
-	@Query ("SELECT COUNT(r) FROM #{#entityName} r WHERE r.company.id = :companyId")
-	long countByCompanyId(@Param ("companyId") Long companyId);
+	@Query ("SELECT COUNT(r) FROM #{#entityName} r WHERE r.company.id = :company_id")
+	long countByCompany_Id(@Param ("company_id") Long company_id);
 	@Modifying
 	@Transactional
-	@Query ("DELETE FROM #{#entityName} r WHERE r.user.id = :userId AND r.company.id = :companyId")
-	void deleteByUserIdAndCompanyId(@Nullable Long userId, @Nullable Long companyId);
+	@Query ("DELETE FROM #{#entityName} r WHERE r.user.id = :userId AND r.company.id = :company_id")
+	void deleteByUserIdAndCompanyId(@Nullable Long userId, @Nullable Long company_id);
 	/** Check if a relationship exists between user and company - concrete implementation */
-	boolean existsByUserIdAndCompanyId(Long userId, Long companyId);
+	boolean existsByUserIdAndCompanyId(Long userId, Long company_id);
 
 	/** Check if a relationship exists between user and company */
 	@Override
@@ -38,13 +38,13 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	}
 
 	/** Find all user company settings for a specific company with eager loading */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.company.id = :companyId")
-	List<CUserCompanySetting> findByCompanyId(@Param ("companyId") Long companyId);
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.company.id = :company_id")
+	List<CUserCompanySetting> findByCompany_Id(@Param ("company_id") Long company_id);
 	/** Find a specific user company setting by user and company using generic pattern */
 	@Query (
-		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.user.id = :userId AND r.company.id = :companyId"
+		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.user.id = :userId AND r.company.id = :company_id"
 	)
-	Optional<CUserCompanySetting> findByUserIdAndCompanyId(@Param ("userId") Long userId, @Param ("companyId") Long companyId);
+	Optional<CUserCompanySetting> findByUserIdAndCompanyId(@Param ("userId") Long userId, @Param ("company_id") Long company_id);
 
 	/** Find relationship by user and entity IDs - concrete implementation */
 	@Override
@@ -61,8 +61,8 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	/** Delete all settings for a specific company. Used for cleanup when a company is deleted. */
 	@Modifying
 	@Transactional
-	@Query ("DELETE FROM #{#entityName} r WHERE r.company.id = :companyId")
-	void deleteByCompanyId(@Param ("companyId") Long companyId);
+	@Query ("DELETE FROM #{#entityName} r WHERE r.company.id = :company_id")
+	void deleteByCompanyId(@Param ("company_id") Long company_id);
 	/** Delete all settings for a specific user. Used for cleanup when a user is deleted. */
 	@Override
 	@Modifying

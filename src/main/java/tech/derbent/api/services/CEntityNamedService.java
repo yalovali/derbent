@@ -40,7 +40,23 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
 		entity.setDescription("");
-		entity.setName("Entity Name");
+		// Generate unique name automatically to avoid name conflicts
+		entity.setName(generateUniqueName());
+	}
+
+	/** Generates a unique name for new entities based on existing entities count. Child classes can override this method for custom name generation
+	 * patterns. Default pattern: "EntitySimpleName##" where ## is a zero-padded number (e.g., "Activity01", "Meeting02")
+	 * @return a unique name string */
+	protected String generateUniqueName() {
+		try {
+			// Count existing entities to generate next available number
+			final long existingCount = count();
+			// Format: EntitySimpleName + zero-padded number (e.g., "Activity01", "Meeting02")
+			return String.format("%s%02d", getEntityClass().getSimpleName(), existingCount + 1);
+		} catch (final Exception e) {
+			LOGGER.warn("Error generating unique name, falling back to generic name: {}", e.getMessage());
+			return "New " + getEntityClass().getSimpleName();
+		}
 	}
 
 	@Transactional (readOnly = true)
@@ -59,25 +75,26 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 
 	@Override
 	@Transactional
-	public EntityClass newEntity() {
+	public EntityClass newEntity() throws Exception {
 		return newEntity("New " + getEntityClass().getSimpleName());
 	}
 
 	@SuppressWarnings ("unchecked")
 	@Transactional
-	public EntityClass newEntity(final String name) {
-		if ("fail".equals(name)) {
-			throw new RuntimeException("This is for testing the error handler");
-		}
-		Check.notBlank(name, "Name cannot be null or empty");
+	public EntityClass newEntity(final String name) throws Exception {
 		try {
+			if ("fail".equals(name)) {
+				throw new RuntimeException("This is for testing the error handler");
+			}
+			Check.notBlank(name, "Name cannot be null or empty");
 			// Get constructor that takes a String parameter and invoke it with the name
 			final Object instance = getEntityClass().getDeclaredConstructor(String.class).newInstance(name.trim());
 			Check.notNull(instance, "Failed to create instance of " + getEntityClass().getName());
 			Check.instanceOf(instance, getEntityClass(), "Created object is not instance of " + getEntityClass().getName());
 			return ((EntityClass) instance);
 		} catch (final Exception e) {
-			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
+			LOGGER.error("Error creating new entity instance of {}: {}", getEntityClass().getName(), e.getMessage());
+			throw e;
 		}
 	}
 

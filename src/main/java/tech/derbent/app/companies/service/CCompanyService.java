@@ -51,7 +51,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 				}
 			}
 			// Rule 2: Check if company has any users
-			final long userCount = userCompanySettingsRepository.countByCompanyId(entity.getId());
+			final long userCount = userCompanySettingsRepository.countByCompany_Id(entity.getId());
 			if (userCount > 0) {
 				return String.format("Cannot delete company. It is associated with %d user(s). Please remove all users first.", userCount);
 			}

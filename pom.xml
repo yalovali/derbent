@@ -49,32 +49,6 @@
 
 	<dependencies>
 
-		<!-- StoredObject Addons - Installed in local Maven repository from lib/
-		folder -->
-		<dependency>
-			<groupId>org.vaadin.addons.so</groupId>
-			<artifactId>so-components</artifactId>
-			<version>14.0.7</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.vaadin.addons.so</groupId>
-			<artifactId>so-charts</artifactId>
-			<version>5.0.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.vaadin.addons.so</groupId>
-			<artifactId>so-helper</artifactId>
-			<version>5.0.1</version>
-		</dependency>
-
 		<!-- Vaadin Boot Starter (Reflections ≠ plugin override yapılmadan
 		gelmesin) -->
 		<dependency>
