@@ -3,6 +3,7 @@ package tech.derbent.app.gannt.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -25,25 +26,25 @@ public class CGanntInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Gantt View Configuration";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
-		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			detailSection.debug_printScreenInformation();
-			return detailSection;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating Gantt view configuration.");
-			return null;
-		}
-	}
+        public static CDetailSection createBasicView(final CProject project) throws Exception {
+                Check.notNull(project, "project cannot be null");
+                try {
+                        final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+                        detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+                        detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+                        detailSection.debug_printScreenInformation();
+                        return detailSection;
+                } catch (final Exception e) {
+                        LOGGER.error("Error creating Gantt view configuration.");
+                        throw e;
+                }
+        }
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
