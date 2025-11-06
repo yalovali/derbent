@@ -42,15 +42,18 @@ import tech.derbent.api.views.components.CCrudToolbar;
 import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CSearchToolbar;
 import tech.derbent.api.views.components.CVerticalLayout;
+import tech.derbent.api.views.components.ICrudToolbarOwnerPage;
 import tech.derbent.api.views.dialogs.CDialogClone;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.api.views.grids.CMasterViewSectionGrid;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.services.pageservice.IPageServiceActions;
+import tech.derbent.api.services.pageservice.CEntityDBPageService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
-		implements ILayoutChangeListener, IContentOwner, IEntityUpdateListener {
+		implements ILayoutChangeListener, IContentOwner, IEntityUpdateListener, ICrudToolbarOwnerPage {
 
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
@@ -65,6 +68,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected CLayoutService layoutService; // Optional injection
 	protected CMasterViewSectionBase<EntityClass> masterViewSection;
 	protected CNotificationService notificationService; // Optional injection
+	private final IPageServiceActions pageService; // Page service for new toolbar pattern
 	protected tech.derbent.app.activities.service.CProjectItemStatusService projectItemStatusService; // Optional injection
 	protected CSearchToolbar searchToolbar;
 	protected ISessionService sessionService;
@@ -78,8 +82,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityService = entityService;
 		this.sessionService = sessionService;
 		binder = new CEnhancedBinder<>(entityClass);
+		// Create page service for new toolbar pattern
+		pageService = new CEntityDBPageService<>(this);
 		// Initialize CRUD toolbar with minimal constructor and configure
 		crudToolbar = new CCrudToolbar();
+		crudToolbar.setPageBase(this);
 		configureCrudToolbarSaveCallback();
 		createPageContent();
 	}
@@ -431,10 +438,23 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	@Override
 	public CNotificationService getNotificationService() { return notificationService; }
 
+	/** Gets the page service for the new toolbar pattern. This service delegates CRUD actions to the page's existing action methods.
+	 * @return the page service instance */
+	@Override
+	public IPageServiceActions getPageService() {
+		return pageService;
+	}
+
 	/** Gets the search toolbar component, if available.
 	 * @return the search toolbar component, or null if entity doesn't support searching */
 	public CSearchToolbar getSearchToolbar() {
 		return searchToolbar;
+	}
+
+	/** Gets the session service.
+	 * @return the session service instance */
+	public ISessionService getSessionService() {
+		return sessionService;
 	}
 
 	@Override
@@ -593,6 +613,13 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		// Restore selection if there was a previously selected entity
 		if (selectedEntityId != null) {
 			masterViewSection.selectLastOrFirst(entityService.getById(selectedEntityId).orElse(null));
+		}
+	}
+
+	/** Selects the first item in the grid. Used after discarding unsaved new entities. */
+	public void selectFirstInGrid() {
+		if (masterViewSection != null) {
+			masterViewSection.selectLastOrFirst(null);
 		}
 	}
 

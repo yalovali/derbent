@@ -8,7 +8,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.view.CDynamicPageBase;
 import tech.derbent.base.session.service.ISessionService;
 
-public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
+public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceActions {
 
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
 	private EntityClass previousEntity;
