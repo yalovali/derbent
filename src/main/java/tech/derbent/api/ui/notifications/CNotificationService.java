@@ -8,6 +8,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CExceptionDialog;
 import tech.derbent.api.ui.dialogs.CInformationDialog;
+import tech.derbent.api.ui.dialogs.CMessageWithDetailsDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
 
@@ -157,6 +158,18 @@ public class CNotificationService {
 		Check.notBlank(message, "Warning dialog message cannot be empty");
 		LOGGER.debug("Showing warning dialog: {}", message);
 		final CWarningDialog dialog = new CWarningDialog(message);
+		dialog.open();
+	}
+
+	/** Shows a message with expandable exception details (modal with Details toggle and OK button). The dialog displays a user-friendly message and
+	 * allows users to expand/collapse technical exception details.
+	 * @param message The user-friendly message to display
+	 * @param exception The exception whose details can be expanded */
+	public void showMessageWithDetails(final String message, final Exception exception) {
+		Check.notBlank(message, "Message cannot be empty");
+		Check.notNull(exception, "Exception cannot be null");
+		LOGGER.debug("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName());
+		final CMessageWithDetailsDialog dialog = new CMessageWithDetailsDialog(message, exception);
 		dialog.open();
 	}
 }
