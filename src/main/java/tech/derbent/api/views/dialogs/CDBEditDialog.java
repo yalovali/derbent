@@ -1,6 +1,7 @@
 package tech.derbent.api.views.dialogs;
 
 import java.util.function.Consumer;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CVerticalLayout;
@@ -10,10 +11,10 @@ import tech.derbent.api.views.components.CVerticalLayout;
 public abstract class CDBEditDialog<EntityClass> extends CDialog {
 
 	private static final long serialVersionUID = 1L;
-	private final EntityClass entity;
-	protected final Consumer<EntityClass> onSave;
-	protected final boolean isNew;
 	private CVerticalLayout dialogLayout;
+	private final EntityClass entity;
+	protected final boolean isNew;
+	protected final Consumer<EntityClass> onSave;
 
 	/** @param entity The data object to edit or create.
 	 * @param onSave Callback to execute on save.
@@ -28,6 +29,8 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 	}
 
 	public CVerticalLayout getDialogLayout() { return dialogLayout; }
+
+	public EntityClass getEntity() { return entity; }
 
 	/** Child can override: success message for create. */
 	protected String getSuccessCreateMessage() { return "Entity created successfully"; }
@@ -61,7 +64,7 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 			try {
 				save();
 			} catch (Exception e1) {
-				e1.printStackTrace();
+				CNotificationService.showException("Error saving entity", e1);
 			}
 		});
 		// Add Enter key shortcut for save button
@@ -81,6 +84,4 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 
 	/** Child must implement: validate form fields. */
 	protected abstract void validateForm();
-
-	public EntityClass getEntity() { return entity; }
 }

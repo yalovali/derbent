@@ -54,9 +54,9 @@ public class CCommentView extends Div {
 		this.editTextArea = new TextArea();
 		this.editButtonsLayout = new HorizontalLayout();
 		// Create buttons
-		this.editButton = CButton.createTertiary("Edit", null, e -> startEditing());
-		this.saveButton = CButton.createPrimary("Save", null, e -> saveChanges());
-		this.cancelButton = CButton.createTertiary("Cancel", null, e -> cancelEditing());
+		this.editButton = CButton.createTertiary("Edit", null, e -> on_actionStartEditing());
+		this.saveButton = CButton.createPrimary("Save", null, e -> on_actionSaveChanges());
+		this.cancelButton = CButton.createTertiary("Cancel", null, e -> on_actionCancelEditing());
 		setupLayout();
 		setupEditComponents();
 		updateContent();
@@ -82,9 +82,9 @@ public class CCommentView extends Div {
 		this.editTextArea = new TextArea();
 		this.editButtonsLayout = new HorizontalLayout();
 		// Create buttons
-		this.editButton = CButton.createTertiary("Edit", null, e -> startEditing());
-		this.saveButton = CButton.createPrimary("Save", null, e -> saveChanges());
-		this.cancelButton = CButton.createTertiary("Cancel", null, e -> cancelEditing());
+		this.editButton = CButton.createTertiary("Edit", null, e -> on_actionStartEditing());
+		this.saveButton = CButton.createPrimary("Save", null, e -> on_actionSaveChanges());
+		this.cancelButton = CButton.createTertiary("Cancel", null, e -> on_actionCancelEditing());
 		setupLayout();
 		setupEditComponents();
 		updateContent();
@@ -92,7 +92,7 @@ public class CCommentView extends Div {
 	}
 
 	/** Cancels editing and reverts to original text. */
-	private void cancelEditing() {
+	private void on_actionCancelEditing() {
 		isEditing = Boolean.FALSE;
 		// Revert any changes made to the comment text
 		if (originalText != null) {
@@ -115,7 +115,7 @@ public class CCommentView extends Div {
 	}
 
 	/** Saves the edited comment text. */
-	private void saveChanges() {
+	private void on_actionSaveChanges() {
 		final String newText = editTextArea.getValue();
 		Check.notBlank(newText, "Cannot save empty comment text");
 		try {
@@ -160,7 +160,7 @@ public class CCommentView extends Div {
 	}
 
 	/** Starts editing mode for the comment. */
-	private void startEditing() {
+	private void on_actionStartEditing() {
 		Check.notNull(commentService, "Cannot edit comment - no comment service available");
 		isEditing = Boolean.TRUE;
 		originalText = comment.getCommentText();

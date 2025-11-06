@@ -12,6 +12,7 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
@@ -102,16 +103,14 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			try {
 				openAddDialog();
 			} catch (final Exception e1) {
-				LOGGER.error("Error opening add dialog: {}", e1.getMessage(), e1);
-				throw new RuntimeException("Failed to open add dialog", e1);
+				CNotificationService.showException("Error opening add dialog", e1);
 			}
 		});
 		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
 			try {
 				openEditDialog();
 			} catch (final Exception e1) {
-				LOGGER.error("Error opening edit dialog: {}", e1.getMessage(), e1);
-				throw new RuntimeException("Failed to open edit dialog", e1);
+				CNotificationService.showException("Error opening edit dialog", e1);
 			}
 		});
 		editButton.setEnabled(false);
@@ -119,8 +118,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			try {
 				deleteSelected();
 			} catch (final Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				CNotificationService.showException("Error deleting selected relationship", e1);
 			}
 		});
 		deleteButton.setEnabled(false);

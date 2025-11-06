@@ -16,6 +16,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 
@@ -27,11 +28,11 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 		extends CAccordionDBEntity<ParentEntity> {
 
 	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	protected final Grid<RelationEntity> grid = new Grid<>(getRelationEntityClass(), false);
 	protected Supplier<List<RelationEntity>> getRelations;
-	protected Consumer<List<RelationEntity>> setRelations;
+	protected final Grid<RelationEntity> grid = new Grid<>(getRelationEntityClass(), false);
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected Runnable saveEntity;
+	protected Consumer<List<RelationEntity>> setRelations;
 
 	/** Constructor for the relation panel */
 	public CAbstractEntityRelationPanel(final String title, final IContentOwner parentContent, final ParentEntity currentEntity,
@@ -42,14 +43,6 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 		setupGrid();
 		setupButtons();
 		closePanel();
-	}
-
-	/** Initialize grid with common settings */
-	private void initializeGrid() {
-		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
-				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) grid.getSelectionModel();
-		sm.setDeselectAllowed(false);
 	}
 
 	/** Abstract method to create delete confirmation message */
@@ -89,12 +82,20 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 	/** Gets the currently selected relation entity */
 	protected RelationEntity getSelectedRelation() { return grid.asSingleSelect().getValue(); }
 
+	/** Initialize grid with common settings */
+	private void initializeGrid() {
+		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
+				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) grid.getSelectionModel();
+		sm.setDeselectAllowed(false);
+	}
+
+	/** Abstract method to open the add dialog */
+	protected abstract void on_actionOpenAddDialog();
+	/** Abstract method to open the edit dialog */
+	protected abstract void on_actionOpenEditDialog();
 	/** Abstract method to handle relation save events */
 	protected abstract void onRelationSaved(final RelationEntity relation);
-	/** Abstract method to open the add dialog */
-	protected abstract void openAddDialog();
-	/** Abstract method to open the edit dialog */
-	protected abstract void openEditDialog();
 
 	/** Refreshes the grid data */
 	public void refresh() {
@@ -116,15 +117,14 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 
 	/** Sets up the action buttons (Add, Edit, Delete) */
 	private void setupButtons() {
-		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> openAddDialog());
-		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> openEditDialog());
+		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> on_actionOpenAddDialog());
+		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> on_actionOpenEditDialog());
 		editButton.setEnabled(false);
 		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> {
 			try {
 				deleteSelected();
 			} catch (final Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				CNotificationService.showException("Error deleting selected relation.", e1);
 			}
 		});
 		deleteButton.setEnabled(false);
@@ -137,7 +137,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 		// Add double-click listener to open edit dialog
 		grid.addItemDoubleClickListener(e -> {
 			if (e.getItem() != null) {
-				openEditDialog();
+				on_actionOpenEditDialog();
 			}
 		});
 		final HorizontalLayout buttonLayout = new HorizontalLayout(addButton, editButton, deleteButton);

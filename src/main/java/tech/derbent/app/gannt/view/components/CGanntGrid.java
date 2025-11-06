@@ -7,6 +7,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.grids.CGrid;
@@ -143,8 +144,7 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 					UI.getCurrent().navigate(navUrl);
 				});
 			} catch (final Exception e) {
-				// Log but don't disrupt user experience
-				e.printStackTrace();
+				CNotificationService.showException("Error navigating to entity page.", e);
 			}
 		});
 	}

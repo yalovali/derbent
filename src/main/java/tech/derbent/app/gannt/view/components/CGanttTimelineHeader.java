@@ -88,7 +88,7 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		renderTimeline(false);
 	}
 
-	private void applyRange(LocalDate desiredStart, LocalDate desiredEnd, final boolean notifyChange) {
+	private void on_actioAapplyRange(LocalDate desiredStart, LocalDate desiredEnd, final boolean notifyChange) {
 		Check.notNull(desiredStart, "desiredStart cannot be null");
 		Check.notNull(desiredEnd, "desiredEnd cannot be null");
 		if (desiredStart.isAfter(desiredEnd)) {
@@ -130,14 +130,14 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		controlBar.setMargin(false);
 		controlBar.setPadding(false);
 		controlBar.setSpacing(false);
-		final CButton scrollBack = createControlButton("vaadin:angle-left", "Scroll left", () -> scroll(-1));
-		final CButton scrollForward = createControlButton("vaadin:angle-right", "Scroll right", () -> scroll(1));
-		final CButton zoomIn = createControlButton("vaadin:search-plus", "Zoom in", () -> zoom(0.7));
-		final CButton zoomOut = createControlButton("vaadin:search-minus", "Zoom out", () -> zoom(1.5));
-		final CButton reset = createControlButton("vaadin:refresh", "Reset to full range", () -> applyRange(fullRangeStart, fullRangeEnd, true));
-		final CButton focusMiddle = createControlButton("vaadin:crosshairs", "Focus to middle of timeline", () -> focusToMiddle());
-		final CButton increaseWidth = createControlButton("vaadin:expand", "Increase timeline width", () -> adjustWidth(100));
-		final CButton decreaseWidth = createControlButton("vaadin:compress", "Decrease timeline width", () -> adjustWidth(-100));
+		final CButton scrollBack = createControlButton("vaadin:angle-left", "Scroll left", () -> on_actionScroll(-1));
+		final CButton scrollForward = createControlButton("vaadin:angle-right", "Scroll right", () -> on_actionScroll(1));
+		final CButton zoomIn = createControlButton("vaadin:search-plus", "Zoom in", () -> on_actionZoom(0.7));
+		final CButton zoomOut = createControlButton("vaadin:search-minus", "Zoom out", () -> on_actionZoom(1.5));
+		final CButton reset = createControlButton("vaadin:refresh", "Reset to full range", () -> on_actioAapplyRange(fullRangeStart, fullRangeEnd, true));
+		final CButton focusMiddle = createControlButton("vaadin:crosshairs", "Focus to middle of timeline", () -> on_actionFocusToMiddle());
+		final CButton increaseWidth = createControlButton("vaadin:expand", "Increase timeline width", () -> on_actionAdjustWidth(100));
+		final CButton decreaseWidth = createControlButton("vaadin:compress", "Decrease timeline width", () -> on_actionAdjustWidth(-100));
 		scaleSelector.setItems(CTimelineScale.values());
 		scaleSelector.setValue(currentScale);
 		scaleSelector.setItemLabelGenerator(CTimelineScale::getLabel);
@@ -311,16 +311,16 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		}
 	}
 
-	private void scroll(final int direction) {
+	private void on_actionScroll(final int direction) {
 		final long currentDuration = ChronoUnit.DAYS.between(startDate, endDate) + 1;
 		final long shiftDays = Math.max(1, Math.round(currentDuration * 0.3));
 		final LocalDate newStart = startDate.plusDays(direction * shiftDays);
 		final LocalDate newEnd = endDate.plusDays(direction * shiftDays);
-		applyRange(newStart, newEnd, true);
+		on_actioAapplyRange(newStart, newEnd, true);
 	}
 
 	public void setRange(final LocalDate newStart, final LocalDate newEnd) {
-		applyRange(newStart, newEnd, false);
+		on_actioAapplyRange(newStart, newEnd, false);
 	}
 
 	private void setScale(final CTimelineScale newScale) {
@@ -345,7 +345,7 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		windowSummary.setText(startDate + " → " + endDate);
 	}
 
-	private void zoom(final double factor) {
+	private void on_actionZoom(final double factor) {
 		final long currentDuration = ChronoUnit.DAYS.between(startDate, endDate) + 1;
 		long newDuration = Math.round(currentDuration * factor);
 		newDuration = Math.max(MIN_DURATION_DAYS, newDuration);
@@ -355,11 +355,11 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		final long halfWindow = newDuration / 2;
 		LocalDate newStart = center.minusDays(halfWindow);
 		LocalDate newEnd = newStart.plusDays(newDuration - 1);
-		applyRange(newStart, newEnd, true);
+		on_actioAapplyRange(newStart, newEnd, true);
 	}
 
 	/** Focus to the middle of the current full timeline range. */
-	private void focusToMiddle() {
+	private void on_actionFocusToMiddle() {
 		final long fullDuration = ChronoUnit.DAYS.between(fullRangeStart, fullRangeEnd) + 1;
 		final LocalDate middleDate = fullRangeStart.plusDays(fullDuration / 2);
 		// Create a window around the middle date
@@ -367,12 +367,12 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 		final long halfWindow = windowSize / 2;
 		final LocalDate newStart = middleDate.minusDays(halfWindow);
 		final LocalDate newEnd = middleDate.plusDays(halfWindow);
-		applyRange(newStart, newEnd, true);
+		on_actioAapplyRange(newStart, newEnd, true);
 	}
 
 	/** Adjust the width of the timeline display.
 	 * @param deltaPixels The change in pixels (positive to increase, negative to decrease) */
-	private void adjustWidth(final int deltaPixels) {
+	private void on_actionAdjustWidth(final int deltaPixels) {
 		if (widthChangeListener != null) {
 			// Calculate new width (constrained to reasonable bounds)
 			final int newWidth = Math.max(400, Math.min(1600, totalWidth + deltaPixels));

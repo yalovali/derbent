@@ -19,24 +19,21 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		setPreviousEntity(null);
 	}
 
-	public void actionCreate() {
+	public void actionCreate() throws Exception {
 		try {
-			LOGGER.debug("Create action triggered for entity type: {}", getEntityClass().getSimpleName());
 			setPreviousEntity(getCurrentEntity());
 			final EntityClass newEntity = getEntityService().newEntity();
 			getEntityService().initializeNewEntity(newEntity);
 			view.onEntityCreated(newEntity);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating new entity instance for type: {} - {}", getEntityClass().getSimpleName(), e.getMessage());
-			LOGGER.error("exception:", e);
-			getNotificationService().showError("Error creating new entity: " + e.getMessage());
+			throw e;
 		}
 	}
 
-	public void actionDelete() {
+	public void actionDelete() throws Exception {
 		try {
 			final EntityClass entity = getCurrentEntity();
-			LOGGER.debug("Delete action triggered for entity: {}", entity != null ? entity.getId() : "null");
 			if (entity == null || entity.getId() == null) {
 				getNotificationService().showWarning("Please select an item to delete.");
 				return;
@@ -48,19 +45,17 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 					LOGGER.info("Entity deleted successfully with ID: {}", entity.getId());
 					view.onEntityDeleted(entity);
 				} catch (final Exception ex) {
-					LOGGER.error("Error deleting entity with ID: {}", entity.getId(), ex);
-					getNotificationService().showDeleteError();
-					// getNotificationService().showE
+					getNotificationService().showException("Error deleting entity with ID:" + entity.getId(), ex);
 				}
 			});
 		} catch (final Exception e) {
-			LOGGER.error("Unexpected error during delete action", e);
-			getNotificationService().showError("Failed to delete item: " + e.getMessage());
+			LOGGER.error("Error during delete action: {}", e.getMessage());
+			throw e;
 		}
 	}
 
 	@SuppressWarnings ("unchecked")
-	public void actionRefresh() {
+	public void actionRefresh() throws Exception {
 		try {
 			final EntityClass entity = getCurrentEntity();
 			LOGGER.debug("Refresh action triggered for entity: {}", entity != null ? entity.getId() : "null");
@@ -95,12 +90,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 			getNotificationService().showInfo("Entity reloaded.");
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing entity: {}", e.getMessage(), e);
-			getNotificationService().showError("Failed to refresh entity: " + e.getMessage());
+			LOGGER.error("Error refreshing entity: {}", e.getMessage());
+			throw e;
 		}
 	}
 
-	public void actionSave() {
+	public void actionSave() throws Exception {
 		try {
 			final EntityClass entity = getCurrentEntity();
 			LOGGER.debug("Save action triggered for entity: {}", entity != null ? entity.getId() : "null");
@@ -118,9 +113,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			view.onEntitySaved(savedEntity);
 			view.populateForm();
 			getNotificationService().showSaveSuccess();
-		} catch (final Exception exception) {
-			LOGGER.error("Unexpected error during save operation", exception);
-			getNotificationService().showError("An unexpected error occurred while saving: " + exception.getMessage());
+		} catch (final Exception e) {
+			LOGGER.error("Error saving entity: {}", e.getMessage());
+			throw e;
 		}
 	}
 

@@ -11,6 +11,7 @@ import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentDetailsMasterToolbar;
 import tech.derbent.api.views.components.CCrudToolbar;
@@ -47,8 +48,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 		try {
 			initializePage();
 		} catch (Exception e) {
-			LOGGER.error("Failed to initialize dynamic page view with sections for: {}: {}", pageEntity.getPageTitle(), e.getMessage());
-			e.printStackTrace();
+			CNotificationService.showException("Failed to initialize dynamic page view with sections for: " + pageEntity.getPageTitle(), e);
 		}
 	}
 
@@ -74,7 +74,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 				try {
 					onEntitySelected(event);
 				} catch (final Exception e) {
-					LOGGER.error("Error handling entity selection", e);
+					CNotificationService.showException("Error handling entity selection from grid", e);
 				}
 			});
 			// Create grid layout with toolbar
@@ -157,15 +157,14 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			crudToolbar = new CCrudToolbar();
 			crudToolbar.setPageBase(this);
 			crudToolbar.setEntityService(getEntityService());
-			crudToolbar.setNotificationService(getNotificationService());
 			crudToolbar.setWorkflowStatusRelationService(getWorkflowStatusRelationService());
 			crudToolbar.setNewEntitySupplier(() -> {
 				try {
 					return createNewEntityInstance();
 				} catch (Exception e) {
-					LOGGER.error("Error creating new entity", e);
-					return null;
+					CNotificationService.showException("Error creating new entity instance", e);
 				}
+				return null;
 			});
 			configureCrudToolbar(crudToolbar);
 			splitBottomLayout.addComponentAsFirst(crudToolbar);
@@ -296,14 +295,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 	/** Select the first item in the grid. Used after discarding unsaved new entities. */
 	@Override
 	public void selectFirstInGrid() {
-		if (grid != null) {
-			try {
-				grid.selectFirstItem();
-				LOGGER.debug("Selected first item in grid");
-			} catch (final Exception e) {
-				LOGGER.error("Error selecting first item in grid: {}", e.getMessage(), e);
-			}
-		}
+		grid.selectFirstItem();
 	}
 
 	/** Reloads entity values into existing components without rebuilding the UI */

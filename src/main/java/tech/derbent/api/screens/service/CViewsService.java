@@ -19,7 +19,7 @@ public class CViewsService {
 
 	public List<String> getAvailableBaseTypes() {
 		LOGGER.debug("Retrieving available base types for views");
-		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser", "CProjectGannt", "CCompanySettings");
+		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser", "CGanttItem", "CCompanySettings");
 	}
 
 	public List<String> getAvailableBeans() {

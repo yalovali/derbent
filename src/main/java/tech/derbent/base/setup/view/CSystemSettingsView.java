@@ -68,51 +68,29 @@ public class CSystemSettingsView extends CAbstractPage {
 		}
 	}
 
-	private void cancelChanges() {
-		LOGGER.debug("cancelChanges called for CSystemSettingsView");
-		if (currentSettings == null) {
-			LOGGER.warn("No current settings available to revert to");
-			new CWarningDialog("No settings loaded to revert to.").open();
-			return;
-		}
-		try {
-			// Reload the current settings from the database to revert any unsaved changes
-			final var freshSettings = systemSettingsService.getOrCreateSystemSettings();
-			currentSettings = freshSettings;
-			// Refresh the form with the original values
-			binder.readBean(currentSettings);
-			// Show confirmation that changes were cancelled
-			Notification.show("Changes cancelled - form reverted to saved state", 3000, Notification.Position.TOP_CENTER);
-			LOGGER.info("Changes cancelled successfully, form reverted to saved state");
-		} catch (final Exception e) {
-			LOGGER.error("Error cancelling changes and reverting form", e);
-			new CWarningDialog("Error cancelling changes: " + e.getMessage()).open();
-		}
-	}
-
 	private Div createButtonLayout() {
 		final var buttonLayout = new Div();
 		buttonLayout.addClassName("button-layout");
 		// reset database for developer
 		final var resetDbMinimal = new CButton("Reset DB (Dev)", null, null);
 		resetDbMinimal.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		resetDbMinimal.addClickListener(e -> resetDatabaseMinimal());
+		resetDbMinimal.addClickListener(e -> on_actionResetDatabaseMinimal());
 		// Reset Database button
 		final var resetDbButton = new CButton("Reset Database", null, null);
 		resetDbButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		resetDbButton.addClickListener(e -> resetDatabase());
+		resetDbButton.addClickListener(e -> on_actionResetDatabase());
 		// Save Settings button
 		final var saveButton = new CButton("Save Settings", null, null);
 		saveButton.addClassName("primary");
-		saveButton.addClickListener(e -> saveSettings());
+		saveButton.addClickListener(e -> on_actionSaveSettings());
 		// Cancel button - to reject changes and revert to original state
 		final var cancelButton = new CButton("Cancel", null, null);
 		cancelButton.addClassName("tertiary");
-		cancelButton.addClickListener(e -> cancelChanges());
+		cancelButton.addClickListener(e -> on_actionCancelChanges());
 		// Reload Settings button
 		final var reloadButton = new CButton("Reload Settings", null, null);
 		reloadButton.addClassName("tertiary");
-		reloadButton.addClickListener(e -> reloadSettings());
+		reloadButton.addClickListener(e -> on_actionReloadSettings());
 		// Reset to Defaults button
 		final var resetButton = new CButton("Reset to Defaults", null, null);
 		resetButton.addClassName("error");
@@ -240,6 +218,106 @@ public class CSystemSettingsView extends CAbstractPage {
 		}
 	}
 
+	private void on_actionCancelChanges() {
+		try {
+			LOGGER.debug("cancelChanges called for CSystemSettingsView");
+			if (currentSettings == null) {
+				LOGGER.warn("No current settings available to revert to");
+				new CWarningDialog("No settings loaded to revert to.").open();
+				return;
+			}
+			// Reload the current settings from the database to revert any unsaved changes
+			final var freshSettings = systemSettingsService.getOrCreateSystemSettings();
+			currentSettings = freshSettings;
+			// Refresh the form with the original values
+			binder.readBean(currentSettings);
+			// Show confirmation that changes were cancelled
+			Notification.show("Changes cancelled - form reverted to saved state", 3000, Notification.Position.TOP_CENTER);
+			LOGGER.info("Changes cancelled successfully, form reverted to saved state");
+		} catch (final Exception e) {
+			CNotificationService.showException("Error cancelling changes", e);
+		}
+	}
+
+	/** Reloads the system settings from the database. */
+	private void on_actionReloadSettings() {
+		LOGGER.debug("reloadSettings called");
+		try {
+			// Reload settings from database
+			currentSettings = systemSettingsService.getOrCreateSystemSettings();
+			// Refresh form
+			binder.readBean(currentSettings);
+			Notification.show("Settings reloaded from database", 2000, Notification.Position.TOP_CENTER);
+			LOGGER.info("System settings reloaded successfully");
+		} catch (final Exception e) {
+			CNotificationService.showException("Error reloading system settings", e);
+		}
+	}
+
+	/** Reloads the system settings from the database. */
+	private void on_actionResetDatabase() {
+		final ConfirmDialog dialog =
+				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", e -> {
+					try {
+						final CDataInitializer init = new CDataInitializer(sessionService);
+						init.reloadForced(false);
+						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
+						final CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						info.open();
+						// UI.getCurrent().getPage().reload();
+					} catch (final Exception ex) {
+						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
+					}
+				}, "Vazgeç", e -> {});
+		dialog.open();
+	}
+
+	private void on_actionResetDatabaseMinimal() {
+		final ConfirmDialog dialog = new ConfirmDialog("Onay",
+				"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", e -> {
+					try {
+						final CDataInitializer init = new CDataInitializer(sessionService);
+						init.reloadForced(true);
+						Notification.show("Minimum örnek veri yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
+						final CInformationDialog info = new CInformationDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						info.open();
+						// UI.getCurrent().getPage().reload();
+					} catch (final Exception ex) {
+						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
+					}
+				}, "Vazgeç", e -> {});
+		dialog.open();
+	}
+
+	/** Saves the current system settings with validation. */
+	private void on_actionSaveSettings() {
+		LOGGER.debug("saveSettings called for CSystemSettings");
+		try {
+			if (currentSettings == null) {
+				showWarningDialog("System settings could not be loaded. Please refresh the page.");
+				return;
+			}
+			// Validate form
+			binder.writeBean(currentSettings);
+			// Save through service
+			final var savedSettings = systemSettingsService.updateSystemSettings(currentSettings);
+			currentSettings = savedSettings;
+			// Show success notification
+			showSuccessNotification("System settings saved successfully");
+			LOGGER.info("System settings saved successfully with ID: {}", savedSettings.getId());
+		} catch (final ValidationException e) {
+			LOGGER.warn("Validation failed when saving system settings", e);
+			if (notificationService != null) {
+				notificationService.showWarning("Please fix validation errors and try again");
+			} else {
+				Notification.show("Please fix validation errors and try again", 3000, Notification.Position.MIDDLE);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error saving system settings", e);
+			showErrorNotification("Error saving settings: " + e.getMessage());
+		}
+	}
+
 	/** Performs the actual reset to default values. */
 	private void performReset() {
 		LOGGER.debug("performReset called for CSystemSettings");
@@ -274,57 +352,6 @@ public class CSystemSettingsView extends CAbstractPage {
 		loadSystemSettings();
 	}
 
-	/** Reloads the system settings from the database. */
-	private void reloadSettings() {
-		LOGGER.debug("reloadSettings called");
-		try {
-			// Reload settings from database
-			currentSettings = systemSettingsService.getOrCreateSystemSettings();
-			// Refresh form
-			binder.readBean(currentSettings);
-			Notification.show("Settings reloaded from database", 2000, Notification.Position.TOP_CENTER);
-			LOGGER.info("System settings reloaded successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error reloading system settings", e);
-			Notification.show("Error reloading settings: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
-		}
-	}
-
-	/** Reloads the system settings from the database. */
-	private void resetDatabase() {
-		final ConfirmDialog dialog =
-				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", e -> {
-					try {
-						final CDataInitializer init = new CDataInitializer(sessionService);
-						init.reloadForced(false);
-						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-						final CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-						info.open();
-						// UI.getCurrent().getPage().reload();
-					} catch (final Exception ex) {
-						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
-					}
-				}, "Vazgeç", e -> {});
-		dialog.open();
-	}
-
-	private void resetDatabaseMinimal() {
-		final ConfirmDialog dialog = new ConfirmDialog("Onay",
-				"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", e -> {
-					try {
-						final CDataInitializer init = new CDataInitializer(sessionService);
-						init.reloadForced(true);
-						Notification.show("Minimum örnek veri yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-						final CInformationDialog info = new CInformationDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-						info.open();
-						// UI.getCurrent().getPage().reload();
-					} catch (final Exception ex) {
-						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
-					}
-				}, "Vazgeç", e -> {});
-		dialog.open();
-	}
-
 	/** Resets all settings to default values. Shows confirmation dialog before proceeding.
 	 * @throws Exception */
 	private void resetToDefaults() throws Exception {
@@ -339,35 +366,6 @@ public class CSystemSettingsView extends CAbstractPage {
 						+ "This will affect application behavior, security settings, and file management. " + "This action cannot be undone.",
 				() -> performReset());
 		confirmDialog.open();
-	}
-
-	/** Saves the current system settings with validation. */
-	private void saveSettings() {
-		LOGGER.debug("saveSettings called for CSystemSettings");
-		try {
-			if (currentSettings == null) {
-				showWarningDialog("System settings could not be loaded. Please refresh the page.");
-				return;
-			}
-			// Validate form
-			binder.writeBean(currentSettings);
-			// Save through service
-			final var savedSettings = systemSettingsService.updateSystemSettings(currentSettings);
-			currentSettings = savedSettings;
-			// Show success notification
-			showSuccessNotification("System settings saved successfully");
-			LOGGER.info("System settings saved successfully with ID: {}", savedSettings.getId());
-		} catch (final ValidationException e) {
-			LOGGER.warn("Validation failed when saving system settings", e);
-			if (notificationService != null) {
-				notificationService.showWarning("Please fix validation errors and try again");
-			} else {
-				Notification.show("Please fix validation errors and try again", 3000, Notification.Position.MIDDLE);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error saving system settings", e);
-			showErrorNotification("Error saving settings: " + e.getMessage());
-		}
 	}
 
 	/** Sets the session service. This is called after bean creation via configuration class.

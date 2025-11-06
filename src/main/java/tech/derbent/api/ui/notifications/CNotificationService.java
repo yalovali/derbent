@@ -19,10 +19,22 @@ import tech.derbent.api.utils.Check;
 public class CNotificationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CNotificationService.class);
+	private static final int LONG_DURATION = 8000;
+	private static final int MEDIUM_DURATION = 5000;
 	// Standard durations in milliseconds
 	private static final int SHORT_DURATION = 2000;
-	private static final int MEDIUM_DURATION = 5000;
-	private static final int LONG_DURATION = 8000;
+
+	/** Shows a message with expandable exception details (modal with Details toggle and OK button). The dialog displays a user-friendly message and
+	 * allows users to expand/collapse technical exception details.
+	 * @param message   The user-friendly message to display
+	 * @param exception The exception whose details can be expanded */
+	public static void showException(final String message, final Exception exception) {
+		Check.notBlank(message, "Message cannot be empty");
+		Check.notNull(exception, "Exception cannot be null");
+		LOGGER.debug("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
+		final CMessageWithDetailsDialog dialog = new CMessageWithDetailsDialog(message, exception);
+		dialog.open();
+	}
 
 	/** Shows a confirmation dialog (modal with Yes/No buttons)
 	 * @throws Exception */
@@ -158,18 +170,6 @@ public class CNotificationService {
 		Check.notBlank(message, "Warning dialog message cannot be empty");
 		LOGGER.debug("Showing warning dialog: {}", message);
 		final CWarningDialog dialog = new CWarningDialog(message);
-		dialog.open();
-	}
-
-	/** Shows a message with expandable exception details (modal with Details toggle and OK button). The dialog displays a user-friendly message and
-	 * allows users to expand/collapse technical exception details.
-	 * @param message The user-friendly message to display
-	 * @param exception The exception whose details can be expanded */
-	public void showMessageWithDetails(final String message, final Exception exception) {
-		Check.notBlank(message, "Message cannot be empty");
-		Check.notNull(exception, "Exception cannot be null");
-		LOGGER.debug("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName());
-		final CMessageWithDetailsDialog dialog = new CMessageWithDetailsDialog(message, exception);
 		dialog.open();
 	}
 }

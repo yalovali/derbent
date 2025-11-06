@@ -24,7 +24,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	private Object currentEntity;
 	CDataProviderResolver dataProviderResolver;
 	private CButton deleteButton;
-	CNotificationService notificationService;
+	// CNotificationService notificationService;
 	private ICrudToolbarOwnerPage pageBase;
 	private CButton refreshButton;
 	private CButton saveButton;
@@ -36,33 +36,13 @@ public class CCrudToolbar extends HorizontalLayout {
 	/** Minimal constructor - creates toolbar with buttons. All behavior is provided via setters. */
 	public CCrudToolbar() {
 		dataProviderResolver = CSpringContext.<CDataProviderResolver>getBean(CDataProviderResolver.class);
-		notificationService = CSpringContext.<CNotificationService>getBean(CNotificationService.class);
+		// notificationService = CSpringContext.<CNotificationService>getBean(CNotificationService.class);
 		setSpacing(true);
 		setPadding(true);
 		addClassName("crud-toolbar");
 		setWidthFull();
 		createToolbarButtons();
 		LOGGER.debug("Created CCrudToolbar as view-only component");
-	}
-
-	public void actionCreate() {
-		LOGGER.debug("Create action triggered from toolbar");
-		pageBase.getPageService().actionCreate();
-	}
-
-	public void actionDelete() {
-		LOGGER.debug("Delete action triggered from toolbar");
-		pageBase.getPageService().actionDelete();
-	}
-
-	public void actionRefresh() {
-		LOGGER.debug("Refresh action triggered from toolbar");
-		pageBase.getPageService().actionRefresh();
-	}
-
-	public void actionSave() {
-		LOGGER.debug("Save action triggered from toolbar");
-		pageBase.getPageService().actionSave();
 	}
 
 	/** Configure visibility of toolbar buttons. This replaces previous per-entity logic and provides a simple view-level way for pages to show/hide
@@ -84,13 +64,13 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	/** Creates the CRUD toolbar buttons and wires them to simple Runnable callbacks. */
 	private void createToolbarButtons() {
-		createButton = CButton.createNewButton("New", e -> actionCreate());
+		createButton = CButton.createNewButton("New", e -> on_actionCreate());
 		createButton.getElement().setAttribute("title", "Create new entity");
-		saveButton = CButton.createSaveButton("Save", e -> actionSave());
+		saveButton = CButton.createSaveButton("Save", e -> on_actionSave());
 		saveButton.getElement().setAttribute("title", "Save current entity");
-		deleteButton = CButton.createDeleteButton("Delete", e -> actionDelete());
+		deleteButton = CButton.createDeleteButton("Delete", e -> on_actionDelete());
 		deleteButton.getElement().setAttribute("title", "Delete current entity");
-		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> actionRefresh());
+		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> on_actionRefresh());
 		refreshButton.getElement().setAttribute("title", "Refresh data");
 		add(createButton, saveButton, deleteButton, refreshButton);
 		updateButtonStates();
@@ -226,6 +206,42 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	public CButton getSaveButton() { return saveButton; }
 
+	public void on_actionCreate() {
+		try {
+			LOGGER.debug("Create action triggered from toolbar");
+			pageBase.getPageService().actionCreate();
+		} catch (Exception e) {
+			CNotificationService.showException("Error during create action", e);
+		}
+	}
+
+	public void on_actionDelete() {
+		try {
+			LOGGER.debug("Delete action triggered from toolbar");
+			pageBase.getPageService().actionDelete();
+		} catch (Exception e) {
+			CNotificationService.showException("Error during delete action", e);
+		}
+	}
+
+	public void on_actionRefresh() {
+		try {
+			LOGGER.debug("Refresh action triggered from toolbar");
+			pageBase.getPageService().actionRefresh();
+		} catch (Exception e) {
+			CNotificationService.showException("Error during refresh action", e);
+		}
+	}
+
+	public void on_actionSave() {
+		try {
+			LOGGER.debug("Save action triggered from toolbar");
+			pageBase.getPageService().actionSave();
+		} catch (Exception e) {
+			CNotificationService.showException("Error during save action", e);
+		}
+	}
+
 	// Allow the page to inform toolbar about the currently selected entity so the toolbar can update its UI state
 	public void setCurrentEntity(final Object entity) {
 		LOGGER.debug("Setting current entity in toolbar: {}", entity);
@@ -244,10 +260,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	}
 
 	public void setNewEntitySupplier(final Supplier<?> supplier) {
-		// no-op: toolbar is now view-only
-	}
-
-	public void setNotificationService(final tech.derbent.api.ui.notifications.CNotificationService notificationService) {
 		// no-op: toolbar is now view-only
 	}
 

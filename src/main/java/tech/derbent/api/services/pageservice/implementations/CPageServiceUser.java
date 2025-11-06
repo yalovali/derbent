@@ -17,7 +17,7 @@ public class CPageServiceUser extends CPageServiceDynamicPage<CUser> {
 	}
 
 	@Override
-	public void actionCreate() {
+	public void actionCreate() throws Exception {
 		super.actionCreate();
 	}
 
