@@ -14,7 +14,6 @@ This directory contains screenshots captured during Playwright UI automation tes
 ### Prerequisites
 Before running tests, ensure you have:
 1. Java 21 environment configured: `source ./setup-java-env.sh`
-2. SO libraries check passes (handled automatically by test script)
 
 ### Running Tests
 

@@ -49,8 +49,7 @@ This document summarizes the Playwright test execution and screenshot capture fo
 1. **screenshots/** - New directory for version-controlled screenshots
 2. **screenshots/README.md** - Comprehensive documentation for screenshot generation
 3. **screenshots/*.png** - Three Playwright screenshots
-4. **install-so-libraries.sh** - Stub script for compatibility (SO libraries removed from project)
-5. **SCREENSHOT_SUMMARY.md** - This summary document
+4. **SCREENSHOT_SUMMARY.md** - This summary document
 
 ### Location Structure
 ```
