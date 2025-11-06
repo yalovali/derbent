@@ -50,6 +50,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				} catch (final Exception ex) {
 					LOGGER.error("Error deleting entity with ID: {}", entity.getId(), ex);
 					getNotificationService().showDeleteError();
+					// getNotificationService().showE
 				}
 			});
 		} catch (final Exception e) {
