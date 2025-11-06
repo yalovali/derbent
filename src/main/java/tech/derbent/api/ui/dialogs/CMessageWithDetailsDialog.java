@@ -13,10 +13,14 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.dialogs.CDialog;
 
-/** CMessageWithDetailsDialog - Dialog for displaying a user-friendly message with optional expandable exception details. Shows a clear message to the
- * user with a "Details" button that toggles visibility of exception stack trace in a scrollable text area. The dialog automatically adjusts its
- * height when details are shown or hidden. Layer: View (MVC) Usage: Use when you want to show a friendly message to users but also provide technical
- * details for troubleshooting. */
+/** CMessageWithDetailsDialog - Dialog for displaying a user-friendly message with optional expandable exception details.
+ * 
+ * Shows a clear message to the user with a "Details" button that toggles visibility of exception stack trace in a scrollable text area. The dialog
+ * automatically adjusts its height when details are shown or hidden.
+ * 
+ * Layer: View (MVC)
+ * 
+ * Usage: Use when you want to show a friendly message to users but also provide technical details for troubleshooting. */
 public final class CMessageWithDetailsDialog extends CDialog {
 
 	private static final long serialVersionUID = 1L;

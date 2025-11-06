@@ -129,7 +129,10 @@ public final class CNotifications {
 		showWarning("Please check the " + fieldName + " field and try again.");
 	}
 
-	/** Shows a message with expandable exception details */
+	/** Shows a message with expandable exception details. Note: This static method currently only logs the error. For full functionality including
+	 * the dialog display, inject CNotificationService directly in your classes.
+	 * @param message The user-friendly message to describe the error
+	 * @param exception The exception whose details should be logged */
 	public static void showMessageWithDetails(final String message, final Exception exception) {
 		Check.notBlank(message, "Message cannot be empty");
 		Check.notNull(exception, "Exception cannot be null");
