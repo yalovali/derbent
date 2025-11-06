@@ -3,10 +3,11 @@ package tech.derbent.api.screens.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.utils.Check;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 
 public class CGridInitializerService extends CInitializerServiceBase {
 
@@ -19,8 +20,9 @@ public class CGridInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Grid Management";
 	private static final boolean showInQuickToolbar = true;
 
-	public static CDetailSection createBasicView(final CProject project) {
-		try {
+        public static CDetailSection createBasicView(final CProject project) throws Exception {
+                Check.notNull(project, "project cannot be null");
+                try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
@@ -35,13 +37,13 @@ public class CGridInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			detailSection.debug_printScreenInformation();
-			return detailSection;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating grid entity view.");
-			return null;
-		}
-	}
+                        detailSection.debug_printScreenInformation();
+                        return detailSection;
+                } catch (final Exception e) {
+                        LOGGER.error("Error creating grid entity view.");
+                        throw e;
+                }
+        }
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);

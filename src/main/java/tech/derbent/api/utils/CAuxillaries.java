@@ -10,8 +10,11 @@ import tech.derbent.api.domains.CEntity;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.domain.CMasterSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.screens.service.CGridInitializerService;
+import tech.derbent.api.screens.service.CMasterInitializerService;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.app.activities.domain.CActivityType;
@@ -23,8 +26,11 @@ import tech.derbent.app.activities.service.CActivityTypeInitializerService;
 import tech.derbent.app.activities.service.CActivityTypeService;
 import tech.derbent.app.activities.service.CProjectItemStatusInitializerService;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
+import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.CCommentPriority;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 import tech.derbent.app.comments.service.CCommentPriorityService;
+import tech.derbent.app.comments.service.CCommentService;
 import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyInitializerService;
@@ -36,6 +42,7 @@ import tech.derbent.app.decisions.service.CDecisionService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
+import tech.derbent.app.gannt.service.CGanntInitializerService;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
 import tech.derbent.app.gannt.view.CProjectGanntView;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -255,10 +262,12 @@ public class CAuxillaries {
 			return CCompanyService.class;
 		case "CProject":
 			return CProjectService.class;
-		case "CDecision":
-			return CDecisionService.class;
-		case "CUser":
-			return CUserService.class;
+                case "CDecision":
+                        return CDecisionService.class;
+                case "CComment":
+                        return CCommentService.class;
+                case "CUser":
+                        return CUserService.class;
 		case "CActivityType":
 			return CActivityTypeService.class;
 		case "CRiskType":
@@ -320,12 +329,14 @@ public class CAuxillaries {
 			return CRiskInitializerService.class;
 		} else if (entityClass == CCompany.class) {
 			return CCompanyInitializerService.class;
-		} else if (entityClass == CProject.class) {
-			return CProjectInitializerService.class;
-		} else if (entityClass == CDecision.class) {
-			return CDecisionInitializerService.class;
-		} else if (entityClass == CUser.class) {
-			return CUserInitializerService.class;
+                } else if (entityClass == CProject.class) {
+                        return CProjectInitializerService.class;
+                } else if (entityClass == CDecision.class) {
+                        return CDecisionInitializerService.class;
+                } else if (entityClass == CComment.class) {
+                        return CCommentInitializerService.class;
+                } else if (entityClass == CUser.class) {
+                        return CUserInitializerService.class;
 		} else if (entityClass == CActivityType.class) {
 			return CActivityTypeInitializerService.class;
 		} else if (entityClass == CProjectItemStatus.class) {
@@ -346,12 +357,14 @@ public class CAuxillaries {
 			return COrderTypeInitializerService.class;
 		} else if (entityClass == CApprovalStatus.class) {
 			return CApprovalStatusInitializerService.class;
-		} else if (entityClass == CDetailSection.class) {
-			return CDetailSectionService.class;
-		} else if (entityClass == CGridEntity.class) {
-			return CGridEntityService.class;
-		} else if (entityClass == CSystemSettings.class) {
-			return CSystemSettingsInitializerService.class;
+                } else if (entityClass == CDetailSection.class) {
+                        return CDetailSectionService.class;
+                } else if (entityClass == CGridEntity.class) {
+                        return CGridInitializerService.class;
+                } else if (entityClass == CMasterSection.class) {
+                        return CMasterInitializerService.class;
+                } else if (entityClass == CSystemSettings.class) {
+                        return CSystemSettingsInitializerService.class;
 		} else if (entityClass == CUserProjectRole.class) {
 			return CUserProjectRoleInitializerService.class;
 		} else if (entityClass == CUserCompanyRole.class) {
@@ -366,9 +379,9 @@ public class CAuxillaries {
 			return CUserProjectSettingsService.class;
 		} else if (entityClass == CUserCompanySetting.class) {
 			return CUserCompanySettingsService.class;
-		} else if (entityClass == CGanntViewEntity.class) {
-			return CGanntViewEntityService.class;
-		} else {
+                } else if (entityClass == CGanntViewEntity.class) {
+                        return CGanntInitializerService.class;
+                } else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
 		}

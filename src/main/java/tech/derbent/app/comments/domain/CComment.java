@@ -25,7 +25,8 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "comment_id"))
 public class CComment extends CEvent<CComment> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
+        public static final String VIEW_NAME = "Comments View";
 	// Activity this comment belongs to
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id", nullable = false)
