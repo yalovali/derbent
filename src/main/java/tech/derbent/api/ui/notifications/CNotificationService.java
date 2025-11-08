@@ -38,7 +38,7 @@ public class CNotificationService {
 
 	/** Shows a confirmation dialog (modal with Yes/No buttons)
 	 * @throws Exception */
-	public void showConfirmationDialog(final String message, final Runnable onConfirm) throws Exception {
+	public static void showConfirmationDialog(final String message, final Runnable onConfirm) throws Exception {
 		Check.notBlank(message, "Confirmation message cannot be empty");
 		LOGGER.debug("Showing confirmation dialog: {}", message);
 		final CConfirmationDialog dialog = new CConfirmationDialog(message, onConfirm);
@@ -47,7 +47,7 @@ public class CNotificationService {
 
 	/** Shows a confirmation dialog with custom action text
 	 * @throws Exception */
-	public void showConfirmationDialog(final String message, final String confirmText, final Runnable onConfirm) throws Exception {
+	public static void showConfirmationDialog(final String message, final String confirmText, final Runnable onConfirm) throws Exception {
 		Check.notBlank(message, "Confirmation message cannot be empty");
 		Check.notBlank(confirmText, "Confirm text cannot be empty");
 		LOGGER.debug("Showing confirmation dialog: {} with confirm text: {}", message, confirmText);
@@ -59,17 +59,17 @@ public class CNotificationService {
 	// Convenience methods for common operations
 
 	/** Shows error message for create operations */
-	public void showCreateError() {
+	public static void showCreateError() {
 		showError("An error occurred while creating. Please try again.");
 	}
 
 	/** Shows success message for create operations */
-	public void showCreateSuccess() {
+	public static void showCreateSuccess() {
 		showSuccess("Item created successfully");
 	}
 
 	/** Shows a custom notification with specified duration and position */
-	public void showCustom(final String message, final int durationMs, final Notification.Position position, final NotificationVariant... variants) {
+	public static void showCustom(final String message, final int durationMs, final Notification.Position position, final NotificationVariant... variants) {
 		Check.notBlank(message, "Custom message cannot be empty");
 		Check.notNull(position, "Position cannot be null");
 		LOGGER.debug("Showing custom notification: {} at {} for {}ms", message, position, durationMs);
@@ -80,17 +80,17 @@ public class CNotificationService {
 	}
 
 	/** Shows error message for delete operations */
-	public void showDeleteError() {
+	public static void showDeleteError() {
 		showError("An error occurred while deleting. Please try again.");
 	}
 
 	/** Shows success message for delete operations */
-	public void showDeleteSuccess() {
+	public static void showDeleteSuccess() {
 		showSuccess("Item deleted successfully");
 	}
 
 	/** Shows an error notification toast (red, middle, long duration) */
-	public void showError(final String message) {
+	public static void showError(final String message) {
 		Check.notBlank(message, "Error message cannot be empty");
 		LOGGER.debug("Showing error notification: {}", message);
 		final Notification notification = Notification.show(message, LONG_DURATION, Notification.Position.MIDDLE);
@@ -98,7 +98,7 @@ public class CNotificationService {
 	}
 
 	/** Shows an error dialog (modal with OK button) */
-	public void showErrorDialog(final Exception exception) {
+	public static void showErrorDialog(final Exception exception) {
 		Check.notNull(exception, "Exception cannot be null");
 		LOGGER.debug("Showing error dialog for exception: {}", exception.getClass().getSimpleName());
 		final CExceptionDialog dialog = new CExceptionDialog(exception);
@@ -106,7 +106,7 @@ public class CNotificationService {
 	}
 
 	/** Shows an error dialog with custom message */
-	public void showErrorDialog(final String message) {
+	public static void showErrorDialog(final String message) {
 		Check.notBlank(message, "Error dialog message cannot be empty");
 		LOGGER.debug("Showing error dialog: {}", message);
 		final CExceptionDialog dialog = new CExceptionDialog(new RuntimeException(message));
@@ -114,7 +114,7 @@ public class CNotificationService {
 	}
 
 	/** Shows an info notification toast (blue, bottom-start, medium duration) */
-	public void showInfo(final String message) {
+	public static void showInfo(final String message) {
 		Check.notBlank(message, "Info message cannot be empty");
 		LOGGER.debug("Showing info notification: {}", message);
 		final Notification notification = Notification.show(message, MEDIUM_DURATION, Notification.Position.BOTTOM_START);
@@ -122,7 +122,7 @@ public class CNotificationService {
 	}
 
 	/** Shows an information dialog (modal with OK button) */
-	public void showInfoDialog(final String message) {
+	public static void showInfoDialog(final String message) {
 		Check.notBlank(message, "Info dialog message cannot be empty");
 		LOGGER.debug("Showing info dialog: {}", message);
 		final CInformationDialog dialog = new CInformationDialog(message);
@@ -130,22 +130,22 @@ public class CNotificationService {
 	}
 
 	/** Shows error for optimistic locking failures */
-	public void showOptimisticLockingError() {
+	public static void showOptimisticLockingError() {
 		showError("Error updating the data. Somebody else has updated the record while you were making changes.");
 	}
 
 	/** Shows error message for save operations */
-	public void showSaveError() {
+	public static void showSaveError() {
 		showError("An error occurred while saving. Please try again.");
 	}
 
 	/** Shows success message for save operations */
-	public void showSaveSuccess() {
+	public static void showSaveSuccess() {
 		showSuccess("Data saved successfully");
 	}
 
 	/** Shows a success notification toast (green, bottom-start, short duration) */
-	public void showSuccess(final String message) {
+	public static void showSuccess(final String message) {
 		Check.notBlank(message, "Success message cannot be empty");
 		LOGGER.debug("Showing success notification: {}", message);
 		final Notification notification = Notification.show(message, SHORT_DURATION, Notification.Position.BOTTOM_START);
@@ -153,12 +153,12 @@ public class CNotificationService {
 	}
 
 	/** Shows warning for validation errors */
-	public void showValidationWarning(final String fieldName) {
+	public static void showValidationWarning(final String fieldName) {
 		showWarning("Please check the " + fieldName + " field and try again.");
 	}
 
 	/** Shows a warning notification toast (orange, top-center, medium duration) */
-	public void showWarning(final String message) {
+	public static void showWarning(final String message) {
 		Check.notBlank(message, "Warning message cannot be empty");
 		LOGGER.debug("Showing warning notification: {}", message);
 		final Notification notification = Notification.show(message, MEDIUM_DURATION, Notification.Position.TOP_CENTER);
@@ -166,7 +166,7 @@ public class CNotificationService {
 	}
 
 	/** Shows a warning dialog (modal with OK button) */
-	public void showWarningDialog(final String message) {
+	public static void showWarningDialog(final String message) {
 		Check.notBlank(message, "Warning dialog message cannot be empty");
 		LOGGER.debug("Showing warning dialog: {}", message);
 		final CWarningDialog dialog = new CWarningDialog(message);
