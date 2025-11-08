@@ -3,16 +3,16 @@ package tech.derbent.api.services.pageservice.implementations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.orders.domain.COrderType;
-import tech.derbent.app.page.view.CDynamicPageBase;
 
 public class CPageServiceOrderType extends CPageServiceDynamicPage<COrderType> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceOrderType.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceOrderType(CDynamicPageBase view) {
+	public CPageServiceOrderType(IPageServiceImplementer view) {
 		super(view);
 	}
 

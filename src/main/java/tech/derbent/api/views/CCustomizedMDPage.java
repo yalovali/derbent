@@ -1,6 +1,5 @@
 package tech.derbent.api.views;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -17,10 +16,6 @@ public abstract class CCustomizedMDPage<EntityClass extends CEntityDB<EntityClas
 			final ISessionService sessionService) {
 		super(entityClass, entityService, sessionService);
 	}
-
-	/** Subclasses should override this to provide their custom label. */
-	@Override
-	protected abstract Div createDetailsTabLeftContent();
 
 	/** Example of how to override the details tab with more complex content while keeping the standard button layout. */
 	@Override
@@ -41,16 +36,12 @@ public abstract class CCustomizedMDPage<EntityClass extends CEntityDB<EntityClas
 		// Add icon
 		final Span icon = new Span(VaadinIcon.EDIT.create());
 		icon.getStyle().set("color", "var(--lumo-primary-color)");
-		// Add custom text
-		final Div customLabel = createDetailsTabLeftContent();
 		// Add status indicator (example)
 		final Span status = new Span("●");
 		status.getStyle().set("color", "var(--lumo-success-color)");
 		status.setTitle("Active");
-		leftContent.add(icon, customLabel, status);
-		// Right side: Standard action buttons (this ensures consistency)
-		final HorizontalLayout buttonLayout = createDetailsTabButtonLayout();
-		tabContent.add(leftContent, buttonLayout);
+		leftContent.add(icon, status);
+		tabContent.add(leftContent, crudToolbar);
 		getDetailsTabLayout().add(tabContent);
 	}
 }

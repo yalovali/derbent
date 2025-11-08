@@ -8,6 +8,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
@@ -49,6 +50,11 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
 	@Override
 	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CPageService<?> getPageService() { // TODO Auto-generated method stub
 		return null;
 	}
 }

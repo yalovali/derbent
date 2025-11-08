@@ -3,8 +3,8 @@ package tech.derbent.api.services.pageservice.implementations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.view.CDynamicPageBase;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
 
 public class CPageServiceUserCompanyRole extends CPageServiceDynamicPage<CUserCompanyRole> {
@@ -12,7 +12,7 @@ public class CPageServiceUserCompanyRole extends CPageServiceDynamicPage<CUserCo
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceUserCompanyRole.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceUserCompanyRole(CDynamicPageBase view) {
+	public CPageServiceUserCompanyRole(IPageServiceImplementer view) {
 		super(view);
 	}
 

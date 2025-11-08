@@ -25,24 +25,24 @@ import tech.derbent.api.domains.CEntityDB;
 /** Enhanced binder that provides detailed field-level error logging and reporting for better debugging of binding and validation issues. This class
  * extends BeanValidationBinder to add: - Detailed field-specific error logging - Enhanced error reporting with field names and validation messages -
  * Easy integration with existing code with minimal changes - Backward compatibility with standard BeanValidationBinder usage
- * @param <BEAN> the bean type */
-public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
+ * @param <EntityClass> the bean type */
+public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEnhancedBinder.class);
 	private static final long serialVersionUID = 1L;
-	private final Class<BEAN> beanType;
+	private final Class<EntityClass> beanType;
 	private final Map<String, String> lastValidationErrors = new HashMap<>();
 
 	/** Creates an enhanced binder for the given bean type.
 	 * @param beanType the bean class, not null */
-	public CEnhancedBinder(final Class<BEAN> beanType) {
+	public CEnhancedBinder(final Class<EntityClass> beanType) {
 		super(beanType);
 		this.beanType = beanType;
 		// LOGGER.debug("Created CEnhancedBinder for bean type: {}", beanType.getSimpleName());
 	}
 
 	@Override
-	public <FIELDVALUE> Binding<BEAN, FIELDVALUE> bind(final HasValue<?, FIELDVALUE> field, final String propertyName) {
+	public <FIELDVALUE> Binding<EntityClass, FIELDVALUE> bind(final HasValue<?, FIELDVALUE> field, final String propertyName) {
 		try {
 			return super.bind(field, propertyName);
 		} catch (final Exception e) {
@@ -67,7 +67,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 
 	/** Returns the bean type this binder is configured for.
 	 * @return the bean class */
-	public Class<BEAN> getBeanType() { return beanType; }
+	public Class<EntityClass> getBeanType() { return beanType; }
 	// Overload bind methods to add detailed logging
 
 	/** Gets the validation error for a specific field.
@@ -153,7 +153,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 
 	public void printBindingProperties() {
 		LOGGER.debug("Current bindings for bean type: {}", beanType.getSimpleName());
-		for (final Binding<BEAN, ?> binding : getBindings()) {
+		for (final Binding<EntityClass, ?> binding : getBindings()) {
 			LOGGER.debug("Binding: {}", binding.toString());
 			if (binding.getField() != null) {
 				LOGGER.debug("  Field: {}", binding.getField().toString());
@@ -163,7 +163,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 	}
 
 	@Override
-	public void readBean(final BEAN bean) {
+	public void readBean(final EntityClass bean) {
 		// LOGGER.debug("Starting readBean operation for bean type:
 		// {}",beanType.getSimpleName());
 		try {
@@ -187,7 +187,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 	}
 
 	@Override
-	public void setBean(final BEAN bean) {
+	public void setBean(final EntityClass bean) {
 		try {
 			// Check for incomplete bindings before attempting to set the bean
 			// This prevents the "All bindings created with forField must be completed" error
@@ -206,8 +206,8 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 		}
 	}
 
-	public void validateBean(BEAN entity) {
-		final BinderValidationStatus<BEAN> status = validate();
+	public void validateBean(EntityClass entity) {
+		final BinderValidationStatus<EntityClass> status = validate();
 		if (!status.isOk()) {
 			final StringBuilder sb = new StringBuilder();
 			sb.append("Validation failed:");
@@ -342,7 +342,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 	 * to binders without initialization, causing ComboBoxes and other components to fail value matching. Only validates fields of type CEntityDB to
 	 * avoid false positives on primitive types.
 	 * @param bean the bean to validate */
-	private void validateBeanFieldsInitialized(final BEAN bean) {
+	private void validateBeanFieldsInitialized(final EntityClass bean) {
 		if (bean == null) {
 			return; // Null beans don't have fields to validate
 		}
@@ -389,7 +389,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 	}
 
 	@Override
-	public void writeBean(final BEAN bean) throws ValidationException {
+	public void writeBean(final EntityClass bean) throws ValidationException {
 		clearLastValidationErrors();
 		try {
 			// Validate all bindings first to collect detailed error information

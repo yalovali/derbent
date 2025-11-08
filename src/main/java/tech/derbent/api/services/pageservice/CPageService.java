@@ -5,16 +5,15 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.view.CDynamicPageBase;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
 	private EntityClass previousEntity;
-	final protected CDynamicPageBase view;
+	final protected IPageServiceImplementer view;
 
-	public CPageService(CDynamicPageBase view) {
+	public CPageService(IPageServiceImplementer view) {
 		this.view = view;
 		setPreviousEntity(null);
 	}
@@ -35,17 +34,17 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		try {
 			final EntityClass entity = getCurrentEntity();
 			if (entity == null || entity.getId() == null) {
-				getNotificationService().showWarning("Please select an item to delete.");
+				CNotificationService.showWarning("Please select an item to delete.");
 				return;
 			}
 			// Show confirmation dialog
-			getNotificationService().showConfirmationDialog("Delete selected item?", () -> {
+			CNotificationService.showConfirmationDialog("Delete selected item?", () -> {
 				try {
 					getEntityService().delete(entity.getId());
 					LOGGER.info("Entity deleted successfully with ID: {}", entity.getId());
 					view.onEntityDeleted(entity);
 				} catch (final Exception ex) {
-					getNotificationService().showException("Error deleting entity with ID:" + entity.getId(), ex);
+					CNotificationService.showException("Error deleting entity with ID:" + entity.getId(), ex);
 				}
 			});
 		} catch (final Exception e) {
@@ -74,7 +73,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				} else {
 					view.selectFirstInGrid();
 				}
-				getNotificationService().showInfo("Entity reloaded.");
+				CNotificationService.showInfo("Entity reloaded.");
 				return;
 			}
 			// Normal refresh for existing entities
@@ -88,7 +87,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			} else {
 				view.selectFirstInGrid();
 			}
-			getNotificationService().showInfo("Entity reloaded.");
+			CNotificationService.showInfo("Entity reloaded.");
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing entity: {}", e.getMessage());
 			throw e;
@@ -101,7 +100,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			LOGGER.debug("Save action triggered for entity: {}", entity != null ? entity.getId() : "null");
 			if (entity == null) {
 				LOGGER.warn("No current entity for save operation");
-				getNotificationService().showWarning("No entity selected for save");
+				CNotificationService.showWarning("No entity selected for save");
 				return;
 			}
 			if (view.getBinder() != null) {
@@ -112,7 +111,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			setCurrentEntity(savedEntity);
 			view.onEntitySaved(savedEntity);
 			view.populateForm();
-			getNotificationService().showSaveSuccess();
+			CNotificationService.showSaveSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error saving entity: {}", e.getMessage());
 			throw e;
@@ -129,10 +128,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	@SuppressWarnings ("unchecked")
 	protected CAbstractService<EntityClass> getEntityService() {
 		Check.notNull(view, "View is not set in page service");
-		return (CAbstractService<EntityClass>) view.getEntityService();
+		return view.getEntityService();
 	}
-
-	protected CNotificationService getNotificationService() { return view.getNotificationService(); }
 
 	public EntityClass getPreviousEntity() { return previousEntity; }
 

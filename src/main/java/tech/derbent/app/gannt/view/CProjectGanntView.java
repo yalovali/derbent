@@ -7,6 +7,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseGannt;
 import tech.derbent.app.activities.service.CActivityService;
@@ -53,4 +54,9 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	public CPageService<?> getPageService() { // TODO Auto-generated method stub
+		return null;
+	}
 }

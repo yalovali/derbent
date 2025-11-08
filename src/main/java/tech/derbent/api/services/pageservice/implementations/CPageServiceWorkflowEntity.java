@@ -3,8 +3,8 @@ package tech.derbent.api.services.pageservice.implementations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.view.CDynamicPageBase;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
@@ -13,7 +13,7 @@ public class CPageServiceWorkflowEntity extends CPageServiceDynamicPage<CWorkflo
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceWorkflowEntity.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceWorkflowEntity(CDynamicPageBase view) {
+	public CPageServiceWorkflowEntity(IPageServiceImplementer view) {
 		super(view);
 	}
 

@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -67,6 +68,11 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	public CPageService<?> getPageService() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {

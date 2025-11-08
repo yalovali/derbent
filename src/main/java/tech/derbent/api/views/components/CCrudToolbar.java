@@ -36,7 +36,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	/** Minimal constructor - creates toolbar with buttons. All behavior is provided via setters. */
 	public CCrudToolbar() {
 		dataProviderResolver = CSpringContext.<CDataProviderResolver>getBean(CDataProviderResolver.class);
-		// notificationService = CSpringContext.<CNotificationService>getBean(CNotificationService.class);
 		setSpacing(true);
 		setPadding(true);
 		addClassName("crud-toolbar");

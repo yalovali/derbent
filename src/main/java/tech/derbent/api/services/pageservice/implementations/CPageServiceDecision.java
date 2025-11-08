@@ -3,16 +3,16 @@ package tech.derbent.api.services.pageservice.implementations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.decisions.domain.CDecision;
-import tech.derbent.app.page.view.CDynamicPageBase;
 
 public class CPageServiceDecision extends CPageServiceDynamicPage<CDecision> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceDecision.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceDecision(CDynamicPageBase view) {
+	public CPageServiceDecision(IPageServiceImplementer view) {
 		super(view);
 	}
 

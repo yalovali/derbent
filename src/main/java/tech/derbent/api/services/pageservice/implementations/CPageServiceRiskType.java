@@ -3,8 +3,8 @@ package tech.derbent.api.services.pageservice.implementations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.view.CDynamicPageBase;
 import tech.derbent.app.risks.domain.CRiskType;
 
 public class CPageServiceRiskType extends CPageServiceDynamicPage<CRiskType> {
@@ -12,7 +12,7 @@ public class CPageServiceRiskType extends CPageServiceDynamicPage<CRiskType> {
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceRiskType.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceRiskType(CDynamicPageBase view) {
+	public CPageServiceRiskType(IPageServiceImplementer view) {
 		super(view);
 	}
 

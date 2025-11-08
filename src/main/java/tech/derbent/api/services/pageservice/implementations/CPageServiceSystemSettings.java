@@ -3,8 +3,8 @@ package tech.derbent.api.services.pageservice.implementations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.view.CDynamicPageBase;
 import tech.derbent.base.setup.domain.CSystemSettings;
 
 public class CPageServiceSystemSettings extends CPageServiceDynamicPage<CSystemSettings> {
@@ -12,7 +12,7 @@ public class CPageServiceSystemSettings extends CPageServiceDynamicPage<CSystemS
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceSystemSettings.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceSystemSettings(CDynamicPageBase view) {
+	public CPageServiceSystemSettings(IPageServiceImplementer view) {
 		super(view);
 	}
 

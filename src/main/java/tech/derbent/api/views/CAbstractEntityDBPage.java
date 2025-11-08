@@ -16,7 +16,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -33,16 +32,14 @@ import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.services.CAbstractService;
-import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CCrudToolbar;
 import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CSearchToolbar;
 import tech.derbent.api.views.components.CVerticalLayout;
-import tech.derbent.api.views.dialogs.CDialogClone;
+import tech.derbent.api.views.components.ICrudToolbarOwnerPage;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.api.views.grids.CMasterViewSectionGrid;
@@ -50,7 +47,7 @@ import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
-		implements ILayoutChangeListener, IContentOwner, IEntityUpdateListener {
+		implements ILayoutChangeListener, IContentOwner, IEntityUpdateListener, ICrudToolbarOwnerPage {
 
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
@@ -80,7 +77,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		binder = new CEnhancedBinder<>(entityClass);
 		// Initialize CRUD toolbar with minimal constructor and configure
 		crudToolbar = new CCrudToolbar();
-		configureCrudToolbarSaveCallback();
+		crudToolbar.setPageBase(this);
 		createPageContent();
 	}
 
@@ -240,32 +237,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		masterViewSection.selectLastOrFirst(lastEntity.orElse(null));
 	}
 
-	/** Configures the CRUD toolbar with custom save callback that includes validation and error handling. This method sets up the save logic specific
-	 * to CAbstractEntityDBPage which includes pre-save events, binder validation, entity validation, and proper error handling. */
-	private void configureCrudToolbarSaveCallback() {}
-
 	protected void createButtonLayout(final Div layout) {
 		LOGGER.debug("createButtonLayout called - default save/delete/cancel buttons are now in details tab");
 		// Default implementation does nothing - buttons are in the tab Subclasses can
 		// override this for additional custom buttons in the main content area
-	}
-
-	protected CButton createCloneButton(final String buttonText) {
-		final CButton cloneButton = CButton.createCloneButton(buttonText, e -> {
-			LOGGER.debug("Clone button clicked");
-			try {
-				if (currentEntity == null) {
-					new CWarningDialog("Please select an item to clone.").open();
-					return;
-				}
-				final EntityClass selectedEntity = masterViewSection.getSelectedItem();
-				final CDialogClone<EntityClass> dialog = new CDialogClone<EntityClass>(selectedEntity, this::onClonedItem);
-				dialog.open();
-			} catch (final Exception exception) {
-				CNotificationService.showException("Failed to clone the item.", exception);
-			}
-		});
-		return cloneButton;
 	}
 
 	@PostConstruct
@@ -292,46 +267,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		updateLayoutOrientation();
 	}
 
-	/** Creates the button layout for the details tab. Uses CCrudToolbar for CRUD operations.
-	 * @return HorizontalLayout with action buttons */
-	protected HorizontalLayout createDetailsTabButtonLayout() {
-		final HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setClassName("details-tab-button-layout");
-		buttonLayout.setSpacing(true);
-		// Add the CRUD toolbar
-		buttonLayout.add(crudToolbar);
-		// Add clone button separately as it's not part of standard CRUD operations
-		buttonLayout.add(createCloneButton("Clone"));
-		return buttonLayout;
-	}
-
-	/** Creates the left content of the details tab. Subclasses can override this to provide custom tab content.
-	 * @return Component for the left side of the tab */
-	protected Div createDetailsTabLeftContent() {
-		final Div detailsTabLabel = new Div();
-		detailsTabLabel.setText("Details");
-		detailsTabLabel.setClassName("details-tab-label");
-		return detailsTabLabel;
-	}
-
 	/** Creates the default details view tab content with save/delete/cancel buttons. Subclasses can override this method to customize the tab content
 	 * while maintaining consistent button placement and styling. */
 	protected void createDetailsViewTab() {
 		// Clear any existing content
 		getDetailsTabLayout().removeAll();
-		// Create a horizontal layout for the tab content
-		final HorizontalLayout tabContent = new HorizontalLayout();
-		tabContent.setWidthFull();
-		tabContent.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
-		tabContent.setPadding(true);
-		tabContent.setSpacing(true);
-		tabContent.setClassName("details-tab-content");
-		// Left side: Tab label or custom content (can be overridden by subclasses)
-		final Div leftContent = createDetailsTabLeftContent();
-		// Right side: Action buttons
-		final HorizontalLayout buttonLayout = createDetailsTabButtonLayout();
-		tabContent.add(leftContent, buttonLayout);
-		getDetailsTabLayout().add(tabContent);
+		getDetailsTabLayout().add(crudToolbar);
 	}
 
 	public abstract void createGridForEntity(final CGrid<EntityClass> grid);

@@ -4,15 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.view.CDynamicPageBase;
 
 public class CPageServiceProjectItemStatus extends CPageServiceDynamicPage<CProjectItemStatus> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceProjectItemStatus.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceProjectItemStatus(CDynamicPageBase view) {
+	public CPageServiceProjectItemStatus(IPageServiceImplementer view) {
 		super(view);
 	}
 
