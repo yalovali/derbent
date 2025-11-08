@@ -13,9 +13,6 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -43,6 +40,7 @@ import tech.derbent.api.views.components.ICrudToolbarOwnerPage;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.api.views.grids.CMasterViewSectionGrid;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -61,8 +59,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected final CAbstractService<EntityClass> entityService;
 	protected CLayoutService layoutService; // Optional injection
 	protected CMasterViewSectionBase<EntityClass> masterViewSection;
-	protected CNotificationService notificationService; // Optional injection
-	protected tech.derbent.app.activities.service.CProjectItemStatusService projectItemStatusService; // Optional injection
+	protected CProjectItemStatusService projectItemStatusService; // Optional injection
 	protected CSearchToolbar searchToolbar;
 	protected ISessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();
@@ -98,40 +95,24 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		try {
 			final EntityClass current = getCurrentEntity();
 			if (current == null) {
-				if (notificationService != null) {
-					notificationService.showWarning("Please select an item to delete.");
-				} else {
-					showNotification("Please select an item to delete.");
-				}
+				CNotificationService.showWarning("Please select an item to delete.");
 				return;
 			}
 			// Use notification service to confirm deletion if available
-			if (notificationService != null) {
-				try {
-					notificationService.showConfirmationDialog("Delete selected item?", () -> {
-						try {
-							entityService.delete(current.getId());
-							refreshGrid();
-							notificationService.showDeleteSuccess();
-						} catch (final Exception ex) {
-							LOGGER.error("Error deleting entity", ex);
-							showErrorNotification("Failed to delete item");
-						}
-					});
-				} catch (final Exception e) {
-					LOGGER.error("Error showing confirmation dialog", e);
-					showErrorNotification("Failed to delete item");
-				}
-			} else {
-				// fallback: delete immediately
-				try {
-					entityService.delete(current.getId());
-					refreshGrid();
-					showNotification("Item deleted successfully");
-				} catch (final Exception ex) {
-					LOGGER.error("Error deleting entity", ex);
-					showErrorNotification("Failed to delete item");
-				}
+			try {
+				CNotificationService.showConfirmationDialog("Delete selected item?", () -> {
+					try {
+						entityService.delete(current.getId());
+						refreshGrid();
+						CNotificationService.showDeleteSuccess();
+					} catch (final Exception ex) {
+						LOGGER.error("Error deleting entity", ex);
+						showErrorNotification("Failed to delete item");
+					}
+				});
+			} catch (final Exception e) {
+				LOGGER.error("Error showing confirmation dialog", e);
+				showErrorNotification("Failed to delete item");
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Unexpected error during delete action", e);
@@ -178,28 +159,15 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				setCurrentEntity(savedEntity);
 				populateForm();
 				// Show success notification
-				if (notificationService != null) {
-					notificationService.showSaveSuccess();
-				} else {
-					showNotification("Data saved successfully");
-				}
+				CNotificationService.showSaveSuccess();
 				navigateToClass();
 			} catch (final ObjectOptimisticLockingFailureException exception) {
 				LOGGER.error("Optimistic locking failure during save", exception);
-				if (notificationService != null) {
-					notificationService.showOptimisticLockingError();
-				} else {
-					showErrorNotification("Error updating the data. Somebody else has updated the record while you were making changes.");
-				}
+				CNotificationService.showOptimisticLockingError();
 				throw new RuntimeException("Optimistic locking failure during save", exception);
 			} catch (final ValidationException validationException) {
 				LOGGER.error("Validation error during save", validationException);
-				if (notificationService != null) {
-					notificationService
-							.showWarning("Failed to save the data. Please check that all required fields are filled and values are valid.");
-				} else {
-					showErrorNotification("Failed to save the data. Please check that all required fields are filled and values are valid.");
-				}
+				CNotificationService.showWarning("Failed to save the data. Please check that all required fields are filled and values are valid.");
 				throw new RuntimeException("Validation error during save", validationException);
 			} catch (final Exception exception) {
 				LOGGER.error("Unexpected error during save operation", exception);
@@ -369,9 +337,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		});
 	}
 
-	@Override
-	public CNotificationService getNotificationService() { return notificationService; }
-
 	/** Gets the search toolbar component, if available.
 	 * @return the search toolbar component, or null if entity doesn't support searching */
 	public CSearchToolbar getSearchToolbar() {
@@ -457,12 +422,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		LOGGER.debug("Entity deleted, refreshing grid");
 		masterViewSection.selectLastOrFirst(null);
 		refreshGrid();
-		// Show success notification
-		if (notificationService != null) {
-			notificationService.showDeleteSuccess();
-		} else {
-			showNotification("Item deleted successfully");
-		}
+		CNotificationService.showDeleteSuccess();
 	}
 
 	@Override
@@ -475,11 +435,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		setCurrentEntity(savedEntity);
 		populateForm();
 		// Show success notification
-		if (notificationService != null) {
-			notificationService.showSaveSuccess();
-		} else {
-			showNotification("Data saved successfully");
-		}
+		CNotificationService.showSaveSuccess();
 		navigateToClass();
 	}
 
@@ -556,37 +512,17 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		updateLayoutOrientation();
 	}
 
-	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
-	public void setNotificationService(final CNotificationService notificationService) {
-		this.notificationService = notificationService;
-	}
-
 	@Override
 	protected void setupToolbar() {}
 
 	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
 	protected void showErrorNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showError(message);
-		} else {
-			// Fallback to direct Vaadin call if service not injected
-			final Notification notification = Notification.show(message);
-			notification.setPosition(Position.MIDDLE);
-			notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			LOGGER.debug("Shown error notification (fallback): {}", message);
-		}
+		CNotificationService.showError(message);
 	}
 
 	/** Shows a success notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
 	protected void showNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showSuccess(message);
-		} else {
-			// Fallback to direct Vaadin call if service not injected
-			final Notification notification = Notification.show(message);
-			notification.setPosition(Position.BOTTOM_START);
-			LOGGER.debug("Shown notification (fallback): {}", message);
-		}
+		CNotificationService.showSuccess(message);
 	}
 
 	protected abstract void updateDetailsComponent()

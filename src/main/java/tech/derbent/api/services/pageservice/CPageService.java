@@ -11,9 +11,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
 	private EntityClass previousEntity;
-	final protected IPageServiceImplementer view;
+	final protected IPageServiceImplementer<EntityClass> view;
 
-	public CPageService(IPageServiceImplementer view) {
+	public CPageService(IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
 		setPreviousEntity(null);
 	}
@@ -120,12 +120,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public void bind() {}
 
-	@SuppressWarnings ("unchecked")
-	private EntityClass getCurrentEntity() { return (EntityClass) view.getCurrentEntity(); }
+	private EntityClass getCurrentEntity() { return view.getCurrentEntity(); }
 
 	protected Class<?> getEntityClass() { return view.getEntityClass(); }
 
-	@SuppressWarnings ("unchecked")
 	protected CAbstractService<EntityClass> getEntityService() {
 		Check.notNull(view, "View is not set in page service");
 		return view.getEntityService();

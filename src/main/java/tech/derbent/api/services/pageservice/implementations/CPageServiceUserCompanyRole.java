@@ -12,7 +12,7 @@ public class CPageServiceUserCompanyRole extends CPageServiceDynamicPage<CUserCo
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceUserCompanyRole.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceUserCompanyRole(IPageServiceImplementer view) {
+	public CPageServiceUserCompanyRole(IPageServiceImplementer<CUserCompanyRole> view) {
 		super(view);
 	}
 

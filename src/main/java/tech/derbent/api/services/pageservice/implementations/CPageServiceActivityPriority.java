@@ -12,7 +12,7 @@ public class CPageServiceActivityPriority extends CPageServiceDynamicPage<CActiv
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivityPriority.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceActivityPriority(IPageServiceImplementer view) {
+	public CPageServiceActivityPriority(IPageServiceImplementer<CActivityPriority> view) {
 		super(view);
 	}
 

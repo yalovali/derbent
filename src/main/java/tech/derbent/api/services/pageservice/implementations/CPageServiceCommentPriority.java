@@ -12,7 +12,7 @@ public class CPageServiceCommentPriority extends CPageServiceDynamicPage<CCommen
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceCommentPriority.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceCommentPriority(IPageServiceImplementer view) {
+	public CPageServiceCommentPriority(IPageServiceImplementer<CCommentPriority> view) {
 		super(view);
 	}
 

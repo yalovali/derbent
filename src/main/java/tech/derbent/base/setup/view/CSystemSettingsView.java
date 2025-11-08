@@ -1,6 +1,5 @@
 package tech.derbent.base.setup.view;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
@@ -46,8 +45,6 @@ public class CSystemSettingsView extends CAbstractPage {
 	private CSystemSettings currentSettings;
 	private Div formContainer;
 	private VerticalLayout mainLayout;
-	@Autowired (required = false)
-	private CNotificationService notificationService; // Optional injection
 	private ISessionService sessionService;
 	private final CSystemSettingsService systemSettingsService;
 
@@ -303,18 +300,12 @@ public class CSystemSettingsView extends CAbstractPage {
 			final var savedSettings = systemSettingsService.updateSystemSettings(currentSettings);
 			currentSettings = savedSettings;
 			// Show success notification
-			showSuccessNotification("System settings saved successfully");
+			CNotificationService.showInfo("System settings saved successfully");
 			LOGGER.info("System settings saved successfully with ID: {}", savedSettings.getId());
 		} catch (final ValidationException e) {
-			LOGGER.warn("Validation failed when saving system settings", e);
-			if (notificationService != null) {
-				notificationService.showWarning("Please fix validation errors and try again");
-			} else {
-				Notification.show("Please fix validation errors and try again", 3000, Notification.Position.MIDDLE);
-			}
+			CNotificationService.showException("Please fix validation errors and try again", e);
 		} catch (final Exception e) {
-			LOGGER.error("Error saving system settings", e);
-			showErrorNotification("Error saving settings: " + e.getMessage());
+			CNotificationService.showException("Please fix validation errors and try again", e);
 		}
 	}
 
@@ -381,24 +372,6 @@ public class CSystemSettingsView extends CAbstractPage {
 		// No specific toolbar needed for this view
 	}
 
-	/** Shows an error notification using the service if available, falls back to direct call */
-	private void showErrorNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showError(message);
-		} else {
-			Notification.show(message, 5000, Notification.Position.MIDDLE);
-		}
-	}
-
-	/** Shows a success notification using the service if available, falls back to direct call */
-	private void showSuccessNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showSuccess(message);
-		} else {
-			Notification.show(message, 3000, Notification.Position.TOP_CENTER);
-		}
-	}
-
 	/** Shows a warning dialog with the specified message.
 	 * @param message the warning message */
 	private void showWarningDialog(final String message) {
@@ -444,8 +417,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			testDialog.open();
 			LOGGER.info("Configuration test completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error testing configuration", e);
-			showErrorNotification("Error testing configuration: " + e.getMessage());
+			CNotificationService.showException("Error testing configuration: " + e.getMessage(), e);
 		}
 	}
 }

@@ -12,7 +12,7 @@ public class CPageServiceOrder extends CPageServiceDynamicPage<COrder> {
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceOrder.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceOrder(IPageServiceImplementer view) {
+	public CPageServiceOrder(IPageServiceImplementer<COrder> view) {
 		super(view);
 	}
 

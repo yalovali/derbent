@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
@@ -68,8 +67,8 @@ public class CCrudToolbar extends HorizontalLayout {
 		updateButtonStates();
 	}
 
-	/** Creates the workflow status combobox for CProjectItem entities. This method is safe to call repeatedly; it will
-	 * replace any existing combobox. Uses standard Vaadin ComboBox for simplicity. */
+	/** Creates the workflow status combobox for CProjectItem entities. This method is safe to call repeatedly; it will replace any existing combobox.
+	 * Uses standard Vaadin ComboBox for simplicity. */
 	private void createWorkflowStatusComboBox() {
 		try {
 			// Remove existing combobox if present
@@ -141,7 +140,6 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	public void on_actionCreate() {
 		try {
-			LOGGER.debug("Create action triggered from toolbar");
 			pageBase.getPageService().actionCreate();
 		} catch (Exception e) {
 			CNotificationService.showException("Error during create action", e);
@@ -150,7 +148,6 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	public void on_actionDelete() {
 		try {
-			LOGGER.debug("Delete action triggered from toolbar");
 			pageBase.getPageService().actionDelete();
 		} catch (Exception e) {
 			CNotificationService.showException("Error during delete action", e);
@@ -159,7 +156,6 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	public void on_actionRefresh() {
 		try {
-			LOGGER.debug("Refresh action triggered from toolbar");
 			pageBase.getPageService().actionRefresh();
 		} catch (Exception e) {
 			CNotificationService.showException("Error during refresh action", e);
@@ -168,7 +164,6 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	public void on_actionSave() {
 		try {
-			LOGGER.debug("Save action triggered from toolbar");
 			pageBase.getPageService().actionSave();
 		} catch (Exception e) {
 			CNotificationService.showException("Error during save action", e);

@@ -12,7 +12,7 @@ public class CPageServiceActivityType extends CPageServiceDynamicPage<CActivityT
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivityType.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceActivityType(IPageServiceImplementer view) {
+	public CPageServiceActivityType(IPageServiceImplementer<CActivityType> view) {
 		super(view);
 	}
 

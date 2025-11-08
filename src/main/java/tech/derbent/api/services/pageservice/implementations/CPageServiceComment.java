@@ -12,7 +12,7 @@ public class CPageServiceComment extends CPageServiceDynamicPage<CComment> {
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceComment.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceComment(IPageServiceImplementer view) {
+	public CPageServiceComment(IPageServiceImplementer<CComment> view) {
 		super(view);
 	}
 

@@ -12,7 +12,7 @@ public class CPageServiceProjectItemStatus extends CPageServiceDynamicPage<CProj
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceProjectItemStatus.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceProjectItemStatus(IPageServiceImplementer view) {
+	public CPageServiceProjectItemStatus(IPageServiceImplementer<CProjectItemStatus> view) {
 		super(view);
 	}
 

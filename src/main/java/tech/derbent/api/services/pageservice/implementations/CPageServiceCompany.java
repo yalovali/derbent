@@ -12,7 +12,7 @@ public class CPageServiceCompany extends CPageServiceDynamicPage<CCompany> {
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceCompany.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceCompany(IPageServiceImplementer view) {
+	public CPageServiceCompany(IPageServiceImplementer<CCompany> view) {
 		super(view);
 	}
 

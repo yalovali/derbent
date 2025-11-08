@@ -199,7 +199,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			// Set the current entity and populate form
 			setCurrentEntity(entity);
 			populateForm();
-			getNotificationService().showSuccess("New " + getEntityClass().getSimpleName() + " created. Fill in the details and click Save.");
+			CNotificationService.showSuccess("New " + getEntityClass().getSimpleName() + " created. Fill in the details and click Save.");
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity created notification:" + e.getMessage());
 			throw e;
@@ -216,7 +216,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			refreshGrid();
 			clearEntityDetails();
 			grid.selectNextItem();
-			getNotificationService().showDeleteSuccess();
+			CNotificationService.showDeleteSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity deleted notification:" + e.getMessage());
 			throw e;

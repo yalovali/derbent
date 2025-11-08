@@ -12,7 +12,7 @@ public class CPageServiceApprovalStatus extends CPageServiceDynamicPage<CApprova
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceApprovalStatus.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceApprovalStatus(IPageServiceImplementer view) {
+	public CPageServiceApprovalStatus(IPageServiceImplementer<CApprovalStatus> view) {
 		super(view);
 	}
 

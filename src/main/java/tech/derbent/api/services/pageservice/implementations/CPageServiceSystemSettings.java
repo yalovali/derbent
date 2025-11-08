@@ -12,7 +12,7 @@ public class CPageServiceSystemSettings extends CPageServiceDynamicPage<CSystemS
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceSystemSettings.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceSystemSettings(IPageServiceImplementer view) {
+	public CPageServiceSystemSettings(IPageServiceImplementer<CSystemSettings> view) {
 		super(view);
 	}
 

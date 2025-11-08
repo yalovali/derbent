@@ -145,11 +145,9 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Selenium WebDriver for UI Testing -->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>4.15.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -199,4 +197,15 @@
 		</plugins>
 	</build>
 
+	<organization>
+		<name>Lova.tech</name>
+		<url>none</url>
+	</organization>
+	<scm>
+		<developerConnection>Yasin Yilmaz</developerConnection>
+		<tag>yalovali</tag>
+		<connection>yalovali@gmail.com</connection>
+	</scm>
+	<name>Derbent</name>
+	<description>A nice Vaading attempt</description>
 </project>

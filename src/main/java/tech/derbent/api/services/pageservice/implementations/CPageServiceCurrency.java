@@ -12,7 +12,7 @@ public class CPageServiceCurrency extends CPageServiceDynamicPage<CCurrency> {
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceCurrency.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceCurrency(IPageServiceImplementer view) {
+	public CPageServiceCurrency(IPageServiceImplementer<CCurrency> view) {
 		super(view);
 	}
 

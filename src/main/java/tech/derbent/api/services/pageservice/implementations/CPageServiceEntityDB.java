@@ -12,7 +12,7 @@ public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> ex
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceEntityDB.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceEntityDB(IPageServiceImplementer view) {
+	public CPageServiceEntityDB(IPageServiceImplementer<EntityClass> view) {
 		super(view);
 	}
 
@@ -22,8 +22,7 @@ public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> ex
 			Check.notNull(view, "View must not be null to bind page service.");
 			super.bind();
 		} catch (Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity: {}", this.getClass().getSimpleName(),
-					e.getMessage());
+			LOGGER.error("Error binding {} to dynamic page for entity: {}", this.getClass().getSimpleName(), e.getMessage());
 			throw e;
 		}
 	}

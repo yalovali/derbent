@@ -12,7 +12,7 @@ public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> {
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceRisk.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceRisk(IPageServiceImplementer view) {
+	public CPageServiceRisk(IPageServiceImplementer<CRisk> view) {
 		super(view);
 	}
 

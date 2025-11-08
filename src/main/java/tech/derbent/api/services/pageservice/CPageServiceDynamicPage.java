@@ -4,7 +4,7 @@ import tech.derbent.api.domains.CEntityDB;
 
 public abstract class CPageServiceDynamicPage<EntityClass extends CEntityDB<EntityClass>> extends CPageService<EntityClass> {
 
-	public CPageServiceDynamicPage(IPageServiceImplementer view) {
+	public CPageServiceDynamicPage(IPageServiceImplementer<EntityClass> view) {
 		super(view);
 	}
 

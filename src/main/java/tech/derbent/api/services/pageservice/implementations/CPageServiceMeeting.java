@@ -12,7 +12,7 @@ public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting> {
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceMeeting.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceMeeting(IPageServiceImplementer view) {
+	public CPageServiceMeeting(IPageServiceImplementer<CMeeting> view) {
 		super(view);
 	}
 

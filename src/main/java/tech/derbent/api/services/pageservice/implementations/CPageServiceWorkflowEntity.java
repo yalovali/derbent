@@ -13,7 +13,7 @@ public class CPageServiceWorkflowEntity extends CPageServiceDynamicPage<CWorkflo
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceWorkflowEntity.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceWorkflowEntity(IPageServiceImplementer view) {
+	public CPageServiceWorkflowEntity(IPageServiceImplementer<CWorkflowEntity> view) {
 		super(view);
 	}
 

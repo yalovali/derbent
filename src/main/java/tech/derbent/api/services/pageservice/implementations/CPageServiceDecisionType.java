@@ -12,7 +12,7 @@ public class CPageServiceDecisionType extends CPageServiceDynamicPage<CDecisionT
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceDecisionType.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceDecisionType(IPageServiceImplementer view) {
+	public CPageServiceDecisionType(IPageServiceImplementer<CDecisionType> view) {
 		super(view);
 	}
 

@@ -12,7 +12,7 @@ public class CPageServiceOrderApproval extends CPageServiceDynamicPage<COrderApp
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceOrderApproval.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceOrderApproval(IPageServiceImplementer view) {
+	public CPageServiceOrderApproval(IPageServiceImplementer<COrderApproval> view) {
 		super(view);
 	}
 
