@@ -97,8 +97,11 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	public void saveEventHandler() {}
 
 	@Override
-	public void setCurrentEntity(Object entity) {
-		// NOT USED
+	public void setCurrentEntity(CEntityDB<?> entity) {
+		// Delegate to parent content owner
+		if (parentContent != null) {
+			parentContent.setCurrentEntity(entity);
+		}
 	}
 
 	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }

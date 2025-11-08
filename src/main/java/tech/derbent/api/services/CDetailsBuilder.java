@@ -15,6 +15,7 @@ import jakarta.persistence.Persistence;
 import jakarta.persistence.PersistenceUtil;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -143,7 +144,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		CDetailsBuilder.applicationContext = context;
 	}
 
-	public void setCurrentEntity(final Object entity) {
+	public void setCurrentEntity(final CEntityDB<?> entity) {
 		Check.notNull(formBuilder, "Form builder cannot be null, first initialize it");
 		formBuilder.setCurrentEntity(entity);
 	}
