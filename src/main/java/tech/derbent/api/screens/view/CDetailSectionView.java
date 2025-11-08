@@ -88,7 +88,9 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	}
 
 	@Override
-	public void setCurrentEntity(CDetailSection entity) {}
+	public void setCurrentEntity(CEntityDB<?> entity) {
+		super.setCurrentEntity(entity);
+	}
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {

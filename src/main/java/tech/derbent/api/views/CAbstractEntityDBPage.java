@@ -47,7 +47,7 @@ import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
-		implements ILayoutChangeListener, IContentOwner, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
+		implements ILayoutChangeListener, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
@@ -500,7 +500,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	@SuppressWarnings ("unchecked")
 	@Override
-	public void setCurrentEntity(final Object currentEntity) {
+	public void setCurrentEntity(final CEntityDB<?> currentEntity) {
 		LOGGER.debug("Setting current entity: {}", currentEntity);
 		this.currentEntity = (EntityClass) currentEntity;
 	}

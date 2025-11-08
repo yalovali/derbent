@@ -1011,7 +1011,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	/** Populates the form with entity data using the internal binder.
 	 * @param entity the entity to populate the form with */
 	@SuppressWarnings ("unchecked")
-	public void populateForm(Object entity) {
+	public void populateForm(CEntityDB<?> entity) {
 		Check.notNull(entity, "Entity for form population");
 		Check.notNull(binder, "Binder for form population");
 		LOGGER.debug("Populating form with entity: {}", entity);
@@ -1040,7 +1040,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
-	public void setCurrentEntity(Object entity) {
+	public void setCurrentEntity(CEntityDB<?> entity) {
 		componentMap.values().forEach(component -> {
 			if (component instanceof IContentOwner) {
 				try {

@@ -71,7 +71,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	}
 
 	@Override
-	public void setCurrentEntity(CGanntViewEntity entity) {
-		// TODO Auto-generated method stub
+	public void setCurrentEntity(CEntityDB<?> entity) {
+		super.setCurrentEntity(entity);
 	}
 }

@@ -299,7 +299,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 
 	/** Reloads entity values into existing components without rebuilding the UI */
 	@Override
-	public void setCurrentEntity(final Object entity) {
+	public void setCurrentEntity(final CEntityDB<?> entity) {
 		LOGGER.debug("Setting current entity in dynamic page view with sections: {}", entity);
 		try {
 			super.setCurrentEntity(entity);

@@ -148,7 +148,9 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	@SuppressWarnings ("unchecked")
 	@Override
-	public void setCurrentEntity(Object entity) { currentEntity = (EntityClass) entity; }
+	public void setCurrentEntity(CEntityDB<?> entity) { 
+		currentEntity = (EntityClass) entity; 
+	}
 
 	protected void setEntityFields(final List<String> fields) {
 		Check.notNull(fields, "Entity fields list cannot be null");
