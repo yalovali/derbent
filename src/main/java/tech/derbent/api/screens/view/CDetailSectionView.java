@@ -13,6 +13,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceEntityDB;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -29,6 +30,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	public static final String VIEW_NAME = "Detail Section View";
 	private final String ENTITY_ID_FIELD = "screen_id";
 	private final CEntityFieldService entityFieldService;
+	private final CPageService<CDetailSection> pageService;
 	private final CDetailLinesService screenLinesService;
 	private final CViewsService viewsService;
 
@@ -39,6 +41,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;
 		this.viewsService = viewsService;
+		this.pageService = new CPageServiceEntityDB<CDetailSection>(this);
 	}
 
 	@Override
@@ -70,9 +73,22 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	public CPageService<?> getPageService() { // TODO Auto-generated method stub
+	public CPageService<CDetailSection> getPageService() { // TODO Auto-generated method stub
+		return pageService;
+	}
+
+	@Override
+	public ISessionService getSessionService() { // TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void selectFirstInGrid() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void setCurrentEntity(CDetailSection entity) {}
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {

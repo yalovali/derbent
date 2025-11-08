@@ -25,7 +25,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
-	private Object currentEntity; // Field to store current entity
+	private CEntityDB<?> currentEntity; // Field to store current entity
 	protected final CDetailsBuilder detailsBuilder;
 	protected CLayoutService layoutService;
 	private IContentOwner parentContent;
@@ -104,7 +104,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	protected CEnhancedBinder<CEntityDB<?>> getCurrentBinder() { return currentBinder; }
 
 	@Override
-	public Object getCurrentEntity() { return currentEntity; }
+	public CEntityDB<?> getCurrentEntity() { return currentEntity; }
 
 	@Override
 	public String getCurrentEntityIdString() {
@@ -113,7 +113,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 			return null;
 		}
 		if (currentEntity instanceof CEntityDB<?>) {
-			final CEntityDB<?> entity = (CEntityDB<?>) currentEntity;
+			final CEntityDB<?> entity = currentEntity;
 			return entity.getId().toString();
 		}
 		return null;
@@ -150,7 +150,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 			// Default implementation - populate current binder if available
 			if ((currentBinder != null) && (getCurrentEntity() != null)) {
 				LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
-				currentBinder.setBean((CEntityDB<?>) getCurrentEntity());
+				currentBinder.setBean(getCurrentEntity());
 			} else if (currentBinder != null) {
 				LOGGER.debug("Clearing form - no current entity");
 				currentBinder.setBean(null);
@@ -169,7 +169,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	public void setContentOwner(final IContentOwner owner) { parentContent = owner; }
 
 	@Override
-	public void setCurrentEntity(final Object entity) {
+	public void setCurrentEntity(final CEntityDB<?> entity) {
 		try {
 			if (entity == null) {
 				LOGGER.debug("Setting current entity to null.");

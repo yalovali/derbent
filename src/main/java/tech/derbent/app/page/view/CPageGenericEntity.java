@@ -28,7 +28,7 @@ import tech.derbent.base.session.service.ISessionService;
  * reflection and generic patterns.
  * @param <EntityClass> The entity type this page manages */
 public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityClass>> extends CPageBaseProjectAware
-		implements IEntityUpdateListener, ILayoutChangeListener {
+		implements IEntityUpdateListener<EntityClass>, ILayoutChangeListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageGenericEntity.class);
 	private static final long serialVersionUID = 1L;
@@ -240,7 +240,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	/** Implementation of CEntityUpdateListener - called when an entity is deleted
 	 * @throws Exception */
 	@Override
-	public void onEntityDeleted(CEntityDB<?> entity) throws Exception {
+	public void onEntityDeleted(EntityClass entity) throws Exception {
 		LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 		refreshGrid();
 		getBaseDetailsLayout().removeAll();
@@ -249,8 +249,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved
 	 * @throws Exception */
+	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntitySaved(CEntityDB<?> entity) throws Exception {
+	public void onEntitySaved(CEntityDB entity) throws Exception {
 		try {
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(entity, "Saved entity cannot be null");

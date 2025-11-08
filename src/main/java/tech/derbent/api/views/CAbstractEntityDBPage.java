@@ -25,10 +25,11 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntity;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
@@ -41,11 +42,12 @@ import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.api.views.grids.CMasterViewSectionGrid;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
+import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
-		implements ILayoutChangeListener, IContentOwner, IEntityUpdateListener, ICrudToolbarOwnerPage {
+		implements ILayoutChangeListener, IContentOwner, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
@@ -63,7 +65,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected CSearchToolbar searchToolbar;
 	protected ISessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();
-	protected tech.derbent.app.workflow.service.CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
+	protected CWorkflowStatusRelationService workflowStatusRelationService; // Optional injection
 
 	protected CAbstractEntityDBPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService,
 			final ISessionService sessionService) {
@@ -292,6 +294,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	public HasComponents getBaseDetailsLayout() { return baseDetailsLayout; }
 
+	@Override
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
 	@Override
@@ -306,6 +309,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	public Div getDetailsTabLayout() { return detailsTabLayout; }
 
+	@Override
 	public Class<EntityClass> getEntityClass() { return entityClass; }
 
 	protected abstract String getEntityRouteIdField();
@@ -336,6 +340,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			return (int) Math.min(total, Integer.MAX_VALUE);
 		});
 	}
+
+	@Override
+	public abstract CPageService<EntityClass> getPageService();
 
 	/** Gets the search toolbar component, if available.
 	 * @return the search toolbar component, or null if entity doesn't support searching */
@@ -409,16 +416,15 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	// Implementation of IEntityUpdateListener interface
 	@Override
-	public void onEntityCreated(final CEntityDB<?> entity) throws Exception {
+	public void onEntityCreated(final EntityClass entity) {
 		LOGGER.debug("Entity created, populating form");
-		@SuppressWarnings ("unchecked")
-		final EntityClass newEntity = (EntityClass) entity;
+		final EntityClass newEntity = entity;
 		setCurrentEntity(newEntity);
 		populateForm();
 	}
 
 	@Override
-	public void onEntityDeleted(final CEntityDB<?> entity) throws Exception {
+	public void onEntityDeleted(final EntityClass entity) throws Exception {
 		LOGGER.debug("Entity deleted, refreshing grid");
 		masterViewSection.selectLastOrFirst(null);
 		refreshGrid();
@@ -426,12 +432,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@Override
-	public void onEntitySaved(final CEntityDB<?> entity) throws Exception {
+	public void onEntitySaved(final EntityClass entity) throws Exception {
 		LOGGER.debug("Entity saved, refreshing grid");
 		refreshGrid();
 		// Update current entity with saved version
-		@SuppressWarnings ("unchecked")
-		final EntityClass savedEntity = (EntityClass) entity;
+		final EntityClass savedEntity = entity;
 		setCurrentEntity(savedEntity);
 		populateForm();
 		// Show success notification

@@ -186,8 +186,9 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 		}
 	}
 
+	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityCreated(final CEntityDB<?> entity) throws Exception {
+	public void onEntityCreated(CEntityDB entity) throws Exception {
 		try {
 			LOGGER.debug("Entity created notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(entity, "Created entity cannot be null");
@@ -207,8 +208,9 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 	}
 
 	// Implementation of CEntityUpdateListener
+	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityDeleted(final CEntityDB<?> entity) {
+	public void onEntityDeleted(final CEntityDB entity) {
 		try {
 			LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(grid, "Grid component is not initialized");
@@ -223,8 +225,15 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 		}
 	}
 
+	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntitySaved(final CEntityDB<?> entity) {
+	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntitySaved(final CEntityDB entity) {
 		try {
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(grid, "Grid component is not initialized");

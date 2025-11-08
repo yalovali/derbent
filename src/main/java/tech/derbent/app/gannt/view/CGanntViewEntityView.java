@@ -54,7 +54,22 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 	}
 
 	@Override
-	public CPageService<?> getPageService() { // TODO Auto-generated method stub
+	public CPageService<CGanntViewEntity> getPageService() { // TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ISessionService getSessionService() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void selectFirstInGrid() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void setCurrentEntity(CGanntViewEntity entity) {
+		// TODO Auto-generated method stub
 	}
 }

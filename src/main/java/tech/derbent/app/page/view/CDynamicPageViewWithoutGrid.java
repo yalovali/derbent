@@ -113,4 +113,33 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 	protected void locateItemById(final Long pageItemId) {
 		return;
 	}
+
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntityCreated(CEntityDB newEntity) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntityDeleted(CEntityDB entity) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntitySaved(CEntityDB savedEntity) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void setCurrentEntity(CEntityDB entity) {
+		// TODO Auto-generated method stub
+	}
 }

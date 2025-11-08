@@ -4,19 +4,20 @@ import java.lang.reflect.Field;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.services.pageservice.service.CPageServiceUtility;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 
-public abstract class CDynamicPageBase extends CPageBaseProjectAware implements IEntityUpdateListener {
+@SuppressWarnings ("rawtypes")
+public abstract class CDynamicPageBase extends CPageBaseProjectAware implements IPageServiceImplementer {
 
 	private static final long serialVersionUID = 1L;
 	protected Class<?> currentEntityType = null;
@@ -62,10 +63,11 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		currentEntityType = null;
 	}
 
+	@Override
 	public Class<?> getEntityClass() { return entityClass; }
 
 	@Override
-	public CAbstractService<?> getEntityService() { return entityService; }
+	public CAbstractService getEntityService() { return entityService; }
 
 	/** Get the page entity this view represents. */
 	public CPageEntity getPageEntity() { return pageEntity; }
@@ -119,7 +121,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	protected abstract void locateItemById(Long pageItemId);
 
 	@SuppressWarnings ({
-			"unchecked", "rawtypes"
+			"unchecked"
 	})
 	protected void rebuildEntityDetails(final Class<?> clazz) throws Exception {
 		try {
@@ -136,13 +138,14 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	}
 
 	/** Select the first item in grid. Subclasses with grids should override this. */
+	@Override
 	public void selectFirstInGrid() {
 		// Default implementation - subclasses with grids should override
 		LOGGER.debug("selectFirstInGrid called on base class (no-op)");
 	}
 
 	@Override
-	public void setCurrentEntity(final Object entity) {
+	public void setCurrentEntity(final CEntityDB<?> entity) {
 		super.setCurrentEntity(entity);
 		if (entity == null) {
 			currentEntityType = null;

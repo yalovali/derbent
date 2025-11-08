@@ -65,7 +65,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 					final CEntityDB<?> reloaded = getEntityService().getById(previousEntity.getId()).orElse(null);
 					if (reloaded != null) {
 						setCurrentEntity((EntityClass) reloaded);
-						view.onEntityRefreshed(reloaded);
+						view.onEntityRefreshed((EntityClass) reloaded);
 					} else {
 						// previous entity no longer exists, clear selection
 						view.selectFirstInGrid();
@@ -83,7 +83,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 			final CEntityDB<?> reloaded = getEntityService().getById(entity.getId()).orElse(null);
 			if (reloaded != null) {
-				view.onEntityRefreshed(reloaded);
+				view.onEntityRefreshed((EntityClass) reloaded);
 			} else {
 				view.selectFirstInGrid();
 			}
