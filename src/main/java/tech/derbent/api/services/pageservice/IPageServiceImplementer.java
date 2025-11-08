@@ -18,4 +18,5 @@ public interface IPageServiceImplementer<EntityClass extends CEntityDB<EntityCla
 	void onEntitySaved(EntityClass savedEntity);
 	void populateForm();
 	void selectFirstInGrid();
+	void setCurrentEntity(EntityClass entity);
 }

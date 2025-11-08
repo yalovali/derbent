@@ -156,16 +156,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			// Create toolbar with minimal constructor and configure
 			crudToolbar = new CCrudToolbar();
 			crudToolbar.setPageBase(this);
-			crudToolbar.setEntityService(getEntityService());
-			crudToolbar.setWorkflowStatusRelationService(getWorkflowStatusRelationService());
-			crudToolbar.setNewEntitySupplier(() -> {
-				try {
-					return createNewEntityInstance();
-				} catch (Exception e) {
-					CNotificationService.showException("Error creating new entity instance", e);
-				}
-				return null;
-			});
 			configureCrudToolbar(crudToolbar);
 			splitBottomLayout.addComponentAsFirst(crudToolbar);
 			grid.selectNextItem();
