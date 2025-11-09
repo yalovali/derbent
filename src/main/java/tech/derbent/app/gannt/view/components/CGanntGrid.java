@@ -38,9 +38,11 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 		dataProvider = new CGanttDataProvider(project, activityService, meetingService);
 		addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_COMPACT);
 		setHeightFull();
-		setDataProvider(dataProvider);
-		createColumns();
-	}
+                setDataProvider(dataProvider);
+                asSingleSelect().setDeselectAllowed(false);
+                createColumns();
+                ensureSelectionWhenDataAvailable();
+        }
 
 	/** Calculate the overall timeline range from all items to properly scale the bars. */
 	private void calculateTimelineRange() {
@@ -105,9 +107,11 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 	}
 
 	/** Public refresh hook. */
-	public void refresh() {
-		dataProvider.refreshAll();
-	}
+        public void refresh() {
+                dataProvider.refreshAll();
+                getDataCommunicator().reset();
+                ensureSelectionWhenDataAvailable();
+        }
 
 	/** Set the timeline column width and refresh the view.
 	 * @param widthPixels The new width in pixels */

@@ -47,8 +47,8 @@ import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
-import tech.derbent.app.gannt.service.CGanntInitializerService;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
+import tech.derbent.app.gannt.service.CGannttItemInitializerService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.app.meetings.service.CMeetingInitializerService;
@@ -1183,7 +1183,8 @@ public class CDataInitializer {
                                         COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
                                         CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
                                         CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CGannttItemInitializerService.initialize(project, gridEntityService, screenService,
+                                                        pageEntityService, ganntViewEntityService);
                                         CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
                                         CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Project-specific type and configuration entities

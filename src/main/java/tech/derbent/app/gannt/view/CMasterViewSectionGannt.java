@@ -111,6 +111,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 			add(grid);
+			grid.refresh();
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());

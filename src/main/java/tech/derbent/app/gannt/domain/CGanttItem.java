@@ -1,6 +1,7 @@
 package tech.derbent.app.gannt.domain;
 
 import java.time.LocalDate;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.utils.CAuxillaries;
@@ -22,27 +23,30 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 
 	/** Constructor for CGanttItem.
 	 * @param entity The project item to wrap */
-	public CGanttItem(final CProjectItem<?> entity) {
-		this.entity = entity;
-		this.id = 0L;
-		entityType = entity.getClass().getSimpleName();
-		startDate = entity.getStartDate();
-		endDate = entity.getEndDate();
-		parentId = entity.getParentId();
-		parentType = entity.getParentType();
+        public CGanttItem(final CProjectItem<?> entity) {
+                Check.notNull(entity, "Project item cannot be null");
+                this.entity = entity;
+                this.id = entity.getId();
+                entityType = entity.getClass().getSimpleName();
+                startDate = entity.getStartDate();
+                endDate = entity.getEndDate();
+                parentId = entity.getParentId();
+                parentType = entity.getParentType();
 		hierarchyLevel = 0; // Will be calculated by hierarchy service
 	}
 
 	/** Constructor with hierarchy level.
 	 * @param entity         The project item to wrap
 	 * @param hierarchyLevel The level in the hierarchy (0 = top level) */
-	public CGanttItem(final CProjectItem<?> entity, final int hierarchyLevel) {
-		this.entity = entity;
-		entityType = entity.getClass().getSimpleName();
-		startDate = entity.getStartDate();
-		endDate = entity.getEndDate();
-		parentId = entity.getParentId();
-		parentType = entity.getParentType();
+        public CGanttItem(final CProjectItem<?> entity, final int hierarchyLevel) {
+                Check.notNull(entity, "Project item cannot be null");
+                this.entity = entity;
+                this.id = entity.getId();
+                entityType = entity.getClass().getSimpleName();
+                startDate = entity.getStartDate();
+                endDate = entity.getEndDate();
+                parentId = entity.getParentId();
+                parentType = entity.getParentType();
 		this.hierarchyLevel = hierarchyLevel;
 	}
 
