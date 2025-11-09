@@ -1,23 +1,51 @@
-# Repository Guidelines
+# AGENTS Playbook
 
-## Project Structure & Module Organization
-The project runs on Maven, Spring Boot, and Vaadin. Shared framework code lives in `src/main/java/tech/derbent/api/` (base entities, services, views). Feature modules under `tech.derbent/*` mirror the `domain/`, `service/`, `view/` tiers. Frontend assets sit in `src/main/frontend`, configuration and sample data in `src/main/resources`, and UI automation in `src/test/java/automated_tests/tech/derbent/ui/automation`. Pattern docs—especially authentication—reside in `docs/implementation/`.
+## 1. Orientation
+- Platform: Spring Boot + Vaadin + Maven. Shared framework code is under `src/main/java/tech/derbent/api/`; every feature module in `tech/derbent/*` mirrors the `domain/ → service/ → view/` layering from `docs/development/project-structure.md`.
+- Frontend/Vaadin assets live in `src/main/frontend`; configuration, seeds, and metadata live in `src/main/resources`; UI automation sits in `src/test/java/automated_tests/tech/derbent/ui/automation`.
+- Documentation is organized by subject (`docs/architecture`, `docs/development`, `docs/implementation`, `docs/testing`). Most coding rules referenced here come from `docs/architecture/coding-standards.md`, `docs/architecture/multi-user-singleton-advisory.md`, and `docs/development/copilot-guidelines.md`.
 
-## Build, Test, and Development Commands
-- `./mvnw spring-boot:run -Dspring.profiles.active=h2` launches the app against in-memory H2.
-- `./mvnw clean verify` compiles, runs tests, and builds Vaadin assets.
-- `./run-playwright-tests.sh [menu|login|comprehensive|all]` runs headless UI flows with automatic browser management.
-- `./run-playwright-visible-postgres.sh` replays the menu navigation suite against a live PostgreSQL database with a visible browser.
-- `mvn spring-boot:run -Dspring-boot.run.main-class=tech.derbent.api.dbResetApplication -Dspring-boot.run.profiles=reset-db` repopulates sample data via the reset profile.
+## 2. Core Commands
+- `./mvnw spring-boot:run -Dspring.profiles.active=h2` starts the local app with the in-memory H2 profile.
+- `./mvnw clean verify` compiles, runs Spotless/Prettier, executes tests, and builds Vaadin assets; use it (or at least `./mvnw spotless:apply`) before review.
+- `./run-playwright-tests.sh [menu|login|comprehensive|all]` runs the headless UI suites; `./run-playwright-visible-postgres.sh` replays the menu suite against a live Postgres instance with a visible browser.
+- Reset sample data via `mvn spring-boot:run -Dspring-boot.run.main-class=tech.derbent.api.dbResetApplication -Dspring-boot.run.profiles=reset-db`.
 
-## Coding Style & Naming Conventions
-Indent Java with four spaces and keep the C-prefix convention (`CProjectView`, `CActivityService`) so custom code is immediately recognizable. Extend the generic base classes in `api/` rather than duplicating logic, and preserve the `domain/` → `service/` → `view/` structure in each module. Maintain `VIEW_NAME` constants and expose deterministic element IDs (`#custom-…`) for Playwright. Run `./mvnw spotless:apply` prior to review to apply the shared Eclipse formatter and Prettier rules.
+## 3. Coding Standards
+- **C-prefix everywhere**: all concrete classes start with `C` (e.g., `CActivity`, `CActivityService`, `CActivityView`). Interfaces use `I*`, tests use `C*Test`. This is non-negotiable and central to AI/code navigation.
+- **Extend the base layers**: entities extend the closest `api/domains` base (e.g., `CProjectItem<T>`), services extend the matching `api/services` base, and views extend the Vaadin base views. Reuse metadata annotations and helper components from `tech.derbent.api`.
+- **Type safety + metadata**: never use raw types; annotate entity fields with validation constraints plus `@AMetaData` (display name, order, requirements) so Vaadin builders stay deterministic.
+- **IDs & constants**: keep `VIEW_NAME`, `TITLE`, and DOM IDs (`#custom-*`) consistent for Playwright selectors. Constants are `static final`, SCREAMING_SNAKE_CASE.
+- **Formatting**: four spaces in Java, shared Eclipse formatter + Prettier. Run `./mvnw spotless:apply` before pushing.
 
-## Testing Guidelines
-UI suites must extend `CBaseUITest` to reuse its login, navigation, wait, and screenshot helpers. Place classes in the automation package, suffix with `*Test`, and run against the H2-backed `test` profile (`./mvnw test -Dspring.profiles.active=test`). Favor resilient selectors (`#custom-username-input`, `vaadin-button:has-text('Save')`), reuse semantic waits (`wait_afterlogin()`), and avoid `Thread.sleep`. Headless runs write PNGs to `target/screenshots/`; keep only meaningful evidence and refresh baselines when new views land.
+## 4. Stateless Service Pattern (Multi-User Safe)
+- Services are singleton-scoped, so they **must not** hold mutable user/project/company state. Only keep injected dependencies, loggers, and constants as fields. All user/company/project context is retrieved per method call via `ISessionService`.
+- No static mutable collections; if you truly need listeners/caches, store them in VaadinSession (see `docs/architecture/multi-user-singleton-advisory.md`) or persist them.
+- Access control annotations (`@PreAuthorize`, `@RolesAllowed`) and transaction boundaries (`@Transactional` / `@Transactional(readOnly = true)`) are required on service entry points.
+- Checklist reminders from `docs/development/multi-user-development-checklist.md`: never cache session lookups, no instance collections of user data, and write tests that mock `ISessionService` for context.
 
-## Commit & Pull Request Guidelines
-Keep commit summaries short, present tense, and imperative (e.g., “Add Playwright login regression”). Group related changes and include follow-up notes in the body when touching multiple modules. Pull requests should link Jira/GitHub issues when applicable, outline testing performed (command output or Playwright suite), and attach screenshots for UI-facing work. Update relevant docs under `docs/` when patterns or conventions shift, and ensure Spotless plus test suites pass before requesting review.
+## 5. View & Component Rules
+- Vaadin views keep the `@Route`, `@PageTitle`, and layout definitions in dedicated initialization methods. Each view maintains deterministic component IDs for UI automation and reuses shared components from `tech.derbent.api.ui`.
+- UI classes may keep state in instance fields (per-user instances) but must clean up listeners on detach and use `UI.access()` for async updates.
+- Follow the pattern docs in `docs/architecture/view-layer-patterns.md` for layout scaffolding, and consult `docs/development/copilot-guidelines.md` for entity/service/view scaffolds that Copilot can mirror.
 
-## Security & Company Context Patterns
-Follow the company-aware login pattern (`username@company_id`) from `docs/implementation/COMPANY_LOGIN_PATTERN.md`. `CCustomLoginView` concatenates the identifier; `CUserService` splits it and queries `findByUsername(company_id, login)`. Services must read company context via the session service and fail fast when absent. Keep `@OnDelete(CASCADE)` mappings intact so company or project teardown cascades cleanly. Document and test multi-tenant rules as they appear.
+## 6. Testing Expectations
+- Unit/service tests suffix with `*Test`, mock the session, and never share mutable fixtures. UI automation extends `CBaseUITest` to reuse login/navigation helpers and semantic waits (`wait_afterlogin()` etc.).
+- Run backend tests with `./mvnw test -Dspring.profiles.active=test`. Playwright screenshots go to `target/screenshots/`—keep only meaningful artifacts and refresh baselines when UI changes.
+- Selectors should be stable (`#custom-username-input`, `vaadin-button:has-text("Save")`) and avoid brittle XPath or `Thread.sleep`.
+
+## 7. Security & Tenant Context
+- Login pattern: `username@company_id` (see `docs/implementation/COMPANY_LOGIN_PATTERN.md`). `CCustomLoginView` constructs the identifier, `CUserService` splits it (`findByUsername(companyId, login)`), and services must fail fast when company context is missing.
+- Entities rely on cascading deletes (`@OnDelete(CASCADE)`) to respect tenant cleanup; keep these annotations intact whenever you touch associations.
+- Always read company/project context through the session service or request scope—never trust caller-provided IDs without verifying ownership.
+
+## 8. Workflow & Reviews
+- Commits: short, present-tense, imperative (e.g., “Add Playwright login regression”). Group related changes, describe cross-module impacts in the body, and link Jira/GitHub issues where possible.
+- PRs: document commands/tests run, include screenshots for UI work, and update relevant docs under `docs/` when patterns/flows change.
+- Before requesting review: Spotless/Prettier clean, `./mvnw clean verify` (or a scoped test plan if faster), and Playwright evidence when UI changes are involved.
+
+## 9. Reference Map
+- Architecture deep dives: `docs/architecture/coding-standards.md`, `service-layer-patterns.md`, `view-layer-patterns.md`, `multi-user-singleton-advisory.md`.
+- Development quickstarts: `docs/development/getting-started.md`, `project-structure.md`, `copilot-guidelines.md`, `multi-user-development-checklist.md`.
+- Security/authentication: `docs/implementation/COMPANY_LOGIN_PATTERN.md`, `LOGIN_AUTHENTICATION_MECHANISM.md`.
+- Testing: `docs/testing/*` plus Playwright scripts (`run-playwright-tests.sh`, `run-playwright-visible-h2.sh`, etc.).
