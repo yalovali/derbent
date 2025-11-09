@@ -54,7 +54,9 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		CProject currentProject = null;
 		currentProject = sessionService.getActiveProject().orElse(null);
 		grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
-		grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
+		// Gantt chart uses CGanttItem DTO, not actual entities, so selection is disabled to prevent binding errors
+		// CGanttItem is a read-only display wrapper and should not trigger detail view editing
+		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
 		add(grid);
 		refreshMasterView();
 	}
@@ -62,7 +64,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	public EntityClass getSelectedItem() {
 		LOGGER.debug("Getting selected item from Gantt chart");
-		return null; // Gantt chart doesn't have traditional selection
+		return null; // Gantt chart doesn't support selection - CGanttItem is a DTO, not an editable entity
 	}
 
 	@Override
@@ -85,14 +87,20 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	public void onProjectChanged(final CProject newProject) throws Exception {
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
-		refreshMasterView();
+		try {
+			refreshMasterView();
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing Gantt chart on project change: {}", e.getMessage(), e);
+			// USER ENTRY POINT: Display exception to user
+			tech.derbent.api.ui.notifications.CNotifications.showErrorDialog(e);
+		}
 	}
 
 	@SuppressWarnings ("unchecked")
 	protected void onSelectionChange(final ValueChangeEvent<?> event) {
-		LOGGER.debug("Gantt chart selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
-		final EntityClass value = (EntityClass) event.getValue();
-		fireEvent(new SelectionChangeEvent<>(this, value));
+		// NOTE: This method is no longer used as selection is disabled in Gantt grid
+		// CGanttItem is a DTO wrapper, not an editable entity, so selection would cause binding errors
+		LOGGER.debug("Gantt chart selection changed (deprecated): {}", event.getValue() != null ? event.getValue().toString() : "null");
 	}
 
 	@Override
@@ -107,7 +115,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			}
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
-			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());
+			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage(), e);
 			throw e;
 		}
 	}
