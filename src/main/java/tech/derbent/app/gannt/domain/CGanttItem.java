@@ -24,7 +24,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param entity The project item to wrap */
 	public CGanttItem(final CProjectItem<?> entity) {
 		this.entity = entity;
-		this.id = 0L;
+		this.id = entity.getId();
 		entityType = entity.getClass().getSimpleName();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
@@ -38,6 +38,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param hierarchyLevel The level in the hierarchy (0 = top level) */
 	public CGanttItem(final CProjectItem<?> entity, final int hierarchyLevel) {
 		this.entity = entity;
+		this.id = entity.getId();
 		entityType = entity.getClass().getSimpleName();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();

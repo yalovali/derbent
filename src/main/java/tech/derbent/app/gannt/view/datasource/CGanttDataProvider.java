@@ -28,6 +28,7 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 	private final Logger LOGGER = LoggerFactory.getLogger(CGanttDataProvider.class);
 	private final CMeetingService meetingService;
 	private final CProject project;
+	private List<CGanttItem> cachedItems;
 
 	public CGanttDataProvider(final CProject project, final CActivityService activityService, final CMeetingService meetingService) {
 		this.project = project;
@@ -37,8 +38,16 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 
 	@Override
 	protected Stream<CGanttItem> fetchFromBackEnd(final Query<CGanttItem, Void> query) {
-		final List<CGanttItem> allItems = loadItems();
+		final List<CGanttItem> allItems = getCachedItems();
 		return allItems.stream().skip(query.getOffset()).limit(query.getLimit());
+	}
+
+	/** Get cached items or load them if not cached. */
+	private List<CGanttItem> getCachedItems() {
+		if (cachedItems == null) {
+			cachedItems = loadItems();
+		}
+		return cachedItems;
 	}
 
 	/** Merge activities and meetings into CGanttItems. */
@@ -58,11 +67,18 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 		}
 		// --- Sıralama: startDate → endDate (null'lar sonda)
 		items.sort(BY_TIMELINE);
+		LOGGER.debug("Loaded {} Gantt items total", items.size());
 		return items;
 	}
 
 	@Override
+	public void refreshAll() {
+		cachedItems = null; // Clear cache on refresh
+		super.refreshAll();
+	}
+
+	@Override
 	protected int sizeInBackEnd(final Query<CGanttItem, Void> query) {
-		return loadItems().size();
+		return getCachedItems().size();
 	}
 }

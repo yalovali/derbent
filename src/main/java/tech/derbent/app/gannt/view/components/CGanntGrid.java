@@ -74,6 +74,7 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 	private void createColumns() {
 		// Calculate timeline range from all items
 		calculateTimelineRange();
+		addIdColumn(CGanttItem::getEntityId, "ID", "entityId").setFlexGrow(0);
 		addShortTextColumn(CGanttItem::getEntityType, "Type", "entityType").setWidth("80px").setFlexGrow(0);
 		// Title column with hierarchical indentation based on hierarchy level
 		addColumn(item -> {
