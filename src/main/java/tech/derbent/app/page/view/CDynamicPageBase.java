@@ -77,7 +77,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		try {
 			Check.notNull(pageEntity, "Page entity cannot be null");
 			Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
-			var constructor = clazz.getDeclaredConstructor(CDynamicPageBase.class);
+			var constructor = clazz.getDeclaredConstructor(IPageServiceImplementer.class);
 			CPageService<?> page = (CPageService<?>) constructor.newInstance(this);
 			Check.notNull(page, "Page service instance cannot be null for page: " + pageEntity.getPageTitle());
 			return page;

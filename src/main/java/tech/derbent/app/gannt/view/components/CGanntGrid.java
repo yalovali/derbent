@@ -33,6 +33,7 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 	public CGanntGrid(final CProject project, final CActivityService activityService, final CMeetingService meetingService,
 			final CPageEntityService pageEntityService) {
 		super(CGanttItem.class);
+		LOGGER.debug("Initializing CGanntGrid for project: {} (ID: {})", project.getName(), project.getId());
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(pageEntityService, "PageEntityService cannot be null");
 		dataProvider = new CGanttDataProvider(project, activityService, meetingService);

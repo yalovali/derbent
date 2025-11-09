@@ -10,7 +10,6 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IProjectChangeListener;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAbstractEntityDBPage;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
@@ -52,6 +51,11 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	public void createMasterView() throws Exception {
 		LOGGER.debug("Creating Gantt chart master view");
+		CProject currentProject = null;
+		currentProject = sessionService.getActiveProject().orElse(null);
+		grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
+		grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
+		add(grid);
 		refreshMasterView();
 	}
 
@@ -95,27 +99,26 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	public void refreshMasterView() throws Exception {
 		try {
 			LOGGER.debug("Refreshing Gantt chart master view");
-			// Get current project from session (with null safety)
-			CProject currentProject = null;
-			currentProject = sessionService.getActiveProject().orElse(null);
-			Check.notNull(sessionService, "Session service is not available");
-			Check.notNull(currentProject, "No active project in session");
-			Check.notNull(activityService, "Activity service is not available");
-			Check.notNull(meetingService, "Meeting service is not available");
-			removeAll();
+			removeAllButGrid();
 			// Create and display new Gantt grid for current project
 			Component toolbar = createGridToolbar();
 			if (toolbar != null) {
 				add(toolbar);
 			}
-			grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
-			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
-			add(grid);
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());
 			throw e;
 		}
+	}
+
+	public void removeAllButGrid() {
+		// iteraate over all components and remove all but the grid
+		getChildren().forEach(component -> {
+			if (component != grid) {
+				remove(component);
+			}
+		});
 	}
 
 	@Override

@@ -48,6 +48,7 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 		// --- Activities ---
 		final List<CActivity> activities = activityService.listByProject(project);
 		for (final CActivity a : activities) {
+			LOGGER.debug("Adding activity to Gantt items: {} (ID: {})", a.getId(), a.getName());
 			items.add(new CGanttItem(a));
 		}
 		// --- Meetings ---
