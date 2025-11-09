@@ -1,15 +1,29 @@
 package tech.derbent.api.views.grids;
 
 import java.util.List;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.views.CAbstractEntityDBPage;
 import tech.derbent.api.views.components.CVerticalLayout;
-import tech.derbent.api.views.grids.CMasterViewSectionGrid.SelectionChangeEvent;
 
 public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout {
+
+	// --- Custom Event Definition ---
+	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionBase<T>> {
+
+		private static final long serialVersionUID = 1L;
+		private final T selectedItem;
+
+		public SelectionChangeEvent(final CMasterViewSectionBase<T> source, final T selectedItem) {
+			super(source, false);
+			this.selectedItem = selectedItem;
+		}
+
+		public T getSelectedItem() { return selectedItem; }
+	}
 
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;

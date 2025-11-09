@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -24,20 +23,6 @@ import tech.derbent.base.session.service.ISessionService;
 
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass>
 		implements IProjectChangeListener {
-
-	// --- Custom Event Definition ---
-	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionGannt<T>> {
-
-		private static final long serialVersionUID = 1L;
-		private final T selectedItem;
-
-		public SelectionChangeEvent(final CMasterViewSectionGannt<T> source, final T selectedItem) {
-			super(source, false);
-			this.selectedItem = selectedItem;
-		}
-
-		public T getSelectedItem() { return selectedItem; }
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGannt.class);
 	private static final long serialVersionUID = 1L;
