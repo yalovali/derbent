@@ -3,6 +3,7 @@ package tech.derbent.app.gannt.view.datasource;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,22 +64,24 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 	private List<CGanttItem> loadItems() {
 		LOGGER.debug("Loading Gantt items for project: {} (ID: {})", project.getName(), project.getId());
 		final List<CGanttItem> items = new ArrayList<>();
+		// Counter to ensure unique IDs across different entity types (Activity ID=1, Meeting ID=1 would collide)
+		final AtomicLong idCounter = new AtomicLong(0);
 		try {
 			// --- Activities ---
 			final List<CActivity> activities = activityService.listByProject(project);
 			for (final CActivity a : activities) {
 				LOGGER.debug("Adding activity to Gantt items: {} (ID: {})", a.getId(), a.getName());
-				items.add(new CGanttItem(a));
+				items.add(new CGanttItem(a, idCounter.incrementAndGet()));
 			}
 			// --- Meetings ---
 			final List<CMeeting> meetings = meetingService.listByProject(project);
 			for (final CMeeting m : meetings) {
 				LOGGER.debug("Adding meeting to Gantt items: {} (ID: {})", m.getId(), m.getName());
-				items.add(new CGanttItem(m));
+				items.add(new CGanttItem(m, idCounter.incrementAndGet()));
 			}
 			// --- Sıralama: startDate → endDate (null'lar sonda)
 			items.sort(BY_TIMELINE);
-			LOGGER.debug("Loaded {} Gantt items total", items.size());
+			LOGGER.debug("Loaded {} Gantt items total with unique IDs 1-{}", items.size(), idCounter.get());
 		} catch (final Exception e) {
 			LOGGER.error("Error loading Gantt items: {}", e.getMessage(), e);
 			// Return empty list on error to prevent UI crash

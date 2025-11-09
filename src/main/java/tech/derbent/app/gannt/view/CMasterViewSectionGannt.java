@@ -54,9 +54,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		CProject currentProject = null;
 		currentProject = sessionService.getActiveProject().orElse(null);
 		grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
-		// Gantt chart uses CGanttItem DTO, not actual entities, so selection is disabled to prevent binding errors
-		// CGanttItem is a read-only display wrapper and should not trigger detail view editing
-		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
+		grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 		add(grid);
 		refreshMasterView();
 	}
@@ -64,7 +62,9 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	public EntityClass getSelectedItem() {
 		LOGGER.debug("Getting selected item from Gantt chart");
-		return null; // Gantt chart doesn't support selection - CGanttItem is a DTO, not an editable entity
+		// CGanttItem is selected in the grid, but we return null since it's a DTO wrapper
+		// The actual entity (Activity/Meeting) should be accessed via CGanttItem.getEntity()
+		return null;
 	}
 
 	@Override
@@ -98,9 +98,11 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 
 	@SuppressWarnings ("unchecked")
 	protected void onSelectionChange(final ValueChangeEvent<?> event) {
-		// NOTE: This method is no longer used as selection is disabled in Gantt grid
-		// CGanttItem is a DTO wrapper, not an editable entity, so selection would cause binding errors
-		LOGGER.debug("Gantt chart selection changed (deprecated): {}", event.getValue() != null ? event.getValue().toString() : "null");
+		LOGGER.debug("Gantt chart selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
+		// CGanttItem is a DTO wrapper - fire selection event but let parent handle DTO appropriately
+		// The parent should check if the selected item is CGanttItem and handle it differently
+		final EntityClass value = (EntityClass) event.getValue();
+		fireEvent(new SelectionChangeEvent<>(this, value));
 	}
 
 	@Override
