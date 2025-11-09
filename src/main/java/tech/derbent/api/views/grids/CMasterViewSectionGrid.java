@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -16,20 +15,6 @@ import tech.derbent.api.views.CAbstractEntityDBPage;
  * - CMasterViewSectionGridWithSearch - CMasterViewSectionGridWithTree Atma kafadan AI !!! */
 
 public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass> {
-
-	// --- Custom Event Definition ---
-	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionGrid<T>> {
-
-		private static final long serialVersionUID = 1L;
-		private final T selectedItem;
-
-		public SelectionChangeEvent(final CMasterViewSectionGrid<T> source, final T selectedItem) {
-			super(source, false);
-			this.selectedItem = selectedItem;
-		}
-
-		public T getSelectedItem() { return selectedItem; }
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGrid.class);
 	private static final long serialVersionUID = 1L;
