@@ -5,9 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IProjectChangeListener;
@@ -24,20 +22,6 @@ import tech.derbent.base.session.service.ISessionService;
 
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass>
 		implements IProjectChangeListener {
-
-	// --- Custom Event Definition ---
-	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionGannt<T>> {
-
-		private static final long serialVersionUID = 1L;
-		private final T selectedItem;
-
-		public SelectionChangeEvent(final CMasterViewSectionGannt<T> source, final T selectedItem) {
-			super(source, false);
-			this.selectedItem = selectedItem;
-		}
-
-		public T getSelectedItem() { return selectedItem; }
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGannt.class);
 	private static final long serialVersionUID = 1L;
@@ -99,12 +83,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		refreshMasterView();
 	}
 
-	@SuppressWarnings ("unchecked")
-	protected void onSelectionChange(final ValueChangeEvent<?> event) {
-		LOGGER.debug("Gantt chart selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
-		final EntityClass value = (EntityClass) event.getValue();
-		fireEvent(new SelectionChangeEvent<>(this, value));
-	}
+
 
 	@Override
 	public void refreshMasterView() throws Exception {
@@ -124,7 +103,8 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 				add(toolbar);
 			}
 			grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
-			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
+			// Disable selection on Gantt grid - it's for visualization only
+			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
 			add(grid);
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
