@@ -77,8 +77,6 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 
 	@SuppressWarnings ("unchecked")
 	protected void onSelectionChange(final ValueChangeEvent<?> event) {
-		System.out.println("=== GRID: onSelectionChange() called ===");
-		System.out.println("=== GRID: Event value: " + (event.getValue() != null ? event.getValue().toString() : "NULL") + " ===");
 		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
 		final EntityClass value = (EntityClass) event.getValue();
 		// reselect the old one, if new selection is null
@@ -89,9 +87,7 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		// // dont fire event
 		// return;
 		// }
-		System.out.println("=== GRID: Firing SelectionChangeEvent ===");
 		fireEvent(new SelectionChangeEvent<>(this, value));
-		System.out.println("=== GRID: SelectionChangeEvent fired ===");
 	}
 
 	@Override
