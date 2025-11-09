@@ -1,0 +1,22 @@
+# Dockerfile for Playwright Testing
+FROM mcr.microsoft.com/playwright/java:v1.40.0-focal
+
+WORKDIR /app
+
+# Copy Maven files
+COPY pom.xml .
+COPY mvnw .
+COPY mvnw.cmd .
+COPY .mvn .mvn
+
+# Copy source code
+COPY src src
+
+# Install dependencies
+RUN ./mvnw dependency:resolve -q
+
+# Install Playwright browsers
+RUN playwright install
+
+# Run tests with screenshots
+CMD ["./mvnw", "test", "-Dspring.profiles.active=test", "-Dtest=*PlaywrightUIAutomationTest", "--batch-mode"]

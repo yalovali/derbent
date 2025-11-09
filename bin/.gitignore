@@ -1,0 +1,31 @@
+/target/
+.idea/
+.vscode/
+.settings
+.project
+.classpath
+
+*.iml
+.DS_Store
+
+# The following files are generated/updated by vaadin-maven-plugin
+node_modules/
+src/main/frontend/generated/
+vite.generated.ts
+/hs_err_pid17975.log
+/hs_err_pid17806.log
+
+# Additional JVM crash logs and compiler artifacts
+hs_err_pid*.log
+javac.*.args
+
+# Profile pictures directory - images should be stored in database, not as files
+profile-pictures/
+/docs.zip
+*.class
+.mv
+.m2
+.codex/
+
+# Exclude playwright-java.jar (available via Maven)
+playwright-java.jar

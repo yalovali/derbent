@@ -1,0 +1,10 @@
+
+${AnsiColor.GREEN}:::::::::::::::::${AnsiColor.BLUE}:::::::::  :::::::::: :::::::::  :::::::::  :::::::::: ::::    ::: :::::::::::${AnsiColor.GREEN}::::::::::::: 
+${AnsiColor.GREEN}::+::+::+::+::+::${AnsiColor.BLUE}:+:${AnsiColor.GREEN}::+:${AnsiColor.BLUE}:+: :+:        :+:    :+: :+:    :+: :+:        :+:+:   :+:     :+:${AnsiColor.GREEN}:+::+::+::+::+::+:: 
+${AnsiColor.GREEN}+:+:+:+:+:+:+:+:+${AnsiColor.BLUE}+:+${AnsiColor.GREEN}+:+:${AnsiColor.BLUE}+:+ +:+        +:+    +:+ +:+    +:+ +:+        :+:+:+  +:+     +:+${AnsiColor.GREEN}+:+:+:+::+:+:+:+:+:+:+ 
+${AnsiColor.GREEN}+:+#+:+#+:+#+:+#+${AnsiColor.BLUE}+#+${AnsiColor.GREEN}+:+#${AnsiColor.BLUE}+:+ +#++:++#   +#++:++#:  +#++:++#+  +#++:++#   +#+ +:+ +#+     +#+${AnsiColor.GREEN}+#+:+#+::+#+:+#+:+#+:+#+:+     
+${AnsiColor.GREEN}#+#+#+#+#+#+#+#+#${AnsiColor.BLUE}+#+${AnsiColor.GREEN}#+#+${AnsiColor.BLUE}+#+ +#+        +#+    +#+ +#+    +#+ +#+        +#+  +#+#+#     +#+${AnsiColor.GREEN}#+#+#+#+#+#+#+#+#+#+#+#+#+##++
+${AnsiColor.GREEN}###+##+##+##+##+#${AnsiColor.BLUE}#+#${AnsiColor.GREEN}###+${AnsiColor.BLUE}#+# #+#        #+#    #+# #+#    #+# #+#        #+#   #+#+#     #+#${AnsiColor.GREEN}##+##+##+##+##+##+##+##+##+##+##+##+
+${AnsiColor.GREEN}#################${AnsiColor.BLUE}#########  ########## ###    ### #########  ########## ###    ####     ###${AnsiColor.GREEN}######################################+++::::::......   
+${AnsiColor.YELLOW}#############################${AnsiColor.MAGENTA}vird${AnsiColor.GREEN}i${AnsiColor.MAGENTA}zeban${AnsiColor.YELLOW}############################################################################################################+++::::::......   
+${AnsiColor.DEFAULT}
