@@ -101,13 +101,30 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 
 	@SuppressWarnings ("unchecked")
 	protected void onSelectionChange(final ValueChangeEvent<?> event) {
-		LOGGER.debug("=== GANTT: onSelectionChange() called ===");
-		LOGGER.debug("=== GANTT: Event value: {} ===", event.getValue() != null ? event.getValue().toString() : "NULL");
-		final EntityClass value = (EntityClass) event.getValue();
-		LOGGER.debug("=== GANTT: Casted value type: {} ===", value != null ? value.getClass().getName() : "NULL");
-		LOGGER.debug("=== GANTT: Firing SelectionChangeEvent ===");
-		fireEvent(new SelectionChangeEvent<>(this, value));
-		LOGGER.debug("=== GANTT: SelectionChangeEvent fired ===");
+		System.out.println("=== GANTT: onSelectionChange() called ===");
+		System.out.println("=== GANTT: Raw event value type: " + (event.getValue() != null ? event.getValue().getClass().getName() : "NULL") + " ===");
+		
+		// The grid contains CGanttItem objects, but we need to extract the actual entity
+		if (event.getValue() instanceof tech.derbent.app.gannt.domain.CGanttItem) {
+			tech.derbent.app.gannt.domain.CGanttItem ganttItem = (tech.derbent.app.gannt.domain.CGanttItem) event.getValue();
+			System.out.println("=== GANTT: CGanttItem detected, extracting entity ===");
+			System.out.println("=== GANTT: Entity type: " + ganttItem.getEntityType() + " ===");
+			
+			// Get the wrapped entity (CActivity, CMeeting, etc.)
+			tech.derbent.api.domains.CProjectItem<?> projectItem = ganttItem.getEntity();
+			System.out.println("=== GANTT: Extracted entity: " + (projectItem != null ? projectItem.getClass().getName() : "NULL") + " ===");
+			
+			// Cast to EntityClass - this should work because all project items extend CEntityDB
+			final EntityClass value = (EntityClass) projectItem;
+			System.out.println("=== GANTT: Casted value type: " + (value != null ? value.getClass().getName() : "NULL") + " ===");
+			System.out.println("=== GANTT: Firing SelectionChangeEvent with entity ID: " + (value != null ? value.getId() : "NULL") + " ===");
+			fireEvent(new SelectionChangeEvent<>(this, value));
+			System.out.println("=== GANTT: SelectionChangeEvent fired ===");
+		} else {
+			System.out.println("=== GANTT: WARNING - Event value is not a CGanttItem! ===");
+			LOGGER.warn("Gantt selection event value is not a CGanttItem: {}", 
+				event.getValue() != null ? event.getValue().getClass().getName() : "null");
+		}
 	}
 
 
@@ -115,6 +132,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	public void refreshMasterView() throws Exception {
 		try {
+			System.out.println("=== GANTT: refreshMasterView() called ===");
 			LOGGER.debug("=== GANTT: refreshMasterView() called ===");
 			// Get current project from session (with null safety)
 			CProject currentProject = null;
@@ -123,6 +141,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			Check.notNull(currentProject, "No active project in session");
 			Check.notNull(activityService, "Activity service is not available");
 			Check.notNull(meetingService, "Meeting service is not available");
+			System.out.println("=== GANTT: Creating grid for project: " + currentProject.getName() + " ===");
 			LOGGER.debug("=== GANTT: Creating grid for project: {} ===", currentProject.getName());
 			removeAll();
 			// Create and display new Gantt grid for current project
@@ -131,9 +150,15 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 				add(toolbar);
 			}
 			grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
+			System.out.println("=== GANTT: Grid created, selection mode: " + grid.getSelectionModel().getClass().getName() + " ===");
+			System.out.println("=== GANTT: Adding selection listener ===");
 			LOGGER.debug("=== GANTT: Grid created, adding selection listener ===");
 			// Add selection listener to track when items are clicked
 			grid.asSingleSelect().addValueChangeListener(event -> {
+				System.out.println("=== GANTT: VALUE CHANGE LISTENER TRIGGERED! ===");
+				System.out.println("=== GANTT: Selection changed! Value: " + (event.getValue() != null ? event.getValue().toString() : "NULL") + " ===");
+				System.out.println("=== GANTT: Event source: " + event.getSource().getClass().getName() + " ===");
+				System.out.println("=== GANTT: Is from client: " + event.isFromClient() + " ===");
 				LOGGER.debug("=== GANTT: Selection changed! Value: {} ===", 
 					event.getValue() != null ? event.getValue().toString() : "NULL");
 				LOGGER.debug("=== GANTT: Event source: {} ===", event.getSource().getClass().getName());
@@ -141,9 +166,11 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 				onSelectionChange(event);
 			});
 			add(grid);
+			System.out.println("=== GANTT: Grid added to view, listener registered ===");
 			LOGGER.debug("=== GANTT: Grid added to view ===");
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
+			System.out.println("=== GANTT: ERROR: " + e.getMessage() + " ===");
 			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());
 			throw e;
 		}
