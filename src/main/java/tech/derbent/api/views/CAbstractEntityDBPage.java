@@ -449,7 +449,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		updateLayoutOrientation();
 	}
 
-	protected void onSelectionChanged(final CMasterViewSectionBase.SelectionChangeEvent<EntityClass> event) {
+	protected void onSelectionChanged(final CMasterViewSectionGrid.SelectionChangeEvent<EntityClass> event) {
 		final EntityClass value = (event.getSelectedItem());
 		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
 		setCurrentEntity(value);
