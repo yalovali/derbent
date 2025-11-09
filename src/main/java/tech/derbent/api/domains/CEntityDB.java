@@ -28,7 +28,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	@AMetaData (displayName = "#", required = false, readOnly = true, description = "No", hidden = false, order = 0)
-	private Long id;
+	protected Long id;
 
 	/** Default constructor for JPA. */
 	protected CEntityDB() {

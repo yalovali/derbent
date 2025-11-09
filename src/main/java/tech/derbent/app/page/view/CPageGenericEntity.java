@@ -270,6 +270,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Handles entity selection events from the grid */
 	private void onEntitySelected(CComponentGridEntity.SelectionChangeEvent event) throws Exception {
+		LOGGER.debug("Entity selected event received");
 		CEntityDB<?> selectedEntity = event.getSelectedItem();
 		populateEntityDetails(selectedEntity);
 	}

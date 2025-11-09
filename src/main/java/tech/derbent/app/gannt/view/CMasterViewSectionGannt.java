@@ -42,7 +42,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGannt.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	private CGanntGrid ganttGrid;
+	private CGanntGrid grid;
 	private final CMeetingService meetingService;
 	private final CPageEntityService pageEntityService;
 	private final ISessionService sessionService;
@@ -79,7 +79,6 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
-		// Register this component to receive project change notifications
 		sessionService.addProjectChangeListener(this);
 		LOGGER.debug("Registered CMasterViewSectionGannt as project change listener");
 	}
@@ -87,7 +86,6 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	protected void onDetach(final DetachEvent detachEvent) {
 		super.onDetach(detachEvent);
-		// Unregister this component to prevent memory leaks
 		sessionService.removeProjectChangeListener(this);
 		LOGGER.debug("Unregistered CMasterViewSectionGannt from project change notifications");
 	}
@@ -125,8 +123,9 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			if (toolbar != null) {
 				add(toolbar);
 			}
-			ganttGrid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
-			add(ganttGrid);
+			grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
+			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
+			add(grid);
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());

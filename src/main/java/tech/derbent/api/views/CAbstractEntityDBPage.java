@@ -24,7 +24,6 @@ import jakarta.annotation.PostConstruct;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntity;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.services.CAbstractService;

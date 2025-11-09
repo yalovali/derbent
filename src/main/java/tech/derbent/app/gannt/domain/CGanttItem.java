@@ -24,6 +24,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param entity The project item to wrap */
 	public CGanttItem(final CProjectItem<?> entity) {
 		this.entity = entity;
+		this.id = 0L;
 		entityType = entity.getClass().getSimpleName();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();

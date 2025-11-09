@@ -2,12 +2,10 @@ package tech.derbent.app.gannt.view.components;
 
 import java.time.LocalDate;
 import java.util.List;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.grids.CGrid;
@@ -27,7 +25,6 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 	private static final int MIN_TIMELINE_WIDTH_PIXELS = 400; // Minimum width
 	private static final long serialVersionUID = 1L;
 	private final CGanttDataProvider dataProvider;
-	private final CPageEntityService pageEntityService;
 	private LocalDate timelineEnd;
 	private CGanttTimelineHeader timelineHeader;
 	private LocalDate timelineStart;
@@ -38,13 +35,11 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 		super(CGanttItem.class);
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(pageEntityService, "PageEntityService cannot be null");
-		this.pageEntityService = pageEntityService;
 		dataProvider = new CGanttDataProvider(project, activityService, meetingService);
 		addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_COMPACT);
 		setHeightFull();
 		setDataProvider(dataProvider);
 		createColumns();
-		setupItemClickNavigation();
 	}
 
 	/** Calculate the overall timeline range from all items to properly scale the bars. */
@@ -123,30 +118,6 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 			getColumns().forEach(this::removeColumn);
 			createColumns();
 		}
-	}
-
-	/** Setup click navigation to appropriate entity page based on item type. */
-	private void setupItemClickNavigation() {
-		LOGGER.debug("Setting up item click navigation for CGanttGrid");
-		addItemClickListener(event -> {
-			try {
-				LOGGER.debug("Item clicked: {}", event.getItem());
-				final CGanttItem item = event.getItem();
-				if (item == null) {
-					return;
-				}
-				// Get the page entity for this entity type
-				final String entityType = item.getEntityType();
-				final Long entityId = item.getEntityId();
-				// Find the page for this entity type
-				pageEntityService.findByEntityClass(entityType).ifPresent(pageEntity -> {
-					final String navUrl = String.format("cdynamicpagerouter/page:%d/item:%d", pageEntity.getId(), entityId);
-					UI.getCurrent().navigate(navUrl);
-				});
-			} catch (final Exception e) {
-				CNotificationService.showException("Error navigating to entity page.", e);
-			}
-		});
 	}
 
 	private void updateTimelineRange(final CGanttTimelineHeader.CGanttTimelineRange range) {

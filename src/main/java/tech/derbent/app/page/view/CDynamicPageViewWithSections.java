@@ -257,6 +257,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 	/** Handle entity selection events from the grid. */
 	private void onEntitySelected(final CComponentGridEntity.SelectionChangeEvent event) throws Exception {
 		try {
+			LOGGER.debug("Entity selection changed event received: {}", event);
 			Check.notNull(event, "Selection change event cannot be null");
 			final CEntityDB<?> selectedEntity = event.getSelectedItem();
 			setCurrentEntity(selectedEntity);
@@ -273,15 +274,13 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 					} catch (final Exception rebuildException) {
 						LOGGER.error("Error rebuilding entity details, will attempt to populate with current binder: {}",
 								rebuildException.getMessage());
-						// Don't throw - try to populate with existing binder
 					}
 				}
 				// Always attempt to populate form, even if rebuild failed
 				populateForm();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity selection: {}", e.getMessage(), e);
-			// Don't rethrow - this prevents the UI from breaking completely
+			CNotificationService.showException("Error handling entity selection", e);
 		}
 	}
 
