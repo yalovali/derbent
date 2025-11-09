@@ -12,6 +12,7 @@ import tech.derbent.base.users.domain.CUser;
  * properties through the CProjectItem base class. */
 public class CGanttItem extends CEntityDB<CGanttItem> {
 
+	public static Long idCounter = 0L;
 	private final LocalDate endDate;
 	private final CProjectItem<?> entity;
 	private final String entityType;
@@ -24,7 +25,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param entity The project item to wrap */
 	public CGanttItem(final CProjectItem<?> entity) {
 		this.entity = entity;
-		this.id = entity.getId();
+		this.id = /* entity.getId(); */ ++idCounter;
 		entityType = entity.getClass().getSimpleName();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
