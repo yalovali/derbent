@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IProjectChangeListener;
@@ -22,6 +24,20 @@ import tech.derbent.base.session.service.ISessionService;
 
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass>
 		implements IProjectChangeListener {
+
+	// --- Custom Event Definition ---
+	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionGannt<T>> {
+
+		private static final long serialVersionUID = 1L;
+		private final T selectedItem;
+
+		public SelectionChangeEvent(final CMasterViewSectionGannt<T> source, final T selectedItem) {
+			super(source, false);
+			this.selectedItem = selectedItem;
+		}
+
+		public T getSelectedItem() { return selectedItem; }
+	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGannt.class);
 	private static final long serialVersionUID = 1L;
@@ -83,12 +99,23 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		refreshMasterView();
 	}
 
+	@SuppressWarnings ("unchecked")
+	protected void onSelectionChange(final ValueChangeEvent<?> event) {
+		LOGGER.debug("=== GANTT: onSelectionChange() called ===");
+		LOGGER.debug("=== GANTT: Event value: {} ===", event.getValue() != null ? event.getValue().toString() : "NULL");
+		final EntityClass value = (EntityClass) event.getValue();
+		LOGGER.debug("=== GANTT: Casted value type: {} ===", value != null ? value.getClass().getName() : "NULL");
+		LOGGER.debug("=== GANTT: Firing SelectionChangeEvent ===");
+		fireEvent(new SelectionChangeEvent<>(this, value));
+		LOGGER.debug("=== GANTT: SelectionChangeEvent fired ===");
+	}
+
 
 
 	@Override
 	public void refreshMasterView() throws Exception {
 		try {
-			LOGGER.debug("Refreshing Gantt chart master view");
+			LOGGER.debug("=== GANTT: refreshMasterView() called ===");
 			// Get current project from session (with null safety)
 			CProject currentProject = null;
 			currentProject = sessionService.getActiveProject().orElse(null);
@@ -96,6 +123,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			Check.notNull(currentProject, "No active project in session");
 			Check.notNull(activityService, "Activity service is not available");
 			Check.notNull(meetingService, "Meeting service is not available");
+			LOGGER.debug("=== GANTT: Creating grid for project: {} ===", currentProject.getName());
 			removeAll();
 			// Create and display new Gantt grid for current project
 			Component toolbar = createGridToolbar();
@@ -103,9 +131,17 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 				add(toolbar);
 			}
 			grid = new CGanntGrid(currentProject, activityService, meetingService, pageEntityService);
-			// Disable selection on Gantt grid - it's for visualization only
-			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
+			LOGGER.debug("=== GANTT: Grid created, adding selection listener ===");
+			// Add selection listener to track when items are clicked
+			grid.asSingleSelect().addValueChangeListener(event -> {
+				LOGGER.debug("=== GANTT: Selection changed! Value: {} ===", 
+					event.getValue() != null ? event.getValue().toString() : "NULL");
+				LOGGER.debug("=== GANTT: Event source: {} ===", event.getSource().getClass().getName());
+				LOGGER.debug("=== GANTT: Is from client: {} ===", event.isFromClient());
+				onSelectionChange(event);
+			});
 			add(grid);
+			LOGGER.debug("=== GANTT: Grid added to view ===");
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());

@@ -28,7 +28,11 @@ public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<Entit
 			"unchecked", "rawtypes"
 	})
 	public Registration addSelectionChangeListener(final ComponentEventListener<SelectionChangeEvent<EntityClass>> listener) {
-		return addListener(SelectionChangeEvent.class, (ComponentEventListener) listener);
+		System.out.println("=== BASE: addSelectionChangeListener() called on " + this.getClass().getSimpleName() + " ===");
+		System.out.println("=== BASE: Registering listener for event type: " + SelectionChangeEvent.class.getName() + " ===");
+		Registration reg = addListener(SelectionChangeEvent.class, (ComponentEventListener) listener);
+		System.out.println("=== BASE: Listener registered successfully ===");
+		return reg;
 	}
 
 	public abstract void createMasterView() throws Exception;

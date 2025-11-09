@@ -451,6 +451,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected void onSelectionChanged(final CMasterViewSectionGrid.SelectionChangeEvent<EntityClass> event) {
 		final EntityClass value = (event.getSelectedItem());
+		System.out.println("=== PAGE: onSelectionChanged() called ===");
+		System.out.println("=== PAGE: Event type: " + event.getClass().getName() + " ===");
+		System.out.println("=== PAGE: Selected value: " + (value != null ? value.toString() : "NULL") + " ===");
 		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
 		setCurrentEntity(value);
 		populateForm();
@@ -461,6 +464,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		} else {
 			sessionService.setActiveId(entityClass.getClass().getSimpleName(), value.getId());
 		}
+		System.out.println("=== PAGE: onSelectionChanged() completed ===");
 	}
 
 	protected void populateAccordionPanels(final EntityClass entity) {
