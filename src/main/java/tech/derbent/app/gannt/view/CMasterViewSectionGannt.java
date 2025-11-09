@@ -62,7 +62,9 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	public EntityClass getSelectedItem() {
 		LOGGER.debug("Getting selected item from Gantt chart");
-		return null; // Gantt chart doesn't have traditional selection
+		// CGanttItem is selected in the grid, but we return null since it's a DTO wrapper
+		// The actual entity (Activity/Meeting) should be accessed via CGanttItem.getEntity()
+		return null;
 	}
 
 	@Override
@@ -85,12 +87,20 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	@Override
 	public void onProjectChanged(final CProject newProject) throws Exception {
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
-		refreshMasterView();
+		try {
+			refreshMasterView();
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing Gantt chart on project change: {}", e.getMessage(), e);
+			// USER ENTRY POINT: Display exception to user
+			tech.derbent.api.ui.notifications.CNotifications.showErrorDialog(e);
+		}
 	}
 
 	@SuppressWarnings ("unchecked")
 	protected void onSelectionChange(final ValueChangeEvent<?> event) {
 		LOGGER.debug("Gantt chart selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
+		// CGanttItem is a DTO wrapper - fire selection event but let parent handle DTO appropriately
+		// The parent should check if the selected item is CGanttItem and handle it differently
 		final EntityClass value = (EntityClass) event.getValue();
 		fireEvent(new SelectionChangeEvent<>(this, value));
 	}
@@ -107,7 +117,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			}
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
-			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());
+			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage(), e);
 			throw e;
 		}
 	}

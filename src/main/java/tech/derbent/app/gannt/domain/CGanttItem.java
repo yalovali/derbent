@@ -24,7 +24,21 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param entity The project item to wrap */
 	public CGanttItem(final CProjectItem<?> entity) {
 		this.entity = entity;
-		this.id = 0L;
+		this.id = entity.getId();
+		entityType = entity.getClass().getSimpleName();
+		startDate = entity.getStartDate();
+		endDate = entity.getEndDate();
+		parentId = entity.getParentId();
+		parentType = entity.getParentType();
+		hierarchyLevel = 0; // Will be calculated by hierarchy service
+	}
+
+	/** Constructor for CGanttItem with explicit ID to avoid collisions across different entity types.
+	 * @param entity   The project item to wrap
+	 * @param uniqueId Unique ID for this CGanttItem (sequential counter to prevent Activity ID=1 and Meeting ID=1 collision) */
+	public CGanttItem(final CProjectItem<?> entity, final long uniqueId) {
+		this.entity = entity;
+		this.id = uniqueId;
 		entityType = entity.getClass().getSimpleName();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
@@ -38,6 +52,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param hierarchyLevel The level in the hierarchy (0 = top level) */
 	public CGanttItem(final CProjectItem<?> entity, final int hierarchyLevel) {
 		this.entity = entity;
+		this.id = entity.getId();
 		entityType = entity.getClass().getSimpleName();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
