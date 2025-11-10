@@ -18,30 +18,30 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.server.streams.InMemoryUploadCallback;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
+import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.dialogs.CDBEditDialog;
-import tech.derbent.api.ui.dialogs.CWarningDialog;
-import tech.derbent.api.ui.notifications.CNotifications;
-import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.base.users.domain.CUser;
 
 /** User profile dialog for editing user profile information. Extends CDBEditDialog to provide consistent dialog behavior. Allows users to: - Edit
  * display name - Change password - Upload/delete profile picture */
 public class CUserProfileDialog extends CDBEditDialog<CUser> {
 
-	private static final long serialVersionUID = 1L;
 	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
-	private final PasswordEncoder passwordEncoder;
-	private TextField nameField;
-	private TextField lastnameField;
-	private PasswordField currentPasswordField;
-	private PasswordField newPasswordField;
-	private PasswordField confirmPasswordField;
-	private Upload profilePictureUpload;
-	private Image profilePicturePreview;
-	private CButton deleteProfilePictureButton;
-	private byte[] temporaryImageData;
+	private static final long serialVersionUID = 1L;
 	private final Binder<CUser> binder = new Binder<>(CUser.class);
+	private PasswordField confirmPasswordField;
+	private PasswordField currentPasswordField;
+	private CButton deleteProfilePictureButton;
+	private TextField lastnameField;
+	private TextField nameField;
+	private PasswordField newPasswordField;
+	private final PasswordEncoder passwordEncoder;
+	private Image profilePicturePreview;
+	private Upload profilePictureUpload;
+	private byte[] temporaryImageData;
 
 	/** Constructor for CUserProfileDialog.
 	 * @param user            The user to edit
@@ -181,7 +181,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		temporaryImageData = null;
 		// Update preview to default
 		setDefaultProfilePicture();
-		CNotifications.showSuccess("Profile picture removed");
+		CNotificationService.showSuccess("Profile picture removed");
 	}
 
 	@Override
@@ -229,7 +229,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		final String dataUrl = CImageUtils.createDataUrl(resizedImageData);
 		profilePicturePreview.setSrc(dataUrl);
 		deleteProfilePictureButton.setEnabled(true);
-		CNotifications.showSuccess("Profile picture uploaded and resized successfully");
+		CNotificationService.showSuccess("Profile picture uploaded and resized successfully");
 	}
 
 	@Override

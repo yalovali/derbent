@@ -1,10 +1,15 @@
 package tech.derbent.api.views.grids;
 
+import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CProjectAwareMDPage;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanttItem;
@@ -19,6 +24,8 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CGridViewBaseGannt.class);
 	private static final long serialVersionUID = 1L;
 	protected final CActivityService activityService;
+	// protected CProjectItem<?> currentGanttEntity;
+	protected CEnhancedBinder<CProjectItem<?>> entityBinder;
 	protected final CMeetingService meetingService;
 	protected final CPageEntityService pageEntityService;
 
@@ -33,7 +40,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 
 	@Override
 	protected void createDetailsComponent() throws Exception {
-		// No detail form for Gantt view - CGanttItem is read-only DTO
+		LOGGER.debug("Creating details component for Gantt view - no detail form available.");
 	}
 
 	// override this to create a Gannt chart
@@ -48,17 +55,56 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	 * CGanttItem is read-only. */
 	@Override
 	protected void onSelectionChanged(final CMasterViewSectionBase.SelectionChangeEvent<EntityClass> event) {
+		// CGanttItem ganttItem=event.getSelectedItem();
 		final EntityClass value = event.getSelectedItem();
 		// Check if selected item is CGanttItem (DTO wrapper)
-		if (value != null && value.getClass().equals(CGanttItem.class)) {
-			final CGanttItem ganttItem = (CGanttItem) ((Object) value);
-			LOGGER.debug("Gantt item selected: {} (Entity Type: {}, Entity ID: {})", ganttItem.getEntity().getName(), ganttItem.getEntityType(),
-					ganttItem.getEntityId());
-			// CGanttItem is a read-only DTO - no form population or editing
-			// Future: Could navigate to actual entity page based on entityType and entityId
+		if (value != null) {
+			Check.instanceOf(value, CGanttItem.class, "Selected item is not a CGanttItem");
+			setCurrentEntity(value);
+			populateForm();
+			return;
+		} else {
+			// Standard entity selection handling for non-DTO items
+			super.onSelectionChanged(event);
+		}
+	}
+
+	@Override
+	public void populateForm() {
+		try {
+			LOGGER.debug("Populating form for entity: {}", getCurrentEntity() != null ? getCurrentEntity().getName() : "null");
+			// Implementation to populate the form with current entity details
+			updateDetailsComponent();
+		} catch (Exception e) {
+			CNotificationService.showException("Error populating form", e);
+		}
+	}
+
+	@SuppressWarnings ("unchecked")
+	@Override
+	protected void updateDetailsComponent() throws Exception {
+		LOGGER.debug("Updating details component for Gantt view - no detail form available.");
+		getBaseDetailsLayout().removeAll();
+		if (getCurrentEntity() == null) {
 			return;
 		}
-		// Standard entity selection handling for non-DTO items
-		super.onSelectionChanged(event);
+		// fetch new fresh entities for the gantt item
+		CProjectItem<?> ganttEntity = ((CGanttItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
+		if (ganttEntity == null) {
+			LOGGER.warn("Gantt item entity is null, cannot populate details form.");
+			return;
+		}
+		entityBinder = new CEnhancedBinder<CProjectItem<?>>((Class<CProjectItem<?>>) ganttEntity.getClass());
+		//
+		// from the CDetailSection service get the detail section for this entity class
+		// CDetailSection detailSection =screenService.findByEntityTypeAndProject(ganttEntity.getClass().getSimpleName(),
+		// sessionService.getActiveProject().orElse(null));
+		//
+		final Field viewNameField = ganttEntity.getClass().getField("VIEW_NAME");
+		final String entityViewName = (String) viewNameField.get(null);
+		buildScreen(entityViewName, entityBinder);
+		// final CVerticalLayout formLayout = CFormBuilder.buildForm(ganttEntity.getClass(), entityBinder, null, this);
+		// getBaseDetailsLayout().add(formLayout);
+		entityBinder.readBean(ganttEntity);
 	}
 }

@@ -10,7 +10,7 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.screens.view.CFieldSelectionDialog;
-import tech.derbent.api.ui.notifications.CNotifications;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
@@ -105,11 +105,9 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 					// Refresh grid
 					grid.createGridColumns();
 					grid.refreshGridData();
-					CNotifications.showSuccess("Grid columns updated successfully");
+					CNotificationService.showSuccess("Grid columns updated successfully");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					CNotifications.showError("Error saving grid columns: " + e.getMessage());
+					CNotificationService.showException("Error saving grid columns", e);
 				}
 			});
 			dialog.open();

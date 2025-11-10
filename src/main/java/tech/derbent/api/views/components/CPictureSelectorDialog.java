@@ -16,38 +16,38 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.streams.InMemoryUploadCallback;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
-import tech.derbent.api.ui.notifications.CNotifications;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Dialog that contains the full picture selector functionality. Used when CPictureSelector is in icon mode and user clicks on the icon. */
 public class CPictureSelectorDialog extends Dialog {
-
-	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CPictureSelectorDialog.class);
-	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
-	private final EntityFieldInfo fieldInfo;
-	private Image imagePreview;
-	private Upload imageUpload;
-	private CButton deleteButton;
-	private CButton saveButton;
-	private CButton cancelButton;
-	private Span dropLabel;
-	private byte[] currentValue;
-	private byte[] originalValue;
-	private boolean readOnly = false;
-	private final List<ValueChangeListener> valueChangeListeners = new ArrayList<>();
 
 	public interface ValueChangeListener {
 
 		void valueChanged(byte[] newValue);
 	}
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPictureSelectorDialog.class);
+	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
+	private static final long serialVersionUID = 1L;
+	private CButton cancelButton;
+	private byte[] currentValue;
+	private CButton deleteButton;
+	private Span dropLabel;
+	private final EntityFieldInfo fieldInfo;
+	private Image imagePreview;
+	private Upload imageUpload;
+	private byte[] originalValue;
+	private boolean readOnly = false;
+	private CButton saveButton;
+	private final List<ValueChangeListener> valueChangeListeners = new ArrayList<>();
+
 	public CPictureSelectorDialog(final EntityFieldInfo fieldInfo, final byte[] initialValue, final boolean readOnly) {
 		this.fieldInfo = fieldInfo;
-		this.currentValue = initialValue != null ? initialValue.clone() : null;
-		this.originalValue = initialValue != null ? initialValue.clone() : null;
+		currentValue = initialValue != null ? initialValue.clone() : null;
+		originalValue = initialValue != null ? initialValue.clone() : null;
 		this.readOnly = readOnly;
 		setWidth("400px");
 		setHeight("500px");
@@ -57,6 +57,10 @@ public class CPictureSelectorDialog extends Dialog {
 		createComponents();
 		setupLayout();
 		updateImagePreview();
+	}
+
+	public void addValueChangeListener(ValueChangeListener listener) {
+		valueChangeListeners.add(listener);
 	}
 
 	private void createComponents() {
@@ -91,6 +95,52 @@ public class CPictureSelectorDialog extends Dialog {
 		deleteButton.setVisible(!readOnly);
 	}
 
+	private void handleCancel(final ClickEvent<Button> event) {
+		// Restore original value
+		currentValue = originalValue != null ? originalValue.clone() : null;
+		close();
+	}
+
+	private void handleDelete(final ClickEvent<Button> event) {
+		currentValue = null;
+		updateImagePreview();
+		CNotificationService.showSuccess("Image deleted");
+	}
+
+	private void handleSave(final ClickEvent<Button> event) {
+		// Notify listeners of the value change
+		for (ValueChangeListener listener : valueChangeListeners) {
+			listener.valueChanged(currentValue);
+		}
+		close();
+	}
+
+	private void handleUpload(final UploadMetadata metadata, final byte[] data) {
+		LOGGER.info("Image upload received: {} ({} bytes)", metadata.fileName(), data.length);
+		try {
+			// Validate the image data
+			CImageUtils.validateImageData(data, metadata.fileName());
+			// Resize image to appropriate size for the field
+			final byte[] resizedImageData = CImageUtils.resizeToProfilePicture(data);
+			// Update the current value
+			currentValue = resizedImageData;
+			updateImagePreview();
+			CNotificationService.showSuccess("Image uploaded and resized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Unexpected error during image upload", e);
+			CNotificationService.showWarningDialog("Failed to upload image: " + e.getMessage());
+		}
+	}
+
+	public void removeValueChangeListener(ValueChangeListener listener) {
+		valueChangeListeners.remove(listener);
+	}
+
+	private void setDefaultImage() {
+		imagePreview.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
+		imagePreview.setAlt("No image selected");
+	}
+
 	private void setupLayout() {
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(true);
@@ -123,43 +173,6 @@ public class CPictureSelectorDialog extends Dialog {
 		});
 	}
 
-	private void handleUpload(final UploadMetadata metadata, final byte[] data) {
-		LOGGER.info("Image upload received: {} ({} bytes)", metadata.fileName(), data.length);
-		try {
-			// Validate the image data
-			CImageUtils.validateImageData(data, metadata.fileName());
-			// Resize image to appropriate size for the field
-			final byte[] resizedImageData = CImageUtils.resizeToProfilePicture(data);
-			// Update the current value
-			this.currentValue = resizedImageData;
-			updateImagePreview();
-			CNotifications.showSuccess("Image uploaded and resized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Unexpected error during image upload", e);
-			CNotifications.showWarningDialog("Failed to upload image: " + e.getMessage());
-		}
-	}
-
-	private void handleDelete(final ClickEvent<Button> event) {
-		this.currentValue = null;
-		updateImagePreview();
-		CNotifications.showSuccess("Image deleted");
-	}
-
-	private void handleSave(final ClickEvent<Button> event) {
-		// Notify listeners of the value change
-		for (ValueChangeListener listener : valueChangeListeners) {
-			listener.valueChanged(currentValue);
-		}
-		close();
-	}
-
-	private void handleCancel(final ClickEvent<Button> event) {
-		// Restore original value
-		this.currentValue = originalValue != null ? originalValue.clone() : null;
-		close();
-	}
-
 	private void updateImagePreview() {
 		if ((currentValue != null) && (currentValue.length > 0)) {
 			final String dataUrl = CImageUtils.createDataUrl(currentValue);
@@ -174,18 +187,5 @@ public class CPictureSelectorDialog extends Dialog {
 			setDefaultImage();
 			deleteButton.setEnabled(false);
 		}
-	}
-
-	private void setDefaultImage() {
-		imagePreview.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
-		imagePreview.setAlt("No image selected");
-	}
-
-	public void addValueChangeListener(ValueChangeListener listener) {
-		valueChangeListeners.add(listener);
-	}
-
-	public void removeValueChangeListener(ValueChangeListener listener) {
-		valueChangeListeners.remove(listener);
 	}
 }

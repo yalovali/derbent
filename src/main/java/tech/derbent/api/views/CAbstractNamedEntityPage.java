@@ -2,6 +2,7 @@ package tech.derbent.api.views;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -26,11 +27,11 @@ public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<
 		this.screenService = screenService;
 	}
 
-	protected void buildScreen(final String baseViewName) {
+	protected void buildScreen(final String baseViewName, CEnhancedBinder<?> detailBinder) {
 		try {
 			final CDetailSection screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), baseViewName);
 			Check.notNull(screenService, "Screen service cannot be null");
-			detailsBuilder.buildDetails(this, screen, getBinder(), getBaseDetailsLayout());
+			detailsBuilder.buildDetails(this, screen, detailBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
 			LOGGER.error("Error building details layout for screen '{}': {}", baseViewName, e.getMessage());

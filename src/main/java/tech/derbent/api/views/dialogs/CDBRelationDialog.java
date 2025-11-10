@@ -12,7 +12,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.services.CAbstractService;
-import tech.derbent.api.ui.notifications.CNotifications;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
@@ -104,25 +104,6 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		refreshComboBoxValues();
 	}
 
-	/** Ensures ComboBox components display correctly by matching bound entity values with items from the ComboBox's data provider. When
-	 * binder.readBean() sets a value on a ComboBox, it might use a different instance of the entity than what's in the ComboBox's items list. This
-	 * method finds the matching item from the items list and sets it explicitly, ensuring the ComboBox displays the value correctly. */
-	private void refreshComboBoxValues() {
-		if (formBuilder == null) {
-			return;
-		}
-		try {
-			final var formLayout = formBuilder.getFormLayout();
-			if (formLayout == null) {
-				return;
-			}
-			// Recursively find and refresh all ComboBox components
-			refreshComboBoxesInComponent(formLayout);
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing ComboBox values: {}", e.getMessage());
-		}
-	}
-
 	/** Recursively finds and refreshes ComboBox components within a component tree. For each ComboBox, if it has a value from binding, this method
 	 * finds the matching item from the ComboBox's items list and sets it explicitly. This ensures the ComboBox displays the value correctly even if
 	 * the bound entity instance is different from the items list instance.
@@ -162,6 +143,25 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		}
 	}
 
+	/** Ensures ComboBox components display correctly by matching bound entity values with items from the ComboBox's data provider. When
+	 * binder.readBean() sets a value on a ComboBox, it might use a different instance of the entity than what's in the ComboBox's items list. This
+	 * method finds the matching item from the items list and sets it explicitly, ensuring the ComboBox displays the value correctly. */
+	private void refreshComboBoxValues() {
+		if (formBuilder == null) {
+			return;
+		}
+		try {
+			final var formLayout = formBuilder.getFormLayout();
+			if (formLayout == null) {
+				return;
+			}
+			// Recursively find and refresh all ComboBox components
+			refreshComboBoxesInComponent(formLayout);
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing ComboBox values: {}", e.getMessage());
+		}
+	}
+
 	/** Override the save method to use unified relationship save functionality with binder support.
 	 * @throws Exception */
 	@Override
@@ -176,10 +176,10 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 			// Delegate to service-specific or callback-based saving
 			performSave();
 			close();
-			CNotifications.showSuccess(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
+			CNotificationService.showSuccess(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
 		} catch (final Exception e) {
 			LOGGER.error("Error saving relationship", e);
-			CNotifications.showError("Error: " + e.getMessage());
+			CNotificationService.showError("Error: " + e.getMessage());
 			throw e;
 		}
 	}

@@ -38,7 +38,6 @@ public abstract class CInitializerServiceBase {
 	}
 
 	protected static CDetailSection createBaseScreenEntity(CProject project, Class<?> clazz) throws Exception {
-		// get baseview name from class static String VIEW_NAME with reflection
 		try {
 			String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
 			return createBaseScreenEntity(project, clazz, baseViewName, 0);
@@ -56,6 +55,8 @@ public abstract class CInitializerServiceBase {
 		scr.setScreenTitle(baseViewName);
 		scr.setName(baseViewName);
 		scr.setDescription(baseViewName);
+		scr.setAttributeNonDeletable(true);
+		scr.setDefaultSection(null);
 		return scr;
 	}
 

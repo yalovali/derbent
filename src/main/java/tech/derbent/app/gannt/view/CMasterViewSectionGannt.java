@@ -10,6 +10,7 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.views.CAbstractEntityDBPage;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
@@ -91,16 +92,13 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			refreshMasterView();
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing Gantt chart on project change: {}", e.getMessage(), e);
-			// USER ENTRY POINT: Display exception to user
-			tech.derbent.api.ui.notifications.CNotifications.showErrorDialog(e);
+			CNotificationService.showErrorDialog(e);
 		}
 	}
 
 	@SuppressWarnings ("unchecked")
 	protected void onSelectionChange(final ValueChangeEvent<?> event) {
 		LOGGER.debug("Gantt chart selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
-		// CGanttItem is a DTO wrapper - fire selection event but let parent handle DTO appropriately
-		// The parent should check if the selected item is CGanttItem and handle it differently
 		final EntityClass value = (EntityClass) event.getValue();
 		fireEvent(new SelectionChangeEvent<>(this, value));
 	}
@@ -123,7 +121,6 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	}
 
 	public void removeAllButGrid() {
-		// iteraate over all components and remove all but the grid
 		getChildren().forEach(component -> {
 			if (component != grid) {
 				remove(component);

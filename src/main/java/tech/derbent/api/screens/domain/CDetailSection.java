@@ -32,6 +32,13 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 			description = "Whether this detail section cannot be deleted by users", hidden = false, order = 5
 	)
 	private boolean attributeNonDeletable = false;
+	// change nullable to false in future versions after data migration
+	@Column (name = "defaultSection", nullable = true)
+	@AMetaData (
+			displayName = "Default For Type", required = false, readOnly = false, description = "Whether this entity definition is default",
+			hidden = false, order = 20, defaultValue = "true"
+	)
+	private Boolean defaultSection = true;
 	@OneToMany (mappedBy = "detailSection", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OrderBy ("lineOrder ASC")
 	private List<CDetailLines> detailLines = new ArrayList<>();
@@ -114,6 +121,8 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }
 
+	public Boolean getDefaultSection() { return defaultSection; }
+
 	public String getEntityType() { return entityType; }
 
 	public String getHeaderText() { return headerText; }
@@ -143,6 +152,8 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	}
 
 	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
+
+	public void setDefaultSection(Boolean defaultSection) { this.defaultSection = defaultSection; }
 
 	public void setEntityType(final String entityType) { this.entityType = entityType; }
 

@@ -164,20 +164,12 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 
 	@Override
 	public void readBean(final EntityClass bean) {
-		// LOGGER.debug("Starting readBean operation for bean type:
-		// {}",beanType.getSimpleName());
 		try {
-			// Check for incomplete bindings before attempting to read the bean
 			validateBindingsComplete();
-			// Validate that the bean's entity fields are initialized to prevent lazy-loading issues
-			// This catches developer errors where entities are passed to binding without initialization
 			validateBeanFieldsInitialized(bean);
 			super.readBean(bean);
-			// LOGGER.debug("Successfully completed readBean operation for bean type:
-			// {}",beanType.getSimpleName());
 		} catch (final Exception e) {
 			LOGGER.error("Error during readBean for bean type: {} - {}: {}", beanType.getSimpleName(), e.getClass().getSimpleName(), e.getMessage());
-			// Log additional context if available
 			if (bean != null) {
 				LOGGER.debug("Bean state: {}", bean.toString());
 			}
@@ -253,6 +245,56 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			throw new IllegalStateException(sb.toString());
 		}
 		writeBeanIfValid(entity);
+	}
+
+	/** Validates that entity fields on the bean are initialized before binding. This prevents issues where lazy-loaded Hibernate entities are passed
+	 * to binders without initialization, causing ComboBoxes and other components to fail value matching. Only validates fields of type CEntityDB to
+	 * avoid false positives on primitive types.
+	 * @param bean the bean to validate */
+	private void validateBeanFieldsInitialized(final EntityClass bean) {
+		if (bean == null) {
+			return; // Null beans don't have fields to validate
+		}
+		try {
+			// Get all fields from the bean's class and superclasses
+			final List<Field> fieldsToCheck = new ArrayList<>();
+			Class<?> currentClass = bean.getClass();
+			while ((currentClass != null) && (currentClass != Object.class)) {
+				final Field[] declaredFields = currentClass.getDeclaredFields();
+				for (final Field field : declaredFields) {
+					// Only check entity fields (CEntityDB and its subclasses)
+					if (CEntityDB.class.isAssignableFrom(field.getType())) {
+						fieldsToCheck.add(field);
+					}
+				}
+				currentClass = currentClass.getSuperclass();
+			}
+			// Validate each entity field is initialized
+			for (final Field field : fieldsToCheck) {
+				try {
+					field.setAccessible(true);
+					final Object fieldValue = field.get(bean);
+					if (fieldValue != null && !Hibernate.isInitialized(fieldValue)) {
+						final String errorMsg = String.format(
+								"Field '%s' of type '%s' in bean '%s' is not initialized (lazy-loaded Hibernate proxy). "
+										+ "Call entity.initializeAllFields() before passing to binder, or access a property on the entity to trigger initialization.",
+								field.getName(), field.getType().getSimpleName(), beanType.getSimpleName());
+						LOGGER.error(errorMsg);
+						throw new IllegalArgumentException(errorMsg);
+					}
+				} catch (final IllegalAccessException e) {
+					LOGGER.debug("Could not access field '{}' for initialization check: {}", field.getName(), e.getMessage());
+				}
+			}
+		} catch (final Exception e) {
+			// If it's our validation error, re-throw it
+			if (e instanceof IllegalArgumentException && e.getMessage().contains("not initialized")) {
+				throw e;
+			}
+			// Otherwise log and continue - don't block binding for validation failures
+			LOGGER.debug("Could not validate bean field initialization for {}: {} - {}", beanType.getSimpleName(), e.getClass().getSimpleName(),
+					e.getMessage());
+		}
 	}
 
 	/** Validates that all field bindings are complete before readBean operation. This prevents the "All bindings created with forField must be
@@ -335,56 +377,6 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 		} catch (final Exception e) {
 			LOGGER.debug("Could not check for incomplete bindings: {} - {}", e.getClass().getSimpleName(), e.getMessage());
 			// Continue with readBean operation even if validation fails
-		}
-	}
-
-	/** Validates that entity fields on the bean are initialized before binding. This prevents issues where lazy-loaded Hibernate entities are passed
-	 * to binders without initialization, causing ComboBoxes and other components to fail value matching. Only validates fields of type CEntityDB to
-	 * avoid false positives on primitive types.
-	 * @param bean the bean to validate */
-	private void validateBeanFieldsInitialized(final EntityClass bean) {
-		if (bean == null) {
-			return; // Null beans don't have fields to validate
-		}
-		try {
-			// Get all fields from the bean's class and superclasses
-			final List<Field> fieldsToCheck = new ArrayList<>();
-			Class<?> currentClass = bean.getClass();
-			while ((currentClass != null) && (currentClass != Object.class)) {
-				final Field[] declaredFields = currentClass.getDeclaredFields();
-				for (final Field field : declaredFields) {
-					// Only check entity fields (CEntityDB and its subclasses)
-					if (CEntityDB.class.isAssignableFrom(field.getType())) {
-						fieldsToCheck.add(field);
-					}
-				}
-				currentClass = currentClass.getSuperclass();
-			}
-			// Validate each entity field is initialized
-			for (final Field field : fieldsToCheck) {
-				try {
-					field.setAccessible(true);
-					final Object fieldValue = field.get(bean);
-					if (fieldValue != null && !Hibernate.isInitialized(fieldValue)) {
-						final String errorMsg = String.format(
-								"Field '%s' of type '%s' in bean '%s' is not initialized (lazy-loaded Hibernate proxy). "
-										+ "Call entity.initializeAllFields() before passing to binder, or access a property on the entity to trigger initialization.",
-								field.getName(), field.getType().getSimpleName(), beanType.getSimpleName());
-						LOGGER.error(errorMsg);
-						throw new IllegalArgumentException(errorMsg);
-					}
-				} catch (final IllegalAccessException e) {
-					LOGGER.debug("Could not access field '{}' for initialization check: {}", field.getName(), e.getMessage());
-				}
-			}
-		} catch (final Exception e) {
-			// If it's our validation error, re-throw it
-			if (e instanceof IllegalArgumentException && e.getMessage().contains("not initialized")) {
-				throw e;
-			}
-			// Otherwise log and continue - don't block binding for validation failures
-			LOGGER.debug("Could not validate bean field initialization for {}: {} - {}", beanType.getSimpleName(), e.getClass().getSimpleName(),
-					e.getMessage());
 		}
 	}
 

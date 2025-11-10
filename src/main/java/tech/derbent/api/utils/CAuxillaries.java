@@ -262,12 +262,12 @@ public class CAuxillaries {
 			return CCompanyService.class;
 		case "CProject":
 			return CProjectService.class;
-                case "CDecision":
-                        return CDecisionService.class;
-                case "CComment":
-                        return CCommentService.class;
-                case "CUser":
-                        return CUserService.class;
+		case "CDecision":
+			return CDecisionService.class;
+		case "CComment":
+			return CCommentService.class;
+		case "CUser":
+			return CUserService.class;
 		case "CActivityType":
 			return CActivityTypeService.class;
 		case "CRiskType":
@@ -329,14 +329,14 @@ public class CAuxillaries {
 			return CRiskInitializerService.class;
 		} else if (entityClass == CCompany.class) {
 			return CCompanyInitializerService.class;
-                } else if (entityClass == CProject.class) {
-                        return CProjectInitializerService.class;
-                } else if (entityClass == CDecision.class) {
-                        return CDecisionInitializerService.class;
-                } else if (entityClass == CComment.class) {
-                        return CCommentInitializerService.class;
-                } else if (entityClass == CUser.class) {
-                        return CUserInitializerService.class;
+		} else if (entityClass == CProject.class) {
+			return CProjectInitializerService.class;
+		} else if (entityClass == CDecision.class) {
+			return CDecisionInitializerService.class;
+		} else if (entityClass == CComment.class) {
+			return CCommentInitializerService.class;
+		} else if (entityClass == CUser.class) {
+			return CUserInitializerService.class;
 		} else if (entityClass == CActivityType.class) {
 			return CActivityTypeInitializerService.class;
 		} else if (entityClass == CProjectItemStatus.class) {
@@ -357,14 +357,14 @@ public class CAuxillaries {
 			return COrderTypeInitializerService.class;
 		} else if (entityClass == CApprovalStatus.class) {
 			return CApprovalStatusInitializerService.class;
-                } else if (entityClass == CDetailSection.class) {
-                        return CDetailSectionService.class;
-                } else if (entityClass == CGridEntity.class) {
-                        return CGridInitializerService.class;
-                } else if (entityClass == CMasterSection.class) {
-                        return CMasterInitializerService.class;
-                } else if (entityClass == CSystemSettings.class) {
-                        return CSystemSettingsInitializerService.class;
+		} else if (entityClass == CDetailSection.class) {
+			return CDetailSectionService.class;
+		} else if (entityClass == CGridEntity.class) {
+			return CGridInitializerService.class;
+		} else if (entityClass == CMasterSection.class) {
+			return CMasterInitializerService.class;
+		} else if (entityClass == CSystemSettings.class) {
+			return CSystemSettingsInitializerService.class;
 		} else if (entityClass == CUserProjectRole.class) {
 			return CUserProjectRoleInitializerService.class;
 		} else if (entityClass == CUserCompanyRole.class) {
@@ -379,9 +379,9 @@ public class CAuxillaries {
 			return CUserProjectSettingsService.class;
 		} else if (entityClass == CUserCompanySetting.class) {
 			return CUserCompanySettingsService.class;
-                } else if (entityClass == CGanntViewEntity.class) {
-                        return CGanntInitializerService.class;
-                } else {
+		} else if (entityClass == CGanntViewEntity.class) {
+			return CGanntInitializerService.class;
+		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
 		}
@@ -406,7 +406,7 @@ public class CAuxillaries {
 			method.setAccessible(true);
 			return method;
 		} catch (final NoSuchMethodException e) {
-			LOGGER.info("Method not found: {}.{}", clazz.getSimpleName(), methodName);
+			LOGGER.warn("Method not found: {}.{}", clazz.getSimpleName(), methodName);
 			return null;
 		}
 	}

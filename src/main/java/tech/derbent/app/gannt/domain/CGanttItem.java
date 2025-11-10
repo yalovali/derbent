@@ -1,16 +1,21 @@
 package tech.derbent.app.gannt.domain;
 
 import java.time.LocalDate;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.domains.CProjectItem;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.api.utils.Check;
+import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.base.users.domain.CUser;
 
 /** CGanttItem - Data transfer object for Gantt chart representation of project items. This class wraps project items (CActivity, CMeeting, CDecision,
  * COrder) to provide a unified interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity
  * properties through the CProjectItem base class. */
-public class CGanttItem extends CEntityDB<CGanttItem> {
+// <T extends CEntityDB<T>>
+public class CGanttItem extends CEntityOfProject<CGanttItem> {
 
 	private final LocalDate endDate;
 	private final CProjectItem<?> entity;
@@ -24,21 +29,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param entity The project item to wrap */
 	public CGanttItem(final CProjectItem<?> entity) {
 		this.entity = entity;
-		this.id = entity.getId();
-		entityType = entity.getClass().getSimpleName();
-		startDate = entity.getStartDate();
-		endDate = entity.getEndDate();
-		parentId = entity.getParentId();
-		parentType = entity.getParentType();
-		hierarchyLevel = 0; // Will be calculated by hierarchy service
-	}
-
-	/** Constructor for CGanttItem with explicit ID to avoid collisions across different entity types.
-	 * @param entity   The project item to wrap
-	 * @param uniqueId Unique ID for this CGanttItem (sequential counter to prevent Activity ID=1 and Meeting ID=1 collision) */
-	public CGanttItem(final CProjectItem<?> entity, final long uniqueId) {
-		this.entity = entity;
-		this.id = uniqueId;
+		id = entity.getId();
 		entityType = entity.getClass().getSimpleName();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
@@ -52,13 +43,27 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @param hierarchyLevel The level in the hierarchy (0 = top level) */
 	public CGanttItem(final CProjectItem<?> entity, final int hierarchyLevel) {
 		this.entity = entity;
-		this.id = entity.getId();
+		id = entity.getId();
 		entityType = entity.getClass().getSimpleName();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
 		parentId = entity.getParentId();
 		parentType = entity.getParentType();
 		this.hierarchyLevel = hierarchyLevel;
+	}
+
+	/** Constructor for CGanttItem with explicit ID to avoid collisions across different entity types.
+	 * @param entity   The project item to wrap
+	 * @param uniqueId Unique ID for this CGanttItem (sequential counter to prevent Activity ID=1 and Meeting ID=1 collision) */
+	public CGanttItem(final CProjectItem<?> entity, final long uniqueId) {
+		this.entity = entity;
+		id = uniqueId;
+		entityType = entity.getClass().getSimpleName();
+		startDate = entity.getStartDate();
+		endDate = entity.getEndDate();
+		parentId = entity.getParentId();
+		parentType = entity.getParentType();
+		hierarchyLevel = 0; // Will be calculated by hierarchy service
 	}
 
 	/** Get the entity color code for visual representation using interface or fallback to reflection.
@@ -78,6 +83,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 
 	/** Get the entity description.
 	 * @return The description or empty string */
+	@Override
 	public String getDescription() {
 		if (entity.getDescription() != null) {
 			return entity.getDescription();
@@ -109,6 +115,23 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	/** Get the entity type name.
 	 * @return The entity type */
 	public String getEntityType() { return entityType; }
+
+	public CProjectItem<?> getGanntItem(CEntityOfProjectService<?> activityService, CEntityOfProjectService<?> meetingService) {
+		CEntityOfProjectService<?> service = null;
+		CProjectItem<?> selectedItem = getEntity();
+		Check.notNull(selectedItem, "Selected Gantt item entity is null");
+		if (selectedItem instanceof CActivity) {
+			service = activityService;
+		} else if (selectedItem instanceof CMeeting) {
+			service = meetingService;
+		} else {
+			Check.fail("Unsupported entity type selected in Gantt item: " + selectedItem.getClass().getSimpleName());
+		}
+		// Add other entity type checks as needed
+		CProjectItem<?> entity = (CProjectItem<?>) service.getById(getEntityId()).orElse(null);
+		Check.notNull(entity, "Entity not found for Gantt item selection");
+		return entity;
+	}
 
 	/** Get the hierarchy level.
 	 * @return The hierarchy level */

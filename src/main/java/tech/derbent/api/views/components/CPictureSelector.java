@@ -16,10 +16,10 @@ import com.vaadin.flow.server.streams.InMemoryUploadCallback;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
 import com.vaadin.flow.shared.Registration;
-import tech.derbent.api.ui.notifications.CNotifications;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Custom picture selector component that handles byte[] image data fields. Provides functionality to display, upload, and delete image data. This
  * component is reusable and can be used anywhere in forms for byte[] fields marked with ImageData=true. Supports two modes: - Full mode (default):
@@ -28,18 +28,20 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 public class CPictureSelector extends Composite<CVerticalLayout>
 		implements HasValueAndElement<AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>, byte[]> {
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPictureSelector.class);
 	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
-	private final EntityFieldInfo fieldInfo;
-	private final Image imagePreview;
-	private final Upload imageUpload;
+	private static final long serialVersionUID = 1L;
+	private byte[] currentValue;
 	private final CButton deleteButton;
 	private final Span dropLabel;
+	private final EntityFieldInfo fieldInfo;
 	private final boolean iconMode;
-	private byte[] currentValue;
+	private final Image imagePreview;
+	private final Upload imageUpload;
 	private boolean readOnly = false;
 	private boolean required = false;
+	private List<ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>>> valueChangeListeners =
+			new ArrayList<>();
 
 	/** Constructor for CPictureSelector component with default full mode.
 	 * @param fieldInfo Field information containing display settings and metadata */
@@ -100,6 +102,94 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 		imagePreview.addClickListener(this::onImageClick);
 	}
 
+	@Override
+	public Registration
+			addValueChangeListener(final ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>> listener) {
+		valueChangeListeners.add(listener);
+		return () -> valueChangeListeners.remove(listener);
+	}
+
+	@Override
+	public byte[] getEmptyValue() { return null; }
+
+	@Override
+	public byte[] getValue() { return currentValue; }
+
+	/** Handles delete button click.
+	 * @param event Click event */
+	private void handleDelete(final ClickEvent<Button> event) {
+		setValue(null);
+		CNotificationService.showSuccess("Image deleted");
+	}
+
+	/** Handles image upload callback.
+	 * @param metadata Upload metadata
+	 * @param data     Image data bytes */
+	private void handleUpload(final UploadMetadata metadata, final byte[] data) {
+		LOGGER.info("Image upload received: {} ({} bytes)", metadata.fileName(), data.length);
+		try {
+			// Validate the image data
+			CImageUtils.validateImageData(data, metadata.fileName());
+			// Resize image to appropriate size for the field
+			final byte[] resizedImageData = CImageUtils.resizeToProfilePicture(data);
+			// Update the value
+			setValue(resizedImageData);
+			CNotificationService.showSuccess("Image uploaded and resized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Unexpected error during image upload", e);
+			CNotificationService.showWarningDialog("Failed to upload image: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public boolean isReadOnly() { return readOnly; }
+
+	@Override
+	public boolean isRequiredIndicatorVisible() { return required; }
+
+	/** Handles click on image preview. In icon mode, opens a dialog with full picture selector functionality. In full mode, does nothing special
+	 * (upload component handles interaction).
+	 * @param event Click event */
+	private void onImageClick(final ClickEvent<Image> event) {
+		if (iconMode && !readOnly) {
+			// Open dialog with full picture selector functionality
+			CPictureSelectorDialog dialog = new CPictureSelectorDialog(fieldInfo, currentValue, readOnly);
+			dialog.addValueChangeListener(newValue -> {
+				// Update our value when dialog saves
+				setValue(newValue);
+			});
+			dialog.open();
+		}
+		// In full mode, user can use the upload component directly
+	}
+
+	/** Sets the default placeholder image. */
+	private void setDefaultImage() {
+		imagePreview.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
+		imagePreview.setAlt("No image selected");
+	}
+
+	@Override
+	public void setReadOnly(final boolean readOnly) {
+		this.readOnly = readOnly;
+		if (!iconMode) {
+			// Only show/hide controls in full mode
+			imageUpload.setVisible(!readOnly);
+			deleteButton.setVisible(!readOnly);
+		}
+		if (readOnly) {
+			imagePreview.getStyle().set("cursor", "default");
+		} else {
+			imagePreview.getStyle().set("cursor", "pointer");
+		}
+	}
+
+	@Override
+	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
+		required = requiredIndicatorVisible;
+		// Could add visual indicator here if needed
+	}
+
 	/** Sets up the layout based on mode. */
 	private void setupLayout() {
 		getContent().setSpacing(!iconMode); // No spacing in icon mode for compact display
@@ -128,46 +218,17 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 		});
 	}
 
-	/** Handles image upload callback.
-	 * @param metadata Upload metadata
-	 * @param data     Image data bytes */
-	private void handleUpload(final UploadMetadata metadata, final byte[] data) {
-		LOGGER.info("Image upload received: {} ({} bytes)", metadata.fileName(), data.length);
-		try {
-			// Validate the image data
-			CImageUtils.validateImageData(data, metadata.fileName());
-			// Resize image to appropriate size for the field
-			final byte[] resizedImageData = CImageUtils.resizeToProfilePicture(data);
-			// Update the value
-			setValue(resizedImageData);
-			CNotifications.showSuccess("Image uploaded and resized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Unexpected error during image upload", e);
-			CNotifications.showWarningDialog("Failed to upload image: " + e.getMessage());
+	@Override
+	public void setValue(final byte[] value) {
+		final byte[] oldValue = currentValue;
+		currentValue = value;
+		updateImagePreview();
+		// Fire value change event to registered listeners
+		final AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]> event =
+				new AbstractField.ComponentValueChangeEvent<>(this, this, oldValue, false);
+		for (ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>> listener : valueChangeListeners) {
+			listener.valueChanged(event);
 		}
-	}
-
-	/** Handles delete button click.
-	 * @param event Click event */
-	private void handleDelete(final ClickEvent<Button> event) {
-		setValue(null);
-		CNotifications.showSuccess("Image deleted");
-	}
-
-	/** Handles click on image preview. In icon mode, opens a dialog with full picture selector functionality. In full mode, does nothing special
-	 * (upload component handles interaction).
-	 * @param event Click event */
-	private void onImageClick(final ClickEvent<Image> event) {
-		if (iconMode && !readOnly) {
-			// Open dialog with full picture selector functionality
-			CPictureSelectorDialog dialog = new CPictureSelectorDialog(fieldInfo, currentValue, readOnly);
-			dialog.addValueChangeListener(newValue -> {
-				// Update our value when dialog saves
-				setValue(newValue);
-			});
-			dialog.open();
-		}
-		// In full mode, user can use the upload component directly
 	}
 
 	/** Updates the image preview based on current value. */
@@ -186,66 +247,4 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 			deleteButton.setEnabled(false);
 		}
 	}
-
-	/** Sets the default placeholder image. */
-	private void setDefaultImage() {
-		imagePreview.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
-		imagePreview.setAlt("No image selected");
-	}
-
-	@Override
-	public byte[] getValue() { return currentValue; }
-
-	@Override
-	public void setValue(final byte[] value) {
-		final byte[] oldValue = this.currentValue;
-		this.currentValue = value;
-		updateImagePreview();
-		// Fire value change event to registered listeners
-		final AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]> event =
-				new AbstractField.ComponentValueChangeEvent<>(this, this, oldValue, false);
-		for (ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>> listener : valueChangeListeners) {
-			listener.valueChanged(event);
-		}
-	}
-
-	private List<ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>>> valueChangeListeners =
-			new ArrayList<>();
-
-	@Override
-	public Registration
-			addValueChangeListener(final ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>> listener) {
-		valueChangeListeners.add(listener);
-		return () -> valueChangeListeners.remove(listener);
-	}
-
-	@Override
-	public void setReadOnly(final boolean readOnly) {
-		this.readOnly = readOnly;
-		if (!iconMode) {
-			// Only show/hide controls in full mode
-			imageUpload.setVisible(!readOnly);
-			deleteButton.setVisible(!readOnly);
-		}
-		if (readOnly) {
-			imagePreview.getStyle().set("cursor", "default");
-		} else {
-			imagePreview.getStyle().set("cursor", "pointer");
-		}
-	}
-
-	@Override
-	public boolean isReadOnly() { return readOnly; }
-
-	@Override
-	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
-		this.required = requiredIndicatorVisible;
-		// Could add visual indicator here if needed
-	}
-
-	@Override
-	public boolean isRequiredIndicatorVisible() { return required; }
-
-	@Override
-	public byte[] getEmptyValue() { return null; }
 }

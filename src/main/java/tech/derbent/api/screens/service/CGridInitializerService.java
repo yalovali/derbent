@@ -20,9 +20,9 @@ public class CGridInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Grid Management";
 	private static final boolean showInQuickToolbar = true;
 
-        public static CDetailSection createBasicView(final CProject project) throws Exception {
-                Check.notNull(project, "project cannot be null");
-                try {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
+		Check.notNull(project, "project cannot be null");
+		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
@@ -37,13 +37,13 @@ public class CGridInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-                        detailSection.debug_printScreenInformation();
-                        return detailSection;
-                } catch (final Exception e) {
-                        LOGGER.error("Error creating grid entity view.");
-                        throw e;
-                }
-        }
+			detailSection.debug_printScreenInformation();
+			return detailSection;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating grid entity view.");
+			throw e;
+		}
+	}
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
