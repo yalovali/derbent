@@ -1,0 +1,191 @@
+@startuml Gantt Component Structure
+
+title Gantt Chart Component Architecture
+
+package "Presentation Layer" {
+  class CProjectGanttView {
+    +String VIEW_NAME
+    +String DEFAULT_ICON
+    +String DEFAULT_COLOR
+    --
+    #createGridForEntity()
+    #createNewEntityInstance()
+    #getEntityRouteIdField()
+  }
+  
+  class CMasterViewSectionGannt<EntityClass> {
+    -CGanttGrid grid
+    -CActivityService activityService
+    -CMeetingService meetingService
+    -CPageEntityService pageEntityService
+    --
+    +createMasterView()
+    +refreshMasterView()
+    +onProjectChanged(CProject)
+    #onSelectionChange(ValueChangeEvent)
+  }
+}
+
+package "Component Layer" {
+  class CGanttGrid {
+    -CGanttDataProvider dataProvider
+    -CGanttTimelineHeader timelineHeader
+    -LocalDate timelineStart
+    -LocalDate timelineEnd
+    -int timelineWidthPixels
+    --
+    +refresh()
+    +setTimelineWidth(int)
+    -createColumns()
+    -calculateTimelineRange()
+    -updateTimelineRange()
+  }
+  
+  class CGanttTimelineHeader {
+    -LocalDate startDate
+    -LocalDate endDate
+    -int totalWidth
+    -CTimelineScale currentScale
+    -IGanttTimelineChangeListener changeListener
+    --
+    +setRange(LocalDate, LocalDate)
+    -renderTimeline(boolean)
+    -renderYearMarkers()
+    -renderMonthMarkers()
+    -renderWeekMarkers()
+    -on_actionScroll(int)
+    -on_actionZoom(double)
+  }
+  
+  class CGanttTimelineBar {
+    --
+    -createBar(CGanttItem, dates, width)
+    -formatBar(CGanttItem, CDiv)
+    -formatProgress(CDiv, int)
+    -createDisplayText()
+    -createToolTip()
+  }
+}
+
+package "Data Layer" {
+  class CGanttItem {
+    -CProjectItem<?> entity
+    -String entityType
+    -LocalDate startDate
+    -LocalDate endDate
+    -Long parentId
+    -String parentType
+    -int hierarchyLevel
+    --
+    +getGanntItem(services): CProjectItem<?>
+    +getEntity(): CProjectItem<?>
+    +getEntityId(): Long
+    +getColorCode(): String
+    +hasDates(): boolean
+    +getDurationDays(): long
+  }
+  
+  class CGanttDataProvider {
+    -CProject project
+    -CActivityService activityService
+    -CMeetingService meetingService
+    -List<CGanttItem> cachedItems
+    --
+    #fetchFromBackEnd(Query): Stream<CGanttItem>
+    -loadItems(): List<CGanttItem>
+    -getCachedItems(): List<CGanttItem>
+    +refreshAll()
+  }
+}
+
+package "Service Layer" {
+  interface CEntityOfProjectService<T> {
+    +listByProject(CProject): List<T>
+    +getById(Long): Optional<T>
+  }
+  
+  class CActivityService {
+    +listByProject(CProject): List<CActivity>
+    +getById(Long): Optional<CActivity>
+  }
+  
+  class CMeetingService {
+    +listByProject(CProject): List<CMeeting>
+    +getById(Long): Optional<CMeeting>
+  }
+}
+
+package "Base Classes" {
+  abstract class CGridViewBaseGannt<EntityClass> {
+    #CActivityService activityService
+    #CMeetingService meetingService
+    #CPageEntityService pageEntityService
+    #CEnhancedBinder<CProjectItem<?>> entityBinder
+    --
+    #createMasterComponent()
+    #createDetailsComponent()
+    #onSelectionChanged(SelectionChangeEvent)
+    #updateDetailsComponent()
+    +populateForm()
+  }
+  
+  abstract class CProjectAwareMDPage<EntityClass> {
+    #EntityClass currentEntity
+    #CMasterViewSectionBase masterViewSection
+    --
+    +setCurrentEntity(EntityClass)
+    +getCurrentEntity(): EntityClass
+    #createMasterComponent()
+    #createDetailsComponent()
+  }
+}
+
+' Inheritance relationships
+CProjectGanttView --|> CGridViewBaseGannt
+CGridViewBaseGannt --|> CProjectAwareMDPage
+CMasterViewSectionGannt --|> CMasterViewSectionBase
+CActivityService ..|> CEntityOfProjectService
+CMeetingService ..|> CEntityOfProjectService
+
+' Composition relationships
+CProjectGanttView *-- CMasterViewSectionGannt : contains
+CMasterViewSectionGannt *-- CGanttGrid : contains
+CGanttGrid *-- CGanttDataProvider : uses
+CGanttGrid *-- CGanttTimelineHeader : has header
+CGanttGrid *-- CGanttTimelineBar : renders rows
+
+' Association relationships
+CGanttDataProvider --> CGanttItem : creates
+CGanttDataProvider --> CActivityService : uses
+CGanttDataProvider --> CMeetingService : uses
+CGanttItem --> CActivityService : fetches from
+CGanttItem --> CMeetingService : fetches from
+CGridViewBaseGannt --> CGanttItem : handles selection
+
+' Dependency relationships
+CGanttTimelineBar ..> CGanttItem : renders
+CMasterViewSectionGannt ..> CPageEntityService : navigation
+
+note right of CGanttItem
+  **Key Pattern:**
+  getGanntItem() fetches fresh
+  entity from database using
+  appropriate service based on
+  entity type (Activity/Meeting)
+end note
+
+note right of CGanttDataProvider
+  **Caching Strategy:**
+  Loads all items once, caches
+  until refreshAll() is called.
+  Items are lightweight DTOs.
+end note
+
+note bottom of CGridViewBaseGannt
+  **Dynamic Form Building:**
+  updateDetailsComponent() fetches
+  fresh entity and builds form
+  dynamically based on VIEW_NAME
+end note
+
+@enduml

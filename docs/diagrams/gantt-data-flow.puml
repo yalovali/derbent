@@ -1,0 +1,116 @@
+@startuml Gantt Data Flow
+
+title Gantt Chart Data Flow Patterns
+
+participant User
+participant CProjectGanttView
+participant CMasterViewSectionGannt
+participant CGanttGrid
+participant CGanttDataProvider
+participant CActivityService
+participant CMeetingService
+database Database
+
+== Initial Load Flow ==
+User -> CProjectGanttView: Navigate to /cprojectganntview
+activate CProjectGanttView
+
+CProjectGanttView -> CProjectGanttView: Constructor
+CProjectGanttView -> CProjectGanttView: createMasterComponent()
+CProjectGanttView -> CMasterViewSectionGannt: new CMasterViewSectionGannt(...)
+activate CMasterViewSectionGannt
+
+CMasterViewSectionGannt -> CMasterViewSectionGannt: createMasterView()
+CMasterViewSectionGannt -> CGanttGrid: new CGanttGrid(project, services...)
+activate CGanttGrid
+
+CGanttGrid -> CGanttDataProvider: new CGanttDataProvider(project, services)
+activate CGanttDataProvider
+
+CGanttGrid -> CGanttDataProvider: setDataProvider(dataProvider)
+CGanttGrid -> CGanttGrid: calculateTimelineRange()
+CGanttGrid -> CGanttGrid: createColumns()
+CGanttGrid --> CMasterViewSectionGannt: Grid ready
+deactivate CGanttGrid
+
+CMasterViewSectionGannt -> CMasterViewSectionGannt: refreshMasterView()
+CMasterViewSectionGannt --> CProjectGanttView: Master view ready
+deactivate CMasterViewSectionGannt
+
+CProjectGanttView --> User: Display Gantt view
+deactivate CProjectGanttView
+
+== Data Loading (First Fetch) ==
+CGanttGrid -> CGanttDataProvider: fetch(Query)
+activate CGanttDataProvider
+
+CGanttDataProvider -> CGanttDataProvider: getCachedItems()
+CGanttDataProvider -> CGanttDataProvider: loadItems() [cache miss]
+
+CGanttDataProvider -> CActivityService: listByProject(project)
+activate CActivityService
+CActivityService -> Database: SELECT * FROM activities\nWHERE project_id = ?
+activate Database
+Database --> CActivityService: List<CActivity>
+deactivate Database
+CActivityService --> CGanttDataProvider: activities
+deactivate CActivityService
+
+CGanttDataProvider -> CMeetingService: listByProject(project)
+activate CMeetingService
+CMeetingService -> Database: SELECT * FROM meetings\nWHERE project_id = ?
+activate Database
+Database --> CMeetingService: List<CMeeting>
+deactivate Database
+CMeetingService --> CGanttDataProvider: meetings
+deactivate CMeetingService
+
+CGanttDataProvider -> CGanttDataProvider: Wrap in CGanttItem DTOs
+CGanttDataProvider -> CGanttDataProvider: Sort by timeline (start→end)
+CGanttDataProvider -> CGanttDataProvider: Cache items
+CGanttDataProvider --> CGanttGrid: Stream<CGanttItem>
+deactivate CGanttDataProvider
+
+CGanttGrid -> CGanttGrid: Render grid rows
+CGanttGrid -> CGanttGrid: Render timeline bars
+CGanttGrid --> User: Display items
+deactivate CGanttGrid
+
+== Project Change Flow ==
+User -> User: Change active project in session
+User -> CMasterViewSectionGannt: onProjectChanged(newProject)
+activate CMasterViewSectionGannt
+
+CMasterViewSectionGannt -> CMasterViewSectionGannt: refreshMasterView()
+CMasterViewSectionGannt -> CGanttDataProvider: refreshAll()
+activate CGanttDataProvider
+
+CGanttDataProvider -> CGanttDataProvider: Clear cache\ncachedItems = null
+CGanttDataProvider --> CMasterViewSectionGannt: Cache cleared
+deactivate CGanttDataProvider
+
+CMasterViewSectionGannt -> CGanttGrid: Trigger data refresh
+activate CGanttGrid
+CGanttGrid -> CGanttDataProvider: fetch(Query)
+activate CGanttDataProvider
+
+CGanttDataProvider -> CGanttDataProvider: loadItems() [new project]
+CGanttDataProvider -> CActivityService: listByProject(newProject)
+activate CActivityService
+CActivityService -> Database: SELECT * FROM activities\nWHERE project_id = ?
+Database --> CActivityService: New project activities
+deactivate CActivityService
+
+CGanttDataProvider -> CMeetingService: listByProject(newProject)
+activate CMeetingService
+CMeetingService -> Database: SELECT * FROM meetings\nWHERE project_id = ?
+Database --> CMeetingService: New project meetings
+deactivate CMeetingService
+
+CGanttDataProvider --> CGanttGrid: New items
+deactivate CGanttDataProvider
+CGanttGrid --> User: Display updated view
+deactivate CGanttGrid
+deactivate CMasterViewSectionGannt
+
+@enduml

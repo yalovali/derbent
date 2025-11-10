@@ -1,0 +1,93 @@
+@startuml Gantt Call Hierarchy - Selection and Database Fetch
+
+title Gantt Chart Selection and Dynamic Database Fetch Flow
+
+actor User
+participant CGanttGrid
+participant CMasterViewSectionGannt
+participant CGridViewBaseGannt
+participant CGanttItem
+participant CActivityService
+participant CMeetingService
+database Database
+participant CEnhancedBinder
+participant "Screen Builder" as ScreenBuilder
+
+== User Interaction Phase ==
+User -> CGanttGrid: Click on Gantt item in grid
+activate CGanttGrid
+CGanttGrid -> CGanttGrid: Fire selection change event
+CGanttGrid -> CMasterViewSectionGannt: onSelectionChange(ValueChangeEvent)
+activate CMasterViewSectionGannt
+
+CMasterViewSectionGannt -> CMasterViewSectionGannt: Extract selected value
+CMasterViewSectionGannt -> CGridViewBaseGannt: Fire SelectionChangeEvent
+deactivate CMasterViewSectionGannt
+deactivate CGanttGrid
+
+== Selection Handling Phase ==
+activate CGridViewBaseGannt
+CGridViewBaseGannt -> CGridViewBaseGannt: onSelectionChanged(SelectionChangeEvent)
+CGridViewBaseGannt -> CGridViewBaseGannt: Check.instanceOf(value, CGanttItem.class)
+CGridViewBaseGannt -> CGridViewBaseGannt: setCurrentEntity(value)
+CGridViewBaseGannt -> CGridViewBaseGannt: populateForm()
+CGridViewBaseGannt -> CGridViewBaseGannt: updateDetailsComponent()
+
+== Database Fetch Phase (KEY PATTERN) ==
+CGridViewBaseGannt -> CGridViewBaseGannt: Cast getCurrentEntity() to CGanttItem
+CGridViewBaseGannt -> CGanttItem: getGanntItem(activityService, meetingService)
+activate CGanttItem
+
+CGanttItem -> CGanttItem: getEntity() returns CProjectItem<?>
+CGanttItem -> CGanttItem: Check.notNull(selectedItem)
+
+alt Entity is CActivity
+    CGanttItem -> CGanttItem: service = activityService
+    CGanttItem -> CActivityService: getById(getEntityId())
+    activate CActivityService
+    CActivityService -> Database: SELECT * FROM activities\nWHERE id = ?
+    activate Database
+    Database --> CActivityService: CActivity with all fields
+    deactivate Database
+    CActivityService --> CGanttItem: Optional<CActivity>
+    deactivate CActivityService
+else Entity is CMeeting
+    CGanttItem -> CGanttItem: service = meetingService
+    CGanttItem -> CMeetingService: getById(getEntityId())
+    activate CMeetingService
+    CMeetingService -> Database: SELECT * FROM meetings\nWHERE id = ?
+    activate Database
+    Database --> CMeetingService: CMeeting with all fields
+    deactivate Database
+    CMeetingService --> CGanttItem: Optional<CMeeting>
+    deactivate CMeetingService
+else Unsupported Type
+    CGanttItem -> CGanttItem: Check.fail("Unsupported entity type")
+end
+
+CGanttItem -> CGanttItem: Check.notNull(entity)
+CGanttItem --> CGridViewBaseGannt: CProjectItem<?> (fresh from DB)
+deactivate CGanttItem
+
+== Dynamic Screen Building Phase ==
+CGridViewBaseGannt -> CEnhancedBinder: new CEnhancedBinder<CProjectItem<?>>(entityClass)
+activate CEnhancedBinder
+
+CGridViewBaseGannt -> CGridViewBaseGannt: Get VIEW_NAME via reflection
+CGridViewBaseGannt -> ScreenBuilder: buildScreen(entityViewName, entityBinder)
+activate ScreenBuilder
+ScreenBuilder -> ScreenBuilder: Create form fields based on entity type
+ScreenBuilder -> ScreenBuilder: Add field bindings
+ScreenBuilder --> CGridViewBaseGannt: Form layout
+deactivate ScreenBuilder
+
+CGridViewBaseGannt -> CEnhancedBinder: readBean(ganttEntity)
+CEnhancedBinder -> CEnhancedBinder: Populate all form fields\nfrom fresh entity
+CEnhancedBinder --> CGridViewBaseGannt: Fields populated
+deactivate CEnhancedBinder
+
+CGridViewBaseGannt -> CGridViewBaseGannt: Add form to details layout
+CGridViewBaseGannt --> User: Display populated detail form
+deactivate CGridViewBaseGannt
+
+@enduml
