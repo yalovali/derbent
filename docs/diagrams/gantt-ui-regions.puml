@@ -1,0 +1,149 @@
+@startuml Gantt UI Regions
+
+title Gantt Chart UI Component Regions
+
+rectangle "Browser Window" {
+  rectangle "Main Layout (CProjectGanttView)" as MainLayout {
+    
+    rectangle "Master Section\n(CMasterViewSectionGannt)" as MasterSection #LightBlue {
+      
+      rectangle "Gantt Grid (CGanttGrid)" as GanttGrid #LightYellow {
+        
+        ' Timeline Controls
+        rectangle "Timeline Controls Region" as Controls #LightGreen {
+          component "[◄]" as ScrollLeft
+          component "[►]" as ScrollRight
+          component "[+]" as ZoomIn
+          component "[-]" as ZoomOut
+          component "[⟲]" as Reset
+          component "[⊕]" as Focus
+          component "[◄─]" as DecWidth
+          component "[─►]" as IncWidth
+          component "Scale: [Auto ▼]" as ScaleSelect
+          component "2024-01-01 → 2024-12-31" as DateRange
+        }
+        
+        ' Timeline Header
+        rectangle "Timeline Header Region" as TimelineHeader #LightCoral {
+          rectangle "Year Layer" as YearLayer {
+            component "[2023]" as Year2023
+            component "[2024]" as Year2024
+          }
+          rectangle "Month Layer" as MonthLayer {
+            component "[Jan]" as Jan
+            component "[Feb]" as Feb
+            component "[Mar]" as Mar
+            component "[Apr]" as Apr
+            component "[May]" as May
+            component "[Jun]" as Jun
+            note right: Continues for all months...
+          }
+          rectangle "Week Layer" as WeekLayer {
+            component "[W1]" as W1
+            component "[W2]" as W2
+            component "[W3]" as W3
+            component "[W4]" as W4
+            note right: Week numbers...
+          }
+          component "| Today" as TodayMarker #Red
+        }
+        
+        ' Grid Data
+        rectangle "Grid Data Region" as GridData #Wheat {
+          rectangle "Column Headers" as Headers {
+            component "ID" as ColID
+            component "Type" as ColType
+            component "Title" as ColTitle
+            component "Responsible" as ColResp
+            component "Start" as ColStart
+            component "End" as ColEnd
+            component "Duration" as ColDur
+            component "Description" as ColDesc
+            component "Timeline" as ColTimeline
+          }
+          
+          rectangle "Data Rows (CGanttItem)" as Rows {
+            component "1 | Act. | Fix Bug" as Row1
+            component "2 | Meet | Planning" as Row2
+            component "3 | Act. |   Sub-task" as Row3
+            note right: Hierarchy indicated\nby indentation
+          }
+          
+          rectangle "Timeline Bars (CGanttTimelineBar)" as TimelineBars #LightSalmon {
+            component "[████████░░] 80%" as Bar1
+            component "  [███████] 100%" as Bar2
+            component "      [████] 40%" as Bar3
+            note right
+              Color-coded by type
+              Progress shown as overlay
+              Synchronized with header
+            end note
+          }
+        }
+      }
+    }
+    
+    rectangle "Detail Section" as DetailSection #LightCyan {
+      rectangle "Dynamic Form Region" as FormRegion {
+        component "Entity: Fix Database Bug" as EntityTitle
+        rectangle "Form Fields (Built Dynamically)" as FormFields {
+          component "Name: [____________]" as FieldName
+          component "Description: [_____]" as FieldDesc
+          component "Start Date: [Date ▼]" as FieldStart
+          component "Due Date: [Date ▼]" as FieldDue
+          component "Responsible: [User ▼]" as FieldResp
+          component "Status: [Status ▼]" as FieldStatus
+          component "Priority: [High ▼]" as FieldPriority
+          component "Progress: [75%]" as FieldProgress
+        }
+        rectangle "Action Buttons" as Actions {
+          component "[Save]" as BtnSave
+          component "[Delete]" as BtnDelete
+          component "[Cancel]" as BtnCancel
+        }
+      }
+    }
+  }
+}
+
+' Layout relationships
+MasterSection -down-> DetailSection : Master-Detail Pattern
+GanttGrid --* MasterSection
+TimelineHeader --* GanttGrid
+TimelineBars --* GridData
+FormRegion --* DetailSection
+
+' Interaction flows
+Controls ..> TimelineHeader : Updates timeline\nrange and scale
+TimelineHeader ..> TimelineBars : Synchronizes\nbar positioning
+Rows ..> FormRegion : Selection triggers\ndatabase fetch
+
+note top of Controls
+  **Timeline Controls Region**
+  - Navigation (scroll, zoom)
+  - View controls (scale, width)
+  - Information display
+end note
+
+note top of TimelineHeader
+  **Timeline Header Region**
+  - Adaptive scale layers
+  - Synchronized markers
+  - Today indicator
+end note
+
+note top of GridData
+  **Grid Data Region**
+  - Entity columns
+  - Timeline visualization
+  - Hierarchical display
+end note
+
+note top of DetailSection
+  **Detail Form Region**
+  - Dynamically built forms
+  - Fresh database data
+  - Type-specific fields
+end note
+
+@enduml
