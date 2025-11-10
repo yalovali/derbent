@@ -1,0 +1,59 @@
+package tech.derbent.api.services;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CPageTestAuxillaryService {
+
+	public class RouteEntry {
+
+		public String iconColor;
+		final public String iconName;
+		final public String route;
+		final public String title;
+
+		public RouteEntry(String title, String iconName, String iconColor, String route) {
+			this.route = route;
+			this.title = title;
+			this.iconName = iconName;
+			this.iconColor = iconColor;
+		}
+	}
+
+	Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillaryService.class);
+	final List<RouteEntry> routes = new ArrayList<RouteEntry>();
+
+	public CPageTestAuxillaryService() {
+		LOGGER.debug("CPageTestAuxillaryService initialized");
+	}
+
+	/** Add a route entry to the service. This method is idempotent — it will not add duplicate entries (same title + route) if called multiple times.
+	 * It also normalizes "dynamic." prefixes into the internal dynamic route format.
+	 * @param iconColor */
+	public synchronized void addRoute(String title, String iconName, String iconColor, String route) {
+		final String resolvedRoute;
+		if (route.startsWith("dynamic.")) {
+			// Remove "dynamic." prefix and navigate
+			String dynamicPath = route.substring("dynamic.".length());
+			// give rest of path as a parameter to dynamicview page
+			resolvedRoute = "cdynamicpagerouter/page:" + dynamicPath;
+		} else {
+			resolvedRoute = route;
+		}
+		routes.add(new RouteEntry(title, iconName, iconColor, resolvedRoute));
+	}
+
+	public synchronized void clearRoutes() {
+		routes.clear();
+	}
+
+	/** Return an unmodifiable view of the route entries to avoid external modification and make callers treat the list as read-only. */
+	public List<RouteEntry> getRoutes() {
+		return Collections.unmodifiableList(routes);
+	}
+}
