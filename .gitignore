@@ -29,3 +29,4 @@ profile-pictures/
 
 # Exclude playwright-java.jar (available via Maven)
 playwright-java.jar
+docs/doxygen-output/
