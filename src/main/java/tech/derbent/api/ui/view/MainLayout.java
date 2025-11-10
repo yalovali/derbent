@@ -33,6 +33,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.interfaces.IPageTitleProvider;
+import tech.derbent.api.services.CPageTestAuxillaryService;
 import tech.derbent.api.services.CRouteDiscoveryService;
 import tech.derbent.api.ui.component.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.CViewToolbar;
@@ -67,6 +68,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private CViewToolbar<?> mainToolbar;
 	private final CPageMenuIntegrationService pageMenuService;
+	private final CPageTestAuxillaryService pageTestAuxillaryService;
 	private final PasswordEncoder passwordEncoder;
 	private final CRouteDiscoveryService routeDiscoveryService;
 	private final ISessionService sessionService;
@@ -75,7 +77,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	MainLayout(final AuthenticationContext authenticationContext, final ISessionService sessionService, final CLayoutService layoutService,
 			final PasswordEncoder passwordEncoder, final CUserService userService, final CSystemSettingsService systemSettingsService,
-			final CRouteDiscoveryService routeDiscoveryService, final CPageMenuIntegrationService pageMenuService) throws Exception {
+			final CRouteDiscoveryService routeDiscoveryService, final CPageMenuIntegrationService pageMenuService,
+			CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
@@ -84,6 +87,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		this.systemSettingsService = systemSettingsService;
 		this.routeDiscoveryService = routeDiscoveryService;
 		this.pageMenuService = pageMenuService;
+		this.pageTestAuxillaryService = pageTestAuxillaryService;
 		currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setSessionUserFromContext();
 		setId("main-layout");
@@ -166,7 +170,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private Div createSlidingHeader() throws Exception {
 		// Add hierarchical side menu below the header content
-		final var hierarchicalMenu = new CHierarchicalSideMenu(pageMenuService);
+		final var hierarchicalMenu = new CHierarchicalSideMenu(pageMenuService, pageTestAuxillaryService);
 		hierarchicalMenu.addClassNames(Margin.Top.MEDIUM);
 		// Create container for the complete sliding header with menu
 		final var completeHeader = new Div();

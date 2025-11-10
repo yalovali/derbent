@@ -28,6 +28,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+import tech.derbent.api.services.CPageTestAuxillaryService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
@@ -167,10 +168,11 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			items = new ArrayList<>();
 		}
 
-		public void addMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path,
+		public CMenuItem addMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path,
 				final Double order) throws Exception {
 			final CMenuItem item = new CMenuItem(clazz, name, iconName, path, null, false, order);
 			items.add(item);
+			return item;
 		}
 
 		public void addNavigationItem(final Class<? extends Component> clazz, final String name, final String iconName, final String targetLevelKey,
@@ -218,13 +220,15 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private final List<String> navigationPath;
 	// Services for dynamic menu integration
 	private final CPageMenuIntegrationService pageMenuService;
+	private final CPageTestAuxillaryService pageTestAuxillaryService;
 
 	/** Constructor initializes the hierarchical side menu component.
 	 * @param pageMenuService Service for dynamic page menu integration
 	 * @throws Exception */
-	public CHierarchicalSideMenu(CPageMenuIntegrationService pageMenuService) throws Exception {
+	public CHierarchicalSideMenu(CPageMenuIntegrationService pageMenuService, CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
 		LOGGER.info("Initializing CHierarchicalSideMenu");
 		this.pageMenuService = pageMenuService;
+		this.pageTestAuxillaryService = pageTestAuxillaryService;
 		navigationPath = new ArrayList<>();
 		menuLevels = new HashMap<>();
 		// Initialize main container
@@ -262,6 +266,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	}
 
 	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1
+	 * @param pageTestAuxillaryService2
 	 * @throws Exception */
 	private void buildMenuHierarchy() throws Exception {
 		LOGGER.debug("Building menu hierarchy from route annotations");
@@ -272,6 +277,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		allMenuEntries.addAll(MenuConfiguration.getMenuEntries());
 		allMenuEntries.addAll(pageMenuService.getDynamicMenuEntries());
 		// Process all menu entries (both static and dynamic)
+		pageTestAuxillaryService.clearRoutes(); // Clear previous routes to avoid duplicates
 		for (final MenuEntry menuEntry : allMenuEntries) {
 			processMenuEntry(menuEntry);
 		}
@@ -418,7 +424,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final String itemName = titleParts[levelCount - 1].trim();
 			final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
 			if (targetLevel != null) {
-				targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
+				CMenuItem menuItem = targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
+				pageTestAuxillaryService.addRoute(itemName, menuItem.iconName, menuItem.iconColor, path);
 			}
 		}
 	}
