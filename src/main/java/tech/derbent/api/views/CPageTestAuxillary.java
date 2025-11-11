@@ -61,14 +61,49 @@ public class CPageTestAuxillary extends Main {
 		pageLinksLayout.getStyle().set("padding", "10px");
 		// border for layout
 		pageLinksLayout.getStyle().set("border", "1px solid #ccc");
+<<<<<<< HEAD
 		final List<RouteEntry> routes = new ArrayList<>(pageTestAuxillaryService.getRoutes());
 		routes.sort(Comparator.comparing(r -> r.title == null ? "" : r.title.toLowerCase(), Comparator.naturalOrder()));
 		routes.forEach(routeEntry -> {
 			final Icon icon = CColorUtils.setIconClassSize(CColorUtils.createStyledIcon(routeEntry.iconName, routeEntry.iconColor), IconSize.MEDIUM);
 			final CButton routeButton = new CButton(routeEntry.title, icon, e -> {
+=======
+		// Add metadata div for Playwright to read button count and route information
+		CDiv metadataDiv = new CDiv();
+		metadataDiv.setId("test-auxillary-metadata");
+		metadataDiv.getStyle().set("display", "none"); // Hidden from UI
+		metadataDiv.getElement().setAttribute("data-button-count", String.valueOf(pageTestAuxillaryService.getRoutes().size()));
+		add(metadataDiv);
+		// Add route links here as needed with clickable navigation links and add icon as button
+		int buttonIndex = 0;
+		for (var routeEntry : pageTestAuxillaryService.getRoutes()) {
+			Icon icon = CColorUtils.setIconClassSize(CColorUtils.createStyledIcon(routeEntry.iconName, routeEntry.iconColor), IconSize.MEDIUM);
+			CButton routeButton = new CButton(routeEntry.title, icon, e -> {
+>>>>>>> branch 'main' of https://github.com/yalovali/derbent.git
 				getUI().ifPresent(ui -> ui.navigate(routeEntry.route));
 			});
+			// Generate unique, stable ID for each button to enable Playwright testing
+			String buttonId = generateButtonId(routeEntry.title, buttonIndex);
+			routeButton.setId(buttonId);
+			// Add data attributes for Playwright metadata
+			routeButton.getElement().setAttribute("data-route", routeEntry.route);
+			routeButton.getElement().setAttribute("data-title", routeEntry.title);
+			routeButton.getElement().setAttribute("data-button-index", String.valueOf(buttonIndex));
 			pageLinksLayout.add(routeButton);
-		});
+			buttonIndex++;
+		}
+		LOGGER.info("Created {} test auxillary navigation buttons", buttonIndex);
+	}
+
+	/** Generate a stable, unique button ID from title and index for Playwright testing.
+	 * @param title       Button title
+	 * @param buttonIndex Button index
+	 * @return Sanitized button ID */
+	private String generateButtonId(String title, int buttonIndex) {
+		// Sanitize title to create a valid DOM ID
+		String sanitized = title.toLowerCase()
+				.replaceAll("[^a-z0-9]+", "-")
+				.replaceAll("(^-|-$)", "");
+		return "test-aux-btn-" + sanitized + "-" + buttonIndex;
 	}
 }
