@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.domains.IHasStatusAndWorkflowService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CProjectItemService;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
@@ -19,7 +19,6 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CProjectItemService<CMeeting> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
 	private final CMeetingTypeService meetingTypeService;
 
@@ -45,7 +44,7 @@ public class CMeetingService extends CProjectItemService<CMeeting> {
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize meeting"));
 		final CUser currentUser = sessionService.getActiveUser()
 				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize meeting"));
-		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, meetingTypeService, projectItemStatusService);
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, meetingTypeService, projectItemStatusService);
 		entity.setLocation("To be decided");
 		entity.setStartDate(LocalDate.now(clock)); // Default: now
 		entity.setStartTime(LocalTime.of(12, 00)); // Default: 10 AM

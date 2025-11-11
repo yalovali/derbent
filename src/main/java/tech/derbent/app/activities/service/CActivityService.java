@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.domains.IHasStatusAndWorkflowService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CProjectItemService;
 import tech.derbent.api.utils.Check;
@@ -19,7 +21,7 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> {
-
+	Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityTypeService entityTypeService;
 
@@ -47,7 +49,7 @@ public class CActivityService extends CProjectItemService<CActivity> {
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
 		// Initialize workflow-based status and type
-		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
 		// Initialize activity-specific fields with sensible defaults
 		final List<CActivityPriority> priorities = activityPriorityService.listByProject(currentProject);
 		Check.notEmpty(priorities, "No activity priorities available in project " + currentProject.getName() + " - cannot initialize new activity");
@@ -68,7 +70,7 @@ public class CActivityService extends CProjectItemService<CActivity> {
 	}
 
 	public List<CActivity> listByUser() {
-		CUser currentUser =
+		final CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
 		return ((IActivityRepository) repository).listByUser(currentUser);
 	}

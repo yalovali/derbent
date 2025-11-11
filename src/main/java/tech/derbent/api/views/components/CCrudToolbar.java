@@ -13,7 +13,6 @@ import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.api.ui.notifications.CNotificationService;
 
 public class CCrudToolbar extends HorizontalLayout {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCrudToolbar.class);
 	private static final long serialVersionUID = 1L;
 	private CButton createButton;
@@ -32,6 +31,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		setPadding(true);
 		addClassName("crud-toolbar");
 		setWidthFull();
+		setStatusProvider(null);
 		createToolbarButtons();
 		LOGGER.debug("Created CCrudToolbar as view-only component");
 	}
@@ -71,6 +71,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	 * Uses standard Vaadin ComboBox for simplicity. */
 	private void createWorkflowStatusComboBox() {
 		try {
+			LOGGER.debug("Creating workflow status combobox for current entity: {}", currentEntity);
 			// Remove existing combobox if present
 			if (statusComboBox != null) {
 				remove(statusComboBox);
@@ -87,13 +88,14 @@ public class CCrudToolbar extends HorizontalLayout {
 				// We only support CProjectItem status editing in toolbar for now
 				return;
 			}
+			// safd sapageBase.getPageService(); // Ensure page service is available
 			// Check if status provider is set before proceeding
 			if (statusProvider == null) {
 				LOGGER.debug("Status provider not set, cannot create workflow combobox");
 				return;
 			}
 			final List<CProjectItemStatus> statuses = statusProvider.get();
-			if (statuses == null || statuses.isEmpty()) {
+			if ((statuses == null) || statuses.isEmpty()) {
 				LOGGER.debug("No statuses available from provider, cannot create workflow combobox");
 				return;
 			}
@@ -108,19 +110,19 @@ public class CCrudToolbar extends HorizontalLayout {
 				statusComboBox.setValue(projectItem.getStatus());
 			}
 			statusComboBox.addValueChangeListener(event -> {
-				if (event.isFromClient() && event.getValue() != null) {
+				if (event.isFromClient() && (event.getValue() != null)) {
 					try {
 						projectItem.setStatus(event.getValue());
 						LOGGER.debug("Status changed to: {}", event.getValue());
 						// Trigger save action if page provided one; otherwise trigger refresh
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error handling workflow status change", e);
 					}
 				}
 			});
 			add(statusComboBox);
 			LOGGER.debug("Created workflow status combobox");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating workflow status combobox", e);
 		}
 	}
@@ -141,7 +143,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	public void on_actionCreate() {
 		try {
 			pageBase.getPageService().actionCreate();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showException("Error during create action", e);
 		}
 	}
@@ -149,7 +151,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	public void on_actionDelete() {
 		try {
 			pageBase.getPageService().actionDelete();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showException("Error during delete action", e);
 		}
 	}
@@ -157,7 +159,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	public void on_actionRefresh() {
 		try {
 			pageBase.getPageService().actionRefresh();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showException("Error during refresh action", e);
 		}
 	}
@@ -165,7 +167,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	public void on_actionSave() {
 		try {
 			pageBase.getPageService().actionSave();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showException("Error during save action", e);
 		}
 	}
@@ -178,7 +180,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		createWorkflowStatusComboBox();
 	}
 
-	public void setPageBase(ICrudToolbarOwnerPage pageBase) { this.pageBase = pageBase; }
+	public void setPageBase(final ICrudToolbarOwnerPage pageBase) { this.pageBase = pageBase; }
 
 	/** Allows the page to provide available statuses for the workflow combobox. This should be set BEFORE calling setCurrentEntity for proper
 	 * initialization. */
@@ -198,13 +200,13 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 		final boolean hasEntity = currentEntity != null;
 		if (saveButton != null) {
-			saveButton.setEnabled(pageBase != null && hasEntity);
+			saveButton.setEnabled((pageBase != null) && hasEntity);
 		}
 		if (deleteButton != null) {
-			deleteButton.setEnabled(pageBase != null && hasEntity);
+			deleteButton.setEnabled((pageBase != null) && hasEntity);
 		}
 		if (refreshButton != null) {
-			refreshButton.setEnabled(pageBase != null && hasEntity);
+			refreshButton.setEnabled((pageBase != null) && hasEntity);
 		}
 	}
 }

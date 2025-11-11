@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.domains.IHasStatusAndWorkflowService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
@@ -24,7 +24,6 @@ import tech.derbent.base.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderService extends CEntityOfProjectService<COrder> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderService.class);
 	private final CCurrencyService currencyService;
 	private final CProjectItemStatusService entityStatusService;
@@ -67,7 +66,7 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order"));
 		// Initialize workflow-based status and type
-		IHasStatusAndWorkflow.initializeNewEntity(entity, currentProject, entityTypeService, entityStatusService);
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, entityStatusService);
 		// Initialize order-specific fields with sensible defaults
 		entity.setActualCost(BigDecimal.ZERO);
 		entity.setEstimatedCost(BigDecimal.ZERO);
