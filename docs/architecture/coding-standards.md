@@ -868,3 +868,147 @@ Use **[Multi-User Development Checklist](../development/multi-user-development-c
 - Reviewing pull requests
 - Testing multi-user scenarios
 
+
+## Playwright Test Support Patterns
+
+### CPageTestAuxillary Pattern
+
+**Purpose**: Provide a centralized navigation hub for Playwright automated testing with metadata support.
+
+**When to Use**:
+- Creating pages that serve as test navigation points
+- Implementing dynamic page discovery for automated tests
+- Passing metadata from application to Playwright tests
+
+**Implementation Requirements**:
+
+#### 1. **Button ID Generation** (Mandatory)
+All test navigation buttons MUST have unique, stable IDs:
+
+```java
+String buttonId = generateButtonId(title, index);
+routeButton.setId(buttonId);
+
+private String generateButtonId(String title, int buttonIndex) {
+    String sanitized = title.toLowerCase()
+        .replaceAll("[^a-z0-9]+", "-")
+        .replaceAll("(^-|-$)", "");
+    return "test-aux-btn-" + sanitized + "-" + buttonIndex;
+}
+```
+
+**Format**: `test-aux-btn-{sanitized-title}-{index}`
+
+#### 2. **Data Attributes** (Recommended)
+Add metadata attributes for Playwright consumption:
+
+```java
+routeButton.getElement().setAttribute("data-route", routeEntry.route);
+routeButton.getElement().setAttribute("data-title", routeEntry.title);
+routeButton.getElement().setAttribute("data-button-index", String.valueOf(buttonIndex));
+```
+
+#### 3. **Metadata Div** (Recommended)
+Include a hidden metadata div for test automation:
+
+```java
+CDiv metadataDiv = new CDiv();
+metadataDiv.setId("test-auxillary-metadata");
+metadataDiv.getStyle().set("display", "none");
+metadataDiv.getElement().setAttribute("data-button-count", 
+    String.valueOf(pageTestAuxillaryService.getRoutes().size()));
+add(metadataDiv);
+```
+
+**Benefits**:
+- Enables dynamic button discovery in tests
+- Provides stable selectors for Playwright
+- Allows test metadata without visible UI changes
+- Supports changing button counts without test updates
+
+#### 4. **Generic Page Testing Pattern**
+
+**Test Structure**:
+```java
+@Test
+void testAllPages() {
+    // 1. Login
+    loginToApplication();
+    
+    // 2. Navigate to test page
+    navigateToTestAuxillaryPage();
+    
+    // 3. Discover buttons dynamically
+    List<ButtonInfo> buttons = discoverNavigationButtons();
+    
+    // 4. Test each button
+    for (ButtonInfo button : buttons) {
+        testNavigationButton(button);
+    }
+}
+```
+
+**Check Functions** (Generic Validators):
+```java
+private boolean checkGridExists() { ... }
+private boolean checkGridHasData() { ... }
+private boolean checkCrudToolbarExists() { ... }
+```
+
+**Test Functions** (Conditional):
+```java
+if (checkGridExists()) {
+    runGridTests(pageName);
+}
+if (checkCrudToolbarExists()) {
+    runCrudToolbarTests(pageName);
+}
+```
+
+**Benefits**:
+- Tests ALL pages without hardcoding
+- Adapts to page content automatically
+- Reusable check functions
+- Fast execution with reasonable timeouts
+- Complete coverage guarantee
+
+#### Example Implementation
+
+```java
+@Route("cpagetestauxillary")
+public class CPageTestAuxillary extends Main {
+    
+    protected void prepareRoutes() {
+        // Create metadata div
+        CDiv metadataDiv = new CDiv();
+        metadataDiv.setId("test-auxillary-metadata");
+        metadataDiv.getStyle().set("display", "none");
+        metadataDiv.getElement().setAttribute("data-button-count", 
+            String.valueOf(routes.size()));
+        add(metadataDiv);
+        
+        // Create buttons with IDs and metadata
+        int buttonIndex = 0;
+        for (var routeEntry : routes) {
+            CButton button = new CButton(routeEntry.title, icon, e -> {
+                getUI().ifPresent(ui -> ui.navigate(routeEntry.route));
+            });
+            
+            // Set ID and attributes
+            String buttonId = "test-aux-btn-" + 
+                sanitize(routeEntry.title) + "-" + buttonIndex;
+            button.setId(buttonId);
+            button.getElement().setAttribute("data-route", routeEntry.route);
+            button.getElement().setAttribute("data-title", routeEntry.title);
+            button.getElement().setAttribute("data-button-index", 
+                String.valueOf(buttonIndex));
+            
+            pageLinksLayout.add(button);
+            buttonIndex++;
+        }
+    }
+}
+```
+
+**Reference**: See `docs/testing/comprehensive-page-testing.md` for complete guide.
+
