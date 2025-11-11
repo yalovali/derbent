@@ -6,18 +6,21 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.utils.Check;
 
 @Service
 public class CPageTestAuxillaryService {
-
 	public class RouteEntry {
-
 		public String iconColor;
 		final public String iconName;
 		final public String route;
 		final public String title;
 
-		public RouteEntry(String title, String iconName, String iconColor, String route) {
+		public RouteEntry(final String title, final String iconName, final String iconColor, final String route) {
+			Check.notNull(title, "title cannot be null");
+			Check.notNull(iconName, "iconName cannot be null");
+			Check.notNull(route, "route cannot be null");
+			Check.notNull(iconColor, "iconColor cannot be null");
 			this.route = route;
 			this.title = title;
 			this.iconName = iconName;
@@ -35,11 +38,11 @@ public class CPageTestAuxillaryService {
 	/** Add a route entry to the service. This method is idempotent — it will not add duplicate entries (same title + route) if called multiple times.
 	 * It also normalizes "dynamic." prefixes into the internal dynamic route format.
 	 * @param iconColor */
-	public synchronized void addRoute(String title, String iconName, String iconColor, String route) {
+	public synchronized void addRoute(final String title, final String iconName, final String iconColor, final String route) {
 		final String resolvedRoute;
 		if (route.startsWith("dynamic.")) {
 			// Remove "dynamic." prefix and navigate
-			String dynamicPath = route.substring("dynamic.".length());
+			final String dynamicPath = route.substring("dynamic.".length());
 			// give rest of path as a parameter to dynamicview page
 			resolvedRoute = "cdynamicpagerouter/page:" + dynamicPath;
 		} else {

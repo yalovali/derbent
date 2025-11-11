@@ -16,7 +16,6 @@ import tech.derbent.base.users.domain.CUser;
  * properties through the CProjectItem base class. */
 // <T extends CEntityDB<T>>
 public class CGanttItem extends CEntityOfProject<CGanttItem> {
-
 	private final LocalDate endDate;
 	private final CProjectItem<?> entity;
 	private final String entityType;
@@ -116,9 +115,9 @@ public class CGanttItem extends CEntityOfProject<CGanttItem> {
 	 * @return The entity type */
 	public String getEntityType() { return entityType; }
 
-	public CProjectItem<?> getGanntItem(CEntityOfProjectService<?> activityService, CEntityOfProjectService<?> meetingService) {
+	public CProjectItem<?> getGanntItem(final CEntityOfProjectService<?> activityService, final CEntityOfProjectService<?> meetingService) {
 		CEntityOfProjectService<?> service = null;
-		CProjectItem<?> selectedItem = getEntity();
+		final CProjectItem<?> selectedItem = getEntity();
 		Check.notNull(selectedItem, "Selected Gantt item entity is null");
 		if (selectedItem instanceof CActivity) {
 			service = activityService;
@@ -128,7 +127,7 @@ public class CGanttItem extends CEntityOfProject<CGanttItem> {
 			Check.fail("Unsupported entity type selected in Gantt item: " + selectedItem.getClass().getSimpleName());
 		}
 		// Add other entity type checks as needed
-		CProjectItem<?> entity = (CProjectItem<?>) service.getById(getEntityId()).orElse(null);
+		final CProjectItem<?> entity = (CProjectItem<?>) service.getById(getEntityId()).orElse(null);
 		Check.notNull(entity, "Entity not found for Gantt item selection");
 		return entity;
 	}
@@ -154,7 +153,7 @@ public class CGanttItem extends CEntityOfProject<CGanttItem> {
 	public int getProgressPercentage() {
 		// Try to get progress from entity if it has a progress field
 		try {
-			final Object result = CAuxillaries.invokeMethod(entity.getClass(), "getProgressPercentage");
+			final Object result = CAuxillaries.invokeMethod(entity, "getProgressPercentage");
 			if (result instanceof Integer) {
 				return (Integer) result;
 			}

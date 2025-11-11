@@ -27,6 +27,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.gannt.service.IGanntEntityItem;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.base.users.domain.CUser;
@@ -34,8 +35,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity> {
-
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem {
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:tasks";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
@@ -240,6 +240,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public CActivityPriority getPriority() { return priority; }
 
+	@Override
 	public Integer getProgressPercentage() { return progressPercentage != null ? progressPercentage : 0; }
 
 	public BigDecimal getRemainingHours() { return remainingHours; }

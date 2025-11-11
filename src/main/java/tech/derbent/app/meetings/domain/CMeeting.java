@@ -22,6 +22,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.gannt.service.IGanntEntityItem;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.base.users.domain.CUser;
@@ -32,8 +33,7 @@ import tech.derbent.base.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting> {
-
+public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem {
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String VIEW_NAME = "Meetings View";
@@ -191,6 +191,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public Set<CUser> getParticipants() { return participants == null ? new HashSet<>() : new HashSet<>(participants); }
 
+	@Override
+	public Integer getProgressPercentage() { // TODO Auto-generated method stub
+		return 21;
+	}
+
 	public CActivity getRelatedActivity() { return relatedActivity; }
 
 	@Override
@@ -270,9 +275,9 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setEndDate(final LocalDate endDate) { this.endDate = endDate; }
 
-	public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+	public void setEndTime(final LocalTime endTime) { this.endTime = endTime; }
 
-	public void setEntityType(CMeetingType entityType) { this.entityType = entityType; }
+	public void setEntityType(final CMeetingType entityType) { this.entityType = entityType; }
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
@@ -293,7 +298,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
 
-	public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+	public void setStartDate(final LocalDate startDate) { this.startDate = startDate; }
 
-	public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
+	public void setStartTime(final LocalTime startTime) { this.startTime = startTime; }
 }
