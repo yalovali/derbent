@@ -95,16 +95,12 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 			return;
 		}
 		entityBinder = new CEnhancedBinder<CProjectItem<?>>((Class<CProjectItem<?>>) ganttEntity.getClass());
-		//
-		// from the CDetailSection service get the detail section for this entity class
-		// CDetailSection detailSection =screenService.findByEntityTypeAndProject(ganttEntity.getClass().getSimpleName(),
-		// sessionService.getActiveProject().orElse(null));
-		//
 		final Field viewNameField = ganttEntity.getClass().getField("VIEW_NAME");
 		final String entityViewName = (String) viewNameField.get(null);
 		buildScreen(entityViewName, entityBinder);
 		// final CVerticalLayout formLayout = CFormBuilder.buildForm(ganttEntity.getClass(), entityBinder, null, this);
 		// getBaseDetailsLayout().add(formLayout);
 		entityBinder.readBean(ganttEntity);
+		crudToolbar.setCurrentEntity(ganttEntity);
 	}
 }

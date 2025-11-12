@@ -521,6 +521,7 @@ public class CDataInitializer {
 		user.setLastname(company.getName() + " Yöneticisi");
 		user.setPhone(phone);
 		user.setProfilePictureData(profilePictureBytes);
+		user.setAttributeDisplaySectionsAsTabs(true);
 		userService.save(user);
 		LOGGER.info("Created user {} for company {} with profile picture {}", username, company.getName(), profilePictureFile);
 	}
@@ -1159,9 +1160,9 @@ public class CDataInitializer {
 					CActivityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CUserInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CCompanyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CDecisionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CCommentInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CMeetingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CDecisionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CCommentInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CMeetingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CRiskInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -1178,14 +1179,14 @@ public class CDataInitializer {
 					CDecisionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMeetingTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CWorkflowStatusRelationInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CWorkflowStatusRelationInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Project-specific type and configuration entities
 					initializeSampleCurrencies(project, minimal);
 					initializeSampleProjectItemStatuses(project, minimal);

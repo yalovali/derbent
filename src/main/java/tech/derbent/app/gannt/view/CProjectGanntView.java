@@ -6,12 +6,14 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseGannt;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
+import tech.derbent.app.gannt.domain.CGanttItem;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.base.session.service.ISessionService;
@@ -57,6 +59,13 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	@Override
 	public CPageService<CGanntViewEntity> getPageService() { // TODO Auto-generated method stub
+		// this returns the entity service of t
+		// CProjectItem<?> ganttEntity = ((CGanttItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
+		CProjectItem<?> item = entityBinder.getBean();
+		// LOGGER.debug("Getting page service for Gannt entity: {} (ID: {})", item.getName(), item.getId());
+		CGanttItem item2 = (CGanttItem) getCurrentEntity();
+		LOGGER.debug("Getting page service for Gannt view entity: {} (ID: {})", item2.getName(), item2.getId());
+		// CProjectItemService<CProjectItem<EntityClass>> service = (CProjectItemService<CProjectItem<EntityClass>>) entityService;
 		return null;
 	}
 
