@@ -6,16 +6,16 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectGannt;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseGannt;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
-import tech.derbent.app.gannt.domain.CGanttItem;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
 import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cprojectganntview")
@@ -29,14 +29,16 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "GanntEntity View";
 	private final String ENTITY_ID_FIELD = "ganntview_id";
+	private CPageServiceProjectGannt pageService;
 
 	protected CProjectGanntView(final CGanntViewEntityService entityService, final ISessionService sessionService,
 			final CDetailSectionService screenService, final CActivityService activityService, final CMeetingService meetingService,
-			final tech.derbent.app.page.service.CPageEntityService pageEntityService) throws Exception {
+			final CPageEntityService pageEntityService) throws Exception {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService, activityService, meetingService, pageEntityService);
 		final CGanntViewEntity viewEntity =
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
 		setCurrentEntity(viewEntity);
+		pageService = new CPageServiceProjectGannt(this);
 		// createDetailsLayout();
 	}
 
@@ -59,14 +61,12 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	@Override
 	public CPageService<CGanntViewEntity> getPageService() { // TODO Auto-generated method stub
-		// this returns the entity service of t
-		// CProjectItem<?> ganttEntity = ((CGanttItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
-		CProjectItem<?> item = entityBinder.getBean();
-		// LOGGER.debug("Getting page service for Gannt entity: {} (ID: {})", item.getName(), item.getId());
-		CGanttItem item2 = (CGanttItem) getCurrentEntity();
-		LOGGER.debug("Getting page service for Gannt view entity: {} (ID: {})", item2.getName(), item2.getId());
-		// CProjectItemService<CProjectItem<EntityClass>> service = (CProjectItemService<CProjectItem<EntityClass>>) entityService;
-		return null;
+		/* CGanttItem ganttItem = null; final Object current = getCurrentEntity(); Check.instanceOf(current, CGanttItem.class,
+		 * "Current entity is not a CGanttItem"); ganttItem = (CGanttItem) current; Check.notNull(ganttItem, "Gantt item is null"); CEntityDB<?>
+		 * entity = ganttItem.getEntity(); Check.notNull(entity, "Underlying entity is null"); Class<?> pageServiceClass =
+		 * CPageServiceUtility.getPageServiceClassByName(CPageServiceUtility.getPageServiceNameForEntityClass(entity.getClass())); Object pageService
+		 * = CSpringContext.getBean(pageServiceClass); return (CPageService<CGanntViewEntity>) pageService; */
+		return pageService;
 	}
 
 	@Override

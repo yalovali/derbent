@@ -24,7 +24,6 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CGridViewBaseGannt.class);
 	private static final long serialVersionUID = 1L;
 	protected final CActivityService activityService;
-	// protected CProjectItem<?> currentGanttEntity;
 	protected CEnhancedBinder<CProjectItem<?>> entityBinder;
 	protected final CMeetingService meetingService;
 	protected final CPageEntityService pageEntityService;
