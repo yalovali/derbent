@@ -8,6 +8,7 @@ import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectGannt;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CProjectAwareMDPage;
@@ -68,6 +69,15 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		}
 	}
 
+	/**
+	 * Gets the entity binder for the actual entity (Activity or Meeting).
+	 * This is needed for the page service to write binder data before saving.
+	 * @return The entity binder
+	 */
+	public CEnhancedBinder<CProjectItem<?>> getEntityBinder() {
+		return entityBinder;
+	}
+
 	@Override
 	public void populateForm() {
 		try {
@@ -101,5 +111,10 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		// getBaseDetailsLayout().add(formLayout);
 		entityBinder.readBean(ganttEntity);
 		crudToolbar.setCurrentEntity(ganttEntity);
+		
+		// Update the page service with the current actual entity
+		if (getPageService() instanceof CPageServiceProjectGannt) {
+			((CPageServiceProjectGannt) getPageService()).setCurrentActualEntity(ganttEntity);
+		}
 	}
 }
