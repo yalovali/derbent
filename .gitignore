@@ -29,5 +29,10 @@ profile-pictures/
 
 # Exclude playwright-java.jar (available via Maven)
 playwright-java.jar
+
+# Generated documentation (Doxygen/Graphviz output)
 docs/doxygen-output/
-/bin/
+docs/graphviz-output/
+
+# Backup files from configuration scripts
+*.backup

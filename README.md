@@ -213,6 +213,7 @@ mvn spring-boot:run -Dspring.profiles.active=h2-local-development
 | **[🤖 Copilot Selenium Guide](COPILOT_SELENIUM_GUIDE.md)** | AI-powered Selenium test generation | QA/Test Engineers |
 | **[🎭 Playwright Test Guide](docs/implementation/PLAYWRIGHT_TEST_GUIDE.md)** | Playwright UI testing framework | QA/Test Engineers |
 | **[🔍 Database Query Debugging](docs/DATABASE_QUERY_DEBUGGING.md)** | SQL query monitoring and debugging guide | Backend Developers |
+| **[📊 Graphviz Documentation Guide](docs/GRAPHVIZ_DOCUMENTATION_GUIDE.md)** | Automated code documentation with Doxygen | All Developers |
 
 <div align="center">
 
@@ -243,6 +244,31 @@ Derbent provides comprehensive AI coding assistant support with configuration fi
 - Architecture patterns in [`docs/architecture/`](docs/architecture/)
 - Testing documentation in [`docs/testing/`](docs/testing/)
 - See [Documentation Guide](docs/development/documentation-guide.md) for complete organization
+
+**📊 Automated Code Documentation:**
+
+Derbent includes a comprehensive **Graphviz/Doxygen documentation system** that automatically generates:
+- 📊 **Class Diagrams**: Visual inheritance hierarchies and relationships
+- 🔗 **Collaboration Diagrams**: How classes work together
+- 📞 **Call Graphs**: Method call dependencies and flow
+- 🗂️ **Directory Graphs**: File organization visualization
+- 📖 **Interactive API Docs**: Searchable HTML documentation with cross-references
+
+```bash
+# Install prerequisites (one-time setup)
+sudo apt-get install doxygen graphviz
+
+# Generate complete project documentation
+./scripts/generate-graphviz-docs.sh
+
+# View documentation
+xdg-open docs/graphviz-output/html/index.html
+
+# Configure documentation settings
+./scripts/update-graphviz-config.sh
+```
+
+**📖 For complete usage guide, see:** [Graphviz Documentation Guide](docs/GRAPHVIZ_DOCUMENTATION_GUIDE.md)
 
 <div align="center">
 
