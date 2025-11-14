@@ -15,6 +15,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CProjectAwareMDPage;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanttItem;
+import tech.derbent.app.gannt.view.components.CGanntGrid;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
@@ -55,14 +56,112 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	 * @return The entity binder */
 	public CEnhancedBinder<CProjectItem<?>> getEntityBinder() { return entityBinder; }
 
+	/** Gets the master view section cast to CMasterViewSectionGannt for accessing Gantt-specific functionality.
+	 * @return The master view section as CMasterViewSectionGannt */
+	@SuppressWarnings ("unchecked")
+	protected CMasterViewSectionGannt<EntityClass> getGanttMasterViewSection() {
+		return (CMasterViewSectionGannt<EntityClass>) masterViewSection;
+	}
+
+	/** Locates a CGanttItem in the grid that wraps the given actual entity. This is needed after save operations to restore selection to the saved
+	 * entity.
+	 * @param actualEntity The actual entity (CActivity or CMeeting) to locate
+	 * @return The CGanttItem wrapper that contains this entity, or null if not found */
+	protected CGanttItem locateGanttItemForEntity(final CProjectItem<?> actualEntity) {
+		if (actualEntity == null || actualEntity.getId() == null) {
+			return null;
+		}
+		try {
+			final CMasterViewSectionGannt<EntityClass> ganttSection = getGanttMasterViewSection();
+			if (ganttSection == null) {
+				LOGGER.warn("Cannot locate Gantt item - master view section is null");
+				return null;
+			}
+			final CGanntGrid ganttGrid = ganttSection.getGrid();
+			if (ganttGrid == null) {
+				LOGGER.warn("Cannot locate Gantt item - Gantt grid is null");
+				return null;
+			}
+			// Search through all grid items to find the one that wraps our entity
+			// We need to match by entity type and entity ID
+			final String entityTypeName = actualEntity.getClass().getSimpleName();
+			final Long entityId = actualEntity.getId();
+			LOGGER.debug("Searching for CGanttItem with entityType={}, entityId={}", entityTypeName, entityId);
+			// Get all items from the grid's data provider
+			final var dataProvider = ganttGrid.getDataProvider();
+			if (dataProvider == null) {
+				LOGGER.warn("Cannot locate Gantt item - data provider is null");
+				return null;
+			}
+			// Fetch all items and search for matching entity
+			final java.util.Optional<CGanttItem> matchingItem = dataProvider.fetch(new com.vaadin.flow.data.provider.Query<>()).filter(item -> {
+				return item.getEntityType().equals(entityTypeName) && item.getEntityId().equals(entityId);
+			}).findFirst();
+			if (matchingItem.isPresent()) {
+				LOGGER.debug("Found matching CGanttItem for entity: {}", actualEntity.getName());
+				return matchingItem.get();
+			} else {
+				LOGGER.debug("No matching CGanttItem found for entity ID {} type {}", entityId, entityTypeName);
+				return null;
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error locating Gantt item for entity: {}", e.getMessage(), e);
+			return null;
+		}
+	}
+
 	@Override
 	public void onEntitySaved(final EntityClass entity) throws Exception {
 		LOGGER.debug("Entity saved, refreshing grid");
+		// Get the current actual entity from page service before refresh
+		CProjectItem<?> savedActualEntity = null;
+		if (getPageService() instanceof CPageServiceProjectGannt) {
+			savedActualEntity = ((CPageServiceProjectGannt) getPageService()).getCurrentActualEntity();
+		}
+		// Refresh the grid - this will reload all data
 		refreshGrid();
-		populateForm();
-		// Show success notification
-		CNotificationService.showSaveSuccess();
+		// After refresh, locate and select the saved entity in the grid
+		if (savedActualEntity != null) {
+			final CGanttItem ganttItemToSelect = locateGanttItemForEntity(savedActualEntity);
+			if (ganttItemToSelect != null) {
+				// Set this as the current entity and update the form
+				setCurrentEntity((EntityClass) ganttItemToSelect);
+				populateForm();
+			} else {
+				LOGGER.warn("Could not locate saved entity in refreshed grid");
+				// Just populate the form with current state
+				populateForm();
+			}
+		} else {
+			populateForm();
+		}
+		// Note: Success notification is shown in CPageServiceProjectGannt.actionSave()
 		navigateToClass();
+	}
+
+	@Override
+	public void refreshGrid() throws Exception {
+		LOGGER.info("Refreshing Gantt grid for {}", getClass().getSimpleName());
+		try {
+			// For Gantt view, we need to refresh the grid's data provider
+			// The grid contains CGanttItem wrappers, not actual entities
+			final CMasterViewSectionGannt<EntityClass> ganttSection = getGanttMasterViewSection();
+			if (ganttSection == null) {
+				LOGGER.warn("Cannot refresh grid - master view section is null");
+				return;
+			}
+			final CGanntGrid ganttGrid = ganttSection.getGrid();
+			if (ganttGrid == null) {
+				LOGGER.warn("Cannot refresh grid - Gantt grid is null");
+				return;
+			}
+			// Refresh the grid's data provider to reload all data from services
+			LOGGER.debug("Calling refresh on Gantt grid data provider");
+			ganttGrid.refresh();
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing Gantt grid: {}", e.getMessage(), e);
+			throw e;
+		}
 	}
 
 	/** Override to handle CGanttItem selection - it's a DTO wrapper, not the actual entity. Selection is logged but no form editing occurs since
@@ -97,13 +196,23 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	@SuppressWarnings ("unchecked")
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		LOGGER.debug("Updating details component for Gantt view - no detail form available.");
+		LOGGER.debug("Updating details component for Gantt view");
 		getBaseDetailsLayout().removeAll();
-		if (getCurrentEntity() == null) {
-			return;
+		// First, try to get the actual entity from the page service
+		// This is necessary for new entities that haven't been wrapped in CGanttItem yet
+		CProjectItem<?> ganttEntity = null;
+		if (getPageService() instanceof CPageServiceProjectGannt) {
+			ganttEntity = ((CPageServiceProjectGannt) getPageService()).getCurrentActualEntity();
 		}
-		// fetch new fresh entities for the gantt item
-		CProjectItem<?> ganttEntity = ((CGanttItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
+		// If we don't have an entity from page service, try to get it from the current CGanttItem
+		if (ganttEntity == null) {
+			if (getCurrentEntity() == null) {
+				LOGGER.debug("No current entity to display in details component");
+				return;
+			}
+			// fetch fresh entity for the gantt item
+			ganttEntity = ((CGanttItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
+		}
 		if (ganttEntity == null) {
 			LOGGER.warn("Gantt item entity is null, cannot populate details form.");
 			return;
