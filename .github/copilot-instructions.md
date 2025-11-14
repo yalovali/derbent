@@ -3,6 +3,63 @@ Derbent is a Java Spring Boot + Vaadin collaborative project management applicat
 
 **ALWAYS reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
 
+---
+
+## 🤖 AI Assistant Workflow Preferences
+
+### Autonomous Operation Mode
+**The AI assistant should work autonomously without asking for permission for standard operations:**
+
+✅ **ALWAYS proceed without confirmation for:**
+- File modifications (create, edit, delete)
+- Code refactoring and improvements
+- Running builds, tests, and validation
+- Applying code formatting (mvn spotless:apply)
+- Taking screenshots for documentation
+- Committing changes to git with descriptive messages
+- Installing dependencies or tools when needed
+- Running Playwright tests after UI changes
+
+❌ **ONLY ask for confirmation when:**
+- Deleting entire directories or multiple files
+- Making breaking changes to public APIs
+- Modifying production configuration files
+- Pushing to remote git repository
+- Making database schema changes in production mode
+
+### Standard Workflow After Completing Tasks
+When completing a task, **automatically execute this workflow:**
+
+1. **Code Formatting**: Run `mvn spotless:apply`
+2. **Compilation Check**: Run `mvn clean compile` (if code changes)
+3. **Test Validation**: Run appropriate tests (if code changes affect functionality)
+4. **Git Commit**: Commit changes with a descriptive message following conventional commits format
+5. **Summary**: Provide a brief summary of what was done
+
+### Git Commit Preferences
+- **Always commit** completed work without asking
+- Use **conventional commit** format: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`
+- Include detailed description of changes
+- Include usage examples for new features
+- Stage only related files (don't commit unrelated changes)
+
+### Testing Preferences
+- **Run Playwright tests automatically** after UI changes:
+  - Quick validation: `./run-playwright-tests.sh menu`
+  - Comprehensive: `./run-playwright-tests.sh comprehensive`
+- **Capture screenshots** for documentation when making UI changes
+- **Use H2 profile** for development testing: `-Dspring.profiles.active=h2`
+- **Run with visible browser** for initial test runs to verify behavior
+
+### Communication Style
+- **Be concise** - provide essential information without over-explaining
+- **Use action-oriented language** - "Running tests...", "Applying formatting...", "Committing changes..."
+- **Report progress** for long-running operations
+- **Highlight critical issues** that need attention
+- **Summarize results** at the end of operations
+
+---
+
 ## Working Effectively
 
 ### Environment Setup (CRITICAL)
@@ -77,15 +134,31 @@ mvn spring-boot:run -Ph2-local-development
 # Run comprehensive Playwright tests (NEVER CANCEL: takes 2+ minutes)
 ./run-playwright-tests.sh comprehensive
 # TIMEOUT: Set 10+ minutes. Expected time: 2-5 minutes
+# Tests all views, grids, and CRUD operations
 
-# Run specific Playwright test categories
-./run-playwright-tests.sh login         # Company login test
-./run-playwright-tests.sh status-types  # Status and type views
-./run-playwright-tests.sh buttons       # Button functionality test
-./run-playwright-tests.sh all           # Run all tests
+# Run specific Playwright test scenarios
+./run-playwright-tests.sh menu           # Fast menu navigation
+./run-playwright-tests.sh comprehensive  # Complete view & CRUD testing
+./run-playwright-tests.sh all-views      # Navigate all application views
+./run-playwright-tests.sh crud           # CRUD operations testing
+
+# Interactive mode - configure before running
+INTERACTIVE_MODE=true ./run-playwright-tests.sh menu
+
+# Fast headless execution without screenshots
+PLAYWRIGHT_HEADLESS=true PLAYWRIGHT_SKIP_SCREENSHOTS=true ./run-playwright-tests.sh menu
+
+# Slow motion debugging (visible browser with delays)
+PLAYWRIGHT_SLOWMO=500 ./run-playwright-tests.sh menu
+
+# Mobile viewport testing (iPhone 12)
+PLAYWRIGHT_VIEWPORT_WIDTH=390 PLAYWRIGHT_VIEWPORT_HEIGHT=844 ./run-playwright-tests.sh menu
 
 # Clean test artifacts
 ./run-playwright-tests.sh clean
+
+# Show all available options
+./run-playwright-tests.sh help
 
 # For detailed testing guidelines and patterns, see:
 # docs/development/copilot-guidelines.md
@@ -362,6 +435,39 @@ notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
 - **UI Automation**: Browser-based testing with screenshot capture
 - **Manual Tests**: Documented scenarios for critical workflows
 
+### Playwright Test Configuration Options
+The test script supports multiple configuration options via environment variables:
+
+**Test Scenarios:**
+- `menu` - Fast menu navigation test (~37 seconds)
+- `comprehensive` - Complete view & CRUD testing (2-5 minutes)
+- `all-views` - Navigate all application views
+- `crud` - CRUD operations testing
+
+**Configuration Environment Variables:**
+- `PLAYWRIGHT_HEADLESS=true|false` - Browser visibility (default: false)
+- `PLAYWRIGHT_SHOW_CONSOLE=true|false` - Console output (default: true)
+- `PLAYWRIGHT_SKIP_SCREENSHOTS=true|false` - Screenshot capture (default: false)
+- `PLAYWRIGHT_SLOWMO=0-5000` - Action delay in ms for debugging (default: 0)
+- `PLAYWRIGHT_VIEWPORT_WIDTH=800-3840` - Viewport width (default: 1920)
+- `PLAYWRIGHT_VIEWPORT_HEIGHT=600-2160` - Viewport height (default: 1080)
+- `INTERACTIVE_MODE=true|false` - Show configuration menu (default: false)
+
+**Common Use Cases:**
+```bash
+# Interactive configuration (recommended for first-time)
+INTERACTIVE_MODE=true ./run-playwright-tests.sh menu
+
+# Fast CI/CD mode (headless, no screenshots, no console)
+PLAYWRIGHT_HEADLESS=true PLAYWRIGHT_SKIP_SCREENSHOTS=true PLAYWRIGHT_SHOW_CONSOLE=false ./run-playwright-tests.sh comprehensive
+
+# Debug mode (visible browser with slow motion)
+PLAYWRIGHT_SLOWMO=500 ./run-playwright-tests.sh menu
+
+# Mobile testing (iPhone 12)
+PLAYWRIGHT_VIEWPORT_WIDTH=390 PLAYWRIGHT_VIEWPORT_HEIGHT=844 ./run-playwright-tests.sh menu
+```
+
 ## Common Tasks
 
 ### Adding New Entities
@@ -390,21 +496,38 @@ mvn spring-boot:run -Dspring.profiles.active=h2 | grep -E "(ERROR|WARN|DEBUG)"
 ```
 
 ### Code Quality Checks
+**AI Assistant should automatically run these before committing:**
 ```bash
-# ALWAYS run before committing:
-mvn spotless:apply      # Fix formatting
-mvn spotless:check      # Verify formatting
-mvn clean compile      # Full build verification (NEVER CANCEL: 12-15 seconds)
+# 1. Fix formatting (ALWAYS run first)
+mvn spotless:apply
 
-# Check for forbidden notification patterns (should return empty):
+# 2. Verify formatting is correct
+mvn spotless:check
+
+# 3. Full build verification (NEVER CANCEL: 12-15 seconds)
+mvn clean compile
+
+# 4. Check for forbidden notification patterns (should return empty):
 grep -r "Notification\.show\|new.*Dialog.*\.open()" src/main/java --include="*.java" | grep -v "CNotificationService.java"
 
-# Optional quality checks:
-./run-playwright-tests.sh menu  # UI validation (37-40 seconds)
+# 5. Optional: UI validation after UI changes
+./run-playwright-tests.sh menu  # Quick validation (37-40 seconds)
+
+# 6. Commit changes automatically with descriptive message
+git add [changed-files]
+git commit -m "feat: descriptive message"
 
 # For complete testing guidelines, workflows, and patterns:
 # See docs/development/copilot-guidelines.md
 ```
+
+**Workflow Summary:**
+1. Make code changes
+2. Run `mvn spotless:apply` automatically
+3. Run `mvn clean compile` to verify build
+4. Run appropriate tests (Playwright for UI changes)
+5. Commit with conventional commit message
+6. Provide summary of changes
 
 ## Technology Stack Reference
 
