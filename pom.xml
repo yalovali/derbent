@@ -194,6 +194,51 @@
 				</dependencies>
 			</plugin>
 
+			<!-- Dokka documentation generator with full call graph support -->
+			<plugin>
+				<groupId>org.jetbrains.dokka</groupId>
+				<artifactId>dokka-maven-plugin</artifactId>
+				<version>1.9.20</version>
+				<executions>
+					<execution>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>dokka</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<outputDir>${project.basedir}/target/dokka</outputDir>
+					<moduleName>Derbent Project Management</moduleName>
+					<includes>
+						<include>${project.basedir}/docs/packages.md</include>
+					</includes>
+					<sourceDirectories>
+						<dir>${project.basedir}/src/main/java</dir>
+					</sourceDirectories>
+					<documentedVisibilities>
+						<visibility>PUBLIC</visibility>
+						<visibility>PROTECTED</visibility>
+						<visibility>PRIVATE</visibility>
+						<visibility>INTERNAL</visibility>
+						<visibility>PACKAGE</visibility>
+					</documentedVisibilities>
+					<suppressInheritedMembers>false</suppressInheritedMembers>
+					<suppressObviousFunctions>false</suppressObviousFunctions>
+					<includeNonPublic>true</includeNonPublic>
+					<reportUndocumented>true</reportUndocumented>
+					<skipEmptyPackages>false</skipEmptyPackages>
+					<skipDeprecated>false</skipDeprecated>
+					<jdkVersion>21</jdkVersion>
+					<pluginsConfiguration>
+						<org.jetbrains.dokka.base.DokkaBase>
+							<footerMessage>Derbent Project Management System</footerMessage>
+							<homepageLink>https://github.com/yourusername/derbent</homepageLink>
+						</org.jetbrains.dokka.base.DokkaBase>
+					</pluginsConfiguration>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 

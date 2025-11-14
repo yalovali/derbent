@@ -1,0 +1,134 @@
+{
+  "moduleName": "Derbent Project Management System",
+  "moduleVersion": "1.0-SNAPSHOT",
+  "outputDir": "./target/dokka",
+  "failOnWarning": false,
+  "suppressObviousFunctions": false,
+  "suppressInheritedMembers": false,
+  "offlineMode": false,
+  "includes": [
+    "docs/packages.md"
+  ],
+  "sourceLinks": [
+    {
+      "localDirectory": "src/main/java",
+      "remoteUrl": "https://github.com/yourusername/derbent/tree/main/src/main/java",
+      "remoteLineSuffix": "#L"
+    }
+  ],
+  "externalDocumentationLinks": [
+    {
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/",
+      "packageListUrl": "https://docs.oracle.com/en/java/javase/21/docs/api/element-list"
+    },
+    {
+      "url": "https://docs.spring.io/spring-framework/docs/current/javadoc-api/",
+      "packageListUrl": "https://docs.spring.io/spring-framework/docs/current/javadoc-api/element-list"
+    },
+    {
+      "url": "https://javadoc.io/doc/com.vaadin/vaadin/latest/",
+      "packageListUrl": "https://javadoc.io/doc/com.vaadin/vaadin/latest/element-list"
+    }
+  ],
+  "perPackageOptions": [
+    {
+      "matchingRegex": "tech.derbent.*",
+      "suppress": false,
+      "skipDeprecated": false,
+      "reportUndocumented": true,
+      "includeNonPublic": true,
+      "documentedVisibilities": ["PUBLIC", "PROTECTED", "PRIVATE", "INTERNAL", "PACKAGE"]
+    }
+  ],
+  "sourceSets": [
+    {
+      "displayName": "JVM",
+      "sourceSetID": {
+        "scopeId": "tech.derbent:derbent",
+        "sourceSetName": "main"
+      },
+      "dependentSourceSets": [],
+      "documentedVisibilities": ["PUBLIC", "PROTECTED", "PRIVATE", "INTERNAL", "PACKAGE"],
+      "reportUndocumented": true,
+      "skipEmptyPackages": false,
+      "skipDeprecated": false,
+      "jdkVersion": 21,
+      "sourceRoots": [
+        "src/main/java"
+      ],
+      "classpath": [],
+      "includes": [
+        "docs/packages.md"
+      ],
+      "samples": [],
+      "sourceLinks": [
+        {
+          "localDirectory": "src/main/java",
+          "remoteUrl": "https://github.com/yourusername/derbent/tree/main/src/main/java",
+          "remoteLineSuffix": "#L"
+        }
+      ],
+      "externalDocumentationLinks": [
+        {
+          "url": "https://docs.oracle.com/en/java/javase/21/docs/api/",
+          "packageListUrl": "https://docs.oracle.com/en/java/javase/21/docs/api/element-list"
+        }
+      ],
+      "perPackageOptions": [
+        {
+          "matchingRegex": "tech.derbent.abstracts.*",
+          "suppress": false,
+          "skipDeprecated": false,
+          "reportUndocumented": true,
+          "includeNonPublic": true,
+          "documentedVisibilities": ["PUBLIC", "PROTECTED", "PRIVATE", "INTERNAL", "PACKAGE"]
+        },
+        {
+          "matchingRegex": "tech.derbent.activities.*",
+          "suppress": false,
+          "skipDeprecated": false,
+          "reportUndocumented": true,
+          "includeNonPublic": true,
+          "documentedVisibilities": ["PUBLIC", "PROTECTED", "PRIVATE", "INTERNAL", "PACKAGE"]
+        },
+        {
+          "matchingRegex": "tech.derbent.projects.*",
+          "suppress": false,
+          "skipDeprecated": false,
+          "reportUndocumented": true,
+          "includeNonPublic": true,
+          "documentedVisibilities": ["PUBLIC", "PROTECTED", "PRIVATE", "INTERNAL", "PACKAGE"]
+        },
+        {
+          "matchingRegex": "tech.derbent.users.*",
+          "suppress": false,
+          "skipDeprecated": false,
+          "reportUndocumented": true,
+          "includeNonPublic": true,
+          "documentedVisibilities": ["PUBLIC", "PROTECTED", "PRIVATE", "INTERNAL", "PACKAGE"]
+        },
+        {
+          "matchingRegex": "tech.derbent.meetings.*",
+          "suppress": false,
+          "skipDeprecated": false,
+          "reportUndocumented": true,
+          "includeNonPublic": true,
+          "documentedVisibilities": ["PUBLIC", "PROTECTED", "PRIVATE", "INTERNAL", "PACKAGE"]
+        }
+      ]
+    }
+  ],
+  "pluginsClasspath": [],
+  "pluginsConfiguration": [
+    {
+      "fqPluginName": "org.jetbrains.dokka.base.DokkaBase",
+      "serializationFormat": "JSON",
+      "values": "{\"footerMessage\":\"Derbent Project Management System\",\"separateInheritedMembers\":false,\"mergeImplicitExpectActualDeclarations\":false}"
+    }
+  ],
+  "modules": [],
+  "delayTemplateSubstitution": false,
+  "cacheRoot": null,
+  "noStdlibLink": false,
+  "noJdkLink": false
+}
