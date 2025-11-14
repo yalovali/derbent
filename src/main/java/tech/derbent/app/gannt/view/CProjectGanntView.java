@@ -10,7 +10,6 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectGannt;
 import tech.derbent.api.ui.CGrid;
-import tech.derbent.api.ui.CGridViewBaseGannt;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;

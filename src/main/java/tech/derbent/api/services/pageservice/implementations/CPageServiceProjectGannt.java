@@ -12,6 +12,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanntViewEntity;
+import tech.derbent.app.gannt.view.CGridViewBaseGannt;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 
@@ -156,8 +157,8 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			// Write binder data to entity if binder is available
 			// The view should have an entityBinder for the actual entity
 			// We need to cast to access it since it's not in the interface
-			if (view instanceof tech.derbent.api.ui.CGridViewBaseGannt) {
-				tech.derbent.api.ui.CGridViewBaseGannt<?> ganttView = (tech.derbent.api.ui.CGridViewBaseGannt<?>) view;
+			if (view instanceof CGridViewBaseGannt) {
+				CGridViewBaseGannt<?> ganttView = (CGridViewBaseGannt<?>) view;
 				if (ganttView.getEntityBinder() != null) {
 					try {
 						ganttView.getEntityBinder().writeBean(entity);
@@ -176,6 +177,10 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			// Update current entity with saved version
 			currentActualEntity = savedEntity;
 			// Let the view know to refresh display
+			// cannot set real entity here, as view expects CGanntViewEntity
+			view.onEntitySaved(null);
+			// set it here for further editing
+			// view.setCurrentEntity(savedEntity);
 			view.populateForm();
 			CNotificationService.showSaveSuccess();
 		} catch (final Exception e) {

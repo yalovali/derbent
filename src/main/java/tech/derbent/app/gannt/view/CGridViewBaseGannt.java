@@ -1,4 +1,4 @@
-package tech.derbent.api.ui;
+package tech.derbent.app.gannt.view;
 
 import java.lang.reflect.Field;
 import org.slf4j.Logger;
@@ -9,12 +9,12 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectGannt;
+import tech.derbent.api.ui.CMasterViewSectionBase;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CProjectAwareMDPage;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.domain.CGanttItem;
-import tech.derbent.app.gannt.view.CMasterViewSectionGannt;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
@@ -54,6 +54,16 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	/** Gets the entity binder for the actual entity (Activity or Meeting). This is needed for the page service to write binder data before saving.
 	 * @return The entity binder */
 	public CEnhancedBinder<CProjectItem<?>> getEntityBinder() { return entityBinder; }
+
+	@Override
+	public void onEntitySaved(final EntityClass entity) throws Exception {
+		LOGGER.debug("Entity saved, refreshing grid");
+		refreshGrid();
+		populateForm();
+		// Show success notification
+		CNotificationService.showSaveSuccess();
+		navigateToClass();
+	}
 
 	/** Override to handle CGanttItem selection - it's a DTO wrapper, not the actual entity. Selection is logged but no form editing occurs since
 	 * CGanttItem is read-only. */
