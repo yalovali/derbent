@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.domains.CEntity;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -182,208 +183,30 @@ public class CAuxillaries {
 	// convert all cases to use this method instead of reflection
 	public static Class<?> getEntityClass(final String simpleName) {
 		Check.notBlank(simpleName, "Entity type must not be empty");
-		switch (simpleName) {
-		case "CEntity":
-			return CEntity.class;
-		case "CPageEntity":
-			return CPageEntity.class;
-		case "CActivity":
-			return CActivity.class;
-		case "CMeeting":
-			return CMeeting.class;
-		case "COrder":
-			return COrder.class;
-		case "CRisk":
-			return CRisk.class;
-		case "CCompany":
-			return CCompany.class;
-		case "CProject":
-			return CProject.class;
-		case "CDecision":
-			return CDecision.class;
-		case "CUser":
-			return CUser.class;
-		case "CActivityType":
-			return CActivityType.class;
-		case "CRiskType":
-			return CRiskType.class;
-		case "CProjectItemStatus":
-			return CProjectItemStatus.class;
-		case "CActivityPriority":
-			return CActivityPriority.class;
-		case "CMeetingType":
-			return CMeetingType.class;
-		case "CProjectGanntView":
-			return CProjectGanntView.class;
-		case "CCommentPriority":
-			return CCommentPriority.class;
-		case "CCurrency":
-			return CCurrency.class;
-		case "CDecisionType":
-			return CDecisionType.class;
-		case "COrderType":
-			return COrderType.class;
-		case "CApprovalStatus":
-			return CApprovalStatus.class;
-		case "CDetailSection":
-			return CDetailSection.class;
-		case "CGridEntity":
-			return CGridEntity.class;
-		case "CSystemSettings":
-			return CSystemSettings.class;
-		case "CUserProjectRole":
-			return CUserProjectRole.class;
-		case "CUserCompanyRole":
-			return CUserCompanyRole.class;
-		case "CWorkflowEntity":
-			return CWorkflowEntity.class;
-		case "CUserCompanySetting":
-			return CUserCompanySetting.class;
-		case "CGanntViewEntity":
-			return CGanntViewEntity.class;
-		default:
-			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update (CAuxillaries.java:234)");
-			throw new IllegalArgumentException("Unknown entity type: " + simpleName);
+		try {
+			return CEntityRegistry.getEntityClass(simpleName);
+		} catch (final IllegalArgumentException e) {
+			LOGGER.error("Unknown entity type: {} - Entity not registered in registry", simpleName);
+			throw e;
 		}
 	}
 
 	public static Class<?> getEntityServiceClasses(final String simpleName) {
 		Check.notBlank(simpleName, "Entity type must not be empty");
-		switch (simpleName) {
-		case "CActivity":
-			return CActivityService.class;
-		case "CMeeting":
-			return CMeetingService.class;
-		case "COrder":
-			return COrderService.class;
-		case "CRisk":
-			return CRiskService.class;
-		case "CCompany":
-			return CCompanyService.class;
-		case "CProject":
-			return CProjectService.class;
-		case "CDecision":
-			return CDecisionService.class;
-		case "CComment":
-			return CCommentService.class;
-		case "CUser":
-			return CUserService.class;
-		case "CActivityType":
-			return CActivityTypeService.class;
-		case "CRiskType":
-			return CRiskTypeService.class;
-		case "CProjectItemStatus":
-			return CProjectItemStatusService.class;
-		case "CActivityPriority":
-			return CActivityPriorityService.class;
-		case "CMeetingType":
-			return CMeetingTypeService.class;
-		case "CPageEntity":
-			return CPageEntityService.class;
-		case "CCommentPriority":
-			return CCommentPriorityService.class;
-		case "CCurrency":
-			return CCurrencyService.class;
-		case "CDecisionType":
-			return CDecisionTypeService.class;
-		case "COrderType":
-			return COrderTypeService.class;
-		case "CApprovalStatus":
-			return CApprovalStatusService.class;
-		case "CDetailSection":
-			return CDetailSectionService.class;
-		case "CGridEntity":
-			return CGridEntityService.class;
-		case "CSystemSettings":
-			return CSystemSettingsService.class;
-		case "CUserProjectRole":
-			return CUserProjectRoleService.class;
-		case "CUserCompanyRole":
-			return CUserCompanyRoleService.class;
-		case "CWorkflowEntity":
-			return CWorkflowEntityService.class;
-		case "CWorkflowStatusRelation":
-			return CWorkflowEntityService.class;
-		case "COrderApproval":
-			return COrderApprovalService.class;
-		case "CUserProjectSettings":
-			return CUserProjectSettingsService.class;
-		case "CUserCompanySetting":
-			return CUserCompanySettingsService.class;
-		case "CGanntViewEntity":
-			return CGanntViewEntityService.class;
-		default:
-			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update CAuxillaries");
-			throw new IllegalArgumentException("Unknown entity type: " + simpleName);
+		try {
+			return CEntityRegistry.getEntityServiceClass(simpleName);
+		} catch (final IllegalArgumentException e) {
+			LOGGER.error("Unknown entity type: {} - Service not registered in registry", simpleName);
+			throw e;
 		}
 	}
 
 	public static Class<?> getInitializerService(final Class<?> entityClass) {
-		if (entityClass == CActivity.class) {
-			return CActivityInitializerService.class;
-		} else if (entityClass == CMeeting.class) {
-			return CMeetingInitializerService.class;
-		} else if (entityClass == COrder.class) {
-			return COrderInitializerService.class;
-		} else if (entityClass == CRisk.class) {
-			return CRiskInitializerService.class;
-		} else if (entityClass == CCompany.class) {
-			return CCompanyInitializerService.class;
-		} else if (entityClass == CProject.class) {
-			return CProjectInitializerService.class;
-		} else if (entityClass == CDecision.class) {
-			return CDecisionInitializerService.class;
-		} else if (entityClass == CComment.class) {
-			return CCommentInitializerService.class;
-		} else if (entityClass == CUser.class) {
-			return CUserInitializerService.class;
-		} else if (entityClass == CActivityType.class) {
-			return CActivityTypeInitializerService.class;
-		} else if (entityClass == CProjectItemStatus.class) {
-			return CProjectItemStatusInitializerService.class;
-		} else if (entityClass == CActivityPriority.class) {
-			return CActivityPriorityInitializerService.class;
-		} else if (entityClass == CMeetingType.class) {
-			return CMeetingTypeInitializerService.class;
-		} else if (entityClass == CPageEntity.class) {
-			return CPageEntityInitializerService.class;
-		} else if (entityClass == CCommentPriority.class) {
-			return CCommentPriorityInitializerService.class;
-		} else if (entityClass == CCurrency.class) {
-			return CCurrencyInitializerService.class;
-		} else if (entityClass == CDecisionType.class) {
-			return CDecisionTypeInitializerService.class;
-		} else if (entityClass == COrderType.class) {
-			return COrderTypeInitializerService.class;
-		} else if (entityClass == CApprovalStatus.class) {
-			return CApprovalStatusInitializerService.class;
-		} else if (entityClass == CDetailSection.class) {
-			return CDetailSectionService.class;
-		} else if (entityClass == CGridEntity.class) {
-			return CGridInitializerService.class;
-		} else if (entityClass == CMasterSection.class) {
-			return CMasterInitializerService.class;
-		} else if (entityClass == CSystemSettings.class) {
-			return CSystemSettingsInitializerService.class;
-		} else if (entityClass == CUserProjectRole.class) {
-			return CUserProjectRoleInitializerService.class;
-		} else if (entityClass == CUserCompanyRole.class) {
-			return CUserCompanyRoleInitializerService.class;
-		} else if (entityClass == CWorkflowEntity.class) {
-			return CWorkflowEntityService.class;
-		} else if (entityClass == CWorkflowStatusRelation.class) {
-			return CWorkflowStatusRelationService.class;
-		} else if (entityClass == COrderApproval.class) {
-			return COrderApprovalService.class;
-		} else if (entityClass == CUserProjectSettings.class) {
-			return CUserProjectSettingsService.class;
-		} else if (entityClass == CUserCompanySetting.class) {
-			return CUserCompanySettingsService.class;
-		} else if (entityClass == CGanntViewEntity.class) {
-			return CGanntInitializerService.class;
-		} else {
-			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
-			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
+		try {
+			return CEntityRegistry.getInitializerService(entityClass);
+		} catch (final IllegalArgumentException e) {
+			LOGGER.error("Unknown entity type: {} - Initializer not registered in registry", entityClass.getSimpleName());
+			throw e;
 		}
 	}
 
@@ -412,136 +235,21 @@ public class CAuxillaries {
 	}
 
 	public static Class<?> getServiceClassForEntity(final Class<?> entityClass) {
-		if (entityClass == CActivity.class) {
-			return CActivityService.class;
-		} else if (entityClass == CMeeting.class) {
-			return CMeetingService.class;
-		} else if (entityClass == COrder.class) {
-			return COrderService.class;
-		} else if (entityClass == CRisk.class) {
-			return CRiskService.class;
-		} else if (entityClass == CCompany.class) {
-			return CCompanyService.class;
-		} else if (entityClass == CProject.class) {
-			return CProjectService.class;
-		} else if (entityClass == CDecision.class) {
-			return CDecisionService.class;
-		} else if (entityClass == CUser.class) {
-			return CUserService.class;
-		} else if (entityClass == CActivityType.class) {
-			return CActivityTypeService.class;
-		} else if (entityClass == CProjectItemStatus.class) {
-			return CProjectItemStatusService.class;
-		} else if (entityClass == CActivityPriority.class) {
-			return CActivityPriorityService.class;
-		} else if (entityClass == CMeetingType.class) {
-			return CMeetingTypeService.class;
-		} else if (entityClass == CPageEntity.class) {
-			return CPageEntityService.class;
-		} else if (entityClass == CCommentPriority.class) {
-			return CCommentPriorityService.class;
-		} else if (entityClass == CCurrency.class) {
-			return CCurrencyService.class;
-		} else if (entityClass == CDecisionType.class) {
-			return CDecisionTypeService.class;
-		} else if (entityClass == COrderType.class) {
-			return COrderTypeService.class;
-		} else if (entityClass == CApprovalStatus.class) {
-			return CApprovalStatusService.class;
-		} else if (entityClass == CDetailSection.class) {
-			return CDetailSectionService.class;
-		} else if (entityClass == CGridEntity.class) {
-			return CGridEntityService.class;
-		} else if (entityClass == CSystemSettings.class) {
-			return CSystemSettingsService.class;
-		} else if (entityClass == CUserProjectRole.class) {
-			return CUserProjectRoleService.class;
-		} else if (entityClass == CUserCompanyRole.class) {
-			return CUserCompanyRoleService.class;
-		} else if (entityClass == CWorkflowEntity.class) {
-			return CWorkflowEntityService.class;
-		} else if (entityClass == CWorkflowStatusRelation.class) {
-			return CWorkflowEntityService.class;
-		} else if (entityClass == COrderApproval.class) {
-			return COrderApprovalService.class;
-		} else if (entityClass == CUserProjectSettings.class) {
-			return CUserProjectSettingsService.class;
-		} else if (entityClass == CUserCompanySetting.class) {
-			return CUserCompanySettingsService.class;
-		} else if (entityClass == CGanntViewEntity.class) {
-			return CGanntViewEntityService.class;
-		} else {
-			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
-			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
+		try {
+			return CEntityRegistry.getServiceClassForEntity(entityClass);
+		} catch (final IllegalArgumentException e) {
+			LOGGER.error("Unknown entity type: {} - Service not registered in registry", entityClass.getSimpleName());
+			throw e;
 		}
 	}
 
 	public static Class<?> getServiceClassFromName(final String simpleName) {
 		Check.notBlank(simpleName, "Entity type must not be empty");
-		switch (simpleName) {
-		case "CUserService":
-			return CUserService.class;
-		case "CActivityService":
-			return CActivityService.class;
-		case "CMeetingService":
-			return CMeetingService.class;
-		case "COrderService":
-			return COrder.class;
-		case "CRiskService":
-			return CRiskService.class;
-		case "CCompanyService":
-			return CCompanyService.class;
-		case "CProjectService":
-			return CProjectService.class;
-		case "CDecisionService":
-			return CDecisionService.class;
-		case "CActivityTypeService":
-			return CActivityTypeService.class;
-		case "CRiskTypeService":
-			return CRiskTypeService.class;
-		case "CProjectItemStatusService":
-			return CProjectItemStatusService.class;
-		case "CActivityPriorityService":
-			return CActivityPriorityService.class;
-		case "CMeetingTypeService":
-			return CMeetingTypeService.class;
-		case "CPageEntityService":
-			return CPageEntityService.class;
-		case "CCommentPriorityService":
-			return CCommentPriorityService.class;
-		case "CCurrencyService":
-			return CCurrencyService.class;
-		case "CDecisionTypeService":
-			return CDecisionTypeService.class;
-		case "COrderTypeService":
-			return COrderTypeService.class;
-		case "CApprovalStatusService":
-			return CApprovalStatusService.class;
-		case "CDetailSectionService":
-			return CDetailSectionService.class;
-		case "CGridEntityService":
-			return CGridEntityService.class;
-		case "CSystemSettingsService":
-			return CSystemSettingsService.class;
-		case "CUserProjectRoleService":
-			return CUserProjectRoleService.class;
-		case "CUserCompanyRoleService":
-			return CUserCompanyRoleService.class;
-		case "CWorkflowEntityService":
-			return CWorkflowEntityService.class;
-		case "CWorkflowStatusRelationService":
-			return CWorkflowStatusRelationService.class;
-		case "COrderApprovalService":
-			return COrderApprovalService.class;
-		case "CUserProjectSettingsService":
-			return CUserProjectSettingsService.class;
-		case "CUserCompanySettingsService":
-			return CUserCompanySettingsService.class;
-		case "CGanntViewEntityService":
-			return CGanntViewEntityService.class;
-		default:
-			LOGGER.error("Unknown service type: " + simpleName + " dont forget to update CAuxillaries");
-			throw new IllegalArgumentException("Unknown service type: " + simpleName);
+		try {
+			return CEntityRegistry.getServiceClassByName(simpleName);
+		} catch (final IllegalArgumentException e) {
+			LOGGER.error("Unknown service type: {} - Service not registered in registry", simpleName);
+			throw e;
 		}
 	}
 
