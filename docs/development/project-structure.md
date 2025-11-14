@@ -4,22 +4,37 @@
 
 This document describes the complete project structure of Derbent, explaining the purpose and organization of each directory and key files.
 
+**Recent Updates:**
+- 📦 Added package-info.java documentation to all major packages
+- 🤖 Added AI tool configuration files (.cursorrules, .clinerules, .aidigestconfig)
+- 📚 Reorganized documentation with archive for historical docs
+- 🗂️ Clean root directory with only essential files
+
+For information on finding documentation, see the [Documentation Guide](documentation-guide.md).
+
 ## Root Directory Structure
 
 ```
 derbent/
 ├── .github/                    # GitHub configuration
 │   ├── workflows/             # CI/CD pipelines
-│   └── copilot-instructions.md # Copilot configuration
+│   └── copilot-instructions.md # GitHub Copilot configuration (468 lines)
+├── .cursorrules               # Cursor IDE AI configuration (NEW)
+├── .clinerules                # Cline AI Assistant configuration (NEW)
+├── .aidigestconfig            # AI Digest / general AI tools config (NEW)
 ├── .mvn/                      # Maven wrapper files
 ├── docs/                      # Documentation
 │   ├── architecture/          # Design patterns and architecture
 │   ├── development/           # Developer guides
 │   ├── implementation/        # Implementation details
-│   └── testing/               # Testing documentation
+│   ├── testing/               # Testing documentation
+│   └── archive/               # Historical documentation (NEW)
+│       ├── tasks/             # Archived task summaries
+│       └── README.md          # Archive explanation
 ├── profile-pictures/          # User profile images
 ├── src/                       # Source code
 │   ├── main/
+│   │   └── java/tech/derbent/ # Each package now has package-info.java (NEW)
 │   └── test/
 ├── target/                    # Build output (generated)
 ├── .gitignore                 # Git ignore rules
@@ -30,6 +45,27 @@ derbent/
 ├── README.md                  # Project overview
 └── run-playwright-tests.sh   # UI test runner
 ```
+
+### Recent Organizational Improvements
+
+**AI Tool Support:**
+- Added `.cursorrules` for Cursor IDE with quick reference
+- Added `.clinerules` for Cline AI Assistant with detailed rules
+- Added `.aidigestconfig` for AI Digest and general AI tools
+- See [AI Tools Guide](ai-tools-guide.md) for complete documentation
+
+**Documentation Organization:**
+- Historical task summaries moved to `docs/archive/tasks/`
+- Development docs consolidated in `docs/development/`
+- Testing docs organized in `docs/testing/`
+- Root directory now contains only essential files
+- See [Documentation Guide](documentation-guide.md) for finding information
+
+**Package Documentation:**
+- Added package-info.java to all major packages (11 files)
+- Documents package purpose, contents, and relationships
+- Improves IDE tooltips and Javadoc generation
+- Enhances AI assistant context understanding
 
 ## Source Code Structure
 
@@ -463,3 +499,77 @@ tech/derbent/newmodule/
 - [View Layer Patterns](../architecture/view-layer-patterns.md)
 - [Getting Started Guide](getting-started.md)
 - [Coding Standards](../architecture/coding-standards.md)
+- [AI Tools Guide](ai-tools-guide.md) - AI assistant configuration
+- [Documentation Guide](documentation-guide.md) - Finding and organizing documentation
+
+## Package-Level Documentation
+
+All major packages now include `package-info.java` files that document:
+- Package purpose and scope
+- Key classes and subpackages
+- Relationships with other packages
+- Usage examples where applicable
+
+### Documented Packages
+
+**Top-Level Packages:**
+- `tech.derbent.api` - Core framework overview
+- `tech.derbent.app` - Business modules overview
+- `tech.derbent.base` - Infrastructure overview
+
+**Business Modules:**
+- `tech.derbent.app.activities` - Activity management
+- `tech.derbent.app.projects` - Project management  
+- `tech.derbent.app.companies` - Company/multi-tenancy
+- `tech.derbent.base.users` - User management
+
+**Core API:**
+- `tech.derbent.api.annotations` - Custom annotations (@AMetaData)
+- `tech.derbent.api.services` - Base service classes
+- `tech.derbent.api.ui` - UI framework components
+- `tech.derbent.api.exceptions` - Custom exceptions
+
+These package-info.java files:
+- Appear in IDE tooltips when hovering over package names
+- Generate package-level documentation in Javadoc
+- Provide context to AI coding assistants
+- Help new developers understand package purposes
+
+To view package documentation:
+1. **In IDE**: Hover over package name or press F1/Ctrl+Q
+2. **In Javadoc**: Generate with `mvn javadoc:javadoc` and open `target/site/apidocs/`
+3. **In Source**: Open `package-info.java` file directly
+
+## AI Tool Configuration
+
+The project includes configuration files for multiple AI coding assistants:
+
+**Configuration Files (in root directory):**
+- `.github/copilot-instructions.md` - GitHub Copilot (complete 468-line guide)
+- `.cursorrules` - Cursor IDE (quick reference)
+- `.clinerules` - Cline AI Assistant (detailed rules)
+- `.aidigestconfig` - AI Digest and general AI tools
+
+**Key Features Documented:**
+- C-prefix naming convention (MANDATORY)
+- Package structure (module/layer pattern)
+- Notification system (CNotificationService)
+- Environment setup (source ./setup-java-env.sh)
+- Build commands and timing expectations
+
+See [AI Tools Guide](ai-tools-guide.md) for complete information on AI configuration and usage.
+
+## Documentation Archive
+
+Historical documentation has been moved to `docs/archive/` to keep the main documentation clean and current:
+
+**Archive Location:** `docs/archive/tasks/`
+- Task completion summaries
+- Implementation summaries
+- Test run reports
+- Screenshot documentation
+- Historical development records
+
+**Note:** Archive docs are preserved for historical context but may contain outdated information. Always refer to current documentation in main `docs/` directories.
+
+See [Documentation Guide](documentation-guide.md) for complete documentation organization and how to find information.
