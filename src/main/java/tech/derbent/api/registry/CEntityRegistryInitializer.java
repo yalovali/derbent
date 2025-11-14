@@ -23,7 +23,7 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 		LOGGER.info("Found {} IEntityRegistrable beans to register", beans.size());
 		beans.values().forEach(registrable -> {
 			try {
-				LOGGER.debug("Registering IEntityRegistrable bean: {}", registrable.getClass().getName());
+				// LOGGER.debug("Registering IEntityRegistrable bean: {}", registrable.getClass().getName());
 				CEntityRegistry.register(registrable);
 			} catch (final Exception e) {
 				LOGGER.error("Failed to register entity from bean {}: {}", registrable.getClass().getName(), e.getMessage(), e);

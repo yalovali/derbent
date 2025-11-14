@@ -182,36 +182,27 @@ public class CEntityRegistry {
 			Check.notNull(registrable, "Registrable cannot be null");
 			Check.notNull(registrable.getEntityClass(), "Entity class cannot be null");
 			Check.notNull(registrable.getServiceClass(), "Service class cannot be null");
+			Check.notBlank(registrable.getSimpleName(), "Simple name cannot be blank");
+			Check.notNull(registrable.getInitializerServiceClass(), "Initializer service class cannot be null");
+			Check.notNull(registrable.getPageServiceClass(), "Page service class cannot be null" + " for entity: " + registrable.getSimpleName());
+			Check.notBlank(registrable.getDefaultIconName(), "Default icon name cannot be blank");
+			Check.notBlank(registrable.getDefaultColor(), "Default color cannot be blank");
 			final Class<?> entityClass = registrable.getEntityClass();
 			final String simpleName = registrable.getSimpleName();
 			final Class<?> serviceClass = registrable.getServiceClass();
+			LOGGER.debug("Registered entity class: {} -> {}", simpleName, entityClass.getName());
 			// Register entity class
 			entityClasses.put(simpleName, entityClass);
-			LOGGER.debug("Registered entity class: {} -> {}", simpleName, entityClass.getName());
-			// Register service class
 			serviceClasses.put(simpleName, serviceClass);
 			serviceClassesByEntity.put(entityClass, serviceClass);
 			serviceClassesByName.put(serviceClass.getSimpleName(), serviceClass);
-			LOGGER.debug("Registered service class: {} -> {}", simpleName, serviceClass.getName());
-			// Register initializer service if available
-			if (registrable.getInitializerServiceClass() != null) {
-				initializerServices.put(entityClass, registrable.getInitializerServiceClass());
-			}
-			// Register page service if available
-			if (registrable.getPageServiceClass() != null) {
-				pageServiceClasses.put(entityClass, registrable.getPageServiceClass());
-				pageServiceClassesByName.put(registrable.getPageServiceClass().getSimpleName(), registrable.getPageServiceClass());
-			}
-			// Register icon if available
-			if (registrable.getDefaultIconName() != null) {
-				defaultIcons.put(entityClass, registrable.getDefaultIconName());
-				defaultIconsByName.put(entityClass.getName(), registrable.getDefaultIconName());
-			}
-			// Register color if available
-			if (registrable.getDefaultColor() != null) {
-				defaultColors.put(entityClass, registrable.getDefaultColor());
-				defaultColorsByName.put(entityClass.getName(), registrable.getDefaultColor());
-			}
+			initializerServices.put(entityClass, registrable.getInitializerServiceClass());
+			pageServiceClasses.put(entityClass, registrable.getPageServiceClass());
+			pageServiceClassesByName.put(registrable.getPageServiceClass().getSimpleName(), registrable.getPageServiceClass());
+			defaultIcons.put(entityClass, registrable.getDefaultIconName());
+			defaultIconsByName.put(entityClass.getName(), registrable.getDefaultIconName());
+			defaultColors.put(entityClass, registrable.getDefaultColor());
+			defaultColorsByName.put(entityClass.getName(), registrable.getDefaultColor());
 		} catch (final Exception e) {
 			LOGGER.error("Error registering entity: {}", e.getMessage(), e);
 			throw new RuntimeException("Failed to register entity", e);
