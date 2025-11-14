@@ -3,7 +3,7 @@ package tech.derbent.api.screens.service;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
-import tech.derbent.api.services.pageservice.service.CPageServiceUtility;
+import tech.derbent.api.services.pageservice.CPageServiceUtility;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;

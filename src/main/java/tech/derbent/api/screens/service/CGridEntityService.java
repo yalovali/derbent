@@ -10,7 +10,6 @@ import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceGridEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;

@@ -1,4 +1,4 @@
-package tech.derbent.api.services.pageservice.service;
+package tech.derbent.api.services.pageservice;
 
 import java.util.List;
 import org.slf4j.Logger;
