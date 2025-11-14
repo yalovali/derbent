@@ -24,9 +24,10 @@ import tech.derbent.api.views.components.CFlexLayout;
 
 @Route ("cpagetestauxillary")
 @PageTitle ("Test Support Page")
-@Menu (order = 3.1001, icon = "class:tech.derbent.app.gannt.view.CProjectGanntView", title = "Setup.Test Support Page")
+@Menu (order = 3.1001, icon = "class:tech.derbent.app.gannt.view.CProjectGanntView", title = "Test Support Page")
 @PermitAll
 public class CPageTestAuxillary extends Main {
+
 	public static final String DEFAULT_COLOR = "#31701F";
 	public static final String DEFAULT_ICON = "vaadin:progressbar";
 	private static final long serialVersionUID = 1L;
