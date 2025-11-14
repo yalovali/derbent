@@ -36,3 +36,4 @@ docs/graphviz-output/
 
 # Backup files from configuration scripts
 *.backup
+/bin/
