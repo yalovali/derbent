@@ -45,9 +45,8 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			activityService.initializeNewEntity(newEntity);
 			// Update the current actual entity
 			currentActualEntity = newEntity;
-			// Note: The view will handle updating the display
-			// We can't call view.onEntityCreated with the new entity directly
-			// because the view expects CGanntViewEntity
+			// Populate the form with the new entity
+			view.populateForm();
 			LOGGER.info("New activity entity created for Gantt view");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating new entity instance for Gantt view: {}", e.getMessage());
@@ -75,8 +74,16 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 					LOGGER.info("Entity deleted successfully with ID: {} of type: {}", entity.getId(), entity.getClass().getSimpleName());
 					// Clear current entity
 					currentActualEntity = null;
-					// Refresh the grid/view
+					previousActualEntity = null;
+					// Refresh the grid to reload data after deletion
+					try {
+						view.refreshGrid();
+					} catch (Exception e) {
+						LOGGER.error("Error refreshing grid after delete: {}", e.getMessage(), e);
+					}
+					// Select first item in grid after deletion
 					view.selectFirstInGrid();
+					CNotificationService.showDeleteSuccess();
 				} catch (final Exception ex) {
 					CNotificationService.showException("Error deleting entity with ID:" + entity.getId(), ex);
 					LOGGER.error("Error deleting entity: {}", ex.getMessage(), ex);
@@ -105,15 +112,30 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 					final CEntityDB<?> reloaded = (CEntityDB<?>) service.getById(previousActualEntity.getId()).orElse(null);
 					if (reloaded != null) {
 						currentActualEntity = (CProjectItem<?>) reloaded;
-						// Let the view know to refresh display
+						// Refresh grid and populate form
+						try {
+							view.refreshGrid();
+						} catch (Exception e) {
+							LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
+						}
 						view.populateForm();
 					} else {
 						// previous entity no longer exists, clear selection
 						currentActualEntity = null;
+						try {
+							view.refreshGrid();
+						} catch (Exception e) {
+							LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
+						}
 						view.selectFirstInGrid();
 					}
 				} else {
 					currentActualEntity = null;
+					try {
+						view.refreshGrid();
+					} catch (Exception e) {
+						LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
+					}
 					view.selectFirstInGrid();
 				}
 				CNotificationService.showInfo("Entity reloaded.");
@@ -121,6 +143,11 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			}
 			// Normal refresh for existing entities
 			if (entity == null) {
+				try {
+					view.refreshGrid();
+				} catch (Exception e) {
+					LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
+				}
 				view.selectFirstInGrid();
 				return;
 			}
@@ -128,9 +155,20 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			final CEntityDB<?> reloaded = (CEntityDB<?>) service.getById(entity.getId()).orElse(null);
 			if (reloaded != null) {
 				currentActualEntity = (CProjectItem<?>) reloaded;
+				// Refresh grid to show latest data
+				try {
+					view.refreshGrid();
+				} catch (Exception e) {
+					LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
+				}
 				view.populateForm();
 			} else {
 				currentActualEntity = null;
+				try {
+					view.refreshGrid();
+				} catch (Exception e) {
+					LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
+				}
 				view.selectFirstInGrid();
 			}
 			CNotificationService.showInfo("Entity reloaded.");

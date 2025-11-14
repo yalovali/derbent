@@ -60,6 +60,10 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		refreshMasterView();
 	}
 
+	/** Gets the Gantt grid instance for direct access to grid operations.
+	 * @return The Gantt grid */
+	public CGanntGrid getGrid() { return grid; }
+
 	@Override
 	public EntityClass getSelectedItem() {
 		LOGGER.debug("Getting selected item from Gantt chart");
