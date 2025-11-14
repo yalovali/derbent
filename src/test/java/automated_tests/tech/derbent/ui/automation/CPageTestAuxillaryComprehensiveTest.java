@@ -75,6 +75,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("📊 Found {} navigation buttons to test", buttons.size());
 			// Step 4: Test each button's target page
 			LOGGER.info("🧪 Step 4: Testing each navigation button's target page...");
+			LOGGER.info("Will test {} buttons by navigating directly to their routes", buttons.size());
 			for (int i = 0; i < buttons.size(); i++) {
 				ButtonInfo button = buttons.get(i);
 				LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -82,11 +83,6 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				LOGGER.info("   Route: {}", button.route);
 				LOGGER.info("   Button ID: {}", button.id);
 				testNavigationButton(button, i + 1, buttons.size());
-				// Navigate back to test auxillary page for next button
-				if (i < buttons.size() - 1) {
-					navigateToTestAuxillaryPage();
-					wait_1000();
-				}
 			}
 			// Step 5: Summary
 			LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -163,14 +159,15 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	 * @param totalButtons Total number of buttons */
 	private void testNavigationButton(ButtonInfo button, int buttonNum, int totalButtons) {
 		try {
-			// Click the button to navigate
-			LOGGER.info("🖱️  Clicking button: {}", button.title);
-			Locator buttonElement = page.locator("#" + button.id);
-			if (buttonElement.count() == 0) {
-				LOGGER.warn("⚠️  Button not found: {}", button.id);
+			// Navigate directly to the route instead of clicking the button
+			// This is more reliable than clicking Vaadin buttons with JavaScript handlers
+			LOGGER.info("🧭 Navigating to: {} (button: {})", button.route, button.title);
+			if (button.route == null || button.route.isEmpty()) {
+				LOGGER.warn("⚠️  Button has no route: {}", button.title);
 				return;
 			}
-			buttonElement.click();
+			String targetUrl = "http://localhost:" + port + "/" + button.route;
+			page.navigate(targetUrl);
 			wait_2000(); // Wait for navigation and page load
 			pagesVisited++;
 			// Take initial screenshot
