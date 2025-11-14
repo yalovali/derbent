@@ -64,12 +64,6 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	@Override
 	public Class<?> getInitializerServiceClass() { return CProjectItemStatusInitializerService.class; }
 
-	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceProjectItemStatus.class; }
-
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
-
 	/** Gets the initial/default status from a workflow.
 	 * <p>
 	 * This method retrieves the workflow's designated initial status, which is the status that should be assigned to new entities. The initial status
@@ -83,19 +77,17 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		}
 		try {
 			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
-			LOGGER.debug("Found {} status relations for workflow: {}", relations.size(), workflow.getName());
+			// LOGGER.debug("Found {} status relations for workflow: {}", relations.size(), workflow.getName());
 			// Get statuses from relations marked as initial
 			final Optional<CProjectItemStatus> initialStatus = relations.stream().filter(r -> r.getInitialStatus() != null && r.getInitialStatus())
 					.map(CWorkflowStatusRelation::getToStatus).distinct().findFirst();
 			if (initialStatus.isPresent()) {
-				LOGGER.debug("Found initial status: {} for workflow: {}", initialStatus.get().getName(), workflow.getName());
+				// LOGGER.debug("Found initial status: {} for workflow: {}", initialStatus.get().getName(), workflow.getName());
 				return initialStatus;
 			}
 			// If no initial statuses found, use the first fromStatus in the workflow as fallback
 			if (!relations.isEmpty()) {
 				final CProjectItemStatus fallbackStatus = relations.get(0).getFromStatus();
-				LOGGER.debug("No explicit initial status found, using first fromStatus as fallback: {} for workflow: {}", fallbackStatus.getName(),
-						workflow.getName());
 				return Optional.of(fallbackStatus);
 			}
 			LOGGER.warn("No status relations found for workflow: {}", workflow.getName());
@@ -104,6 +96,12 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		}
 		return Optional.empty();
 	}
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceProjectItemStatus.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Gets the list of valid next statuses for the current entity based on its workflow.
 	 * <p>
@@ -126,7 +124,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 			validStatuses.add(item.getStatus()); // Always include current status
 		} else {
 			// For new items without a status, return initial statuses from the workflow
-			LOGGER.debug("Getting initial statuses for new project item with workflow: {}", workflow.getName());
+			// LOGGER.debug("Getting initial statuses for new project item with workflow: {}", workflow.getName());
 			final Optional<CProjectItemStatus> initialStatus = getInitialStatusFromWorkflow(workflow);
 			initialStatus.ifPresent(validStatuses::add);
 			return validStatuses;

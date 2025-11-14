@@ -86,6 +86,7 @@ public final class CDataProviderResolver {
 
 	public Object resolveMethodAnnotations(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
+			boolean there_is_param = false;
 			Check.notNull(fieldInfo, "Field info cannot be null");
 			final String beanName = fieldInfo.getDataProviderBean();
 			// Check for "none" sentinel value first - indicates field should not have a data provider
@@ -96,6 +97,7 @@ public final class CDataProviderResolver {
 			Check.notBlank(beanName, "Data provider owner or bean name cannot be empty");
 			Object paramValue = null;
 			if (!fieldInfo.getDataProviderParamMethod().isEmpty()) {
+				there_is_param = true;
 				paramValue = resolveParamValue(contentOwner, fieldInfo);
 			}
 			Object bean;
@@ -117,7 +119,12 @@ public final class CDataProviderResolver {
 					return applicationContext.getBean(beanName);
 				});
 			}
-			Object result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod(), paramValue);
+			Object result;
+			if (there_is_param) {
+				result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod(), paramValue);
+			} else {
+				result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod());
+			}
 			Check.notNull(result, "Result from data provider method cannot be null");
 			return result;
 		} catch (Exception e) {

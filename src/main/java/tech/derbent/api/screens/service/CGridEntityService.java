@@ -6,16 +6,18 @@ import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
-import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceGridEntity;
+import tech.derbent.api.utils.Check;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
+public class CGridEntityService extends CEntityOfProjectService<CGridEntity> implements IEntityRegistrable {
 
 	public CGridEntityService(final IGridEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -42,7 +44,7 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 	}
 
 	@Override
-	protected Class<CGridEntity> getEntityClass() { return CGridEntity.class; }
+	public Class<CGridEntity> getEntityClass() { return CGridEntity.class; }
 
 	public List<String> getFieldNames(final CGridEntity entity) {
 		Check.notNull(entity, "Grid Entity must not be null");
@@ -52,6 +54,21 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 		Check.notNull(entityType, "Extracted entity type cannot be null");
 		List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
 		return allFields.stream().map(EntityFieldInfo::getFieldName).toList();
+	}
+
+	@Override
+	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+		return CGridEntityInitializerService.class;
+	}
+
+	@Override
+	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+		return CPageServiceGridEntity.class;
+	}
+
+	@Override
+	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+		return this.getClass();
 	}
 
 	@Override

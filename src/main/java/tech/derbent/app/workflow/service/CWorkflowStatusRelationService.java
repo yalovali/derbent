@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CAbstractEntityRelationService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceWorkflowStatusRelation;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -17,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 /** Service class for managing workflow-status relationships. Handles CRUD operations for CWorkflowStatusRelation entities. */
 @Service
 @Transactional (readOnly = true)
-public class CWorkflowStatusRelationService extends CAbstractEntityRelationService<CWorkflowStatusRelation> {
+public class CWorkflowStatusRelationService extends CAbstractEntityRelationService<CWorkflowStatusRelation> implements IEntityRegistrable {
 
 	private final IWorkflowStatusRelationRepository repository;
 
@@ -149,7 +151,22 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	}
 
 	@Override
-	protected Class<CWorkflowStatusRelation> getEntityClass() { return CWorkflowStatusRelation.class; }
+	public Class<CWorkflowStatusRelation> getEntityClass() { return CWorkflowStatusRelation.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+		return CWorkflowStatusRelationInitializerService.class;
+	}
+
+	@Override
+	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+		return CPageServiceWorkflowStatusRelation.class;
+	}
+
+	@Override
+	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+		return this.getClass();
+	}
 
 	/** Initialize lazy fields for a CWorkflowStatusRelation entity within a transaction context. This method should be called when you need to access
 	 * lazy-loaded fields outside of the original Hibernate session. The repository queries already eagerly fetch common fields (workflow, statuses,

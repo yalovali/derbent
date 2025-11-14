@@ -17,7 +17,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CGridInitializerService;
+import tech.derbent.api.screens.service.CGridEntityInitializerService;
 import tech.derbent.api.services.CTypeEntityService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -1185,7 +1185,7 @@ public class CDataInitializer {
 					CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Project-specific type and configuration entities
 					initializeSampleCurrencies(project, minimal);

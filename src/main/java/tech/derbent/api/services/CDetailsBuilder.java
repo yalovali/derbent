@@ -44,10 +44,10 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		return null;
 	}
 
-	private final ISessionService sessionService;
 	CFormBuilder<?> formBuilder = null;
 	private HasComponents formLayout = null;
 	private final Map<String, CPanelDetails> mapSectionPanels;
+	private final ISessionService sessionService;
 	private TabSheet tabsOfForm;
 
 	public CDetailsBuilder(final ISessionService sessionService) {
@@ -112,7 +112,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				currentSection = (CPanelDetails) component;
 				mapSectionPanels.put(currentSection.getName(), currentSection);
 			} else {
-				LOGGER.error("First create a section!");
+				LOGGER.error("First create a section!" + " Line: {}", line.getFieldCaption());
 			}
 		}
 		return formLayout;

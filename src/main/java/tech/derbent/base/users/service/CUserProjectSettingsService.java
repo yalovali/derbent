@@ -7,11 +7,13 @@ import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.app.roles.domain.CUserProjectRole;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CAbstractEntityRelationService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectSettings;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.IProjectRepository;
+import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
@@ -19,7 +21,7 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 /** Service class for managing user-project relationships. Handles CRUD operations for CUserProjectSettings entities. */
 @Service
 @Transactional (readOnly = true)
-public class CUserProjectSettingsService extends CAbstractEntityRelationService<CUserProjectSettings> {
+public class CUserProjectSettingsService extends CAbstractEntityRelationService<CUserProjectSettings> implements IEntityRegistrable {
 
 	private final IUserProjectSettingsRepository repository;
 
@@ -59,6 +61,11 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 			project.addUserSettings(savedSettings);
 		}
 		return savedSettings;
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CUserProjectSettings entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override
@@ -113,17 +120,21 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	}
 
 	@Override
-	protected Class<CUserProjectSettings> getEntityClass() { return CUserProjectSettings.class; }
+	public Class<CUserProjectSettings> getEntityClass() { return CUserProjectSettings.class; }
 
 	@Override
-	public String checkDeleteAllowed(final CUserProjectSettings entity) {
-		return super.checkDeleteAllowed(entity);
+	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+		return CUserProjectSettingsInitializerService.class;
 	}
 
 	@Override
-	public void initializeNewEntity(final CUserProjectSettings entity) {
-		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
+	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+		return CPageServiceUserProjectSettings.class;
+	}
+
+	@Override
+	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+		return this.getClass();
 	}
 
 	/** Initialize lazy fields for a CUserProjectSettings entity within a transaction context. This method should be called when you need to access
@@ -144,6 +155,12 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		// Access lazy fields to trigger loading within transaction
 		managed.initializeAllFields();
 		return managed;
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserProjectSettings entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	@Override

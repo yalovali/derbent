@@ -61,11 +61,6 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	@Override
 	public CPageService<CGanntViewEntity> getPageService() { // TODO Auto-generated method stub
-		/* CGanttItem ganttItem = null; final Object current = getCurrentEntity(); Check.instanceOf(current, CGanttItem.class,
-		 * "Current entity is not a CGanttItem"); ganttItem = (CGanttItem) current; Check.notNull(ganttItem, "Gantt item is null"); CEntityDB<?>
-		 * entity = ganttItem.getEntity(); Check.notNull(entity, "Underlying entity is null"); Class<?> pageServiceClass =
-		 * CPageServiceUtility.getPageServiceClassByName(CPageServiceUtility.getPageServiceNameForEntityClass(entity.getClass())); Object pageService
-		 * = CSpringContext.getBean(pageServiceClass); return (CPageService<CGanntViewEntity>) pageService; */
 		return pageService;
 	}
 

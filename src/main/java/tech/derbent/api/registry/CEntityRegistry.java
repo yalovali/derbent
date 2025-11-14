@@ -134,7 +134,7 @@ public class CEntityRegistry {
 			final Class<?> entityClass = registrable.getEntityClass();
 			final String simpleName = registrable.getSimpleName();
 			final Class<?> serviceClass = registrable.getServiceClass();
-			LOGGER.debug("Registered entity class: {} -> {}", simpleName, entityClass.getName());
+			// LOGGER.debug("Registered entity class: {} -> {}", simpleName, entityClass.getName());
 			// Register entity class
 			entityClasses.put(simpleName, entityClass);
 			serviceClasses.put(simpleName, serviceClass);

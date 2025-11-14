@@ -6,10 +6,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CAbstractEntityRelationService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanySetting;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserCompanySetting;
@@ -18,7 +20,7 @@ import tech.derbent.base.users.domain.CUserCompanySetting;
  * provides business logic for company membership management. */
 @Service
 @Transactional (readOnly = true)
-public class CUserCompanySettingsService extends CAbstractEntityRelationService<CUserCompanySetting> {
+public class CUserCompanySettingsService extends CAbstractEntityRelationService<CUserCompanySetting> implements IEntityRegistrable {
 
 	private final IUserCompanySettingsRepository repository;
 
@@ -45,6 +47,11 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		validateRelationship(settings);
 		final CUserCompanySetting savedSettings = save(settings);
 		return savedSettings;
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CUserCompanySetting entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	// Implementation of abstract methods
@@ -122,11 +129,21 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	}
 
 	@Override
-	protected Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
+	public Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
 
 	@Override
-	public String checkDeleteAllowed(final CUserCompanySetting entity) {
-		return super.checkDeleteAllowed(entity);
+	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+		return CUserCompanySettingInitializerService.class;
+	}
+
+	@Override
+	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+		return CPageServiceUserCompanySetting.class;
+	}
+
+	@Override
+	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+		return this.getClass();
 	}
 
 	@Override

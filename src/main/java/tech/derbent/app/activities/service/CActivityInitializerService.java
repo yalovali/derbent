@@ -31,11 +31,9 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			// create screen lines
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			scr.addScreenLine(CDetailLinesService.createSection(CActivityInitializerService.BASE_PANEL_NAME));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));

@@ -9,11 +9,11 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
-public class CGridInitializerService extends CInitializerServiceBase {
+public class CGridEntityInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Grid Information";
 	private static final Class<?> clazz = CGridEntity.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CGridInitializerService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CGridEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
 	private static final String menuTitle = MenuTitle_SETUP + ".UI.Grids";
 	private static final String pageDescription = "Grid management for system ";
