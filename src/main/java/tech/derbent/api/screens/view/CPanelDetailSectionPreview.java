@@ -4,11 +4,11 @@ import java.util.List;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.services.CDetailsBuilder;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CDiv;
@@ -59,7 +59,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 			final CDetailsBuilder builder = new CDetailsBuilder(sessionService);
 			divPreview.removeAll();
 			// get service for the class
-			final Class<?> screenClass = CAuxillaries.getEntityClass(screen.getEntityType());
+			final Class<?> screenClass = CEntityRegistry.getEntityClass(screen.getEntityType());
 			// Instead of creating a new binder, reuse the existing one from the base class
 			// This fixes the issue of multiple binders being created unnecessarily
 			CEnhancedBinder<?> sharedBinder = getBinder();

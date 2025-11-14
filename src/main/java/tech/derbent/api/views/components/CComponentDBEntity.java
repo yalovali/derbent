@@ -8,8 +8,8 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.services.CAbstractService;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
 public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout
@@ -31,7 +31,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		this.entityClass = entityClass;
 		Check.notNull(entityClass, "Entity class cannot be null");
 		binder = new CEnhancedBinder<>(entityClass);
-		entityService = (CAbstractService<EntityClass>) CSpringContext.getBean(CAuxillaries.getServiceClassForEntity(entityClass));
+		entityService = (CAbstractService<EntityClass>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(entityClass));
 	}
 
 	public void clearForm() {

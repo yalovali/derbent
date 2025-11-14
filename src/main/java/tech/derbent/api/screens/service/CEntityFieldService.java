@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
 /** Service to provide entity field information for screen line configuration. This service uses reflection to extract field information from domain
@@ -344,7 +344,7 @@ public class CEntityFieldService {
 	 * @return list of available custom component method names */
 	public static List<String> getCustomComponentMethods(final String entityType) {
 		Check.notBlank(entityType, "Entity type must not be empty");
-		final Class<?> entityClass = CAuxillaries.getEntityClass(entityType);
+		final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
 		if (entityClass == null) {
 			return List.of();
 		}
@@ -394,7 +394,7 @@ public class CEntityFieldService {
 
 	public static Field getEntityField(final String entityType, final String fieldName) throws NoSuchFieldException {
 		Check.notBlank(entityType, "Entity type must not be empty");
-		final Class<?> currentClass = CAuxillaries.getEntityClass(entityType);
+		final Class<?> currentClass = CEntityRegistry.getEntityClass(entityType);
 		Check.notNull(currentClass, "Entity class must not be null for type: " + entityType);
 		return getEntityField(currentClass, fieldName);
 	}
@@ -411,7 +411,7 @@ public class CEntityFieldService {
 	 * @return list of field information */
 	public static List<EntityFieldInfo> getEntityFields(final String entityType) {
 		Check.notBlank(entityType, "Entity type must not be empty");
-		final Class<?> entityClass = CAuxillaries.getEntityClass(entityType);
+		final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
 		Check.notNull(entityClass, "Entity class must not be null for type: " + entityType);
 		final List<EntityFieldInfo> fields = new ArrayList<>();
 		final List<Field> allFields = getAllFields(entityClass);
@@ -432,7 +432,7 @@ public class CEntityFieldService {
 
 	public static List<EntityFieldInfo> getEntityRelationFields(final String entityType, final List<EntityFieldInfo> listOfAdditionalFields) {
 		Check.notBlank(entityType, "Entity type must not be empty");
-		final Class<?> entityClass = CAuxillaries.getEntityClass(entityType);
+		final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
 		Check.notNull(entityClass, "Entity class must not be null for type: " + entityType);
 		final List<EntityFieldInfo> fields = new ArrayList<>();
 		if (listOfAdditionalFields != null) {
@@ -454,7 +454,7 @@ public class CEntityFieldService {
 
 	public static List<EntityFieldInfo> getEntitySimpleFields(final String entityType, final List<EntityFieldInfo> listOfAdditionalFields) {
 		Check.notBlank(entityType, "Entity type must not be empty");
-		final Class<?> entityClass = CAuxillaries.getEntityClass(entityType);
+		final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
 		Check.notNull(entityClass, "Entity class must not be null for type: " + entityType);
 		final List<EntityFieldInfo> fields = new ArrayList<>();
 		if (listOfAdditionalFields != null) {

@@ -14,14 +14,14 @@ import com.vaadin.flow.component.tabs.TabSheet;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.utils.CAuxillaries;
-import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CDiv;
-import tech.derbent.api.views.dialogs.CDBEditDialog;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CDiv;
+import tech.derbent.api.views.dialogs.CDBEditDialog;
 
 /** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
 public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
@@ -258,7 +258,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			getEntity().setActive(true);
 			getEntity().setIsCaptionVisible(true);
 			getEntity().setFieldCaption(relationFieldName);
-			getEntity().setDataProviderBean(CAuxillaries.getEntityServiceClasses(screen.getEntityType()).getSimpleName());
+			getEntity().setDataProviderBean(CEntityRegistry.getEntityServiceClass(screen.getEntityType()).getSimpleName());
 			binder.readBean(getEntity());
 			return;
 		} else {

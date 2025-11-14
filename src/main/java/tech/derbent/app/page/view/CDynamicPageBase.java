@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -11,7 +12,6 @@ import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.services.pageservice.service.CPageServiceUtility;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
@@ -105,7 +105,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			final CDetailSection detailSection = pageEntity.getDetailSection();
 			Check.notNull(detailSection, "Detail section cannot be null");
 			Check.notBlank(detailSection.getEntityType(), "Entity type cannot be blank");
-			entityClass = CAuxillaries.getEntityClass(detailSection.getEntityType());
+			entityClass = CEntityRegistry.getEntityClass(detailSection.getEntityType());
 			Check.notNull(entityClass, "Entity class not found for type: " + detailSection.getEntityType());
 			Check.isTrue(CEntityDB.class.isAssignableFrom(entityClass), "Entity class does not extend CEntityDB: " + entityClass);
 		} catch (final Exception e) {

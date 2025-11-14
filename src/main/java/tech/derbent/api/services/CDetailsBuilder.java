@@ -17,11 +17,11 @@ import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
@@ -77,7 +77,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			LOGGER.warn("No lines found for screen: {}", screen.getName());
 			return new FormLayout(); // Return an empty layout if no lines are present
 		}
-		final Class<?> screenClass = CAuxillaries.getEntityClass(screen.getEntityType());
+		final Class<?> screenClass = CEntityRegistry.getEntityClass(screen.getEntityType());
 		Check.notNull(screenClass, "Screen class cannot be null");
 		formBuilder = new CFormBuilder<>(null, screenClass, binder);
 		//
