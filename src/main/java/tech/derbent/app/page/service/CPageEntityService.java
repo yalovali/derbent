@@ -7,7 +7,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.pageservice.implementations.CPageServicePageEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.projects.domain.CProject;

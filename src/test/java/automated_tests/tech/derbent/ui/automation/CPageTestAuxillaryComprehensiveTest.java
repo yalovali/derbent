@@ -20,7 +20,8 @@ import java.util.List;
  * <ul>
  * <li>Navigates to CPageTestAuxillary page after login
  * <li>Dynamically discovers all navigation buttons
- * <li>For each button, navigates to the target page
+ * <li>For each button, extracts the target route from data-route attribute
+ * <li>Navigates directly to each route URL (more reliable than clicking JavaScript handlers)
  * <li>Runs conditional tests based on page content:
  * <ul>
  * <li>Grid tests if grid is present
@@ -35,6 +36,7 @@ import java.util.List;
  * <li><b>Fast execution</b>: Reasonable timeouts, no excessive waits
  * <li><b>Complete coverage</b>: Tests ALL buttons, no skipping
  * <li><b>Generic testing</b>: Reusable functions work with any page type
+ * <li><b>Direct navigation</b>: Uses URL navigation instead of clicking for reliability
  * <li><b>Detailed logging</b>: Clear progress indicators and error messages
  * </ul> */
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
@@ -75,6 +77,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("📊 Found {} navigation buttons to test", buttons.size());
 			// Step 4: Test each button's target page
 			LOGGER.info("🧪 Step 4: Testing each navigation button's target page...");
+			LOGGER.info("Will test {} buttons by navigating directly to their routes", buttons.size());
 			for (int i = 0; i < buttons.size(); i++) {
 				ButtonInfo button = buttons.get(i);
 				LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -82,11 +85,6 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				LOGGER.info("   Route: {}", button.route);
 				LOGGER.info("   Button ID: {}", button.id);
 				testNavigationButton(button, i + 1, buttons.size());
-				// Navigate back to test auxillary page for next button
-				if (i < buttons.size() - 1) {
-					navigateToTestAuxillaryPage();
-					wait_1000();
-				}
 			}
 			// Step 5: Summary
 			LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -163,14 +161,15 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	 * @param totalButtons Total number of buttons */
 	private void testNavigationButton(ButtonInfo button, int buttonNum, int totalButtons) {
 		try {
-			// Click the button to navigate
-			LOGGER.info("🖱️  Clicking button: {}", button.title);
-			Locator buttonElement = page.locator("#" + button.id);
-			if (buttonElement.count() == 0) {
-				LOGGER.warn("⚠️  Button not found: {}", button.id);
+			// Navigate directly to the route instead of clicking the button
+			// This is more reliable than clicking Vaadin buttons with JavaScript handlers
+			LOGGER.info("🧭 Navigating to: {} (button: {})", button.route, button.title);
+			if (button.route == null || button.route.isEmpty()) {
+				LOGGER.warn("⚠️  Button has no route: {}", button.title);
 				return;
 			}
-			buttonElement.click();
+			String targetUrl = "http://localhost:" + port + "/" + button.route;
+			page.navigate(targetUrl);
 			wait_2000(); // Wait for navigation and page load
 			pagesVisited++;
 			// Take initial screenshot

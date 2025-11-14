@@ -1,4 +1,4 @@
-package tech.derbent.api.services.pageservice.implementations;
+package tech.derbent.api.screens.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
