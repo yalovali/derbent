@@ -4,7 +4,9 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceCurrency;
 import tech.derbent.app.orders.domain.CCurrency;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -13,14 +15,23 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CCurrencyService extends CEntityOfProjectService<CCurrency> {
+public class CCurrencyService extends CEntityOfProjectService<CCurrency> implements IEntityRegistrable {
 
 	CCurrencyService(final ICurrencyRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
 	@Override
-	protected Class<CCurrency> getEntityClass() { return CCurrency.class; }
+	public Class<CCurrency> getEntityClass() { return CCurrency.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CCurrencyInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceCurrency.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public String checkDeleteAllowed(final CCurrency entity) {

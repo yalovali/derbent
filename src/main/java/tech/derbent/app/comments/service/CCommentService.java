@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceComment;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.comments.domain.CComment;
@@ -20,7 +22,7 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CCommentService extends CAbstractService<CComment> {
+public class CCommentService extends CAbstractService<CComment> implements IEntityRegistrable {
 
 	public CCommentService(final ICommentRepository repository, final CCommentPriorityService commentPriorityService, final Clock clock,
 			final ISessionService sessionService) {
@@ -75,7 +77,16 @@ public class CCommentService extends CAbstractService<CComment> {
 	}
 
 	@Override
-	protected Class<CComment> getEntityClass() { return CComment.class; }
+	public Class<CComment> getEntityClass() { return CComment.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CCommentInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceComment.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CComment entity) {

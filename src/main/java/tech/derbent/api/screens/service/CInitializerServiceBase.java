@@ -1,9 +1,9 @@
 package tech.derbent.api.screens.service;
 
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.services.pageservice.service.CPageServiceUtility;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
@@ -29,7 +29,7 @@ public abstract class CInitializerServiceBase {
 			baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
 			CGridEntity grid = new CGridEntity(baseViewName, project);
 			grid.setDescription(baseViewName + " Grid");
-			Class<?> bean = CAuxillaries.getEntityServiceClasses(clazz.getSimpleName());
+			Class<?> bean = CEntityRegistry.getEntityServiceClass(clazz.getSimpleName());
 			grid.setDataServiceBeanName(bean.getSimpleName());
 			grid.setAttributeNonDeletable(true);
 			return grid;

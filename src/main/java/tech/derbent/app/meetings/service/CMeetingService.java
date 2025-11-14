@@ -9,7 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.domains.IHasStatusAndWorkflowService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CProjectItemService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceMeeting;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.projects.domain.CProject;
@@ -18,7 +20,7 @@ import tech.derbent.base.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CMeetingService extends CProjectItemService<CMeeting> {
+public class CMeetingService extends CProjectItemService<CMeeting> implements IEntityRegistrable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
 	private final CMeetingTypeService meetingTypeService;
 
@@ -34,7 +36,16 @@ public class CMeetingService extends CProjectItemService<CMeeting> {
 	}
 
 	@Override
-	protected Class<CMeeting> getEntityClass() { return CMeeting.class; }
+	public Class<CMeeting> getEntityClass() { return CMeeting.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CMeetingInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceMeeting.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CMeeting entity) {

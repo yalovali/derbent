@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.pageservice.implementations.CPageServicePageEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.projects.domain.CProject;
@@ -13,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CPageEntityService extends CEntityOfProjectService<CPageEntity> {
+public class CPageEntityService extends CEntityOfProjectService<CPageEntity> implements IEntityRegistrable {
 
 	public CPageEntityService(final IPageEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -68,7 +70,16 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> {
 	}
 
 	@Override
-	protected Class<CPageEntity> getEntityClass() { return CPageEntity.class; }
+	public Class<CPageEntity> getEntityClass() { return CPageEntity.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CPageEntityInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServicePageEntity.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Get page hierarchy for project. */
 	public List<CPageEntity> getPageHierarchyForProject(CProject project) {

@@ -9,7 +9,9 @@ import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.IHasStatusAndWorkflowService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CProjectItemService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceRisk;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.risks.domain.CRisk;
@@ -20,7 +22,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Menu (order = 0, icon = "vaadin:clipboard-check", title = "Settings.Risks")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CRiskService extends CProjectItemService<CRisk> {
+public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskService.class);
 	private final CRiskTypeService riskTypeService;
 
@@ -36,7 +38,16 @@ public class CRiskService extends CProjectItemService<CRisk> {
 	}
 
 	@Override
-	protected Class<CRisk> getEntityClass() { return CRisk.class; }
+	public Class<CRisk> getEntityClass() { return CRisk.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CRiskInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceRisk.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CRisk entity) {

@@ -8,7 +8,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.domains.IHasStatusAndWorkflowService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceDecision;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.decisions.domain.CDecision;
 import tech.derbent.app.projects.domain.CProject;
@@ -19,7 +21,7 @@ import tech.derbent.base.users.domain.CUser;
  * validation, creation, approval workflow management, and project-based queries. */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CDecisionService extends CEntityOfProjectService<CDecision> {
+public class CDecisionService extends CEntityOfProjectService<CDecision> implements IEntityRegistrable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionService.class);
 	private final CProjectItemStatusService entityStatusService;
 	private final CDecisionTypeService entityTypeService;
@@ -37,7 +39,16 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 	}
 
 	@Override
-	protected Class<CDecision> getEntityClass() { return CDecision.class; }
+	public Class<CDecision> getEntityClass() { return CDecision.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CDecisionInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceDecision.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CDecision entity) {
