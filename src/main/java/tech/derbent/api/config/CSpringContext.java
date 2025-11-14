@@ -1,6 +1,7 @@
 package tech.derbent.api.config;
 // package tech.derbent.api.config;
 
+import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -31,6 +32,11 @@ public class CSpringContext implements ApplicationContextAware {
 		}
 		Check.notNull(result, "Bean of type " + beanName + " not found in application context");
 		return result;
+	}
+
+	public static <T> Map<String, T> getBeansOfType(Class<T> type) {
+		Map<String, T> beans = applicationContext.getBeansOfType(type);
+		return beans;
 	}
 
 	@Override

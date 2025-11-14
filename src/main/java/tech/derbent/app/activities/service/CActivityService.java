@@ -10,7 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.domains.IHasStatusAndWorkflowService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CProjectItemService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceActivity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
@@ -20,16 +22,17 @@ import tech.derbent.base.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CActivityService extends CProjectItemService<CActivity> {
-	Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
+public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable {
+
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityTypeService entityTypeService;
+	Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
 
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
 			final CActivityTypeService activityTypeService, final CProjectItemStatusService projectItemStatusService,
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, projectItemStatusService);
-		this.entityTypeService = activityTypeService;
+		entityTypeService = activityTypeService;
 		this.activityPriorityService = activityPriorityService;
 	}
 
@@ -39,7 +42,22 @@ public class CActivityService extends CProjectItemService<CActivity> {
 	}
 
 	@Override
-	protected Class<CActivity> getEntityClass() { return CActivity.class; }
+	public Class<CActivity> getEntityClass() { return CActivity.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+		return CActivityInitializerService.class;
+	}
+
+	@Override
+	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+		return CPageServiceActivity.class;
+	}
+
+	@Override
+	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+		return this.getClass();
+	}
 
 	@Override
 	public void initializeNewEntity(final CActivity entity) {
