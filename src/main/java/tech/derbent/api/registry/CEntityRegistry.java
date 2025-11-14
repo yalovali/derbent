@@ -22,6 +22,10 @@ public class CEntityRegistry {
 	private static final Map<Class<?>, Class<?>> initializerServices = new ConcurrentHashMap<>();
 	private static final Map<String, Class<?>> serviceClassesByName = new ConcurrentHashMap<>();
 
+	// Maps for PageService lookups
+	private static final Map<Class<?>, Class<?>> pageServiceClasses = new ConcurrentHashMap<>();
+	private static final Map<String, Class<?>> pageServiceClassesByName = new ConcurrentHashMap<>();
+
 	// Maps for icon and color lookups
 	private static final Map<Class<?>, String> defaultIcons = new ConcurrentHashMap<>();
 	private static final Map<Class<?>, String> defaultColors = new ConcurrentHashMap<>();
@@ -60,6 +64,13 @@ public class CEntityRegistry {
 			if (registrable.getInitializerServiceClass() != null) {
 				initializerServices.put(entityClass, registrable.getInitializerServiceClass());
 				LOGGER.debug("Registered initializer service: {} -> {}", simpleName, registrable.getInitializerServiceClass().getName());
+			}
+
+			// Register page service if available
+			if (registrable.getPageServiceClass() != null) {
+				pageServiceClasses.put(entityClass, registrable.getPageServiceClass());
+				pageServiceClassesByName.put(registrable.getPageServiceClass().getSimpleName(), registrable.getPageServiceClass());
+				LOGGER.debug("Registered page service: {} -> {}", simpleName, registrable.getPageServiceClass().getName());
 			}
 
 			// Register icon if available
@@ -163,6 +174,28 @@ public class CEntityRegistry {
 	}
 
 	/**
+	 * Gets the page service class for an entity class.
+	 * 
+	 * @param entityClass the entity class
+	 * @return the page service class, or null if not registered
+	 */
+	public static Class<?> getPageServiceClass(final Class<?> entityClass) {
+		Check.notNull(entityClass, "Entity class cannot be null");
+		return pageServiceClasses.get(entityClass);
+	}
+
+	/**
+	 * Gets the page service class by service name.
+	 * 
+	 * @param pageServiceName the page service name (e.g., "CPageServiceActivity")
+	 * @return the page service class, or null if not registered
+	 */
+	public static Class<?> getPageServiceClassByName(final String pageServiceName) {
+		Check.notBlank(pageServiceName, "Page service name cannot be blank");
+		return pageServiceClassesByName.get(pageServiceName);
+	}
+
+	/**
 	 * Gets the default icon for an entity class.
 	 * 
 	 * @param entityClass the entity class
@@ -243,6 +276,8 @@ public class CEntityRegistry {
 		serviceClassesByEntity.clear();
 		initializerServices.clear();
 		serviceClassesByName.clear();
+		pageServiceClasses.clear();
+		pageServiceClassesByName.clear();
 		defaultIcons.clear();
 		defaultColors.clear();
 		defaultIconsByName.clear();

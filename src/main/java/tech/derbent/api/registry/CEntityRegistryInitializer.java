@@ -94,6 +94,34 @@ import tech.derbent.base.users.service.CUserCompanySettingsService;
 import tech.derbent.base.users.service.CUserInitializerService;
 import tech.derbent.base.users.service.CUserProjectSettingsService;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceActivity;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityPriority;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityType;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceApprovalStatus;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceComment;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceCommentPriority;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceCompany;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceCurrency;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceDecision;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceDecisionType;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceGridEntity;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceMeeting;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceMeetingType;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceOrder;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceOrderApproval;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceOrderType;
+import tech.derbent.api.services.pageservice.implementations.CPageServicePageEntity;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceProject;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectItemStatus;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceRisk;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceRiskType;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceSystemSettings;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUser;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanyRole;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanySetting;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectRole;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectSettings;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceWorkflowEntity;
 
 /**
  * Initializes the entity registry at application startup.
@@ -123,7 +151,7 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 
 	private void registerAllEntities() {
 		// Register core entities
-		register("CEntity", CEntity.class, null, null, null, null);
+		registerCEntity();
 		
 		// Register domain entities with full metadata
 		registerActivity();
@@ -166,197 +194,203 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 
 	private void registerActivity() {
 		register("CActivity", CActivity.class, CActivityService.class, 
-				CActivityInitializerService.class, 
+				CActivityInitializerService.class, CPageServiceActivity.class,
 				"vaadin:tasks", "#DC143C");
 	}
 
 	private void registerMeeting() {
 		register("CMeeting", CMeeting.class, CMeetingService.class, 
-				CMeetingInitializerService.class, 
+				CMeetingInitializerService.class, CPageServiceMeeting.class,
 				"vaadin:calendar", "#fd7e14");
 	}
 
 	private void registerOrder() {
 		register("COrder", COrder.class, COrderService.class, 
-				COrderInitializerService.class, 
+				COrderInitializerService.class, CPageServiceOrder.class,
 				"vaadin:money", "#28a745");
 	}
 
 	private void registerRisk() {
 		register("CRisk", CRisk.class, CRiskService.class, 
-				CRiskInitializerService.class, 
+				CRiskInitializerService.class, CPageServiceRisk.class,
 				"vaadin:warning", "#dc3545");
 	}
 
 	private void registerCompany() {
 		register("CCompany", CCompany.class, CCompanyService.class, 
-				CCompanyInitializerService.class, 
+				CCompanyInitializerService.class, CPageServiceCompany.class,
 				"vaadin:building", "#6c757d");
 	}
 
 	private void registerProject() {
 		register("CProject", CProject.class, CProjectService.class, 
-				CProjectInitializerService.class, 
+				CProjectInitializerService.class, CPageServiceProject.class,
 				"vaadin:folder-open", "#007bff");
 	}
 
 	private void registerDecision() {
 		register("CDecision", CDecision.class, CDecisionService.class, 
-				CDecisionInitializerService.class, 
+				CDecisionInitializerService.class, CPageServiceDecision.class,
 				"vaadin:check-circle", "#17a2b8");
 	}
 
 	private void registerComment() {
 		register("CComment", CComment.class, CCommentService.class, 
-				CCommentInitializerService.class, 
+				CCommentInitializerService.class, CPageServiceComment.class,
 				"vaadin:comment", "#ffc107");
 	}
 
 	private void registerUser() {
 		register("CUser", CUser.class, CUserService.class, 
-				CUserInitializerService.class, 
+				CUserInitializerService.class, CPageServiceUser.class,
 				"vaadin:user", "#6610f2");
 	}
 
 	private void registerActivityType() {
 		register("CActivityType", CActivityType.class, CActivityTypeService.class, 
-				CActivityTypeInitializerService.class, 
+				CActivityTypeInitializerService.class, CPageServiceActivityType.class,
 				"vaadin:tag", "#e83e8c");
 	}
 
 	private void registerRiskType() {
 		register("CRiskType", CRiskType.class, CRiskTypeService.class, 
-				null, "vaadin:warning", "#dc3545");
+				null, CPageServiceRiskType.class,
+				"vaadin:warning", "#dc3545");
 	}
 
 	private void registerProjectItemStatus() {
 		register("CProjectItemStatus", CProjectItemStatus.class, CProjectItemStatusService.class, 
-				CProjectItemStatusInitializerService.class, 
+				CProjectItemStatusInitializerService.class, CPageServiceProjectItemStatus.class,
 				"vaadin:check", "#20c997");
 	}
 
 	private void registerActivityPriority() {
 		register("CActivityPriority", CActivityPriority.class, CActivityPriorityService.class, 
-				CActivityPriorityInitializerService.class, 
+				CActivityPriorityInitializerService.class, CPageServiceActivityPriority.class,
 				"vaadin:flag", "#fd7e14");
 	}
 
 	private void registerMeetingType() {
 		register("CMeetingType", CMeetingType.class, CMeetingTypeService.class, 
-				CMeetingTypeInitializerService.class, 
+				CMeetingTypeInitializerService.class, CPageServiceMeetingType.class,
 				"vaadin:calendar-clock", "#fd7e14");
 	}
 
 	private void registerCommentPriority() {
 		register("CCommentPriority", CCommentPriority.class, CCommentPriorityService.class, 
-				CCommentPriorityInitializerService.class, 
+				CCommentPriorityInitializerService.class, CPageServiceCommentPriority.class,
 				"vaadin:flag", "#ffc107");
 	}
 
 	private void registerCurrency() {
 		register("CCurrency", CCurrency.class, CCurrencyService.class, 
-				CCurrencyInitializerService.class, 
+				CCurrencyInitializerService.class, CPageServiceCurrency.class,
 				"vaadin:dollar", "#28a745");
 	}
 
 	private void registerDecisionType() {
 		register("CDecisionType", CDecisionType.class, CDecisionTypeService.class, 
-				CDecisionTypeInitializerService.class, 
+				CDecisionTypeInitializerService.class, CPageServiceDecisionType.class,
 				"vaadin:check-circle-o", "#17a2b8");
 	}
 
 	private void registerOrderType() {
 		register("COrderType", COrderType.class, COrderTypeService.class, 
-				COrderTypeInitializerService.class, 
+				COrderTypeInitializerService.class, CPageServiceOrderType.class,
 				"vaadin:tag", "#28a745");
 	}
 
 	private void registerApprovalStatus() {
 		register("CApprovalStatus", CApprovalStatus.class, CApprovalStatusService.class, 
-				CApprovalStatusInitializerService.class, 
+				CApprovalStatusInitializerService.class, CPageServiceApprovalStatus.class,
 				"vaadin:check-square", "#20c997");
 	}
 
 	private void registerPageEntity() {
 		register("CPageEntity", CPageEntity.class, CPageEntityService.class, 
-				CPageEntityInitializerService.class, 
+				CPageEntityInitializerService.class, CPageServicePageEntity.class,
 				"vaadin:file-text", "#6c757d");
 	}
 
 	private void registerDetailSection() {
 		register("CDetailSection", CDetailSection.class, CDetailSectionService.class, 
-				CDetailSectionService.class, 
+				CDetailSectionService.class, null,
 				"vaadin:grid-small", "#95a5a6");
 	}
 
 	private void registerGridEntity() {
 		register("CGridEntity", CGridEntity.class, CGridEntityService.class, 
-				CGridInitializerService.class, 
+				CGridInitializerService.class, CPageServiceGridEntity.class,
 				"vaadin:grid-big", "#95a5a6");
 	}
 
 	private void registerMasterSection() {
 		register("CMasterSection", CMasterSection.class, null, 
-				CMasterInitializerService.class, 
+				CMasterInitializerService.class, null,
 				"vaadin:grid", "#95a5a6");
 	}
 
 	private void registerSystemSettings() {
 		register("CSystemSettings", CSystemSettings.class, CSystemSettingsService.class, 
-				CSystemSettingsInitializerService.class, 
+				CSystemSettingsInitializerService.class, CPageServiceSystemSettings.class,
 				"vaadin:cog", "#6c757d");
 	}
 
 	private void registerUserProjectRole() {
 		register("CUserProjectRole", CUserProjectRole.class, CUserProjectRoleService.class, 
-				CUserProjectRoleInitializerService.class, 
+				CUserProjectRoleInitializerService.class, CPageServiceUserProjectRole.class,
 				"vaadin:user-check", "#6610f2");
 	}
 
 	private void registerUserCompanyRole() {
 		register("CUserCompanyRole", CUserCompanyRole.class, CUserCompanyRoleService.class, 
-				CUserCompanyRoleInitializerService.class, 
+				CUserCompanyRoleInitializerService.class, CPageServiceUserCompanyRole.class,
 				"vaadin:user-star", "#6610f2");
 	}
 
 	private void registerWorkflowEntity() {
 		register("CWorkflowEntity", CWorkflowEntity.class, CWorkflowEntityService.class, 
-				CWorkflowEntityService.class, 
+				CWorkflowEntityService.class, CPageServiceWorkflowEntity.class,
 				"vaadin:flow-tree", "#17a2b8");
 	}
 
 	private void registerWorkflowStatusRelation() {
 		register("CWorkflowStatusRelation", CWorkflowStatusRelation.class, CWorkflowStatusRelationService.class, 
-				CWorkflowStatusRelationService.class, 
+				CWorkflowStatusRelationService.class, null,
 				"vaadin:connect", "#17a2b8");
 	}
 
 	private void registerOrderApproval() {
 		register("COrderApproval", COrderApproval.class, COrderApprovalService.class, 
-				COrderApprovalService.class, 
+				COrderApprovalService.class, CPageServiceOrderApproval.class,
 				"vaadin:check-circle", "#28a745");
 	}
 
 	private void registerUserProjectSettings() {
 		register("CUserProjectSettings", CUserProjectSettings.class, CUserProjectSettingsService.class, 
-				CUserProjectSettingsService.class, 
+				CUserProjectSettingsService.class, CPageServiceUserProjectSettings.class,
 				"vaadin:cogs", "#6c757d");
 	}
 
 	private void registerUserCompanySetting() {
 		register("CUserCompanySetting", CUserCompanySetting.class, CUserCompanySettingsService.class, 
-				CUserCompanySettingsService.class, 
+				CUserCompanySettingsService.class, CPageServiceUserCompanySetting.class,
 				"vaadin:cog-o", "#6c757d");
 	}
 
 	private void registerGanntViewEntity() {
 		register("CGanntViewEntity", CGanntViewEntity.class, CGanntViewEntityService.class, 
-				CGanntInitializerService.class, 
+				CGanntInitializerService.class, null,
 				"vaadin:timeline", "#fd7e14");
+	}
+
+	private void registerCEntity() {
+		register("CEntity", CEntity.class, null, null, null, null, null);
 	}
 
 	private void register(final String simpleName, final Class<?> entityClass, 
 			final Class<?> serviceClass, final Class<?> initializerClass,
+			final Class<?> pageServiceClass,
 			final String icon, final String color) {
 		CEntityRegistry.register(new IEntityRegistrable() {
 			@Override
@@ -372,6 +406,11 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 			@Override
 			public Class<?> getInitializerServiceClass() {
 				return initializerClass;
+			}
+
+			@Override
+			public Class<?> getPageServiceClass() {
+				return pageServiceClass;
 			}
 
 			@Override

@@ -27,6 +27,14 @@ public interface IEntityRegistrable {
 	}
 
 	/**
+	 * Gets the page service class for the entity.
+	 * @return the page service class, or null if not applicable
+	 */
+	default Class<?> getPageServiceClass() {
+		return null;
+	}
+
+	/**
 	 * Gets the default icon for the entity.
 	 * @return the icon string (e.g., "vaadin:user"), or null if not applicable
 	 */
