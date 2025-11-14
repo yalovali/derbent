@@ -1,0 +1,84 @@
+# AI Digest Configuration for Derbent Project
+
+## Project Type
+java-spring-boot-vaadin
+
+## Tech Stack
+- Java 21
+- Spring Boot 3.5
+- Vaadin Flow 24.8
+- PostgreSQL / H2
+- Maven 3.9+
+- Playwright (testing)
+
+## Critical Rules
+
+### Naming Convention (MANDATORY)
+- All custom classes MUST have "C" prefix: CActivity, CUser, CProject
+- Interfaces use "I" prefix: IActivityRepository, IUserService
+- NO exceptions to C-prefix rule for custom classes
+
+### Package Structure
+tech.derbent.{module}.{layer}
+- Modules: activities, users, projects, meetings, companies, risks, decisions, comments, workflow
+- Layers: domain, service, view
+
+### Code Organization
+- Domain entities: Extend CEntityDB<T> or CProjectItem<T>
+- Services: Extend CAbstractService<T>
+- Views: Extend CAbstractEntityDBPage<T>
+- Use generics, avoid raw types
+
+### Notification Pattern
+NEVER: Notification.show()
+ALWAYS: notificationService.showSuccess/Error/Warning()
+OR: CNotifications.showSuccess/Error/Warning()
+
+## Build & Test Commands
+```bash
+# Setup environment (ALWAYS FIRST)
+source ./setup-java-env.sh
+
+# Build
+mvn clean compile
+
+# Format (REQUIRED before commit)
+mvn spotless:apply
+
+# Run with H2
+mvn spring-boot:run -Dspring.profiles.active=h2
+
+# Test
+./run-playwright-tests.sh menu
+```
+
+## Important Files
+- Main config: .github/copilot-instructions.md
+- Coding standards: docs/architecture/coding-standards.md
+- Project structure: docs/development/project-structure.md
+- Build config: pom.xml
+
+## Directories
+- Source: src/main/java/tech/derbent/
+- Tests: src/test/java/
+- Docs: docs/ (architecture/, development/, testing/, archive/)
+- Resources: src/main/resources/
+
+## Key Patterns
+1. C-prefix on all custom classes
+2. Consistent domain/service/view structure
+3. Metadata-driven with @AMetaData
+4. Type-safe with generics
+5. CNotificationService for messages
+6. Multi-tenant company-based architecture
+
+## Entry Points
+- Main: src/main/java/tech/derbent/Application.java
+- Config: src/main/resources/application.properties
+- Tests: src/test/java/automated_tests/
+
+## Documentation Priority
+1. .github/copilot-instructions.md - Complete guide
+2. docs/architecture/ - Design patterns
+3. docs/development/ - Setup and workflows
+4. docs/testing/ - Test strategies

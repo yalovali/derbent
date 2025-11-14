@@ -1,0 +1,221 @@
+# Cline Rules for Derbent Project
+
+You are working on Derbent, a Java 21 Spring Boot + Vaadin 24.8 project management application.
+
+## CRITICAL: Environment Setup
+ALWAYS run this FIRST in every session:
+```bash
+source ./setup-java-env.sh
+```
+This configures Java 21 which is REQUIRED by the project.
+
+## Mandatory Coding Rules
+
+### 1. C-Prefix Convention (NO EXCEPTIONS)
+ALL custom classes MUST start with "C":
+```java
+✅ CActivity, CUser, CProject
+✅ CActivityService, CUserService
+✅ CActivityView, CUserPage
+✅ CButton, CGrid, CDialog
+
+❌ Activity, User, Project (WRONG!)
+❌ ActivityService (WRONG!)
+```
+
+Only exceptions:
+- Interfaces: IActivityRepository, IUserService (use I-prefix)
+- Tests: CActivityTest (keep C-prefix)
+
+### 2. Package Organization
+```
+tech.derbent.{module}.{layer}
+
+Modules: activities, users, projects, meetings, companies, risks, decisions, comments, orders, workflow, roles
+Layers: domain, service, view
+```
+
+Examples:
+- `tech.derbent.activities.domain.CActivity`
+- `tech.derbent.activities.service.CActivityService`
+- `tech.derbent.activities.view.CActivityCard`
+
+### 3. Base Classes (Extend These)
+- Entity classes → `CEntityDB<T>`, `CProjectItem<T>`, `CEntityOfProject<T>`
+- Service classes → `CAbstractService<T>`
+- Repository interfaces → `IAbstractRepository<T>`
+- View pages → `CAbstractEntityDBPage<T>`, `CAbstractNamedEntityPage<T>`
+
+### 4. Notification System (CRITICAL - No Exceptions)
+```java
+// ❌ NEVER do this:
+Notification.show("message");
+
+// ✅ ALWAYS do this:
+@Autowired
+private CNotificationService notificationService;
+
+notificationService.showSuccess("Operation completed");
+notificationService.showError("Operation failed");
+notificationService.showSaveSuccess();
+notificationService.showDeleteError();
+
+// For static/utility contexts:
+CNotifications.showSuccess("Message");
+CNotifications.showError("Message");
+```
+
+### 5. Type Safety (Always Use Generics)
+```java
+// ✅ Correct
+public class CActivity extends CProjectItem<CActivity> {}
+List<CActivity> activities = service.findAll();
+
+// ❌ Wrong - raw types
+public class CActivity extends CProjectItem {}
+List activities = service.findAll();
+```
+
+### 6. Metadata Annotations
+Use @AMetaData for UI metadata:
+```java
+@Column(nullable = false, length = 255)
+@NotBlank(message = "Name is required")
+@AMetaData(
+    displayName = "Activity Name",
+    required = true,
+    order = 10,
+    maxLength = 255
+)
+private String name;
+```
+
+## Build & Development Commands
+
+### Initial Setup
+```bash
+source ./setup-java-env.sh
+java -version  # Should show Java 21
+mvn -version   # Should show Maven 3.9+
+```
+
+### Compilation (15 seconds)
+```bash
+mvn clean compile
+```
+
+### Code Formatting (REQUIRED before commits)
+```bash
+mvn spotless:apply  # Fix formatting
+mvn spotless:check  # Verify formatting
+```
+
+### Run Application
+```bash
+# Development with H2 database (no PostgreSQL needed)
+mvn spring-boot:run -Dspring.profiles.active=h2
+
+# Application accessible at: http://localhost:8080
+```
+
+### Testing
+```bash
+# UI tests with screenshots (37-40 seconds)
+./run-playwright-tests.sh menu
+
+# Comprehensive test suite (2-5 minutes)
+./run-playwright-tests.sh comprehensive
+
+# Specific test categories
+./run-playwright-tests.sh login
+./run-playwright-tests.sh status-types
+./run-playwright-tests.sh buttons
+```
+
+## Project Structure
+
+### Source Code
+```
+src/main/java/tech/derbent/
+├── api/          # Core framework, base classes, utilities
+├── app/          # Business modules (activities, meetings, projects, etc.)
+└── base/         # Infrastructure (login, session, setup, users)
+```
+
+### Documentation
+```
+docs/
+├── architecture/     # Design patterns, coding standards
+├── development/      # Getting started, project structure
+├── testing/          # Testing guides
+├── implementation/   # Feature implementation details
+└── archive/          # Historical documentation
+```
+
+### Key Files
+- `.github/copilot-instructions.md` - Complete coding guidelines (468 lines)
+- `docs/architecture/coding-standards.md` - Detailed standards
+- `docs/development/project-structure.md` - Package organization
+- `pom.xml` - Maven configuration
+
+## Common Patterns
+
+### Adding New Entity Module
+1. Create package: `tech.derbent.{module}`
+2. Add subpackages: `domain/`, `service/`, `view/`
+3. Create entity: `C{Entity}.java` extends base class
+4. Create service: `C{Entity}Service.java`
+5. Create repository: `I{Entity}Repository.java`
+6. Create view: `C{Entity}View.java` or page
+
+### Service Implementation
+```java
+@Service
+public class CActivityService extends CAbstractService<CActivity> {
+    private final IActivityRepository repository;
+    
+    @Autowired
+    private CNotificationService notificationService;
+    
+    // Implementation
+}
+```
+
+### View Implementation
+```java
+@Route("activities")
+public class CActivityView extends CAbstractEntityDBPage<CActivity> {
+    @Autowired
+    private CNotificationService notificationService;
+    
+    // UI Implementation
+}
+```
+
+## Validation Checklist
+
+Before completing any task:
+1. ✅ All custom classes have C-prefix
+2. ✅ No raw types - generics used everywhere
+3. ✅ CNotificationService used (not Notification.show)
+4. ✅ Package structure follows module/layer pattern
+5. ✅ Code formatted with `mvn spotless:apply`
+6. ✅ Project compiles: `mvn clean compile`
+7. ✅ Tests pass: `./run-playwright-tests.sh menu`
+
+## Common Mistakes to Avoid
+❌ Forgetting C-prefix on custom classes
+❌ Using Notification.show() directly
+❌ Using raw types without generics
+❌ Inconsistent package structure
+❌ Not running spotless before commit
+❌ Forgetting to source setup-java-env.sh
+
+## For Complete Details
+See `.github/copilot-instructions.md` for comprehensive guidelines (468 lines covering all patterns, validation scenarios, and build configurations).
+
+## Need Help?
+- Architecture patterns: `docs/architecture/`
+- Setup issues: `docs/development/getting-started.md`
+- Testing: `docs/testing/`
+- Examples: Look at existing modules in `src/main/java/tech/derbent/app/`

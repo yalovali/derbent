@@ -1,0 +1,131 @@
+# Derbent Project - Cursor IDE Rules
+
+## Project Overview
+Derbent is a Java 21 Spring Boot + Vaadin 24.8 project management application.
+
+## Essential Setup
+Before coding, ALWAYS run:
+```bash
+source ./setup-java-env.sh  # Configure Java 21 environment
+```
+
+## Coding Standards (MANDATORY)
+
+### 1. C-Prefix Convention
+ALL custom classes MUST use "C" prefix:
+- ✅ `CActivity`, `CUser`, `CProject`
+- ✅ `CActivityService`, `CUserService`
+- ✅ `CActivityView`, `CUserPage`
+- ❌ `Activity`, `User` (WRONG - missing prefix)
+
+Exceptions:
+- Interfaces: Use "I" prefix (`IActivityRepository`)
+- Tests: Keep C-prefix (`CActivityTest`)
+
+### 2. Package Structure
+```
+tech.derbent.{module}.{layer}
+- module: activities, users, projects, etc.
+- layer: domain, service, view
+```
+
+Example:
+- `tech.derbent.activities.domain.CActivity`
+- `tech.derbent.activities.service.CActivityService`
+- `tech.derbent.activities.view.CActivityView`
+
+### 3. Inheritance Patterns
+Follow established base classes:
+- Entities: Extend `CEntityDB<T>`, `CProjectItem<T>`, etc.
+- Services: Extend `CAbstractService<T>`
+- Views: Extend `CAbstractEntityDBPage<T>`
+
+### 4. Notification System (CRITICAL)
+NEVER use direct Vaadin Notification.show(). ALWAYS use:
+```java
+@Autowired
+private CNotificationService notificationService;
+
+notificationService.showSuccess("Operation completed");
+notificationService.showError("Operation failed");
+notificationService.showSaveSuccess();
+notificationService.showDeleteError();
+```
+
+For static contexts:
+```java
+CNotifications.showSuccess("Message");
+CNotifications.showError("Message");
+```
+
+### 5. Type Safety
+Always use generics:
+```java
+// ✅ Correct
+public class CActivity extends CProjectItem<CActivity> {}
+List<CActivity> activities = service.findAll();
+
+// ❌ Wrong
+public class CActivity extends CProjectItem {}  // Raw type
+```
+
+## Build Commands
+
+### Compile (15 seconds)
+```bash
+mvn clean compile
+```
+
+### Format Code (REQUIRED before commit)
+```bash
+mvn spotless:apply
+mvn spotless:check
+```
+
+### Run Application (H2 database for development)
+```bash
+mvn spring-boot:run -Dspring.profiles.active=h2
+```
+
+### Run Tests
+```bash
+./run-playwright-tests.sh menu        # UI tests with screenshots
+./run-playwright-tests.sh comprehensive # Full test suite
+```
+
+## File Locations
+
+### Documentation
+- Architecture: `docs/architecture/`
+- Development guides: `docs/development/`
+- Testing: `docs/testing/`
+- Archived docs: `docs/archive/`
+
+### Code Organization
+- Core framework: `src/main/java/tech/derbent/api/`
+- Business modules: `src/main/java/tech/derbent/app/`
+- Base/infrastructure: `src/main/java/tech/derbent/base/`
+
+## Key References
+- Coding standards: `docs/architecture/coding-standards.md`
+- Project structure: `docs/development/project-structure.md`
+- Getting started: `docs/development/getting-started.md`
+- Full guidelines: `.github/copilot-instructions.md`
+
+## Quick Tips
+1. Run `source ./setup-java-env.sh` at start of each session
+2. Use C-prefix for ALL custom classes
+3. Use CNotificationService for user messages
+4. Run `mvn spotless:apply` before committing
+5. Check existing patterns before adding new code
+6. Follow domain/service/view package structure
+
+## Common Mistakes to Avoid
+❌ Missing C-prefix on custom classes
+❌ Using raw types (missing generics)
+❌ Direct Notification.show() calls
+❌ Inconsistent package structure
+❌ Forgetting to format with spotless
+
+## For Complete Guidelines
+See `.github/copilot-instructions.md` (468 lines) for comprehensive documentation.
