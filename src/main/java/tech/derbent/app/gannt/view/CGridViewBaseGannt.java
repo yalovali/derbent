@@ -174,6 +174,11 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		if (value != null) {
 			Check.instanceOf(value, CGanttItem.class, "Selected item is not a CGanttItem");
 			setCurrentEntity(value);
+			// Clear the cached entity in page service to force refresh from the selected item
+			// This ensures details update correctly when switching between different gantt items
+			if (getPageService() instanceof CPageServiceProjectGannt) {
+				((CPageServiceProjectGannt) getPageService()).setCurrentActualEntity(null);
+			}
 			populateForm();
 			return;
 		} else {
