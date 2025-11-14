@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityNamedService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceCompany;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
@@ -18,7 +20,7 @@ import tech.derbent.base.users.service.IUserCompanySettingsRepository;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CCompanyService extends CEntityNamedService<CCompany> {
+public class CCompanyService extends CEntityNamedService<CCompany> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
 	@Autowired
@@ -92,7 +94,16 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 	}
 
 	@Override
-	protected Class<CCompany> getEntityClass() { return CCompany.class; }
+	public Class<CCompany> getEntityClass() { return CCompany.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CCompanyInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceCompany.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CCompany entity) {

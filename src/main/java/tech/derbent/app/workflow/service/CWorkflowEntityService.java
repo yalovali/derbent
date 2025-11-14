@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceWorkflowEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -19,7 +21,7 @@ import tech.derbent.base.session.service.ISessionService;
  * management including CRUD operations and validation. */
 @Service
 @Transactional
-public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> {
+public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
 	private final IWorkflowEntityRepository workflowEntityRepository;
@@ -64,7 +66,16 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 	}
 
 	@Override
-	protected Class<CWorkflowEntity> getEntityClass() { return CWorkflowEntity.class; }
+	public Class<CWorkflowEntity> getEntityClass() { return CWorkflowEntity.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CWorkflowEntityInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceWorkflowEntity.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Gets a random workflow entity for a specific project and entity class.
 	 * @param project     the project to filter by

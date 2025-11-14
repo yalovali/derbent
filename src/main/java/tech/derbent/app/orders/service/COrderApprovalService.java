@@ -5,7 +5,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityNamedService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceOrderApproval;
 import tech.derbent.app.orders.domain.COrderApproval;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -15,7 +17,7 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderApprovalService extends CEntityNamedService<COrderApproval> {
+public class COrderApprovalService extends CEntityNamedService<COrderApproval> implements IEntityRegistrable {
 
 	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final ISessionService sessionService,
 			final CApprovalStatusService approvalStatusService) {
@@ -28,7 +30,16 @@ public class COrderApprovalService extends CEntityNamedService<COrderApproval> {
 	}
 
 	@Override
-	protected Class<COrderApproval> getEntityClass() { return COrderApproval.class; }
+	public Class<COrderApproval> getEntityClass() { return COrderApproval.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return COrderApprovalInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceOrderApproval.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final COrderApproval entity) {

@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityNamedService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceProject;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentProjectUserSettings;
@@ -22,7 +24,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CProjectService extends CEntityNamedService<CProject> {
+public class CProjectService extends CEntityNamedService<CProject> implements IEntityRegistrable {
 
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -89,7 +91,16 @@ public class CProjectService extends CEntityNamedService<CProject> {
 	}
 
 	@Override
-	protected Class<CProject> getEntityClass() { return CProject.class; }
+	public Class<CProject> getEntityClass() { return CProject.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CProjectInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceProject.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@PreAuthorize ("permitAll()")
 	public long getTotalProjectCount() { return repository.count(); }

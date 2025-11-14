@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityNamedService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUser;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentUserProjectSettings;
 import tech.derbent.app.companies.domain.CCompany;
@@ -36,7 +38,7 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserService extends CEntityNamedService<CUser> implements UserDetailsService {
+public class CUserService extends CEntityNamedService<CUser> implements UserDetailsService, IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
@@ -185,7 +187,16 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	}
 
 	@Override
-	protected Class<CUser> getEntityClass() { return CUser.class; }
+	public Class<CUser> getEntityClass() { return CUser.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CUserInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceUser.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	public CUser getRandomByCompany(final CCompany company) {
 		final List<CUser> users = ((IUserRepository) repository).findByCompany_Id(company.getId());

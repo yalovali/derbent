@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.IHasStatusAndWorkflowService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceOrder;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.orders.domain.CCurrency;
@@ -23,7 +25,7 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderService extends CEntityOfProjectService<COrder> {
+public class COrderService extends CEntityOfProjectService<COrder> implements IEntityRegistrable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderService.class);
 	private final CCurrencyService currencyService;
 	private final CProjectItemStatusService entityStatusService;
@@ -55,7 +57,16 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 	}
 
 	@Override
-	protected Class<COrder> getEntityClass() { return COrder.class; }
+	public Class<COrder> getEntityClass() { return COrder.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return COrderInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceOrder.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final COrder entity) {

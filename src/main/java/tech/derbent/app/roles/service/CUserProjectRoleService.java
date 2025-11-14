@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.app.roles.domain.CUserProjectRole;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectRole;
+import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CUserProjectRoleService - Service layer for CUserProjectRole entity. Layer: Service (MVC) Handles business logic for project-aware user project
@@ -15,7 +17,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjectRole> {
+public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjectRole> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectRoleService.class);
 
@@ -67,7 +69,16 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	}
 
 	@Override
-	protected Class<CUserProjectRole> getEntityClass() { return CUserProjectRole.class; }
+	public Class<CUserProjectRole> getEntityClass() { return CUserProjectRole.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CUserProjectRoleInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceUserProjectRole.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public String checkDeleteAllowed(final CUserProjectRole entity) {

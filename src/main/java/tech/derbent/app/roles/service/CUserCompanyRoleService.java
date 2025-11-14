@@ -9,9 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
+import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanyRole;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CUserCompanyRoleService - Service layer for CUserCompanyRole entity. Layer: Service (MVC) Handles business logic for company-aware user company
@@ -19,7 +21,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompanyRole> {
+public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompanyRole> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanyRoleService.class);
 
@@ -66,7 +68,16 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 	}
 
 	@Override
-	protected Class<CUserCompanyRole> getEntityClass() { return CUserCompanyRole.class; }
+	public Class<CUserCompanyRole> getEntityClass() { return CUserCompanyRole.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CUserCompanyRoleInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceUserCompanyRole.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public CUserCompanyRole getRandom() {
