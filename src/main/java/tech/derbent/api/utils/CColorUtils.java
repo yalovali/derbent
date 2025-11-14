@@ -20,6 +20,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.domains.CStatus;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.base.users.domain.CUser;
 
@@ -259,15 +260,27 @@ public final class CColorUtils {
 
 	public static String getStaticIconColorCode(final Class<?> clazz) throws Exception {
 		try {
+			// Try registry first for fast lookup
+			final String color = CEntityRegistry.getDefaultColor(clazz);
+			if (color != null) {
+				return color;
+			}
+			// Fall back to reflection for backward compatibility
 			return getStaticStringValue(clazz, "DEFAULT_COLOR");
 		} catch (final Exception e) {
-			LOGGER.error("Error getting static icon filename for class {}: {}", clazz.getSimpleName(), e.getMessage());
+			LOGGER.error("Error getting static icon color code for class {}: {}", clazz.getSimpleName(), e.getMessage());
 			throw e;
 		}
 	}
 
 	public static String getStaticIconColorCode(final String className) throws Exception {
 		Check.notBlank(className, "className is blank");
+		// Try registry first for fast lookup
+		final String color = CEntityRegistry.getDefaultColorByName(className);
+		if (color != null) {
+			return color;
+		}
+		// Fall back to reflection for backward compatibility
 		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		Check.notNull(cl, "ClassLoader is null");
 		final Class<?> clazz = Class.forName(className, true, cl);
@@ -276,6 +289,12 @@ public final class CColorUtils {
 
 	public static String getStaticIconFilename(final Class<?> clazz) throws Exception {
 		try {
+			// Try registry first for fast lookup
+			final String icon = CEntityRegistry.getDefaultIcon(clazz);
+			if (icon != null) {
+				return icon;
+			}
+			// Fall back to reflection for backward compatibility
 			return getStaticStringValue(clazz, "DEFAULT_ICON");
 		} catch (final Exception e) {
 			LOGGER.error("Error getting static icon filename for class {}: {}", clazz.getSimpleName(), e.getMessage());
@@ -285,6 +304,12 @@ public final class CColorUtils {
 
 	public static String getStaticIconFilename(final String className) throws Exception {
 		Check.notBlank(className, "className is blank");
+		// Try registry first for fast lookup
+		final String icon = CEntityRegistry.getDefaultIconByName(className);
+		if (icon != null) {
+			return icon;
+		}
+		// Fall back to reflection for backward compatibility
 		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		Check.notNull(cl, "ClassLoader is null");
 		final Class<?> clazz = Class.forName(className, true, cl);

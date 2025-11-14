@@ -38,7 +38,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 		final CGanntViewEntity viewEntity =
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
 		setCurrentEntity(viewEntity);
-		pageService = new CPageServiceProjectGannt(this);
+		pageService = new CPageServiceProjectGannt(this, activityService, meetingService);
 		// createDetailsLayout();
 	}
 
