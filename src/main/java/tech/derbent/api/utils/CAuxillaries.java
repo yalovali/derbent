@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.app.gannt.view.CProjectGanntView;
 
 public class CAuxillaries {
 
@@ -91,40 +90,10 @@ public class CAuxillaries {
 		return null;
 	}
 
-	// convert all cases to use this method instead of reflection
-	public static Class<?> getEntityClass(final String simpleName) {
-		Check.notBlank(simpleName, "Entity type must not be empty");
-		try {
-			return CEntityRegistry.getEntityClass(simpleName);
-		} catch (final IllegalArgumentException e) {
-			LOGGER.error("Unknown entity type: {} - Entity not registered in registry", simpleName);
-			throw e;
-		}
-	}
-
-	public static Class<?> getEntityServiceClasses(final String simpleName) {
-		Check.notBlank(simpleName, "Entity type must not be empty");
-		try {
-			return CEntityRegistry.getEntityServiceClass(simpleName);
-		} catch (final IllegalArgumentException e) {
-			LOGGER.error("Unknown entity type: {} - Service not registered in registry", simpleName);
-			throw e;
-		}
-	}
-
-	public static Class<?> getInitializerService(final Class<?> entityClass) {
-		try {
-			return CEntityRegistry.getInitializerService(entityClass);
-		} catch (final IllegalArgumentException e) {
-			LOGGER.error("Unknown entity type: {} - Initializer not registered in registry", entityClass.getSimpleName());
-			throw e;
-		}
-	}
-
 	public static Class<?> getInitializerService(final String entityType) {
 		Check.notBlank(entityType, "Entity type must not be empty");
-		Class<?> clazz = getEntityClass(entityType);
-		return getInitializerService(clazz);
+		Class<?> clazz = CEntityRegistry.getEntityClass(entityType);
+		return CEntityRegistry.getInitializerService(clazz);
 	}
 
 	/** Get a method from a class without caching.
@@ -145,42 +114,6 @@ public class CAuxillaries {
 		}
 	}
 
-	public static Class<?> getServiceClassForEntity(final Class<?> entityClass) {
-		try {
-			return CEntityRegistry.getServiceClassForEntity(entityClass);
-		} catch (final IllegalArgumentException e) {
-			LOGGER.error("Unknown entity type: {} - Service not registered in registry", entityClass.getSimpleName());
-			throw e;
-		}
-	}
-
-	public static Class<?> getServiceClassFromName(final String simpleName) {
-		Check.notBlank(simpleName, "Entity type must not be empty");
-		try {
-			return CEntityRegistry.getServiceClassByName(simpleName);
-		} catch (final IllegalArgumentException e) {
-			LOGGER.error("Unknown service type: {} - Service not registered in registry", simpleName);
-			throw e;
-		}
-	}
-
-	public static Class<?> getViewClassForEntity(final String simpleName) {
-		Check.notBlank(simpleName, "Entity type must not be empty");
-		switch (simpleName) {
-		case "CProjectGanntView":
-			return CProjectGanntView.class;
-		default:
-			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update CAuxillaries");
-			throw new IllegalArgumentException("Unknown entity type: " + simpleName);
-		}
-	}
-
-	/** Safely invokes a method on an object.
-	 * @param target     the target object
-	 * @param methodName the method name
-	 * @param args       the method arguments
-	 * @return the method result or null if invocation failed
-	 * @throws Exception */
 	public static Object invokeMethod(final Object target, final String methodName, final Object... args) throws Exception {
 		try {
 			Check.notBlank(methodName, "methodName is blank");
