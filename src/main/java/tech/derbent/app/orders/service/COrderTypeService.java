@@ -4,14 +4,16 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CTypeEntityService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceOrderType;
 import tech.derbent.app.orders.domain.COrderType;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderTypeService extends CTypeEntityService<COrderType> {
+public class COrderTypeService extends CTypeEntityService<COrderType> implements IEntityRegistrable {
 
 	COrderTypeService(final IOrderTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -31,7 +33,16 @@ public class COrderTypeService extends CTypeEntityService<COrderType> {
 	}
 
 	@Override
-	protected Class<COrderType> getEntityClass() { return COrderType.class; }
+	public Class<COrderType> getEntityClass() { return COrderType.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return COrderTypeInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceOrderType.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final COrderType entity) {

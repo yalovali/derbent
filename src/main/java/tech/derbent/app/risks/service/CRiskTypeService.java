@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CTypeEntityService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceRiskType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.risks.domain.CRiskType;
 import tech.derbent.base.session.service.ISessionService;
@@ -17,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CRiskTypeService extends CTypeEntityService<CRiskType> {
+public class CRiskTypeService extends CTypeEntityService<CRiskType> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskTypeService.class);
 	@Autowired
@@ -53,7 +55,16 @@ public class CRiskTypeService extends CTypeEntityService<CRiskType> {
 	}
 
 	@Override
-	protected Class<CRiskType> getEntityClass() { return CRiskType.class; }
+	public Class<CRiskType> getEntityClass() { return CRiskType.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CRiskTypeInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceRiskType.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CRiskType entity) {

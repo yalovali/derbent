@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CTypeEntityService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityType;
 import tech.derbent.app.activities.domain.CActivityType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -17,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CActivityTypeService extends CTypeEntityService<CActivityType> {
+public class CActivityTypeService extends CTypeEntityService<CActivityType> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityTypeService.class);
 	@Autowired
@@ -53,7 +55,16 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> {
 	}
 
 	@Override
-	protected Class<CActivityType> getEntityClass() { return CActivityType.class; }
+	public Class<CActivityType> getEntityClass() { return CActivityType.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CActivityTypeInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceActivityType.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Initializes a new activity type. Most common fields are initialized by super class.
 	 * @param entity the newly created activity type to initialize */

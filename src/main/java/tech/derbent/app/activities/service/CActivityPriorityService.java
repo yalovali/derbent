@@ -4,14 +4,16 @@ import java.time.Clock;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CTypeEntityService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceActivityPriority;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @Transactional
-public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> {
+public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable {
 
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CActivityPriorityService.class);
 
@@ -38,7 +40,16 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 	}
 
 	@Override
-	protected Class<CActivityPriority> getEntityClass() { return CActivityPriority.class; }
+	public Class<CActivityPriority> getEntityClass() { return CActivityPriority.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CActivityPriorityInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceActivityPriority.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CActivityPriority entity) {

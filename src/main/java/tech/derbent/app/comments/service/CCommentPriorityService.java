@@ -3,8 +3,11 @@ package tech.derbent.app.comments.service;
 import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CTypeEntityService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceCommentPriority;
 import tech.derbent.app.comments.domain.CCommentPriority;
+import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CCommentPriorityService - Service class for CCommentPriority entities. Layer: Service (MVC) Provides business logic operations for comment
@@ -12,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
  * components */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CCommentPriorityService extends CTypeEntityService<CCommentPriority> {
+public class CCommentPriorityService extends CTypeEntityService<CCommentPriority> implements IEntityRegistrable {
 
 	CCommentPriorityService(final ICommentPriorityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -32,7 +35,16 @@ public class CCommentPriorityService extends CTypeEntityService<CCommentPriority
 	}
 
 	@Override
-	protected Class<CCommentPriority> getEntityClass() { return CCommentPriority.class; }
+	public Class<CCommentPriority> getEntityClass() { return CCommentPriority.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CCommentPriorityInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceCommentPriority.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CCommentPriority entity) {
