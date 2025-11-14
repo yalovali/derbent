@@ -20,7 +20,8 @@ import java.util.List;
  * <ul>
  * <li>Navigates to CPageTestAuxillary page after login
  * <li>Dynamically discovers all navigation buttons
- * <li>For each button, navigates to the target page
+ * <li>For each button, extracts the target route from data-route attribute
+ * <li>Navigates directly to each route URL (more reliable than clicking JavaScript handlers)
  * <li>Runs conditional tests based on page content:
  * <ul>
  * <li>Grid tests if grid is present
@@ -35,6 +36,7 @@ import java.util.List;
  * <li><b>Fast execution</b>: Reasonable timeouts, no excessive waits
  * <li><b>Complete coverage</b>: Tests ALL buttons, no skipping
  * <li><b>Generic testing</b>: Reusable functions work with any page type
+ * <li><b>Direct navigation</b>: Uses URL navigation instead of clicking for reliability
  * <li><b>Detailed logging</b>: Clear progress indicators and error messages
  * </ul> */
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
