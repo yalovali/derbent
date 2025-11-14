@@ -759,15 +759,27 @@ public abstract class CBaseUITest {
 	void setupTestEnvironment() {
 		LOGGER.info("🧪 Setting up Playwright test environment...");
 		try {
-			// Determine headless mode setting first
+			// Read configuration from system properties
 			boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
+			int slowmo = Integer.parseInt(System.getProperty("playwright.slowmo", "0"));
+			int viewportWidth = Integer.parseInt(System.getProperty("playwright.viewport.width", "1920"));
+			int viewportHeight = Integer.parseInt(System.getProperty("playwright.viewport.height", "1080"));
+			
 			LOGGER.info("🎭 Browser mode: {}", headless ? "HEADLESS" : "VISIBLE");
+			if (slowmo > 0) {
+				LOGGER.info("⏱️ Browser slowdown: {}ms per action", slowmo);
+			}
+			LOGGER.info("📺 Viewport size: {}x{}", viewportWidth, viewportHeight);
+			
 			List<String> launchArguments = new ArrayList<>(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"));
 			if (!headless) {
 				launchArguments.add("--start-maximized");
 			}
-			BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions().setHeadless(headless)
+			BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions()
+					.setHeadless(headless)
+					.setSlowMo(slowmo)
 					.setArgs(launchArguments);
+			
 			// Check if chromium is available in Playwright cache
 			String playwrightCache = System.getProperty("user.home") + "/.cache/ms-playwright/chromium-1091/chrome";
 			java.io.File cachedChromium = new java.io.File(playwrightCache);
@@ -805,8 +817,16 @@ public abstract class CBaseUITest {
 				}
 			}
 			final Browser.NewContextOptions contextOptions = new Browser.NewContextOptions();
-			if (!headless) {
-				contextOptions.setViewportSize(null); // allow the browser window to control size when visible
+			if (headless) {
+				// Set viewport size in headless mode
+				contextOptions.setViewportSize(viewportWidth, viewportHeight);
+			} else {
+				// In visible mode, let browser window control size or use configured viewport
+				if (viewportWidth != 1920 || viewportHeight != 1080) {
+					contextOptions.setViewportSize(viewportWidth, viewportHeight);
+				} else {
+					contextOptions.setViewportSize(null); // allow the browser window to control size when visible
+				}
 			}
 			context = browser.newContext(contextOptions);
 			page = context.newPage();
@@ -827,6 +847,15 @@ public abstract class CBaseUITest {
 	/** Takes a screenshot with optional logging. Screenshots are saved to target/screenshots/ directory. */
 	protected void takeScreenshot(final String name, final boolean logAction) {
 		try {
+			// Check if screenshots are disabled
+			boolean skipScreenshots = Boolean.parseBoolean(System.getenv("PLAYWRIGHT_SKIP_SCREENSHOTS"));
+			if (skipScreenshots) {
+				if (logAction) {
+					LOGGER.debug("📸 Screenshot skipped (disabled): {}", name);
+				}
+				return;
+			}
+			
 			if (logAction) {
 				LOGGER.info("📸 Taking screenshot: {}", name);
 			}
