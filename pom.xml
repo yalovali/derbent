@@ -194,6 +194,29 @@
 				</dependencies>
 			</plugin>
 
+			<!-- JavaDoc with lenient error handling -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.6.3</version>
+				<configuration>
+					<source>21</source>
+					<show>private</show>
+					<doclint>none</doclint>
+					<quiet>true</quiet>
+					<failOnError>false</failOnError>
+					<failOnWarnings>false</failOnWarnings>
+					<outputDirectory>${project.build.directory}/javadoc</outputDirectory>
+					<reportOutputDirectory>${project.build.directory}/javadoc</reportOutputDirectory>
+					<linksource>true</linksource>
+					<detectLinks>true</detectLinks>
+					<links>
+						<link>https://docs.oracle.com/en/java/javase/21/docs/api/</link>
+						<link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
+					</links>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
