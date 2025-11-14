@@ -216,6 +216,36 @@ mvn spring-boot:run -Dspring.profiles.active=h2-local-development
 
 <div align="center">
 
+### 🤖 **AI Tool Support & Configuration** 🤖
+
+</div>
+
+Derbent provides comprehensive AI coding assistant support with configuration files for multiple tools:
+
+| **🤖 AI Tool** | **📄 Config File** | **📋 Description** |
+|:---|:---|:---|
+| **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | Complete 468-line guide with build procedures, validation scenarios, and troubleshooting |
+| **Cursor IDE** | [`.cursorrules`](.cursorrules) | Quick reference with essential coding rules and build commands |
+| **Cline AI Assistant** | [`.clinerules`](.clinerules) | Detailed rules with validation checklist and common patterns |
+| **AI Digest / General** | [`.aidigestconfig`](.aidigestconfig) | Universal configuration for various AI tools |
+| **All AI Tools** | **[AI Tools Guide](docs/development/ai-tools-guide.md)** | Complete guide to AI configuration and tool-specific usage |
+
+**✨ AI-Optimized Features:**
+- 🎯 **C-Prefix Convention**: All custom classes use C-prefix for instant AI recognition
+- 📋 **Consistent Patterns**: Standard domain/service/view structure across all modules
+- 📝 **Package Documentation**: Comprehensive package-info.java files for context
+- 🔄 **Metadata-Driven**: @AMetaData annotations guide AI suggestions
+- 🛡️ **Type Safety**: Full generic type parameters for better AI understanding
+
+**📚 Documentation Organization:**
+- All historical docs moved to [`docs/archive/`](docs/archive/) for clean navigation
+- Development guides in [`docs/development/`](docs/development/)
+- Architecture patterns in [`docs/architecture/`](docs/architecture/)
+- Testing documentation in [`docs/testing/`](docs/testing/)
+- See [Documentation Guide](docs/development/documentation-guide.md) for complete organization
+
+<div align="center">
+
 ### 🔒 **Multi-User & Concurrency** 🔒
 
 </div>
