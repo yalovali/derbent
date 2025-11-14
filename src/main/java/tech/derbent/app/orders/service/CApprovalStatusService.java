@@ -4,7 +4,9 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CStatusService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceApprovalStatus;
 import tech.derbent.app.orders.domain.CApprovalStatus;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -13,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CApprovalStatusService extends CStatusService<CApprovalStatus> {
+public class CApprovalStatusService extends CStatusService<CApprovalStatus> implements IEntityRegistrable {
 
 	CApprovalStatusService(final IApprovalStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -33,7 +35,16 @@ public class CApprovalStatusService extends CStatusService<CApprovalStatus> {
 	}
 
 	@Override
-	protected Class<CApprovalStatus> getEntityClass() { return CApprovalStatus.class; }
+	public Class<CApprovalStatus> getEntityClass() { return CApprovalStatus.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CApprovalStatusInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceApprovalStatus.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CApprovalStatus entity) {

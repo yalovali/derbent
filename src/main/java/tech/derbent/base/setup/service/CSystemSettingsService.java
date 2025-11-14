@@ -9,7 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceSystemSettings;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.domain.CSystemSettings;
@@ -20,7 +22,7 @@ import tech.derbent.base.setup.domain.CSystemSettings;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
+public class CSystemSettingsService extends CAbstractService<CSystemSettings> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsService.class);
 
@@ -71,7 +73,16 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	}
 
 	@Override
-	protected Class<CSystemSettings> getEntityClass() { return CSystemSettings.class; }
+	public Class<CSystemSettings> getEntityClass() { return CSystemSettings.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CSystemSettingsInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceSystemSettings.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Checks dependencies before allowing system settings deletion. Note: System settings should not be deleted, but this method provides
 	 * protection.

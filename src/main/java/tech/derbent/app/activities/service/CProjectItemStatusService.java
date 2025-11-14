@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CStatusService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectItemStatus;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -23,7 +25,7 @@ import tech.derbent.base.session.service.ISessionService;
  * status management including CRUD operations, validation, and workflow management. */
 @Service
 @Transactional
-public class CProjectItemStatusService extends CStatusService<CProjectItemStatus> {
+public class CProjectItemStatusService extends CStatusService<CProjectItemStatus> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectItemStatusService.class);
 	private final CWorkflowStatusRelationService workflowStatusRelationService;
@@ -57,7 +59,16 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	}
 
 	@Override
-	protected Class<CProjectItemStatus> getEntityClass() { return CProjectItemStatus.class; }
+	public Class<CProjectItemStatus> getEntityClass() { return CProjectItemStatus.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CProjectItemStatusInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceProjectItemStatus.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Gets the initial/default status from a workflow.
 	 * <p>

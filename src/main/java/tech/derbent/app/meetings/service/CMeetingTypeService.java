@@ -4,7 +4,9 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.services.CTypeEntityService;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceMeetingType;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -13,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CMeetingTypeService extends CTypeEntityService<CMeetingType> {
+public class CMeetingTypeService extends CTypeEntityService<CMeetingType> implements IEntityRegistrable {
 
 	CMeetingTypeService(final IMeetingTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -35,7 +37,16 @@ public class CMeetingTypeService extends CTypeEntityService<CMeetingType> {
 	}
 
 	@Override
-	protected Class<CMeetingType> getEntityClass() { return CMeetingType.class; }
+	public Class<CMeetingType> getEntityClass() { return CMeetingType.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CMeetingTypeInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceMeetingType.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Initializes a new meeting type with default values based on current session and available data. Sets: - Project from current session - User
 	 * for creation tracking - Auto-generated name - Default color and icon - Default sort order - Not marked as non-deletable
