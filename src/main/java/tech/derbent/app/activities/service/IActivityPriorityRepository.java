@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import tech.derbent.api.services.IEntityOfProjectRepository;
+import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.app.projects.domain.CProject;
 

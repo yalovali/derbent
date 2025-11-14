@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IProjectChangeListener;
-import tech.derbent.api.services.CAbstractService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 

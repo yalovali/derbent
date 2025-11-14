@@ -1,0 +1,151 @@
+package tech.derbent.api.views;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.tabs.TabSheet;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceUtil;
+import tech.derbent.api.annotations.CFormBuilder;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.screens.domain.CDetailLines;
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.utils.CPanelDetails;
+import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
+
+@org.springframework.stereotype.Component
+public final class CDetailsBuilder implements ApplicationContextAware {
+
+	private static ApplicationContext applicationContext;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
+
+	public static ApplicationContext getApplicationContext() { return applicationContext; }
+
+	private static Component processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CUser user) {
+		Check.notNull(line, "Line cannot be null");
+		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
+			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
+			return sectionPanel;
+		}
+		return null;
+	}
+
+	CFormBuilder<?> formBuilder = null;
+	private HasComponents formLayout = null;
+	private final Map<String, CPanelDetails> mapSectionPanels;
+	private final ISessionService sessionService;
+	private TabSheet tabsOfForm;
+
+	public CDetailsBuilder(final ISessionService sessionService) {
+		Check.notNull(sessionService, "Session service cannot be null");
+		this.sessionService = sessionService;
+		mapSectionPanels = new HashMap<>();
+	}
+
+	public HasComponents buildDetails(final IContentOwner contentOwner, CDetailSection screen, final CEnhancedBinder<?> binder,
+			final HasComponents detailsLayout) throws Exception {
+		Check.notNull(screen, "Screen cannot be null");
+		Check.notNull(binder, "Binder cannot be null");
+		Check.notNull(applicationContext, "Details name cannot be null");
+		if (detailsLayout != null) {
+			formLayout = detailsLayout;
+		} else {
+			formLayout = new FormLayout();
+		}
+		final CDetailSectionService screenService = applicationContext.getBean(CDetailSectionService.class);
+		Check.notNull(screenService, "Screen service cannot be null");
+		// for lazy loading of screen lines
+		final PersistenceUtil persistenceUtil = Persistence.getPersistenceUtil();
+		if (!persistenceUtil.isLoaded(screen, "screenLines")) {
+			screen = screenService.findByIdWithScreenLines(screen.getId());
+		}
+		if ((screen.getScreenLines() == null) || screen.getScreenLines().isEmpty()) {
+			LOGGER.warn("No lines found for screen: {}", screen.getName());
+			return new FormLayout(); // Return an empty layout if no lines are present
+		}
+		final Class<?> screenClass = CEntityRegistry.getEntityClass(screen.getEntityType());
+		Check.notNull(screenClass, "Screen class cannot be null");
+		formBuilder = new CFormBuilder<>(null, screenClass, binder);
+		//
+		CPanelDetails currentSection = null;
+		final int counter = 0;
+		final CUser user = sessionService.getActiveUser().orElseThrow();
+		// screen.getScreenLines().size(); // Ensure lines are loaded
+		if (user.getAttributeDisplaySectionsAsTabs()) {
+			// LOGGER.debug("User '{}' prefers sections as tabs.", user.getUsername());
+			tabsOfForm = new TabSheet();
+			formLayout.add(tabsOfForm);
+		} else {
+			// LOGGER.debug("User '{}' prefers sections as accordion.", user.getUsername());
+		}
+		final List<CDetailLines> lines = screen.getScreenLines();
+		for (final CDetailLines line : lines) {
+			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
+				// no more current section. switch to base
+				currentSection = null;
+			}
+			if (currentSection != null) {
+				currentSection.processLine(contentOwner, counter, screen, line, formBuilder);
+				continue;
+			}
+			final Component component = processLine(counter, screen, line, user);
+			if (component instanceof CPanelDetails) {
+				if (user.getAttributeDisplaySectionsAsTabs()) {
+					tabsOfForm.add(line.getSectionName(), component);
+				} else {
+					formLayout.add(component);
+				}
+				currentSection = (CPanelDetails) component;
+				mapSectionPanels.put(currentSection.getName(), currentSection);
+			} else {
+				LOGGER.error("First create a section!" + " Line: {}", line.getFieldCaption());
+			}
+		}
+		return formLayout;
+	}
+
+	public Component getComponentByName(final String panelName, final String componentName) {
+		final CPanelDetails panel = getSectionPanel(panelName);
+		Check.notNull(panel, "Panel cannot be null");
+		return panel.getComponentByName(componentName);
+	}
+
+	public CPanelDetails getSectionPanel(final String sectionName) {
+		Check.notNull(sectionName, "Section name cannot be null");
+		return mapSectionPanels.get(sectionName);
+	}
+
+	/** Clears the details form by setting the form builder bean to null. */
+	public void populateForm() {
+		if (formBuilder != null) {
+			formBuilder.populateForm();
+		}
+	}
+
+	/** Sets the application context and initializes the data provider resolver. This method is called automatically by Spring.
+	 * @param context the Spring application context */
+	@Override
+	public void setApplicationContext(final ApplicationContext context) {
+		// Store the application context for String data provider resolution
+		CDetailsBuilder.applicationContext = context;
+	}
+
+	public void setCurrentEntity(final CEntityDB<?> entity) {
+		Check.notNull(formBuilder, "Form builder cannot be null, first initialize it");
+		formBuilder.setCurrentEntity(entity);
+	}
+}

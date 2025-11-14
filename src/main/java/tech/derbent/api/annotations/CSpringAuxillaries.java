@@ -8,7 +8,7 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.router.Route;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.Check;
 
 /** CSpringAuxillaries - Utility class for Spring and Hibernate operations. Layer: Utility (MVC) Provides helper methods for handling lazy loading,

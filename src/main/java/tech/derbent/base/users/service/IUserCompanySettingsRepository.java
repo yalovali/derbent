@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.IUserRelationshipRepository;
+import tech.derbent.api.interfaces.IUserRelationshipRepository;
 import tech.derbent.base.users.domain.CUserCompanySetting;
 
 /** Repository interface for CUserCompanySetting entity. Provides data access methods for user-company relationships. */

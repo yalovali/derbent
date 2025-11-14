@@ -8,7 +8,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.app.companies.domain.CCompany;
 
 @MappedSuperclass

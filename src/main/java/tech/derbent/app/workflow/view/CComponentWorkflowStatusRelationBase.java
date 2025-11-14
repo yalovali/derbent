@@ -2,12 +2,12 @@ package tech.derbent.app.workflow.view;
 
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.ui.component.CComponentRelationPanelBase;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CComponentRelationPanelBase;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;

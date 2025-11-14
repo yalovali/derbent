@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.entity.domain.CEntityNamed;
 
 /** CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB to provide database
  * functionality. */

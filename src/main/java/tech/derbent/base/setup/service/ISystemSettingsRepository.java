@@ -3,7 +3,7 @@ package tech.derbent.base.setup.service;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.services.IAbstractRepository;
+import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.base.setup.domain.CSystemSettings;
 
 /** CSystemSettingsRepository - Data access layer for CSystemSettings entities. Layer: Service (MVC) - Repository interface Provides database access

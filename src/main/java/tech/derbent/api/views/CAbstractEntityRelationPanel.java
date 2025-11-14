@@ -12,13 +12,13 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.ui.component.CButton;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
 
 /** Abstract base class for managing entity-to-entity relationships. This class provides common functionality for panels that manage relationships
  * between entities.

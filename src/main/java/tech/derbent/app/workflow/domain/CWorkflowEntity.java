@@ -35,13 +35,6 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 			description = "Indicates if this workflow is currently active", hidden = false, order = 3
 	)
 	private Boolean isActive = Boolean.TRUE;
-	@Column (name = "target_entity_class", nullable = true, length = 255)
-	@AMetaData (
-			displayName = "Target Entity Class", required = false, readOnly = false,
-			description = "Fully qualified class name of the target entity (e.g., tech.derbent.app.activities.domain.CActivity)", hidden = false,
-			order = 4, maxLength = 255
-	)
-	private String targetEntityClass;
 	// lets keep it layzily loaded to avoid loading all status relations at once
 	@OneToMany (mappedBy = "workflowentity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
@@ -50,6 +43,13 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 			dataProviderParamBean = "context", dataProviderParamMethod = "getCurrentEntity"
 	)
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
+	@Column (name = "target_entity_class", nullable = true, length = 255)
+	@AMetaData (
+			displayName = "Target Entity Class", required = false, readOnly = false,
+			description = "Fully qualified class name of the target entity (e.g., tech.derbent.app.activities.domain.CActivity)", hidden = false,
+			order = 4, maxLength = 255
+	)
+	private String targetEntityClass;
 
 	/** Default constructor for JPA. */
 	public CWorkflowEntity() {

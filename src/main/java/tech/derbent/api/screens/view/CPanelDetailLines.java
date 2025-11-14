@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -16,8 +16,8 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
+import tech.derbent.api.ui.CGrid;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.views.grids.CGrid;
 
 public class CPanelDetailLines extends CPanelDetailSectionBase {
 

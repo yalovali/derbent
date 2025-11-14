@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tech.derbent.api.ui.component.CComponentListSelection;
 
 /** Unit tests for CComponentListSelection to verify List-based selection functionality without ordering. */
 public class CComponentListSelectionTest {

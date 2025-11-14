@@ -6,7 +6,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;

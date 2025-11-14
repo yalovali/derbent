@@ -4,8 +4,8 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceCurrency;
 import tech.derbent.app.orders.domain.CCurrency;
 import tech.derbent.base.session.service.ISessionService;
@@ -22,6 +22,11 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> impleme
 	}
 
 	@Override
+	public String checkDeleteAllowed(final CCurrency entity) {
+		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
 	public Class<CCurrency> getEntityClass() { return CCurrency.class; }
 
 	@Override
@@ -32,11 +37,6 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> impleme
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
-
-	@Override
-	public String checkDeleteAllowed(final CCurrency entity) {
-		return super.checkDeleteAllowed(entity);
-	}
 
 	@Override
 	public void initializeNewEntity(final CCurrency entity) {

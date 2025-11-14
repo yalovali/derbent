@@ -21,15 +21,15 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CProjectItem;
-import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.gannt.service.IGanntEntityItem;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity

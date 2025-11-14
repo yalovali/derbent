@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceWorkflowEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;

@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.CAuxillaries;
 
 /** Base grid class for entity-to-entity relationships. Provides consistent styling and behavior for relationship grids.

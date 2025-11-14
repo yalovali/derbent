@@ -7,20 +7,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.domains.IHasStatusAndWorkflowService;
+import tech.derbent.api.entity.domain.CPageServiceMeeting;
+import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CProjectItemService;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceMeeting;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CProjectItemService<CMeeting> implements IEntityRegistrable {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
 	private final CMeetingTypeService meetingTypeService;
 

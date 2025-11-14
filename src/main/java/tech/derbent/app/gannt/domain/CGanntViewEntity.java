@@ -4,7 +4,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.app.projects.domain.CProject;
 
 @Entity

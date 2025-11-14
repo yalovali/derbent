@@ -1,7 +1,7 @@
 package tech.derbent.api.interfaces;
 
 import java.time.LocalDate;
-import tech.derbent.api.domains.CProjectItem;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.base.users.domain.CUser;
 
 /** IGanttDisplayable - Interface for entities that can be displayed in Gantt charts. Provides standardized access to properties for Gantt chart

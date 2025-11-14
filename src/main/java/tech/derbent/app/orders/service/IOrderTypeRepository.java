@@ -1,6 +1,6 @@
 package tech.derbent.app.orders.service;
 
-import tech.derbent.api.services.IEntityOfProjectRepository;
+import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.orders.domain.COrderType;
 
 /** COrderTypeRepository - Repository interface for COrderType entities. Layer: Service (MVC) Provides data access operations for project-aware order

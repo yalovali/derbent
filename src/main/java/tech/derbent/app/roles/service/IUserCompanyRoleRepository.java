@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
-import tech.derbent.api.services.IAbstractNamedRepository;
+import tech.derbent.api.entity.service.IAbstractNamedRepository;
 import tech.derbent.app.companies.domain.CCompany;
 
 /** IUserCompanyRoleRepository - Repository interface for CUserCompanyRole entity. Layer: Service (MVC) Provides data access operations for

@@ -2,7 +2,7 @@ package tech.derbent.api.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.views.components.CButton;
+import tech.derbent.api.ui.component.CButton;
 
 /** CConfirmationDialog - Dialog for user confirmations with Yes/No options. Layer: View (MVC) Used for dangerous operations that require user
  * confirmation like deletions. */

@@ -15,7 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;

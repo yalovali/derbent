@@ -3,7 +3,7 @@ package tech.derbent.app.risks.service;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.services.IEntityOfProjectRepository;
+import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.risks.domain.CRisk;
 import tech.derbent.app.risks.domain.CRiskType;
 

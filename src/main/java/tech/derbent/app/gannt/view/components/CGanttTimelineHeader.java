@@ -12,11 +12,11 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
+import tech.derbent.api.ui.component.CButton;
+import tech.derbent.api.ui.component.CHorizontalLayout;
+import tech.derbent.api.ui.component.CVerticalLayout;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
-import tech.derbent.api.views.components.CHorizontalLayout;
-import tech.derbent.api.views.components.CVerticalLayout;
 
 @Tag ("div")
 public class CGanttTimelineHeader extends CVerticalLayout {

@@ -14,8 +14,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
-import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 
 @Entity

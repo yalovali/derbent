@@ -6,11 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CEntityOfProjectService;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectRole;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.service.CPageServiceUserProjectRole;
 
 /** CUserProjectRoleService - Service layer for CUserProjectRole entity. Layer: Service (MVC) Handles business logic for project-aware user project
  * role operations. Uses super class methods where available to maintain simplicity. */
@@ -27,6 +27,11 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	 * @param sessionService the session service for user context */
 	public CUserProjectRoleService(final IUserProjectRoleRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CUserProjectRole entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	/** Create a default admin role for a project.
@@ -80,17 +85,6 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@Override
-	public String checkDeleteAllowed(final CUserProjectRole entity) {
-		return super.checkDeleteAllowed(entity);
-	}
-
-	@Override
-	public void initializeNewEntity(final CUserProjectRole entity) {
-		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
-	}
-
 	/** Initialize default roles for a project if they don't exist. */
 	@Transactional
 	public void initializeDefaultRoles() {
@@ -100,5 +94,11 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 			createGuestRole("Default Guest");
 			LOGGER.info("Initialized default project roles");
 		}
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserProjectRole entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
 	}
 }

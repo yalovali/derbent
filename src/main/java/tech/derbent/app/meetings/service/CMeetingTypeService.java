@@ -4,9 +4,9 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.entity.domain.CPageServiceMeetingType;
+import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CTypeEntityService;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceMeetingType;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.base.session.service.ISessionService;
 

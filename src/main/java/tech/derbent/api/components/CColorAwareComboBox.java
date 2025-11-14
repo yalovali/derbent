@@ -7,14 +7,14 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.annotations.CDataProviderResolver;
-import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.ui.component.CEntityLabel;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CEntityLabel;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 

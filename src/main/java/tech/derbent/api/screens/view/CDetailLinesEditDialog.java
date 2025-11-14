@@ -19,9 +19,9 @@ import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.ui.component.CDiv;
+import tech.derbent.api.ui.dialogs.CDBEditDialog;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CDiv;
-import tech.derbent.api.views.dialogs.CDBEditDialog;
 
 /** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
 public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {

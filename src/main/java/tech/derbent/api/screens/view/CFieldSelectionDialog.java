@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CComponentFieldSelection;
-import tech.derbent.api.views.dialogs.CDBEditDialog;
 import tech.derbent.api.screens.domain.CGridEntity.FieldSelection;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.ui.component.CComponentFieldSelection;
+import tech.derbent.api.ui.dialogs.CDBEditDialog;
 
 /** Dialog for selecting and ordering grid column fields. Uses CComponentFieldSelection with FormBuilder patterns for the selection interface. */
 public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {

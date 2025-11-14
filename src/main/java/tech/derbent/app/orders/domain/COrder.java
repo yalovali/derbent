@@ -17,13 +17,13 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CProjectItem;
-import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity
@@ -202,11 +202,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	public LocalDate getOrderDate() { return orderDate; }
 
-	/** Gets the start date for Gantt chart display. For orders, this is the order date.
-	 * @return the order date */
-	@Override
-	public LocalDate getStartDate() { return orderDate; }
-
 	public String getOrderNumber() { return orderNumber; }
 
 	public String getProviderCompanyName() { return providerCompanyName; }
@@ -220,6 +215,11 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	public LocalDate getRequiredDate() { return requiredDate; }
 
 	public CUser getResponsible() { return responsible; }
+
+	/** Gets the start date for Gantt chart display. For orders, this is the order date.
+	 * @return the order date */
+	@Override
+	public LocalDate getStartDate() { return orderDate; }
 
 	@Override
 	public CProjectItemStatus getStatus() { return status; }
@@ -298,7 +298,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, COrderType.class, "Type entity must be an instance of COrderType");
-		this.entityType = (COrderType) typeEntity;
+		entityType = (COrderType) typeEntity;
 		updateLastModified();
 	}
 

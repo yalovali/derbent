@@ -5,13 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.ui.component.CCrudToolbar;
+import tech.derbent.api.ui.component.CFlexLayout;
+import tech.derbent.api.ui.component.CVerticalLayout;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CCrudToolbar;
-import tech.derbent.api.views.components.CFlexLayout;
-import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 

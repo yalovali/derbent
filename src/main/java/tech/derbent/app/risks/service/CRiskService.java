@@ -7,15 +7,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.IHasStatusAndWorkflowService;
+import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CProjectItemService;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceRisk;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.risks.domain.CRisk;
 import tech.derbent.app.risks.domain.ERiskSeverity;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

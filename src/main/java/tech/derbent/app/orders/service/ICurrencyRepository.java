@@ -1,6 +1,6 @@
 package tech.derbent.app.orders.service;
 
-import tech.derbent.api.services.IEntityOfProjectRepository;
+import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.orders.domain.CCurrency;
 
 public interface ICurrencyRepository extends IEntityOfProjectRepository<CCurrency> {

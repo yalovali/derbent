@@ -1,6 +1,6 @@
 package tech.derbent.api.interfaces;
 
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 
 /** Interface for receiving notifications when entities are saved, deleted, or updated. This allows components to react to data changes and refresh
  * their content accordingly. */

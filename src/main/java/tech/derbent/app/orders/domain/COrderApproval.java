@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity

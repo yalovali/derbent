@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.entity.domain.CEntityDB;
 
 /** Abstract base class for entity relationships with ownership capabilities. This class provides common fields and methods for managing relationships
  * between entities with ownership levels and privileges.

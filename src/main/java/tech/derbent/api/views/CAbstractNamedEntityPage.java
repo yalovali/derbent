@@ -3,12 +3,11 @@ package tech.derbent.api.views;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.services.CDetailsBuilder;
-import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 

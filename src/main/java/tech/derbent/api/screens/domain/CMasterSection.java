@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.app.projects.domain.CProject;
 
 @Entity

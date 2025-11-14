@@ -24,11 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CEntityNamedService;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceUser;
+import tech.derbent.api.ui.component.CComponentUserProjectSettings;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CComponentUserProjectSettings;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
@@ -195,9 +194,6 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceUser.class; }
 
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
-
 	public CUser getRandomByCompany(final CCompany company) {
 		final List<CUser> users = ((IUserRepository) repository).findByCompany_Id(company.getId());
 		if (!users.isEmpty()) {
@@ -208,6 +204,9 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		}
 		return null;
 	}
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Initializes a new user entity with default values based on current session and available data. Sets: - Company from current session - User
 	 * type (first available) - Company role (first available) - Auto-generated unique name and login - Enabled status - Default password prompt

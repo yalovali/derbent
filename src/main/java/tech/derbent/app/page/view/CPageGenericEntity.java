@@ -7,20 +7,20 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
-import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.ui.component.CComponentDetailsMasterToolbar;
+import tech.derbent.api.ui.component.CCrudToolbar;
+import tech.derbent.api.ui.component.CFlexLayout;
+import tech.derbent.api.ui.component.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CComponentDetailsMasterToolbar;
-import tech.derbent.api.views.components.CCrudToolbar;
-import tech.derbent.api.views.components.CFlexLayout;
-import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -140,7 +140,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		// Create toolbar with minimal constructor and configure
 		CCrudToolbar toolbar = new CCrudToolbar();
-		if (typedEntity instanceof tech.derbent.api.domains.IHasStatusAndWorkflow) {
+		if (typedEntity instanceof tech.derbent.app.workflow.service.IHasStatusAndWorkflow) {
 			toolbar.setStatusProvider(() -> {
 				try {
 					// Try to get statuses from available services

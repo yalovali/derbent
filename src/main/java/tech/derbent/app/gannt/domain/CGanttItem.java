@@ -1,9 +1,9 @@
 package tech.derbent.app.gannt.domain;
 
 import java.time.LocalDate;
-import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.domains.CProjectItem;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -16,6 +16,7 @@ import tech.derbent.base.users.domain.CUser;
  * properties through the CProjectItem base class. */
 // <T extends CEntityDB<T>>
 public class CGanttItem extends CEntityOfProject<CGanttItem> {
+
 	private final LocalDate endDate;
 	private final CProjectItem<?> entity;
 	private final String entityType;

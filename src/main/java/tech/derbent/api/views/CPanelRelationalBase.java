@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.function.Supplier;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.services.CAbstractService;
-import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.ui.CGrid;
 
 public abstract class CPanelRelationalBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CAccordionDBEntity<MasterClass> {

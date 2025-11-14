@@ -6,8 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.services.IEntityOfProjectRepository;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.api.screens.domain.CDetailSection;
 
 public interface IDetailSectionRepository extends IEntityOfProjectRepository<CDetailSection> {

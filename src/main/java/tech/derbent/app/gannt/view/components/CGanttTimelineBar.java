@@ -3,9 +3,9 @@ package tech.derbent.app.gannt.view.components;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.ui.component.CDiv;
+import tech.derbent.api.ui.component.CHorizontalLayout;
 import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.api.views.components.CDiv;
-import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.app.gannt.domain.CGanttItem;
 
 /** CGanttTimelineBar - Visual timeline bar component for Gantt items. Displays colorful, responsive bars with progress indicators, task owners, and

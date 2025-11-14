@@ -1,7 +1,7 @@
 package tech.derbent.app.workflow.service;
 
 import java.time.Clock;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.app.workflow.domain.CWorkflowBase;
 import tech.derbent.base.session.service.ISessionService;
 

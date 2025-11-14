@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 
 /** CSystemSettings - Domain entity representing system-wide configuration settings. Layer: Domain (MVC) This entity stores application-level
  * configurations that apply across the entire system regardless of company, including application metadata, security settings, file management, email

@@ -3,7 +3,7 @@ package tech.derbent.app.activities.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;

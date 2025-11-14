@@ -9,7 +9,9 @@ import java.time.Clock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Unit tests for CAbstractService validation functionality. Demonstrates the nullable field validation using a concrete implementation. */

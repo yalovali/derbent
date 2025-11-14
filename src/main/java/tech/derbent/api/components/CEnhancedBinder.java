@@ -20,7 +20,7 @@ import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 
 /** Enhanced binder that provides detailed field-level error logging and reporting for better debugging of binding and validation issues. This class
  * extends BeanValidationBinder to add: - Detailed field-specific error logging - Enhanced error reporting with field names and validation messages -

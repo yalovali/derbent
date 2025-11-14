@@ -8,9 +8,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextArea;
+import tech.derbent.api.ui.component.CButton;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
-import tech.derbent.api.views.dialogs.CDialog;
 
 /** CMessageWithDetailsDialog - Dialog for displaying a user-friendly message with optional expandable exception details. Shows a clear message to the
  * user with a "Details" button that toggles visibility of exception stack trace in a scrollable text area. The dialog automatically adjusts its

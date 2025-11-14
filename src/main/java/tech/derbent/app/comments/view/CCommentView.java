@@ -11,8 +11,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
+import tech.derbent.api.ui.component.CButton;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.service.CCommentService;
 

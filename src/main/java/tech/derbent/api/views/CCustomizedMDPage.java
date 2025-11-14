@@ -3,8 +3,8 @@ package tech.derbent.api.views;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Example implementation showing how to customize the details view tab while maintaining consistent button placement and styling. */

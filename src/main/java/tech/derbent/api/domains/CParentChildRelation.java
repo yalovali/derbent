@@ -6,6 +6,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import tech.derbent.api.entity.domain.CEntityDB;
 
 @Entity
 @Table (name = "cparentchildrelation", uniqueConstraints = {

@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.services.IAbstractRepository;
+import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.comments.domain.CComment;
 

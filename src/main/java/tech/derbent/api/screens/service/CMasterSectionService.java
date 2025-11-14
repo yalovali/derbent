@@ -4,7 +4,7 @@ import java.time.Clock;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.screens.domain.CMasterSection;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -16,17 +16,17 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 		super(repository, clock, sessionService);
 	}
 
+	@Override
+	public String checkDeleteAllowed(final CMasterSection entity) {
+		return super.checkDeleteAllowed(entity);
+	}
+
 	public List<String> getAvailableTypes() {
 		return List.of("Grid Chart", "Gannt", "None"); // Replace with actual types
 	}
 
 	@Override
 	protected Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
-
-	@Override
-	public String checkDeleteAllowed(final CMasterSection entity) {
-		return super.checkDeleteAllowed(entity);
-	}
 
 	@Override
 	public void initializeNewEntity(final CMasterSection entity) {

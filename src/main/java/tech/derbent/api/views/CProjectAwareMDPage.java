@@ -4,13 +4,13 @@ import java.lang.reflect.InvocationTargetException;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import tech.derbent.api.annotations.CFormBuilder;
-import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.entity.service.CEntityNamedService;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.services.CEntityNamedService;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.ui.component.CVerticalLayout;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 

@@ -1,6 +1,6 @@
 package tech.derbent.api.interfaces;
 
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 
 /** Interface for services that provide dependency checking before entity deletion. Services implementing this interface can provide custom logic to
  * determine if an entity can be safely deleted based on its relationships with other entities.

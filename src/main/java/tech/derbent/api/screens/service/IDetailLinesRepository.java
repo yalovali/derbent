@@ -3,7 +3,7 @@ package tech.derbent.api.screens.service;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.services.IAbstractRepository;
+import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 

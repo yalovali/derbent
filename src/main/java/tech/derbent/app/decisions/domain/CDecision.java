@@ -14,12 +14,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 /** CDecision - Domain entity representing project decisions with comprehensive management features. Layer: Domain (MVC) Supports: - Decision type
@@ -164,7 +164,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CDecisionType.class, "Type entity must be an instance of CDecisionType");
-		this.entityType = (CDecisionType) typeEntity;
+		entityType = (CDecisionType) typeEntity;
 		updateLastModified();
 	}
 

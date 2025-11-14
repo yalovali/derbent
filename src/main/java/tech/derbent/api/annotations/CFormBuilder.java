@@ -44,21 +44,21 @@ import tech.derbent.api.components.CColorPickerComboBox;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.components.CNavigableComboBox;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.ui.component.CComponentFieldSelection;
+import tech.derbent.api.ui.component.CComponentListSelection;
+import tech.derbent.api.ui.component.CDiv;
+import tech.derbent.api.ui.component.CHorizontalLayout;
+import tech.derbent.api.ui.component.CPictureSelector;
+import tech.derbent.api.ui.component.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CComponentFieldSelection;
-import tech.derbent.api.views.components.CComponentListSelection;
-import tech.derbent.api.views.components.CDiv;
-import tech.derbent.api.views.components.CHorizontalLayout;
-import tech.derbent.api.views.components.CPictureSelector;
-import tech.derbent.api.views.components.CVerticalLayout;
 
 @org.springframework.stereotype.Component
 public final class CFormBuilder<EntityClass> implements ApplicationContextAware {

@@ -2,8 +2,8 @@ package tech.derbent.app.workflow.view;
 
 import java.util.List;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CProjectItemStatus;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;

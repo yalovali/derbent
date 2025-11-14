@@ -9,16 +9,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.IHasStatusAndWorkflowService;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CEntityOfProjectService;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceOrder;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.orders.domain.CCurrency;
 import tech.derbent.app.orders.domain.COrder;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -26,6 +25,7 @@ import tech.derbent.base.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderService extends CEntityOfProjectService<COrder> implements IEntityRegistrable {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderService.class);
 	private final CCurrencyService currencyService;
 	private final CProjectItemStatusService entityStatusService;
@@ -35,8 +35,8 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 			final COrderTypeService orderTypeService, final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService);
 		this.currencyService = currencyService;
-		this.entityTypeService = orderTypeService;
-		this.entityStatusService = statusService;
+		entityTypeService = orderTypeService;
+		entityStatusService = statusService;
 	}
 
 	@Override

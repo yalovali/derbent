@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.roles.domain.CUserProjectRole;
-import tech.derbent.api.services.IEntityOfProjectRepository;
 
 /** CUserProjectRoleRepository - Repository interface for CUserProjectRole entity. Layer: Service (MVC) Provides data access operations for
  * project-aware user project roles with eager loading support. Uses super interface methods where available to maintain simplicity. */

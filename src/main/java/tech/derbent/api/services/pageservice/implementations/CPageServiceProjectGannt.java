@@ -2,9 +2,9 @@ package tech.derbent.api.services.pageservice.implementations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CProjectItem;
-import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -156,8 +156,8 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			// Write binder data to entity if binder is available
 			// The view should have an entityBinder for the actual entity
 			// We need to cast to access it since it's not in the interface
-			if (view instanceof tech.derbent.api.views.grids.CGridViewBaseGannt) {
-				tech.derbent.api.views.grids.CGridViewBaseGannt<?> ganttView = (tech.derbent.api.views.grids.CGridViewBaseGannt<?>) view;
+			if (view instanceof tech.derbent.api.ui.CGridViewBaseGannt) {
+				tech.derbent.api.ui.CGridViewBaseGannt<?> ganttView = (tech.derbent.api.ui.CGridViewBaseGannt<?>) view;
 				if (ganttView.getEntityBinder() != null) {
 					try {
 						ganttView.getEntityBinder().writeBean(entity);
@@ -206,5 +206,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 
 	/** Updates the current actual entity being edited. This should be called by the view when a Gantt item is selected.
 	 * @param entity The actual entity (CActivity or CMeeting) */
-	public void setCurrentActualEntity(CProjectItem<?> entity) { currentActualEntity = entity; }
+	public void setCurrentActualEntity(CProjectItem<?> entity) {
+		currentActualEntity = entity;
+	}
 }

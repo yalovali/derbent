@@ -3,9 +3,8 @@ package tech.derbent.api.ui.dialogs;
 import java.lang.reflect.InvocationTargetException;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
+import tech.derbent.api.ui.component.CButton;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
-import tech.derbent.api.views.dialogs.CDialog;
 
 public abstract class CBaseInfoDialog extends CDialog {
 

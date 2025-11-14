@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.services.IAbstractNamedRepository;
+import tech.derbent.api.entity.service.IAbstractNamedRepository;
 import tech.derbent.app.companies.domain.CCompany;
 
 /** CCompanyRepository - Data access layer for CCompany entities Layer: Service (MVC) - Repository interface Extends CAbstractRepository to provide

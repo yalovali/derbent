@@ -17,14 +17,14 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.service.IGanntEntityItem;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 /** CMeeting - Domain entity representing meetings. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association. */
@@ -34,6 +34,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
 public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem {
+
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String VIEW_NAME = "Meetings View";
@@ -144,7 +145,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	 * @param meetingType the type of the meeting */
 	public CMeeting(final String name, final CProject project, final CMeetingType meetingType) {
 		super(CMeeting.class, name, project);
-		this.entityType = meetingType;
+		entityType = meetingType;
 	}
 
 	/** Convenience method to add an attendee to the meeting.
@@ -282,7 +283,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CMeetingType.class, "Type entity must be an instance of CMeetingType");
-		this.entityType = (CMeetingType) typeEntity;
+		entityType = (CMeetingType) typeEntity;
 		updateLastModified();
 	}
 

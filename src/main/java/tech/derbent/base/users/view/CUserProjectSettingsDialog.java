@@ -3,7 +3,7 @@ package tech.derbent.base.users.view;
 import java.util.List;
 import java.util.function.Consumer;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.views.dialogs.CUserProjectRelationDialog;
+import tech.derbent.api.ui.dialogs.CUserProjectRelationDialog;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectService;
 import tech.derbent.base.users.domain.CUser;

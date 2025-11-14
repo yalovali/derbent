@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.IUserRelationshipRepository;
+import tech.derbent.api.interfaces.IUserRelationshipRepository;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
 /** Repository interface for CUserProjectSettings entity. Provides data access methods for user-project relationships. */

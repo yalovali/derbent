@@ -4,9 +4,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -14,8 +14,8 @@ import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceEntityDB;
-import tech.derbent.api.views.grids.CGrid;
-import tech.derbent.api.views.grids.CGridViewBaseProject;
+import tech.derbent.api.ui.CGrid;
+import tech.derbent.api.ui.CGridViewBaseProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cdetailsectionview")

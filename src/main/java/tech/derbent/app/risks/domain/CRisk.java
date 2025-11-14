@@ -10,12 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 @Entity
 @Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
@@ -86,7 +86,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CRiskType.class, "Type entity must be an instance of CRiskType");
-		this.entityType = (CRiskType) typeEntity;
+		entityType = (CRiskType) typeEntity;
 		updateLastModified();
 	}
 

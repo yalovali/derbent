@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.IAbstractRepository;
+import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 
 /** Repository interface for CWorkflowStatusRelation entity. Provides data access methods for workflow-status relationships. */

@@ -2,16 +2,16 @@ package tech.derbent.api.screens.view;
 
 import java.util.List;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.services.CAbstractService;
-import tech.derbent.api.services.CDetailsBuilder;
+import tech.derbent.api.ui.component.CButton;
+import tech.derbent.api.ui.component.CDiv;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
-import tech.derbent.api.views.components.CDiv;
+import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.base.session.service.ISessionService;
 
 public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {

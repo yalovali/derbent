@@ -3,8 +3,8 @@ package tech.derbent.app.orders.service;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.orders.domain.COrder;
-import tech.derbent.api.services.IEntityOfProjectRepository;
 
 public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 

@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -17,6 +17,11 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 
 	public CDetailSectionService(final IDetailSectionRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CDetailSection entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Transactional (readOnly = true)
@@ -52,11 +57,6 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 
 	@Override
 	protected Class<CDetailSection> getEntityClass() { return CDetailSection.class; }
-
-	@Override
-	public String checkDeleteAllowed(final CDetailSection entity) {
-		return super.checkDeleteAllowed(entity);
-	}
 
 	@Override
 	public void initializeNewEntity(final CDetailSection entity) {

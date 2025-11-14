@@ -9,16 +9,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.CProjectItemStatus;
-import tech.derbent.api.domains.IHasStatusAndWorkflow;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfProject.domain.CStatusService;
+import tech.derbent.api.entityOfProject.service.CPageServiceProjectItemStatus;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CStatusService;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceProjectItemStatus;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CProjectItemStatusService - Service class for managing CProjectItemStatus entities. Layer: Service (MVC) Provides business logic for activity

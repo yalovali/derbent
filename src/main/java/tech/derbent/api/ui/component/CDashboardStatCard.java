@@ -77,7 +77,7 @@ public final class CDashboardStatCard extends Div {
 	private void initializeCard() {
 		// Apply responsive width and height
 		setWidthFull();
-		setMinHeight("100px");
+		setMinHeight("120px");
 		// Apply card styling using Lumo utility classes
 		addClassNames(Background.BASE, BorderRadius.MEDIUM, BoxShadow.SMALL, Padding.MEDIUM, Display.FLEX, AlignItems.CENTER, JustifyContent.CENTER);
 		// Add hover effect

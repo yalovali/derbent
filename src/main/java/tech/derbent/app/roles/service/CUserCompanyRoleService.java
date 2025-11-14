@@ -10,9 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanyRole;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.companies.service.CPageServiceUserCompanyRole;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.base.session.service.ISessionService;
 

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.services.pageservice.implementations.CPageServicePageEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
@@ -35,13 +35,6 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 		return listByProject(project);
 	}
 
-	/** Find child pages by parent page. */
-	public List<CPageEntity> findByParentPage(CPageEntity parentPage) {
-		Check.notNull(parentPage, "Parent page cannot be null");
-		// For now, return empty list as hierarchy is not fully implemented
-		return List.of();
-	}
-
 	/** Find page by entity class name. This is used to navigate to entity-specific pages from generic contexts like Gantt charts.
 	 * @param entityClassName the simple class name of the entity (e.g., "CActivity", "CMeeting")
 	 * @return Optional containing the page entity if found */
@@ -55,6 +48,13 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 			}
 			return false;
 		}).findFirst();
+	}
+
+	/** Find child pages by parent page. */
+	public List<CPageEntity> findByParentPage(CPageEntity parentPage) {
+		Check.notNull(parentPage, "Parent page cannot be null");
+		// For now, return empty list as hierarchy is not fully implemented
+		return List.of();
 	}
 
 	/** Find page by route. */
@@ -75,17 +75,17 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 	@Override
 	public Class<?> getInitializerServiceClass() { return CPageEntityInitializerService.class; }
 
-	@Override
-	public Class<?> getPageServiceClass() { return CPageServicePageEntity.class; }
-
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
-
 	/** Get page hierarchy for project. */
 	public List<CPageEntity> getPageHierarchyForProject(CProject project) {
 		Check.notNull(project, "Project cannot be null");
 		return listByProject(project);
 	}
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServicePageEntity.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CPageEntity entity) {

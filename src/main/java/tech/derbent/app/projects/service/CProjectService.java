@@ -11,12 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.services.CEntityNamedService;
-import tech.derbent.api.services.pageservice.implementations.CPageServiceProject;
+import tech.derbent.api.ui.component.CComponentProjectUserSettings;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CComponentProjectUserSettings;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.events.ProjectListChangeEvent;
@@ -76,6 +75,21 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 		return ((IProjectRepository) repository).findByCompany_Id(company.getId(), safePage);
 	}
 
+	/** Override to generate unique name based on company-specific project count. Pattern: "Project##" where ## is zero-padded number within company
+	 * (e.g., "Project01", "Project02").
+	 * @return unique project name for the current company */
+	@Override
+	protected String generateUniqueName() {
+		try {
+			final CCompany currentCompany = getCurrentCompany();
+			final long existingCount = ((IProjectRepository) repository).countByCompany_Id(currentCompany.getId());
+			return String.format("Project%02d", existingCount + 1);
+		} catch (final Exception e) {
+			LOGGER.warn("Error generating unique project name, falling back to base class: {}", e.getMessage());
+			return super.generateUniqueName();
+		}
+	}
+
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
 	public List<CProject> getAvailableProjectsForUser(final Long userId) {
@@ -115,21 +129,6 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 		// Name is set by base class generateUniqueName() which is overridden below
 		// Note: CProject extends CEntityNamed, not CEntityOfProject, so it doesn't have project field
 		// The company field is the primary association for projects
-	}
-
-	/** Override to generate unique name based on company-specific project count. Pattern: "Project##" where ## is zero-padded number within company
-	 * (e.g., "Project01", "Project02").
-	 * @return unique project name for the current company */
-	@Override
-	protected String generateUniqueName() {
-		try {
-			final CCompany currentCompany = getCurrentCompany();
-			final long existingCount = ((IProjectRepository) repository).countByCompany_Id(currentCompany.getId());
-			return String.format("Project%02d", existingCount + 1);
-		} catch (final Exception e) {
-			LOGGER.warn("Error generating unique project name, falling back to base class: {}", e.getMessage());
-			return super.generateUniqueName();
-		}
 	}
 
 	@Override

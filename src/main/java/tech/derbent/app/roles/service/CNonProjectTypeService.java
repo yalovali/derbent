@@ -1,9 +1,9 @@
 package tech.derbent.app.roles.service;
 
 import java.time.Clock;
-import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.services.CEntityNamedService;
-import tech.derbent.api.services.IAbstractNamedRepository;
+import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entity.service.CEntityNamedService;
+import tech.derbent.api.entity.service.IAbstractNamedRepository;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CNonProjectTypeService<EntityClass extends CEntityNamed<EntityClass>> extends CEntityNamedService<EntityClass> {
