@@ -1,5 +1,6 @@
 package tech.derbent.api.ui.component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -7,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 public class CCrudToolbar extends HorizontalLayout {
@@ -32,7 +35,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		setPadding(true);
 		addClassName("crud-toolbar");
 		setWidthFull();
-		setStatusProvider(null);
+		statusProvider = null;
 		createToolbarButtons();
 		LOGGER.debug("Created CCrudToolbar as view-only component");
 	}
@@ -89,8 +92,17 @@ public class CCrudToolbar extends HorizontalLayout {
 				// We only support CProjectItem status editing in toolbar for now
 				return;
 			}
-			// safd sapageBase.getPageService(); // Ensure page service is available
-			// Check if status provider is set before proceeding
+			statusProvider = (() -> {
+				try {
+					CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+					if (statusService != null) {
+						return statusService.findAll();
+					}
+				} catch (Exception e) {
+					LOGGER.debug("Could not get status service, workflow combobox will not be created", e);
+				}
+				return Collections.emptyList();
+			});
 			if (statusProvider == null) {
 				LOGGER.debug("Status provider not set, cannot create workflow combobox");
 				return;
@@ -113,6 +125,7 @@ public class CCrudToolbar extends HorizontalLayout {
 			statusComboBox.addValueChangeListener(event -> {
 				if (event.isFromClient() && (event.getValue() != null)) {
 					try {
+						pageBase.getPageService().actionChangeStatus(event.getValue());
 						projectItem.setStatus(event.getValue());
 						LOGGER.debug("Status changed to: {}", event.getValue());
 						// Trigger save action if page provided one; otherwise trigger refresh
@@ -182,16 +195,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	}
 
 	public void setPageBase(final ICrudToolbarOwnerPage pageBase) { this.pageBase = pageBase; }
-
-	/** Allows the page to provide available statuses for the workflow combobox. This should be set BEFORE calling setCurrentEntity for proper
-	 * initialization. */
-	public void setStatusProvider(final Supplier<List<CProjectItemStatus>> statusProvider) {
-		this.statusProvider = statusProvider;
-		// Recreate combobox to refresh available items if entity is already set
-		if (currentEntity != null) {
-			createWorkflowStatusComboBox();
-		}
-	}
 
 	/** Update enabled state of toolbar buttons based on whether callbacks are provided and current entity presence. */
 	private void updateButtonStates() {

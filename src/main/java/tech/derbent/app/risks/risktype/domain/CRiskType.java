@@ -1,4 +1,4 @@
-package tech.derbent.app.risks.domain;
+package tech.derbent.app.risks.risktype.domain;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;

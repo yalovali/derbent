@@ -1,11 +1,11 @@
-package tech.derbent.app.risks.service;
+package tech.derbent.app.risks.risk.service;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
-import tech.derbent.app.risks.domain.CRisk;
-import tech.derbent.app.risks.domain.CRiskType;
+import tech.derbent.app.risks.risk.domain.CRisk;
+import tech.derbent.app.risks.risktype.domain.CRiskType;
 
 public interface IRiskRepository extends IEntityOfProjectRepository<CRisk> {
 

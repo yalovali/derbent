@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.CPageServiceUtility;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.CCrudToolbar;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
@@ -61,6 +62,12 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		currentBinder = null;
 		currentEntityViewName = null;
 		currentEntityType = null;
+	}
+
+	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
+	@Override
+	protected void configureCrudToolbar(final CCrudToolbar toolbar) {
+		super.configureCrudToolbar(toolbar);
 	}
 
 	@Override

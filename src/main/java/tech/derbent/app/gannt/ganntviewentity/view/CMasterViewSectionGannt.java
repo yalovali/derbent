@@ -4,7 +4,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -12,7 +11,6 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
 import tech.derbent.api.grid.view.CMasterViewSectionBase;
 import tech.derbent.api.interfaces.IProjectChangeListener;
-import tech.derbent.api.ui.component.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.ganntviewentity.view.components.CGanntGrid;
@@ -42,11 +40,6 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		this.pageEntityService = pageEntityService;
 		LOGGER.debug("Initializing CMasterViewSectionGannt for entity: {}", entityClass.getSimpleName());
 		createMasterView();
-	}
-
-	protected Component createGridToolbar() {
-		CDiv toolbar = new CDiv("Gannt Chart Toolbar");
-		return toolbar;
 	}
 
 	@Override
@@ -112,11 +105,6 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		try {
 			LOGGER.debug("Refreshing Gantt chart master view");
 			removeAllButGrid();
-			// Create and display new Gantt grid for current project
-			Component toolbar = createGridToolbar();
-			if (toolbar != null) {
-				add(toolbar);
-			}
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage(), e);

@@ -1,11 +1,11 @@
-package tech.derbent.app.risks.service;
+package tech.derbent.app.risks.risk.service;
 
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.risks.domain.CRisk;
+import tech.derbent.app.risks.risk.domain.CRisk;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;

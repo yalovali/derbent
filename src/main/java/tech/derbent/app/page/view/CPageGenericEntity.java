@@ -138,27 +138,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	 * @return a configured CCrudToolbar instance */
 	@SuppressWarnings ({})
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
-		// Create toolbar with minimal constructor and configure
 		CCrudToolbar toolbar = new CCrudToolbar();
-		if (typedEntity instanceof tech.derbent.app.workflow.service.IHasStatusAndWorkflow) {
-			toolbar.setStatusProvider(() -> {
-				try {
-					// Try to get statuses from available services
-					// This is a best-effort approach that works with available infrastructure
-					tech.derbent.app.activities.service.CProjectItemStatusService statusService =
-							tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.activities.service.CProjectItemStatusService.class);
-					if (statusService != null) {
-						return statusService.findAll();
-					}
-				} catch (Exception e) {
-					LOGGER.debug("Could not get status service, workflow combobox will not be created", e);
-				}
-				return java.util.Collections.emptyList();
-			});
-		}
-		// Set current entity AFTER setting status provider
 		toolbar.setCurrentEntity(typedEntity);
-		// Allow subclasses to customize toolbar if needed
 		configureCrudToolbar(toolbar);
 		return toolbar;
 	}

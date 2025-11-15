@@ -3,6 +3,7 @@ package tech.derbent.api.services.pageservice;
 import org.slf4j.Logger;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
@@ -16,6 +17,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	public CPageService(IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
 		setPreviousEntity(null);
+	}
+
+	public void actionChangeStatus(CProjectItemStatus value) {
+		// TODO Auto-generated method stub
 	}
 
 	public void actionCreate() throws Exception {

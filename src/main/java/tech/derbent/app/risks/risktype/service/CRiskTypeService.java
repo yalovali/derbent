@@ -1,4 +1,4 @@
-package tech.derbent.app.risks.service;
+package tech.derbent.app.risks.risktype.service;
 
 import java.time.Clock;
 import org.slf4j.Logger;
@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.risks.domain.CRiskType;
+import tech.derbent.app.risks.risk.service.IRiskRepository;
+import tech.derbent.app.risks.risktype.domain.CRiskType;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type

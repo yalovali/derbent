@@ -1,11 +1,11 @@
-package tech.derbent.app.risks.service;
+package tech.derbent.app.risks.risktype.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.risks.domain.CRiskType;
+import tech.derbent.app.risks.risktype.domain.CRiskType;
 
 public class CPageServiceRiskType extends CPageServiceDynamicPage<CRiskType> {
 

@@ -1,4 +1,4 @@
-package tech.derbent.app.risks.service;
+package tech.derbent.app.risks.risk.service;
 
 import java.time.Clock;
 import org.slf4j.Logger;
@@ -12,8 +12,9 @@ import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.risks.domain.CRisk;
-import tech.derbent.app.risks.domain.ERiskSeverity;
+import tech.derbent.app.risks.risk.domain.CRisk;
+import tech.derbent.app.risks.risk.domain.ERiskSeverity;
+import tech.derbent.app.risks.risktype.service.CRiskTypeService;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -22,6 +23,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Menu (order = 0, icon = "vaadin:clipboard-check", title = "Settings.Risks")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskService.class);
 	private final CRiskTypeService riskTypeService;
 
