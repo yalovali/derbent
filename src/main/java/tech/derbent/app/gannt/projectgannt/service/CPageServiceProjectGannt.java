@@ -1,7 +1,9 @@
 package tech.derbent.app.gannt.projectgannt.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -12,10 +14,12 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.gannt.ganntviewentity.domain.CGanntViewEntity;
 import tech.derbent.app.gannt.ganntviewentity.view.CGridViewBaseGannt;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntViewEntity> {
 
@@ -26,36 +30,84 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 	private final CMeetingService meetingService;
 	// The previous actual entity for refresh operations
 	private CProjectItem<?> previousActualEntity;
+	protected CProjectItemStatusService projectItemStatusService;
 
 	public CPageServiceProjectGannt(final IPageServiceImplementer<CGanntViewEntity> view, final CActivityService activityService,
 			final CMeetingService meetingService) {
 		super(view);
 		this.activityService = activityService;
 		this.meetingService = meetingService;
+		// Get the status service from Spring context for workflow validation
+		try {
+			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+		} catch (Exception e) {
+			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
+		}
 	}
 
+	/** Handle status change with workflow validation for Gantt entities.
+	 * <p>
+	 * This method handles status changes for both CActivity and CMeeting entities in the Gantt view. It validates the status transition against workflow
+	 * rules before applying the change.
+	 * @param newStatus the new status selected by the user
+	 * @throws Exception if the status change or save operation fails */
 	@Override
 	public void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
 		try {
 			final CProjectItem<?> entity = currentActualEntity;
 			if (entity == null) {
+				LOGGER.warn("No current entity for status change operation");
 				CNotificationService.showWarning("Please select an item to change status.");
 				return;
 			}
-			LOGGER.debug("Change status action triggered for entity ID: {} to status: {}", entity.getId(), value);
-			entity.setStatus(value);
-			// Save the entity with new status
+			if (newStatus == null) {
+				LOGGER.warn("Null status provided for status change");
+				CNotificationService.showWarning("Invalid status selected");
+				return;
+			}
+			LOGGER.debug("Change status action triggered for entity ID: {} (type: {}) to status: {}", entity.getId(),
+					entity.getClass().getSimpleName(), newStatus.getName());
+			// Validate workflow if entity supports it (both CActivity and CMeeting do)
+			if (entity instanceof IHasStatusAndWorkflow) {
+				if (projectItemStatusService == null) {
+					LOGGER.error("CProjectItemStatusService not available - cannot validate status change");
+					CNotificationService.showError("Status validation service unavailable");
+					return;
+				}
+				// Get valid next statuses from workflow
+				final List<CProjectItemStatus> validStatuses = projectItemStatusService.getValidNextStatuses((IHasStatusAndWorkflow<?>) entity);
+				// Check if the new status is in the list of valid statuses
+				final boolean isValidTransition = validStatuses.stream().anyMatch(s -> s.getId().equals(newStatus.getId()));
+				if (!isValidTransition) {
+					final String currentStatusName = entity.getStatus() != null ? entity.getStatus().getName() : "none";
+					LOGGER.warn("Invalid status transition from '{}' to '{}' for entity ID: {}", currentStatusName, newStatus.getName(),
+							entity.getId());
+					CNotificationService.showWarning(
+							String.format("Cannot change status from '%s' to '%s' - transition not allowed by workflow", currentStatusName,
+									newStatus.getName()));
+					return;
+				}
+			}
+			// Status change is valid - apply it
+			final String oldStatusName = entity.getStatus() != null ? entity.getStatus().getName() : "none";
+			entity.setStatus(newStatus);
+			LOGGER.info("Status changed from '{}' to '{}' for entity ID: {} (type: {})", oldStatusName, newStatus.getName(), entity.getId(),
+					entity.getClass().getSimpleName());
+			// Save the entity with new status - ALWAYS save after status change
+			@SuppressWarnings ("rawtypes")
 			final CAbstractService service = getServiceForEntity(entity);
+			@SuppressWarnings ("unchecked")
 			final CProjectItem<?> savedEntity = (CProjectItem<?>) service.save(entity);
-			LOGGER.info("Entity status changed successfully for ID: {} to status: {}", savedEntity.getId(), value);
-			// Update current entity
+			LOGGER.info("Entity status saved successfully for ID: {} to status: {}", savedEntity.getId(), newStatus.getName());
+			// Update current entity with saved version
 			currentActualEntity = savedEntity;
-			// Refresh the view
+			// Refresh the view to show updated status
 			view.onEntitySaved(null);
 			view.populateForm();
-			CNotificationService.showInfo("Status changed successfully.");
+			CNotificationService.showInfo(String.format("Status changed to '%s'", newStatus.getName()));
 		} catch (final Exception e) {
 			LOGGER.error("Error changing status: {}", e.getMessage(), e);
+			CNotificationService.showError("Failed to change status: " + e.getMessage());
 			throw e;
 		}
 	}
