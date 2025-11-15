@@ -2,12 +2,12 @@ package tech.derbent.api.entity.domain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.CPageServiceWithWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.meetings.domain.CMeeting;
 
-public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting> {
+public class CPageServiceMeeting extends CPageServiceWithWorkflow<CMeeting> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceMeeting.class);
 	Long serialVersionUID = 1L;

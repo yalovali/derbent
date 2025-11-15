@@ -28,11 +28,12 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	protected final CPageEntity pageEntity;
 	protected final CPageService<?> pageService;
 
-	public CDynamicPageBase(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService) throws Exception {
+	public CDynamicPageBase(final CPageEntity pageEntity, final ISessionService sessionService, final CDetailSectionService detailSectionService)
+			throws Exception {
 		super(sessionService, detailSectionService);
 		Check.notNull(pageEntity, "Page entity cannot be null");
 		this.pageEntity = pageEntity;
-		pageService = getPageService();
+		pageService = createPageService();
 		Check.notNull(pageService, "Page service cannot be null for dynamic page: " + pageEntity.getPageTitle());
 	}
 
@@ -79,17 +80,27 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	/** Get the page entity this view represents. */
 	public CPageEntity getPageEntity() { return pageEntity; }
 
-	public CPageService<?> getPageService() {
-		// this creates a page service instance per page. this may be memory inefficient.
+	/** Get the cached page service instance for this page.
+	 * <p>
+	 * The page service is created once during construction and cached for the lifetime of the page. This avoids the performance overhead of recreating
+	 * the service instance on every call.
+	 * @return the cached page service instance */
+	public CPageService<?> getPageService() { return pageService; }
+
+	/** Create a new page service instance for this page.
+	 * <p>
+	 * This method is called once during construction to create and cache the page service instance.
+	 * @return the newly created page service instance */
+	private CPageService<?> createPageService() {
 		try {
 			Check.notNull(pageEntity, "Page entity cannot be null");
-			Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
-			var constructor = clazz.getDeclaredConstructor(IPageServiceImplementer.class);
-			CPageService<?> page = (CPageService<?>) constructor.newInstance(this);
+			final Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
+			final var constructor = clazz.getDeclaredConstructor(IPageServiceImplementer.class);
+			final CPageService<?> page = (CPageService<?>) constructor.newInstance(this);
 			Check.notNull(page, "Page service instance cannot be null for page: " + pageEntity.getPageTitle());
 			return page;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to get CPageService bean: {}", e.getMessage());
+			LOGGER.error("Failed to create CPageService instance: {}", e.getMessage());
 			return null;
 		}
 	}

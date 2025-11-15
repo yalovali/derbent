@@ -96,6 +96,12 @@ public class CCrudToolbar extends HorizontalLayout {
 				try {
 					CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 					if (statusService != null) {
+						// For workflow entities, get valid next statuses based on workflow rules
+						// This ensures only allowed transitions are shown in the combobox
+						if (currentEntity instanceof IHasStatusAndWorkflow) {
+							return statusService.getValidNextStatuses((IHasStatusAndWorkflow<?>) currentEntity);
+						}
+						// Fallback for non-workflow entities: return all statuses
 						return statusService.findAll();
 					}
 				} catch (Exception e) {
@@ -122,18 +128,7 @@ public class CCrudToolbar extends HorizontalLayout {
 			if (projectItem.getStatus() != null) {
 				statusComboBox.setValue(projectItem.getStatus());
 			}
-			statusComboBox.addValueChangeListener(event -> {
-				if (event.isFromClient() && (event.getValue() != null)) {
-					try {
-						pageBase.getPageService().actionChangeStatus(event.getValue());
-						projectItem.setStatus(event.getValue());
-						LOGGER.debug("Status changed to: {}", event.getValue());
-						// Trigger save action if page provided one; otherwise trigger refresh
-					} catch (final Exception e) {
-						LOGGER.error("Error handling workflow status change", e);
-					}
-				}
-			});
+			statusComboBox.addValueChangeListener(e -> on_actionStatusChange(e.getValue()));
 			add(statusComboBox);
 			LOGGER.debug("Created workflow status combobox");
 		} catch (final Exception e) {
@@ -162,7 +157,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	public void on_actionDelete() {
+	private void on_actionDelete() {
 		try {
 			pageBase.getPageService().actionDelete();
 		} catch (final Exception e) {
@@ -170,7 +165,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	public void on_actionRefresh() {
+	private void on_actionRefresh() {
 		try {
 			pageBase.getPageService().actionRefresh();
 		} catch (final Exception e) {
@@ -178,11 +173,19 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	public void on_actionSave() {
+	private void on_actionSave() {
 		try {
 			pageBase.getPageService().actionSave();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during save action", e);
+		}
+	}
+
+	private void on_actionStatusChange(CProjectItemStatus value) {
+		try {
+			pageBase.getPageService().actionChangeStatus(value);
+		} catch (final Exception e) {
+			CNotificationService.showException("Error during status action", e);
 		}
 	}
 

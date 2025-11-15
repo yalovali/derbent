@@ -14,13 +14,19 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	private EntityClass previousEntity;
 	final protected IPageServiceImplementer<EntityClass> view;
 
-	public CPageService(IPageServiceImplementer<EntityClass> view) {
+	public CPageService(final IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
 		setPreviousEntity(null);
 	}
 
-	public void actionChangeStatus(CProjectItemStatus value) {
-		// TODO Auto-generated method stub
+	/** Handle status change action triggered from the CRUD toolbar.
+	 * <p>
+	 * Default implementation for entities without workflow support. Simply sets the new status on the current entity. Subclasses should override this
+	 * method to implement workflow-aware status validation.
+	 * @param newStatus the new status selected by the user
+	 * @throws Exception if the status change fails */
+	public void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
+		LOGGER.debug("Base actionChangeStatus called - entity type does not support workflow status changes");
 	}
 
 	public void actionCreate() throws Exception {
@@ -138,9 +144,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	protected ISessionService getSessionService() { return view.getSessionService(); }
 
-	protected void setCurrentEntity(EntityClass entity) {
+	protected void setCurrentEntity(final EntityClass entity) {
 		view.setCurrentEntity(entity);
 	}
 
-	public void setPreviousEntity(EntityClass previousEntity) { this.previousEntity = previousEntity; }
+	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }
 }
