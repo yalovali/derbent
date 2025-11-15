@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -26,11 +27,37 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 	// The previous actual entity for refresh operations
 	private CProjectItem<?> previousActualEntity;
 
-	public CPageServiceProjectGannt(IPageServiceImplementer<CGanntViewEntity> view, CActivityService activityService,
-			CMeetingService meetingService) {
+	public CPageServiceProjectGannt(final IPageServiceImplementer<CGanntViewEntity> view, final CActivityService activityService,
+			final CMeetingService meetingService) {
 		super(view);
 		this.activityService = activityService;
 		this.meetingService = meetingService;
+	}
+
+	@Override
+	public void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
+		try {
+			final CProjectItem<?> entity = currentActualEntity;
+			if (entity == null) {
+				CNotificationService.showWarning("Please select an item to change status.");
+				return;
+			}
+			LOGGER.debug("Change status action triggered for entity ID: {} to status: {}", entity.getId(), value);
+			entity.setStatus(value);
+			// Save the entity with new status
+			final CAbstractService service = getServiceForEntity(entity);
+			final CProjectItem<?> savedEntity = (CProjectItem<?>) service.save(entity);
+			LOGGER.info("Entity status changed successfully for ID: {} to status: {}", savedEntity.getId(), value);
+			// Update current entity
+			currentActualEntity = savedEntity;
+			// Refresh the view
+			view.onEntitySaved(null);
+			view.populateForm();
+			CNotificationService.showInfo("Status changed successfully.");
+		} catch (final Exception e) {
+			LOGGER.error("Error changing status: {}", e.getMessage(), e);
+			throw e;
+		}
 	}
 
 	@Override
@@ -69,7 +96,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 					@SuppressWarnings ({
 							"rawtypes"
 					})
-					CAbstractService service = getServiceForEntity(entity);
+					final CAbstractService service = getServiceForEntity(entity);
 					service.delete(entity.getId());
 					LOGGER.info("Entity deleted successfully with ID: {} of type: {}", entity.getId(), entity.getClass().getSimpleName());
 					// Clear current entity
@@ -78,7 +105,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 					// Refresh the grid to reload data after deletion
 					try {
 						view.refreshGrid();
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error refreshing grid after delete: {}", e.getMessage(), e);
 					}
 					// Select first item in grid after deletion
@@ -108,14 +135,14 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			if (entity != null && entity.getId() == null) {
 				// Discard the new entity and restore previous selection
 				if (previousActualEntity != null && previousActualEntity.getId() != null) {
-					CAbstractService service = getServiceForEntity(previousActualEntity);
+					final CAbstractService service = getServiceForEntity(previousActualEntity);
 					final CEntityDB<?> reloaded = (CEntityDB<?>) service.getById(previousActualEntity.getId()).orElse(null);
 					if (reloaded != null) {
 						currentActualEntity = (CProjectItem<?>) reloaded;
 						// Refresh grid and populate form
 						try {
 							view.refreshGrid();
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
 						}
 						view.populateForm();
@@ -124,7 +151,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 						currentActualEntity = null;
 						try {
 							view.refreshGrid();
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
 						}
 						view.selectFirstInGrid();
@@ -133,7 +160,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 					currentActualEntity = null;
 					try {
 						view.refreshGrid();
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
 					}
 					view.selectFirstInGrid();
@@ -145,20 +172,20 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			if (entity == null) {
 				try {
 					view.refreshGrid();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
 				}
 				view.selectFirstInGrid();
 				return;
 			}
-			CAbstractService service = getServiceForEntity(entity);
+			final CAbstractService service = getServiceForEntity(entity);
 			final CEntityDB<?> reloaded = (CEntityDB<?>) service.getById(entity.getId()).orElse(null);
 			if (reloaded != null) {
 				currentActualEntity = (CProjectItem<?>) reloaded;
 				// Refresh grid to show latest data
 				try {
 					view.refreshGrid();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
 				}
 				view.populateForm();
@@ -166,7 +193,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 				currentActualEntity = null;
 				try {
 					view.refreshGrid();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Error refreshing grid: {}", e.getMessage(), e);
 				}
 				view.selectFirstInGrid();
@@ -196,12 +223,12 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 			// The view should have an entityBinder for the actual entity
 			// We need to cast to access it since it's not in the interface
 			if (view instanceof CGridViewBaseGannt) {
-				CGridViewBaseGannt<?> ganttView = (CGridViewBaseGannt<?>) view;
+				final CGridViewBaseGannt<?> ganttView = (CGridViewBaseGannt<?>) view;
 				if (ganttView.getEntityBinder() != null) {
 					try {
 						ganttView.getEntityBinder().writeBean(entity);
 						LOGGER.debug("Binder data written to entity before save");
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error writing binder data: {}", e.getMessage());
 						CNotificationService.showError("Validation failed: " + e.getMessage());
 						return;
@@ -209,7 +236,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 				}
 			}
 			// Get the appropriate service for this entity type
-			CAbstractService service = getServiceForEntity(entity);
+			final CAbstractService service = getServiceForEntity(entity);
 			final CProjectItem<?> savedEntity = (CProjectItem<?>) service.save(entity);
 			LOGGER.info("Entity saved successfully with ID: {} of type: {}", savedEntity.getId(), savedEntity.getClass().getSimpleName());
 			// Update current entity with saved version
@@ -236,7 +263,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 	 * @param entity The entity to get the service for
 	 * @return The service for the entity type */
 	@SuppressWarnings ("unchecked")
-	private <T extends CProjectItem<T>> CAbstractService<T> getServiceForEntity(CProjectItem<?> entity) {
+	private <T extends CProjectItem<T>> CAbstractService<T> getServiceForEntity(final CProjectItem<?> entity) {
 		Check.notNull(entity, "Entity cannot be null when getting service");
 		if (entity instanceof CActivity) {
 			return (CAbstractService<T>) activityService;
@@ -249,7 +276,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 
 	/** Updates the current actual entity being edited. This should be called by the view when a Gantt item is selected.
 	 * @param entity The actual entity (CActivity or CMeeting) */
-	public void setCurrentActualEntity(CProjectItem<?> entity) {
+	public void setCurrentActualEntity(final CProjectItem<?> entity) {
 		currentActualEntity = entity;
 	}
 }

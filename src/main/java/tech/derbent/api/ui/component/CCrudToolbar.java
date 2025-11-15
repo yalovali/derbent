@@ -128,22 +128,7 @@ public class CCrudToolbar extends HorizontalLayout {
 			if (projectItem.getStatus() != null) {
 				statusComboBox.setValue(projectItem.getStatus());
 			}
-			statusComboBox.addValueChangeListener(event -> {
-				if (event.isFromClient() && (event.getValue() != null)) {
-					try {
-						// Call page service to handle status change with workflow validation
-						// The page service will validate, set status, and save the entity
-						pageBase.getPageService().actionChangeStatus(event.getValue());
-						LOGGER.debug("Status change action completed successfully for value: {}", event.getValue());
-					} catch (final Exception e) {
-						LOGGER.error("Error handling workflow status change", e);
-						// Reset combobox to previous value on error
-						if (projectItem.getStatus() != null) {
-							statusComboBox.setValue(projectItem.getStatus());
-						}
-					}
-				}
-			});
+			statusComboBox.addValueChangeListener(e -> on_actionStatusChange(e.getValue()));
 			add(statusComboBox);
 			LOGGER.debug("Created workflow status combobox");
 		} catch (final Exception e) {
@@ -172,7 +157,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	public void on_actionDelete() {
+	private void on_actionDelete() {
 		try {
 			pageBase.getPageService().actionDelete();
 		} catch (final Exception e) {
@@ -180,7 +165,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	public void on_actionRefresh() {
+	private void on_actionRefresh() {
 		try {
 			pageBase.getPageService().actionRefresh();
 		} catch (final Exception e) {
@@ -188,11 +173,19 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	public void on_actionSave() {
+	private void on_actionSave() {
 		try {
 			pageBase.getPageService().actionSave();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during save action", e);
+		}
+	}
+
+	private void on_actionStatusChange(CProjectItemStatus value) {
+		try {
+			pageBase.getPageService().actionChangeStatus(value);
+		} catch (final Exception e) {
+			CNotificationService.showException("Error during status action", e);
 		}
 	}
 
