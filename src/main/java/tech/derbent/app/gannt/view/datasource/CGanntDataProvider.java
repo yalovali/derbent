@@ -12,27 +12,27 @@ import com.vaadin.flow.data.provider.Query;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.gannt.domain.CGanttItem;
+import tech.derbent.app.gannt.domain.CGanntItem;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.projects.domain.CProject;
 
 /** CGanttDataProvider - Combines activities and meetings of a project into unified CGanttItem list. Provides a single data source for Gantt grids and
  * charts. */
-public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, Void> {
+public class CGanntDataProvider extends AbstractBackEndDataProvider<CGanntItem, Void> {
 
 	/** Zaman çizelgesi için tarih öncelikli sıralama: startDate (null'lar sonda) → endDate (null'lar sonda) */
-	private static final Comparator<CGanttItem> BY_TIMELINE =
-			Comparator.comparing(CGanttItem::getStartDate, Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(CGanttItem::getEndDate,
+	private static final Comparator<CGanntItem> BY_TIMELINE =
+			Comparator.comparing(CGanntItem::getStartDate, Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(CGanntItem::getEndDate,
 					Comparator.nullsLast(Comparator.naturalOrder()));
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	private final Logger LOGGER = LoggerFactory.getLogger(CGanttDataProvider.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(CGanntDataProvider.class);
 	private final CMeetingService meetingService;
 	private final CProject project;
-	private List<CGanttItem> cachedItems;
+	private List<CGanntItem> cachedItems;
 
-	public CGanttDataProvider(final CProject project, final CActivityService activityService, final CMeetingService meetingService) {
+	public CGanntDataProvider(final CProject project, final CActivityService activityService, final CMeetingService meetingService) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(activityService, "ActivityService cannot be null");
 		Check.notNull(meetingService, "MeetingService cannot be null");
@@ -42,9 +42,9 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 	}
 
 	@Override
-	protected Stream<CGanttItem> fetchFromBackEnd(final Query<CGanttItem, Void> query) {
+	protected Stream<CGanntItem> fetchFromBackEnd(final Query<CGanntItem, Void> query) {
 		try {
-			final List<CGanttItem> allItems = getCachedItems();
+			final List<CGanntItem> allItems = getCachedItems();
 			return allItems.stream().skip(query.getOffset()).limit(query.getLimit());
 		} catch (final Exception e) {
 			LOGGER.error("Error fetching Gantt items from backend: {}", e.getMessage(), e);
@@ -53,7 +53,7 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 	}
 
 	/** Get cached items or load them if not cached. */
-	private List<CGanttItem> getCachedItems() {
+	private List<CGanntItem> getCachedItems() {
 		if (cachedItems == null) {
 			cachedItems = loadItems();
 		}
@@ -61,9 +61,9 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 	}
 
 	/** Merge activities and meetings into CGanttItems. */
-	private List<CGanttItem> loadItems() {
+	private List<CGanntItem> loadItems() {
 		LOGGER.debug("Loading Gantt items for project: {} (ID: {})", project.getName(), project.getId());
-		final List<CGanttItem> items = new ArrayList<>();
+		final List<CGanntItem> items = new ArrayList<>();
 		// Counter to ensure unique IDs across different entity types (Activity ID=1, Meeting ID=1 would collide)
 		final AtomicLong idCounter = new AtomicLong(0);
 		try {
@@ -71,13 +71,13 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 			final List<CActivity> activities = activityService.listByProject(project);
 			for (final CActivity a : activities) {
 				LOGGER.debug("Adding activity to Gantt items: {} (ID: {})", a.getId(), a.getName());
-				items.add(new CGanttItem(a, idCounter.incrementAndGet()));
+				items.add(new CGanntItem(a, idCounter.incrementAndGet()));
 			}
 			// --- Meetings ---
 			final List<CMeeting> meetings = meetingService.listByProject(project);
 			for (final CMeeting m : meetings) {
 				LOGGER.debug("Adding meeting to Gantt items: {} (ID: {})", m.getId(), m.getName());
-				items.add(new CGanttItem(m, idCounter.incrementAndGet()));
+				items.add(new CGanntItem(m, idCounter.incrementAndGet()));
 			}
 			// --- Sıralama: startDate → endDate (null'lar sonda)
 			items.sort(BY_TIMELINE);
@@ -97,7 +97,7 @@ public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, 
 	}
 
 	@Override
-	protected int sizeInBackEnd(final Query<CGanttItem, Void> query) {
+	protected int sizeInBackEnd(final Query<CGanntItem, Void> query) {
 		try {
 			return getCachedItems().size();
 		} catch (final Exception e) {

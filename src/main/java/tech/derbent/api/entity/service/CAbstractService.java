@@ -64,7 +64,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 				continue; // tanımadığımız kolonları atla
 			}
 			// El yapımı comparator: nulls last + Comparable check
-			java.util.Comparator<EntityClass> c = (a, b) -> {
+			Comparator<EntityClass> c = (a, b) -> {
 				final Object va = keyFn.apply(a);
 				final Object vb = keyFn.apply(b);
 				if (va == vb) {

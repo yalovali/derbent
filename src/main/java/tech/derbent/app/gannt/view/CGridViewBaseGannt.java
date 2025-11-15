@@ -13,7 +13,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CProjectAwareMDPage;
 import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.gannt.domain.CGanttItem;
+import tech.derbent.app.gannt.domain.CGanntItem;
 import tech.derbent.app.gannt.service.CPageServiceProjectGannt;
 import tech.derbent.app.gannt.view.components.CGanntGrid;
 import tech.derbent.app.meetings.service.CMeetingService;
@@ -67,7 +67,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	 * entity.
 	 * @param actualEntity The actual entity (CActivity or CMeeting) to locate
 	 * @return The CGanttItem wrapper that contains this entity, or null if not found */
-	protected CGanttItem locateGanttItemForEntity(final CProjectItem<?> actualEntity) {
+	protected CGanntItem locateGanttItemForEntity(final CProjectItem<?> actualEntity) {
 		if (actualEntity == null || actualEntity.getId() == null) {
 			return null;
 		}
@@ -94,7 +94,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 				return null;
 			}
 			// Fetch all items and search for matching entity
-			final java.util.Optional<CGanttItem> matchingItem = dataProvider.fetch(new com.vaadin.flow.data.provider.Query<>()).filter(item -> {
+			final java.util.Optional<CGanntItem> matchingItem = dataProvider.fetch(new com.vaadin.flow.data.provider.Query<>()).filter(item -> {
 				return item.getEntityType().equals(entityTypeName) && item.getEntityId().equals(entityId);
 			}).findFirst();
 			if (matchingItem.isPresent()) {
@@ -122,7 +122,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		refreshGrid();
 		// After refresh, locate and select the saved entity in the grid
 		if (savedActualEntity != null) {
-			final CGanttItem ganttItemToSelect = locateGanttItemForEntity(savedActualEntity);
+			final CGanntItem ganttItemToSelect = locateGanttItemForEntity(savedActualEntity);
 			if (ganttItemToSelect != null) {
 				// Set this as the current entity and update the form
 				setCurrentEntity((EntityClass) ganttItemToSelect);
@@ -172,7 +172,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		final EntityClass value = event.getSelectedItem();
 		// Check if selected item is CGanttItem (DTO wrapper)
 		if (value != null) {
-			Check.instanceOf(value, CGanttItem.class, "Selected item is not a CGanttItem");
+			Check.instanceOf(value, CGanntItem.class, "Selected item is not a CGanttItem");
 			setCurrentEntity(value);
 			// Clear the cached entity in page service to force refresh from the selected item
 			// This ensures details update correctly when switching between different gantt items
@@ -216,7 +216,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 				return;
 			}
 			// fetch fresh entity for the gantt item
-			ganttEntity = ((CGanttItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
+			ganttEntity = ((CGanntItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
 		}
 		if (ganttEntity == null) {
 			LOGGER.warn("Gantt item entity is null, cannot populate details form.");

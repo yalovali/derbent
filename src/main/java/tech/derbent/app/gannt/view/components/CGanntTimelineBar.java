@@ -6,15 +6,15 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.ui.component.CDiv;
 import tech.derbent.api.ui.component.CHorizontalLayout;
 import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.app.gannt.domain.CGanttItem;
+import tech.derbent.app.gannt.domain.CGanntItem;
 
 /** CGanttTimelineBar - Visual timeline bar component for Gantt items. Displays colorful, responsive bars with progress indicators, task owners, and
  * hover effects. Bars are scaled proportionally to the timeline range and synchronized with the timeline header for proper alignment. */
-public class CGanttTimelineBar extends CHorizontalLayout {
+public class CGanntTimelineBar extends CHorizontalLayout {
 
 	private static final long serialVersionUID = 1L;
 
-	public CGanttTimelineBar(final CGanttItem item, final LocalDate timelineStart, final LocalDate timelineEnd, final int totalWidth) {
+	public CGanntTimelineBar(final CGanntItem item, final LocalDate timelineStart, final LocalDate timelineEnd, final int totalWidth) {
 		setWidth(totalWidth + "px");
 		setHeight("100%");
 		getStyle().set("display", "flex");
@@ -27,7 +27,7 @@ public class CGanttTimelineBar extends CHorizontalLayout {
 		createBar(item, timelineStart, timelineEnd, totalWidth);
 	}
 
-	private void createBar(final CGanttItem item, final LocalDate timelineStart, final LocalDate timelineEnd, final int totalWidth) {
+	private void createBar(final CGanntItem item, final LocalDate timelineStart, final LocalDate timelineEnd, final int totalWidth) {
 		final LocalDate itemStart = item.getStartDate();
 		final LocalDate itemEnd = item.getEndDate();
 		final long totalDays = ChronoUnit.DAYS.between(timelineStart, timelineEnd) + 1;
@@ -70,7 +70,7 @@ public class CGanttTimelineBar extends CHorizontalLayout {
 		add(barLayout);
 	}
 
-	private void createDisplayText(CHorizontalLayout barLayout, final CGanttItem item, final int startPx, final int progress, final int totalWidth) {
+	private void createDisplayText(CHorizontalLayout barLayout, final CGanntItem item, final int startPx, final int progress, final int totalWidth) {
 		final String displayText = String.format("%s (%s) - %d%%", item.getEntity().getName(), item.getResponsibleName(), progress);
 		final CDiv label = new CDiv(displayText);
 		label.setText(displayText);
@@ -93,13 +93,13 @@ public class CGanttTimelineBar extends CHorizontalLayout {
 		barLayout.add(label);
 	}
 
-	private void createToolTip(final CGanttItem item, final LocalDate itemStart, final LocalDate itemEnd, final CDiv bar, final int progress) {
+	private void createToolTip(final CGanntItem item, final LocalDate itemStart, final LocalDate itemEnd, final CDiv bar, final int progress) {
 		final String tooltip = String.format("%s\n%s\nProgress: %d%%\nDuration: %d days\nStart: %s\nEnd: %s", item.getEntity().getName(),
 				item.getResponsibleName(), progress, item.getDurationDays(), itemStart, itemEnd);
 		bar.getElement().setAttribute("title", tooltip);
 	}
 
-	private void formatBar(final CGanttItem item, final CDiv bar) {
+	private void formatBar(final CGanntItem item, final CDiv bar) {
 		bar.getStyle().set("height", "90%");
 		bar.getStyle().set("display", "flex");
 		bar.getStyle().set("align-items", "center");

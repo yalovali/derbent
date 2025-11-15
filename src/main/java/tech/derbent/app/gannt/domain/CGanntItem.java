@@ -15,7 +15,7 @@ import tech.derbent.base.users.domain.CUser;
  * COrder) to provide a unified interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity
  * properties through the CProjectItem base class. */
 // <T extends CEntityDB<T>>
-public class CGanttItem extends CEntityOfProject<CGanttItem> {
+public class CGanntItem extends CEntityOfProject<CGanntItem> {
 
 	private final LocalDate endDate;
 	private final CProjectItem<?> entity;
@@ -27,7 +27,7 @@ public class CGanttItem extends CEntityOfProject<CGanttItem> {
 
 	/** Constructor for CGanttItem.
 	 * @param entity The project item to wrap */
-	public CGanttItem(final CProjectItem<?> entity) {
+	public CGanntItem(final CProjectItem<?> entity) {
 		this.entity = entity;
 		id = entity.getId();
 		entityType = entity.getClass().getSimpleName();
@@ -41,7 +41,7 @@ public class CGanttItem extends CEntityOfProject<CGanttItem> {
 	/** Constructor with hierarchy level.
 	 * @param entity         The project item to wrap
 	 * @param hierarchyLevel The level in the hierarchy (0 = top level) */
-	public CGanttItem(final CProjectItem<?> entity, final int hierarchyLevel) {
+	public CGanntItem(final CProjectItem<?> entity, final int hierarchyLevel) {
 		this.entity = entity;
 		id = entity.getId();
 		entityType = entity.getClass().getSimpleName();
@@ -55,7 +55,7 @@ public class CGanttItem extends CEntityOfProject<CGanttItem> {
 	/** Constructor for CGanttItem with explicit ID to avoid collisions across different entity types.
 	 * @param entity   The project item to wrap
 	 * @param uniqueId Unique ID for this CGanttItem (sequential counter to prevent Activity ID=1 and Meeting ID=1 collision) */
-	public CGanttItem(final CProjectItem<?> entity, final long uniqueId) {
+	public CGanntItem(final CProjectItem<?> entity, final long uniqueId) {
 		this.entity = entity;
 		id = uniqueId;
 		entityType = entity.getClass().getSimpleName();

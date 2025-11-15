@@ -10,33 +10,33 @@ import tech.derbent.api.ui.CGrid;
 import tech.derbent.api.ui.component.CDiv;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.gannt.domain.CGanttItem;
-import tech.derbent.app.gannt.view.datasource.CGanttDataProvider;
+import tech.derbent.app.gannt.domain.CGanntItem;
+import tech.derbent.app.gannt.view.datasource.CGanntDataProvider;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
 /** CGanntGrid - Gantt items displayed in a unified grid with navigation to entity pages and visual timeline bars. */
 @CssImport ("./themes/default/gantt.css")
-public class CGanntGrid extends CGrid<CGanttItem> {
+public class CGanntGrid extends CGrid<CGanntItem> {
 
 	private static final int DEFAULT_TIMELINE_WIDTH_PIXELS = 800; // Default width for timeline column
 	private static final int MAX_TIMELINE_WIDTH_PIXELS = 1600; // Maximum width
 	private static final int MIN_TIMELINE_WIDTH_PIXELS = 400; // Minimum width
 	private static final long serialVersionUID = 1L;
-	private final CGanttDataProvider dataProvider;
+	private final CGanntDataProvider dataProvider;
 	private LocalDate timelineEnd;
-	private CGanttTimelineHeader timelineHeader;
+	private CGanntTimelineHeader timelineHeader;
 	private LocalDate timelineStart;
 	private int timelineWidthPixels = DEFAULT_TIMELINE_WIDTH_PIXELS;
 
 	public CGanntGrid(final CProject project, final CActivityService activityService, final CMeetingService meetingService,
 			final CPageEntityService pageEntityService) {
-		super(CGanttItem.class);
+		super(CGanntItem.class);
 		LOGGER.debug("Initializing CGanntGrid for project: {} (ID: {})", project.getName(), project.getId());
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(pageEntityService, "PageEntityService cannot be null");
-		dataProvider = new CGanttDataProvider(project, activityService, meetingService);
+		dataProvider = new CGanntDataProvider(project, activityService, meetingService);
 		addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_COMPACT);
 		setHeightFull();
 		setDataProvider(dataProvider);
@@ -45,10 +45,10 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 
 	/** Calculate the overall timeline range from all items to properly scale the bars. */
 	private void calculateTimelineRange() {
-		final List<CGanttItem> allItems = dataProvider.fetch(new com.vaadin.flow.data.provider.Query<>()).toList();
+		final List<CGanntItem> allItems = dataProvider.fetch(new com.vaadin.flow.data.provider.Query<>()).toList();
 		timelineStart = null;
 		timelineEnd = null;
-		for (final CGanttItem item : allItems) {
+		for (final CGanntItem item : allItems) {
 			if (item.hasDates()) {
 				final LocalDate itemStart = item.getStartDate();
 				final LocalDate itemEnd = item.getEndDate();
@@ -74,8 +74,8 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 	private void createColumns() {
 		// Calculate timeline range from all items
 		calculateTimelineRange();
-		addIdColumn(CGanttItem::getEntityId, "ID", "entityId").setFlexGrow(0);
-		addShortTextColumn(CGanttItem::getEntityType, "Type", "entityType").setWidth("80px").setFlexGrow(0);
+		addIdColumn(CGanntItem::getEntityId, "ID", "entityId").setFlexGrow(0);
+		addShortTextColumn(CGanntItem::getEntityType, "Type", "entityType").setWidth("80px").setFlexGrow(0);
 		// Title column with hierarchical indentation based on hierarchy level
 		addColumn(item -> {
 			final StringBuilder title = new StringBuilder();
@@ -86,22 +86,22 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 			title.append(item.getEntity().getName());
 			return title.toString();
 		}).setHeader("Title").setKey("title").setWidth("200px").setFlexGrow(0).setSortable(false);
-		addShortTextColumn(CGanttItem::getResponsibleName, "Responsible", "responsible").setWidth("120px").setFlexGrow(0);
+		addShortTextColumn(CGanntItem::getResponsibleName, "Responsible", "responsible").setWidth("120px").setFlexGrow(0);
 		// Timeline visual bar column - colorful, responsive, with proper scaling
-		addDateColumn(CGanttItem::getStartDate, "Start", "startDate").setWidth("100px").setFlexGrow(0);
-		addDateColumn(CGanttItem::getEndDate, "End", "endDate").setWidth("100px").setFlexGrow(0);
+		addDateColumn(CGanntItem::getStartDate, "Start", "startDate").setWidth("100px").setFlexGrow(0);
+		addDateColumn(CGanntItem::getEndDate, "End", "endDate").setWidth("100px").setFlexGrow(0);
 		addIntegerColumn(item -> (int) item.getDurationDays(), "Duration (d)", "durationDays").setWidth("100px").setFlexGrow(0);
-		addLongTextColumn(CGanttItem::getDescription, "Description", "description").setWidth("200px");
+		addLongTextColumn(CGanntItem::getDescription, "Description", "description").setWidth("200px");
 		// Timeline column with custom header showing timeline markers
-		final Renderer<CGanttItem> timelineRenderer = new ComponentRenderer<>(item -> {
+		final Renderer<CGanntItem> timelineRenderer = new ComponentRenderer<>(item -> {
 			final CDiv wrapper = new CDiv();
 			wrapper.setWidth(timelineWidthPixels + "px");
 			wrapper.setHeight("10px");
 			// wrapper.getStyle().set("border", "1px dashed lightgray");
-			wrapper.add(new CGanttTimelineBar(item, timelineStart, timelineEnd, timelineWidthPixels));
+			wrapper.add(new CGanntTimelineBar(item, timelineStart, timelineEnd, timelineWidthPixels));
 			return wrapper;
 		});
-		timelineHeader = new CGanttTimelineHeader(timelineStart, timelineEnd, timelineWidthPixels, range -> updateTimelineRange(range),
+		timelineHeader = new CGanntTimelineHeader(timelineStart, timelineEnd, timelineWidthPixels, range -> updateTimelineRange(range),
 				this::setTimelineWidth);
 		addColumn(timelineRenderer).setHeader(timelineHeader).setKey("timeline").setFlexGrow(1).setSortable(false);
 	}
@@ -122,7 +122,7 @@ public class CGanntGrid extends CGrid<CGanttItem> {
 		}
 	}
 
-	private void updateTimelineRange(final CGanttTimelineHeader.CGanttTimelineRange range) {
+	private void updateTimelineRange(final CGanntTimelineHeader.CGanttTimelineRange range) {
 		timelineStart = range.startDate();
 		timelineEnd = range.endDate();
 		dataProvider.refreshAll();

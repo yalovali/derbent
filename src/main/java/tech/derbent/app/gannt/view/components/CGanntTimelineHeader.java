@@ -19,7 +19,7 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
 @Tag ("div")
-public class CGanttTimelineHeader extends CVerticalLayout {
+public class CGanntTimelineHeader extends CVerticalLayout {
 
 	public enum CTimelineScale {
 
@@ -65,7 +65,7 @@ public class CGanttTimelineHeader extends CVerticalLayout {
 	private final boolean useRandomColors = false;
 	private final Span windowSummary = new Span();
 
-	public CGanttTimelineHeader(final LocalDate startDate, final LocalDate endDate, final int totalWidth,
+	public CGanntTimelineHeader(final LocalDate startDate, final LocalDate endDate, final int totalWidth,
 			final IGanttTimelineChangeListener changeListener, final IGanttWidthChangeListener widthChangeListener) {
 		Check.notNull(startDate, "startDate cannot be null");
 		Check.notNull(endDate, "endDate cannot be null");
