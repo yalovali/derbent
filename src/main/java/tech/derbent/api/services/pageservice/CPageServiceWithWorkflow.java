@@ -88,12 +88,11 @@ public abstract class CPageServiceWithWorkflow<EntityClass extends CProjectItem<
 			LOGGER.info("Status changed from '{}' to '{}' for entity ID: {}", oldStatusName, newStatus.getName(), entity.getId());
 			// Save the entity to persist the status change
 			final EntityClass savedEntity = getEntityService().save(entity);
+			LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 			setCurrentEntity(savedEntity);
-			view.setCurrentEntity(savedEntity);
+			// Notify view that entity was saved - this triggers grid refresh
+			view.onEntitySaved(savedEntity);
 			view.populateForm();
-			// setCurrentEntity(savedEntity);
-			// view.onEntitySaved(savedEntity);
-			// view.populateForm();
 			CNotificationService.showInfo(String.format("Status changed to '%s'", newStatus.getName()));
 		} catch (final Exception e) {
 			LOGGER.error("Error changing status: {}", e.getMessage(), e);
