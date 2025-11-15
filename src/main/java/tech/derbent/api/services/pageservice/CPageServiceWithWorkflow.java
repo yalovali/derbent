@@ -12,8 +12,8 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 /** CPageServiceWithWorkflow - Base page service for entities that implement IHasStatusAndWorkflow.
  * <p>
- * This class provides workflow-aware status change handling with validation against workflow status relations. It should be used as the base class for
- * page services of entities like CActivity, CMeeting, CDecision, CRisk, and COrder.
+ * This class provides workflow-aware status change handling with validation against workflow status relations. It should be used as the base class
+ * for page services of entities like CActivity, CMeeting, CDecision, CRisk, and COrder.
  * <p>
  * Key features:
  * <ul>
@@ -34,7 +34,7 @@ public abstract class CPageServiceWithWorkflow<EntityClass extends CProjectItem<
 		// Get the status service from Spring context
 		try {
 			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
 	}
@@ -78,9 +78,8 @@ public abstract class CPageServiceWithWorkflow<EntityClass extends CProjectItem<
 			if (!isValidTransition) {
 				final String currentStatusName = entity.getStatus() != null ? entity.getStatus().getName() : "none";
 				LOGGER.warn("Invalid status transition from '{}' to '{}' for entity ID: {}", currentStatusName, newStatus.getName(), entity.getId());
-				CNotificationService.showWarning(
-						String.format("Cannot change status from '%s' to '%s' - transition not allowed by workflow", currentStatusName,
-								newStatus.getName()));
+				CNotificationService.showWarning(String.format("Cannot change status from '%s' to '%s' - transition not allowed by workflow",
+						currentStatusName, newStatus.getName()));
 				return;
 			}
 			// Status change is valid - apply it
@@ -89,8 +88,12 @@ public abstract class CPageServiceWithWorkflow<EntityClass extends CProjectItem<
 			LOGGER.info("Status changed from '{}' to '{}' for entity ID: {}", oldStatusName, newStatus.getName(), entity.getId());
 			// Save the entity to persist the status change
 			final EntityClass savedEntity = getEntityService().save(entity);
+			setCurrentEntity(savedEntity);
 			view.setCurrentEntity(savedEntity);
 			view.populateForm();
+			// setCurrentEntity(savedEntity);
+			// view.onEntitySaved(savedEntity);
+			// view.populateForm();
 			CNotificationService.showInfo(String.format("Status changed to '%s'", newStatus.getName()));
 		} catch (final Exception e) {
 			LOGGER.error("Error changing status: {}", e.getMessage(), e);
