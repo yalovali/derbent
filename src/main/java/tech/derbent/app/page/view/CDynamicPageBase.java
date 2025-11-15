@@ -28,7 +28,8 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	protected final CPageEntity pageEntity;
 	protected final CPageService<?> pageService;
 
-	public CDynamicPageBase(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService) throws Exception {
+	public CDynamicPageBase(final CPageEntity pageEntity, final ISessionService sessionService, final CDetailSectionService detailSectionService)
+			throws Exception {
 		super(sessionService, detailSectionService);
 		Check.notNull(pageEntity, "Page entity cannot be null");
 		this.pageEntity = pageEntity;
@@ -81,11 +82,12 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 
 	public CPageService<?> getPageService() {
 		// this creates a page service instance per page. this may be memory inefficient.
+		// TODO: consider using a singleton pattern or caching mechanism if needed. Dont need to recreate every time until class type changes
 		try {
 			Check.notNull(pageEntity, "Page entity cannot be null");
-			Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
-			var constructor = clazz.getDeclaredConstructor(IPageServiceImplementer.class);
-			CPageService<?> page = (CPageService<?>) constructor.newInstance(this);
+			final Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
+			final var constructor = clazz.getDeclaredConstructor(IPageServiceImplementer.class);
+			final CPageService<?> page = (CPageService<?>) constructor.newInstance(this);
 			Check.notNull(page, "Page service instance cannot be null for page: " + pageEntity.getPageTitle());
 			return page;
 		} catch (final Exception e) {

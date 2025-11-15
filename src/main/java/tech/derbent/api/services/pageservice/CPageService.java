@@ -14,7 +14,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	private EntityClass previousEntity;
 	final protected IPageServiceImplementer<EntityClass> view;
 
-	public CPageService(IPageServiceImplementer<EntityClass> view) {
+	public CPageService(final IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
 		setPreviousEntity(null);
 	}
@@ -26,20 +26,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param newStatus the new status selected by the user
 	 * @throws Exception if the status change fails */
 	public void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
-		LOGGER.debug("Status change requested to: {}", newStatus != null ? newStatus.getName() : "null");
-		final EntityClass entity = getCurrentEntity();
-		if (entity == null) {
-			LOGGER.warn("No current entity for status change operation");
-			CNotificationService.showWarning("No entity selected for status change");
-			return;
-		}
-		if (newStatus == null) {
-			LOGGER.warn("Null status provided for status change");
-			CNotificationService.showWarning("Invalid status selected");
-			return;
-		}
-		// Default implementation: just log the change
-		// Subclasses should override to implement validation and persistence
 		LOGGER.debug("Base actionChangeStatus called - entity type does not support workflow status changes");
 	}
 
@@ -158,9 +144,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	protected ISessionService getSessionService() { return view.getSessionService(); }
 
-	protected void setCurrentEntity(EntityClass entity) {
+	protected void setCurrentEntity(final EntityClass entity) {
 		view.setCurrentEntity(entity);
 	}
 
-	public void setPreviousEntity(EntityClass previousEntity) { this.previousEntity = previousEntity; }
+	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }
 }
