@@ -14,7 +14,7 @@ import tech.derbent.app.projects.domain.CProject;
 public class CRiskLevel extends CProjectItem<CRiskLevel> {
 
 	public static final String DEFAULT_COLOR = "#9C27B0";
-	public static final String DEFAULT_ICON = "vaadin:level-up";
+	public static final String DEFAULT_ICON = "vaadin:chart-3d";
 	public static final String VIEW_NAME = "Risk Levels View";
 
 	@Column (nullable = true)

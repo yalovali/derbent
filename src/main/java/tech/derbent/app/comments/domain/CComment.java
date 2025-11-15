@@ -136,6 +136,8 @@ public class CComment extends CEvent<CComment> {
 		}
 	}
 
+	public Boolean getImportant() { return important; }
+
 	public Boolean isImportant() { return important; }
 
 	public void setActivity(final CActivity activity) {

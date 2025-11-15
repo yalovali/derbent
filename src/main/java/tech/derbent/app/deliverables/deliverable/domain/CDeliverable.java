@@ -22,7 +22,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStatusAndWorkflow<CDeliverable> {
 
 	public static final String DEFAULT_COLOR = "#AB47BC";
-	public static final String DEFAULT_ICON = "vaadin:package";
+	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
 	public static final String VIEW_NAME = "Deliverable View";
 
 	@ManyToOne (fetch = FetchType.EAGER)

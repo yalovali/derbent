@@ -182,6 +182,23 @@ public class CDataInitializer {
 	private final CProjectService projectService;
 	private final CRiskService riskService;
 	private final CRiskTypeService riskTypeService;
+	private final tech.derbent.app.assets.asset.service.CAssetService assetService;
+	private final tech.derbent.app.assets.assettype.service.CAssetTypeService assetTypeService;
+	private final tech.derbent.app.milestones.milestone.service.CMilestoneService milestoneService;
+	private final tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService milestoneTypeService;
+	private final tech.derbent.app.tickets.ticket.service.CTicketService ticketService;
+	private final tech.derbent.app.tickets.tickettype.service.CTicketTypeService ticketTypeService;
+	private final tech.derbent.app.budgets.budget.service.CBudgetService budgetService;
+	private final tech.derbent.app.budgets.budgettype.service.CBudgetTypeService budgetTypeService;
+	private final tech.derbent.app.deliverables.deliverable.service.CDeliverableService deliverableService;
+	private final tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService deliverableTypeService;
+	private final tech.derbent.app.providers.provider.service.CProviderService providerService;
+	private final tech.derbent.app.providers.providertype.service.CProviderTypeService providerTypeService;
+	private final tech.derbent.app.products.product.service.CProductService productService;
+	private final tech.derbent.app.products.producttype.service.CProductTypeService productTypeService;
+	private final tech.derbent.app.components.component.service.CComponentService componentService;
+	private final tech.derbent.app.components.componenttype.service.CComponentTypeService componentTypeService;
+	private final tech.derbent.app.teams.team.service.CTeamService teamService;
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
 	private final ISessionService sessionService;
@@ -223,6 +240,27 @@ public class CDataInitializer {
 		userCompanyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 		projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+		workflowStatusRelationService = CSpringContext.getBean(CWorkflowStatusRelationService.class);
+		jdbcTemplate = CSpringContext.getBean(JdbcTemplate.class);
+		this.sessionService = sessionService;
+		// Initialize new entity services
+		assetService = CSpringContext.getBean(tech.derbent.app.assets.asset.service.CAssetService.class);
+		assetTypeService = CSpringContext.getBean(tech.derbent.app.assets.assettype.service.CAssetTypeService.class);
+		milestoneService = CSpringContext.getBean(tech.derbent.app.milestones.milestone.service.CMilestoneService.class);
+		milestoneTypeService = CSpringContext.getBean(tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService.class);
+		ticketService = CSpringContext.getBean(tech.derbent.app.tickets.ticket.service.CTicketService.class);
+		ticketTypeService = CSpringContext.getBean(tech.derbent.app.tickets.tickettype.service.CTicketTypeService.class);
+		budgetService = CSpringContext.getBean(tech.derbent.app.budgets.budget.service.CBudgetService.class);
+		budgetTypeService = CSpringContext.getBean(tech.derbent.app.budgets.budgettype.service.CBudgetTypeService.class);
+		deliverableService = CSpringContext.getBean(tech.derbent.app.deliverables.deliverable.service.CDeliverableService.class);
+		deliverableTypeService = CSpringContext.getBean(tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService.class);
+		providerService = CSpringContext.getBean(tech.derbent.app.providers.provider.service.CProviderService.class);
+		providerTypeService = CSpringContext.getBean(tech.derbent.app.providers.providertype.service.CProviderTypeService.class);
+		productService = CSpringContext.getBean(tech.derbent.app.products.product.service.CProductService.class);
+		productTypeService = CSpringContext.getBean(tech.derbent.app.products.producttype.service.CProductTypeService.class);
+		componentService = CSpringContext.getBean(tech.derbent.app.components.component.service.CComponentService.class);
+		componentTypeService = CSpringContext.getBean(tech.derbent.app.components.componenttype.service.CComponentTypeService.class);
+		teamService = CSpringContext.getBean(tech.derbent.app.teams.team.service.CTeamService.class);
 		Check.notNull(activityService, "ActivityService bean not found");
 		Check.notNull(activityPriorityService, "ActivityPriorityService bean not found");
 		Check.notNull(activityStatusService, "ProjectItemStatusService bean not found");
@@ -248,12 +286,8 @@ public class CDataInitializer {
 		Check.notNull(userProjectSettingsService, "UserProjectSettingsService bean not found");
 		Check.notNull(workflowEntityService, "WorkflowEntityService bean not found");
 		Check.notNull(projectItemStatusService, "ProjectItemStatusService bean not found");
-		workflowStatusRelationService = CSpringContext.getBean(CWorkflowStatusRelationService.class);
 		Check.notNull(workflowStatusRelationService, "WorkflowStatusRelationService bean not found");
 		LOGGER.info("All service beans obtained successfully");
-		final DataSource ds = CSpringContext.getBean(DataSource.class);
-		jdbcTemplate = new JdbcTemplate(ds);
-		this.sessionService = sessionService;
 	}
 	// ========================================================================
 	// PUBLIC API METHODS - Main entry points for initialization

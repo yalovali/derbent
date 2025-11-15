@@ -16,7 +16,7 @@ import tech.derbent.app.projects.domain.CProject;
 public class CDeliverableType extends CTypeEntity<CDeliverableType> {
 
 	public static final String DEFAULT_COLOR = "#9C27B0";
-	public static final String DEFAULT_ICON = "vaadin:package";
+	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
 	public static final String VIEW_NAME = "Deliverable Type Management";
 
 	/** Default constructor for JPA. */
