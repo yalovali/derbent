@@ -138,6 +138,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		// TODO Auto-generated method stub
 	}
 
+	@SuppressWarnings ("rawtypes")
 	@Override
 	public void setCurrentEntity(CEntityDB entity) {
 		// TODO Auto-generated method stub

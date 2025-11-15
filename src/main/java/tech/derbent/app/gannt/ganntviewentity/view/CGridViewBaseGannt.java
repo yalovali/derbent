@@ -58,8 +58,9 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 
 	/** Gets the master view section cast to CMasterViewSectionGannt for accessing Gantt-specific functionality.
 	 * @return The master view section as CMasterViewSectionGannt */
-	@SuppressWarnings ("unchecked")
-	protected CMasterViewSectionGannt<EntityClass> getGanttMasterViewSection() { return (CMasterViewSectionGannt<EntityClass>) masterViewSection; }
+	protected CMasterViewSectionGannt<EntityClass> getGanttMasterViewSection() {
+		return (CMasterViewSectionGannt<EntityClass>) masterViewSection;
+	}
 
 	/** Locates a CGanttItem in the grid that wraps the given actual entity. This is needed after save operations to restore selection to the saved
 	 * entity.
