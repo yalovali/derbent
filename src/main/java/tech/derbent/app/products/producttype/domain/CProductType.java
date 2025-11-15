@@ -1,0 +1,32 @@
+package tech.derbent.app.products.producttype.domain;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.app.projects.domain.CProject;
+
+@Entity
+@Table (name = "cproducttype", uniqueConstraints = @UniqueConstraint (columnNames = {
+"name", "project_id"
+}))
+@AttributeOverride (name = "id", column = @Column (name = "cproducttype_id"))
+public class CProductType extends CTypeEntity<CProductType> {
+
+public static final String DEFAULT_COLOR = "#00BCD4";
+public static final String DEFAULT_ICON = "vaadin:package";
+public static final String VIEW_NAME = "Product Type Management";
+
+public CProductType() {
+super();
+}
+
+public CProductType(final String name, final CProject project) {
+super(CProductType.class, name, project);
+}
+
+@Override
+public void initializeAllFields() {}
+}
