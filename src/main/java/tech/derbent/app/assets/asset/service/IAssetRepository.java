@@ -9,8 +9,8 @@ import tech.derbent.app.assets.assettype.domain.CAssetType;
 
 public interface IAssetRepository extends IEntityOfProjectRepository<CAsset> {
 
-	@Query ("SELECT COUNT(a) FROM {#entityName} a WHERE a.entityType = :type")
-	long countByType(@Param ("type") CAssetType type);
+	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :entityType")
+	long countByType(@Param ("entityType") CAssetType type);
 	@Override
 	@Query (
 		"SELECT r FROM CAsset r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType " + "WHERE r.id = :id"

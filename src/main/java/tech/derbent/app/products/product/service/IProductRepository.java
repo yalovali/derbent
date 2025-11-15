@@ -9,8 +9,8 @@ import tech.derbent.app.products.producttype.domain.CProductType;
 
 public interface IProductRepository extends IEntityOfProjectRepository<CProduct> {
 
-@Query ("SELECT COUNT(a) FROM {#entityName} a WHERE a.entityType = :type")
-long countByType(@Param ("type") CProductType type);
+@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :entityType")
+long countByType(@Param ("entityType") CProductType type);
 
 @Override
 @Query ("SELECT r FROM CProduct r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType WHERE r.id = :id")

@@ -9,8 +9,8 @@ import tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpens
 
 public interface IProjectExpenseRepository extends IEntityOfProjectRepository<CProjectExpense> {
 
-	@Query ("SELECT COUNT(a) FROM {#entityName} a WHERE a.entityType = :type")
-	long countByType(@Param ("type") CProjectExpenseType type);
+	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :entityType")
+	long countByType(@Param ("entityType") CProjectExpenseType type);
 	@Override
 	@Query (
 		"SELECT r FROM CProjectExpense r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType " + "WHERE r.id = :id"

@@ -9,8 +9,8 @@ import tech.derbent.app.providers.providertype.domain.CProviderType;
 
 public interface IProviderRepository extends IEntityOfProjectRepository<CProvider> {
 
-	@Query ("SELECT COUNT(a) FROM {#entityName} a WHERE a.entityType = :type")
-	long countByType(@Param ("type") CProviderType type);
+	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :entityType")
+	long countByType(@Param ("entityType") CProviderType type);
 	@Override
 	@Query (
 		"SELECT r FROM CProvider r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType " + "WHERE r.id = :id"

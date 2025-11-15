@@ -9,8 +9,8 @@ import tech.derbent.app.components.componentversiontype.domain.CComponentVersion
 
 public interface IComponentVersionRepository extends IEntityOfProjectRepository<CComponentVersion> {
 
-@Query ("SELECT COUNT(a) FROM {#entityName} a WHERE a.entityType = :type")
-long countByType(@Param ("type") CComponentVersionType type);
+@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :entityType")
+long countByType(@Param ("entityType") CComponentVersionType type);
 
 @Override
 @Query ("SELECT r FROM CComponentVersion r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType LEFT JOIN FETCH r.component WHERE r.id = :id")
