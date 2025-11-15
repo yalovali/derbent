@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -26,26 +27,83 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public static final String DEFAULT_COLOR = "#003444";
 	public static final String DEFAULT_ICON = "vaadin:warning";
 	public static final String VIEW_NAME = "Risks View";
+
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk", hidden = false, order = 2,
-			dataProviderBean = "CRiskTypeService", setBackgroundFromColor = true, useIcon = true
+			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk",
+			hidden = false, order = 2, dataProviderBean = "CRiskTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CRiskType entityType;
+
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
-			displayName = "Risk Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk",
-			hidden = false, order = 2, useRadioButtons = false
+			displayName = "Severity", required = true, readOnly = false, defaultValue = "LOW",
+			description = "Severity level of the risk", hidden = false, order = 10, useRadioButtons = false
 	)
 	private ERiskSeverity riskSeverity;
+
+	@Enumerated (EnumType.STRING)
+	@Column (name = "risk_likelihood", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
+	@AMetaData (
+			displayName = "Likelihood", required = false, readOnly = false, defaultValue = "POSSIBLE",
+			description = "Probability of risk occurring", hidden = false, order = 11, useRadioButtons = false
+	)
+	private ERiskLikelihood riskLikelihood;
+
+	@Enumerated (EnumType.STRING)
+	@Column (name = "risk_criticality", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
+	@AMetaData (
+			displayName = "Criticality", required = false, readOnly = false, defaultValue = "MODERATE",
+			description = "Overall importance/criticality of the risk", hidden = false, order = 12, useRadioButtons = false
+	)
+	private ERiskCriticality riskCriticality;
+
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk",
+			hidden = false, order = 20, maxLength = 1000
+	)
+	private String cause;
+
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Impact", required = false, readOnly = false, description = "Potential impact if risk occurs",
+			hidden = false, order = 21, maxLength = 1000
+	)
+	private String impact;
+
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Mitigation", required = false, readOnly = false, description = "Strategy to mitigate or reduce the risk",
+			hidden = false, order = 22, maxLength = 2000
+	)
+	private String mitigation;
+
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Action Plan", required = false, readOnly = false, description = "Detailed action plan to address the risk",
+			hidden = false, order = 23, maxLength = 2000
+	)
+	private String plan;
+
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Result", required = false, readOnly = false, description = "Outcome or result of risk management",
+			hidden = false, order = 24, maxLength = 1000
+	)
+	private String result;
 
 	/** Default constructor for JPA. */
 	public CRisk() {
 		super();
 		initializeDefaults();
-		// Initialize with default values for JPA
 	}
 
 	public CRisk(final String name, final CProject project) {
@@ -53,13 +111,27 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		initializeDefaults();
 	}
 
+	public String getCause() { return cause; }
+
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
+
+	public String getImpact() { return impact; }
+
+	public String getMitigation() { return mitigation; }
+
+	public String getPlan() { return plan; }
+
+	public String getResult() { return result; }
+
+	public ERiskCriticality getRiskCriticality() { return riskCriticality; }
+
+	public ERiskLikelihood getRiskLikelihood() { return riskLikelihood; }
 
 	public ERiskSeverity getRiskSeverity() { return riskSeverity; }
 
 	@Override
-	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
+	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
 	}
@@ -81,7 +153,20 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		riskSeverity = ERiskSeverity.LOW;
+		if (riskSeverity == null) {
+			riskSeverity = ERiskSeverity.LOW;
+		}
+		if (riskLikelihood == null) {
+			riskLikelihood = ERiskLikelihood.POSSIBLE;
+		}
+		if (riskCriticality == null) {
+			riskCriticality = ERiskCriticality.MODERATE;
+		}
+	}
+
+	public void setCause(final String cause) {
+		this.cause = cause;
+		updateLastModified();
 	}
 
 	@Override
@@ -91,5 +176,38 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		updateLastModified();
 	}
 
-	public void setRiskSeverity(final ERiskSeverity riskSeverity) { this.riskSeverity = riskSeverity; }
+	public void setImpact(final String impact) {
+		this.impact = impact;
+		updateLastModified();
+	}
+
+	public void setMitigation(final String mitigation) {
+		this.mitigation = mitigation;
+		updateLastModified();
+	}
+
+	public void setPlan(final String plan) {
+		this.plan = plan;
+		updateLastModified();
+	}
+
+	public void setResult(final String result) {
+		this.result = result;
+		updateLastModified();
+	}
+
+	public void setRiskCriticality(final ERiskCriticality riskCriticality) {
+		this.riskCriticality = riskCriticality;
+		updateLastModified();
+	}
+
+	public void setRiskLikelihood(final ERiskLikelihood riskLikelihood) {
+		this.riskLikelihood = riskLikelihood;
+		updateLastModified();
+	}
+
+	public void setRiskSeverity(final ERiskSeverity riskSeverity) {
+		this.riskSeverity = riskSeverity;
+		updateLastModified();
+	}
 }
