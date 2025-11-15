@@ -204,34 +204,36 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		getBaseDetailsLayout().removeAll();
 		// First, try to get the actual entity from the page service
 		// This is necessary for new entities that haven't been wrapped in CGanttItem yet
-		CProjectItem<?> ganttEntity = null;
+		CProjectItem<?> ganntEntity = null;
 		if (getPageService() instanceof CPageServiceProjectGannt) {
-			ganttEntity = ((CPageServiceProjectGannt) getPageService()).getCurrentActualEntity();
+			ganntEntity = ((CPageServiceProjectGannt) getPageService()).getCurrentActualEntity();
 		}
 		// If we don't have an entity from page service, try to get it from the current CGanttItem
-		if (ganttEntity == null) {
+		if (ganntEntity == null) {
 			if (getCurrentEntity() == null) {
 				LOGGER.debug("No current entity to display in details component");
 				return;
 			}
 			// fetch fresh entity for the gantt item
-			ganttEntity = ((CGanntItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
+			ganntEntity = ((CGanntItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
 		}
-		if (ganttEntity == null) {
+		if (ganntEntity == null) {
 			LOGGER.warn("Gantt item entity is null, cannot populate details form.");
 			return;
+		} else {
+			ganntEntity = CGanntItem.getGanntItemById(ganntEntity.getId(), ganntEntity, activityService, meetingService);
 		}
-		entityBinder = new CEnhancedBinder<CProjectItem<?>>((Class<CProjectItem<?>>) ganttEntity.getClass());
-		final Field viewNameField = ganttEntity.getClass().getField("VIEW_NAME");
+		entityBinder = new CEnhancedBinder<CProjectItem<?>>((Class<CProjectItem<?>>) ganntEntity.getClass());
+		final Field viewNameField = ganntEntity.getClass().getField("VIEW_NAME");
 		final String entityViewName = (String) viewNameField.get(null);
 		buildScreen(entityViewName, entityBinder);
 		// final CVerticalLayout formLayout = CFormBuilder.buildForm(ganttEntity.getClass(), entityBinder, null, this);
 		// getBaseDetailsLayout().add(formLayout);
-		entityBinder.readBean(ganttEntity);
-		crudToolbar.setCurrentEntity(ganttEntity);
+		entityBinder.readBean(ganntEntity);
+		crudToolbar.setCurrentEntity(ganntEntity);
 		// Update the page service with the current actual entity
 		if (getPageService() instanceof CPageServiceProjectGannt) {
-			((CPageServiceProjectGannt) getPageService()).setCurrentActualEntity(ganttEntity);
+			((CPageServiceProjectGannt) getPageService()).setCurrentActualEntity(ganntEntity);
 		}
 	}
 }

@@ -17,6 +17,22 @@ import tech.derbent.base.users.domain.CUser;
 // <T extends CEntityDB<T>>
 public class CGanntItem extends CEntityOfProject<CGanntItem> {
 
+	static public CProjectItem<?> getGanntItemById(Long id, CProjectItem<?> selectedItem, final CEntityOfProjectService<?> activityService,
+			final CEntityOfProjectService<?> meetingService) {
+		CEntityOfProjectService<?> service = null;
+		if (selectedItem instanceof CActivity) {
+			service = activityService;
+		} else if (selectedItem instanceof CMeeting) {
+			service = meetingService;
+		} else {
+			Check.fail("Unsupported entity type selected in Gantt item: " + selectedItem.getClass().getSimpleName());
+		}
+		// Add other entity type checks as needed
+		final CProjectItem<?> entity = (CProjectItem<?>) service.getById(id).orElse(null);
+		Check.notNull(entity, "Entity not found for Gantt item selection");
+		return entity;
+	}
+
 	private final LocalDate endDate;
 	private final CProjectItem<?> entity;
 	private final String entityType;

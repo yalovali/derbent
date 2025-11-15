@@ -23,7 +23,7 @@ import tech.derbent.api.views.CPageTestAuxillaryService.RouteEntry;
 
 @Route ("cpagetestauxillary")
 @PageTitle ("Test Support Page")
-@Menu (order = 3.1001, icon = "class:tech.derbent.app.gannt.view.CProjectGanntView", title = "Test Support Page")
+@Menu (order = 3.1001, icon = "class:tech.derbent.app.gannt.projectgannt.view.CProjectGanntView", title = "Test Support Page")
 @PermitAll
 public class CPageTestAuxillary extends Main {
 
