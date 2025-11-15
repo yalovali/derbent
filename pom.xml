@@ -215,8 +215,7 @@
 						<link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
 					</links>
 				</configuration>
-			</plugin>
-
+			</plugin> 
 		</plugins>
 	</build>
 

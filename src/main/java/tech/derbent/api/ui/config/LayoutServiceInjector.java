@@ -3,8 +3,8 @@ package tech.derbent.api.ui.config;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
+import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.app.page.view.CPageGenericEntity;
 import tech.derbent.base.session.service.CLayoutService;
 

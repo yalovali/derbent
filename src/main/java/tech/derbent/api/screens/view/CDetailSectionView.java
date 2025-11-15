@@ -8,14 +8,14 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CGridViewBaseProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.services.pageservice.CPageService;
-import tech.derbent.api.ui.CGrid;
-import tech.derbent.api.ui.CGridViewBaseProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cdetailsectionview")
@@ -41,7 +41,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;
 		this.viewsService = viewsService;
-		this.pageService = new CPageServiceEntityDB<CDetailSection>(this);
+		pageService = new CPageServiceEntityDB<CDetailSection>(this);
 	}
 
 	@Override

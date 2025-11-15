@@ -1,7 +1,7 @@
 package tech.derbent.app.page.view;
 
 import com.vaadin.flow.router.BeforeEnterEvent;
-import tech.derbent.api.views.CAbstractPage;
+import tech.derbent.api.entity.view.CAbstractPage;
 
 public abstract class CPageBase extends CAbstractPage {
 

@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.ui.CGrid;
+import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CComponentRelationBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>

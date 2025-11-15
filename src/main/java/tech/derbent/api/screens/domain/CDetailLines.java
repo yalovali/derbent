@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.views.CAbstractEntityDBPage;
+import tech.derbent.api.entity.view.CAbstractEntityDBPage;
 
 /** CDetailLines - Domain entity representing individual lines/fields in a screen definition. Layer: Domain (MVC) Each line represents a field that
  * should be displayed in the screen view. */

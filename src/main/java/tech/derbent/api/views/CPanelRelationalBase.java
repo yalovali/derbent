@@ -6,8 +6,8 @@ import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.ui.CGrid;
 
 public abstract class CPanelRelationalBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CAccordionDBEntity<MasterClass> {
@@ -22,8 +22,8 @@ public abstract class CPanelRelationalBase<MasterClass extends CEntityDB<MasterC
 			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> masterService, final Class<RelationalClass> relationalClass) {
 		super(title, parentContent, beanValidationBinder, entityClass, masterService);
 		this.relationalClass = relationalClass;
-		this.grid = new CGrid<>(relationalClass);
-		this.getSettings = () -> List.of();
+		grid = new CGrid<>(relationalClass);
+		getSettings = () -> List.of();
 	}
 
 	public void refresh() {

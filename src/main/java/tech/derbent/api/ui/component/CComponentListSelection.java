@@ -13,9 +13,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.ui.CGrid;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 

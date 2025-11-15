@@ -21,7 +21,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.gannt.service.IGanntEntityItem;
+import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
