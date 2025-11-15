@@ -96,6 +96,12 @@ public class CCrudToolbar extends HorizontalLayout {
 				try {
 					CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 					if (statusService != null) {
+						// For workflow entities, get valid next statuses based on workflow rules
+						// This ensures only allowed transitions are shown in the combobox
+						if (currentEntity instanceof IHasStatusAndWorkflow) {
+							return statusService.getValidNextStatuses((IHasStatusAndWorkflow<?>) currentEntity);
+						}
+						// Fallback for non-workflow entities: return all statuses
 						return statusService.findAll();
 					}
 				} catch (Exception e) {
@@ -125,12 +131,16 @@ public class CCrudToolbar extends HorizontalLayout {
 			statusComboBox.addValueChangeListener(event -> {
 				if (event.isFromClient() && (event.getValue() != null)) {
 					try {
+						// Call page service to handle status change with workflow validation
+						// The page service will validate, set status, and save the entity
 						pageBase.getPageService().actionChangeStatus(event.getValue());
-						projectItem.setStatus(event.getValue());
-						LOGGER.debug("Status changed to: {}", event.getValue());
-						// Trigger save action if page provided one; otherwise trigger refresh
+						LOGGER.debug("Status change action completed successfully for value: {}", event.getValue());
 					} catch (final Exception e) {
 						LOGGER.error("Error handling workflow status change", e);
+						// Reset combobox to previous value on error
+						if (projectItem.getStatus() != null) {
+							statusComboBox.setValue(projectItem.getStatus());
+						}
 					}
 				}
 			});
