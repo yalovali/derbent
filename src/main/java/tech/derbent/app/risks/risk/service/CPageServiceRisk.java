@@ -2,12 +2,12 @@ package tech.derbent.app.risks.risk.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.CPageServiceWithWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.risks.risk.domain.CRisk;
 
-public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> {
+public class CPageServiceRisk extends CPageServiceWithWorkflow<CRisk> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceRisk.class);
 	Long serialVersionUID = 1L;
