@@ -111,9 +111,9 @@ public class CWebSessionService implements ISessionService {
 	public Optional<CCompany> getActiveCompany() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		CUser activeUser = (CUser) session.getAttribute(ACTIVE_USER_KEY);
+		final CUser activeUser = (CUser) session.getAttribute(ACTIVE_USER_KEY);
 		Check.notNull(activeUser, "Active user must not be null to get company");
-		CCompany company = activeUser.getCompany();
+		final CCompany company = activeUser.getCompany();
 		return Optional.ofNullable(company);
 	}
 
@@ -138,7 +138,7 @@ public class CWebSessionService implements ISessionService {
 		if (session == null) {
 			return Optional.empty();
 		}
-		CProject activeProject = (CProject) session.getAttribute(ACTIVE_PROJECT_KEY);
+		final CProject activeProject = (CProject) session.getAttribute(ACTIVE_PROJECT_KEY);
 		return Optional.ofNullable(activeProject);
 	}
 
@@ -150,7 +150,7 @@ public class CWebSessionService implements ISessionService {
 		if (session == null) {
 			return Optional.empty();
 		}
-		CUser activeUser = (CUser) session.getAttribute(ACTIVE_USER_KEY);
+		final CUser activeUser = (CUser) session.getAttribute(ACTIVE_USER_KEY);
 		return Optional.ofNullable(activeUser);
 	}
 
@@ -158,7 +158,7 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public List<CProject> getAvailableProjects() {
 		// Get current company from session
-		CCompany currentCompany = getCurrentCompany();
+		final CCompany currentCompany = getCurrentCompany();
 		if (currentCompany != null) {
 			LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 			// change this to findByUserId if you want to filter by user as well
@@ -242,6 +242,17 @@ public class CWebSessionService implements ISessionService {
 		notifyProjectListChanged();
 	}
 
+	/** Helper method to notify all project change listeners. */
+	private void notifyProjectChangeListeners(final CProject project) {
+		getCurrentProjectChangeListeners().forEach(listener -> {
+			try {
+				listener.onProjectChanged(project);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
+			}
+		});
+	}
+
 	/** Notifies all registered project list change listeners about changes to the project list. This method safely handles UI access for components
 	 * that may be in different UIs. */
 	@Override
@@ -292,6 +303,13 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	@Override
+	public void setActiveCompany(final CCompany company) {
+		// dont call it
+		// use set user or set project instead
+		Check.fail("setActiveCompany should not be called directly; use setActiveUser or setActiveProject instead");
+	}
+
+	@Override
 	public void setActiveId(final String entityType, final Long id) {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -332,23 +350,12 @@ public class CWebSessionService implements ISessionService {
 		}
 	}
 
-	/** Helper method to notify all project change listeners. */
-	private void notifyProjectChangeListeners(final CProject project) {
-		getCurrentProjectChangeListeners().forEach(listener -> {
-			try {
-				listener.onProjectChanged(project);
-			} catch (final Exception e) {
-				LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
-			}
-		});
-	}
-
 	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member
 	 * of the company.
 	 * @param company the company to set as active
 	 * @param user    the user to set as active (must be a member of the company) */
 	@Override
-	public void setActiveUser(CUser user) {
+	public void setActiveUser(final CUser user) {
 		LOGGER.debug("setActiveUser called");
 		Check.notNull(user, "User must not be null");
 		clearSession(); // Clear session data before setting new user
@@ -358,7 +365,7 @@ public class CWebSessionService implements ISessionService {
 		// Set first available project
 		final List<CProject> availableProjects = getAvailableProjects();
 		if (!availableProjects.isEmpty()) {
-			CProject activeProject = availableProjects.get(0);
+			final CProject activeProject = availableProjects.get(0);
 			setActiveProject(activeProject);
 		}
 	}

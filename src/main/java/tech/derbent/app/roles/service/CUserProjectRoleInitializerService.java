@@ -3,15 +3,19 @@ package tech.derbent.app.roles.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.roles.domain.CUserProjectRole;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.roles.domain.CUserProjectRole;
 
 public class CUserProjectRoleInitializerService extends CInitializerServiceBase {
 
@@ -74,5 +78,31 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		final CGridEntity grid = createGridEntity(project, false);
 		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		// Project role data: [name, description, isAdmin, isUser, isGuest]
+		final String[][] roleData = {
+				{
+						"Project Admin", "Administrative role with full project access", "true", "false", "false"
+				}, {
+						"Project User", "Standard user role with regular access", "false", "true", "false"
+				}, {
+						"Project Guest", "Guest role with limited access", "false", "false", "true"
+				}
+		};
+		// Use consumer pattern to set role-specific fields
+		final int[] index = {
+				0
+		}; // Mutable counter for array access in lambda
+		initializeProjectEntity(roleData,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(ENTITY_CLASS)), project, minimal, item -> {
+					final CUserProjectRole role = (CUserProjectRole) item;
+					final String[] data = roleData[index[0]++];
+					role.setIsAdmin(Boolean.parseBoolean(data[2]));
+					role.setIsUser(Boolean.parseBoolean(data[3]));
+					role.setIsGuest(Boolean.parseBoolean(data[4]));
+					role.setColor(CColorUtils.getRandomColor(true));
+				});
 	}
 }

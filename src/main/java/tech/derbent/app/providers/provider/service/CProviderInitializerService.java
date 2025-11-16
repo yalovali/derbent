@@ -3,15 +3,20 @@ package tech.derbent.app.providers.provider.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.providers.provider.domain.CProvider;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.providers.provider.domain.CProvider;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 
 public class CProviderInitializerService extends CInitializerServiceBase {
 
@@ -57,5 +62,21 @@ public class CProviderInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] nameAndDescriptions = {
+				{
+						"TechVendor Solutions Inc.", "Hardware and software vendor"
+				}, {
+						"Expert Consulting Group", "Business and technical consulting services"
+				}
+		};
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+					final CProvider provider = (CProvider) item;
+					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
+					provider.setAssignedTo(user);
+				});
 	}
 }

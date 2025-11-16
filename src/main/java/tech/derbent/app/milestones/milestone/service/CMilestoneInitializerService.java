@@ -3,15 +3,20 @@ package tech.derbent.app.milestones.milestone.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.milestones.milestone.domain.CMilestone;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.milestones.milestone.domain.CMilestone;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 
 public class CMilestoneInitializerService extends CInitializerServiceBase {
 
@@ -57,5 +62,21 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] nameAndDescriptions = {
+				{
+						"Alpha Release Milestone", "First alpha release with core features"
+				}, {
+						"Beta Release Milestone", "Beta release for user acceptance testing"
+				}
+		};
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+					final CMilestone milestone = (CMilestone) item;
+					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
+					milestone.setAssignedTo(user);
+				});
 	}
 }

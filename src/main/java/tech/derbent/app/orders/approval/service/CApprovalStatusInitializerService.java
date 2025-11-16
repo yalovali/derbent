@@ -3,12 +3,16 @@ package tech.derbent.app.orders.approval.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -57,5 +61,31 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		// Approval status data: [name, description, sortOrder]
+		final String[][] statusData = {
+				{
+						"Draft", "Approval is in draft state", "1"
+				}, {
+						"Submitted", "Approval has been submitted", "2"
+				}, {
+						"Approved", "Approval has been approved", "3"
+				}, {
+						"Rejected", "Approval has been rejected", "4"
+				}
+		};
+		// Use consumer pattern to set approval-specific fields
+		final int[] index = {
+				0
+		}; // Mutable counter for array access in lambda
+		initializeProjectEntity(statusData,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+					final CApprovalStatus status = (CApprovalStatus) item;
+					final String[] data = statusData[index[0]++];
+					status.setColor(CColorUtils.getRandomColor(true));
+					status.setSortOrder(Integer.parseInt(data[2]));
+				});
 	}
 }

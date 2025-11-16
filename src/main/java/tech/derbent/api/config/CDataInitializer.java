@@ -37,7 +37,6 @@ import tech.derbent.app.assets.assettype.service.CAssetTypeInitializerService;
 import tech.derbent.app.assets.assettype.service.CAssetTypeService;
 import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
 import tech.derbent.app.budgets.budget.service.CBudgetService;
-import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeService;
 import tech.derbent.app.comments.domain.CComment;
@@ -76,11 +75,8 @@ import tech.derbent.app.milestones.milestone.service.CMilestoneInitializerServic
 import tech.derbent.app.milestones.milestone.service.CMilestoneService;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeInitializerService;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService;
-import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.app.orders.approval.service.CApprovalStatusInitializerService;
-import tech.derbent.app.orders.approval.service.CApprovalStatusService;
 import tech.derbent.app.orders.approval.service.COrderApprovalInitializerService;
-import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.currency.service.CCurrencyInitializerService;
 import tech.derbent.app.orders.currency.service.CCurrencyService;
 import tech.derbent.app.orders.order.service.COrderInitializerService;
@@ -89,10 +85,8 @@ import tech.derbent.app.orders.type.service.COrderTypeInitializerService;
 import tech.derbent.app.orders.type.service.COrderTypeService;
 import tech.derbent.app.page.service.CPageEntityInitializerService;
 import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.products.product.domain.CProduct;
 import tech.derbent.app.products.product.service.CProductInitializerService;
 import tech.derbent.app.products.product.service.CProductService;
-import tech.derbent.app.products.producttype.domain.CProductType;
 import tech.derbent.app.products.producttype.service.CProductTypeInitializerService;
 import tech.derbent.app.products.producttype.service.CProductTypeService;
 import tech.derbent.app.products.productversion.service.CProductVersionInitializerService;
@@ -154,12 +148,6 @@ public class CDataInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
-	private static final String STATUS_CANCELLED = "Cancelled";
-	private static final String STATUS_COMPLETED = "Completed";
-	private static final String STATUS_IN_PROGRESS = "In Progress";
-	// Status Names
-	private static final String STATUS_NOT_STARTED = "Not Started";
-	private static final String STATUS_ON_HOLD = "On Hold";
 	// User Login Names
 	private static final String USER_ADMIN = "admin";
 	private static final String USER_ADMIN2 = "yasin";
@@ -377,34 +365,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void createActivityPriority(final CProject project, final String name, final String description, final String color,
-			final Integer priorityLevel, final boolean isDefault, final int sortOrder) {
-		final CActivityPriority priority = new CActivityPriority(name, project, color, sortOrder);
-		priority.setDescription(description);
-		priority.setPriorityLevel(priorityLevel);
-		priority.setIsDefault(isDefault);
-		activityPriorityService.save(priority);
-	}
-
-	private void createApprovalStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
-			final int sortOrder) {
-		final CApprovalStatus status = new CApprovalStatus(name, project);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setSortOrder(sortOrder);
-		CSpringContext.getBean(CApprovalStatusService.class).save(status);
-	}
-
-	/** Creates backend development activity. */
-	private void createCommentPriority(final CProject project, final String name, final String description, final String color,
-			final Integer priorityLevel, final boolean isDefault, final int sortOrder) {
-		final CCommentPriority priority = new CCommentPriority(name, project, color, sortOrder);
-		priority.setDescription(description);
-		priority.setPriorityLevel(priorityLevel);
-		priority.setDefault(isDefault);
-		commentPriorityService.save(priority);
-	}
-
 	/** Creates consulting company. */
 	private void createConsultingCompany() {
 		final CCompany consulting = new CCompany(COMPANY_OF_DANISMANLIK);
@@ -426,21 +386,6 @@ public class CDataInitializer {
 		companyService.save(consulting);
 	}
 
-	/** Create a currency entity with proper validation. */
-	private void createCurrency(final CProject project, final String code, final String name, final String symbol) {
-		try {
-			final CCurrency currency = new CCurrency(project, name);
-			currency.setCurrencyCode(code);
-			currency.setCurrencySymbol(symbol);
-			// Add business description
-			currency.setDescription(String.format("%s (%s) - International currency for business transactions", name, code));
-			currencyService.save(currency);
-		} catch (final Exception e) {
-			LOGGER.error("Error creating currency: {} ({})", name, code, e);
-			throw new RuntimeException("Failed to create currency: " + code, e);
-		}
-	}
-
 	private void createProjectDigitalTransformation(final CCompany company) {
 		final CProject project = new CProject("Digital Transformation Initiative", company);
 		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
@@ -452,15 +397,6 @@ public class CDataInitializer {
 		final CProject project = new CProject("Infrastructure Upgrade Project", company);
 		project.setDescription("Upgrading IT infrastructure for improved performance and scalability");
 		projectService.save(project);
-	}
-
-	private void createProjectItemStatus(final String name, final CProject project, final String description, final String color,
-			final boolean isFinal, final int sortOrder) {
-		final CProjectItemStatus status = new CProjectItemStatus(name, project);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setSortOrder(sortOrder);
-		activityStatusService.save(status);
 	}
 
 	/** Create sample comments for a decision.
@@ -669,115 +605,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleApprovalStatuses(final CProject project, final boolean minimal) {
-		try {
-			createApprovalStatus("Draft", project, "Approval is in draft state", CColorUtils.getRandomColor(true), false, 1);
-			if (minimal) {
-				return;
-			}
-			createApprovalStatus("Submitted", project, "Approval has been submitted", CColorUtils.getRandomColor(true), false, 2);
-			createApprovalStatus("Approved", project, "Approval has been approved", CColorUtils.getRandomColor(true), true, 3);
-			createApprovalStatus("Rejected", project, "Approval has been rejected", CColorUtils.getRandomColor(true), true, 4);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing approval statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize approval statuses for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleAssets(final CProject project, final boolean minimal) {
-		try {
-			final tech.derbent.app.assets.assettype.domain.CAssetType type1 = assetTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.assets.asset.domain.CAsset asset1 =
-					new tech.derbent.app.assets.asset.domain.CAsset("Development Laptop - MacBook Pro", project);
-			asset1.setDescription("High-performance laptop for software development");
-			asset1.setEntityType(type1);
-			asset1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(asset1);
-				if (!initialStatuses.isEmpty()) {
-					asset1.setStatus(initialStatuses.get(0));
-				}
-			}
-			assetService.save(asset1);
-			if (minimal) {
-				return;
-			}
-			final tech.derbent.app.assets.assettype.domain.CAssetType type2 = assetTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.assets.asset.domain.CAsset asset2 =
-					new tech.derbent.app.assets.asset.domain.CAsset("Production Server - AWS EC2", project);
-			asset2.setDescription("Cloud server instance for production environment");
-			asset2.setEntityType(type2);
-			asset2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(asset2);
-				if (!initialStatuses.isEmpty()) {
-					asset2.setStatus(initialStatuses.get(0));
-				}
-			}
-			assetService.save(asset2);
-			LOGGER.debug("Created sample assets for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample assets for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample assets for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleBudgets(final CProject project, final boolean minimal) {
-		try {
-			final tech.derbent.app.budgets.budgettype.domain.CBudgetType type1 = budgetTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.budgets.budget.domain.CBudget budget1 =
-					new tech.derbent.app.budgets.budget.domain.CBudget("Q1 2024 Development Budget", project);
-			budget1.setDescription("First quarter development budget allocation");
-			budget1.setEntityType(type1);
-			budget1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(budget1);
-				if (!initialStatuses.isEmpty()) {
-					budget1.setStatus(initialStatuses.get(0));
-				}
-			}
-			budgetService.save(budget1);
-			if (minimal) {
-				return;
-			}
-			final CBudgetType type2 = budgetTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.budgets.budget.domain.CBudget budget2 =
-					new tech.derbent.app.budgets.budget.domain.CBudget("Annual Marketing Budget 2024", project);
-			budget2.setDescription("Annual marketing and promotional budget");
-			budget2.setEntityType(type2);
-			budget2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(budget2);
-				if (!initialStatuses.isEmpty()) {
-					budget2.setStatus(initialStatuses.get(0));
-				}
-			}
-			budgetService.save(budget2);
-			LOGGER.debug("Created sample budgets for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample budgets for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample budgets for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleCommentPriorities(final CProject project, final boolean minimal) {
-		try {
-			createCommentPriority(project, "Low", "Low priority comment", CColorUtils.getRandomColor(true), 1, false, 1);
-			if (minimal) {
-				return;
-			}
-			createCommentPriority(project, "Medium", "Medium priority comment", CColorUtils.getRandomColor(true), 2, true, 2);
-			createCommentPriority(project, "High", "High priority comment", CColorUtils.getRandomColor(true), 3, false, 3);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample comment priorities for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample comment priorities for project: " + project.getName(), e);
-		}
-	}
-
 	private void initializeSampleCompanyRoles(final CCompany company, final boolean minimal) {
 		try {
 			// Create three company roles: Admin, User, Guest (one for each role type)
@@ -805,60 +632,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating company roles for company: {}", company.getName(), e);
 			throw new RuntimeException("Failed to initialize company roles for company: " + company.getName(), e);
-		}
-	}
-
-	private void initializeSampleComponents(final CProject project, final boolean minimal) {
-		try {
-			final tech.derbent.app.components.componenttype.domain.CComponentType type1 = componentTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.components.component.domain.CComponent component1 =
-					new tech.derbent.app.components.component.domain.CComponent("Authentication Module", project);
-			component1.setDescription("User authentication and authorization module");
-			component1.setEntityType(type1);
-			component1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(component1);
-				if (!initialStatuses.isEmpty()) {
-					component1.setStatus(initialStatuses.get(0));
-				}
-			}
-			componentService.save(component1);
-			if (minimal) {
-				return;
-			}
-			final tech.derbent.app.components.componenttype.domain.CComponentType type2 = componentTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.components.component.domain.CComponent component2 =
-					new tech.derbent.app.components.component.domain.CComponent("Payment Gateway Integration", project);
-			component2.setDescription("Third-party payment gateway integration library");
-			component2.setEntityType(type2);
-			component2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(component2);
-				if (!initialStatuses.isEmpty()) {
-					component2.setStatus(initialStatuses.get(0));
-				}
-			}
-			componentService.save(component2);
-			LOGGER.debug("Created sample components for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample components for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample components for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleCurrencies(final CProject project, final boolean minimal) {
-		try {
-			createCurrency(project, "USD", "US Dollar", "$ ");
-			if (minimal) {
-				return;
-			}
-			createCurrency(project, "EUR", "Euro", "€");
-			createCurrency(project, "TRY", "Turkish Lira", "₺");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample currencies for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample currencies for project: " + project.getName(), e);
 		}
 	}
 
@@ -906,46 +679,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleDeliverables(final CProject project, final boolean minimal) {
-		try {
-			final tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType type1 = deliverableTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.deliverables.deliverable.domain.CDeliverable deliverable1 =
-					new tech.derbent.app.deliverables.deliverable.domain.CDeliverable("Requirements Specification Document", project);
-			deliverable1.setDescription("Comprehensive requirements specification for the project");
-			deliverable1.setEntityType(type1);
-			deliverable1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(deliverable1);
-				if (!initialStatuses.isEmpty()) {
-					deliverable1.setStatus(initialStatuses.get(0));
-				}
-			}
-			deliverableService.save(deliverable1);
-			if (minimal) {
-				return;
-			}
-			final tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType type2 = deliverableTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.deliverables.deliverable.domain.CDeliverable deliverable2 =
-					new tech.derbent.app.deliverables.deliverable.domain.CDeliverable("Release Package v1.0", project);
-			deliverable2.setDescription("Production release package with deployment artifacts");
-			deliverable2.setEntityType(type2);
-			deliverable2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(deliverable2);
-				if (!initialStatuses.isEmpty()) {
-					deliverable2.setStatus(initialStatuses.get(0));
-				}
-			}
-			deliverableService.save(deliverable2);
-			LOGGER.debug("Created sample deliverables for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample deliverables for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample deliverables for project: " + project.getName(), e);
 		}
 	}
 
@@ -1033,96 +766,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleMilestones(final CProject project, final boolean minimal) {
-		try {
-			final tech.derbent.app.milestones.milestonetype.domain.CMilestoneType type1 = milestoneTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.milestones.milestone.domain.CMilestone milestone1 =
-					new tech.derbent.app.milestones.milestone.domain.CMilestone("Alpha Release Milestone", project);
-			milestone1.setDescription("First alpha release with core features");
-			milestone1.setEntityType(type1);
-			milestone1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(milestone1);
-				if (!initialStatuses.isEmpty()) {
-					milestone1.setStatus(initialStatuses.get(0));
-				}
-			}
-			milestoneService.save(milestone1);
-			if (minimal) {
-				return;
-			}
-			final tech.derbent.app.milestones.milestonetype.domain.CMilestoneType type2 = milestoneTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.milestones.milestone.domain.CMilestone milestone2 =
-					new tech.derbent.app.milestones.milestone.domain.CMilestone("Beta Release Milestone", project);
-			milestone2.setDescription("Beta release for user acceptance testing");
-			milestone2.setEntityType(type2);
-			milestone2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(milestone2);
-				if (!initialStatuses.isEmpty()) {
-					milestone2.setStatus(initialStatuses.get(0));
-				}
-			}
-			milestoneService.save(milestone2);
-			LOGGER.debug("Created sample milestones for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample milestones for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample milestones for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleProducts(final CProject project, final boolean minimal) {
-		try {
-			final CProductType type1 = productTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.products.product.domain.CProduct product1 =
-					new tech.derbent.app.products.product.domain.CProduct("Enterprise ERP System", project);
-			product1.setDescription("Comprehensive enterprise resource planning software");
-			product1.setEntityType(type1);
-			product1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(product1);
-				if (!initialStatuses.isEmpty()) {
-					product1.setStatus(initialStatuses.get(0));
-				}
-			}
-			productService.save(product1);
-			if (minimal) {
-				return;
-			}
-			final CProductType type2 = productTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final CProduct product2 = new CProduct("Cloud CRM Platform", project);
-			product2.setDescription("Customer relationship management platform");
-			product2.setEntityType(type2);
-			product2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(product2);
-				if (!initialStatuses.isEmpty()) {
-					product2.setStatus(initialStatuses.get(0));
-				}
-			}
-			productService.save(product2);
-			LOGGER.debug("Created sample products for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample products for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample products for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleProductTypes(final CProject project, final boolean minimal) {
-		final String[][] productTypes = {
-				{
-						"Software", "Software products and solutions"
-				}, {
-						"Service", "Service offerings and subscriptions"
-				}
-		};
-		initializeType(productTypes, productTypeService, project, minimal);
-	}
-
 	private void initializeSampleProjectExpenses(final CProject project, final boolean minimal) {
 		try {
 			final tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService expenseTypeService =
@@ -1165,19 +808,6 @@ public class CDataInitializer {
 			LOGGER.error("Error initializing sample project expenses for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample project expenses for project: " + project.getName(), e);
 		}
-	}
-
-	private void initializeSampleProjectExpenseTypes(final CProject project, final boolean minimal) {
-		final String[][] expenseTypes = {
-				{
-						"Hardware", "Hardware purchases and equipment"
-				}, {
-						"Consulting", "External consulting services"
-				}
-		};
-		final tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService expenseTypeService =
-				CSpringContext.getBean(tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService.class);
-		initializeType(expenseTypes, expenseTypeService, project, minimal);
 	}
 
 	private void initializeSampleProjectIncomes(final CProject project, final boolean minimal) {
@@ -1224,156 +854,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleProjectIncomeTypes(final CProject project, final boolean minimal) {
-		final String[][] incomeTypes = {
-				{
-						"License", "Software license revenue"
-				}, {
-						"Service", "Service and support contracts"
-				}
-		};
-		final tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService incomeTypeService =
-				CSpringContext.getBean(tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService.class);
-		initializeType(incomeTypes, incomeTypeService, project, minimal);
-	}
-
 	/** Initializes comprehensive activity data with available fields populated. */
-	private void initializeSampleProjectItemStatuses(final CProject project, final boolean minimal) {
-		try {
-			createProjectItemStatus(STATUS_NOT_STARTED, project, "Activity has not been started yet", "#95a5a6", false, 1);
-			if (minimal) {
-				return;
-			}
-			createProjectItemStatus(STATUS_IN_PROGRESS, project, "Activity is currently in progress", "#3498db", false, 2);
-			createProjectItemStatus(STATUS_ON_HOLD, project, "Activity is temporarily on hold", "#f39c12", false, 3);
-			createProjectItemStatus(STATUS_COMPLETED, project, "Activity has been completed", "#27ae60", true, 4);
-			createProjectItemStatus(STATUS_CANCELLED, project, "Activity has been cancelled", "#e74c3c", true, 5);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing activity statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize activity statuses for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleProjectRoles(final CProject project, final boolean minimal) {
-		try {
-			// Create three project roles: Admin, User, Guest (one for each role type)
-			final String[][] projectRoles = {
-					{
-							"Project Admin", "Administrative role with full project access", "true", "false", "false"
-					}, {
-							"Project User", "Standard user role with regular access", "false", "true", "false"
-					}, {
-							"Project Guest", "Guest role with limited access", "false", "false", "true"
-					}
-			};
-			for (final String[] roleData : projectRoles) {
-				final CUserProjectRole role = new CUserProjectRole(roleData[0], project);
-				role.setDescription(roleData[1]);
-				role.setIsAdmin(Boolean.parseBoolean(roleData[2]));
-				role.setIsUser(Boolean.parseBoolean(roleData[3]));
-				role.setIsGuest(Boolean.parseBoolean(roleData[4]));
-				role.setColor(CColorUtils.getRandomColor(true));
-				userProjectRoleService.save(role);
-				if (minimal) {
-					return;
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating project roles for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize project roles for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleProviders(final CProject project, final boolean minimal) {
-		try {
-			final tech.derbent.app.providers.providertype.domain.CProviderType type1 = providerTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.providers.provider.domain.CProvider provider1 =
-					new tech.derbent.app.providers.provider.domain.CProvider("TechVendor Solutions Inc.", project);
-			provider1.setDescription("Hardware and software vendor");
-			provider1.setEntityType(type1);
-			provider1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(provider1);
-				if (!initialStatuses.isEmpty()) {
-					provider1.setStatus(initialStatuses.get(0));
-				}
-			}
-			providerService.save(provider1);
-			if (minimal) {
-				return;
-			}
-			final tech.derbent.app.providers.providertype.domain.CProviderType type2 = providerTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.providers.provider.domain.CProvider provider2 =
-					new tech.derbent.app.providers.provider.domain.CProvider("Expert Consulting Group", project);
-			provider2.setDescription("Business and technical consulting services");
-			provider2.setEntityType(type2);
-			provider2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(provider2);
-				if (!initialStatuses.isEmpty()) {
-					provider2.setStatus(initialStatuses.get(0));
-				}
-			}
-			providerService.save(provider2);
-			LOGGER.debug("Created sample providers for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample providers for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample providers for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleProviderTypes(final CProject project, final boolean minimal) {
-		final String[][] providerTypes = {
-				{
-						"Vendor", "Hardware and software vendors"
-				}, {
-						"Consultant", "External consultants and contractors"
-				}
-		};
-		initializeType(providerTypes, providerTypeService, project, minimal);
-	}
-
-	private void initializeSampleRisks(final CProject project, final boolean minimal) {
-		try {
-			final tech.derbent.app.risks.risktype.domain.CRiskType type1 = riskTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.risks.risk.domain.CRisk risk1 =
-					new tech.derbent.app.risks.risk.domain.CRisk("Data Security Vulnerability", project);
-			risk1.setDescription("Potential security vulnerability in data access layer");
-			risk1.setEntityType(type1);
-			risk1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(risk1);
-				if (!initialStatuses.isEmpty()) {
-					risk1.setStatus(initialStatuses.get(0));
-				}
-			}
-			riskService.save(risk1);
-			if (minimal) {
-				return;
-			}
-			final tech.derbent.app.risks.risktype.domain.CRiskType type2 = riskTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.risks.risk.domain.CRisk risk2 = new tech.derbent.app.risks.risk.domain.CRisk("Budget Overrun Risk", project);
-			risk2.setDescription("Risk of exceeding allocated project budget");
-			risk2.setEntityType(type2);
-			risk2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(risk2);
-				if (!initialStatuses.isEmpty()) {
-					risk2.setStatus(initialStatuses.get(0));
-				}
-			}
-			riskService.save(risk2);
-			LOGGER.debug("Created sample risks for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample risks for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample risks for project: " + project.getName(), e);
-		}
-	}
-
 	private void initializeSampleTeams(final CProject project, final boolean minimal) {
 		try {
 			final CCompany company = project.getCompany();
@@ -1646,10 +1127,10 @@ public class CDataInitializer {
 					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Project-specific type and configuration entities
-					initializeSampleCurrencies(project, minimal);
-					initializeSampleProjectItemStatuses(project, minimal);
-					initializeSampleApprovalStatuses(project, minimal);
-					initializeSampleProjectRoles(project, minimal);
+					CCurrencyInitializerService.initializeSample(project, minimal);
+					CProjectItemStatusInitializerService.initializeSample(project, minimal);
+					CApprovalStatusInitializerService.initializeSample(project, minimal);
+					CUserProjectRoleInitializerService.initializeSample(project, minimal);
 					initializeSampleWorkflowEntities(project, minimal);
 					// types
 					CMeetingTypeInitializerService.initializeSample(project, minimal);
@@ -1662,30 +1143,30 @@ public class CDataInitializer {
 					CDeliverableTypeInitializerService.initializeSample(project, minimal);
 					CMilestoneTypeInitializerService.initializeSample(project, minimal);
 					CTicketTypeInitializerService.initializeSample(project, minimal);
-					initializeSampleProviderTypes(project, minimal);
-					initializeSampleProductTypes(project, minimal);
+					CProviderTypeInitializerService.initializeSample(project, minimal);
+					CProductTypeInitializerService.initializeSample(project, minimal);
 					CComponentTypeInitializerService.initializeSample(project, minimal);
-					initializeSampleProjectExpenseTypes(project, minimal);
-					initializeSampleProjectIncomeTypes(project, minimal);
+					CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
+					CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
 					CActivityPriorityInitializerService.initializeSample(project, minimal);
-					initializeSampleCommentPriorities(project, minimal);
+					CCommentPriorityInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
 					// entities
 					initializeSampleDecisions(project, minimal);
 					initializeSampleMeetings(project, minimal);
 					initializeSampleActivities(project, minimal);
-					initializeSampleAssets(project, minimal);
-					initializeSampleBudgets(project, minimal);
-					initializeSampleDeliverables(project, minimal);
-					initializeSampleMilestones(project, minimal);
+					CAssetInitializerService.initializeSample(project, minimal);
+					CBudgetInitializerService.initializeSample(project, minimal);
+					CDeliverableInitializerService.initializeSample(project, minimal);
+					CMilestoneInitializerService.initializeSample(project, minimal);
 					initializeSampleTickets(project, minimal);
-					initializeSampleProviders(project, minimal);
-					initializeSampleProducts(project, minimal);
-					initializeSampleComponents(project, minimal);
+					CProviderInitializerService.initializeSample(project, minimal);
+					CProductInitializerService.initializeSample(project, minimal);
+					CComponentInitializerService.initializeSample(project, minimal);
 					initializeSampleProjectExpenses(project, minimal);
 					initializeSampleProjectIncomes(project, minimal);
 					initializeSampleTeams(project, minimal);
-					initializeSampleRisks(project, minimal);
+					CRiskInitializerService.initializeSample(project, minimal);
 					if (minimal) {
 						break;
 					}
