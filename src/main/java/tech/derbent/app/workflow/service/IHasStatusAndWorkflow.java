@@ -28,15 +28,13 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
  * @see CProjectItemStatus
  * @see tech.derbent.app.workflow.domain.CWorkflowStatusRelation */
 public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow<EntityClass>> {
+
 	Logger LOGGER = LoggerFactory.getLogger(IHasStatusAndWorkflow.class);
 
 	CTypeEntity<?> getEntityType();
-
 	CProjectItemStatus getStatus();
-
 	CWorkflowEntity getWorkflow();
-
 	void setEntityType(CTypeEntity<?> typeEntity);
-
 	void setStatus(CProjectItemStatus status);
+	void setWorkflow(CWorkflowEntity workflow);
 }

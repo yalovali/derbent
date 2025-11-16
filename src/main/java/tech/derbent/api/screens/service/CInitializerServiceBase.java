@@ -1,5 +1,8 @@
 package tech.derbent.api.screens.service;
 
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -9,6 +12,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.service.CWorkflowEntityService;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 public abstract class CInitializerServiceBase {
 
@@ -23,31 +28,31 @@ public abstract class CInitializerServiceBase {
 	protected static final String MenuTitle_SYSTEM = "System";
 	protected static final String MenuTitle_TYPES = "Types";
 
-	protected static CGridEntity createBaseGridEntity(CProject project, Class<?> clazz) {
+	protected static CGridEntity createBaseGridEntity(final CProject project, final Class<?> clazz) {
 		String baseViewName;
 		try {
 			baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
-			CGridEntity grid = new CGridEntity(baseViewName, project);
+			final CGridEntity grid = new CGridEntity(baseViewName, project);
 			grid.setDescription(baseViewName + " Grid");
-			Class<?> bean = CEntityRegistry.getEntityServiceClass(clazz.getSimpleName());
+			final Class<?> bean = CEntityRegistry.getEntityServiceClass(clazz.getSimpleName());
 			grid.setDataServiceBeanName(bean.getSimpleName());
 			grid.setAttributeNonDeletable(true);
 			return grid;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException("Error accessing VIEW_NAME field in class " + clazz.getName(), e);
 		}
 	}
 
-	protected static CDetailSection createBaseScreenEntity(CProject project, Class<?> clazz) throws Exception {
+	protected static CDetailSection createBaseScreenEntity(final CProject project, final Class<?> clazz) throws Exception {
 		try {
-			String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
+			final String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
 			return createBaseScreenEntity(project, clazz, baseViewName, 0);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new Exception("Error accessing VIEW_NAME or getViewClassStatic field in class " + clazz.getName(), e);
 		}
 	}
 
-	protected static CDetailSection createBaseScreenEntity(CProject project, Class<?> clazz, String baseViewName, int dummy) {
+	protected static CDetailSection createBaseScreenEntity(final CProject project, final Class<?> clazz, final String baseViewName, final int dummy) {
 		final CDetailSection scr = new CDetailSection();
 		scr.setProject(project);
 		scr.setEntityType(clazz.getSimpleName());
@@ -61,9 +66,10 @@ public abstract class CInitializerServiceBase {
 		return scr;
 	}
 
-	protected static CPageEntity createPageEntity(Class<?> entityClass, CProject project, CGridEntity grid, CDetailSection detailSection,
-			String menuLocation, String pageTitle, String description, String order) throws Exception {
-		CPageEntity page = new CPageEntity(grid.getName(), project);
+	protected static CPageEntity createPageEntity(final Class<?> entityClass, final CProject project, final CGridEntity grid,
+			final CDetailSection detailSection, final String menuLocation, final String pageTitle, final String description, final String order)
+			throws Exception {
+		final CPageEntity page = new CPageEntity(grid.getName(), project);
 		page.setDescription(description);
 		page.setMenuTitle(menuLocation);
 		page.setPageTitle(pageTitle);
@@ -76,17 +82,17 @@ public abstract class CInitializerServiceBase {
 		page.setColor(CColorUtils.getStaticIconColorCode(entityClass));
 		page.setMenuOrder(order);
 		// Set the pageService based on entity class
-		String pageServiceName = CPageServiceUtility.getPageServiceNameForEntityClass(entityClass);
+		final String pageServiceName = CPageServiceUtility.getPageServiceNameForEntityClass(entityClass);
 		if (pageServiceName != null) {
 			page.setPageService(pageServiceName);
 		}
 		return page;
 	}
 
-	public static void initBase(Class<?> clazz, final CProject project, final CGridEntityService gridEntityService,
+	public static void initBase(final Class<?> clazz, final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CDetailSection detailSection,
-			final CGridEntity grid, String menuTitle, String pageTitle, String pageDescription, boolean showInQuickToolbar, String order)
-			throws Exception {
+			final CGridEntity grid, final String menuTitle, final String pageTitle, final String pageDescription, final boolean showInQuickToolbar,
+			final String order) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		Check.notNull(gridEntityService, "gridEntityService cannot be null");
 		Check.notNull(detailSectionService, "detailSectionService cannot be null");
@@ -96,5 +102,32 @@ public abstract class CInitializerServiceBase {
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription, order);
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
+	}
+
+	@SuppressWarnings ("unchecked")
+	protected static <EntityClass extends CEntityOfProject<EntityClass>> void initializeProjectEntity(final String[][] nameAndDescription,
+			final CEntityOfProjectService<EntityClass> service, final CProject project, final boolean minimal) throws Exception {
+		try {
+			for (final String[] typeData : nameAndDescription) {
+				final CEntityOfProject<EntityClass> item = service.newEntity(typeData[0], project);
+				item.setDescription(typeData[1]);
+				// if item has color field, set random color
+				if (item.getClass().getDeclaredMethod("setColor", String.class) != null) {
+					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
+				}
+				if (item instanceof IHasStatusAndWorkflow) {
+					// item.setSortOrder(typeService.countByProject(project) + 1);
+					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
+					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
+					statusItem.setWorkflow(workflowEntityService.getRandomByEntityType(project, item.getClass()));
+				}
+				service.save((EntityClass) item);
+				if (minimal) {
+					return;
+				}
+			}
+		} catch (final Exception e) {
+			throw e;
+		}
 	}
 }
