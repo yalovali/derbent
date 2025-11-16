@@ -1,9 +1,13 @@
 package tech.derbent.api.screens.service;
 
+import java.lang.reflect.Field;
+import java.util.List;
 import java.util.function.Consumer;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -11,6 +15,7 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.services.pageservice.CPageServiceUtility;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -95,7 +100,7 @@ public abstract class CInitializerServiceBase {
 	 * @param clazz     the class to search
 	 * @param fieldName the field name to find
 	 * @return the field or null if not found */
-	private static java.lang.reflect.Field findFieldInHierarchy(Class<?> clazz, final String fieldName) {
+	private static Field findFieldInHierarchy(Class<?> clazz, final String fieldName) {
 		while (clazz != null) {
 			try {
 				return clazz.getDeclaredField(fieldName);
@@ -104,6 +109,19 @@ public abstract class CInitializerServiceBase {
 			}
 		}
 		return null;
+	}
+
+	private static <EntityClass extends CTypeEntity<EntityClass>> CTypeEntityService<?>
+			getEntityTypeService(final IHasStatusAndWorkflow<?> statusItem) {
+		final Field field = findFieldInHierarchy(statusItem.getClass(), "entityType");
+		Check.notNull(field, "Field 'entityType' not found in class hierarchy of " + statusItem.getClass().getName());
+		final Class<?> returnType = field.getType();
+		final Class<?> serviceClass = CEntityRegistry.getEntityServiceClass(returnType.getSimpleName());
+		Check.notNull(serviceClass, "Service class not found for " + returnType.getSimpleName());
+		Check.instanceOf(CTypeEntityService.class, serviceClass, "Service class " + serviceClass.getName() + " is not a CTypeEntityService");
+		final CTypeEntityService<?> typeService = (CTypeEntityService<?>) CSpringContext.getBean(serviceClass);
+		Check.notNull(typeService, "Could not get bean of type " + serviceClass.getName());
+		return typeService;
 	}
 
 	public static void initBase(final Class<?> clazz, final CProject project, final CGridEntityService gridEntityService,
@@ -136,41 +154,32 @@ public abstract class CInitializerServiceBase {
 					// no color setter present
 				}
 				if (item instanceof IHasStatusAndWorkflow) {
-					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
+					/* item has: void setEntityType(CTypeEntity<?> typeEntity); void setStatus(CProjectItemStatus status); */
 					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-					statusItem.setWorkflow(workflowEntityService.getRandomByEntityType(project, item.getClass()));
+					final CTypeEntityService<?> typeServiceInstance = getEntityTypeService(statusItem);
+					final CTypeEntity<EntityClass> randomType = (CTypeEntity<EntityClass>) typeServiceInstance.getRandom(project);
+					Check.notNull(randomType, "No type entities found for " + item.getClass().getSimpleName()
+							+ ". Cannot initialize status and workflow for new entity.");
+					statusItem.setEntityType(randomType);
+					final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+					final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(statusItem);
+					Check.notEmpty(initialStatuses,
+							"No valid initial statuses found for " + item.getClass().getSimpleName() + ". Cannot initialize status for new entity.");
+					if (!initialStatuses.isEmpty()) {
+						statusItem.setStatus(initialStatuses.get(0));
+					}
+				}
+				if (item instanceof CTypeEntity<?>) {
+					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
+					final CTypeEntity<?> typeEntity = (CTypeEntity<?>) item;
+					typeEntity.setColor(CColorUtils.getRandomColor(true));
+					typeEntity.setWorkflow(workflowEntityService.getRandom(project));
+					typeEntity.setSortOrder(100);
+					typeEntity.setAttributeNonDeletable(true);
 				}
 				// last-chance specialization
 				if (customizer != null) {
 					customizer.accept((EntityClass) item);
-				}
-				service.save((EntityClass) item);
-				if (minimal) {
-					return;
-				}
-			}
-		} catch (final Exception e) {
-			throw e;
-		}
-	}
-
-	@SuppressWarnings ("unchecked")
-	protected static <EntityClass extends CEntityOfProject<EntityClass>> void initializeProjectEntity(final String[][] nameAndDescription,
-			final CEntityOfProjectService<EntityClass> service, final CProject project, final boolean minimal)
-			throws Exception {
-		try {
-			for (final String[] typeData : nameAndDescription) {
-				final CEntityOfProject<EntityClass> item = service.newEntity(typeData[0], project);
-				item.setDescription(typeData[1]);
-				// if item has color field, set random color
-				if (item.getClass().getDeclaredMethod("setColor", String.class) != null) {
-					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				}
-				if (item instanceof IHasStatusAndWorkflow) {
-					// item.setSortOrder(typeService.countByProject(project) + 1);
-					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
-					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-					statusItem.setWorkflow(workflowEntityService.getRandomByEntityType(project, item.getClass()));
 				}
 				service.save((EntityClass) item);
 				if (minimal) {

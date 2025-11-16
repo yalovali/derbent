@@ -3,6 +3,9 @@ package tech.derbent.app.orders.type.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -63,7 +66,7 @@ public class COrderTypeInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		final String[][] orderTypes = {
+		final String[][] nameAndDescriptions = {
 				{
 						"Hardware", "Hardware procurement orders"
 				}, {
@@ -82,8 +85,7 @@ public class COrderTypeInitializerService extends CInitializerServiceBase {
 						"Supplies", "Office supplies and materials orders"
 				}
 		};
-		final tech.derbent.app.orders.type.service.COrderTypeService service =
-				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.orders.type.service.COrderTypeService.class);
-		initializeProjectEntity(orderTypes, service, project, minimal);
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
 	}
 }

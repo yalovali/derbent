@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -81,6 +82,7 @@ public class CRiskTypeInitializerService extends CInitializerServiceBase {
 						"Compliance Risk", "Risks related to regulatory compliance"
 				}
 		};
-		initializeProjectEntity(nameAndDescriptions, (CEntityOfProjectService<?>) CSpringContext.getBean(clazz), project, minimal);
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
 	}
 }

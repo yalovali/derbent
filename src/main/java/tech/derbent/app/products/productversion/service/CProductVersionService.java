@@ -11,10 +11,10 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.products.product.service.CProductService;
 import tech.derbent.app.products.productversion.domain.CProductVersion;
 import tech.derbent.app.products.productversiontype.service.CProductVersionTypeService;
-import tech.derbent.app.products.product.service.CProductService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -24,45 +24,39 @@ import tech.derbent.base.session.service.ISessionService;
 @PermitAll
 public class CProductVersionService extends CProjectItemService<CProductVersion> implements IEntityRegistrable {
 
-private static final Logger LOGGER = LoggerFactory.getLogger(CProductVersionService.class);
-private final CProductVersionTypeService productversionTypeService;
-private final CProductService cProductService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProductVersionService.class);
+	private final CProductVersionTypeService productversionTypeService;
 
-CProductVersionService(final IProductVersionRepository repository, final Clock clock, 
-final ISessionService sessionService,
-final CProductVersionTypeService productversionTypeService,
-final CProductService cProductService,
-final CProjectItemStatusService projectItemStatusService) {
-super(repository, clock, sessionService, projectItemStatusService);
-this.productversionTypeService = productversionTypeService;
-this.cProductService = cProductService;
-}
+	CProductVersionService(final IProductVersionRepository repository, final Clock clock, final ISessionService sessionService,
+			final CProductVersionTypeService productversionTypeService, final CProductService cProductService,
+			final CProjectItemStatusService projectItemStatusService) {
+		super(repository, clock, sessionService, projectItemStatusService);
+		this.productversionTypeService = productversionTypeService;
+	}
 
-@Override
-public String checkDeleteAllowed(final CProductVersion entity) {
-return super.checkDeleteAllowed(entity);
-}
+	@Override
+	public String checkDeleteAllowed(final CProductVersion entity) {
+		return super.checkDeleteAllowed(entity);
+	}
 
-@Override
-public Class<CProductVersion> getEntityClass() { return CProductVersion.class; }
+	@Override
+	public Class<CProductVersion> getEntityClass() { return CProductVersion.class; }
 
-@Override
-public Class<?> getInitializerServiceClass() { return CProductVersionInitializerService.class; }
+	@Override
+	public Class<?> getInitializerServiceClass() { return CProductVersionInitializerService.class; }
 
-@Override
-public Class<?> getPageServiceClass() { return CPageServiceProductVersion.class; }
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceProductVersion.class; }
 
-@Override
-public Class<?> getServiceClass() { return this.getClass(); }
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
-@Override
-public void initializeNewEntity(final CProductVersion entity) {
-super.initializeNewEntity(entity);
-LOGGER.debug("Initializing new productversion entity");
-final CProject currentProject = sessionService.getActiveProject()
-.orElseThrow(() -> new CInitializationException("No active project"));
-IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, 
-productversionTypeService, projectItemStatusService);
-LOGGER.debug("ProductVersion initialization complete");
-}
+	@Override
+	public void initializeNewEntity(final CProductVersion entity) {
+		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new productversion entity");
+		final CProject currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, productversionTypeService, projectItemStatusService);
+		LOGGER.debug("ProductVersion initialization complete");
+	}
 }

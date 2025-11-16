@@ -3,6 +3,9 @@ package tech.derbent.app.assets.assettype.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -10,9 +13,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.assets.assettype.domain.CAssetType;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.assets.assettype.domain.CAssetType;
 
 public class CAssetTypeInitializerService extends CInitializerServiceBase {
 
@@ -66,15 +69,14 @@ public class CAssetTypeInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		final String[][] assetTypes = {
+		final String[][] nameAndDescriptions = {
 				{
 						"Hardware", "Physical hardware assets and equipment"
 				}, {
 						"Software", "Software licenses and applications"
 				}
 		};
-		final tech.derbent.app.assets.assettype.service.CAssetTypeService service =
-				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.assets.assettype.service.CAssetTypeService.class);
-		initializeProjectEntity(assetTypes, service, project, minimal);
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
 	}
 }

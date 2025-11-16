@@ -3,6 +3,7 @@ package tech.derbent.app.tickets.tickettype.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -73,8 +74,7 @@ public class CTicketTypeInitializerService extends CInitializerServiceBase {
 						"Feature Request", "New feature requests and enhancements"
 				}
 		};
-		final tech.derbent.app.tickets.tickettype.service.CTicketTypeService service =
-				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.tickets.tickettype.service.CTicketTypeService.class);
-		initializeProjectEntity(ticketTypes, service, project, minimal);
+		final CTicketTypeService service = CSpringContext.getBean(tech.derbent.app.tickets.tickettype.service.CTicketTypeService.class);
+		initializeProjectEntity(ticketTypes, service, project, minimal, null);
 	}
 }

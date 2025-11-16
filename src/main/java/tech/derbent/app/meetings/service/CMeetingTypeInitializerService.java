@@ -3,6 +3,9 @@ package tech.derbent.app.meetings.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -25,10 +28,10 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Meeting Type Management";
 	private static final boolean showInQuickToolbar = false;
 
-        public static CDetailSection createBasicView(final CProject project) throws Exception {
-                Check.notNull(project, "project cannot be null");
-                try {
-                        final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
+		Check.notNull(project, "project cannot be null");
+		try {
+			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
@@ -42,13 +45,13 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-                        detailSection.debug_printScreenInformation();
-                        return detailSection;
-                } catch (final Exception e) {
-                        LOGGER.error("Error creating meeting type view.");
-                        throw e;
-                }
-        }
+			detailSection.debug_printScreenInformation();
+			return detailSection;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating meeting type view.");
+			throw e;
+		}
+	}
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
@@ -65,7 +68,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		final String[][] meetingTypes = {
+		final String[][] nameAndDescriptions = {
 				{
 						"Daily Standup", "Daily team synchronization meetings"
 				}, {
@@ -84,8 +87,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 						"Training Session", "Training and knowledge sharing sessions"
 				}
 		};
-		final tech.derbent.app.meetings.service.CMeetingTypeService service =
-				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.meetings.service.CMeetingTypeService.class);
-		initializeProjectEntity(meetingTypes, service, project, minimal);
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
 	}
 }

@@ -3,6 +3,7 @@ package tech.derbent.app.deliverables.deliverabletype.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -10,9 +11,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType;
 
 public class CDeliverableTypeInitializerService extends CInitializerServiceBase {
 
@@ -74,7 +75,7 @@ public class CDeliverableTypeInitializerService extends CInitializerServiceBase 
 				}
 		};
 		final tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService service =
-				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService.class);
-		initializeProjectEntity(deliverableTypes, service, project, minimal);
+				CSpringContext.getBean(tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService.class);
+		initializeProjectEntity(deliverableTypes, service, project, minimal, null);
 	}
 }

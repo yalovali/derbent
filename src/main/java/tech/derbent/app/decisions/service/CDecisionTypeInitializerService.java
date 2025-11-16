@@ -4,6 +4,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -68,7 +70,7 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		final String[][] decisionTypes = {
+		final String[][] nameAndDescriptions = {
 				{
 						"Strategic", "High-level strategic decisions affecting organization direction"
 				}, {
@@ -87,12 +89,10 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 						"Quality", "Quality assurance and standards decisions"
 				}
 		};
-		final CDecisionTypeService service = CSpringContext.getBean(CDecisionTypeService.class);
-		// Demonstrate last-chance specialization via lambda
-		initializeProjectEntity(decisionTypes, service, project, minimal, dt -> {
-			if (dt.getName() != null && dt.getName().equalsIgnoreCase("Strategic")) {
-				dt.setRequiresApproval(true);
-			}
-		});
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, x -> {
+					final CDecisionType item = (CDecisionType) x;
+					item.setRequiresApproval(true);
+				});
 	}
 }

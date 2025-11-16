@@ -43,13 +43,6 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 			dataProviderParamBean = "context", dataProviderParamMethod = "getCurrentEntity"
 	)
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
-	@Column (name = "target_entity_class", nullable = true, length = 255)
-	@AMetaData (
-			displayName = "Target Entity Class", required = false, readOnly = false,
-			description = "Fully qualified class name of the target entity (e.g., tech.derbent.app.activities.domain.CActivity)", hidden = false,
-			order = 4, maxLength = 255
-	)
-	private String targetEntityClass;
 
 	/** Default constructor for JPA. */
 	public CWorkflowEntity() {
@@ -93,10 +86,6 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	/** Gets the list of status relations for this workflow. */
 	public List<CWorkflowStatusRelation> getStatusRelations() { return statusRelations; }
 
-	/** Gets the target entity class name for this workflow.
-	 * @return the fully qualified class name */
-	public String getTargetEntityClass() { return targetEntityClass; }
-
 	@Override
 	public int hashCode() {
 		return Objects.hash(super.hashCode(), isActive);
@@ -113,21 +102,10 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
 	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
 
-	/** Sets the target entity class name for this workflow.
-	 * @param targetEntityClass the fully qualified class name to set */
-	public void setTargetEntityClass(final String targetEntityClass) {
-		this.targetEntityClass = targetEntityClass;
-	}
-
 	@Override
 	public String toString() {
 		if (getName() == null) {
 			return super.toString();
-		}
-		if (targetEntityClass != null && !targetEntityClass.isEmpty()) {
-			// Extract simple class name from fully qualified name
-			final String simpleClassName = targetEntityClass.substring(targetEntityClass.lastIndexOf('.') + 1);
-			return getName() + " [" + simpleClassName + "]";
 		}
 		return getName();
 	}

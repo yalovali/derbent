@@ -1,7 +1,6 @@
 package tech.derbent.app.workflow.service;
 
 import java.time.Clock;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.view.CComponentWorkflowStatusRelations;
 import tech.derbent.base.session.service.ISessionService;
@@ -23,12 +20,13 @@ import tech.derbent.base.session.service.ISessionService;
 public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
+	@SuppressWarnings ("unused")
 	private final IWorkflowEntityRepository workflowEntityRepository;
 
 	@Autowired
 	public CWorkflowEntityService(final IWorkflowEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.workflowEntityRepository = repository;
+		workflowEntityRepository = repository;
 	}
 
 	/** Checks dependencies before allowing workflow entity deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
@@ -50,11 +48,11 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		}
 	}
 
-	public Component createWorkflowStatusRelationsComponent(CWorkflowEntity workflowEntity) {
+	public Component createWorkflowStatusRelationsComponent(final CWorkflowEntity workflowEntity) {
 		try {
-			CComponentWorkflowStatusRelations component = new CComponentWorkflowStatusRelations(this, sessionService);
+			final CComponentWorkflowStatusRelations component = new CComponentWorkflowStatusRelations(this, sessionService);
 			return component;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to create workflow status relations component.");
 			// Fallback to simple div with error message
 			final Div errorDiv = new Div();
@@ -75,20 +73,6 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
-
-	/** Gets a random workflow entity for a specific project and entity class.
-	 * @param project     the project to filter by
-	 * @param entityClass the entity class to filter by (e.g., CActivity.class, CMeeting.class)
-	 * @return a random workflow matching the criteria, or null if none found */
-	public CWorkflowEntity getRandomByEntityType(final CProject project, final Class<?> entityClass) {
-		Check.notNull(project, "Project cannot be null");
-		Check.notNull(entityClass, "Entity class cannot be null");
-		final String className = entityClass.getSimpleName();
-		final List<CWorkflowEntity> workflows = workflowEntityRepository.findByProjectAndTargetEntityClass(project, className);
-		Check.notEmpty(workflows, "Workflows list cannot be empty for project: " + project.getName() + " and entity class: " + className);
-		final int randomIndex = (int) (Math.random() * workflows.size());
-		return workflows.get(randomIndex);
-	}
 
 	/** Initializes a new workflow entity with default values.
 	 * @param entity the newly created workflow entity to initialize */

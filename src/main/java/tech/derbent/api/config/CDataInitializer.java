@@ -37,6 +37,7 @@ import tech.derbent.app.assets.assettype.service.CAssetTypeInitializerService;
 import tech.derbent.app.assets.assettype.service.CAssetTypeService;
 import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
 import tech.derbent.app.budgets.budget.service.CBudgetService;
+import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeService;
 import tech.derbent.app.comments.domain.CComment;
@@ -84,7 +85,6 @@ import tech.derbent.app.orders.currency.service.CCurrencyInitializerService;
 import tech.derbent.app.orders.currency.service.CCurrencyService;
 import tech.derbent.app.orders.order.service.COrderInitializerService;
 import tech.derbent.app.orders.order.service.COrderService;
-import tech.derbent.app.orders.type.domain.COrderType;
 import tech.derbent.app.orders.type.service.COrderTypeInitializerService;
 import tech.derbent.app.orders.type.service.COrderTypeService;
 import tech.derbent.app.page.service.CPageEntityInitializerService;
@@ -111,7 +111,6 @@ import tech.derbent.app.providers.providertype.service.CProviderTypeService;
 import tech.derbent.app.risklevel.risklevel.service.CRiskLevelInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskService;
-import tech.derbent.app.risks.risktype.domain.CRiskType;
 import tech.derbent.app.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.app.risks.risktype.service.CRiskTypeService;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
@@ -149,15 +148,7 @@ import tech.derbent.base.users.service.CUserService;
  * @version 2.0 - Refactored for better organization and maintainability */
 public class CDataInitializer {
 
-	private static final String ACTIVITY_TYPE_DESIGN = "Design";
-	// Activity Type Names
-	private static final String ACTIVITY_TYPE_DEVELOPMENT = "Development";
-	private static final String ACTIVITY_TYPE_DOCUMENTATION = "Documentation";
-	private static final String ACTIVITY_TYPE_RESEARCH = "Research";
-	private static final String ACTIVITY_TYPE_TESTING = "Testing";
 	private static final String COMPANY_OF_DANISMANLIK = "Of Stratejik Danışmanlık";
-	private static final String COMPANY_OF_ENDUSTRI = "Of Endüstri Dinamikleri";
-	private static final String COMPANY_OF_SAGLIK = "Of Sağlık Teknolojileri";
 	// Company Names
 	private static final String COMPANY_OF_TEKNOLOJI = "Of Teknoloji Çözümleri";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataInitializer.class);
@@ -450,48 +441,6 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Creates healthcare company. */
-	private void createHealthcareCompany() {
-		final CCompany healthcare = new CCompany(COMPANY_OF_SAGLIK);
-		healthcare.setDescription("İleri tıp teknolojisi ve sağlık çözümleri");
-		healthcare.setAddress("Yeni Mahalle, Sağlık Sokağı No:21, Of/Trabzon");
-		healthcare.setPhone("+90-462-751-0404");
-		healthcare.setEmail("iletisim@ofsaglik.com.tr");
-		healthcare.setWebsite("https://www.ofsaglik.com.tr");
-		healthcare.setTaxNumber("TR-789123456");
-		healthcare.setCompanyTheme("lumo-light");
-		healthcare.setCompanyLogoUrl("/assets/logos/healthcare-logo.svg");
-		healthcare.setPrimaryColor("#f44336");
-		healthcare.setWorkingHoursStart("07:00");
-		healthcare.setWorkingHoursEnd("19:00");
-		healthcare.setCompanyTimezone("Europe/Istanbul");
-		healthcare.setDefaultLanguage("tr");
-		healthcare.setEnableNotifications(true);
-		healthcare.setNotificationEmail("acil@ofsaglik.com.tr");
-		companyService.save(healthcare);
-	}
-
-	/** Creates manufacturing company. */
-	private void createManufacturingCompany() {
-		final CCompany manufacturing = new CCompany(COMPANY_OF_ENDUSTRI);
-		manufacturing.setDescription("Hassas mühendislik bileşenlerinde lider üretici");
-		manufacturing.setAddress("Sanayi Mahallesi, İstiklal Caddesi No:42, Of/Trabzon");
-		manufacturing.setPhone("+90-462-751-0202");
-		manufacturing.setEmail("bilgi@ofendüstri.com.tr");
-		manufacturing.setWebsite("https://www.ofendüstri.com.tr");
-		manufacturing.setTaxNumber("TR-987654321");
-		manufacturing.setCompanyTheme("lumo-dark");
-		manufacturing.setCompanyLogoUrl("/assets/logos/manufacturing-logo.svg");
-		manufacturing.setPrimaryColor("#ff9800");
-		manufacturing.setWorkingHoursStart("06:00");
-		manufacturing.setWorkingHoursEnd("18:00");
-		manufacturing.setCompanyTimezone("Europe/Istanbul");
-		manufacturing.setDefaultLanguage("tr");
-		manufacturing.setEnableNotifications(true);
-		manufacturing.setNotificationEmail("operasyon@ofendüstri.com.tr");
-		companyService.save(manufacturing);
-	}
-
 	private void createProjectDigitalTransformation(final CCompany company) {
 		final CProject project = new CProject("Digital Transformation Initiative", company);
 		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
@@ -512,12 +461,6 @@ public class CDataInitializer {
 		status.setColor(color);
 		status.setSortOrder(sortOrder);
 		activityStatusService.save(status);
-	}
-
-	private void createProjectProductDevelopment(final CCompany company) {
-		final CProject project = new CProject("New Product Development", company);
-		project.setDescription("Development of innovative products to expand market reach");
-		projectService.save(project);
 	}
 
 	/** Create sample comments for a decision.
@@ -668,7 +611,7 @@ public class CDataInitializer {
 			activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 150)));
 			// Set initial status from workflow
 			if (type1 != null && type1.getWorkflow() != null) {
-				final java.util.List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity1);
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity1);
 				if (!initialStatuses.isEmpty()) {
 					activity1.setStatus(initialStatuses.get(0));
 				}
@@ -689,7 +632,7 @@ public class CDataInitializer {
 			activity2.setParent(activity1);
 			// Set initial status from workflow
 			if (type2 != null && type2.getWorkflow() != null) {
-				final java.util.List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity2);
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity2);
 				if (!initialStatuses.isEmpty()) {
 					activity2.setStatus(initialStatuses.get(0));
 				}
@@ -724,40 +667,6 @@ public class CDataInitializer {
 			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
 		}
-	}
-
-	private void initializeSampleActivityPriorities(final CProject project, final boolean minimal) {
-		try {
-			createActivityPriority(project, "Critical", "Critical priority - immediate attention required", CColorUtils.getRandomColor(true), 1,
-					false, 1);
-			if (minimal) {
-				return;
-			}
-			createActivityPriority(project, "High", "High priority - urgent attention needed", CColorUtils.getRandomColor(true), 2, false, 2);
-			createActivityPriority(project, "Medium", "Medium priority - normal workflow", CColorUtils.getRandomColor(true), 3, true, 3);
-			createActivityPriority(project, "Low", "Low priority - can be scheduled later", CColorUtils.getRandomColor(true), 4, false, 4);
-			createActivityPriority(project, "Lowest", "Lowest priority - no immediate action needed", CColorUtils.getRandomColor(true), 5, false, 5);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing activity priorities for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize activity priorities for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleActivityTypes(final CProject project, final boolean minimal) {
-		final String[][] activityTypes = {
-				{
-						ACTIVITY_TYPE_DEVELOPMENT, "Software development and coding tasks"
-				}, {
-						ACTIVITY_TYPE_TESTING, "Quality assurance and testing activities"
-				}, {
-						ACTIVITY_TYPE_DESIGN, "UI/UX design and system architecture"
-				}, {
-						ACTIVITY_TYPE_DOCUMENTATION, "Technical writing and documentation"
-				}, {
-						ACTIVITY_TYPE_RESEARCH, "Research and analysis activities"
-				}
-		};
-		initializeType(activityTypes, activityTypeService, project, minimal);
 	}
 
 	private void initializeSampleApprovalStatuses(final CProject project, final boolean minimal) {
@@ -815,17 +724,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleAssetTypes(final CProject project, final boolean minimal) {
-		final String[][] assetTypes = {
-				{
-						"Hardware", "Physical hardware assets and equipment"
-				}, {
-						"Software", "Software licenses and applications"
-				}
-		};
-		initializeType(assetTypes, assetTypeService, project, minimal);
-	}
-
 	private void initializeSampleBudgets(final CProject project, final boolean minimal) {
 		try {
 			final tech.derbent.app.budgets.budgettype.domain.CBudgetType type1 = budgetTypeService.getRandom(project);
@@ -845,7 +743,7 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			final tech.derbent.app.budgets.budgettype.domain.CBudgetType type2 = budgetTypeService.getRandom(project);
+			final CBudgetType type2 = budgetTypeService.getRandom(project);
 			final CUser user2 = userService.getRandom();
 			final tech.derbent.app.budgets.budget.domain.CBudget budget2 =
 					new tech.derbent.app.budgets.budget.domain.CBudget("Annual Marketing Budget 2024", project);
@@ -864,17 +762,6 @@ public class CDataInitializer {
 			LOGGER.error("Error initializing sample budgets for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample budgets for project: " + project.getName(), e);
 		}
-	}
-
-	private void initializeSampleBudgetTypes(final CProject project, final boolean minimal) {
-		final String[][] budgetTypes = {
-				{
-						"Development", "Development and engineering budget"
-				}, {
-						"Marketing", "Marketing and promotional budget"
-				}
-		};
-		initializeType(budgetTypes, budgetTypeService, project, minimal);
 	}
 
 	private void initializeSampleCommentPriorities(final CProject project, final boolean minimal) {
@@ -961,17 +848,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleComponentTypes(final CProject project, final boolean minimal) {
-		final String[][] componentTypes = {
-				{
-						"Module", "Software modules and packages"
-				}, {
-						"Library", "Reusable libraries and frameworks"
-				}
-		};
-		initializeType(componentTypes, componentTypeService, project, minimal);
-	}
-
 	private void initializeSampleCurrencies(final CProject project, final boolean minimal) {
 		try {
 			createCurrency(project, "USD", "US Dollar", "$ ");
@@ -1033,29 +909,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleDecisionTypes(final CProject project, final boolean minimal) {
-		final String[][] decisionTypes = {
-				{
-						"Strategic", "High-level strategic decisions affecting organization direction"
-				}, {
-						"Tactical", "Mid-level tactical decisions for project execution"
-				}, {
-						"Operational", "Day-to-day operational decisions"
-				}, {
-						"Technical", "Technology and implementation related decisions"
-				}, {
-						"Budget", "Financial and budgeting decisions"
-				}, {
-						"Resource", "Human resource and allocation decisions"
-				}, {
-						"Timeline", "Schedule and milestone related decisions"
-				}, {
-						"Quality", "Quality assurance and standards decisions"
-				}
-		};
-		initializeType(decisionTypes, decisionTypeService, project, minimal);
-	}
-
 	private void initializeSampleDeliverables(final CProject project, final boolean minimal) {
 		try {
 			final tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType type1 = deliverableTypeService.getRandom(project);
@@ -1094,17 +947,6 @@ public class CDataInitializer {
 			LOGGER.error("Error initializing sample deliverables for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample deliverables for project: " + project.getName(), e);
 		}
-	}
-
-	private void initializeSampleDeliverableTypes(final CProject project, final boolean minimal) {
-		final String[][] deliverableTypes = {
-				{
-						"Document", "Documentation and reports"
-				}, {
-						"Software Package", "Software releases and packages"
-				}
-		};
-		initializeType(deliverableTypes, deliverableTypeService, project, minimal);
 	}
 
 	/** Initialize 2 sample meetings per project with all fields populated.
@@ -1191,29 +1033,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleMeetingTypes(final CProject project, final boolean minimal) {
-		final String[][] meetingTypes = {
-				{
-						"Daily Standup", "Daily team synchronization meetings"
-				}, {
-						"Sprint Planning", "Sprint planning and estimation meetings"
-				}, {
-						"Sprint Review", "Sprint review and demonstration meetings"
-				}, {
-						"Sprint Retrospective", "Sprint retrospective and improvement meetings"
-				}, {
-						"Project Review", "Project review and status meetings"
-				}, {
-						"Technical Review", "Technical design and code review meetings"
-				}, {
-						"Stakeholder Meeting", "Meetings with project stakeholders"
-				}, {
-						"Training Session", "Training and knowledge sharing sessions"
-				}
-		};
-		initializeType(meetingTypes, meetingTypeService, project, minimal);
-	}
-
 	private void initializeSampleMilestones(final CProject project, final boolean minimal) {
 		try {
 			final tech.derbent.app.milestones.milestonetype.domain.CMilestoneType type1 = milestoneTypeService.getRandom(project);
@@ -1252,40 +1071,6 @@ public class CDataInitializer {
 			LOGGER.error("Error initializing sample milestones for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample milestones for project: " + project.getName(), e);
 		}
-	}
-
-	private void initializeSampleMilestoneTypes(final CProject project, final boolean minimal) {
-		final String[][] milestoneTypes = {
-				{
-						"Phase Completion", "Project phase completion milestones"
-				}, {
-						"Release", "Product or feature release milestones"
-				}
-		};
-		initializeType(milestoneTypes, milestoneTypeService, project, minimal);
-	}
-
-	private void initializeSampleOrderTypes(final CProject project, final boolean minimal) {
-		final String[][] orderTypes = {
-				{
-						"Hardware", "Hardware procurement orders"
-				}, {
-						"Software", "Software licensing and subscription orders"
-				}, {
-						"Service", "Professional services and consulting orders"
-				}, {
-						"Training", "Training and certification orders"
-				}, {
-						"Maintenance", "Maintenance and support service orders"
-				}, {
-						"Infrastructure", "Infrastructure and hosting service orders"
-				}, {
-						"Equipment", "Equipment rental and leasing orders"
-				}, {
-						"Supplies", "Office supplies and materials orders"
-				}
-		};
-		initializeType(orderTypes, orderTypeService, project, minimal);
 	}
 
 	private void initializeSampleProducts(final CProject project, final boolean minimal) {
@@ -1652,17 +1437,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleTicketTypes(final CProject project, final boolean minimal) {
-		final String[][] ticketTypes = {
-				{
-						"Bug", "Bug reports and defects"
-				}, {
-						"Feature Request", "New feature requests and enhancements"
-				}
-		};
-		initializeType(ticketTypes, ticketTypeService, project, minimal);
-	}
-
 	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
 	 * @param project2 */
 	private void initializeSampleUserProjectSettings(final CProject project, final boolean minimal) {
@@ -1679,8 +1453,8 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleWorkflow(final String name, final CProject project, final Class<?> targetClass,
-			final List<CProjectItemStatus> statuses, final List<CUserProjectRole> roles) {
+	private void initializeSampleWorkflow(final String name, final CProject project, final List<CProjectItemStatus> statuses,
+			final List<CUserProjectRole> roles) {
 		if (statuses.isEmpty() || roles.isEmpty()) {
 			LOGGER.warn("No statuses or roles found for project {}. Skipping workflow initialization.", project.getName());
 			return;
@@ -1688,7 +1462,6 @@ public class CDataInitializer {
 		final CWorkflowEntity activityWorkflow = new CWorkflowEntity(name, project);
 		activityWorkflow.setDescription("Defines status transitions for activities based on user roles");
 		activityWorkflow.setIsActive(true);
-		activityWorkflow.setTargetEntityClass(targetClass.getSimpleName());
 		workflowEntityService.save(activityWorkflow);
 		// Add status relations to the activity workflow
 		for (int i = 0; i < Math.min(statuses.size() - 1, 3); i++) {
@@ -1716,11 +1489,11 @@ public class CDataInitializer {
 			// Get available statuses for this project
 			final List<CProjectItemStatus> statuses = projectItemStatusService.list(Pageable.unpaged()).getContent();
 			final List<CUserProjectRole> roles = userProjectRoleService.list(Pageable.unpaged()).getContent();
-			initializeSampleWorkflow("Activity Status Workflow", project, CActivityType.class, statuses, roles);
-			initializeSampleWorkflow("Decision Status Workflow", project, CDecisionType.class, statuses, roles);
-			initializeSampleWorkflow("Meeting Status Workflow", project, CMeetingType.class, statuses, roles);
-			initializeSampleWorkflow("Risk Status Workflow", project, CRiskType.class, statuses, roles);
-			initializeSampleWorkflow("Project Status Workflow", project, COrderType.class, statuses, roles);
+			initializeSampleWorkflow("Activity Status Workflow", project, statuses, roles);
+			initializeSampleWorkflow("Decision Status Workflow", project, statuses, roles);
+			initializeSampleWorkflow("Meeting Status Workflow", project, statuses, roles);
+			initializeSampleWorkflow("Risk Status Workflow", project, statuses, roles);
+			initializeSampleWorkflow("Project Status Workflow", project, statuses, roles);
 			LOGGER.debug("Created sample workflow entities with status relations for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample workflow entities for project: {}", project.getName(), e);
@@ -1736,7 +1509,7 @@ public class CDataInitializer {
 				final CTypeEntity<EntityClass> item = typeService.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomColor(true));
-				item.setWorkflow(workflowEntityService.getRandomByEntityType(project, item.getClass()));
+				item.setWorkflow(workflowEntityService.getRandom(project));
 				typeService.save((EntityClass) item);
 				if (minimal) {
 					return;
@@ -1894,7 +1667,7 @@ public class CDataInitializer {
 					CComponentTypeInitializerService.initializeSample(project, minimal);
 					initializeSampleProjectExpenseTypes(project, minimal);
 					initializeSampleProjectIncomeTypes(project, minimal);
-					initializeSampleActivityPriorities(project, minimal);
+					CActivityPriorityInitializerService.initializeSample(project, minimal);
 					initializeSampleCommentPriorities(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
 					// entities
