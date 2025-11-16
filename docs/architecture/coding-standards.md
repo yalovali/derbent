@@ -505,6 +505,127 @@ public void completeActivity(CActivity activity) {
 
 ## Code Formatting
 
+### Import Organization (Mandatory)
+
+**ALWAYS use import statements instead of full class names:**
+
+#### ✅ Correct
+```java
+import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.projects.domain.CProject;
+
+public class CActivityService {
+    public CActivity createActivity(String name, CProject project) {
+        CActivity activity = new CActivity(name, project);
+        return save(activity);
+    }
+}
+```
+
+#### ❌ Incorrect
+```java
+public class CActivityService {
+    public tech.derbent.app.activities.domain.CActivity createActivity(
+            String name, tech.derbent.app.projects.domain.CProject project) {
+        tech.derbent.app.activities.domain.CActivity activity = 
+            new tech.derbent.app.activities.domain.CActivity(name, project);
+        return save(activity);
+    }
+}
+```
+
+**Benefits**:
+- Improved code readability
+- Easier code maintenance
+- Better IDE support and refactoring
+- Reduced line length
+- Consistent with Java best practices
+
+**Rule**: Full package paths should only appear in import statements at the top of the file.
+
+### Sample Data Initialization Pattern (Mandatory)
+
+**ALWAYS use the `initializeSample()` pattern in InitializerService classes:**
+
+#### Pattern Structure
+```java
+public class CEntityTypeInitializerService extends CInitializerServiceBase {
+    
+    private static final Class<?> clazz = CEntityType.class;
+    
+    // Standard initialize method for UI setup
+    public static void initialize(final CProject project, 
+            final CGridEntityService gridEntityService,
+            final CDetailSectionService detailSectionService, 
+            final CPageEntityService pageEntityService) throws Exception {
+        // Setup grid and detail views...
+    }
+    
+    // Sample data initialization method (REQUIRED)
+    public static void initializeSample(final CProject project, 
+            final boolean minimal) throws Exception {
+        final String[][] nameAndDescriptions = {
+            { "Type 1", "Description for type 1" },
+            { "Type 2", "Description for type 2" },
+            { "Type 3", "Description for type 3" }
+        };
+        initializeProjectEntity(nameAndDescriptions,
+            (CEntityOfProjectService<?>) CSpringContext.getBean(
+                CEntityRegistry.getServiceClassForEntity(clazz)), 
+            project, minimal, null);
+    }
+}
+```
+
+#### Implementation Rules
+
+1. **Naming Convention**: Method must be named `initializeSample`
+2. **Parameters**: `(final CProject project, final boolean minimal)`
+3. **Data Format**: Use String[][] for name and description pairs
+4. **Base Method**: Call `initializeProjectEntity()` from `CInitializerServiceBase`
+5. **Minimal Mode**: Respect the `minimal` parameter to create reduced datasets
+
+#### Sample Data Customization with Consumer
+
+For complex entities requiring additional configuration:
+
+```java
+public static void initializeSample(final CProject project, 
+        final boolean minimal) throws Exception {
+    final String[][] nameAndDescriptions = {
+        { "Entity 1", "Description 1" },
+        { "Entity 2", "Description 2" }
+    };
+    
+    // Use consumer for custom initialization
+    initializeProjectEntity(nameAndDescriptions,
+        (CEntityOfProjectService<?>) CSpringContext.getBean(
+            CEntityRegistry.getServiceClassForEntity(clazz)), 
+        project, minimal, 
+        entity -> {
+            // Custom configuration
+            entity.setCustomField(someValue);
+            entity.setRelatedEntity(getRelatedEntity());
+        });
+}
+```
+
+#### Integration with CDataInitializer
+
+Replace manual initialization calls with InitializerService calls:
+
+```java
+// ❌ OLD Pattern - Manual initialization in CDataInitializer
+private void initializeSampleEntityTypes(CProject project, boolean minimal) {
+    final String[][] types = { {"Type1", "Desc1"}, {"Type2", "Desc2"} };
+    final CEntityTypeService service = CSpringContext.getBean(CEntityTypeService.class);
+    initializeType(types, service, project, minimal);
+}
+
+// ✅ NEW Pattern - Delegate to InitializerService
+CEntityTypeInitializerService.initializeSample(project, minimal);
+```
+
 ### Spotless Configuration
 
 The project uses Spotless for automatic code formatting:
