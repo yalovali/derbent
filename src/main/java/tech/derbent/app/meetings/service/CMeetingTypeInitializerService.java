@@ -63,4 +63,29 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] meetingTypes = {
+				{
+						"Daily Standup", "Daily team synchronization meetings"
+				}, {
+						"Sprint Planning", "Sprint planning and estimation meetings"
+				}, {
+						"Sprint Review", "Sprint review and demonstration meetings"
+				}, {
+						"Sprint Retrospective", "Sprint retrospective and improvement meetings"
+				}, {
+						"Project Review", "Project review and status meetings"
+				}, {
+						"Technical Review", "Technical design and code review meetings"
+				}, {
+						"Stakeholder Meeting", "Meetings with project stakeholders"
+				}, {
+						"Training Session", "Training and knowledge sharing sessions"
+				}
+		};
+		final tech.derbent.app.meetings.service.CMeetingTypeService service =
+				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.meetings.service.CMeetingTypeService.class);
+		initializeProjectEntity(meetingTypes, service, project, minimal);
+	}
 }

@@ -112,25 +112,49 @@ public abstract class CInitializerServiceBase {
 			for (final String[] typeData : nameAndDescription) {
 				final CEntityOfProject<EntityClass> item = service.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
-				typeItem.setActive(Boolean.TRUE);
-				// if item has color field, set random color
-				if (item.getClass().getDeclaredMethod("setColor", String.class) != null) {
+				item.setActive(Boolean.TRUE);
+				
+				// Try to set color field if it exists
+				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
+				} catch (final NoSuchMethodException e) {
+					// Color field doesn't exist, ignore
 				}
+				
+				// Handle CTypeEntity (has workflow)
 				if (item instanceof CTypeEntity<?>) {
 					final CTypeEntity<?> typeItem = (CTypeEntity<?>) item;
 					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 					// pick random workflow for project
 					typeItem.setWorkflow(workflowEntityService.getRandomByProject(project));
 				}
+				
+				// Handle entities with status and workflow (need entityType)
 				if (item instanceof IHasStatusAndWorkflow) {
-					// item.setSortOrder(typeService.countByProject(project) + 1);
 					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-					// TODO Check entityType field metadata for dataProviderBean
-					//or locate it by searching services for CTypeEntity<clazz> in beans???
-					// locate that service and get random type by project
-					statusItem.setEntityType(?.getRandomByEntityType(project, item.getClass()));
+					// Try to get entityType from metadata and set it
+					try {
+						// Get the entityType field
+						final java.lang.reflect.Field entityTypeField = findFieldInHierarchy(item.getClass(), "entityType");
+						if (entityTypeField != null) {
+							entityTypeField.setAccessible(true);
+							// Get metadata annotation
+							final tech.derbent.api.annotations.AMetaData metadata = entityTypeField.getAnnotation(tech.derbent.api.annotations.AMetaData.class);
+							if (metadata != null && !metadata.dataProviderBean().isEmpty()) {
+								// Get service bean
+								final String beanName = metadata.dataProviderBean();
+								final Object serviceBean = CSpringContext.getBean(beanName);
+								// Call getRandom(project) method
+								final java.lang.reflect.Method getRandomMethod = serviceBean.getClass().getMethod("getRandom", CProject.class);
+								final Object randomType = getRandomMethod.invoke(serviceBean, project);
+								statusItem.setEntityType((CTypeEntity<?>) randomType);
+							}
+						}
+					} catch (final Exception e) {
+						// EntityType not set, entity will work without it
+					}
 				}
+				
 				service.save((EntityClass) item);
 				if (minimal) {
 					return;
@@ -139,5 +163,20 @@ public abstract class CInitializerServiceBase {
 		} catch (final Exception e) {
 			throw e;
 		}
+	}
+	
+	/** Helper method to find a field in class hierarchy.
+	 * @param clazz     the class to search
+	 * @param fieldName the field name to find
+	 * @return the field or null if not found */
+	private static java.lang.reflect.Field findFieldInHierarchy(Class<?> clazz, final String fieldName) {
+		while (clazz != null) {
+			try {
+				return clazz.getDeclaredField(fieldName);
+			} catch (final NoSuchFieldException e) {
+				clazz = clazz.getSuperclass();
+			}
+		}
+		return null;
 	}
 }

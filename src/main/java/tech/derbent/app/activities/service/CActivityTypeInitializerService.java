@@ -64,4 +64,23 @@ public class CActivityTypeInitializerService extends CInitializerServiceBase {
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] activityTypes = {
+				{
+						"Development", "Software development and coding tasks"
+				}, {
+						"Testing", "Quality assurance and testing activities"
+				}, {
+						"Design", "UI/UX design and system architecture"
+				}, {
+						"Documentation", "Technical writing and documentation"
+				}, {
+						"Research", "Research and analysis activities"
+				}
+		};
+		final tech.derbent.app.activities.service.CActivityTypeService service =
+				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.activities.service.CActivityTypeService.class);
+		initializeProjectEntity(activityTypes, service, project, minimal);
+	}
 }

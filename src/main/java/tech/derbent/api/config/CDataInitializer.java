@@ -1879,11 +1879,10 @@ public class CDataInitializer {
 					initializeSampleProjectRoles(project, minimal);
 					initializeSampleWorkflowEntities(project, minimal);
 					// types
-					initializeSampleMeetingTypes(project, minimal);
-					initializeSampleDecisionTypes(project, minimal);
+					CMeetingTypeInitializerService.initializeSample(project, minimal);
+					CDecisionTypeInitializerService.initializeSample(project, minimal);
 					initializeSampleOrderTypes(project, minimal);
-					initializeSampleActivityTypes(project, minimal);
-					// initializeSampleRiskTypes(project, minimal);
+					CActivityTypeInitializerService.initializeSample(project, minimal);
 					CRiskTypeInitializerService.initializeSample(project, minimal);
 					initializeSampleAssetTypes(project, minimal);
 					initializeSampleBudgetTypes(project, minimal);
