@@ -39,7 +39,7 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 		super(CCurrency.class, "New Currency", null);
 	}
 
-	public CCurrency(final CProject project, final String name) {
+	public CCurrency(final String name, final CProject project) {
 		super(CCurrency.class, name, project);
 	}
 

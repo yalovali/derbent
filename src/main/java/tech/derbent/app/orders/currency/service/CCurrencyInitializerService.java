@@ -75,8 +75,8 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 				}
 		};
 		// Use consumer pattern to set currency-specific fields
-		initializeProjectEntity(currencyData,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+		initializeProjectEntity(currencyData, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, item -> {
 					final CCurrency currency = (CCurrency) item;
 					// currencyData format: [name, description, code, symbol]
 					// Get the index to access the correct data

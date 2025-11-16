@@ -30,7 +30,7 @@ public class CSessionService implements ISessionService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSessionService.class);
 	// MULTI-USER NOTE: These instance fields are acceptable ONLY for reset-db profile (single-user scenario)
 	// For web applications, state MUST be stored in VaadinSession - see CWebSessionService
-	private tech.derbent.app.companies.domain.CCompany activeCompany;
+	// private CCompany activeCompany;
 	private CProject activeProject;
 	// Simple in-memory storage for reset operations
 	private CUser activeUser;
@@ -65,7 +65,7 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public Optional<tech.derbent.app.companies.domain.CCompany> getActiveCompany() { return Optional.ofNullable(activeCompany); }
+	public Optional<CCompany> getActiveCompany() { return Optional.ofNullable(getActiveUser().get().getCompany()); }
 
 	@Override
 	public Long getActiveId(final String entityType) {
@@ -102,7 +102,7 @@ public class CSessionService implements ISessionService {
 	@Override
 	public List<CProject> getAvailableProjects() {
 		// Get current company
-		CCompany currentCompany = getCurrentCompany();
+		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 		return projectRepository.findAll().stream().filter(p -> p.getCompanyId() != null && p.getCompanyId().equals(currentCompany.getId())).toList();
 	}
@@ -134,6 +134,11 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
+	public void setActiveCompany(final CCompany company) {
+		Check.fail("setActiveCompany should not be called directly; use setActiveUser or setActiveProject instead");
+	}
+
+	@Override
 	public void setActiveId(final String entityType, final Long id) {
 		// No-op in reset mode
 	}
@@ -150,7 +155,6 @@ public class CSessionService implements ISessionService {
 		Check.notNull(user, "User must not be null");
 		LOGGER.info("Setting company {} and user {} atomically", user.getCompany().getName(), user.getUsername());
 		activeUser = user;
-		activeCompany = user.getCompany();
 	}
 
 	@Override

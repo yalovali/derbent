@@ -25,6 +25,7 @@ public interface ISessionService {
 	void notifyProjectListChanged();
 	void removeProjectChangeListener(IProjectChangeListener listener);
 	void removeProjectListChangeListener(IProjectListChangeListener listener);
+	void setActiveCompany(CCompany company);
 	void setActiveId(String entityType, Long id);
 	void setActiveProject(CProject project);
 	void setActiveUser(CUser user);

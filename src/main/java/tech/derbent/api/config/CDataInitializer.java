@@ -37,7 +37,6 @@ import tech.derbent.app.assets.assettype.service.CAssetTypeInitializerService;
 import tech.derbent.app.assets.assettype.service.CAssetTypeService;
 import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
 import tech.derbent.app.budgets.budget.service.CBudgetService;
-import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeService;
 import tech.derbent.app.comments.domain.CComment;
@@ -76,11 +75,8 @@ import tech.derbent.app.milestones.milestone.service.CMilestoneInitializerServic
 import tech.derbent.app.milestones.milestone.service.CMilestoneService;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeInitializerService;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService;
-import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.app.orders.approval.service.CApprovalStatusInitializerService;
-import tech.derbent.app.orders.approval.service.CApprovalStatusService;
 import tech.derbent.app.orders.approval.service.COrderApprovalInitializerService;
-import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.currency.service.CCurrencyInitializerService;
 import tech.derbent.app.orders.currency.service.CCurrencyService;
 import tech.derbent.app.orders.order.service.COrderInitializerService;
@@ -89,10 +85,8 @@ import tech.derbent.app.orders.type.service.COrderTypeInitializerService;
 import tech.derbent.app.orders.type.service.COrderTypeService;
 import tech.derbent.app.page.service.CPageEntityInitializerService;
 import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.products.product.domain.CProduct;
 import tech.derbent.app.products.product.service.CProductInitializerService;
 import tech.derbent.app.products.product.service.CProductService;
-import tech.derbent.app.products.producttype.domain.CProductType;
 import tech.derbent.app.products.producttype.service.CProductTypeInitializerService;
 import tech.derbent.app.products.producttype.service.CProductTypeService;
 import tech.derbent.app.products.productversion.service.CProductVersionInitializerService;
@@ -154,12 +148,6 @@ public class CDataInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
-	private static final String STATUS_CANCELLED = "Cancelled";
-	private static final String STATUS_COMPLETED = "Completed";
-	private static final String STATUS_IN_PROGRESS = "In Progress";
-	// Status Names
-	private static final String STATUS_NOT_STARTED = "Not Started";
-	private static final String STATUS_ON_HOLD = "On Hold";
 	// User Login Names
 	private static final String USER_ADMIN = "admin";
 	private static final String USER_ADMIN2 = "yasin";
@@ -377,34 +365,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void createActivityPriority(final CProject project, final String name, final String description, final String color,
-			final Integer priorityLevel, final boolean isDefault, final int sortOrder) {
-		final CActivityPriority priority = new CActivityPriority(name, project, color, sortOrder);
-		priority.setDescription(description);
-		priority.setPriorityLevel(priorityLevel);
-		priority.setIsDefault(isDefault);
-		activityPriorityService.save(priority);
-	}
-
-	private void createApprovalStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
-			final int sortOrder) {
-		final CApprovalStatus status = new CApprovalStatus(name, project);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setSortOrder(sortOrder);
-		CSpringContext.getBean(CApprovalStatusService.class).save(status);
-	}
-
-	/** Creates backend development activity. */
-	private void createCommentPriority(final CProject project, final String name, final String description, final String color,
-			final Integer priorityLevel, final boolean isDefault, final int sortOrder) {
-		final CCommentPriority priority = new CCommentPriority(name, project, color, sortOrder);
-		priority.setDescription(description);
-		priority.setPriorityLevel(priorityLevel);
-		priority.setDefault(isDefault);
-		commentPriorityService.save(priority);
-	}
-
 	/** Creates consulting company. */
 	private void createConsultingCompany() {
 		final CCompany consulting = new CCompany(COMPANY_OF_DANISMANLIK);
@@ -426,21 +386,6 @@ public class CDataInitializer {
 		companyService.save(consulting);
 	}
 
-	/** Create a currency entity with proper validation. */
-	private void createCurrency(final CProject project, final String code, final String name, final String symbol) {
-		try {
-			final CCurrency currency = new CCurrency(project, name);
-			currency.setCurrencyCode(code);
-			currency.setCurrencySymbol(symbol);
-			// Add business description
-			currency.setDescription(String.format("%s (%s) - International currency for business transactions", name, code));
-			currencyService.save(currency);
-		} catch (final Exception e) {
-			LOGGER.error("Error creating currency: {} ({})", name, code, e);
-			throw new RuntimeException("Failed to create currency: " + code, e);
-		}
-	}
-
 	private void createProjectDigitalTransformation(final CCompany company) {
 		final CProject project = new CProject("Digital Transformation Initiative", company);
 		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
@@ -452,15 +397,6 @@ public class CDataInitializer {
 		final CProject project = new CProject("Infrastructure Upgrade Project", company);
 		project.setDescription("Upgrading IT infrastructure for improved performance and scalability");
 		projectService.save(project);
-	}
-
-	private void createProjectItemStatus(final String name, final CProject project, final String description, final String color,
-			final boolean isFinal, final int sortOrder) {
-		final CProjectItemStatus status = new CProjectItemStatus(name, project);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setSortOrder(sortOrder);
-		activityStatusService.save(status);
 	}
 
 	/** Create sample comments for a decision.
@@ -666,20 +602,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleCommentPriorities(final CProject project, final boolean minimal) {
-		try {
-			createCommentPriority(project, "Low", "Low priority comment", CColorUtils.getRandomColor(true), 1, false, 1);
-			if (minimal) {
-				return;
-			}
-			createCommentPriority(project, "Medium", "Medium priority comment", CColorUtils.getRandomColor(true), 2, true, 2);
-			createCommentPriority(project, "High", "High priority comment", CColorUtils.getRandomColor(true), 3, false, 3);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample comment priorities for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample comment priorities for project: " + project.getName(), e);
 		}
 	}
 
