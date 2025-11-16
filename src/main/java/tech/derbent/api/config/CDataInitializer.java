@@ -4,7 +4,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
-import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +31,14 @@ import tech.derbent.app.activities.service.CActivityTypeInitializerService;
 import tech.derbent.app.activities.service.CActivityTypeService;
 import tech.derbent.app.activities.service.CProjectItemStatusInitializerService;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
+import tech.derbent.app.assets.asset.service.CAssetInitializerService;
+import tech.derbent.app.assets.asset.service.CAssetService;
+import tech.derbent.app.assets.assettype.service.CAssetTypeInitializerService;
+import tech.derbent.app.assets.assettype.service.CAssetTypeService;
+import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
+import tech.derbent.app.budgets.budget.service.CBudgetService;
+import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
+import tech.derbent.app.budgets.budgettype.service.CBudgetTypeService;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.CCommentPriority;
 import tech.derbent.app.comments.service.CCommentInitializerService;
@@ -41,12 +48,22 @@ import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyInitializerService;
 import tech.derbent.app.companies.service.CCompanyService;
+import tech.derbent.app.components.component.service.CComponentInitializerService;
+import tech.derbent.app.components.component.service.CComponentService;
+import tech.derbent.app.components.componenttype.service.CComponentTypeInitializerService;
+import tech.derbent.app.components.componenttype.service.CComponentTypeService;
+import tech.derbent.app.components.componentversion.service.CComponentVersionInitializerService;
+import tech.derbent.app.components.componentversiontype.service.CComponentVersionTypeInitializerService;
 import tech.derbent.app.decisions.domain.CDecision;
 import tech.derbent.app.decisions.domain.CDecisionType;
 import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
+import tech.derbent.app.deliverables.deliverable.service.CDeliverableInitializerService;
+import tech.derbent.app.deliverables.deliverable.service.CDeliverableService;
+import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
+import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.domain.CMeetingType;
@@ -54,6 +71,10 @@ import tech.derbent.app.meetings.service.CMeetingInitializerService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.meetings.service.CMeetingTypeInitializerService;
 import tech.derbent.app.meetings.service.CMeetingTypeService;
+import tech.derbent.app.milestones.milestone.service.CMilestoneInitializerService;
+import tech.derbent.app.milestones.milestone.service.CMilestoneService;
+import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeInitializerService;
+import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService;
 import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.app.orders.approval.service.CApprovalStatusInitializerService;
 import tech.derbent.app.orders.approval.service.CApprovalStatusService;
@@ -68,46 +89,38 @@ import tech.derbent.app.orders.type.service.COrderTypeInitializerService;
 import tech.derbent.app.orders.type.service.COrderTypeService;
 import tech.derbent.app.page.service.CPageEntityInitializerService;
 import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.products.product.service.CProductInitializerService;
+import tech.derbent.app.products.product.service.CProductService;
+import tech.derbent.app.products.producttype.service.CProductTypeInitializerService;
+import tech.derbent.app.products.producttype.service.CProductTypeService;
+import tech.derbent.app.products.productversion.service.CProductVersionInitializerService;
+import tech.derbent.app.products.productversiontype.service.CProductVersionTypeInitializerService;
+import tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseInitializerService;
+import tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeInitializerService;
+import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeInitializerService;
+import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeInitializerService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectInitializerService;
 import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.app.providers.provider.service.CProviderInitializerService;
+import tech.derbent.app.providers.provider.service.CProviderService;
+import tech.derbent.app.providers.providertype.service.CProviderTypeInitializerService;
+import tech.derbent.app.providers.providertype.service.CProviderTypeService;
+import tech.derbent.app.risklevel.risklevel.service.CRiskLevelInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskService;
 import tech.derbent.app.risks.risktype.domain.CRiskType;
 import tech.derbent.app.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.app.risks.risktype.service.CRiskTypeService;
-import tech.derbent.app.risklevel.risklevel.service.CRiskLevelInitializerService;
-import tech.derbent.app.assets.asset.service.CAssetInitializerService;
-import tech.derbent.app.assets.assettype.service.CAssetTypeInitializerService;
-import tech.derbent.app.milestones.milestone.service.CMilestoneInitializerService;
-import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeInitializerService;
-import tech.derbent.app.tickets.ticket.service.CTicketInitializerService;
-import tech.derbent.app.tickets.tickettype.service.CTicketTypeInitializerService;
-import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
-import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
-import tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseInitializerService;
-import tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeInitializerService;
-import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeInitializerService;
-import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeInitializerService;
-import tech.derbent.app.deliverables.deliverable.service.CDeliverableInitializerService;
-import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
-import tech.derbent.app.providers.provider.service.CProviderInitializerService;
-import tech.derbent.app.providers.providertype.service.CProviderTypeInitializerService;
-import tech.derbent.app.products.product.service.CProductInitializerService;
-import tech.derbent.app.products.producttype.service.CProductTypeInitializerService;
-import tech.derbent.app.products.productversion.service.CProductVersionInitializerService;
-import tech.derbent.app.products.productversiontype.service.CProductVersionTypeInitializerService;
-import tech.derbent.app.components.component.service.CComponentInitializerService;
-import tech.derbent.app.components.componenttype.service.CComponentTypeInitializerService;
-import tech.derbent.app.components.componentversion.service.CComponentVersionInitializerService;
-import tech.derbent.app.components.componentversiontype.service.CComponentVersionTypeInitializerService;
-import tech.derbent.app.teams.team.service.CTeamInitializerService;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
+import tech.derbent.app.teams.team.service.CTeamInitializerService;
+import tech.derbent.app.tickets.ticket.service.CTicketInitializerService;
+import tech.derbent.app.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
@@ -161,12 +174,20 @@ public class CDataInitializer {
 	private final CActivityService activityService;
 	private final CProjectItemStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
+	private final CAssetService assetService;
+	private final CAssetTypeService assetTypeService;
+	private final CBudgetService budgetService;
+	private final CBudgetTypeService budgetTypeService;
 	private final CCommentPriorityService commentPriorityService;
 	private final CCommentService commentService;
 	private final CCompanyService companyService;
+	private final CComponentService componentService;
+	private final CComponentTypeService componentTypeService;
 	private final CCurrencyService currencyService;
 	private final CDecisionService decisionService;
 	private final CDecisionTypeService decisionTypeService;
+	private final CDeliverableService deliverableService;
+	private final CDeliverableTypeService deliverableTypeService;
 	@PersistenceContext
 	private EntityManager em;
 	private final CGanntViewEntityService ganntViewEntityService;
@@ -174,34 +195,26 @@ public class CDataInitializer {
 	private final JdbcTemplate jdbcTemplate;
 	private final CMeetingService meetingService;
 	private final CMeetingTypeService meetingTypeService;
+	private final CMilestoneService milestoneService;
+	private final CMilestoneTypeService milestoneTypeService;
 	private final COrderService orderService;
 	private final COrderTypeService orderTypeService;
 	private final CPageEntityService pageEntityService;
+	private final CProductService productService;
+	private final CProductTypeService productTypeService;
 	private final CProjectItemStatusService projectItemStatusService;
 	// Service dependencies - injected via constructor
 	private final CProjectService projectService;
+	private final CProviderService providerService;
+	private final CProviderTypeService providerTypeService;
 	private final CRiskService riskService;
 	private final CRiskTypeService riskTypeService;
-	private final tech.derbent.app.assets.asset.service.CAssetService assetService;
-	private final tech.derbent.app.assets.assettype.service.CAssetTypeService assetTypeService;
-	private final tech.derbent.app.milestones.milestone.service.CMilestoneService milestoneService;
-	private final tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService milestoneTypeService;
-	private final tech.derbent.app.tickets.ticket.service.CTicketService ticketService;
-	private final tech.derbent.app.tickets.tickettype.service.CTicketTypeService ticketTypeService;
-	private final tech.derbent.app.budgets.budget.service.CBudgetService budgetService;
-	private final tech.derbent.app.budgets.budgettype.service.CBudgetTypeService budgetTypeService;
-	private final tech.derbent.app.deliverables.deliverable.service.CDeliverableService deliverableService;
-	private final tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService deliverableTypeService;
-	private final tech.derbent.app.providers.provider.service.CProviderService providerService;
-	private final tech.derbent.app.providers.providertype.service.CProviderTypeService providerTypeService;
-	private final tech.derbent.app.products.product.service.CProductService productService;
-	private final tech.derbent.app.products.producttype.service.CProductTypeService productTypeService;
-	private final tech.derbent.app.components.component.service.CComponentService componentService;
-	private final tech.derbent.app.components.componenttype.service.CComponentTypeService componentTypeService;
-	private final tech.derbent.app.teams.team.service.CTeamService teamService;
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
 	private final ISessionService sessionService;
+	private final tech.derbent.app.teams.team.service.CTeamService teamService;
+	private final tech.derbent.app.tickets.ticket.service.CTicketService ticketService;
+	private final tech.derbent.app.tickets.tickettype.service.CTicketTypeService ticketTypeService;
 	private final CUserCompanyRoleService userCompanyRoleService;
 	private final CUserProjectRoleService userProjectRoleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
@@ -287,6 +300,25 @@ public class CDataInitializer {
 		Check.notNull(workflowEntityService, "WorkflowEntityService bean not found");
 		Check.notNull(projectItemStatusService, "ProjectItemStatusService bean not found");
 		Check.notNull(workflowStatusRelationService, "WorkflowStatusRelationService bean not found");
+		Check.notNull(sessionService, "SessionService cannot be null");
+		Check.notNull(jdbcTemplate, "JdbcTemplate bean not found");
+		Check.notNull(assetService, "AssetService bean not found");
+		Check.notNull(assetTypeService, "AssetTypeService bean not found");
+		Check.notNull(milestoneService, "MilestoneService bean not found");
+		Check.notNull(milestoneTypeService, "MilestoneTypeService bean not found");
+		Check.notNull(ticketService, "TicketService bean not found");
+		Check.notNull(ticketTypeService, "TicketTypeService bean not found");
+		Check.notNull(budgetService, "BudgetService bean not found");
+		Check.notNull(budgetTypeService, "BudgetTypeService bean not found");
+		Check.notNull(deliverableService, "DeliverableService bean not found");
+		Check.notNull(deliverableTypeService, "DeliverableTypeService bean not found");
+		Check.notNull(providerService, "ProviderService bean not found");
+		Check.notNull(providerTypeService, "ProviderTypeService bean not found");
+		Check.notNull(productService, "ProductService bean not found");
+		Check.notNull(productTypeService, "ProductTypeService bean not found");
+		Check.notNull(componentService, "ComponentService bean not found");
+		Check.notNull(componentTypeService, "ComponentTypeService bean not found");
+		Check.notNull(teamService, "TeamService bean not found");
 		LOGGER.info("All service beans obtained successfully");
 	}
 	// ========================================================================
@@ -525,7 +557,7 @@ public class CDataInitializer {
 	/** Create sample comments for a meeting.
 	 * @param meeting the meeting to create comments for
 	 * @param minimal */
-	private void createSampleCommentsForMeeting(final tech.derbent.app.meetings.domain.CMeeting meeting, boolean minimal) {
+	private void createSampleCommentsForMeeting(final tech.derbent.app.meetings.domain.CMeeting meeting, final boolean minimal) {
 		try {
 			// Comments require an activity - create a simple activity related to this meeting
 			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject());
@@ -618,7 +650,7 @@ public class CDataInitializer {
 	/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
 	 * @param project the project to create activities for
 	 * @param minimal whether to create minimal sample data */
-	private void initializeSampleActivities(final CProject project, boolean minimal) {
+	private void initializeSampleActivities(final CProject project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
 			final CActivityType type1 = activityTypeService.getRandom(project);
@@ -692,7 +724,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleActivityPriorities(final CProject project, boolean minimal) {
+	private void initializeSampleActivityPriorities(final CProject project, final boolean minimal) {
 		try {
 			createActivityPriority(project, "Critical", "Critical priority - immediate attention required", CColorUtils.getRandomColor(true), 1,
 					false, 1);
@@ -709,7 +741,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleActivityTypes(final CProject project, boolean minimal) {
+	private void initializeSampleActivityTypes(final CProject project, final boolean minimal) {
 		final String[][] activityTypes = {
 				{
 						ACTIVITY_TYPE_DEVELOPMENT, "Software development and coding tasks"
@@ -726,7 +758,7 @@ public class CDataInitializer {
 		initializeType(activityTypes, activityTypeService, project, minimal);
 	}
 
-	private void initializeSampleApprovalStatuses(final CProject project, boolean minimal) {
+	private void initializeSampleApprovalStatuses(final CProject project, final boolean minimal) {
 		try {
 			createApprovalStatus("Draft", project, "Approval is in draft state", CColorUtils.getRandomColor(true), false, 1);
 			if (minimal) {
@@ -741,7 +773,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleCommentPriorities(final CProject project, boolean minimal) {
+	private void initializeSampleCommentPriorities(final CProject project, final boolean minimal) {
 		try {
 			createCommentPriority(project, "Low", "Low priority comment", CColorUtils.getRandomColor(true), 1, false, 1);
 			if (minimal) {
@@ -755,7 +787,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleCompanyRoles(final CCompany company, boolean minimal) {
+	private void initializeSampleCompanyRoles(final CCompany company, final boolean minimal) {
 		try {
 			// Create three company roles: Admin, User, Guest (one for each role type)
 			final String[][] companyRoles = {
@@ -785,7 +817,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleCurrencies(final CProject project, boolean minimal) {
+	private void initializeSampleCurrencies(final CProject project, final boolean minimal) {
 		try {
 			createCurrency(project, "USD", "US Dollar", "$ ");
 			if (minimal) {
@@ -801,7 +833,7 @@ public class CDataInitializer {
 
 	/** Initialize 2 sample decisions per project with all fields populated.
 	 * @param project the project to create decisions for */
-	private void initializeSampleDecisions(final CProject project, boolean minimal) {
+	private void initializeSampleDecisions(final CProject project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
 			final CDecisionType type1 = decisionTypeService.getRandom(project);
@@ -846,7 +878,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleDecisionTypes(final CProject project, boolean minimal) {
+	private void initializeSampleDecisionTypes(final CProject project, final boolean minimal) {
 		final String[][] decisionTypes = {
 				{
 						"Strategic", "High-level strategic decisions affecting organization direction"
@@ -871,7 +903,7 @@ public class CDataInitializer {
 
 	/** Initialize 2 sample meetings per project with all fields populated.
 	 * @param project the project to create meetings for */
-	private void initializeSampleMeetings(final CProject project, boolean minimal) {
+	private void initializeSampleMeetings(final CProject project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
 			final CMeetingType type1 = meetingTypeService.getRandom(project);
@@ -953,7 +985,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleMeetingTypes(final CProject project, boolean minimal) {
+	private void initializeSampleMeetingTypes(final CProject project, final boolean minimal) {
 		final String[][] meetingTypes = {
 				{
 						"Daily Standup", "Daily team synchronization meetings"
@@ -976,7 +1008,7 @@ public class CDataInitializer {
 		initializeType(meetingTypes, meetingTypeService, project, minimal);
 	}
 
-	private void initializeSampleOrderTypes(final CProject project, boolean minimal) {
+	private void initializeSampleOrderTypes(final CProject project, final boolean minimal) {
 		final String[][] orderTypes = {
 				{
 						"Hardware", "Hardware procurement orders"
@@ -1000,7 +1032,7 @@ public class CDataInitializer {
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
-	private void initializeSampleProjectItemStatuses(final CProject project, boolean minimal) {
+	private void initializeSampleProjectItemStatuses(final CProject project, final boolean minimal) {
 		try {
 			createProjectItemStatus(STATUS_NOT_STARTED, project, "Activity has not been started yet", "#95a5a6", false, 1);
 			if (minimal) {
@@ -1016,7 +1048,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleProjectRoles(final CProject project, boolean minimal) {
+	private void initializeSampleProjectRoles(final CProject project, final boolean minimal) {
 		try {
 			// Create three project roles: Admin, User, Guest (one for each role type)
 			final String[][] projectRoles = {
@@ -1046,7 +1078,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleRiskTypes(final CProject project, boolean minimal) {
+	private void initializeSampleRiskTypes(final CProject project, final boolean minimal) {
 		final String[][] riskTypes = {
 				{
 						"Technical Risk", "Risks related to technology and implementation"
@@ -1065,7 +1097,7 @@ public class CDataInitializer {
 
 	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
 	 * @param project2 */
-	private void initializeSampleUserProjectSettings(final CProject project, boolean minimal) {
+	private void initializeSampleUserProjectSettings(final CProject project, final boolean minimal) {
 		try {
 			for (final CUser user : userService.findAll()) {
 				userProjectSettingsService.addUserToProject(user, project, userProjectRoleService.getRandom(project), "write");
@@ -1079,8 +1111,8 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleWorkflow(String name, CProject project, Class<?> targetClass, final List<CProjectItemStatus> statuses,
-			final List<CUserProjectRole> roles) {
+	private void initializeSampleWorkflow(final String name, final CProject project, final Class<?> targetClass,
+			final List<CProjectItemStatus> statuses, final List<CUserProjectRole> roles) {
 		if (statuses.isEmpty() || roles.isEmpty()) {
 			LOGGER.warn("No statuses or roles found for project {}. Skipping workflow initialization.", project.getName());
 			return;
@@ -1111,7 +1143,7 @@ public class CDataInitializer {
 	/** Initialize sample workflow entities to demonstrate workflow management.
 	 * @param project the project to create workflow entities for
 	 * @param minimal whether to create minimal sample data */
-	private void initializeSampleWorkflowEntities(final CProject project, boolean minimal) {
+	private void initializeSampleWorkflowEntities(final CProject project, final boolean minimal) {
 		try {
 			// Get available statuses for this project
 			final List<CProjectItemStatus> statuses = projectItemStatusService.list(Pageable.unpaged()).getContent();
@@ -1130,7 +1162,7 @@ public class CDataInitializer {
 
 	@SuppressWarnings ("unchecked")
 	private <EntityClass extends CTypeEntity<EntityClass>> void initializeType(final String[][] nameAndDescription,
-			CTypeEntityService<EntityClass> typeService, final CProject project, boolean minimal) {
+			final CTypeEntityService<EntityClass> typeService, final CProject project, final boolean minimal) {
 		try {
 			for (final String[] typeData : nameAndDescription) {
 				final CTypeEntity<EntityClass> item = typeService.newEntity(typeData[0], project);
@@ -1175,15 +1207,15 @@ public class CDataInitializer {
 		}
 	}
 
-	public void loadSampleData(boolean minimal) throws Exception {
+	public void loadSampleData(final boolean minimal) throws Exception {
 		try {
 			// ========== NON-PROJECT RELATED INITIALIZATION PHASE ==========
 			// **** CREATE COMPANY SAMPLES ****//
 			createTechCompany();
 			if (!minimal) {
 				createConsultingCompany();
-				createHealthcareCompany();
-				createManufacturingCompany();
+				// createHealthcareCompany();
+				// createManufacturingCompany();
 			}
 			/* create sample projects */
 			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
@@ -1191,7 +1223,7 @@ public class CDataInitializer {
 				createProjectDigitalTransformation(company);
 				if (!minimal) {
 					createProjectInfrastructureUpgrade(company);
-					createProjectProductDevelopment(company);
+					// createProjectProductDevelopment(company);
 				}
 				createUserForCompany(company);
 				if (minimal) {
@@ -1305,7 +1337,7 @@ public class CDataInitializer {
 		}
 	}
 
-	public void reloadForced(boolean minimal) throws Exception {
+	public void reloadForced(final boolean minimal) throws Exception {
 		LOGGER.info("Sample data reload (forced) started");
 		clearSampleData(); // <<<<< ÖNCE TEMİZLE
 		loadSampleData(minimal); // <<<<< SONRA YENİDEN OLUŞTUR

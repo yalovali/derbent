@@ -18,7 +18,7 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
 
 	static Optional<CProjectItemStatus> getInitialStatus(final IHasStatusAndWorkflow<?> entity,
 			final CProjectItemStatusService projectItemStatusService) {
-		if ((entity == null) || (entity.getWorkflow() == null)) {
+		if (entity == null || entity.getWorkflow() == null) {
 			return Optional.empty();
 		}
 		final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(entity);
@@ -38,7 +38,8 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
 		Check.notNull(projectItemStatusService, "projectItemStatusService cannot be null");
 		// Step 1: Assign entity type
 		final List<?> availableTypes = typeService.listByProject(currentProject);
-		Check.notEmpty(availableTypes, "No entity types available in project " + currentProject.getName() + " - cannot initialize entity");
+		Check.notEmpty(availableTypes, "No entity types available in project " + currentProject.getName() + " for entity class "
+				+ entity.getClass().getSimpleName() + " - cannot initialize entity");
 		final CTypeEntity<?> selectedType = (CTypeEntity<?>) availableTypes.get(0);
 		entity.setEntityType(selectedType);
 		LOGGER.debug("Assigned entity type: {} to new entity", selectedType.getName());

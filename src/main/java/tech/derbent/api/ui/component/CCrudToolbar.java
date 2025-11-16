@@ -92,9 +92,9 @@ public class CCrudToolbar extends HorizontalLayout {
 				// We only support CProjectItem status editing in toolbar for now
 				return;
 			}
-			statusProvider = (() -> {
+			statusProvider = () -> {
 				try {
-					CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+					final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 					if (statusService != null) {
 						// For workflow entities, get valid next statuses based on workflow rules
 						// This ensures only allowed transitions are shown in the combobox
@@ -104,17 +104,17 @@ public class CCrudToolbar extends HorizontalLayout {
 						// Fallback for non-workflow entities: return all statuses
 						return statusService.findAll();
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.debug("Could not get status service, workflow combobox will not be created", e);
 				}
 				return Collections.emptyList();
-			});
+			};
 			if (statusProvider == null) {
 				LOGGER.debug("Status provider not set, cannot create workflow combobox");
 				return;
 			}
 			final List<CProjectItemStatus> statuses = statusProvider.get();
-			if ((statuses == null) || statuses.isEmpty()) {
+			if (statuses == null || statuses.isEmpty()) {
 				LOGGER.debug("No statuses available from provider, cannot create workflow combobox");
 				return;
 			}
@@ -181,7 +181,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	private void on_actionStatusChange(CProjectItemStatus value) {
+	private void on_actionStatusChange(final CProjectItemStatus value) {
 		try {
 			pageBase.getPageService().actionChangeStatus(value);
 		} catch (final Exception e) {
@@ -197,7 +197,12 @@ public class CCrudToolbar extends HorizontalLayout {
 		createWorkflowStatusComboBox();
 	}
 
-	public void setPageBase(final ICrudToolbarOwnerPage pageBase) { this.pageBase = pageBase; }
+	public void setPageBase(final ICrudToolbarOwnerPage pageBase) {
+		this.pageBase = pageBase;
+		// update them so the `new` button is enabled if appropriate
+		updateButtonStates();
+		LOGGER.debug("Set page base for toolbar: {}", pageBase);
+	}
 
 	/** Update enabled state of toolbar buttons based on whether callbacks are provided and current entity presence. */
 	private void updateButtonStates() {
@@ -207,13 +212,13 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 		final boolean hasEntity = currentEntity != null;
 		if (saveButton != null) {
-			saveButton.setEnabled((pageBase != null) && hasEntity);
+			saveButton.setEnabled(pageBase != null && hasEntity);
 		}
 		if (deleteButton != null) {
-			deleteButton.setEnabled((pageBase != null) && hasEntity);
+			deleteButton.setEnabled(pageBase != null && hasEntity);
 		}
 		if (refreshButton != null) {
-			refreshButton.setEnabled((pageBase != null) && hasEntity);
+			refreshButton.setEnabled(pageBase != null && hasEntity);
 		}
 	}
 }
