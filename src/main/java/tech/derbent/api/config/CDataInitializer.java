@@ -1112,17 +1112,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleProductTypes(final CProject project, final boolean minimal) {
-		final String[][] productTypes = {
-				{
-						"Software", "Software products and solutions"
-				}, {
-						"Service", "Service offerings and subscriptions"
-				}
-		};
-		initializeType(productTypes, productTypeService, project, minimal);
-	}
-
 	private void initializeSampleProjectExpenses(final CProject project, final boolean minimal) {
 		try {
 			final tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService expenseTypeService =
@@ -1167,19 +1156,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleProjectExpenseTypes(final CProject project, final boolean minimal) {
-		final String[][] expenseTypes = {
-				{
-						"Hardware", "Hardware purchases and equipment"
-				}, {
-						"Consulting", "External consulting services"
-				}
-		};
-		final tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService expenseTypeService =
-				CSpringContext.getBean(tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService.class);
-		initializeType(expenseTypes, expenseTypeService, project, minimal);
-	}
-
 	private void initializeSampleProjectIncomes(final CProject project, final boolean minimal) {
 		try {
 			final tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService incomeTypeService =
@@ -1222,19 +1198,6 @@ public class CDataInitializer {
 			LOGGER.error("Error initializing sample project incomes for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample project incomes for project: " + project.getName(), e);
 		}
-	}
-
-	private void initializeSampleProjectIncomeTypes(final CProject project, final boolean minimal) {
-		final String[][] incomeTypes = {
-				{
-						"License", "Software license revenue"
-				}, {
-						"Service", "Service and support contracts"
-				}
-		};
-		final tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService incomeTypeService =
-				CSpringContext.getBean(tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService.class);
-		initializeType(incomeTypes, incomeTypeService, project, minimal);
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
@@ -1322,17 +1285,6 @@ public class CDataInitializer {
 			LOGGER.error("Error initializing sample providers for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample providers for project: " + project.getName(), e);
 		}
-	}
-
-	private void initializeSampleProviderTypes(final CProject project, final boolean minimal) {
-		final String[][] providerTypes = {
-				{
-						"Vendor", "Hardware and software vendors"
-				}, {
-						"Consultant", "External consultants and contractors"
-				}
-		};
-		initializeType(providerTypes, providerTypeService, project, minimal);
 	}
 
 	private void initializeSampleRisks(final CProject project, final boolean minimal) {
@@ -1662,13 +1614,13 @@ public class CDataInitializer {
 					CDeliverableTypeInitializerService.initializeSample(project, minimal);
 					CMilestoneTypeInitializerService.initializeSample(project, minimal);
 					CTicketTypeInitializerService.initializeSample(project, minimal);
-					initializeSampleProviderTypes(project, minimal);
-					initializeSampleProductTypes(project, minimal);
+					CProviderTypeInitializerService.initializeSample(project, minimal);
+					CProductTypeInitializerService.initializeSample(project, minimal);
 					CComponentTypeInitializerService.initializeSample(project, minimal);
-					initializeSampleProjectExpenseTypes(project, minimal);
-					initializeSampleProjectIncomeTypes(project, minimal);
+					CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
+					CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
 					CActivityPriorityInitializerService.initializeSample(project, minimal);
-					initializeSampleCommentPriorities(project, minimal);
+					CCommentPriorityInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
 					// entities
 					initializeSampleDecisions(project, minimal);
