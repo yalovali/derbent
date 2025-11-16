@@ -3,6 +3,9 @@ package tech.derbent.app.orders.currency.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -59,5 +62,31 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] currencyData = {
+				{
+						"US Dollar", "USD - International currency for business transactions", "USD", "$ "
+				}, {
+						"Euro", "EUR - European currency for business transactions", "EUR", "€"
+				}, {
+						"Turkish Lira", "TRY - Turkish currency for business transactions", "TRY", "₺"
+				}
+		};
+		// Use consumer pattern to set currency-specific fields
+		initializeProjectEntity(currencyData,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+					final CCurrency currency = (CCurrency) item;
+					// currencyData format: [name, description, code, symbol]
+					// Get the index to access the correct data
+					for (final String[] data : currencyData) {
+						if (data[0].equals(currency.getName())) {
+							currency.setCurrencyCode(data[2]);
+							currency.setCurrencySymbol(data[3]);
+							break;
+						}
+					}
+				});
 	}
 }
