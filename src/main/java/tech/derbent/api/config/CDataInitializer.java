@@ -669,21 +669,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleApprovalStatuses(final CProject project, final boolean minimal) {
-		try {
-			createApprovalStatus("Draft", project, "Approval is in draft state", CColorUtils.getRandomColor(true), false, 1);
-			if (minimal) {
-				return;
-			}
-			createApprovalStatus("Submitted", project, "Approval has been submitted", CColorUtils.getRandomColor(true), false, 2);
-			createApprovalStatus("Approved", project, "Approval has been approved", CColorUtils.getRandomColor(true), true, 3);
-			createApprovalStatus("Rejected", project, "Approval has been rejected", CColorUtils.getRandomColor(true), true, 4);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing approval statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize approval statuses for project: " + project.getName(), e);
-		}
-	}
-
 	private void initializeSampleCommentPriorities(final CProject project, final boolean minimal) {
 		try {
 			createCommentPriority(project, "Low", "Low priority comment", CColorUtils.getRandomColor(true), 1, false, 1);
@@ -948,52 +933,6 @@ public class CDataInitializer {
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
-	private void initializeSampleProjectItemStatuses(final CProject project, final boolean minimal) {
-		try {
-			createProjectItemStatus(STATUS_NOT_STARTED, project, "Activity has not been started yet", "#95a5a6", false, 1);
-			if (minimal) {
-				return;
-			}
-			createProjectItemStatus(STATUS_IN_PROGRESS, project, "Activity is currently in progress", "#3498db", false, 2);
-			createProjectItemStatus(STATUS_ON_HOLD, project, "Activity is temporarily on hold", "#f39c12", false, 3);
-			createProjectItemStatus(STATUS_COMPLETED, project, "Activity has been completed", "#27ae60", true, 4);
-			createProjectItemStatus(STATUS_CANCELLED, project, "Activity has been cancelled", "#e74c3c", true, 5);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing activity statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize activity statuses for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleProjectRoles(final CProject project, final boolean minimal) {
-		try {
-			// Create three project roles: Admin, User, Guest (one for each role type)
-			final String[][] projectRoles = {
-					{
-							"Project Admin", "Administrative role with full project access", "true", "false", "false"
-					}, {
-							"Project User", "Standard user role with regular access", "false", "true", "false"
-					}, {
-							"Project Guest", "Guest role with limited access", "false", "false", "true"
-					}
-			};
-			for (final String[] roleData : projectRoles) {
-				final CUserProjectRole role = new CUserProjectRole(roleData[0], project);
-				role.setDescription(roleData[1]);
-				role.setIsAdmin(Boolean.parseBoolean(roleData[2]));
-				role.setIsUser(Boolean.parseBoolean(roleData[3]));
-				role.setIsGuest(Boolean.parseBoolean(roleData[4]));
-				role.setColor(CColorUtils.getRandomColor(true));
-				userProjectRoleService.save(role);
-				if (minimal) {
-					return;
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating project roles for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize project roles for project: " + project.getName(), e);
-		}
-	}
-
 	private void initializeSampleTeams(final CProject project, final boolean minimal) {
 		try {
 			final CCompany company = project.getCompany();
@@ -1267,9 +1206,9 @@ public class CDataInitializer {
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Project-specific type and configuration entities
 					CCurrencyInitializerService.initializeSample(project, minimal);
-					initializeSampleProjectItemStatuses(project, minimal);
-					initializeSampleApprovalStatuses(project, minimal);
-					initializeSampleProjectRoles(project, minimal);
+					CProjectItemStatusInitializerService.initializeSample(project, minimal);
+					CApprovalStatusInitializerService.initializeSample(project, minimal);
+					CUserProjectRoleInitializerService.initializeSample(project, minimal);
 					initializeSampleWorkflowEntities(project, minimal);
 					// types
 					CMeetingTypeInitializerService.initializeSample(project, minimal);

@@ -3,7 +3,10 @@ package tech.derbent.app.activities.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -59,5 +62,34 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		// Status data: [name, description, color, isFinalStatus, sortOrder]
+		final String[][] statusData = {
+				{
+						"Not Started", "Activity has not been started yet", "#95a5a6", "false", "1"
+				}, {
+						"In Progress", "Activity is currently in progress", "#3498db", "false", "2"
+				}, {
+						"On Hold", "Activity is temporarily on hold", "#f39c12", "false", "3"
+				}, {
+						"Completed", "Activity has been completed", "#27ae60", "true", "4"
+				}, {
+						"Cancelled", "Activity has been cancelled", "#e74c3c", "true", "5"
+				}
+		};
+		// Use consumer pattern to set status-specific fields
+		final int[] index = {
+				0
+		}; // Mutable counter for array access in lambda
+		initializeProjectEntity(statusData,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+					final CProjectItemStatus status = (CProjectItemStatus) item;
+					final String[] data = statusData[index[0]++];
+					status.setColor(data[2]);
+					status.setFinalStatus(Boolean.parseBoolean(data[3]));
+					status.setSortOrder(Integer.parseInt(data[4]));
+				});
 	}
 }
