@@ -3,6 +3,7 @@ package tech.derbent.app.decisions.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -25,10 +26,10 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Decision Type Management";
 	private static final boolean showInQuickToolbar = false;
 
-        public static CDetailSection createBasicView(final CProject project) throws Exception {
-                Check.notNull(project, "project cannot be null");
-                try {
-                        final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
+		Check.notNull(project, "project cannot be null");
+		try {
+			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
@@ -44,13 +45,13 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-                        detailSection.debug_printScreenInformation();
-                        return detailSection;
-                } catch (final Exception e) {
-                        LOGGER.error("Error creating decision type view.");
-                        throw e;
-                }
-        }
+			detailSection.debug_printScreenInformation();
+			return detailSection;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating decision type view.");
+			throw e;
+		}
+	}
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
@@ -86,8 +87,12 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 						"Quality", "Quality assurance and standards decisions"
 				}
 		};
-		final tech.derbent.app.decisions.service.CDecisionTypeService service =
-				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.decisions.service.CDecisionTypeService.class);
-		initializeProjectEntity(decisionTypes, service, project, minimal);
+		final CDecisionTypeService service = CSpringContext.getBean(CDecisionTypeService.class);
+		// Demonstrate last-chance specialization via lambda
+		initializeProjectEntity(decisionTypes, service, project, minimal, dt -> {
+			if (dt.getName() != null && dt.getName().equalsIgnoreCase("Strategic")) {
+				dt.setRequiresApproval(true);
+			}
+		});
 	}
 }
