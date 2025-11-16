@@ -64,4 +64,17 @@ public class CDeliverableTypeInitializerService extends CInitializerServiceBase 
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] deliverableTypes = {
+				{
+						"Document", "Documentation and reports"
+				}, {
+						"Software Package", "Software releases and packages"
+				}
+		};
+		final tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService service =
+				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService.class);
+		initializeProjectEntity(deliverableTypes, service, project, minimal);
+	}
 }

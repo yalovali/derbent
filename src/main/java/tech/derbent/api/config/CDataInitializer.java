@@ -1881,17 +1881,17 @@ public class CDataInitializer {
 					// types
 					CMeetingTypeInitializerService.initializeSample(project, minimal);
 					CDecisionTypeInitializerService.initializeSample(project, minimal);
-					initializeSampleOrderTypes(project, minimal);
+					COrderTypeInitializerService.initializeSample(project, minimal);
 					CActivityTypeInitializerService.initializeSample(project, minimal);
 					CRiskTypeInitializerService.initializeSample(project, minimal);
-					initializeSampleAssetTypes(project, minimal);
-					initializeSampleBudgetTypes(project, minimal);
-					initializeSampleDeliverableTypes(project, minimal);
-					initializeSampleMilestoneTypes(project, minimal);
-					initializeSampleTicketTypes(project, minimal);
+					CAssetTypeInitializerService.initializeSample(project, minimal);
+					CBudgetTypeInitializerService.initializeSample(project, minimal);
+					CDeliverableTypeInitializerService.initializeSample(project, minimal);
+					CMilestoneTypeInitializerService.initializeSample(project, minimal);
+					CTicketTypeInitializerService.initializeSample(project, minimal);
 					initializeSampleProviderTypes(project, minimal);
 					initializeSampleProductTypes(project, minimal);
-					initializeSampleComponentTypes(project, minimal);
+					CComponentTypeInitializerService.initializeSample(project, minimal);
 					initializeSampleProjectExpenseTypes(project, minimal);
 					initializeSampleProjectIncomeTypes(project, minimal);
 					initializeSampleActivityPriorities(project, minimal);

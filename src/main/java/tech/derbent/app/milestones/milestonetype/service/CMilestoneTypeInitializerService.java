@@ -64,4 +64,17 @@ public class CMilestoneTypeInitializerService extends CInitializerServiceBase {
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] milestoneTypes = {
+				{
+						"Phase Completion", "Project phase completion milestones"
+				}, {
+						"Release", "Product or feature release milestones"
+				}
+		};
+		final tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService service =
+				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService.class);
+		initializeProjectEntity(milestoneTypes, service, project, minimal);
+	}
 }

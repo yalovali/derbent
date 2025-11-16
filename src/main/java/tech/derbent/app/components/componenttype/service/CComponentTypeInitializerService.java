@@ -65,3 +65,29 @@ initBase(clazz, project, gridEntityService, detailSectionService, pageEntityServ
 grid, menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder);
 }
 }
+
+public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+final String[][] componentTypes = {
+{
+"Module", "Software modules and packages"
+}, {
+"Library", "Reusable libraries and frameworks"
+}
+};
+final tech.derbent.app.components.componenttype.service.CComponentTypeService service =
+tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.components.componenttype.service.CComponentTypeService.class);
+initializeProjectEntity(componentTypes, service, project, minimal);
+
+public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+final String[][] componentTypes = {
+{
+"Module", "Software modules and packages"
+}, {
+"Library", "Reusable libraries and frameworks"
+}
+};
+final tech.derbent.app.components.componenttype.service.CComponentTypeService service =
+tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.components.componenttype.service.CComponentTypeService.class);
+initializeProjectEntity(componentTypes, service, project, minimal);
+}
+}

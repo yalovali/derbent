@@ -64,4 +64,17 @@ public class CTicketTypeInitializerService extends CInitializerServiceBase {
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] ticketTypes = {
+				{
+						"Bug", "Bug reports and defects"
+				}, {
+						"Feature Request", "New feature requests and enhancements"
+				}
+		};
+		final tech.derbent.app.tickets.tickettype.service.CTicketTypeService service =
+				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.tickets.tickettype.service.CTicketTypeService.class);
+		initializeProjectEntity(ticketTypes, service, project, minimal);
+	}
 }

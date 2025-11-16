@@ -64,4 +64,17 @@ public class CBudgetTypeInitializerService extends CInitializerServiceBase {
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] budgetTypes = {
+				{
+						"Development", "Development and engineering budget"
+				}, {
+						"Marketing", "Marketing and promotional budget"
+				}
+		};
+		final tech.derbent.app.budgets.budgettype.service.CBudgetTypeService service =
+				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.budgets.budgettype.service.CBudgetTypeService.class);
+		initializeProjectEntity(budgetTypes, service, project, minimal);
+	}
 }
