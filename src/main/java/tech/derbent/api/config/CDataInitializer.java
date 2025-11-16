@@ -31,13 +31,10 @@ import tech.derbent.app.activities.service.CActivityTypeInitializerService;
 import tech.derbent.app.activities.service.CActivityTypeService;
 import tech.derbent.app.activities.service.CProjectItemStatusInitializerService;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
-import tech.derbent.app.assets.asset.domain.CAsset;
 import tech.derbent.app.assets.asset.service.CAssetInitializerService;
 import tech.derbent.app.assets.asset.service.CAssetService;
-import tech.derbent.app.assets.assettype.domain.CAssetType;
 import tech.derbent.app.assets.assettype.service.CAssetTypeInitializerService;
 import tech.derbent.app.assets.assettype.service.CAssetTypeService;
-import tech.derbent.app.budgets.budget.domain.CBudget;
 import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
 import tech.derbent.app.budgets.budget.service.CBudgetService;
 import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
@@ -52,10 +49,8 @@ import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyInitializerService;
 import tech.derbent.app.companies.service.CCompanyService;
-import tech.derbent.app.components.component.domain.CComponent;
 import tech.derbent.app.components.component.service.CComponentInitializerService;
 import tech.derbent.app.components.component.service.CComponentService;
-import tech.derbent.app.components.componenttype.domain.CComponentType;
 import tech.derbent.app.components.componenttype.service.CComponentTypeInitializerService;
 import tech.derbent.app.components.componenttype.service.CComponentTypeService;
 import tech.derbent.app.components.componentversion.service.CComponentVersionInitializerService;
@@ -66,10 +61,8 @@ import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
-import tech.derbent.app.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.app.deliverables.deliverable.service.CDeliverableInitializerService;
 import tech.derbent.app.deliverables.deliverable.service.CDeliverableService;
-import tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
@@ -79,10 +72,8 @@ import tech.derbent.app.meetings.service.CMeetingInitializerService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.meetings.service.CMeetingTypeInitializerService;
 import tech.derbent.app.meetings.service.CMeetingTypeService;
-import tech.derbent.app.milestones.milestone.domain.CMilestone;
 import tech.derbent.app.milestones.milestone.service.CMilestoneInitializerService;
 import tech.derbent.app.milestones.milestone.service.CMilestoneService;
-import tech.derbent.app.milestones.milestonetype.domain.CMilestoneType;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeInitializerService;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService;
 import tech.derbent.app.orders.approval.domain.CApprovalStatus;
@@ -106,32 +97,20 @@ import tech.derbent.app.products.producttype.service.CProductTypeInitializerServ
 import tech.derbent.app.products.producttype.service.CProductTypeService;
 import tech.derbent.app.products.productversion.service.CProductVersionInitializerService;
 import tech.derbent.app.products.productversiontype.service.CProductVersionTypeInitializerService;
-import tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense;
 import tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseInitializerService;
-import tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseService;
-import tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpenseType;
 import tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeInitializerService;
-import tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService;
-import tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeInitializerService;
-import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeService;
-import tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType;
 import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeInitializerService;
-import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectInitializerService;
 import tech.derbent.app.projects.service.CProjectService;
-import tech.derbent.app.providers.provider.domain.CProvider;
 import tech.derbent.app.providers.provider.service.CProviderInitializerService;
 import tech.derbent.app.providers.provider.service.CProviderService;
-import tech.derbent.app.providers.providertype.domain.CProviderType;
 import tech.derbent.app.providers.providertype.service.CProviderTypeInitializerService;
 import tech.derbent.app.providers.providertype.service.CProviderTypeService;
 import tech.derbent.app.risklevel.risklevel.service.CRiskLevelInitializerService;
-import tech.derbent.app.risks.risk.domain.CRisk;
 import tech.derbent.app.risks.risk.service.CRiskInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskService;
-import tech.derbent.app.risks.risktype.domain.CRiskType;
 import tech.derbent.app.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.app.risks.risktype.service.CRiskTypeService;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
@@ -140,15 +119,9 @@ import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
-import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.app.teams.team.service.CTeamInitializerService;
-import tech.derbent.app.teams.team.service.CTeamService;
-import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.ticket.service.CTicketInitializerService;
-import tech.derbent.app.tickets.ticket.service.CTicketService;
-import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeInitializerService;
-import tech.derbent.app.tickets.tickettype.service.CTicketTypeService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
@@ -1314,45 +1287,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleRisks(final CProject project, final boolean minimal) {
-		try {
-			final tech.derbent.app.risks.risktype.domain.CRiskType type1 = riskTypeService.getRandom(project);
-			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.risks.risk.domain.CRisk risk1 =
-					new tech.derbent.app.risks.risk.domain.CRisk("Data Security Vulnerability", project);
-			risk1.setDescription("Potential security vulnerability in data access layer");
-			risk1.setEntityType(type1);
-			risk1.setAssignedTo(user1);
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(risk1);
-				if (!initialStatuses.isEmpty()) {
-					risk1.setStatus(initialStatuses.get(0));
-				}
-			}
-			riskService.save(risk1);
-			if (minimal) {
-				return;
-			}
-			final tech.derbent.app.risks.risktype.domain.CRiskType type2 = riskTypeService.getRandom(project);
-			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.risks.risk.domain.CRisk risk2 = new tech.derbent.app.risks.risk.domain.CRisk("Budget Overrun Risk", project);
-			risk2.setDescription("Risk of exceeding allocated project budget");
-			risk2.setEntityType(type2);
-			risk2.setAssignedTo(user2);
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(risk2);
-				if (!initialStatuses.isEmpty()) {
-					risk2.setStatus(initialStatuses.get(0));
-				}
-			}
-			riskService.save(risk2);
-			LOGGER.debug("Created sample risks for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample risks for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample risks for project: " + project.getName(), e);
-		}
-	}
-
 	private void initializeSampleTeams(final CProject project, final boolean minimal) {
 		try {
 			final CCompany company = project.getCompany();
@@ -1664,7 +1598,7 @@ public class CDataInitializer {
 					initializeSampleProjectExpenses(project, minimal);
 					initializeSampleProjectIncomes(project, minimal);
 					initializeSampleTeams(project, minimal);
-					initializeSampleRisks(project, minimal);
+					CRiskInitializerService.initializeSample(project, minimal);
 					if (minimal) {
 						break;
 					}

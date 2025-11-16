@@ -118,7 +118,7 @@ public abstract class CInitializerServiceBase {
 		final Class<?> returnType = field.getType();
 		final Class<?> serviceClass = CEntityRegistry.getEntityServiceClass(returnType.getSimpleName());
 		Check.notNull(serviceClass, "Service class not found for " + returnType.getSimpleName());
-		Check.instanceOf(CTypeEntityService.class, serviceClass, "Service class " + serviceClass.getName() + " is not a CTypeEntityService");
+		Check.instanceOf(serviceClass, CTypeEntityService.class, "Service class " + serviceClass.getName() + " is not a CTypeEntityService");
 		final CTypeEntityService<?> typeService = (CTypeEntityService<?>) CSpringContext.getBean(serviceClass);
 		Check.notNull(typeService, "Could not get bean of type " + serviceClass.getName());
 		return typeService;
