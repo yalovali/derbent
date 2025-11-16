@@ -11,9 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityInitializerService;
@@ -936,10 +934,12 @@ public class CDataInitializer {
 
 	private void initializeSampleWorkflow(final String name, final CProject project, final List<CProjectItemStatus> statuses,
 			final List<CUserProjectRole> roles) {
-		if (statuses.isEmpty() || roles.isEmpty()) {
-			LOGGER.warn("No statuses or roles found for project {}. Skipping workflow initialization.", project.getName());
-			return;
-		}
+		Check.notNull(name, "Workflow name cannot be null");
+		Check.notNull(project, "Project cannot be null");
+		Check.notNull(statuses, "Statuses list cannot be null");
+		Check.notNull(roles, "Roles list cannot be null");
+		Check.notEmpty(statuses, "Statuses list cannot be empty");
+		Check.notEmpty(roles, "Roles list cannot be empty");
 		final CWorkflowEntity activityWorkflow = new CWorkflowEntity(name, project);
 		activityWorkflow.setDescription("Defines status transitions for activities based on user roles");
 		activityWorkflow.setIsActive(true);
@@ -969,7 +969,9 @@ public class CDataInitializer {
 		try {
 			// Get available statuses for this project
 			final List<CProjectItemStatus> statuses = projectItemStatusService.list(Pageable.unpaged()).getContent();
+			Check.notEmpty(statuses, "No project item statuses found for project: " + project.getName());
 			final List<CUserProjectRole> roles = userProjectRoleService.list(Pageable.unpaged()).getContent();
+			Check.notEmpty(roles, "No user project roles found for project: " + project.getName());
 			initializeSampleWorkflow("Activity Status Workflow", project, statuses, roles);
 			initializeSampleWorkflow("Decision Status Workflow", project, statuses, roles);
 			initializeSampleWorkflow("Meeting Status Workflow", project, statuses, roles);
@@ -979,26 +981,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample workflow entities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample workflow entities for project: " + project.getName(), e);
-		}
-	}
-
-	@SuppressWarnings ("unchecked")
-	private <EntityClass extends CTypeEntity<EntityClass>> void initializeType(final String[][] nameAndDescription,
-			final CTypeEntityService<EntityClass> typeService, final CProject project, final boolean minimal) {
-		try {
-			for (final String[] typeData : nameAndDescription) {
-				final CTypeEntity<EntityClass> item = typeService.newEntity(typeData[0], project);
-				item.setDescription(typeData[1]);
-				item.setColor(CColorUtils.getRandomColor(true));
-				item.setWorkflow(workflowEntityService.getRandom(project));
-				typeService.save((EntityClass) item);
-				if (minimal) {
-					return;
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating types for project: {} {}", project.getName(), e.getMessage());
-			throw e;
 		}
 	}
 

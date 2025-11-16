@@ -71,27 +71,21 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	 * @param workflow the workflow entity to get initial status from
 	 * @return Optional containing the initial status if found, empty otherwise */
 	public Optional<CProjectItemStatus> getInitialStatusFromWorkflow(final CWorkflowEntity workflow) {
-		if (workflow == null) {
-			LOGGER.debug("Workflow is null, cannot get initial status");
-			return Optional.empty();
-		}
+		Check.notNull(workflow, "Workflow cannot be null when retrieving initial status");
 		try {
 			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
-			// LOGGER.debug("Found {} status relations for workflow: {}", relations.size(), workflow.getName());
-			// Get statuses from relations marked as initial
+			Check.notEmpty(relations, "No status relations found for workflow: " + workflow.getName());
 			final Optional<CProjectItemStatus> initialStatus = relations.stream().filter(r -> r.getInitialStatus() != null && r.getInitialStatus())
 					.map(CWorkflowStatusRelation::getToStatus).distinct().findFirst();
 			if (initialStatus.isPresent()) {
-				// LOGGER.debug("Found initial status: {} for workflow: {}", initialStatus.get().getName(), workflow.getName());
 				return initialStatus;
 			}
-			// If no initial statuses found, use the first fromStatus in the workflow as fallback
 			if (!relations.isEmpty()) {
 				final CProjectItemStatus fallbackStatus = relations.get(0).getFromStatus();
 				return Optional.of(fallbackStatus);
 			}
 			LOGGER.warn("No status relations found for workflow: {}", workflow.getName());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error retrieving initial status for workflow {}: {}", workflow.getName(), e.getMessage());
 		}
 		return Optional.empty();
@@ -135,7 +129,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 			// Find relations where fromStatus matches current status and exclude current status from valid next statuses
 			relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
 					.distinct().filter(r -> !r.getId().equals(currentStatus.getId())).forEach(validStatuses::add);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error retrieving valid next statuses for project item {}: {}", item.toString(), e.getMessage());
 		}
 		return validStatuses;

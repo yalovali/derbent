@@ -23,10 +23,10 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Asset Information";
 	private static final Class<?> clazz = CAsset.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetInitializerService.class);
-	private static final String menuTitle = MenuTitle_PROJECT + ".Assets";
-	private static final String pageTitle = "Asset Management";
-	private static final String pageDescription = "Asset management";
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Assets";
+	private static final String pageDescription = "Asset management";
+	private static final String pageTitle = "Asset Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -73,7 +73,8 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+				(item, index) -> {
 					final CAsset asset = (CAsset) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
 					asset.setAssignedTo(user);

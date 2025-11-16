@@ -90,9 +90,10 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, x -> {
-					final CDecisionType item = (CDecisionType) x;
-					item.setRequiresApproval(true);
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+				(item, index) -> {
+					final CDecisionType type = (CDecisionType) item;
+					type.setRequiresApproval(true);
 				});
 	}
 }

@@ -23,10 +23,10 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Milestone Information";
 	private static final Class<?> clazz = CMilestone.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestoneInitializerService.class);
-	private static final String menuTitle = MenuTitle_PROJECT + ".Milestones";
-	private static final String pageTitle = "Milestone Management";
-	private static final String pageDescription = "Milestone management";
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Milestones";
+	private static final String pageDescription = "Milestone management";
+	private static final String pageTitle = "Milestone Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -73,7 +73,8 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+				(item, index) -> {
 					final CMilestone milestone = (CMilestone) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
 					milestone.setAssignedTo(user);

@@ -2,7 +2,7 @@ package tech.derbent.api.screens.service;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.ObjIntConsumer;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
@@ -118,6 +118,9 @@ public abstract class CInitializerServiceBase {
 		final Class<?> returnType = field.getType();
 		final Class<?> serviceClass = CEntityRegistry.getEntityServiceClass(returnType.getSimpleName());
 		Check.notNull(serviceClass, "Service class not found for " + returnType.getSimpleName());
+		// if (!CTypeEntityService.class.isAssignableFrom(serviceClass)) {
+		// throw new IllegalStateException("Service class " + serviceClass.getName() + " is not a CTypeEntityService");
+		// }
 		Check.instanceOf(serviceClass, CTypeEntityService.class, "Service class " + serviceClass.getName() + " is not a CTypeEntityService");
 		final CTypeEntityService<?> typeService = (CTypeEntityService<?>) CSpringContext.getBean(serviceClass);
 		Check.notNull(typeService, "Could not get bean of type " + serviceClass.getName());
@@ -141,9 +144,10 @@ public abstract class CInitializerServiceBase {
 
 	@SuppressWarnings ("unchecked")
 	protected static <EntityClass extends CEntityOfProject<EntityClass>> void initializeProjectEntity(final String[][] nameAndDescription,
-			final CEntityOfProjectService<EntityClass> service, final CProject project, final boolean minimal, final Consumer<EntityClass> customizer)
-			throws Exception {
+			final CEntityOfProjectService<EntityClass> service, final CProject project, final boolean minimal,
+			final ObjIntConsumer<EntityClass> customizer) throws Exception {
 		try {
+			int index = 0;
 			for (final String[] typeData : nameAndDescription) {
 				final CEntityOfProject<EntityClass> item = service.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
@@ -179,9 +183,10 @@ public abstract class CInitializerServiceBase {
 				}
 				// last-chance specialization
 				if (customizer != null) {
-					customizer.accept((EntityClass) item);
+					customizer.accept((EntityClass) item, index);
 				}
 				service.save((EntityClass) item);
+				index++;
 				if (minimal) {
 					return;
 				}

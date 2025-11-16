@@ -23,10 +23,10 @@ public class CProviderInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Provider Information";
 	private static final Class<?> clazz = CProvider.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProviderInitializerService.class);
-	private static final String menuTitle = MenuTitle_PROJECT + ".Providers";
-	private static final String pageTitle = "Provider Management";
-	private static final String pageDescription = "Provider management";
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Providers";
+	private static final String pageDescription = "Provider management";
+	private static final String pageTitle = "Provider Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -73,7 +73,8 @@ public class CProviderInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+				(item, index) -> {
 					final CProvider provider = (CProvider) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
 					provider.setAssignedTo(user);

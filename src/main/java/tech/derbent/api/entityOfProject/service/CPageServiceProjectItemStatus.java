@@ -12,7 +12,7 @@ public class CPageServiceProjectItemStatus extends CPageServiceDynamicPage<CProj
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceProjectItemStatus.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceProjectItemStatus(IPageServiceImplementer<CProjectItemStatus> view) {
+	public CPageServiceProjectItemStatus(final IPageServiceImplementer<CProjectItemStatus> view) {
 		super(view);
 	}
 
@@ -22,7 +22,7 @@ public class CPageServiceProjectItemStatus extends CPageServiceDynamicPage<CProj
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CProjectItemStatus.class.getSimpleName());
 			Check.notNull(view, "View must not be null to bind page service.");
 			super.bind();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(),
 					CProjectItemStatus.class.getSimpleName(), e.getMessage());
 			throw e;

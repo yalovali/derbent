@@ -22,10 +22,10 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 	public static final String BASE_PANEL_NAME = "Project Role Details";
 	private static final Class<?> ENTITY_CLASS = CUserProjectRole.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectRoleInitializerService.class);
-	private static final String menuTitle = MenuTitle_ROLES + ".User Project Roles";
-	private static final String pageTitle = "User Project Role Management";
-	private static final String pageDescription = "Manage project-specific roles and permissions";
 	private static final String menuOrder = Menu_Order_ROLES + ".1";
+	private static final String menuTitle = MenuTitle_ROLES + ".User Project Roles";
+	private static final String pageDescription = "Manage project-specific roles and permissions";
+	private static final String pageTitle = "User Project Role Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -92,13 +92,10 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 				}
 		};
 		// Use consumer pattern to set role-specific fields
-		final int[] index = {
-				0
-		}; // Mutable counter for array access in lambda
-		initializeProjectEntity(roleData,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(ENTITY_CLASS)), project, minimal, item -> {
+		initializeProjectEntity(roleData, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(ENTITY_CLASS)),
+				project, minimal, (item, index) -> {
 					final CUserProjectRole role = (CUserProjectRole) item;
-					final String[] data = roleData[index[0]++];
+					final String[] data = roleData[index];
 					role.setIsAdmin(Boolean.parseBoolean(data[2]));
 					role.setIsUser(Boolean.parseBoolean(data[3]));
 					role.setIsGuest(Boolean.parseBoolean(data[4]));

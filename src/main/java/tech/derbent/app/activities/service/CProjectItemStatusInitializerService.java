@@ -66,7 +66,7 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
 		// Status data: [name, description, color, isFinalStatus, sortOrder]
-		final String[][] statusData = {
+		final String[][] data = {
 				{
 						"Not Started", "Activity has not been started yet", "#95a5a6", "false", "1"
 				}, {
@@ -79,17 +79,12 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 						"Cancelled", "Activity has been cancelled", "#e74c3c", "true", "5"
 				}
 		};
-		// Use consumer pattern to set status-specific fields
-		final int[] index = {
-				0
-		}; // Mutable counter for array access in lambda
-		initializeProjectEntity(statusData,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+		initializeProjectEntity(data, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project,
+				minimal, (item, index) -> {
 					final CProjectItemStatus status = (CProjectItemStatus) item;
-					final String[] data = statusData[index[0]++];
-					status.setColor(data[2]);
-					status.setFinalStatus(Boolean.parseBoolean(data[3]));
-					status.setSortOrder(Integer.parseInt(data[4]));
+					status.setColor(data[index][2]);
+					status.setFinalStatus(Boolean.parseBoolean(data[index][3]));
+					status.setSortOrder(Integer.parseInt(data[index][4]));
 				});
 	}
 }

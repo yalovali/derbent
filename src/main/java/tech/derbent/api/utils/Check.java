@@ -60,7 +60,7 @@ public class Check {
 		final double value = number.doubleValue();
 		final double minValue = min.doubleValue();
 		final double maxValue = max.doubleValue();
-		if ((value < minValue) || (value > maxValue)) {
+		if (value < minValue || value > maxValue) {
 			final String def = String.format("Number must be between %s and %s (inclusive)", min, max);
 			final String m = msg(message, def);
 			logFail(m);
@@ -119,10 +119,10 @@ public class Check {
 	 * @param message custom error message, or null for default
 	 * @throws IllegalArgumentException if objects are not equal */
 	public static void equals(final Object obj1, final Object obj2, final String message) {
-		if ((obj1 == null) && (obj2 == null)) {
+		if (obj1 == null && obj2 == null) {
 			return; // Both null is considered equal
 		}
-		if ((obj1 == null) || (obj2 == null) || !obj1.equals(obj2)) {
+		if (obj1 == null || obj2 == null || !obj1.equals(obj2)) {
 			final String def = String.format("Objects are not equal: %s != %s", obj1, obj2);
 			final String m = msg(message, def);
 			logFail(m);
@@ -154,7 +154,7 @@ public class Check {
 	}
 
 	public static void index(final int index, final int size, final String message) {
-		if ((index < 0) || (index >= size)) {
+		if (index < 0 || index >= size) {
 			final String def = String.format("Index %d is out of bounds for size %d", index, size);
 			final String m = msg(message, def);
 			logFail(m);
@@ -175,7 +175,7 @@ public class Check {
 	public static void instanceOf(final Object object, final Class<?> expectedClass, final String message) {
 		notNull(object, message);
 		notNull(expectedClass, message);
-		Check.isTrue(expectedClass.isInstance(object) || object.getClass().equals(expectedClass),
+		Check.isTrue(object.getClass().isInstance(expectedClass) || object.getClass().equals(expectedClass),
 				"Object of type " + object.getClass().getSimpleName() + " is not an instance of " + expectedClass.getSimpleName());
 	}
 
@@ -184,7 +184,7 @@ public class Check {
 	}
 
 	public static void isBlank(final String string, final String message) {
-		if ((string != null) && !string.trim().isEmpty()) {
+		if (string != null && !string.trim().isEmpty()) {
 			final String m = msg(message, "String must be null or blank");
 			logFail(m);
 			throw new IllegalArgumentException(m);
@@ -246,7 +246,7 @@ public class Check {
 		nonNegative(maxLength, message);
 		isTrue(minLength <= maxLength, "Minimum length cannot be greater than maximum length");
 		final int length = string.length();
-		if ((length < minLength) || (length > maxLength)) {
+		if (length < minLength || length > maxLength) {
 			final String def = String.format("String length %d is not between %d and %d (inclusive)", length, minLength, maxLength);
 			final String m = msg(message, def);
 			logFail(m);
@@ -361,7 +361,7 @@ public class Check {
 
 	/** Resolve message (custom or default). */
 	private static String msg(final String custom, final String deflt) {
-		return (custom != null) ? custom : deflt;
+		return custom != null ? custom : deflt;
 	}
 
 	public static void nonNegative(final Number number) {
@@ -434,7 +434,7 @@ public class Check {
 	}
 
 	public static void notEquals(final Object obj1, final Object obj2, final String message) {
-		if (((obj1 == null) && (obj2 == null)) || ((obj1 != null) && obj1.equals(obj2))) {
+		if (obj1 == null && obj2 == null || obj1 != null && obj1.equals(obj2)) {
 			final String def = String.format("Objects must not be equal: %s == %s", obj1, obj2);
 			final String m = msg(message, def);
 			logFail(m);
@@ -456,7 +456,7 @@ public class Check {
 
 	private static String shortClassName(final String fqcn) {
 		final int idx = fqcn.lastIndexOf('.');
-		return ((idx >= 0) && (idx < (fqcn.length() - 1))) ? fqcn.substring(idx + 1) : fqcn;
+		return idx >= 0 && idx < fqcn.length() - 1 ? fqcn.substring(idx + 1) : fqcn;
 	}
 
 	public static void sizeRange(final Collection<?> collection, final int minSize, final int maxSize) {
@@ -469,7 +469,7 @@ public class Check {
 		nonNegative(maxSize, message);
 		isTrue(minSize <= maxSize, "Minimum size cannot be greater than maximum size");
 		final int size = collection.size();
-		if ((size < minSize) || (size > maxSize)) {
+		if (size < minSize || size > maxSize) {
 			final String def = String.format("Collection size %d is not between %d and %d (inclusive)", size, minSize, maxSize);
 			final String m = msg(message, def);
 			logFail(m);

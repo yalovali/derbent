@@ -80,7 +80,8 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+				(item, index) -> {
 					final CRisk risk = (CRisk) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
 					risk.setAssignedTo(user);

@@ -23,10 +23,10 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Deliverable Information";
 	private static final Class<?> clazz = CDeliverable.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableInitializerService.class);
-	private static final String menuTitle = MenuTitle_PROJECT + ".Deliverables";
-	private static final String pageTitle = "Deliverable Management";
-	private static final String pageDescription = "Deliverable management";
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Deliverables";
+	private static final String pageDescription = "Deliverable management";
+	private static final String pageTitle = "Deliverable Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -73,7 +73,8 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+				(item, index) -> {
 					final CDeliverable deliverable = (CDeliverable) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
 					deliverable.setAssignedTo(user);

@@ -65,7 +65,7 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		final String[][] currencyData = {
+		final String[][] data = {
 				{
 						"US Dollar", "USD - International currency for business transactions", "USD", "$ "
 				}, {
@@ -75,18 +75,11 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 				}
 		};
 		// Use consumer pattern to set currency-specific fields
-		initializeProjectEntity(currencyData, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
-				project, minimal, item -> {
+		initializeProjectEntity(data, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project,
+				minimal, (item, index) -> {
 					final CCurrency currency = (CCurrency) item;
-					// currencyData format: [name, description, code, symbol]
-					// Get the index to access the correct data
-					for (final String[] data : currencyData) {
-						if (data[0].equals(currency.getName())) {
-							currency.setCurrencyCode(data[2]);
-							currency.setCurrencySymbol(data[3]);
-							break;
-						}
-					}
+					currency.setCurrencyCode(data[index][2]);
+					currency.setCurrencySymbol(data[index][3]);
 				});
 	}
 }

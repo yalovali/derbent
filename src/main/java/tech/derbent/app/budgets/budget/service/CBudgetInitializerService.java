@@ -23,10 +23,10 @@ public class CBudgetInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Budget Information";
 	private static final Class<?> clazz = CBudget.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetInitializerService.class);
-	private static final String menuTitle = MenuTitle_PROJECT + ".Budgets";
-	private static final String pageTitle = "Budget Management";
-	private static final String pageDescription = "Budget management";
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Budgets";
+	private static final String pageDescription = "Budget management";
+	private static final String pageTitle = "Budget Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -73,7 +73,8 @@ public class CBudgetInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+				(item, index) -> {
 					final CBudget budget = (CBudget) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
 					budget.setAssignedTo(user);

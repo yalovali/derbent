@@ -76,14 +76,10 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 						"Rejected", "Approval has been rejected", "4"
 				}
 		};
-		// Use consumer pattern to set approval-specific fields
-		final int[] index = {
-				0
-		}; // Mutable counter for array access in lambda
-		initializeProjectEntity(statusData,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, item -> {
+		initializeProjectEntity(statusData, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CApprovalStatus status = (CApprovalStatus) item;
-					final String[] data = statusData[index[0]++];
+					final String[] data = statusData[index];
 					status.setColor(CColorUtils.getRandomColor(true));
 					status.setSortOrder(Integer.parseInt(data[2]));
 				});

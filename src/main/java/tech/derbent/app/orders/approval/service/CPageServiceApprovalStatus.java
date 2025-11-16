@@ -12,7 +12,7 @@ public class CPageServiceApprovalStatus extends CPageServiceDynamicPage<CApprova
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceApprovalStatus.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceApprovalStatus(IPageServiceImplementer<CApprovalStatus> view) {
+	public CPageServiceApprovalStatus(final IPageServiceImplementer<CApprovalStatus> view) {
 		super(view);
 	}
 
@@ -22,7 +22,7 @@ public class CPageServiceApprovalStatus extends CPageServiceDynamicPage<CApprova
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CApprovalStatus.class.getSimpleName());
 			Check.notNull(view, "View must not be null to bind page service.");
 			super.bind();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CApprovalStatus.class.getSimpleName(),
 					e.getMessage());
 			throw e;
