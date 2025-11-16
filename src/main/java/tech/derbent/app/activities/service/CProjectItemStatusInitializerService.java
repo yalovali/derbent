@@ -4,8 +4,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -13,6 +13,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
@@ -64,7 +65,7 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		// Status data: [name, description, color, isFinalStatus, sortOrder]
 		final String[][] data = {
 				{
@@ -79,7 +80,7 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 						"Cancelled", "Activity has been cancelled", "#e74c3c", "true", "5"
 				}
 		};
-		initializeProjectEntity(data, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project,
+		initializeCompanyEntity(data, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company,
 				minimal, (item, index) -> {
 					final CProjectItemStatus status = (CProjectItemStatus) item;
 					status.setColor(data[index][2]);

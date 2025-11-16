@@ -4,7 +4,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -13,6 +13,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -63,7 +64,7 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CCompany project, final boolean minimal) throws Exception {
 		// Approval status data: [name, description, sortOrder]
 		final String[][] statusData = {
 				{
@@ -76,7 +77,7 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 						"Rejected", "Approval has been rejected", "4"
 				}
 		};
-		initializeProjectEntity(statusData, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+		initializeCompanyEntity(statusData, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
 				project, minimal, (item, index) -> {
 					final CApprovalStatus status = (CApprovalStatus) item;
 					final String[] data = statusData[index];

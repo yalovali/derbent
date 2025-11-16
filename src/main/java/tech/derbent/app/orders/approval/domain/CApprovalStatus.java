@@ -5,7 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CStatus;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "capprovalstatus")
@@ -22,22 +22,11 @@ public class CApprovalStatus extends CStatus<CApprovalStatus> {
 		setColor(DEFAULT_COLOR);
 	}
 
-	public CApprovalStatus(final String name, final CProject project) {
-		super(CApprovalStatus.class, name, project);
+	public CApprovalStatus(final String name, final CCompany company) {
+		super(CApprovalStatus.class, name, company);
 		setColor(DEFAULT_COLOR);
 	}
 
 	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
+	public void initializeAllFields() {}
 }

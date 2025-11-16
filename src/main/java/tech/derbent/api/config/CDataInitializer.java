@@ -639,7 +639,7 @@ public class CDataInitializer {
 		try {
 			// Get random values from database for dependencies
 			final CDecisionType type1 = decisionTypeService.getRandom(project);
-			final CProjectItemStatus status1 = activityStatusService.getRandom(project);
+			final CProjectItemStatus status1 = activityStatusService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom();
 			// Create first decision
 			final CDecision decision1 = new CDecision("Adopt Cloud-Native Architecture", project);
@@ -659,7 +659,7 @@ public class CDataInitializer {
 			}
 			// Create second decision
 			final CDecisionType type2 = decisionTypeService.getRandom(project);
-			final CProjectItemStatus status2 = activityStatusService.getRandom(project);
+			final CProjectItemStatus status2 = activityStatusService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom();
 			final CDecision decision2 = new CDecision("Implement Agile Methodology", project);
 			decision2.setDescription("Operational decision to transition from waterfall to agile development methodology");
@@ -1110,8 +1110,8 @@ public class CDataInitializer {
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Project-specific type and configuration entities
 					CCurrencyInitializerService.initializeSample(project, minimal);
-					CProjectItemStatusInitializerService.initializeSample(project, minimal);
-					CApprovalStatusInitializerService.initializeSample(project, minimal);
+					CProjectItemStatusInitializerService.initializeSample(project.getCompany(), minimal);
+					CApprovalStatusInitializerService.initializeSample(project.getCompany(), minimal);
 					CUserProjectRoleInitializerService.initializeSample(project, minimal);
 					initializeSampleWorkflowEntities(project, minimal);
 					// types

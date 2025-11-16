@@ -64,7 +64,7 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 	@PreAuthorize ("permitAll()")
 	public List<CProject> findAll() {
 		Check.notNull(repository, "Repository must not be null");
-		return ((IProjectRepository) repository).findByCompany_Id(getCurrentCompany().getId());
+		return ((IProjectRepository) repository).findByCompanyId(getCurrentCompany().getId());
 	}
 
 	@PreAuthorize ("permitAll()")
@@ -72,7 +72,7 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 		Check.notNull(repository, "Repository must not be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		CCompany company = getCurrentCompany();
-		return ((IProjectRepository) repository).findByCompany_Id(company.getId(), safePage);
+		return ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
 	}
 
 	/** Override to generate unique name based on company-specific project count. Pattern: "Project##" where ## is zero-padded number within company
@@ -136,7 +136,7 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 	public Page<CProject> list(final Pageable pageable) {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		CCompany company = getCurrentCompany();
-		final Page<CProject> entities = ((IProjectRepository) repository).findByCompany_Id(company.getId(), safePage);
+		final Page<CProject> entities = ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
 		return entities;
 	}
 

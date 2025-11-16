@@ -2,15 +2,15 @@ package tech.derbent.api.entityOfProject.domain;
 
 import java.time.Clock;
 import tech.derbent.api.domains.CStatus;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
-import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CStatusService - Abstract service class for entities that extend CStatus. Layer: Service (MVC) Provides common business logic operations for
  * status entities that extend CTypeEntity and include status-specific functionality. */
-public abstract class CStatusService<EntityClass extends CStatus<EntityClass>> extends CEntityOfProjectService<EntityClass> {
+public abstract class CStatusService<EntityClass extends CStatus<EntityClass>> extends CEntityOfCompanyService<EntityClass> {
 
-	public CStatusService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
+	public CStatusService(final IEntityOfCompanyRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

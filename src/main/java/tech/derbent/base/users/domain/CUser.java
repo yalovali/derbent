@@ -15,7 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
@@ -28,7 +28,7 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 		"login", "company_id"
 })) // Using quoted identifier to ensure exact case matching in
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
-public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInfoGenerator {
+public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator {
 
 	public static final String DEFAULT_COLOR = "#00546d";
 	public static final String DEFAULT_ICON = "vaadin:user";
@@ -47,13 +47,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			description = "Whether to display user interface sections as tabs", hidden = false, order = 50
 	)
 	private Boolean attributeDisplaySectionsAsTabs;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "company_id", nullable = true)
-	@AMetaData (
-			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false, order = 15,
-			setBackgroundFromColor = true, useIcon = true
-	)
-	private CCompany company;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_role_id", nullable = true)
 	@AMetaData (
@@ -114,13 +107,13 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		super();
 	}
 
-	public CUser(final String name) {
-		super(CUser.class, name);
+	public CUser(final String name, final CCompany company) {
+		super(CUser.class, name, company);
 	}
 
 	public CUser(final String username, final String password, final String name, final String email, final CCompany company,
 			final CUserCompanyRole companyRole) {
-		super(CUser.class, name);
+		super(CUser.class, name, company);
 		login = username;
 		this.email = email;
 		setPassword(password);
@@ -156,8 +149,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		return CUser.class;
 	}
 
-	public CCompany getCompany() { return company; }
-
 	public CUserCompanyRole getCompanyRole() { return companyRole; }
 
 	public String getEmail() { return email; }
@@ -186,10 +177,7 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 
 	@Override
 	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (company != null) {
-			company.getName(); // Trigger company loading
-		}
+		super.initializeAllFields();
 		if (companyRole != null) {
 			companyRole.getName(); // Trigger company role loading
 		}
@@ -197,32 +185,32 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 
 	@Override
 	public boolean matches(final String searchText) {
-		if ((searchText == null) || searchText.trim().isEmpty()) {
+		if (searchText == null || searchText.trim().isEmpty()) {
 			return true; // Empty search matches all
 		}
 		final String lowerSearchText = searchText.toLowerCase().trim();
 		// Search in name field (first name)
-		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
+		if (getName() != null && getName().toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in lastname field
-		if ((lastname != null) && lastname.toLowerCase().contains(lowerSearchText)) {
+		if (lastname != null && lastname.toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in login field
-		if ((login != null) && login.toLowerCase().contains(lowerSearchText)) {
+		if (login != null && login.toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in email field
-		if ((email != null) && email.toLowerCase().contains(lowerSearchText)) {
+		if (email != null && email.toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in description field
-		if ((getDescription() != null) && getDescription().toLowerCase().contains(lowerSearchText)) {
+		if (getDescription() != null && getDescription().toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in ID as string
-		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
+		if (getId() != null && getId().toString().contains(lowerSearchText)) {
 			return true;
 		}
 		return false;
@@ -245,7 +233,7 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	}
 
 	public void setCompany(final CCompany company, final CUserCompanyRole companyRole) {
-		this.company = company;
+		setCompany(company);
 		this.companyRole = companyRole;
 	}
 
@@ -276,13 +264,13 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@Override
 	public String toString() {
 		// Return user-friendly representation for UI display
-		if ((getName() != null) && !getName().trim().isEmpty()) {
-			if ((lastname != null) && !lastname.trim().isEmpty()) {
+		if (getName() != null && !getName().trim().isEmpty()) {
+			if (lastname != null && !lastname.trim().isEmpty()) {
 				return getName() + " " + lastname;
 			}
 			return getName();
 		}
-		if ((login != null) && !login.trim().isEmpty()) {
+		if (login != null && !login.trim().isEmpty()) {
 			return login;
 		}
 		return "User #" + getId();

@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CStatus;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cprojectitemstatus", uniqueConstraints = @UniqueConstraint (columnNames = {
@@ -35,8 +35,8 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 		finalStatus = Boolean.FALSE;
 	}
 
-	public CProjectItemStatus(final String name, final CProject project) {
-		super(CProjectItemStatus.class, name, project);
+	public CProjectItemStatus(final String name, final CCompany company) {
+		super(CProjectItemStatus.class, name, company);
 		setColor(DEFAULT_COLOR);
 	}
 
@@ -59,18 +59,7 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 	}
 
 	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
+	public void initializeAllFields() {}
 
 	public void setFinalStatus(final Boolean finalStatus) { this.finalStatus = finalStatus; }
 

@@ -7,13 +7,13 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.app.companies.domain.CCompany;
 
 /** CStatus - Abstract base entity for all status types in the system. Layer: Domain (MVC) This class provides common functionality for status
  * entities including name and description. All status types (like CProjectItemStatus) should inherit from this class. */
 @MappedSuperclass
-public abstract class CStatus<EntityClass> extends CEntityOfProject<EntityClass> {
+public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CStatus.class);
 	@Column (nullable = false)
@@ -77,8 +77,8 @@ public abstract class CStatus<EntityClass> extends CEntityOfProject<EntityClass>
 
 	/** Constructor with name (required field).
 	 * @param name the name of the status */
-	protected CStatus(final Class<EntityClass> clazz, final String name, final CProject project) {
-		super(clazz, name, project);
+	protected CStatus(final Class<EntityClass> clazz, final String name, final CCompany company) {
+		super(clazz, name, company);
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;

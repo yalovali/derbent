@@ -6,11 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entity.service.IAbstractNamedRepository;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.app.companies.service.ICompanyEntityRepositoryBase;
 import tech.derbent.base.users.domain.CUser;
 
-public interface IUserRepository extends IAbstractNamedRepository<CUser>, ICompanyEntityRepositoryBase<CUser> {
+public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICompanyEntityRepositoryBase<CUser> {
 
 	/** Count distinct users by project ID using generic pattern */
 	@Query ("SELECT COUNT(DISTINCT u) FROM #{#entityName} u LEFT JOIN u.projectSettings ps WHERE ps.project.id = :projectId")
@@ -20,13 +20,13 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser>, ICompa
 	@Query (
 		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company.id = :company_id"
 	)
-	List<CUser> findByCompany_Id(@Param ("company_id") Long company_id);
+	List<CUser> findByCompanyId(@Param ("company_id") Long company_id);
 	/** Find users by company ID with pagination */
 	@Override
 	@Query (
 		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company.id = :company_id"
 	)
-	Page<CUser> findByCompany_Id(@Param ("company_id") Long company_id, Pageable pageable);
+	Page<CUser> findByCompanyId(@Param ("company_id") Long company_id, Pageable pageable);
 	/** Find user by ID with eager loading using generic pattern */
 	@Override
 	@Query ("SELECT u FROM #{#entityName} u " + /* */

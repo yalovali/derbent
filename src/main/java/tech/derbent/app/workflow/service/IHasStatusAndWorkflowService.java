@@ -57,7 +57,7 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
 		}
 		// Step 4: Fallback - use first available status if no workflow or no initial statuses
 		LOGGER.debug("No workflow initial status found, using fallback status assignment");
-		final List<CProjectItemStatus> availableStatuses = projectItemStatusService.listByProject(currentProject);
+		final List<CProjectItemStatus> availableStatuses = projectItemStatusService.listByCompany(currentProject.getCompany());
 		if (!availableStatuses.isEmpty()) {
 			entity.setStatus(availableStatuses.get(0));
 			LOGGER.debug("Assigned fallback status: {} to new entity", availableStatuses.get(0).getName());

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.function.ObjIntConsumer;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
@@ -16,6 +18,7 @@ import tech.derbent.api.services.pageservice.CPageServiceUtility;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CProjectItemStatusService;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -140,6 +143,56 @@ public abstract class CInitializerServiceBase {
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription, order);
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
+	}
+
+	protected static <EntityClass extends CEntityOfCompany<EntityClass>> void initializeCompanyEntity(final String[][] nameAndDescription,
+			final CEntityOfCompanyService<EntityClass> service, final CCompany company, final boolean minimal,
+			final ObjIntConsumer<EntityClass> customizer) throws Exception {
+		try {
+			int index = 0;
+			for (final String[] typeData : nameAndDescription) {
+				final CEntityOfCompany<EntityClass> item = service.newEntity(typeData[0], company);
+				item.setDescription(typeData[1]);
+				// if item has color field, set random color
+				try {
+					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
+				} catch (final NoSuchMethodException ignore) {
+					// no color setter present
+				}
+				if (item instanceof IHasStatusAndWorkflow) {
+					/* item has: void setEntityType(CTypeEntity<?> typeEntity); void setStatus(CProjectItemStatus status); */
+					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
+					final CTypeEntityService<?> typeServiceInstance = getEntityTypeService(statusItem);
+					// must use company not project
+					final CTypeEntity<EntityClass> randomType = (CTypeEntity<EntityClass>) typeServiceInstance.getRandom(null);
+					Check.notNull(randomType, "No type entities found for " + item.getClass().getSimpleName()
+							+ ". Cannot initialize status and workflow for new entity.");
+					statusItem.setEntityType(randomType);
+					final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+					final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(statusItem);
+					Check.notEmpty(initialStatuses,
+							"No valid initial statuses found for " + item.getClass().getSimpleName() + ". Cannot initialize status for new entity.");
+					if (!initialStatuses.isEmpty()) {
+						statusItem.setStatus(initialStatuses.get(0));
+					}
+				}
+				/* if (item instanceof CTypeEntity<?>) { final CWorkflowEntityService workflowEntityService =
+				 * CSpringContext.getBean(CWorkflowEntityService.class); final CTypeEntity<?> typeEntity = (CTypeEntity<?>) item;
+				 * typeEntity.setColor(CColorUtils.getRandomColor(true)); typeEntity.setWorkflow(workflowEntityService.getRandom(company));
+				 * typeEntity.setSortOrder(100); typeEntity.setAttributeNonDeletable(true); } */
+				// last-chance specialization
+				if (customizer != null) {
+					customizer.accept((EntityClass) item, index);
+				}
+				service.save((EntityClass) item);
+				index++;
+				if (minimal) {
+					return;
+				}
+			}
+		} catch (final Exception e) {
+			throw e;
+		}
 	}
 
 	@SuppressWarnings ("unchecked")

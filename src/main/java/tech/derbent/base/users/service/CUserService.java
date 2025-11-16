@@ -24,7 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import tech.derbent.api.entity.service.CEntityNamedService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.ui.component.CComponentUserProjectSettings;
 import tech.derbent.api.utils.Check;
@@ -37,14 +38,14 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserService extends CEntityNamedService<CUser> implements UserDetailsService, IEntityRegistrable {
+public class CUserService extends CEntityOfCompanyService<CUser> implements UserDetailsService, IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
 
-	public CUserService(final IUserRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CUserService(final IEntityOfCompanyRepository<CUser> repository, final Clock clock, final ISessionService sessionService) {
+		super(repository, clock, sessionService);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 		// hashing
 		@SuppressWarnings ("unused")
@@ -61,7 +62,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			}
 			Check.notNull(entity.getCompany(), "User company cannot be null");
 			// Rule 1: Check if this is the last user in the company
-			final List<CUser> companyUsers = ((IUserRepository) repository).findByCompany_Id(entity.getCompany().getId());
+			final List<CUser> companyUsers = ((IUserRepository) repository).findByCompanyId(entity.getCompany().getId());
 			if (companyUsers.size() == 1) {
 				return "Cannot delete the last user in the company. At least one user must remain.";
 			}
@@ -118,7 +119,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	public List<CUser> findAll() {
 		final CCompany currentCompany = getCurrentCompany();
 		// LOGGER.debug("Finding all users for company: {}", currentCompany.getName());
-		return ((IUserRepository) repository).findByCompany_Id(currentCompany.getId());
+		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
 	}
 
 	/** Finds a user by login username.
@@ -134,8 +135,8 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	protected String generateUniqueName() {
 		try {
 			final CCompany currentCompany = sessionService.getCurrentCompany();
-			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompany_Id(currentCompany.getId());
-			String prefix = "User";
+			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
+			final String prefix = "User";
 			return getUniqueNameFromList(prefix, existingUsers);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique user name, falling back to base class: {}", e.getMessage());
@@ -147,7 +148,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	 * @param rolesString comma-separated roles (e.g., "USER,ADMIN")
 	 * @return Collection of GrantedAuthority objects */
 	private Collection<GrantedAuthority> getAuthorities(final String rolesString) {
-		if ((rolesString == null) || rolesString.trim().isEmpty()) {
+		if (rolesString == null || rolesString.trim().isEmpty()) {
 			LOGGER.warn("User has no roles assigned, defaulting to ROLE_USER");
 			return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
 		}
@@ -195,7 +196,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	public Class<?> getPageServiceClass() { return CPageServiceUser.class; }
 
 	public CUser getRandomByCompany(final CCompany company) {
-		final List<CUser> users = ((IUserRepository) repository).findByCompany_Id(company.getId());
+		final List<CUser> users = ((IUserRepository) repository).findByCompanyId(company.getId());
 		if (!users.isEmpty()) {
 			final int randomIndex = (int) (Math.random() * users.size());
 			return users.get(randomIndex);
@@ -242,7 +243,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	public Page<CUser> list(final Pageable pageable) {
 		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Listing users for company: {}", currentCompany.getName());
-		return ((IUserRepository) repository).findByCompany_Id(currentCompany.getId(), pageable);
+		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
 	}
 
 	/** Lists users by project using the CUserProjectSettings relationship. This method allows CUserService to work with dynamic pages that expect
