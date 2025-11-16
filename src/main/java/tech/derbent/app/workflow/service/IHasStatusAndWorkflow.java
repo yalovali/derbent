@@ -36,5 +36,5 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 	CWorkflowEntity getWorkflow();
 	void setEntityType(CTypeEntity<?> typeEntity);
 	void setStatus(CProjectItemStatus status);
-	void setWorkflow(CWorkflowEntity workflow);
+	// void setWorkflow(CWorkflowEntity workflow);
 }

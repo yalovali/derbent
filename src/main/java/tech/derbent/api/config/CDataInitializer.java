@@ -89,8 +89,10 @@ import tech.derbent.app.orders.type.service.COrderTypeInitializerService;
 import tech.derbent.app.orders.type.service.COrderTypeService;
 import tech.derbent.app.page.service.CPageEntityInitializerService;
 import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.products.product.domain.CProduct;
 import tech.derbent.app.products.product.service.CProductInitializerService;
 import tech.derbent.app.products.product.service.CProductService;
+import tech.derbent.app.products.producttype.domain.CProductType;
 import tech.derbent.app.products.producttype.service.CProductTypeInitializerService;
 import tech.derbent.app.products.producttype.service.CProductTypeService;
 import tech.derbent.app.products.productversion.service.CProductVersionInitializerService;
@@ -1288,7 +1290,7 @@ public class CDataInitializer {
 
 	private void initializeSampleProducts(final CProject project, final boolean minimal) {
 		try {
-			final tech.derbent.app.products.producttype.domain.CProductType type1 = productTypeService.getRandom(project);
+			final CProductType type1 = productTypeService.getRandom(project);
 			final CUser user1 = userService.getRandom();
 			final tech.derbent.app.products.product.domain.CProduct product1 =
 					new tech.derbent.app.products.product.domain.CProduct("Enterprise ERP System", project);
@@ -1305,10 +1307,9 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			final tech.derbent.app.products.producttype.domain.CProductType type2 = productTypeService.getRandom(project);
+			final CProductType type2 = productTypeService.getRandom(project);
 			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.products.product.domain.CProduct product2 =
-					new tech.derbent.app.products.product.domain.CProduct("Cloud CRM Platform", project);
+			final CProduct product2 = new CProduct("Cloud CRM Platform", project);
 			product2.setDescription("Customer relationship management platform");
 			product2.setEntityType(type2);
 			product2.setAssignedTo(user2);

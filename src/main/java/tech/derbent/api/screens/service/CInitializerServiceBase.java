@@ -1,6 +1,7 @@
 package tech.derbent.api.screens.service;
 
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -111,15 +112,24 @@ public abstract class CInitializerServiceBase {
 			for (final String[] typeData : nameAndDescription) {
 				final CEntityOfProject<EntityClass> item = service.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
+				typeItem.setActive(Boolean.TRUE);
 				// if item has color field, set random color
 				if (item.getClass().getDeclaredMethod("setColor", String.class) != null) {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
 				}
+				if (item instanceof CTypeEntity<?>) {
+					final CTypeEntity<?> typeItem = (CTypeEntity<?>) item;
+					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
+					// pick random workflow for project
+					typeItem.setWorkflow(workflowEntityService.getRandomByProject(project));
+				}
 				if (item instanceof IHasStatusAndWorkflow) {
 					// item.setSortOrder(typeService.countByProject(project) + 1);
-					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-					statusItem.setWorkflow(workflowEntityService.getRandomByEntityType(project, item.getClass()));
+					// TODO Check entityType field metadata for dataProviderBean
+					//or locate it by searching services for CTypeEntity<clazz> in beans???
+					// locate that service and get random type by project
+					statusItem.setEntityType(?.getRandomByEntityType(project, item.getClass()));
 				}
 				service.save((EntityClass) item);
 				if (minimal) {
