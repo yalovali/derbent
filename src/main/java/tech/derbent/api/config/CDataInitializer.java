@@ -1095,6 +1095,120 @@ public class CDataInitializer {
 		initializeType(riskTypes, riskTypeService, project, minimal);
 	}
 
+	private void initializeSampleAssetTypes(final CProject project, final boolean minimal) {
+		final String[][] assetTypes = {
+				{
+						"Hardware", "Physical hardware assets and equipment"
+				}, {
+						"Software", "Software licenses and applications"
+				}
+		};
+		initializeType(assetTypes, assetTypeService, project, minimal);
+	}
+
+	private void initializeSampleBudgetTypes(final CProject project, final boolean minimal) {
+		final String[][] budgetTypes = {
+				{
+						"Development", "Development and engineering budget"
+				}, {
+						"Marketing", "Marketing and promotional budget"
+				}
+		};
+		initializeType(budgetTypes, budgetTypeService, project, minimal);
+	}
+
+	private void initializeSampleDeliverableTypes(final CProject project, final boolean minimal) {
+		final String[][] deliverableTypes = {
+				{
+						"Document", "Documentation and reports"
+				}, {
+						"Software Package", "Software releases and packages"
+				}
+		};
+		initializeType(deliverableTypes, deliverableTypeService, project, minimal);
+	}
+
+	private void initializeSampleMilestoneTypes(final CProject project, final boolean minimal) {
+		final String[][] milestoneTypes = {
+				{
+						"Phase Completion", "Project phase completion milestones"
+				}, {
+						"Release", "Product or feature release milestones"
+				}
+		};
+		initializeType(milestoneTypes, milestoneTypeService, project, minimal);
+	}
+
+	private void initializeSampleTicketTypes(final CProject project, final boolean minimal) {
+		final String[][] ticketTypes = {
+				{
+						"Bug", "Bug reports and defects"
+				}, {
+						"Feature Request", "New feature requests and enhancements"
+				}
+		};
+		initializeType(ticketTypes, ticketTypeService, project, minimal);
+	}
+
+	private void initializeSampleProviderTypes(final CProject project, final boolean minimal) {
+		final String[][] providerTypes = {
+				{
+						"Vendor", "Hardware and software vendors"
+				}, {
+						"Consultant", "External consultants and contractors"
+				}
+		};
+		initializeType(providerTypes, providerTypeService, project, minimal);
+	}
+
+	private void initializeSampleProductTypes(final CProject project, final boolean minimal) {
+		final String[][] productTypes = {
+				{
+						"Software", "Software products and solutions"
+				}, {
+						"Service", "Service offerings and subscriptions"
+				}
+		};
+		initializeType(productTypes, productTypeService, project, minimal);
+	}
+
+	private void initializeSampleComponentTypes(final CProject project, final boolean minimal) {
+		final String[][] componentTypes = {
+				{
+						"Module", "Software modules and packages"
+				}, {
+						"Library", "Reusable libraries and frameworks"
+				}
+		};
+		initializeType(componentTypes, componentTypeService, project, minimal);
+	}
+
+	private void initializeSampleProjectExpenseTypes(final CProject project, final boolean minimal) {
+		final String[][] expenseTypes = {
+				{
+						"Hardware", "Hardware purchases and equipment"
+				}, {
+						"Consulting", "External consulting services"
+				}
+		};
+		final tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService expenseTypeService = 
+			CSpringContext.getBean(tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService.class);
+		initializeType(expenseTypes, expenseTypeService, project, minimal);
+	}
+
+	private void initializeSampleProjectIncomeTypes(final CProject project, final boolean minimal) {
+		final String[][] incomeTypes = {
+				{
+						"License", "Software license revenue"
+				}, {
+						"Service", "Service and support contracts"
+				}
+		};
+		final tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService incomeTypeService = 
+			CSpringContext.getBean(tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService.class);
+		initializeType(incomeTypes, incomeTypeService, project, minimal);
+	}
+
 	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
 	 * @param project2 */
 	private void initializeSampleUserProjectSettings(final CProject project, final boolean minimal) {
@@ -1108,6 +1222,481 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user project settings.");
 			throw e;
+		}
+	}
+
+	private void initializeSampleAssets(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.assets.assettype.domain.CAssetType type1 = assetTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.assets.asset.domain.CAsset asset1 = 
+				new tech.derbent.app.assets.asset.domain.CAsset("Development Laptop - MacBook Pro", project);
+			asset1.setDescription("High-performance laptop for software development");
+			asset1.setEntityType(type1);
+			asset1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(asset1);
+				if (!initialStatuses.isEmpty()) {
+					asset1.setStatus(initialStatuses.get(0));
+				}
+			}
+			assetService.save(asset1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.assets.assettype.domain.CAssetType type2 = assetTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.assets.asset.domain.CAsset asset2 = 
+				new tech.derbent.app.assets.asset.domain.CAsset("Production Server - AWS EC2", project);
+			asset2.setDescription("Cloud server instance for production environment");
+			asset2.setEntityType(type2);
+			asset2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(asset2);
+				if (!initialStatuses.isEmpty()) {
+					asset2.setStatus(initialStatuses.get(0));
+				}
+			}
+			assetService.save(asset2);
+			LOGGER.debug("Created sample assets for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample assets for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample assets for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleBudgets(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.budgets.budgettype.domain.CBudgetType type1 = budgetTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.budgets.budget.domain.CBudget budget1 = 
+				new tech.derbent.app.budgets.budget.domain.CBudget("Q1 2024 Development Budget", project);
+			budget1.setDescription("First quarter development budget allocation");
+			budget1.setEntityType(type1);
+			budget1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(budget1);
+				if (!initialStatuses.isEmpty()) {
+					budget1.setStatus(initialStatuses.get(0));
+				}
+			}
+			budgetService.save(budget1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.budgets.budgettype.domain.CBudgetType type2 = budgetTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.budgets.budget.domain.CBudget budget2 = 
+				new tech.derbent.app.budgets.budget.domain.CBudget("Annual Marketing Budget 2024", project);
+			budget2.setDescription("Annual marketing and promotional budget");
+			budget2.setEntityType(type2);
+			budget2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(budget2);
+				if (!initialStatuses.isEmpty()) {
+					budget2.setStatus(initialStatuses.get(0));
+				}
+			}
+			budgetService.save(budget2);
+			LOGGER.debug("Created sample budgets for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample budgets for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample budgets for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleDeliverables(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType type1 = deliverableTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.deliverables.deliverable.domain.CDeliverable deliverable1 = 
+				new tech.derbent.app.deliverables.deliverable.domain.CDeliverable("Requirements Specification Document", project);
+			deliverable1.setDescription("Comprehensive requirements specification for the project");
+			deliverable1.setEntityType(type1);
+			deliverable1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(deliverable1);
+				if (!initialStatuses.isEmpty()) {
+					deliverable1.setStatus(initialStatuses.get(0));
+				}
+			}
+			deliverableService.save(deliverable1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType type2 = deliverableTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.deliverables.deliverable.domain.CDeliverable deliverable2 = 
+				new tech.derbent.app.deliverables.deliverable.domain.CDeliverable("Release Package v1.0", project);
+			deliverable2.setDescription("Production release package with deployment artifacts");
+			deliverable2.setEntityType(type2);
+			deliverable2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(deliverable2);
+				if (!initialStatuses.isEmpty()) {
+					deliverable2.setStatus(initialStatuses.get(0));
+				}
+			}
+			deliverableService.save(deliverable2);
+			LOGGER.debug("Created sample deliverables for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample deliverables for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample deliverables for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleMilestones(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.milestones.milestonetype.domain.CMilestoneType type1 = milestoneTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.milestones.milestone.domain.CMilestone milestone1 = 
+				new tech.derbent.app.milestones.milestone.domain.CMilestone("Alpha Release Milestone", project);
+			milestone1.setDescription("First alpha release with core features");
+			milestone1.setEntityType(type1);
+			milestone1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(milestone1);
+				if (!initialStatuses.isEmpty()) {
+					milestone1.setStatus(initialStatuses.get(0));
+				}
+			}
+			milestoneService.save(milestone1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.milestones.milestonetype.domain.CMilestoneType type2 = milestoneTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.milestones.milestone.domain.CMilestone milestone2 = 
+				new tech.derbent.app.milestones.milestone.domain.CMilestone("Beta Release Milestone", project);
+			milestone2.setDescription("Beta release for user acceptance testing");
+			milestone2.setEntityType(type2);
+			milestone2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(milestone2);
+				if (!initialStatuses.isEmpty()) {
+					milestone2.setStatus(initialStatuses.get(0));
+				}
+			}
+			milestoneService.save(milestone2);
+			LOGGER.debug("Created sample milestones for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample milestones for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample milestones for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleTickets(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.tickets.tickettype.domain.CTicketType type1 = ticketTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.tickets.ticket.domain.CTicket ticket1 = 
+				new tech.derbent.app.tickets.ticket.domain.CTicket("Login Authentication Bug", project);
+			ticket1.setDescription("Users unable to login with correct credentials");
+			ticket1.setEntityType(type1);
+			ticket1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(ticket1);
+				if (!initialStatuses.isEmpty()) {
+					ticket1.setStatus(initialStatuses.get(0));
+				}
+			}
+			ticketService.save(ticket1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.tickets.tickettype.domain.CTicketType type2 = ticketTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.tickets.ticket.domain.CTicket ticket2 = 
+				new tech.derbent.app.tickets.ticket.domain.CTicket("Dashboard Customization Feature", project);
+			ticket2.setDescription("Allow users to customize their dashboard layout");
+			ticket2.setEntityType(type2);
+			ticket2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(ticket2);
+				if (!initialStatuses.isEmpty()) {
+					ticket2.setStatus(initialStatuses.get(0));
+				}
+			}
+			ticketService.save(ticket2);
+			LOGGER.debug("Created sample tickets for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample tickets for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample tickets for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleProviders(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.providers.providertype.domain.CProviderType type1 = providerTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.providers.provider.domain.CProvider provider1 = 
+				new tech.derbent.app.providers.provider.domain.CProvider("TechVendor Solutions Inc.", project);
+			provider1.setDescription("Hardware and software vendor");
+			provider1.setEntityType(type1);
+			provider1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(provider1);
+				if (!initialStatuses.isEmpty()) {
+					provider1.setStatus(initialStatuses.get(0));
+				}
+			}
+			providerService.save(provider1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.providers.providertype.domain.CProviderType type2 = providerTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.providers.provider.domain.CProvider provider2 = 
+				new tech.derbent.app.providers.provider.domain.CProvider("Expert Consulting Group", project);
+			provider2.setDescription("Business and technical consulting services");
+			provider2.setEntityType(type2);
+			provider2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(provider2);
+				if (!initialStatuses.isEmpty()) {
+					provider2.setStatus(initialStatuses.get(0));
+				}
+			}
+			providerService.save(provider2);
+			LOGGER.debug("Created sample providers for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample providers for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample providers for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleProducts(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.products.producttype.domain.CProductType type1 = productTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.products.product.domain.CProduct product1 = 
+				new tech.derbent.app.products.product.domain.CProduct("Enterprise ERP System", project);
+			product1.setDescription("Comprehensive enterprise resource planning software");
+			product1.setEntityType(type1);
+			product1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(product1);
+				if (!initialStatuses.isEmpty()) {
+					product1.setStatus(initialStatuses.get(0));
+				}
+			}
+			productService.save(product1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.products.producttype.domain.CProductType type2 = productTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.products.product.domain.CProduct product2 = 
+				new tech.derbent.app.products.product.domain.CProduct("Cloud CRM Platform", project);
+			product2.setDescription("Customer relationship management platform");
+			product2.setEntityType(type2);
+			product2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(product2);
+				if (!initialStatuses.isEmpty()) {
+					product2.setStatus(initialStatuses.get(0));
+				}
+			}
+			productService.save(product2);
+			LOGGER.debug("Created sample products for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample products for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample products for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleComponents(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.components.componenttype.domain.CComponentType type1 = componentTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.components.component.domain.CComponent component1 = 
+				new tech.derbent.app.components.component.domain.CComponent("Authentication Module", project);
+			component1.setDescription("User authentication and authorization module");
+			component1.setEntityType(type1);
+			component1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(component1);
+				if (!initialStatuses.isEmpty()) {
+					component1.setStatus(initialStatuses.get(0));
+				}
+			}
+			componentService.save(component1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.components.componenttype.domain.CComponentType type2 = componentTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.components.component.domain.CComponent component2 = 
+				new tech.derbent.app.components.component.domain.CComponent("Payment Gateway Integration", project);
+			component2.setDescription("Third-party payment gateway integration library");
+			component2.setEntityType(type2);
+			component2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(component2);
+				if (!initialStatuses.isEmpty()) {
+					component2.setStatus(initialStatuses.get(0));
+				}
+			}
+			componentService.save(component2);
+			LOGGER.debug("Created sample components for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample components for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample components for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleProjectExpenses(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService expenseTypeService = 
+				CSpringContext.getBean(tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService.class);
+			final tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseService expenseService = 
+				CSpringContext.getBean(tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseService.class);
+			
+			final tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpenseType type1 = expenseTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense expense1 = 
+				new tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense("Cloud Hosting Services", project);
+			expense1.setDescription("Monthly cloud infrastructure hosting costs");
+			expense1.setEntityType(type1);
+			expense1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(expense1);
+				if (!initialStatuses.isEmpty()) {
+					expense1.setStatus(initialStatuses.get(0));
+				}
+			}
+			expenseService.save(expense1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpenseType type2 = expenseTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense expense2 = 
+				new tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense("External Development Team", project);
+			expense2.setDescription("Contracted external development services");
+			expense2.setEntityType(type2);
+			expense2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(expense2);
+				if (!initialStatuses.isEmpty()) {
+					expense2.setStatus(initialStatuses.get(0));
+				}
+			}
+			expenseService.save(expense2);
+			LOGGER.debug("Created sample project expenses for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample project expenses for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample project expenses for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleProjectIncomes(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService incomeTypeService = 
+				CSpringContext.getBean(tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService.class);
+			final tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeService incomeService = 
+				CSpringContext.getBean(tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeService.class);
+			
+			final tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType type1 = incomeTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome income1 = 
+				new tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome("Software License Revenue", project);
+			income1.setDescription("Revenue from software license sales");
+			income1.setEntityType(type1);
+			income1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(income1);
+				if (!initialStatuses.isEmpty()) {
+					income1.setStatus(initialStatuses.get(0));
+				}
+			}
+			incomeService.save(income1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType type2 = incomeTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome income2 = 
+				new tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome("Support Contract Revenue", project);
+			income2.setDescription("Annual support and maintenance contracts");
+			income2.setEntityType(type2);
+			income2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(income2);
+				if (!initialStatuses.isEmpty()) {
+					income2.setStatus(initialStatuses.get(0));
+				}
+			}
+			incomeService.save(income2);
+			LOGGER.debug("Created sample project incomes for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample project incomes for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample project incomes for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleTeams(final CProject project, final boolean minimal) {
+		try {
+			final CCompany company = project.getCompany();
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.teams.team.domain.CTeam team1 = 
+				new tech.derbent.app.teams.team.domain.CTeam("Development Team", company);
+			team1.setDescription("Core development team responsible for implementation");
+			team1.setTeamManager(user1);
+			teamService.save(team1);
+			if (minimal) {
+				return;
+			}
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.teams.team.domain.CTeam team2 = 
+				new tech.derbent.app.teams.team.domain.CTeam("QA Team", company);
+			team2.setDescription("Quality assurance and testing team");
+			team2.setTeamManager(user2);
+			teamService.save(team2);
+			LOGGER.debug("Created sample teams for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample teams for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample teams for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleRisks(final CProject project, final boolean minimal) {
+		try {
+			final tech.derbent.app.risks.risktype.domain.CRiskType type1 = riskTypeService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final tech.derbent.app.risks.risk.domain.CRisk risk1 = 
+				new tech.derbent.app.risks.risk.domain.CRisk("Data Security Vulnerability", project);
+			risk1.setDescription("Potential security vulnerability in data access layer");
+			risk1.setEntityType(type1);
+			risk1.setAssignedTo(user1);
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(risk1);
+				if (!initialStatuses.isEmpty()) {
+					risk1.setStatus(initialStatuses.get(0));
+				}
+			}
+			riskService.save(risk1);
+			if (minimal) {
+				return;
+			}
+			final tech.derbent.app.risks.risktype.domain.CRiskType type2 = riskTypeService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final tech.derbent.app.risks.risk.domain.CRisk risk2 = 
+				new tech.derbent.app.risks.risk.domain.CRisk("Budget Overrun Risk", project);
+			risk2.setDescription("Risk of exceeding allocated project budget");
+			risk2.setEntityType(type2);
+			risk2.setAssignedTo(user2);
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(risk2);
+				if (!initialStatuses.isEmpty()) {
+					risk2.setStatus(initialStatuses.get(0));
+				}
+			}
+			riskService.save(risk2);
+			LOGGER.debug("Created sample risks for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample risks for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample risks for project: " + project.getName(), e);
 		}
 	}
 
@@ -1316,12 +1905,35 @@ public class CDataInitializer {
 					initializeSampleOrderTypes(project, minimal);
 					initializeSampleActivityTypes(project, minimal);
 					initializeSampleRiskTypes(project, minimal);
+					initializeSampleAssetTypes(project, minimal);
+					initializeSampleBudgetTypes(project, minimal);
+					initializeSampleDeliverableTypes(project, minimal);
+					initializeSampleMilestoneTypes(project, minimal);
+					initializeSampleTicketTypes(project, minimal);
+					initializeSampleProviderTypes(project, minimal);
+					initializeSampleProductTypes(project, minimal);
+					initializeSampleComponentTypes(project, minimal);
+					initializeSampleProjectExpenseTypes(project, minimal);
+					initializeSampleProjectIncomeTypes(project, minimal);
 					initializeSampleActivityPriorities(project, minimal);
 					initializeSampleCommentPriorities(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
+					// entities
 					initializeSampleDecisions(project, minimal);
 					initializeSampleMeetings(project, minimal);
 					initializeSampleActivities(project, minimal);
+					initializeSampleAssets(project, minimal);
+					initializeSampleBudgets(project, minimal);
+					initializeSampleDeliverables(project, minimal);
+					initializeSampleMilestones(project, minimal);
+					initializeSampleTickets(project, minimal);
+					initializeSampleProviders(project, minimal);
+					initializeSampleProducts(project, minimal);
+					initializeSampleComponents(project, minimal);
+					initializeSampleProjectExpenses(project, minimal);
+					initializeSampleProjectIncomes(project, minimal);
+					initializeSampleTeams(project, minimal);
+					initializeSampleRisks(project, minimal);
 					if (minimal) {
 						break;
 					}
