@@ -61,4 +61,29 @@ public class COrderTypeInitializerService extends CInitializerServiceBase {
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] orderTypes = {
+				{
+						"Hardware", "Hardware procurement orders"
+				}, {
+						"Software", "Software licensing and subscription orders"
+				}, {
+						"Service", "Professional services and consulting orders"
+				}, {
+						"Training", "Training and certification orders"
+				}, {
+						"Maintenance", "Maintenance and support service orders"
+				}, {
+						"Infrastructure", "Infrastructure and hosting service orders"
+				}, {
+						"Equipment", "Equipment rental and leasing orders"
+				}, {
+						"Supplies", "Office supplies and materials orders"
+				}
+		};
+		final tech.derbent.app.orders.type.service.COrderTypeService service =
+				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.orders.type.service.COrderTypeService.class);
+		initializeProjectEntity(orderTypes, service, project, minimal);
+	}
 }

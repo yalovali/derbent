@@ -65,4 +65,29 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] decisionTypes = {
+				{
+						"Strategic", "High-level strategic decisions affecting organization direction"
+				}, {
+						"Tactical", "Mid-level tactical decisions for project execution"
+				}, {
+						"Operational", "Day-to-day operational decisions"
+				}, {
+						"Technical", "Technology and implementation related decisions"
+				}, {
+						"Budget", "Financial and budgeting decisions"
+				}, {
+						"Resource", "Human resource and allocation decisions"
+				}, {
+						"Timeline", "Schedule and milestone related decisions"
+				}, {
+						"Quality", "Quality assurance and standards decisions"
+				}
+		};
+		final tech.derbent.app.decisions.service.CDecisionTypeService service =
+				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.decisions.service.CDecisionTypeService.class);
+		initializeProjectEntity(decisionTypes, service, project, minimal);
+	}
 }
