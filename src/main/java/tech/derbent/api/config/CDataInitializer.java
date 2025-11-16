@@ -1588,23 +1588,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleRiskTypes(final CProject project, final boolean minimal) {
-		final String[][] riskTypes = {
-				{
-						"Technical Risk", "Risks related to technology and implementation"
-				}, {
-						"Operational Risk", "Risks affecting daily operations"
-				}, {
-						"Financial Risk", "Risks impacting financial performance"
-				}, {
-						"Strategic Risk", "Risks associated with strategic decisions"
-				}, {
-						"Compliance Risk", "Risks related to regulatory compliance"
-				}
-		};
-		initializeType(riskTypes, riskTypeService, project, minimal);
-	}
-
 	private void initializeSampleTeams(final CProject project, final boolean minimal) {
 		try {
 			final CCompany company = project.getCompany();
