@@ -3,10 +3,12 @@ package tech.derbent.api.entityOfCompany.domain;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.app.companies.domain.CCompany;
 
+@MappedSuperclass
 public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityClass> {
 
 	@ManyToOne (fetch = FetchType.LAZY)
