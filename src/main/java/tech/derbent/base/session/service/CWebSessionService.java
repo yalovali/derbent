@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import tech.derbent.base.users.service.IUserRepository;
 
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */
 @Service ("CSessionService")
+@Primary
 @ConditionalOnWebApplication
 @Profile ("!reset-db")
 public class CWebSessionService implements ISessionService {
