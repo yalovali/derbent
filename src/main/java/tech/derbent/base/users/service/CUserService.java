@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +45,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
 
-	public CUserService(final IEntityOfCompanyRepository<CUser> repository, final Clock clock, final ISessionService sessionService) {
+	public CUserService(final IEntityOfCompanyRepository<CUser> repository, final Clock clock, @Lazy final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 		// hashing
