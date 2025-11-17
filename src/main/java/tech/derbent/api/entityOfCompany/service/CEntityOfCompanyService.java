@@ -46,7 +46,8 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		Check.notNull(company, "Company cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
-			final Optional<EntityClass> entities = ((IEntityOfCompanyRepository<EntityClass>) repository).findByNameAndCompany(name, company);
+			final Optional<EntityClass> entities =
+					((IEntityOfCompanyRepository<EntityClass>) repository).findByNameIgnoreCaseAndCompany(name, company);
 			return entities;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entities by project '{}' in {}: {}", company.getName(), getClass().getSimpleName(), e.getMessage());
@@ -67,7 +68,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	public List<EntityClass> listByCompany(final CCompany company) {
 		Check.notNull(company, "Project cannot be null");
 		try {
-			final List<EntityClass> entities = ((IEntityOfCompanyRepository<EntityClass>) repository).listByCompany(company);
+			final List<EntityClass> entities = ((IEntityOfCompanyRepository<EntityClass>) repository).findByCompany(company);
 			return entities;
 		} catch (final RuntimeException ex) {
 			LOGGER.error("findByProject failed (company: {}): {}", Optional.ofNullable(company.getName()).orElse("<no-name>"), ex.toString(), ex);
