@@ -1,8 +1,8 @@
-package tech.derbent.api.entityOfProject.service;
+package tech.derbent.api.entityOfCompany.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;

@@ -15,12 +15,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
-import tech.derbent.api.domains.CStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
+import tech.derbent.api.entityOfCompany.domain.CStatus;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.base.users.domain.CUser;
 

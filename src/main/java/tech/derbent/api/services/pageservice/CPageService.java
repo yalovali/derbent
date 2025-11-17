@@ -3,7 +3,7 @@ package tech.derbent.api.services.pageservice;
 import org.slf4j.Logger;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;

@@ -1,4 +1,4 @@
-package tech.derbent.api.entityOfProject.domain;
+package tech.derbent.api.entityOfCompany.domain;
 
 import java.util.Objects;
 import jakarta.persistence.AttributeOverride;
@@ -7,12 +7,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CStatus;
 import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cprojectitemstatus", uniqueConstraints = @UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cprojectitemstatus_id"))
 public class CProjectItemStatus extends CStatus<CProjectItemStatus> {

@@ -26,6 +26,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CGridCell;
@@ -37,6 +38,7 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.CDiv;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -577,8 +579,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// first get the selected item to restore selection later
 			CEntityDB<?> selectedItem = getSelectedItem();
 			//
-			CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
-			Check.notNull(project, "Project is null");
 			CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
 			Check.instanceOf(serviceBean, CAbstractService.class,
 					"Service bean does not extend CAbstractService: " + gridEntity.getDataServiceBeanName());
@@ -587,10 +587,17 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			List data;
 			// Check if this is a project-specific service and filter by the gridEntity's project
 			if (serviceBean instanceof CEntityOfProjectService) {
+				CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
+				Check.notNull(project, "Project is null");
 				CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
 				data = projectService.listByProject(project, pageRequest).getContent();
+			} else if (serviceBean instanceof CEntityOfCompanyService) {
+				CCompany company = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company found."));
+				Check.notNull(company, "Company is null");
+				CEntityOfCompanyService<?> projectService = (CEntityOfCompanyService<?>) serviceBean;
+				data = projectService.findByCompany(company, pageRequest).getContent();
 			} else {
-				// For non-project services, use regular list method
+				// For non-project or company services, use regular list method
 				data = serviceBean.list(pageRequest).getContent();
 			}
 			Check.notNull(data, "Data loaded from service is null");

@@ -2,11 +2,11 @@ package tech.derbent.app.workflow.view;
 
 import java.util.List;
 import java.util.function.Consumer;
-import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CDBRelationDialog;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;

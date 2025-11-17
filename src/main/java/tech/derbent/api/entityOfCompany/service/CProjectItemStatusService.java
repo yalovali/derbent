@@ -1,4 +1,4 @@
-package tech.derbent.app.activities.service;
+package tech.derbent.api.entityOfCompany.service;
 
 import java.time.Clock;
 import java.util.ArrayList;
@@ -9,9 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfProject.domain.CStatusService;
-import tech.derbent.api.entityOfProject.service.CPageServiceProjectItemStatus;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.ICompanyEntityRepositoryBase;
 import tech.derbent.base.users.domain.CUser;
 
@@ -15,6 +16,12 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 	/** Count distinct users by project ID using generic pattern */
 	@Query ("SELECT COUNT(DISTINCT u) FROM #{#entityName} u LEFT JOIN u.projectSettings ps WHERE ps.project.id = :projectId")
 	long countByProjectId(@Param ("projectId") Long projectId);
+	@Override
+	@Query (
+		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company = :company"
+	)
+	Page<CUser> findByCompany(@Param ("company") CCompany company, Pageable pageable);
+	// Page<CUser> findByCompany(CCompany company, Pageable pageable);
 	/** Find all users by company ID with eager loading */
 	@Override
 	@Query (

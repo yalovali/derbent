@@ -16,8 +16,10 @@ public interface IEntityOfCompanyRepository<EntityClass extends CEntityOfCompany
 
 	long countByCompany(CCompany company);
 	boolean existsByNameIgnoreCaseAndCompany(String name, CCompany company);
-	List<EntityClass> findByCompany(CCompany company);
-	Page<EntityClass> findByCompany(CCompany company, Pageable pageable);
+	@Query ("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.company co WHERE e.company = :company")
+	List<EntityClass> findByCompany(@Param ("company") CCompany company);
+	@Query ("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.company co WHERE e.company = :company")
+	Page<EntityClass> findByCompany(@Param ("company") CCompany company, Pageable pageable);
 	Optional<EntityClass> findByNameIgnoreCaseAndCompany(String name, CCompany company);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.company.id = :cid")
 	List<EntityClass> listByCompanyId(@Param ("cid") Long cid);

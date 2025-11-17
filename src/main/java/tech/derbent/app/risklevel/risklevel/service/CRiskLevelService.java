@@ -7,9 +7,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.risklevel.risklevel.domain.CRiskLevel;
 import tech.derbent.base.session.service.ISessionService;
 

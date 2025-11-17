@@ -11,7 +11,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusInitializerService;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityInitializerService;
@@ -27,8 +29,6 @@ import tech.derbent.app.activities.service.CActivityPriorityService;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.activities.service.CActivityTypeInitializerService;
 import tech.derbent.app.activities.service.CActivityTypeService;
-import tech.derbent.app.activities.service.CProjectItemStatusInitializerService;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.assets.asset.service.CAssetInitializerService;
 import tech.derbent.app.assets.asset.service.CAssetService;
 import tech.derbent.app.assets.assettype.service.CAssetTypeInitializerService;
@@ -1045,6 +1045,8 @@ public class CDataInitializer {
 				// Use new atomic method to set both company and user
 				Check.notNull(sessionService, "SessionService is not initialized");
 				sessionService.setActiveUser(user); // Set company first, then user who is member of that company
+				CProjectItemStatusInitializerService.initializeSample(company, minimal);
+				CApprovalStatusInitializerService.initializeSample(company, minimal);
 				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 				for (final CProject project : projects) {
 					LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),
@@ -1110,8 +1112,6 @@ public class CDataInitializer {
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Project-specific type and configuration entities
 					CCurrencyInitializerService.initializeSample(project, minimal);
-					CProjectItemStatusInitializerService.initializeSample(project.getCompany(), minimal);
-					CApprovalStatusInitializerService.initializeSample(project.getCompany(), minimal);
 					CUserProjectRoleInitializerService.initializeSample(project, minimal);
 					initializeSampleWorkflowEntities(project, minimal);
 					// types

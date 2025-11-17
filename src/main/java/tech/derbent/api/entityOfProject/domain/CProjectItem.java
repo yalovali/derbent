@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 

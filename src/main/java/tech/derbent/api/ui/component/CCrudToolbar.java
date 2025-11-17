@@ -9,10 +9,10 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 public class CCrudToolbar extends HorizontalLayout {

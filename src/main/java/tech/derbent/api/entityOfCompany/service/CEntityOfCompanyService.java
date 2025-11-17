@@ -3,9 +3,12 @@ package tech.derbent.api.entityOfCompany.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
@@ -39,6 +42,19 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		final CCompany company = sessionService.getActiveCompany()
 				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without company context"));
 		return listByCompany(company);
+	}
+
+	@Transactional (readOnly = true)
+	public Page<EntityClass> findByCompany(final CCompany company, final Pageable pageable) {
+		Check.notNull(company, "Company cannot be null");
+		final Pageable safe = CPageableUtils.validateAndFix(pageable);
+		try {
+			return ((IEntityOfCompanyRepository<EntityClass>) repository).findByCompany(company, safe);
+		} catch (final RuntimeException ex) {
+			LOGGER.error("listByCompany failed (company: {}, page: {}): {}", Optional.ofNullable(company.getName()).orElse("<no-name>"), safe,
+					ex.toString(), ex);
+			throw ex; // Spring’in exception translation’ını koru
+		}
 	}
 
 	@Transactional (readOnly = true)

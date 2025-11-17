@@ -1,9 +1,7 @@
-package tech.derbent.api.entityOfProject.domain;
+package tech.derbent.api.entityOfCompany.service;
 
 import java.time.Clock;
-import tech.derbent.api.domains.CStatus;
-import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
-import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
+import tech.derbent.api.entityOfCompany.domain.CStatus;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CStatusService - Abstract service class for entities that extend CStatus. Layer: Service (MVC) Provides common business logic operations for

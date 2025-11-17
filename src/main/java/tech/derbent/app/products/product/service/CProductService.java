@@ -7,13 +7,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.products.product.domain.CProduct;
 import tech.derbent.app.products.producttype.service.CProductTypeService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -23,42 +23,38 @@ import tech.derbent.base.session.service.ISessionService;
 @PermitAll
 public class CProductService extends CProjectItemService<CProduct> implements IEntityRegistrable {
 
-private static final Logger LOGGER = LoggerFactory.getLogger(CProductService.class);
-private final CProductTypeService productTypeService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProductService.class);
+	private final CProductTypeService productTypeService;
 
-CProductService(final IProductRepository repository, final Clock clock, 
-final ISessionService sessionService,
-final CProductTypeService productTypeService,
-final CProjectItemStatusService projectItemStatusService) {
-super(repository, clock, sessionService, projectItemStatusService);
-this.productTypeService = productTypeService;
-}
+	CProductService(final IProductRepository repository, final Clock clock, final ISessionService sessionService,
+			final CProductTypeService productTypeService, final CProjectItemStatusService projectItemStatusService) {
+		super(repository, clock, sessionService, projectItemStatusService);
+		this.productTypeService = productTypeService;
+	}
 
-@Override
-public String checkDeleteAllowed(final CProduct entity) {
-return super.checkDeleteAllowed(entity);
-}
+	@Override
+	public String checkDeleteAllowed(final CProduct entity) {
+		return super.checkDeleteAllowed(entity);
+	}
 
-@Override
-public Class<CProduct> getEntityClass() { return CProduct.class; }
+	@Override
+	public Class<CProduct> getEntityClass() { return CProduct.class; }
 
-@Override
-public Class<?> getInitializerServiceClass() { return CProductInitializerService.class; }
+	@Override
+	public Class<?> getInitializerServiceClass() { return CProductInitializerService.class; }
 
-@Override
-public Class<?> getPageServiceClass() { return CPageServiceProduct.class; }
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceProduct.class; }
 
-@Override
-public Class<?> getServiceClass() { return this.getClass(); }
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
-@Override
-public void initializeNewEntity(final CProduct entity) {
-super.initializeNewEntity(entity);
-LOGGER.debug("Initializing new product entity");
-final CProject currentProject = sessionService.getActiveProject()
-.orElseThrow(() -> new CInitializationException("No active project"));
-IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, 
-productTypeService, projectItemStatusService);
-LOGGER.debug("Product initialization complete");
-}
+	@Override
+	public void initializeNewEntity(final CProduct entity) {
+		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new product entity");
+		final CProject currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, productTypeService, projectItemStatusService);
+		LOGGER.debug("Product initialization complete");
+	}
 }

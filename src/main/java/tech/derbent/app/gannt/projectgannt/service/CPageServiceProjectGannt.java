@@ -6,15 +6,15 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.gannt.ganntviewentity.domain.CGanntViewEntity;
 import tech.derbent.app.gannt.ganntviewentity.view.CGridViewBaseGannt;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -47,8 +47,8 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 
 	/** Handle status change with workflow validation for Gantt entities.
 	 * <p>
-	 * This method handles status changes for both CActivity and CMeeting entities in the Gantt view. It validates the status transition against workflow
-	 * rules before applying the change.
+	 * This method handles status changes for both CActivity and CMeeting entities in the Gantt view. It validates the status transition against
+	 * workflow rules before applying the change.
 	 * @param newStatus the new status selected by the user
 	 * @throws Exception if the status change or save operation fails */
 	@Override
@@ -82,9 +82,8 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 					final String currentStatusName = entity.getStatus() != null ? entity.getStatus().getName() : "none";
 					LOGGER.warn("Invalid status transition from '{}' to '{}' for entity ID: {}", currentStatusName, newStatus.getName(),
 							entity.getId());
-					CNotificationService.showWarning(
-							String.format("Cannot change status from '%s' to '%s' - transition not allowed by workflow", currentStatusName,
-									newStatus.getName()));
+					CNotificationService.showWarning(String.format("Cannot change status from '%s' to '%s' - transition not allowed by workflow",
+							currentStatusName, newStatus.getName()));
 					return;
 				}
 			}

@@ -7,13 +7,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.assets.asset.domain.CAsset;
 import tech.derbent.app.assets.assettype.service.CAssetTypeService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -27,8 +27,7 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 	private final CAssetTypeService assetTypeService;
 
 	CAssetService(final IAssetRepository repository, final Clock clock, final ISessionService sessionService,
-			final CAssetTypeService assetTypeService,
-			final CProjectItemStatusService projectItemStatusService) {
+			final CAssetTypeService assetTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.assetTypeService = assetTypeService;
 	}

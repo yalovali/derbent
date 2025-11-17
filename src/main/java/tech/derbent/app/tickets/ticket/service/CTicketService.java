@@ -7,10 +7,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeService;
@@ -27,8 +27,7 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 	private final CTicketTypeService ticketTypeService;
 
 	CTicketService(final ITicketRepository repository, final Clock clock, final ISessionService sessionService,
-			final CTicketTypeService ticketTypeService,
-			final CProjectItemStatusService projectItemStatusService) {
+			final CTicketTypeService ticketTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.ticketTypeService = ticketTypeService;
 	}

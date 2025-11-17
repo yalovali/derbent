@@ -175,7 +175,9 @@ public class Check {
 	public static void instanceOf(final Object object, final Class<?> expectedClass, final String message) {
 		notNull(object, message);
 		notNull(expectedClass, message);
-		Check.isTrue(object.getClass().isInstance(expectedClass) || object.getClass().equals(expectedClass),
+		Check.isTrue(
+				object.getClass().isInstance(expectedClass) || object.getClass().equals(expectedClass)
+						|| expectedClass.isAssignableFrom(object.getClass()),
 				"Object of type " + object.getClass().getSimpleName() + " is not an instance of " + expectedClass.getSimpleName());
 	}
 

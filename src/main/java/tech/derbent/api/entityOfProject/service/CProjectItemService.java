@@ -1,8 +1,8 @@
 package tech.derbent.api.entityOfProject.service;
 
 import java.time.Clock;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 

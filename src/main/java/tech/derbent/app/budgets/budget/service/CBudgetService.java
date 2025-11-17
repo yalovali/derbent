@@ -7,13 +7,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.activities.service.CProjectItemStatusService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.budgets.budget.domain.CBudget;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -27,8 +27,7 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 	private final CBudgetTypeService budgetTypeService;
 
 	CBudgetService(final IBudgetRepository repository, final Clock clock, final ISessionService sessionService,
-			final CBudgetTypeService budgetTypeService,
-			final CProjectItemStatusService projectItemStatusService) {
+			final CBudgetTypeService budgetTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.budgetTypeService = budgetTypeService;
 	}

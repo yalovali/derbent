@@ -3,7 +3,7 @@ package tech.derbent.app.workflow.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entityOfProject.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 /** IHasStatusAndWorkflow - Interface for entities that support workflow-based status management.
