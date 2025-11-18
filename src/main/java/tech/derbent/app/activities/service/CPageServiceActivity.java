@@ -32,4 +32,8 @@ public class CPageServiceActivity extends CPageServiceWithWorkflow<CActivity> {
 			throw e;
 		}
 	}
+
+	protected void on_name_changed() {
+		LOGGER.debug("Activity name changed to: {}", getCurrentEntity().getName());
+	}
 }
