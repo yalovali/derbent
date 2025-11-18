@@ -1,18 +1,25 @@
 package tech.derbent.api.services.pageservice;
 
+import java.lang.reflect.Method;
 import org.slf4j.Logger;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
+import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
-
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
 	private EntityClass previousEntity;
 	final protected IPageServiceImplementer<EntityClass> view;
+	protected CDetailsBuilder detailsBuilder = null;
+	protected CFormBuilder<?> formBuilder = null;
 
 	public CPageService(final IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
@@ -44,7 +51,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	public void actionDelete() throws Exception {
 		try {
 			final EntityClass entity = getCurrentEntity();
-			if (entity == null || entity.getId() == null) {
+			if ((entity == null) || (entity.getId() == null)) {
 				CNotificationService.showWarning("Please select an item to delete.");
 				return;
 			}
@@ -70,7 +77,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			final EntityClass entity = getCurrentEntity();
 			LOGGER.debug("Refresh action triggered for entity: {}", entity != null ? entity.getId() : "null");
 			// Check if current entity is a new unsaved entity (no ID)
-			if (entity != null && entity.getId() == null) {
+			if ((entity != null) && (entity.getId() == null)) {
 				// Discard the new entity and restore previous selection
 				if (previousEntity != null) {
 					final CEntityDB<?> reloaded = getEntityService().getById(previousEntity.getId()).orElse(null);
@@ -130,6 +137,71 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	}
 
 	public void bind() {}
+
+	private void bindComponent(final Method method, final Component component, final String methodName, final String componentName,
+			final String action) {
+		LOGGER.debug("Binding method {} to component {} for action {}.", methodName, componentName, action);
+		// bind method to component based on action
+		switch (action) {
+		case "click" -> {
+			if (component instanceof final Button button) {
+				button.addClickListener(event -> {
+					try {
+						method.invoke(this);
+					} catch (final Exception e) {
+						LOGGER.error("Error invoking method {}: {}", methodName, e.getMessage());
+					}
+				});
+			}
+		}
+		case "change" -> {
+			// implement change listener binding if needed
+			if (component instanceof final HasValue<?, ?> hasValue) {
+				hasValue.addValueChangeListener(event -> {
+					try {
+						method.invoke(this);
+					} catch (final Exception e) {
+						LOGGER.error("Error invoking method {}: {}", methodName, e.getMessage());
+					}
+				});
+			}
+		}
+		// add more actions as needed
+		default -> LOGGER.warn("Action {} not recognized for binding.", action);
+		}
+	}
+
+	protected void bindMethods(final CPageService<?> page) {
+		if (formBuilder == null) {
+			LOGGER.warn("FormBuilder is null; cannot bind methods.");
+			return;
+		}
+		// get the list of components in the formbuilder
+		final var components = formBuilder.getComponentMap();
+		// print component names
+		for (final var entry : components.entrySet()) {
+			LOGGER.debug("Component name: {}", entry.getKey());
+		}
+		// print methods of this class which are in format on_[componentName]_[action]
+		// actions are like click, change etc
+		final var methods = page.getClass().getDeclaredMethods();
+		for (final var method : methods) {
+			final var methodName = method.getName();
+			// use regex to match method names in format on_[componentName]_[action]
+			if (!methodName.matches("on_[a-zA-Z0-9]+_[a" + "-zA-Z0-9]+")) {
+				continue;
+			}
+			final var parts = methodName.split("_");
+			if (parts.length != 3) {
+				continue;
+			}
+			final var componentName = parts[1];
+			final var action = parts[2];
+			final var component = components.get(componentName);
+			Check.notNull(component, "Component " + componentName + " not found in FormBuilder.");
+			bindComponent(method, component, methodName, componentName, action);
+		}
+	}
 
 	private EntityClass getCurrentEntity() { return view.getCurrentEntity(); }
 

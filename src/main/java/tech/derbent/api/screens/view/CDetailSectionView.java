@@ -16,6 +16,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cdetailsectionview")
@@ -23,7 +24,6 @@ import tech.derbent.base.session.service.ISessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Setup.UI.Detail Sections")
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
-
 	public static final String DEFAULT_COLOR = "#00141b";
 	public static final String DEFAULT_ICON = "vaadin:clipboard";
 	private static final long serialVersionUID = 1L;
@@ -70,6 +70,11 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	}
 
 	@Override
+	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
@@ -88,7 +93,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	}
 
 	@Override
-	public void setCurrentEntity(CEntityDB<?> entity) {
+	public void setCurrentEntity(final CEntityDB<?> entity) {
 		super.setCurrentEntity(entity);
 	}
 

@@ -11,6 +11,7 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CGridViewBaseProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.app.gannt.ganntviewentity.domain.CGanntViewEntity;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.base.session.service.ISessionService;
@@ -72,4 +73,8 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 	public void setCurrentEntity(CEntityDB<?> entity) {
 		super.setCurrentEntity(entity);
 	}
+
+	@Override
+	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
+	return null; }
 }

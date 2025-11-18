@@ -21,7 +21,6 @@ import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
-
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
@@ -61,6 +60,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	 * @param detailsLayout the layout to build the screen into */
 	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass, final CFlexLayout detailsLayout) {
 		try {
+			LOGGER.debug("Building screen '{}' for entity type: {}", baseViewName, entityClass.getSimpleName());
 			detailsLayout.removeAll();
 			final CDetailSection screen = screenService.findByNameAndProject(
 					getSessionService().getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")),
@@ -118,6 +118,8 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		}
 		return null;
 	}
+
+	public CDetailsBuilder getDetailsBuilder() { return detailsBuilder; }
 
 	public ISessionService getSessionService() { return sessionService; }
 

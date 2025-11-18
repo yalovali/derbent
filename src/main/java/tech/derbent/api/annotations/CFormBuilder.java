@@ -932,7 +932,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	private CEnhancedBinder<?> binder;
-	final Map<String, Component> componentMap;
+	private final Map<String, Component> componentMap;
 	final CVerticalLayout formLayout;
 	final Map<String, CHorizontalLayout> horizontalLayoutMap;
 
@@ -956,22 +956,22 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		horizontalLayoutMap = new HashMap<>();
 		formLayout = new CVerticalLayout(false, false, false);
 		this.binder = binder;
-		CFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout, contentOwner);
+		CFormBuilder.buildForm(entityClass, binder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout, contentOwner);
 	}
 
 	public Component addFieldLine(final EntityFieldInfo fieldInfo) throws Exception {
-		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, componentMap);
+		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, getComponentMap());
 	}
 
 	public Component addFieldLine(IContentOwner contentOwner, final String screenClassType, final CDetailLines line, final VerticalLayout layout,
 			Map<String, Component> componentMap2, Map<String, CHorizontalLayout> horizontalLayoutMap2) throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
-		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap);
+		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, getComponentMap());
 	}
 
 	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
 			throws Exception {
-		return CFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout);
+		return CFormBuilder.buildForm(entityClass, binder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout);
 	}
 
 	/** Gets the internal binder for this form builder.
@@ -980,7 +980,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	public Component getComponent(final String fieldName) {
 		Check.notNull(fieldName, "Field name for component retrieval");
-		final Component component = componentMap.get(fieldName);
+		final Component component = getComponentMap().get(fieldName);
 		Check.notNull(component, "Component for field " + fieldName + " not found in form builder map");
 		return component;
 	}
@@ -997,7 +997,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	/** Clears the form by setting the binder bean to null. */
 	public void populateForm() {
 		// go through all components and call populate if available
-		componentMap.values().forEach(component -> {
+		getComponentMap().values().forEach(component -> {
 			if (component instanceof IContentOwner) {
 				try {
 					((IContentOwner) component).populateForm();
@@ -1016,7 +1016,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(binder, "Binder for form population");
 		LOGGER.debug("Populating form with entity: {}", entity);
 		((CEnhancedBinder<Object>) binder).setBean(entity);
-		componentMap.values().forEach(component -> {
+		getComponentMap().values().forEach(component -> {
 			if (component instanceof IContentOwner) {
 				try {
 					((IContentOwner) component).setCurrentEntity(entity);
@@ -1041,7 +1041,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	public void setCurrentEntity(CEntityDB<?> entity) {
-		componentMap.values().forEach(component -> {
+		getComponentMap().values().forEach(component -> {
 			if (component instanceof IContentOwner) {
 				try {
 					((IContentOwner) component).setCurrentEntity(entity);
@@ -1050,5 +1050,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				}
 			}
 		});
+	}
+
+	public Map<String, Component> getComponentMap() {
+		return componentMap;
 	}
 }

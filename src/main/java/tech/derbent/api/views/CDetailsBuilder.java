@@ -99,7 +99,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				currentSection = null;
 			}
 			if (currentSection != null) {
-				currentSection.processLine(contentOwner, counter, screen, line, formBuilder);
+				currentSection.processLine(contentOwner, counter, screen, line, getFormBuilder());
 				continue;
 			}
 			final Component component = processLine(counter, screen, line, user);
@@ -131,8 +131,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	/** Clears the details form by setting the form builder bean to null. */
 	public void populateForm() {
-		if (formBuilder != null) {
-			formBuilder.populateForm();
+		if (getFormBuilder() != null) {
+			getFormBuilder().populateForm();
 		}
 	}
 
@@ -145,7 +145,11 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	}
 
 	public void setCurrentEntity(final CEntityDB<?> entity) {
-		Check.notNull(formBuilder, "Form builder cannot be null, first initialize it");
-		formBuilder.setCurrentEntity(entity);
+		Check.notNull(getFormBuilder(), "Form builder cannot be null, first initialize it");
+		getFormBuilder().setCurrentEntity(entity);
+	}
+
+	public CFormBuilder<?> getFormBuilder() {
+		return formBuilder;
 	}
 }
