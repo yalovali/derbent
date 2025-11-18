@@ -12,28 +12,15 @@ import tech.derbent.base.session.service.ISessionService;
  * IEntityUpdateListener for entity lifecycle events.
  * @param <EntityClass> the entity type managed by this page */
 public interface IPageServiceImplementer<EntityClass extends CEntityDB<EntityClass>> extends IContentOwner, IEntityUpdateListener<EntityClass> {
-	/** Gets the binder used for form validation and binding.
-	 * @return the enhanced binder for the entity */
-	CEnhancedBinder<EntityClass> getBinder();
 
-	/** Gets the current entity being edited/viewed. Overrides IContentOwner to return the specific entity type.
-	 * @return the current entity */
+	CEnhancedBinder<EntityClass> getBinder();
 	@Override
 	EntityClass getCurrentEntity();
-
 	CDetailsBuilder getDetailsBuilder();
-
-	/** Gets the entity class managed by this page.
-	 * @return the entity class */
 	Class<?> getEntityClass();
-
-	/** Gets the entity service for this page. Overrides IContentOwner to return the specific service type.
-	 * @return the entity service */
 	@Override
 	CAbstractService<EntityClass> getEntityService();
-
-	/** Gets the session service for user and project context.
-	 * @return the session service */
+	CPageService<EntityClass> getPageService();
 	ISessionService getSessionService();
 
 	@Override

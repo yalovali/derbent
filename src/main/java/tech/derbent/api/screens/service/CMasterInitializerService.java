@@ -24,20 +24,18 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionType"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionDBName"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			detailSection.debug_printScreenInformation();
-			return detailSection;
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			scr.addScreenLine(CDetailLinesService.createSection("Configuration"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionType"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionDBName"));
+			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.debug_printScreenInformation();
+			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating master section view.");
 			throw e;

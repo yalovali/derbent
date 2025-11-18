@@ -27,7 +27,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
-import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -38,6 +37,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CColorPickerComboBox;
@@ -73,7 +73,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFormBuilder.class);
 
 	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		if ((component == null) || (fieldInfo == null)) {
+		if (component == null || fieldInfo == null) {
 			return;
 		}
 		String entityPart = "entity";
@@ -122,7 +122,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			List<String> entityFields, final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
+			final List<String> entityFields, final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
 			final CVerticalLayout formLayout) throws Exception {
 		return buildForm(entityClass, binder, entityFields, mapComponents, mapHorizontalLayouts, formLayout, null);
 	}
@@ -175,7 +175,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		final NumberField numberField = new NumberField();
 		CAuxillaries.setId(numberField);
 		numberField.setStep(0.01); // Set decimal step for BigDecimal fields
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				final double defaultVal = Double.parseDouble(fieldInfo.getDefaultValue());
 				numberField.setValue(defaultVal);
@@ -189,7 +189,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			// Use converter to handle BigDecimal conversion
 			binder.forField(numberField).withConverter(value -> value != null ? BigDecimal.valueOf(value) : null,
 					value -> value != null ? value.doubleValue() : null, "Invalid decimal value").bind(fieldInfo.getFieldName());
-			LOGGER.debug("Successfully bound NumberField with BigDecimal converter for field '{}'", fieldInfo.getFieldName());
+			// LOGGER.debug("Successfully bound NumberField with BigDecimal converter for field '{}'", fieldInfo.getFieldName());
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind BigDecimal field for field '{}': {} - using fallback binding", fieldInfo.getFieldName(), e.getMessage());
 			// Fallback to simple binding without converter
@@ -209,7 +209,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			// Set ID for better test automation
 			CAuxillaries.setId(checkbox);
 			// Safe null checking and parsing for default value
-			if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+			if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 				checkbox.setValue(Boolean.parseBoolean(fieldInfo.getDefaultValue()));
 			}
 			safeBindComponent(binder, checkbox, fieldInfo.getFieldName(), "Checkbox");
@@ -222,7 +222,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	private static Component createColorPicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		try {
-			CColorPickerComboBox colorPicker = new CColorPickerComboBox(fieldInfo);
+			final CColorPickerComboBox colorPicker = new CColorPickerComboBox(fieldInfo);
 			safeBindComponent(binder, colorPicker, fieldInfo.getFieldName(), "ColorPicker");
 			return colorPicker;
 		} catch (final Exception e) {
@@ -231,7 +231,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
-	public static <T extends CEntityDB<T>> CNavigableComboBox<T> createComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+	public static <T extends CEntityDB<T>> CNavigableComboBox<T> createComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
@@ -247,7 +247,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			navigableComboBox.setItems(items);
 			if (!items.isEmpty()) {
-				if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+				if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 					// For entity types, try to find by name or toString match
 					final T defaultItem = items.stream().filter(item -> {
 						final String itemDisplay = CColorUtils.getDisplayTextFromEntity(item);
@@ -272,7 +272,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	@SuppressWarnings ("unchecked")
-	private static <T> MultiSelectComboBox<T> createComboBoxMultiSelect(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+	private static <T> MultiSelectComboBox<T> createComboBoxMultiSelect(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
@@ -311,8 +311,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
-	private static Component createComponentForField(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
-			throws Exception {
+	private static Component createComponentForField(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Component component = null;
 			Check.notNull(fieldInfo, "Field");
@@ -329,7 +329,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			// Check if field should be rendered as ComboBox based on metadata
 			final boolean hasDataProvider = hasValidDataProvider(fieldInfo.getDataProviderBean());
-			if (hasDataProvider && (fieldType == String.class)) {
+			if (hasDataProvider && fieldType == String.class) {
 				// gets strings from a method in a spring bean
 				component = createStringComboBox(contentOwner, fieldInfo, binder);
 			} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
@@ -356,9 +356,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					fieldInfo.setDataProviderBean(fieldType.getSimpleName() + "Service");
 				}
 				component = createComboBox(contentOwner, fieldInfo, binder);
-			} else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
+			} else if (fieldType == Boolean.class || fieldType == boolean.class) {
 				component = createCheckbox(fieldInfo, binder);
-			} else if ((fieldType == String.class)) {
+			} else if (fieldType == String.class) {
 				if (fieldInfo.isColorField()) {
 					component = createColorPicker(fieldInfo, binder);
 				} else if (fieldInfo.isUseIcon()) {
@@ -370,23 +370,23 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createTextField(fieldInfo, binder);
 				}
-			} else if ((fieldType == Integer.class) || (fieldType == int.class) || (fieldType == Long.class) || (fieldType == long.class)) {
+			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class) {
 				// Integer types
 				component = createIntegerField(fieldInfo, binder);
 			} else if (fieldType == BigDecimal.class) {
 				component = createBigDecimalField(fieldInfo, binder);
-			} else if ((fieldType == Double.class) || (fieldType == double.class) || (fieldType == Float.class) || (fieldType == float.class)) {
+			} else if (fieldType == Double.class || fieldType == double.class || fieldType == Float.class || fieldType == float.class) {
 				// Floating-point types
 				component = createFloatingPointField(fieldInfo, binder);
 			} else if (fieldType == LocalDate.class) {
 				component = createDatePicker(fieldInfo, binder);
 			} else if (fieldType == LocalTime.class) {
 				component = createTimePicker(fieldInfo, binder);
-			} else if ((fieldType == LocalDateTime.class) || (fieldType == Instant.class)) {
+			} else if (fieldType == LocalDateTime.class || fieldType == Instant.class) {
 				component = createDateTimePicker(fieldInfo, binder);
 			} else if (fieldType.isEnum()) {
 				component = createEnumComponent(fieldInfo, binder);
-			} else if ((fieldType == byte[].class) && fieldInfo.isImageData()) {
+			} else if (fieldType == byte[].class && fieldInfo.isImageData()) {
 				component = createPictureSelector(fieldInfo, binder);
 			} else {
 				Check.isTrue(false, "Component field [" + fieldInfo.getFieldName() + "], unsupported field type [" + fieldType.getSimpleName()
@@ -400,7 +400,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			component.setClassName("form-field-" + component.getClass().getSimpleName());
 			// Create field
 			return component;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating component for field '{}", fieldInfo.getFieldName());
 			throw e;
 		}
@@ -413,7 +413,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param binder       the enhanced binder for form binding
 	 * @return the custom component or null if creation fails
 	 * @throws Exception */
-	private static Component createCustomComponent(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
+	private static Component createCustomComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
 			throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for custom component creation");
@@ -424,7 +424,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			// Check.notNull(contentOwner, "ContentOwner for custom component creation");
 			// use first method only
 			final String methodName = fieldInfo.getCreateComponentMethod().split(",")[0].trim();
-			String oldBeanMethod = fieldInfo.getDataProviderMethod();
+			final String oldBeanMethod = fieldInfo.getDataProviderMethod();
 			fieldInfo.setDataProviderMethod(methodName); // geçici olarak method adını değiştir
 			final Component component = dataProviderResolver.resolveDataComponent(contentOwner, fieldInfo);
 			fieldInfo.setDataProviderMethod(oldBeanMethod); // orijinal method adına geri dön
@@ -443,13 +443,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return datePicker;
 	}
 
-	private static TimePicker createTimePicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		final TimePicker timePicker = new TimePicker();
-		CAuxillaries.setId(timePicker);
-		safeBindComponent(binder, timePicker, fieldInfo.getFieldName(), "TimePicker");
-		return timePicker;
-	}
-
 	private static DateTimePicker createDateTimePicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		final DateTimePicker dateTimePicker = new DateTimePicker();
 		CAuxillaries.setId(dateTimePicker);
@@ -457,8 +450,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return dateTimePicker;
 	}
 
-	private static <EntityClass, DetailClass> CComponentFieldSelection<EntityClass, DetailClass> createDualListSelector2(IContentOwner contentOwner,
-			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
+	private static <EntityClass, DetailClass> CComponentFieldSelection<EntityClass, DetailClass> createDualListSelector2(
+			final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
 		LOGGER.debug("Creating CComponentFieldSelection for field: {}", fieldInfo.getFieldName());
 		final CComponentFieldSelection<EntityClass, DetailClass> dualListSelector = new CComponentFieldSelection<EntityClass, DetailClass>(
@@ -536,7 +529,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// Set step for floating point fields
 		numberField.setStep(0.01);
 		// Set default value if specified
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			final double defaultVal = Double.parseDouble(fieldInfo.getDefaultValue());
 			numberField.setValue(defaultVal);
 		}
@@ -544,8 +537,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return numberField;
 	}
 
-	private static <EntityClass, DetailClass> CComponentListSelection<EntityClass, DetailClass> createGridListSelector(IContentOwner contentOwner,
-			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
+	private static <EntityClass, DetailClass> CComponentListSelection<EntityClass, DetailClass> createGridListSelector(
+			final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for GridListSelector creation");
 		LOGGER.debug("Creating CComponentListSelection for field: {}", fieldInfo.getFieldName());
 		final CComponentListSelection<EntityClass, DetailClass> gridListSelector =
@@ -587,31 +580,31 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			if (iconName == null || iconName.isEmpty()) {
 				return new Span("No icon selected");
 			}
-			HorizontalLayout layout = new HorizontalLayout();
+			final HorizontalLayout layout = new HorizontalLayout();
 			layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
 			layout.setSpacing(true);
 			try {
 				// Parse the icon name (remove "vaadin:" prefix if present)
-				String cleanIconName = iconName.startsWith("vaadin:") ? iconName.substring(7) : iconName;
-				VaadinIcon vaadinIcon = VaadinIcon.valueOf(cleanIconName.toUpperCase().replace("-", "_"));
-				Icon icon = CColorUtils.styleIcon(vaadinIcon.create());
+				final String cleanIconName = iconName.startsWith("vaadin:") ? iconName.substring(7) : iconName;
+				final VaadinIcon vaadinIcon = VaadinIcon.valueOf(cleanIconName.toUpperCase().replace("-", "_"));
+				final Icon icon = CColorUtils.styleIcon(vaadinIcon.create());
 				layout.add(icon);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// If icon cannot be created, show a placeholder
-				Span placeholder = new Span("?");
+				final Span placeholder = new Span("?");
 				placeholder.getStyle().set("width", "16px").set("text-align", "center");
 				layout.add(placeholder);
 			}
-			Span label = new Span(iconName);
+			final Span label = new Span(iconName);
 			layout.add(label);
 			return layout;
 		}));
 		// Set item label generator for text representation
 		comboBox.setItemLabelGenerator(iconName -> iconName);
 		// Handle default value
-		final boolean hasDefaultValue = (fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty();
+		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
 		if (hasDefaultValue) {
-			String defaultIcon = fieldInfo.getDefaultValue();
+			final String defaultIcon = fieldInfo.getDefaultValue();
 			if (iconNames.contains(defaultIcon)) {
 				comboBox.setValue(defaultIcon);
 				LOGGER.debug("Set Icon ComboBox default value for field '{}': '{}'", fieldInfo.getFieldName(), defaultIcon);
@@ -633,21 +626,21 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CAuxillaries.setId(numberField);
 		numberField.setStep(1);
 		// Set default value if specified
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			final double defaultVal = Double.parseDouble(fieldInfo.getDefaultValue());
 			numberField.setValue(defaultVal);
 		}
 		// Handle different integer types with proper conversion
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 		final String propertyName = fieldInfo.getFieldName();
-		if ((fieldType == Integer.class) || (fieldType == int.class)) {
+		if (fieldType == Integer.class || fieldType == int.class) {
 			binder.forField(numberField).withConverter(value -> value != null ? value.intValue() : null,
 					value -> value != null ? value.doubleValue() : null, "Invalid integer value").bind(propertyName);
-			LOGGER.debug("Successfully bound NumberField with Integer converter for field '{}'", fieldInfo.getFieldName());
-		} else if ((fieldType == Long.class) || (fieldType == long.class)) {
+			// LOGGER.debug("Successfully bound NumberField with Integer converter for field '{}'", fieldInfo.getFieldName());
+		} else if (fieldType == Long.class || fieldType == long.class) {
 			binder.forField(numberField).withConverter(value -> value != null ? value.longValue() : null,
 					value -> value != null ? value.doubleValue() : null, "Invalid long value").bind(propertyName);
-			LOGGER.debug("Successfully bound NumberField with Long converter for field '{}'", fieldInfo.getFieldName());
+			// LOGGER.debug("Successfully bound NumberField with Long converter for field '{}'", fieldInfo.getFieldName());
 		} else {
 			// Fallback for other number types (Double, etc.)
 			binder.bind(numberField, propertyName);
@@ -657,14 +650,14 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	private static Component createPictureSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		// LOGGER.debug("Creating CPictureSelector for field: {}", fieldInfo.getFieldName());
-		CPictureSelector pictureSelector = new CPictureSelector(fieldInfo);
+		final CPictureSelector pictureSelector = new CPictureSelector(fieldInfo);
 		safeBindComponent(binder, pictureSelector, fieldInfo.getFieldName(), "PictureSelector");
 		// LOGGER.debug("Successfully created CPictureSelector for field: {}", fieldInfo.getFieldName());
 		return pictureSelector;
 	}
 
-	private static ComboBox<String> createStringComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
-			throws Exception {
+	private static ComboBox<String> createStringComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "Field for String ComboBox creation");
 		final ComboBox<String> comboBox = new ComboBox<>();
 		// Configure basic properties from metadata
@@ -685,7 +678,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			comboBox.setValue(null);
 		}
 		// Handle default value
-		final boolean hasDefaultValue = (fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty();
+		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
 		if (hasDefaultValue) {
 			// For String ComboBox, try to match default value exactly
 			if (items.contains(fieldInfo.getDefaultValue())) {
@@ -713,7 +706,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		item.setMinWidth("200px");
 		item.setMaxWidth("800px");
 		item.setMinHeight("100px");
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
 			} catch (final Exception e) {
@@ -741,7 +734,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		item.setWidthFull();
 		item.setMinWidth("200px");
 		item.setMaxWidth("800px");
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
 			} catch (final Exception e) {
@@ -769,16 +762,23 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		item.setWidthFull();
 		item.setMinWidth("200px");
 		item.setMaxWidth("800px");
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			item.setValue(fieldInfo.getDefaultValue());
 		}
 		item.setRevealButtonVisible(fieldInfo.isPasswordRevealButton());
 		return item;
 	}
 
+	private static TimePicker createTimePicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+		final TimePicker timePicker = new TimePicker();
+		CAuxillaries.setId(timePicker);
+		safeBindComponent(binder, timePicker, fieldInfo.getFieldName(), "TimePicker");
+		return timePicker;
+	}
+
 	private static void getListOfAllFields(final Class<?> entityClass, final List<Field> allFields) {
 		Class<?> current = entityClass;
-		while ((current != null) && (current != Object.class)) {
+		while (current != null && current != Object.class) {
 			final Field[] declaredFields = current.getDeclaredFields();
 			allFields.addAll(Arrays.asList(declaredFields));
 			current = current.getSuperclass();
@@ -808,10 +808,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	private static List<String> getVaadinIconNames() {
-		List<String> iconNames = new ArrayList<>();
+		final List<String> iconNames = new ArrayList<>();
 		// Add all VaadinIcon enum values as "vaadin:iconname" format
-		for (VaadinIcon icon : VaadinIcon.values()) {
-			String iconName = "vaadin:" + icon.name().toLowerCase().replace("_", "-");
+		for (final VaadinIcon icon : VaadinIcon.values()) {
+			final String iconName = "vaadin:" + icon.name().toLowerCase().replace("_", "-");
 			iconNames.add(iconName);
 		}
 		// Sort the list for better user experience
@@ -824,7 +824,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param dataProviderBean the data provider bean name to check
 	 * @return true if the field has a valid data provider bean, false otherwise */
 	private static boolean hasValidDataProvider(final String dataProviderBean) {
-		return (dataProviderBean != null) && !dataProviderBean.trim().isEmpty() && !"none".equalsIgnoreCase(dataProviderBean.trim());
+		return dataProviderBean != null && !dataProviderBean.trim().isEmpty() && !"none".equalsIgnoreCase(dataProviderBean.trim());
 	}
 
 	public static <EntityClass> Component processField(final IContentOwner contentOwner, final CEnhancedBinder<EntityClass> binder,
@@ -840,7 +840,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			if (mapHorizontalLayouts != null) {
 				mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
 			}
-			if ((component != null) && (mapComponents != null)) {
+			if (component != null && mapComponents != null) {
 				mapComponents.put(fieldInfo.getFieldName(), component);
 			}
 			return component;
@@ -942,15 +942,15 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		formLayout = new CVerticalLayout(false, false, false);
 	}
 
-	public CFormBuilder(IContentOwner contentOwner, final Class<?> entityClass) throws Exception {
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass) throws Exception {
 		this(contentOwner, entityClass, createEnhancedBinder(entityClass), List.of());
 	}
 
-	public CFormBuilder(IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder) throws Exception {
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder) throws Exception {
 		this(contentOwner, entityClass, binder, List.of());
 	}
 
-	public CFormBuilder(IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final List<String> entityFields) throws Exception {
 		componentMap = new HashMap<>();
 		horizontalLayoutMap = new HashMap<>();
@@ -963,8 +963,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, getComponentMap());
 	}
 
-	public Component addFieldLine(IContentOwner contentOwner, final String screenClassType, final CDetailLines line, final VerticalLayout layout,
-			Map<String, Component> componentMap2, Map<String, CHorizontalLayout> horizontalLayoutMap2) throws Exception {
+	public Component addFieldLine(final IContentOwner contentOwner, final String screenClassType, final CDetailLines line,
+			final VerticalLayout layout, final Map<String, Component> componentMap2, final Map<String, CHorizontalLayout> horizontalLayoutMap2)
+			throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
 		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, getComponentMap());
 	}
@@ -984,6 +985,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(component, "Component for field " + fieldName + " not found in form builder map");
 		return component;
 	}
+
+	public Map<String, Component> getComponentMap() { return componentMap; }
 
 	public CVerticalLayout getFormLayout() { return formLayout; }
 
@@ -1011,7 +1014,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	/** Populates the form with entity data using the internal binder.
 	 * @param entity the entity to populate the form with */
 	@SuppressWarnings ("unchecked")
-	public void populateForm(CEntityDB<?> entity) {
+	public void populateForm(final CEntityDB<?> entity) {
 		Check.notNull(entity, "Entity for form population");
 		Check.notNull(binder, "Binder for form population");
 		LOGGER.debug("Populating form with entity: {}", entity);
@@ -1040,7 +1043,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
-	public void setCurrentEntity(CEntityDB<?> entity) {
+	public void setCurrentEntity(final CEntityDB<?> entity) {
 		getComponentMap().values().forEach(component -> {
 			if (component instanceof IContentOwner) {
 				try {
@@ -1050,9 +1053,5 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				}
 			}
 		});
-	}
-
-	public Map<String, Component> getComponentMap() {
-		return componentMap;
 	}
 }

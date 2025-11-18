@@ -10,12 +10,13 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CInitializerServiceProjectItem;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
-public class CActivityInitializerService extends CInitializerServiceBase {
+public class CActivityInitializerService extends CInitializerServiceProjectItem {
 
 	public static final String BASE_PANEL_NAME = "Activity Information";
 	static final Class<?> clazz = CActivity.class;
@@ -31,9 +32,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			scr.addScreenLine(CDetailLinesService.createSection(CActivityInitializerService.BASE_PANEL_NAME));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
@@ -60,7 +59,6 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));

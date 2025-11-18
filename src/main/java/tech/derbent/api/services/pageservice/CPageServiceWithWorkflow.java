@@ -8,6 +8,7 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 /** CPageServiceWithWorkflow - Base page service for entities that implement IHasStatusAndWorkflow.
@@ -99,5 +100,15 @@ public abstract class CPageServiceWithWorkflow<EntityClass extends CProjectItem<
 			CNotificationService.showError("Failed to change status: " + e.getMessage());
 			throw e;
 		}
+	}
+
+	public List<CProjectItemStatus> getAvailableStatusesForProjectItem() {
+		final EntityClass entity = view.getCurrentEntity();
+		if (entity == null) {
+			LOGGER.warn("No current entity for retrieving available statuses");
+			return List.of();
+		}
+		Check.notNull(projectItemStatusService, "CProjectItemStatusService cannot be null");
+		return projectItemStatusService.getValidNextStatuses(entity);
 	}
 }

@@ -3,15 +3,16 @@ package tech.derbent.app.companies.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
 
@@ -26,34 +27,33 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
-			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Company Information
-			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "address"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "website"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "taxNumber"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "address"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "website"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "taxNumber"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			// Company Branding & UI Settings
-			scr.addScreenLine(CDetailLinesService.createSection("Company Branding & UI"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTheme"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyLogoUrl"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryColor"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Company Branding & UI"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTheme"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyLogoUrl"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryColor"));
 			// Business Operations
-			scr.addScreenLine(CDetailLinesService.createSection("Business Operations"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursStart"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursEnd"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTimezone"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultLanguage"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Business Operations"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursStart"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursEnd"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTimezone"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultLanguage"));
 			// Notification Settings
-			scr.addScreenLine(CDetailLinesService.createSection("Notification Settings"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableNotifications"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notificationEmail"));
-			scr.debug_printScreenInformation();
-			return scr;
+			detailSection.addScreenLine(CDetailLinesService.createSection("Notification Settings"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableNotifications"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notificationEmail"));
+			detailSection.debug_printScreenInformation();
+			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating company view.");
 			throw e;

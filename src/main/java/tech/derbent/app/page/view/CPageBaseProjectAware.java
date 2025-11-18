@@ -21,6 +21,7 @@ import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
+
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
@@ -67,7 +68,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 					baseViewName);
 			Check.notNull(screen, "Screen not found: " + baseViewName);
 			// Only create binder if not already set for this entity type or if no current binder exists
-			if ((currentBinder == null) || !currentBinder.getBeanType().equals(entityClass)) {
+			if (currentBinder == null || !currentBinder.getBeanType().equals(entityClass)) {
 				@SuppressWarnings ("unchecked")
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
@@ -150,7 +151,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		try {
 			detailsBuilder.setCurrentEntity(currentEntity);
 			// Default implementation - populate current binder if available
-			if ((currentBinder != null) && (getCurrentEntity() != null)) {
+			if (currentBinder != null && getCurrentEntity() != null) {
 				LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
 				currentBinder.setBean(getCurrentEntity());
 			} else if (currentBinder != null) {

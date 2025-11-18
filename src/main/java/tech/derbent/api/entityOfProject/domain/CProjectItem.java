@@ -28,7 +28,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	@JoinColumn (name = "cprojectitemstatus_id", nullable = true)
 	@AMetaData (
 			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30,
-			dataProviderBean = "CProjectItemStatusService", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "view", dataProviderMethod = "getAvailableStatusesForProjectItem", setBackgroundFromColor = true, useIcon = true
 	)
 	protected CProjectItemStatus status;
 
@@ -85,7 +85,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		}
 		final String pType = parent.getClass().getSimpleName();
 		// self-parent koruması: aynı tip + aynı id
-		if ((getId() != null) && getId().equals(pid) && this.getClass().getSimpleName().equals(pType)) {
+		if (getId() != null && getId().equals(pid) && this.getClass().getSimpleName().equals(pType)) {
 			throw new IllegalArgumentException("An item cannot be parent of itself");
 		}
 		parentType = pType; // Örn: "CActivity", "CMeeting"

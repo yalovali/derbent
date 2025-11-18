@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.comments.domain.CCommentPriority;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -31,8 +32,7 @@ public class CCommentPriorityInitializerService extends CInitializerServiceBase 
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Priority Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));

@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.assets.assettype.domain.CAssetType;
 import tech.derbent.app.page.service.CPageEntityService;
@@ -32,9 +33,7 @@ public class CAssetTypeInitializerService extends CInitializerServiceBase {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));

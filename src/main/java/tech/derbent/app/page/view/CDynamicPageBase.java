@@ -50,9 +50,6 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			event.rerouteToError(IllegalStateException.class, "Page not available");
 			return;
 		}
-		if (pageService != null) {
-			pageService.bind();
-		}
 	}
 
 	/** Clear entity details and reset state. */
@@ -71,22 +68,6 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		super.configureCrudToolbar(toolbar);
 	}
 
-	@Override
-	public Class<?> getEntityClass() { return entityClass; }
-
-	@Override
-	public CAbstractService<?> getEntityService() { return entityService; }
-
-	/** Get the page entity this view represents. */
-	public CPageEntity getPageEntity() { return pageEntity; }
-
-	/** Get the cached page service instance for this page.
-	 * <p>
-	 * The page service is created once during construction and cached for the lifetime of the page. This avoids the performance overhead of recreating
-	 * the service instance on every call.
-	 * @return the cached page service instance */
-	public CPageService<?> getPageService() { return pageService; }
-
 	/** Create a new page service instance for this page.
 	 * <p>
 	 * This method is called once during construction to create and cache the page service instance.
@@ -104,6 +85,22 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			return null;
 		}
 	}
+
+	@Override
+	public Class<?> getEntityClass() { return entityClass; }
+
+	@Override
+	public CAbstractService<?> getEntityService() { return entityService; }
+
+	/** Get the page entity this view represents. */
+	public CPageEntity getPageEntity() { return pageEntity; }
+
+	/** Get the cached page service instance for this page.
+	 * <p>
+	 * The page service is created once during construction and cached for the lifetime of the page. This avoids the performance overhead of
+	 * recreating the service instance on every call.
+	 * @return the cached page service instance */
+	public CPageService<?> getPageService() { return pageService; }
 
 	/** Implementation of IPageTitleProvider - provides the page title from the CPageEntity */
 	@Override
@@ -149,6 +146,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			clearEntityDetails();
 			currentEntityViewName = entityViewName;
 			buildScreen(entityViewName, (Class) entityClass, baseDetailsLayout);
+			pageService.bind();
 		} catch (final Exception e) {
 			LOGGER.error("Error rebuilding entity details for view '{}': {}", clazz.getField("VIEW_NAME"), e.getMessage());
 			throw e;

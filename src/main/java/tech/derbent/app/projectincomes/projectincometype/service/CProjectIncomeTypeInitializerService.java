@@ -12,10 +12,11 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType;
+import tech.derbent.app.projects.domain.CProject;
 
 public class CProjectIncomeTypeInitializerService extends CInitializerServiceBase {
 
@@ -32,10 +33,7 @@ public class CProjectIncomeTypeInitializerService extends CInitializerServiceBas
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));

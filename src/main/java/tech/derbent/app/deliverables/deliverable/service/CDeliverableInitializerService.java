@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -32,9 +33,7 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(CDeliverableInitializerService.BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));

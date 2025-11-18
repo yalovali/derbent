@@ -23,22 +23,20 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNone"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Data Provider"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dataServiceBeanName"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "columnFields"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			detailSection.debug_printScreenInformation();
-			return detailSection;
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNone"));
+			scr.addScreenLine(CDetailLinesService.createSection("Data Provider"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dataServiceBeanName"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "columnFields"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
+			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.debug_printScreenInformation();
+			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating grid entity view.");
 			throw e;

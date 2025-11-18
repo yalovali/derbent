@@ -16,6 +16,7 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
@@ -59,38 +60,39 @@ public final class CDataProviderResolver {
 		return String.format("CDataProviderResolver - Method cache: %d entries, Bean cache: %d entries", methodCache.size(), beanCache.size());
 	}
 
-	public Component resolveDataComponent(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	public Component resolveDataComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
-			Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
+			final Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
 			final Component component = (Component) result;
 			if (component instanceof IHasContentOwner) {
 				((IHasContentOwner) component).setContentOwner(contentOwner);
 			}
 			return component;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error resolving data for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
 			throw e;
 		}
 	}
 
 	@SuppressWarnings ("unchecked")
-	public <T> List<T> resolveDataList(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	public <T> List<T> resolveDataList(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
-			Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
+			final Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
 			return (List<T>) result;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error resolving data for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
 			throw e;
 		}
 	}
 
-	public Object resolveMethodAnnotations(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	@SuppressWarnings ("rawtypes")
+	public Object resolveMethodAnnotations(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
 			boolean there_is_param = false;
 			Check.notNull(fieldInfo, "Field info cannot be null");
 			final String beanName = fieldInfo.getDataProviderBean();
 			// Check for "none" sentinel value first - indicates field should not have a data provider
-			if ((beanName != null) && "none".equalsIgnoreCase(beanName.trim())) {
+			if (beanName != null && "none".equalsIgnoreCase(beanName.trim())) {
 				throw new IllegalArgumentException("Data provider bean is set to 'none' for field '" + fieldInfo.getFieldName()
 						+ "' - this field should not use a data provider");
 			}
@@ -111,6 +113,10 @@ public final class CDataProviderResolver {
 							"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
 					return applicationContext.getBean("CSessionService");
 				});
+			} else if ("view".equals(beanName)) {
+				Check.instanceOf(contentOwner, IPageServiceImplementer.class,
+						"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
+				bean = ((IPageServiceImplementer) contentOwner).getPageService();
 			} else {
 				// Get bean from Spring context with caching
 				bean = getBeanFromCache(beanName, () -> {
@@ -119,6 +125,7 @@ public final class CDataProviderResolver {
 					return applicationContext.getBean(beanName);
 				});
 			}
+			Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName + " field: " + fieldInfo.getFieldName());
 			Object result;
 			if (there_is_param) {
 				result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod(), paramValue);
@@ -127,18 +134,18 @@ public final class CDataProviderResolver {
 			}
 			Check.notNull(result, "Result from data provider method cannot be null");
 			return result;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error resolving method annotations for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
 			throw e;
 		}
 	}
 
-	Object resolveParamValue(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	Object resolveParamValue(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		Check.notNull(fieldInfo, "Field info cannot be null");
 		Object paramValue = null;
 		Object paramBean = null;
 		String bName = fieldInfo.getDataProviderParamBean();
-		String paramMethod = fieldInfo.getDataProviderParamMethod();
+		final String paramMethod = fieldInfo.getDataProviderParamMethod();
 		if (bName.isEmpty()) {
 			bName = fieldInfo.getDataProviderBean();
 		}

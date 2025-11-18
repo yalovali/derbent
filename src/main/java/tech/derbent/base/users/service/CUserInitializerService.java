@@ -27,41 +27,41 @@ public class CUserInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
-			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// create screen lines
-			scr.addScreenLine(CDetailLinesService.createSection(CUserInitializerService.BASE_PANEL_NAME));
+			detailSection.addScreenLine(CDetailLinesService.createSection(CUserInitializerService.BASE_PANEL_NAME));
 			// for test purposes only
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastname"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "login"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
-			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
-			scr.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastname"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "login"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("System Access"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
 			line.setRelationFieldName("projectSettings");
 			line.setFieldCaption("projectSettings");
 			line.setProperty("Component:createUserProjectSettingsComponent");
 			line.setDataProviderBean("CUserService");
-			scr.addScreenLine(line);
-			scr.addScreenLine(CDetailLinesService.createSection("Organization"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyRole"));
-			scr.addScreenLine(CDetailLinesService.createSection("Profile"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "profilePictureData"));
-			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
-			scr.addScreenLine(CDetailLinesService.createSection("Settings"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeDisplaySectionsAsTabs"));
-			scr.debug_printScreenInformation();
-			return scr;
+			detailSection.addScreenLine(line);
+			detailSection.addScreenLine(CDetailLinesService.createSection("Organization"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyRole"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Profile"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "profilePictureData"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Information"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeDisplaySectionsAsTabs"));
+			detailSection.debug_printScreenInformation();
+			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user view.");
 			throw e;

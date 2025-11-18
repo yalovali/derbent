@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -31,7 +32,7 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencyCode"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencySymbol"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));

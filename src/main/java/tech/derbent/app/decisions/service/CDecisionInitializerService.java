@@ -9,6 +9,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.decisions.domain.CDecision;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -26,26 +27,24 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
-			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// create screen lines
-			scr.addScreenLine(CDetailLinesService.createSection(CDecisionInitializerService.BASE_PANEL_NAME));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "reviewDate"));
-			scr.addScreenLine(CDetailLinesService.createSection("Associations"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "accountableUser"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "implementationDate"));
-			scr.debug_printScreenInformation();
-			return scr;
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Schedule"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "reviewDate"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Associations"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "accountableUser"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "implementationDate"));
+			detailSection.debug_printScreenInformation();
+			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating decision view.");
 			throw e;

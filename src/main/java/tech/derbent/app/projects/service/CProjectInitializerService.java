@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -14,6 +12,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 
 public class CProjectInitializerService extends CInitializerServiceBase {
 
@@ -30,23 +31,21 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
-			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "userSettings");
 			line.setRelationFieldName("userSettings");
 			line.setFieldCaption("userSettings");
 			line.setProperty("Component:createProjectUserSettingsComponent");
 			line.setDataProviderBean("CProjectService");
-			scr.addScreenLine(line);
-			scr.debug_printScreenInformation();
-			return scr;
+			detailSection.addScreenLine(line);
+			detailSection.debug_printScreenInformation();
+			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating project view.");
 			throw e;

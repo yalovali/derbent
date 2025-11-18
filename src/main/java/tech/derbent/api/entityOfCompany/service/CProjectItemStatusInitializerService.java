@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -29,21 +30,18 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "finalStatus"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			detailSection.debug_printScreenInformation();
-			return detailSection;
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "finalStatus"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.debug_printScreenInformation();
+			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating status view");
 			throw e;

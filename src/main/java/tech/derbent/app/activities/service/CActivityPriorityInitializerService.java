@@ -13,6 +13,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.app.page.service.CPageEntityService;
@@ -32,24 +33,22 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 	public static CDetailSection createBasicView(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Behavior"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isDefault"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			detailSection.debug_printScreenInformation();
-			return detailSection;
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			scr.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
+			scr.addScreenLine(CDetailLinesService.createSection("Behavior"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isDefault"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.debug_printScreenInformation();
+			return scr;
 		} catch (final Exception e) {
 			final String errorMsg = "Error creating activity priority view: " + e.getMessage();
 			LOGGER.error(errorMsg, e);

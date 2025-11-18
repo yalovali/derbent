@@ -105,10 +105,8 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	 * @param item the project item entity
 	 * @return list of valid next statuses */
 	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
+		Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
 		final List<CProjectItemStatus> validStatuses = new ArrayList<>();
-		if (item == null) {
-			return validStatuses;
-		}
 		final CWorkflowEntity workflow = item.getWorkflow();
 		Check.notNull(workflow, "Workflow cannot be null for project item");
 		final CProjectItemStatus currentStatus = item.getStatus();

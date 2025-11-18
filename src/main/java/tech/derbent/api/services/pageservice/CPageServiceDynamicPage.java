@@ -7,9 +7,4 @@ public abstract class CPageServiceDynamicPage<EntityClass extends CEntityDB<Enti
 	public CPageServiceDynamicPage(final IPageServiceImplementer<EntityClass> view) {
 		super(view);
 	}
-
-	@Override
-	public void bind() {
-		super.bind();
-	}
 }
