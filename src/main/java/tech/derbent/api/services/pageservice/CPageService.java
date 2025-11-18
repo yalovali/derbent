@@ -141,27 +141,78 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	private void bindComponent(final Method method, final Component component, final String methodName, final String componentName,
 			final String action) {
 		LOGGER.debug("Binding method {} to component {} for action {}.", methodName, componentName, action);
+		// Check method signature to determine if it accepts parameters
+		final int paramCount = method.getParameterCount();
+		final boolean acceptsParams = paramCount >= 1;
+		
 		// bind method to component based on action
 		switch (action) {
 		case "click" -> {
 			if (component instanceof final Button button) {
 				button.addClickListener(event -> {
 					try {
-						method.invoke(this);
+						if (acceptsParams && paramCount == 1) {
+							method.invoke(this, component);
+						} else if (acceptsParams && paramCount >= 2) {
+							method.invoke(this, component, null); // click events don't have values
+						} else {
+							method.invoke(this);
+						}
 					} catch (final Exception e) {
 						LOGGER.error("Error invoking method {}: {}", methodName, e.getMessage());
 					}
 				});
 			}
 		}
-		case "change" -> {
+		case "change", "changed" -> {
 			// implement change listener binding if needed
 			if (component instanceof final HasValue<?, ?> hasValue) {
 				hasValue.addValueChangeListener(event -> {
 					try {
-						method.invoke(this);
+						final Object newValue = event.getValue();
+						if (acceptsParams && paramCount == 1) {
+							method.invoke(this, component);
+						} else if (acceptsParams && paramCount >= 2) {
+							method.invoke(this, component, newValue);
+						} else {
+							method.invoke(this);
+						}
 					} catch (final Exception e) {
 						LOGGER.error("Error invoking method {}: {}", methodName, e.getMessage());
+					}
+				});
+			}
+		}
+		case "focus" -> {
+			if (component instanceof com.vaadin.flow.component.Focusable) {
+				component.getElement().addEventListener("focus", e -> {
+					try {
+						if (acceptsParams && paramCount == 1) {
+							method.invoke(this, component);
+						} else if (acceptsParams && paramCount >= 2) {
+							method.invoke(this, component, null);
+						} else {
+							method.invoke(this);
+						}
+					} catch (final Exception ex) {
+						LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+					}
+				});
+			}
+		}
+		case "blur" -> {
+			if (component instanceof com.vaadin.flow.component.Focusable) {
+				component.getElement().addEventListener("blur", e -> {
+					try {
+						if (acceptsParams && paramCount == 1) {
+							method.invoke(this, component);
+						} else if (acceptsParams && paramCount >= 2) {
+							method.invoke(this, component, null);
+						} else {
+							method.invoke(this);
+						}
+					} catch (final Exception ex) {
+						LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
 					}
 				});
 			}
@@ -203,7 +254,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
-	private EntityClass getCurrentEntity() { return view.getCurrentEntity(); }
+	protected EntityClass getCurrentEntity() { return view.getCurrentEntity(); }
 
 	protected Class<?> getEntityClass() { return view.getEntityClass(); }
 
@@ -215,6 +266,126 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	public EntityClass getPreviousEntity() { return previousEntity; }
 
 	protected ISessionService getSessionService() { return view.getSessionService(); }
+	
+	/** Get a component from the form by its field name.
+	 * @param fieldName the name of the field/component
+	 * @return the component, or null if not found */
+	protected Component getComponentByName(final String fieldName) {
+		if (formBuilder == null) {
+			LOGGER.warn("FormBuilder is null; cannot retrieve component '{}'", fieldName);
+			return null;
+		}
+		return formBuilder.getComponentMap().get(fieldName);
+	}
+	
+	/** Get a typed component from the form by its field name.
+	 * @param <T> the expected component type
+	 * @param fieldName the name of the field/component
+	 * @param componentType the expected class of the component
+	 * @return the typed component, or null if not found or wrong type */
+	@SuppressWarnings("unchecked")
+	protected <T extends Component> T getComponent(final String fieldName, final Class<T> componentType) {
+		final Component component = getComponentByName(fieldName);
+		if (component == null) {
+			LOGGER.warn("Component '{}' not found", fieldName);
+			return null;
+		}
+		if (!componentType.isInstance(component)) {
+			LOGGER.warn("Component '{}' is of type {} but expected {}", 
+					fieldName, component.getClass().getSimpleName(), componentType.getSimpleName());
+			return null;
+		}
+		return (T) component;
+	}
+	
+	/** Get a TextField component by field name.
+	 * @param fieldName the name of the field
+	 * @return the TextField component, or null if not found or wrong type */
+	protected com.vaadin.flow.component.textfield.TextField getTextField(final String fieldName) {
+		return getComponent(fieldName, com.vaadin.flow.component.textfield.TextField.class);
+	}
+	
+	/** Get a TextArea component by field name.
+	 * @param fieldName the name of the field
+	 * @return the TextArea component, or null if not found or wrong type */
+	protected com.vaadin.flow.component.textfield.TextArea getTextArea(final String fieldName) {
+		return getComponent(fieldName, com.vaadin.flow.component.textfield.TextArea.class);
+	}
+	
+	/** Get a ComboBox component by field name.
+	 * @param <T> the type of items in the ComboBox
+	 * @param fieldName the name of the field
+	 * @return the ComboBox component, or null if not found or wrong type */
+	@SuppressWarnings("unchecked")
+	protected <T> com.vaadin.flow.component.combobox.ComboBox<T> getComboBox(final String fieldName) {
+		final Component component = getComponentByName(fieldName);
+		if (component == null) {
+			LOGGER.warn("Component '{}' not found", fieldName);
+			return null;
+		}
+		// Check if it's a CNavigableComboBox (which is a CustomField containing a ComboBox)
+		if (component instanceof tech.derbent.api.components.CNavigableComboBox<?>) {
+			return (com.vaadin.flow.component.combobox.ComboBox<T>) ((tech.derbent.api.components.CNavigableComboBox<?>) component).getComboBox();
+		}
+		// Otherwise check if it's a direct ComboBox
+		if (component instanceof com.vaadin.flow.component.combobox.ComboBox) {
+			return (com.vaadin.flow.component.combobox.ComboBox<T>) component;
+		}
+		LOGGER.warn("Component '{}' is not a ComboBox (found: {})", fieldName, component.getClass().getSimpleName());
+		return null;
+	}
+	
+	/** Get a Checkbox component by field name.
+	 * @param fieldName the name of the field
+	 * @return the Checkbox component, or null if not found or wrong type */
+	protected com.vaadin.flow.component.checkbox.Checkbox getCheckbox(final String fieldName) {
+		return getComponent(fieldName, com.vaadin.flow.component.checkbox.Checkbox.class);
+	}
+	
+	/** Get a DatePicker component by field name.
+	 * @param fieldName the name of the field
+	 * @return the DatePicker component, or null if not found or wrong type */
+	protected com.vaadin.flow.component.datepicker.DatePicker getDatePicker(final String fieldName) {
+		return getComponent(fieldName, com.vaadin.flow.component.datepicker.DatePicker.class);
+	}
+	
+	/** Get the current value of a component by field name.
+	 * @param fieldName the name of the field
+	 * @return the current value, or null if component not found or has no value */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	protected Object getComponentValue(final String fieldName) {
+		final Component component = getComponentByName(fieldName);
+		if (component == null) {
+			LOGGER.warn("Cannot get value: Component '{}' not found", fieldName);
+			return null;
+		}
+		if (component instanceof HasValue) {
+			return ((HasValue) component).getValue();
+		}
+		LOGGER.warn("Component '{}' does not have a value (not a HasValue)", fieldName);
+		return null;
+	}
+	
+	/** Set the value of a component by field name.
+	 * @param fieldName the name of the field
+	 * @param value the value to set */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	protected void setComponentValue(final String fieldName, final Object value) {
+		final Component component = getComponentByName(fieldName);
+		if (component == null) {
+			LOGGER.warn("Cannot set value: Component '{}' not found", fieldName);
+			return;
+		}
+		if (component instanceof HasValue) {
+			try {
+				((HasValue) component).setValue(value);
+			} catch (final Exception e) {
+				LOGGER.error("Error setting value for component '{}': {}", fieldName, e.getMessage());
+			}
+		} else {
+			LOGGER.warn("Component '{}' does not support setting value (not a HasValue)", fieldName);
+		}
+	}
 
 	protected void setCurrentEntity(final EntityClass entity) {
 		view.setCurrentEntity(entity);
