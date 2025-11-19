@@ -204,6 +204,14 @@ public class CCrudToolbar extends HorizontalLayout {
 		LOGGER.debug("Set page base for toolbar: {}", pageBase);
 	}
 
+	/** Enable or disable the save button. This allows programmatic control from page services for validation purposes.
+	 * @param enabled true to enable the save button, false to disable it */
+	public void setSaveButtonEnabled(final boolean enabled) {
+		if (saveButton != null) {
+			saveButton.setEnabled(enabled);
+		}
+	}
+
 	/** Update enabled state of toolbar buttons based on whether callbacks are provided and current entity presence. */
 	private void updateButtonStates() {
 		// LOGGER.debug("Updating toolbar button states");

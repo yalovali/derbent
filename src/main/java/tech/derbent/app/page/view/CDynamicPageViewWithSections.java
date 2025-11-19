@@ -316,4 +316,10 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			throw e;
 		}
 	}
+
+	/** Get the CRUD toolbar for this view. Used by page services to control button states.
+	 * @return the CRUD toolbar, or null if not initialized */
+	public CCrudToolbar getCrudToolbar() {
+		return crudToolbar;
+	}
 }
