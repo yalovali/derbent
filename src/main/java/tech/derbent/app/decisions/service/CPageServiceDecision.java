@@ -2,12 +2,12 @@ package tech.derbent.app.decisions.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.services.pageservice.CPageServiceWithWorkflow;
+import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.decisions.domain.CDecision;
 
-public class CPageServiceDecision extends CPageServiceWithWorkflow<CDecision> {
+public class CPageServiceDecision extends CPageServiceDynamicPage<CDecision> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceDecision.class);
 	Long serialVersionUID = 1L;

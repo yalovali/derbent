@@ -5,24 +5,32 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.services.pageservice.CPageServiceWithWorkflow;
+import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.app.activities.domain.CActivity;
 
-public class CPageServiceActivity extends CPageServiceWithWorkflow<CActivity> implements IPageServiceHasStatusAndWorkflow<CActivity> {
+public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity> implements IPageServiceHasStatusAndWorkflow<CActivity> {
 
 	public Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivity.class);
 	Long serialVersionUID = 1L;
+	
+	// Declare the field required by the interface
+	private CProjectItemStatusService projectItemStatusService;
 
 	public CPageServiceActivity(final IPageServiceImplementer<CActivity> view) {
 		super(view);
-		projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+		// Initialize the service from Spring context
+		try {
+			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+		} catch (Exception e) {
+			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
+		}
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { // TODO Auto-generated method stub
-		return projectItemStatusService;
+	public CProjectItemStatusService getProjectItemStatusService() { 
+		return projectItemStatusService; 
 	}
 
 	public void on_description_blur(final Component component, final Object value) {
