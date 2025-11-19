@@ -28,7 +28,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	protected CDetailsBuilder detailsBuilder = null;
 	protected CFormBuilder<?> formBuilder = null;
 	private EntityClass previousEntity;
-	final protected IPageServiceImplementer<EntityClass> view;
+	private final IPageServiceImplementer<EntityClass> view;
 
 	public CPageService(final IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
@@ -50,7 +50,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			setPreviousEntity(getCurrentEntity());
 			final EntityClass newEntity = getEntityService().newEntity();
 			getEntityService().initializeNewEntity(newEntity);
-			view.onEntityCreated(newEntity);
+			getView().onEntityCreated(newEntity);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating new entity instance for type: {} - {}", getEntityClass().getSimpleName(), e.getMessage());
 			throw e;
@@ -69,7 +69,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				try {
 					getEntityService().delete(entity.getId());
 					LOGGER.info("Entity deleted successfully with ID: {}", entity.getId());
-					view.onEntityDeleted(entity);
+					getView().onEntityDeleted(entity);
 				} catch (final Exception ex) {
 					CNotificationService.showException("Error deleting entity with ID:" + entity.getId(), ex);
 				}
@@ -92,27 +92,27 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 					final CEntityDB<?> reloaded = getEntityService().getById(previousEntity.getId()).orElse(null);
 					if (reloaded != null) {
 						setCurrentEntity((EntityClass) reloaded);
-						view.onEntityRefreshed((EntityClass) reloaded);
+						getView().onEntityRefreshed((EntityClass) reloaded);
 					} else {
 						// previous entity no longer exists, clear selection
-						view.selectFirstInGrid();
+						getView().selectFirstInGrid();
 					}
 				} else {
-					view.selectFirstInGrid();
+					getView().selectFirstInGrid();
 				}
 				CNotificationService.showInfo("Entity reloaded.");
 				return;
 			}
 			// Normal refresh for existing entities
 			if (entity == null) {
-				view.selectFirstInGrid();
+				getView().selectFirstInGrid();
 				return;
 			}
 			final CEntityDB<?> reloaded = getEntityService().getById(entity.getId()).orElse(null);
 			if (reloaded != null) {
-				view.onEntityRefreshed((EntityClass) reloaded);
+				getView().onEntityRefreshed((EntityClass) reloaded);
 			} else {
-				view.selectFirstInGrid();
+				getView().selectFirstInGrid();
 			}
 			CNotificationService.showInfo("Entity reloaded.");
 		} catch (final Exception e) {
@@ -130,14 +130,14 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				CNotificationService.showWarning("No entity selected for save");
 				return;
 			}
-			if (view.getBinder() != null) {
-				view.getBinder().writeBean(entity);
+			if (getView().getBinder() != null) {
+				getView().getBinder().writeBean(entity);
 			}
 			final EntityClass savedEntity = getEntityService().save(entity);
 			LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 			setCurrentEntity(savedEntity);
-			view.onEntitySaved(savedEntity);
-			view.populateForm();
+			getView().onEntitySaved(savedEntity);
+			getView().populateForm();
 			CNotificationService.showSaveSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error saving entity: {}", e.getMessage());
@@ -148,8 +148,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	public void bind() {
 		try {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CActivity.class.getSimpleName());
-			Check.notNull(view, "View must not be null to bind page service.");
-			detailsBuilder = view.getDetailsBuilder();
+			Check.notNull(getView(), "View must not be null to bind page service.");
+			detailsBuilder = getView().getDetailsBuilder();
 			if (detailsBuilder != null) {
 				formBuilder = detailsBuilder.getFormBuilder();
 			}
@@ -315,22 +315,22 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		return null;
 	}
 
-	protected EntityClass getCurrentEntity() { return view.getCurrentEntity(); }
+	protected EntityClass getCurrentEntity() { return getView().getCurrentEntity(); }
 
 	protected DatePicker getDatePicker(final String fieldName) {
 		return getComponent(fieldName, DatePicker.class);
 	}
 
-	protected Class<?> getEntityClass() { return view.getEntityClass(); }
+	protected Class<?> getEntityClass() { return getView().getEntityClass(); }
 
-	protected CAbstractService<EntityClass> getEntityService() {
-		Check.notNull(view, "View is not set in page service");
-		return view.getEntityService();
+	public CAbstractService<EntityClass> getEntityService() {
+		Check.notNull(getView(), "View is not set in page service");
+		return getView().getEntityService();
 	}
 
 	public EntityClass getPreviousEntity() { return previousEntity; }
 
-	protected ISessionService getSessionService() { return view.getSessionService(); }
+	protected ISessionService getSessionService() { return getView().getSessionService(); }
 
 	protected TextArea getTextArea(final String fieldName) {
 		return getComponent(fieldName, TextArea.class);
@@ -360,9 +360,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
-	protected void setCurrentEntity(final EntityClass entity) {
-		view.setCurrentEntity(entity);
+	public void setCurrentEntity(final EntityClass entity) {
+		getView().setCurrentEntity(entity);
 	}
 
 	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }
+
+	public IPageServiceImplementer<EntityClass> getView() {
+		return view;
+	}
 }

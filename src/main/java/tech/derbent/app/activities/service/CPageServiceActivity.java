@@ -3,17 +3,26 @@ package tech.derbent.app.activities.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceWithWorkflow;
+import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.app.activities.domain.CActivity;
 
-public class CPageServiceActivity extends CPageServiceWithWorkflow<CActivity> {
+public class CPageServiceActivity extends CPageServiceWithWorkflow<CActivity> implements IPageServiceHasStatusAndWorkflow<CActivity> {
 
 	public Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivity.class);
 	Long serialVersionUID = 1L;
 
 	public CPageServiceActivity(final IPageServiceImplementer<CActivity> view) {
 		super(view);
+		projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+	}
+
+	@Override
+	public CProjectItemStatusService getProjectItemStatusService() { // TODO Auto-generated method stub
+		return projectItemStatusService;
 	}
 
 	public void on_description_blur(final Component component, final Object value) {

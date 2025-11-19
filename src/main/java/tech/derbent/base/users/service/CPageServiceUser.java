@@ -25,7 +25,7 @@ public class CPageServiceUser extends CPageServiceDynamicPage<CUser> {
 	public void bind() {
 		try {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CUser.class.getSimpleName());
-			Check.notNull(view, "View must not be null to bind page service.");
+			Check.notNull(getView(), "View must not be null to bind page service.");
 			super.bind();
 		} catch (Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CUser.class.getSimpleName(),

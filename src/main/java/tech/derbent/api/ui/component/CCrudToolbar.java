@@ -75,7 +75,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	 * Uses standard Vaadin ComboBox for simplicity. */
 	private void createWorkflowStatusComboBox() {
 		try {
-			LOGGER.debug("Creating workflow status combobox for current entity: {}", currentEntity);
+			// LOGGER.debug("Creating workflow status combobox for current entity: {}", currentEntity);
 			// Remove existing combobox if present
 			if (statusComboBox != null) {
 				remove(statusComboBox);
@@ -191,7 +191,7 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	// Allow the page to inform toolbar about the currently selected entity so the toolbar can update its UI state
 	public void setCurrentEntity(final Object entity) {
-		LOGGER.debug("Setting current entity in toolbar: {}", entity);
+		// LOGGER.debug("Setting current entity in toolbar: {}", entity);
 		currentEntity = entity;
 		updateButtonStates();
 		createWorkflowStatusComboBox();
@@ -206,7 +206,7 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	/** Update enabled state of toolbar buttons based on whether callbacks are provided and current entity presence. */
 	private void updateButtonStates() {
-		LOGGER.debug("Updating toolbar button states");
+		// LOGGER.debug("Updating toolbar button states");
 		if (createButton != null) {
 			createButton.setEnabled(pageBase != null);
 		}
