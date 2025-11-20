@@ -1,5 +1,7 @@
 package tech.derbent.api.views;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +34,30 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	private static ApplicationContext applicationContext;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
+	private static final int MAX_NESTING_LEVEL = 3;
+
+	// Helper class to track container hierarchy
+	private static class ContainerContext {
+		CPanelDetails panel;
+		HasComponents container;
+		TabSheet tabSheet;
+		int level;
+		
+		ContainerContext(CPanelDetails panel, HasComponents container, TabSheet tabSheet, int level) {
+			this.panel = panel;
+			this.container = container;
+			this.tabSheet = tabSheet;
+			this.level = level;
+		}
+	}
 
 	public static ApplicationContext getApplicationContext() { return applicationContext; }
 
-	private static Component processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CUser user) {
+	private static Component processLine(final int counter, final CDetailSection screen, final CDetailLines line, 
+			final String containerType) {
 		Check.notNull(line, "Line cannot be null");
 		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
-			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
+			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), containerType);
 			return sectionPanel;
 		}
 		return null;
@@ -48,7 +67,6 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	private HasComponents formLayout = null;
 	private final Map<String, CPanelDetails> mapSectionPanels;
 	private final ISessionService sessionService;
-	private TabSheet tabsOfForm;
 
 	public CDetailsBuilder(final ISessionService sessionService) {
 		Check.notNull(sessionService, "Session service cannot be null");
@@ -80,41 +98,116 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		final Class<?> screenClass = CEntityRegistry.getEntityClass(screen.getEntityType());
 		Check.notNull(screenClass, "Screen class cannot be null");
 		formBuilder = new CFormBuilder<>(null, screenClass, binder);
-		//
-		CPanelDetails currentSection = null;
-		final int counter = 0;
+		
 		final CUser user = sessionService.getActiveUser().orElseThrow();
-		// screen.getScreenLines().size(); // Ensure lines are loaded
-		if (user.getAttributeDisplaySectionsAsTabs()) {
-			// LOGGER.debug("User '{}' prefers sections as tabs.", user.getUsername());
-			tabsOfForm = new TabSheet();
-			formLayout.add(tabsOfForm);
-		} else {
-			// LOGGER.debug("User '{}' prefers sections as accordion.", user.getUsername());
-		}
 		final List<CDetailLines> lines = screen.getScreenLines();
+		
+		// Use a stack to manage hierarchical nesting
+		Deque<ContainerContext> containerStack = new ArrayDeque<>();
+		final int counter = 0;
+		
+		// Initialize root container
+		containerStack.push(new ContainerContext(null, formLayout, null, 0));
+		
 		for (final CDetailLines line : lines) {
-			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
-				// no more current section. switch to base
-				currentSection = null;
-			}
-			if (currentSection != null) {
-				currentSection.processLine(contentOwner, counter, screen, line, getFormBuilder());
+			final String relationFieldName = line.getRelationFieldName();
+			final String containerType = line.getContainerType();
+			
+			// Handle SECTION_END - pop from stack
+			if (CEntityFieldService.SECTION_END.equals(relationFieldName) || 
+			    CEntityFieldService.CONTAINER_TYPE_SECTION_END.equals(containerType)) {
+				if (containerStack.size() > 1) {
+					containerStack.pop();
+					LOGGER.debug("Closed container, current level: {}", containerStack.peek().level);
+				} else {
+					LOGGER.warn("Attempted to close root container, ignoring");
+				}
 				continue;
 			}
-			final Component component = processLine(counter, screen, line, user);
-			if (component instanceof CPanelDetails) {
-				if (user.getAttributeDisplaySectionsAsTabs()) {
-					tabsOfForm.add(line.getSectionName(), component);
-				} else {
-					formLayout.add(component);
+			
+			// Get current context
+			ContainerContext currentContext = containerStack.peek();
+			CPanelDetails currentPanel = currentContext.panel;
+			HasComponents currentContainer = currentContext.container;
+			int currentLevel = currentContext.level;
+			
+			// Handle new section/tab
+			if (CEntityFieldService.SECTION.equals(relationFieldName)) {
+				// Check nesting level
+				if (currentLevel >= MAX_NESTING_LEVEL) {
+					LOGGER.error("Maximum nesting level ({}) exceeded, skipping section: {}", 
+						MAX_NESTING_LEVEL, line.getSectionName());
+					continue;
 				}
-				currentSection = (CPanelDetails) component;
-				mapSectionPanels.put(currentSection.getName(), currentSection);
+				
+				// Determine container type - use line's containerType if specified, otherwise use SECTION
+				String newContainerType = (containerType != null && !containerType.isEmpty()) 
+					? containerType 
+					: CEntityFieldService.CONTAINER_TYPE_SECTION;
+				
+				// Create new panel
+				final Component component = processLine(counter, screen, line, newContainerType);
+				if (component instanceof CPanelDetails) {
+					CPanelDetails newPanel = (CPanelDetails) component;
+					
+					// Determine where to add this new panel based on parent type and new panel type
+					if (currentPanel == null) {
+						// Root level - add to form layout
+						formLayout.add(newPanel);
+					} else if (CEntityFieldService.CONTAINER_TYPE_TAB.equals(newContainerType)) {
+						// Creating a TAB
+						if (CEntityFieldService.CONTAINER_TYPE_SECTION.equals(currentPanel.getContainerType())) {
+							// TAB inside SECTION - need to create/use TabSheet
+							TabSheet tabSheet = currentPanel.getChildTabSheet();
+							if (tabSheet == null) {
+								tabSheet = new TabSheet();
+								tabSheet.setWidthFull();
+								currentPanel.getBaseLayout().add(tabSheet);
+								currentPanel.setChildTabSheet(tabSheet);
+							}
+							tabSheet.add(line.getSectionName(), newPanel);
+						} else {
+							// TAB inside TAB - add to parent's TabSheet
+							if (currentContext.tabSheet != null) {
+								currentContext.tabSheet.add(line.getSectionName(), newPanel);
+							} else {
+								LOGGER.error("Cannot add TAB to TAB without TabSheet context");
+								currentPanel.getBaseLayout().add(newPanel);
+							}
+						}
+					} else {
+						// Creating a SECTION
+						if (CEntityFieldService.CONTAINER_TYPE_TAB.equals(currentPanel.getContainerType())) {
+							// SECTION inside TAB - add to panel's base layout
+							currentPanel.getBaseLayout().add(newPanel);
+						} else {
+							// SECTION inside SECTION - add to panel's base layout
+							currentPanel.getBaseLayout().add(newPanel);
+						}
+					}
+					
+					// Push new context onto stack
+					TabSheet contextTabSheet = null;
+					if (CEntityFieldService.CONTAINER_TYPE_TAB.equals(newContainerType)) {
+						contextTabSheet = currentContext.tabSheet; // Inherit parent's TabSheet if we're a tab
+					}
+					containerStack.push(new ContainerContext(newPanel, newPanel.getBaseLayout(), contextTabSheet, currentLevel + 1));
+					mapSectionPanels.put(newPanel.getName(), newPanel);
+					
+					LOGGER.debug("Created {} '{}' at level {}", newContainerType, line.getSectionName(), currentLevel + 1);
+				} else {
+					LOGGER.error("First create a section! Line: {}", line.getFieldCaption());
+				}
 			} else {
-				LOGGER.error("First create a section!" + " Line: {}", line.getFieldCaption());
+				// Regular field line - add to current panel
+				if (currentPanel != null) {
+					currentPanel.processLine(contentOwner, counter, screen, line, getFormBuilder());
+				} else {
+					LOGGER.error("No current section to add field to: {}", line.getFieldCaption());
+				}
 			}
 		}
+		
 		return formLayout;
 	}
 

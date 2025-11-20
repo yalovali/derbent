@@ -58,15 +58,34 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	}
 
 	public static CDetailLines createSection(final String sectionName) {
+		return createSection(sectionName, CEntityFieldService.CONTAINER_TYPE_SECTION);
+	}
+
+	public static CDetailLines createSection(final String sectionName, final String containerType) {
 		try {
 			final CDetailLines line = new CDetailLines();
 			line.setRelationFieldName(CEntityFieldService.SECTION);
 			line.setProperty(CEntityFieldService.SECTION);
 			line.setSectionName(sectionName);
+			line.setContainerType(containerType);
 			return line;
 		} catch (Exception e) {
 			LOGGER.error("Error creating section line for section: {}: {}", sectionName, e.getMessage());
 			throw new RuntimeException("Error creating section line for section: " + sectionName + ". " + e.getMessage());
+		}
+	}
+
+	public static CDetailLines createSectionEnd() {
+		try {
+			final CDetailLines line = new CDetailLines();
+			line.setRelationFieldName(CEntityFieldService.SECTION_END);
+			line.setProperty(CEntityFieldService.SECTION_END);
+			line.setFieldCaption(CEntityFieldService.SECTION_END);
+			line.setContainerType(CEntityFieldService.CONTAINER_TYPE_SECTION_END);
+			return line;
+		} catch (Exception e) {
+			LOGGER.error("Error creating section end line: {}", e.getMessage());
+			throw new RuntimeException("Error creating section end line. " + e.getMessage());
 		}
 	}
 

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.TabSheet;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.domain.CDetailLines;
@@ -22,38 +23,64 @@ public class CPanelDetails extends CDiv {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelDetails.class);
 	private static final long serialVersionUID = 1L;
 	private final String name;
+	private final String containerType;
 	final Map<String, Component> componentMap;
 	final Map<String, CHorizontalLayout> horizontalLayoutMap;
 	private Component component = null; // call it with getFormContainerComponent
+	private TabSheet childTabSheet = null; // For tabs within sections
 
-	public CPanelDetails(final String name, final String title, final CUser user) {
+	public CPanelDetails(final String name, final String title, final String containerType) {
 		super();
 		setWidthFull();
-		// set height minimum?
-		// setHeightUndefined();
-		if (user.getAttributeDisplaySectionsAsTabs()) {
+		this.name = name;
+		this.containerType = containerType;
+		this.componentMap = new HashMap<>();
+		this.horizontalLayoutMap = new HashMap<>();
+		
+		// Create the appropriate container based on type
+		if ("TAB".equals(containerType)) {
 			component = new CTab(title);
 		} else {
 			component = new CAccordion(title);
 		}
-		this.name = name;
-		this.componentMap = new HashMap<>();
-		this.horizontalLayoutMap = new HashMap<>();
 		add(component);
+	}
+
+	// Backward compatibility constructor
+	public CPanelDetails(final String name, final String title, final CUser user) {
+		this(name, title, user.getAttributeDisplaySectionsAsTabs() ? "TAB" : "SECTION");
 	}
 
 	// Override this method to customize the panel content creation
 	protected void createPanelContent() {}
 
-	public VerticalLayout getBaseLayout() { return getFormContainerComponent().getBaseLayout(); }
+	public VerticalLayout getBaseLayout() { 
+		return getFormContainerComponent().getBaseLayout(); 
+	}
 
 	public Component getComponentByName(final String componentName) {
 		return componentMap.get(componentName);
 	}
 
-	IFormContainerComponent getFormContainerComponent() { return (IFormContainerComponent) component; }
+	IFormContainerComponent getFormContainerComponent() { 
+		return (IFormContainerComponent) component; 
+	}
 
-	public String getName() { return name; }
+	public String getName() { 
+		return name; 
+	}
+
+	public String getContainerType() {
+		return containerType;
+	}
+
+	public TabSheet getChildTabSheet() {
+		return childTabSheet;
+	}
+
+	public void setChildTabSheet(TabSheet tabSheet) {
+		this.childTabSheet = tabSheet;
+	}
 
 	public void processLine(final IContentOwner contentOwner, final int counter, final CDetailSection screen, final CDetailLines line,
 			final CFormBuilder<?> formBuilder) throws Exception {

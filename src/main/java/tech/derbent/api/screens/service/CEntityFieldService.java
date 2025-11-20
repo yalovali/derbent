@@ -210,6 +210,11 @@ public class CEntityFieldService {
 	public static final String SECTION = "Section";
 	public static final String SECTION_END = "End of Section";
 	public static final String THIS_CLASS = "This Class";
+	
+	// Container type constants
+	public static final String CONTAINER_TYPE_SECTION = "SECTION";
+	public static final String CONTAINER_TYPE_TAB = "TAB";
+	public static final String CONTAINER_TYPE_SECTION_END = "SECTION_END";
 
 	public static EntityFieldInfo createFieldInfo(final AMetaData metaData) {
 		try {

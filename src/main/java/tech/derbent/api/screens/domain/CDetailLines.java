@@ -126,12 +126,14 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 			order = 2, maxLength = 100, dataProviderBean = "none"
 	)
 	private String relationFieldName;
-	@Column (name = "is_required", nullable = false)
+	@Column (name = "container_type", nullable = true, length = 20)
+	@Size (max = 20, message = "Container type cannot exceed 20 characters")
 	@AMetaData (
-			displayName = "A Tab Section", required = false, readOnly = false, description = "Whether this section is a tab", hidden = false,
-			order = 6, defaultValue = "false"
+			displayName = "Container Type", required = false, readOnly = false, 
+			description = "Type of container: SECTION, TAB, or SECTION_END", hidden = false,
+			order = 6, defaultValue = "", maxLength = 20
 	)
-	private Boolean sectionAsTab;
+	private String containerType;
 	@Column (name = "sectionName", nullable = true, length = 100)
 	@Size (max = 100, message = "Name cannot exceed 100 characters")
 	@AMetaData (
@@ -181,7 +183,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public String getRelationFieldName() { return relationFieldName; }
 
-	public Boolean getSectionAsTab() { return sectionAsTab; }
+	public String getContainerType() { return containerType; }
 
 	public String getSectionName() { return sectionName; }
 
@@ -227,7 +229,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public void setRelationFieldName(final String relationFieldName) { this.relationFieldName = relationFieldName; }
 
-	public void setSectionAsTab(Boolean sectionAsTab) { this.sectionAsTab = sectionAsTab; }
+	public void setContainerType(String containerType) { this.containerType = containerType; }
 
 	public void setSectionName(final String sectionName) {
 		this.sectionName = sectionName;
