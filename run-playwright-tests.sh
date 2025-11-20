@@ -96,6 +96,28 @@ run_crud_test() {
     run_comprehensive_test
 }
 
+# Function to run workflow status and validation test
+run_workflow_validation_test() {
+    echo "🧪 Running Workflow Status and Name Validation Test..."
+    echo "======================================================="
+    echo "This test will:"
+    echo "  1. Login to the application"
+    echo "  2. Test status combobox appears for workflow entities"
+    echo "  3. Verify status combobox shows valid transitions"
+    echo "  4. Test save button disabled when name field is empty"
+    echo "  5. Test save button enabled when name has content"
+    echo "  6. Test name validation on multiple entity types"
+    echo "  7. Capture detailed screenshots at each step"
+    echo ""
+    
+    # Show options menu if INTERACTIVE mode is set
+    if [ "${INTERACTIVE_MODE:-false}" = "true" ]; then
+        show_options_menu
+    fi
+    
+    run_test "automated_tests.tech.derbent.ui.automation.CWorkflowStatusAndValidationTest"
+}
+
 # Function to show interactive options menu
 show_options_menu() {
     echo ""
@@ -271,6 +293,7 @@ OPTIONS:
     comprehensive   Run comprehensive page tests (all views + CRUD operations)
     all-views       Navigate through all application views and capture screenshots
     crud            Test CRUD operations on all pages with toolbars
+    workflow-validation  Test workflow status combobox and name field validation
     clean           Clean test artifacts (screenshots, reports)
     install         Install Playwright browsers
     help            Show this help message
@@ -332,6 +355,14 @@ TEST DESCRIPTIONS:
                     - Tests toolbar buttons on pages with CRUD functionality
                     - Verifies form dialogs open and close correctly
                     - Captures screenshots of each operation (if enabled)
+    
+    workflow-validation  Workflow status and name validation testing (1-2 minutes)
+                    - Tests status combobox appears for workflow entities
+                    - Verifies status combobox shows valid workflow transitions
+                    - Tests save button disabled when name field is empty
+                    - Tests save button enabled when name has content
+                    - Tests name validation on multiple entity types
+                    - Captures screenshots showing validation behavior (if enabled)
 
 INTERACTIVE MODE:
     Set INTERACTIVE_MODE=true to configure test options before running:
@@ -374,6 +405,9 @@ case "${1:-menu}" in
         ;;
     crud)
         run_crud_test
+        ;;
+    workflow-validation)
+        run_workflow_validation_test
         ;;
     clean)
         echo "🧹 Cleaning test artifacts..."

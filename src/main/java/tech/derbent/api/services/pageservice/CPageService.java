@@ -154,6 +154,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				formBuilder = detailsBuilder.getFormBuilder();
 			}
 			bindMethods(this);
+			setupNameFieldValidation();
 		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CActivity.class.getSimpleName(),
 					e.getMessage());
@@ -368,5 +369,64 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public IPageServiceImplementer<EntityClass> getView() {
 		return view;
+	}
+
+	/** Setup validation for the name field. Automatically disables the save button when the name field is empty. This method is called automatically
+	 * during bind(). Subclasses can override validateEntity() to add additional validation logic. */
+	protected void setupNameFieldValidation() {
+		try {
+			final TextField nameField = getTextField("name");
+			if (nameField != null) {
+				nameField.addValueChangeListener(event -> updateSaveButtonState());
+				// Also validate on initial load
+				updateSaveButtonState();
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not setup name field validation: {}", e.getMessage());
+		}
+	}
+
+	/** Update the save button state based on validation results. This method is called automatically when the name field changes. */
+	protected void updateSaveButtonState() {
+		try {
+			final boolean isValid = validateEntity();
+			// Try to access the CRUD toolbar from the view
+			if (getView() instanceof tech.derbent.app.page.view.CDynamicPageViewWithSections) {
+				final tech.derbent.app.page.view.CDynamicPageViewWithSections dynamicView =
+						(tech.derbent.app.page.view.CDynamicPageViewWithSections) getView();
+				final tech.derbent.api.ui.component.CCrudToolbar toolbar = dynamicView.getCrudToolbar();
+				if (toolbar != null) {
+					// Only disable if invalid, let the toolbar's normal logic handle enable
+					if (!isValid) {
+						toolbar.setSaveButtonEnabled(false);
+					} else {
+						// Re-check if there's a current entity before enabling
+						if (getCurrentEntity() != null) {
+							toolbar.setSaveButtonEnabled(true);
+						}
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not update save button state: {}", e.getMessage());
+		}
+	}
+
+	/** Validate the current entity. Default implementation checks that the name field is not empty. Subclasses can override this method to add
+	 * additional validation logic.
+	 * @return true if the entity is valid and can be saved, false otherwise */
+	protected boolean validateEntity() {
+		try {
+			final TextField nameField = getTextField("name");
+			if (nameField != null) {
+				final String name = nameField.getValue();
+				return (name != null) && !name.trim().isEmpty();
+			}
+			// If there's no name field, consider it valid
+			return true;
+		} catch (final Exception e) {
+			LOGGER.debug("Error during entity validation: {}", e.getMessage());
+			return true; // Default to valid on error to avoid blocking saves
+		}
 	}
 }
