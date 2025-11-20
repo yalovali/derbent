@@ -77,6 +77,9 @@ public final class CDataProviderResolver {
 	@SuppressWarnings ("unchecked")
 	public <T> List<T> resolveDataList(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
+			if (fieldInfo.getDataProviderBean().equalsIgnoreCase("none")) {
+				return List.of();
+			}
 			final Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
 			return (List<T>) result;
 		} catch (final Exception e) {
@@ -93,6 +96,7 @@ public final class CDataProviderResolver {
 			final String beanName = fieldInfo.getDataProviderBean();
 			// Check for "none" sentinel value first - indicates field should not have a data provider
 			if (beanName != null && "none".equalsIgnoreCase(beanName.trim())) {
+				// dont come here !!! fix it before
 				throw new IllegalArgumentException("Data provider bean is set to 'none' for field '" + fieldInfo.getFieldName()
 						+ "' - this field should not use a data provider");
 			}

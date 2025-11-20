@@ -7,6 +7,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
@@ -46,36 +47,41 @@ public abstract class CDialog extends Dialog {
 
 	/* call this class in child constructor after all fields are initialized, use setupContent and setupButtons to customize content */
 	protected void setupDialog() throws Exception {
-		setHeaderTitle(getHeaderTitle());
-		setModal(true);
-		setCloseOnEsc(true);
-		setCloseOnOutsideClick(false);
-		setWidth("500px");
-		mainLayout = new VerticalLayout();
-		mainLayout.setPadding(false);
-		mainLayout.setSpacing(true);
-		final HorizontalLayout headerLayout = new HorizontalLayout();
-		headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-		headerLayout.setSpacing(true);
-		final Icon icon = getFormIcon();
-		Check.notNull(icon, "Form icon cannot be null");
-		icon.setSize("24px");
-		headerLayout.add(icon);
-		formTitle = new H3(getFormTitleString());
-		headerLayout.add(formTitle);
-		mainLayout.add(headerLayout);
-		add(mainLayout);
-		//
-		buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
-		buttonLayout.getStyle().set("margin-top", "16px");
-		getFooter().add(buttonLayout);
-		setupContent();
-		setupButtons();
-		// Add colorful border and background to make dialog more appealing
-		getElement().getStyle().set("border", "2px solid #1976D2");
-		getElement().getStyle().set("border-radius", "12px");
-		getElement().getStyle().set("box-shadow", "0 4px 20px rgba(25, 118, 210, 0.3)");
-		// Set a subtle gradient background
-		getElement().getStyle().set("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)");
+		try {
+			LOGGER.debug("Setting up dialog: {}", getDialogTitleString());
+			setHeaderTitle(getHeaderTitle());
+			setModal(true);
+			setCloseOnEsc(true);
+			setCloseOnOutsideClick(false);
+			setWidth("500px");
+			mainLayout = new VerticalLayout();
+			mainLayout.setPadding(false);
+			mainLayout.setSpacing(true);
+			final HorizontalLayout headerLayout = new HorizontalLayout();
+			headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
+			headerLayout.setSpacing(true);
+			final Icon icon = getFormIcon();
+			Check.notNull(icon, "Form icon cannot be null");
+			icon.setSize("24px");
+			headerLayout.add(icon);
+			formTitle = new H3(getFormTitleString());
+			headerLayout.add(formTitle);
+			mainLayout.add(headerLayout);
+			add(mainLayout);
+			//
+			buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
+			buttonLayout.getStyle().set("margin-top", "16px");
+			getFooter().add(buttonLayout);
+			setupContent();
+			setupButtons();
+			// Add colorful border and background to make dialog more appealing
+			getElement().getStyle().set("border", "2px solid #1976D2");
+			getElement().getStyle().set("border-radius", "12px");
+			getElement().getStyle().set("box-shadow", "0 4px 20px rgba(25, 118, 210, 0.3)");
+			// Set a subtle gradient background
+			getElement().getStyle().set("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)");
+		} catch (final Exception e) {
+			CNotificationService.showException("Error setting up dialog", e);
+		}
 	}
 }

@@ -107,7 +107,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 					selectedLine = null;
 				}
 			} catch (final Exception ex) {
-				CNotificationService.showError("Error processing selection: " + ex.getMessage());
+				CNotificationService.showException("Error opening edit dialog", ex);
 			}
 		});
 		toolbar.add(addButton, deleteButton, moveUpButton, moveDownButton);

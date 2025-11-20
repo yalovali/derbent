@@ -137,7 +137,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final List<Field> allFields = new ArrayList<>();
 			getListOfAllFields(entityClass, allFields);
 			final List<Field> sortedFields = getSortedFilteredFieldsList(allFields);
-			LOGGER.info("Processing {} visible fields for form generation", sortedFields.size());
+			// LOGGER.info("Processing {} visible fields for form generation", sortedFields.size());
 			// Create components with enhanced error handling and logging
 			if (entityFields == null) {
 				entityFields = sortedFields.stream().map(Field::getName).collect(Collectors.toList());
@@ -819,12 +819,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return iconNames;
 	}
 
-	/** Checks if a field has a valid data provider bean. Returns false if the bean name is null, empty, blank, or "none". The "none" value is used as
-	 * a sentinel to explicitly indicate that a field should not have a data provider.
-	 * @param dataProviderBean the data provider bean name to check
-	 * @return true if the field has a valid data provider bean, false otherwise */
 	private static boolean hasValidDataProvider(final String dataProviderBean) {
-		return dataProviderBean != null && !dataProviderBean.trim().isEmpty() && !"none".equalsIgnoreCase(dataProviderBean.trim());
+		return dataProviderBean != null && !dataProviderBean.trim().isEmpty();
+		// && !"none".equalsIgnoreCase(dataProviderBean.trim());
 	}
 
 	public static <EntityClass> Component processField(final IContentOwner contentOwner, final CEnhancedBinder<EntityClass> binder,
