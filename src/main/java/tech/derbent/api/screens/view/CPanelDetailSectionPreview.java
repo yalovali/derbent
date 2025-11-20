@@ -8,13 +8,15 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.CButton;
 import tech.derbent.api.ui.component.CDiv;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.base.session.service.ISessionService;
 
-public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
+public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implements IPageServiceImplementer {
 
 	private static final long serialVersionUID = 1L;
 	CDiv divPreview;
@@ -45,6 +47,41 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 		});
 		divPreview = new CDiv();
 		getBaseLayout().add(divPreview);
+	}
+
+	@Override
+	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Class getEntityClass() { // TODO Auto-generated method stub
+		return entityClass;
+	}
+
+	@Override
+	public CPageService getPageService() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ISessionService getSessionService() { // TODO Auto-generated method stub
+		return sessionService;
+	}
+
+	@Override
+	public void onEntityCreated(CEntityDB newEntity) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void onEntityDeleted(CEntityDB entity) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void onEntitySaved(CEntityDB savedEntity) throws Exception {
+		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -87,6 +124,11 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void selectFirstInGrid() {
+		// TODO Auto-generated method stub
 	}
 
 	@Override

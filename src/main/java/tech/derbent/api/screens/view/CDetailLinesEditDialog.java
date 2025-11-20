@@ -37,11 +37,11 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 	private final CFormBuilder<CDetailLines> formEntity;
 	private final CFormBuilder<CDetailLines> formSection;
 	private final CDetailSection screen;
-	Tab tabEntity;
-	Span tabEntitySpan;
-	Tab tabSection;
-	Span tabSectionSpan;
-	TabSheet tabsOfDialog;
+	private Tab tabEntity;
+	private Span tabEntitySpan;
+	private Tab tabSection;
+	private Span tabSectionSpan;
+	private TabSheet tabsOfDialog;
 
 	public CDetailLinesEditDialog(final CDetailLines entity, final Consumer<CDetailLines> onSave, final boolean isNew, final CDetailSection screen)
 			throws Exception {
@@ -75,7 +75,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 					List.of("entityProperty", "lineOrder", "fieldCaption", "fieldDescription", "isRequired", "isReadonly", "isHidden",
 							"isCaptionVisible", "defaultValue", "relatedEntityType", "dataProviderBean", "maxLength", "active")));
 			// BUILD SECTION TAB
-			tabSectionSpan.add(formSection.build(CDetailLines.class, binder, List.of("sectionName", "fieldCaption", "active")));
+			tabSectionSpan.add(formSection.build(CDetailLines.class, binder, List.of("sectionName", "fieldCaption", "sectionAsTab", "active")));
 			// SETUP ENTITY TAB COMBOXBOXES
 			cmbFieldClass = ((ComboBox<String>) formClassType.getComponent("relationFieldName"));
 			cmbFieldClass.addValueChangeListener(event -> {

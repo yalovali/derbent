@@ -208,6 +208,7 @@ public class CEntityFieldService {
 	public static final String COMPONENT = "Component";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityFieldService.class);
 	public static final String SECTION = "Section";
+	public static final String SECTION_END = "End of Section";
 	public static final String THIS_CLASS = "This Class";
 
 	public static EntityFieldInfo createFieldInfo(final AMetaData metaData) {

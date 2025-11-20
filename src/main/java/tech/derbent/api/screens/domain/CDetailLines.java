@@ -126,6 +126,12 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 			order = 2, maxLength = 100, dataProviderBean = "none"
 	)
 	private String relationFieldName;
+	@Column (name = "is_required", nullable = false)
+	@AMetaData (
+			displayName = "A Tab Section", required = false, readOnly = false, description = "Whether this section is a tab", hidden = false,
+			order = 6, defaultValue = "false"
+	)
+	private Boolean sectionAsTab;
 	@Column (name = "sectionName", nullable = true, length = 100)
 	@Size (max = 100, message = "Name cannot exceed 100 characters")
 	@AMetaData (
@@ -175,6 +181,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public String getRelationFieldName() { return relationFieldName; }
 
+	public Boolean getSectionAsTab() { return sectionAsTab; }
+
 	public String getSectionName() { return sectionName; }
 
 	@Override
@@ -218,6 +226,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	public void setRelatedEntityType(final String relatedEntityType) { this.relatedEntityType = relatedEntityType; }
 
 	public void setRelationFieldName(final String relationFieldName) { this.relationFieldName = relationFieldName; }
+
+	public void setSectionAsTab(Boolean sectionAsTab) { this.sectionAsTab = sectionAsTab; }
 
 	public void setSectionName(final String sectionName) {
 		this.sectionName = sectionName;
