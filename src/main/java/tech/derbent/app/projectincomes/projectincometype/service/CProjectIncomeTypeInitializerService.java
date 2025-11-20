@@ -20,7 +20,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CProjectIncomeTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "ProjectIncomeType Information";
 	private static final Class<?> clazz = CProjectIncomeType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectIncomeTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";

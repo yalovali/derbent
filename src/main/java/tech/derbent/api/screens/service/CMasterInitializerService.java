@@ -12,7 +12,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CMasterInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Master Section Information";
 	private static final Class<?> clazz = CMasterSection.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".11";

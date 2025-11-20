@@ -21,7 +21,6 @@ import tech.derbent.base.users.service.CUserService;
 
 public class CProductInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Product Information";
 	private static final Class<?> clazz = CProduct.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".30";

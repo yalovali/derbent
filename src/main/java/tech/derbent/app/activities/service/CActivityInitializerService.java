@@ -18,7 +18,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CActivityInitializerService extends CInitializerServiceProjectItem {
 
-	public static final String BASE_PANEL_NAME = "Activity Information";
 	static final Class<?> clazz = CActivity.class;
 	static Map<String, EntityFieldInfo> fields;
 	static EntityFieldInfo info;

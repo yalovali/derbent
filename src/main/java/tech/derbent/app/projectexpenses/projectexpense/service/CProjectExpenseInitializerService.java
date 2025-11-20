@@ -16,7 +16,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CProjectExpenseInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "ProjectExpense Information";
 	private static final Class<?> clazz = CProjectExpense.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectExpenseInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";

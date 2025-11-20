@@ -16,7 +16,6 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 
 public class CUserCompanyRoleInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Company Role Information";
 	static final Class<?> clazz = CUserCompanyRole.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanyRoleInitializerService.class);
 	private static final String menuOrder = Menu_Order_ROLES + ".1";
@@ -29,7 +28,6 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Company Role Information
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));

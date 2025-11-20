@@ -20,7 +20,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CMilestoneTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "MilestoneType Information";
 	private static final Class<?> clazz = CMilestoneType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestoneTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
@@ -33,7 +32,6 @@ public class CMilestoneTypeInitializerService extends CInitializerServiceBase {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));

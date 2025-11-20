@@ -19,7 +19,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CCommentPriorityInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Comment Priority Information";
 	private static final Class<?> clazz = CCommentPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriorityInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".15";
@@ -31,7 +30,6 @@ public class CCommentPriorityInitializerService extends CInitializerServiceBase 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Priority Configuration"));

@@ -137,6 +137,11 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 	@Override
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 
+	/** Get the CRUD toolbar for this view. Used by page services to control button states.
+	 * @return the CRUD toolbar, or null if not initialized */
+	@Override
+	public CCrudToolbar getCrudToolbar() { return crudToolbar; }
+
 	@Override
 	protected void initializePage() throws Exception {
 		try {
@@ -315,11 +320,5 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			LOGGER.error("Error setting current entity in toolbar:" + e.getMessage());
 			throw e;
 		}
-	}
-
-	/** Get the CRUD toolbar for this view. Used by page services to control button states.
-	 * @return the CRUD toolbar, or null if not initialized */
-	public CCrudToolbar getCrudToolbar() {
-		return crudToolbar;
 	}
 }

@@ -16,7 +16,6 @@ import tech.derbent.app.risklevel.risklevel.domain.CRiskLevel;
 
 public class CRiskLevelInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Risk Level Information";
 	private static final Class<?> clazz = CRiskLevel.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskLevelInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".11";

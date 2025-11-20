@@ -21,7 +21,6 @@ import tech.derbent.base.users.service.CUserService;
 
 public class CBudgetInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Budget Information";
 	private static final Class<?> clazz = CBudget.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";

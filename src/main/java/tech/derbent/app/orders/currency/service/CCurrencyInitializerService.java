@@ -19,7 +19,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CCurrencyInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Currency Information";
 	private static final Class<?> clazz = CCurrency.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCurrencyInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".11";
@@ -31,7 +30,6 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencyCode"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencySymbol"));

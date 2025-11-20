@@ -18,7 +18,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CProjectInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Project Information";
 	static final Class<?> clazz = CProject.class;
 	static Map<String, EntityFieldInfo> fields;
 	static EntityFieldInfo info;

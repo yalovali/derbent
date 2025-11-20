@@ -21,7 +21,6 @@ import tech.derbent.base.users.service.CUserService;
 
 public class CMilestoneInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Milestone Information";
 	private static final Class<?> clazz = CMilestone.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestoneInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";

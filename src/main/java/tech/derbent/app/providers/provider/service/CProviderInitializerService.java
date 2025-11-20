@@ -21,7 +21,6 @@ import tech.derbent.base.users.service.CUserService;
 
 public class CProviderInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Provider Information";
 	private static final Class<?> clazz = CProvider.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProviderInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";

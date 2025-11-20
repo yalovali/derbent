@@ -21,7 +21,6 @@ import tech.derbent.base.users.service.CUserService;
 
 public class CDeliverableInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Deliverable Information";
 	private static final Class<?> clazz = CDeliverable.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";

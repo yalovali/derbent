@@ -17,7 +17,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CComponentVersionTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "ComponentVersionType Information";
 	private static final Class<?> clazz = CComponentVersionType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentVersionTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";

@@ -16,6 +16,8 @@ import tech.derbent.api.components.CNavigableComboBox;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.ui.component.CCrudToolbar;
+import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
@@ -145,6 +147,23 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
+	/** Update the save button state based on validation results. This method is called automatically when the name field changes. */
+	protected void baselistener_on_name_change() {
+		try {
+			LOGGER.debug("Validating entity to update save button state.");
+			final boolean isSaveValid = validateEntitySave();
+			// Try to access the CRUD toolbar from the view
+			if (getView() instanceof ICrudToolbarOwnerPage) {
+				final ICrudToolbarOwnerPage crudView = (ICrudToolbarOwnerPage) getView();
+				final CCrudToolbar toolbar = crudView.getCrudToolbar();
+				Check.notNull(toolbar, "CRUD Toolbar must not be null to update save button state.");
+				toolbar.setSaveButtonEnabled(isSaveValid);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not update save button state: {}", e.getMessage());
+		}
+	}
+
 	public void bind() {
 		try {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CActivity.class.getSimpleName());
@@ -154,7 +173,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				formBuilder = detailsBuilder.getFormBuilder();
 			}
 			bindMethods(this);
-			setupNameFieldValidation();
+			setup_base_listeners();
 		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CActivity.class.getSimpleName(),
 					e.getMessage());
@@ -341,6 +360,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		return getComponent(fieldName, TextField.class);
 	}
 
+	public IPageServiceImplementer<EntityClass> getView() { return view; }
+
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
@@ -367,55 +388,25 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }
 
-	public IPageServiceImplementer<EntityClass> getView() {
-		return view;
-	}
-
 	/** Setup validation for the name field. Automatically disables the save button when the name field is empty. This method is called automatically
 	 * during bind(). Subclasses can override validateEntity() to add additional validation logic. */
-	protected void setupNameFieldValidation() {
+	protected void setup_base_listeners() {
 		try {
 			final TextField nameField = getTextField("name");
 			if (nameField != null) {
-				nameField.addValueChangeListener(event -> updateSaveButtonState());
+				nameField.addValueChangeListener(event -> baselistener_on_name_change());
 				// Also validate on initial load
-				updateSaveButtonState();
+				baselistener_on_name_change();
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not setup name field validation: {}", e.getMessage());
 		}
 	}
 
-	/** Update the save button state based on validation results. This method is called automatically when the name field changes. */
-	protected void updateSaveButtonState() {
-		try {
-			final boolean isValid = validateEntity();
-			// Try to access the CRUD toolbar from the view
-			if (getView() instanceof tech.derbent.app.page.view.CDynamicPageViewWithSections) {
-				final tech.derbent.app.page.view.CDynamicPageViewWithSections dynamicView =
-						(tech.derbent.app.page.view.CDynamicPageViewWithSections) getView();
-				final tech.derbent.api.ui.component.CCrudToolbar toolbar = dynamicView.getCrudToolbar();
-				if (toolbar != null) {
-					// Only disable if invalid, let the toolbar's normal logic handle enable
-					if (!isValid) {
-						toolbar.setSaveButtonEnabled(false);
-					} else {
-						// Re-check if there's a current entity before enabling
-						if (getCurrentEntity() != null) {
-							toolbar.setSaveButtonEnabled(true);
-						}
-					}
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not update save button state: {}", e.getMessage());
-		}
-	}
-
 	/** Validate the current entity. Default implementation checks that the name field is not empty. Subclasses can override this method to add
 	 * additional validation logic.
 	 * @return true if the entity is valid and can be saved, false otherwise */
-	protected boolean validateEntity() {
+	protected boolean validateEntitySave() {
 		try {
 			final TextField nameField = getTextField("name");
 			if (nameField != null) {

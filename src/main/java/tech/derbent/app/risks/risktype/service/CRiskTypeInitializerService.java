@@ -20,7 +20,6 @@ import tech.derbent.app.risks.risktype.domain.CRiskType;
 
 public class CRiskTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Risk Type Information";
 	private static final Class<?> clazz = CRiskType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".1";
@@ -33,7 +32,6 @@ public class CRiskTypeInitializerService extends CInitializerServiceBase {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));

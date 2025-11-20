@@ -16,7 +16,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CPageEntityInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Page Information";
 	private static final Class<?> clazz = CPageEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
@@ -28,7 +27,6 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "pageService"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));

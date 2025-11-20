@@ -5,5 +5,6 @@ import tech.derbent.api.services.pageservice.CPageService;
 
 public interface ICrudToolbarOwnerPage extends IContentOwner {
 
+	public CCrudToolbar getCrudToolbar();
 	CPageService<?> getPageService();
 }

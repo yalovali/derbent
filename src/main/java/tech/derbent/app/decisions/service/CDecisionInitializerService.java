@@ -16,7 +16,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CDecisionInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Decisions Information";
 	private static final Class<?> clazz = CDecision.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".3";

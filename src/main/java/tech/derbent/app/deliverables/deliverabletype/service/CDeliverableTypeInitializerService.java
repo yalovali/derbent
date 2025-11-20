@@ -18,7 +18,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CDeliverableTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "DeliverableType Information";
 	private static final Class<?> clazz = CDeliverableType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";

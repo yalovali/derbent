@@ -298,6 +298,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
 	@Override
+	public CCrudToolbar getCrudToolbar() { return crudToolbar; }
+
+	@Override
 	public EntityClass getCurrentEntity() { return currentEntity; }
 
 	@Override

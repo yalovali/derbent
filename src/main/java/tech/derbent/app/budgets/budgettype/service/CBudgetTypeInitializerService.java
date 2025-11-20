@@ -20,7 +20,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CBudgetTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "BudgetType Information";
 	private static final Class<?> clazz = CBudgetType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";

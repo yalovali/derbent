@@ -20,7 +20,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CProjectExpenseTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "ProjectExpenseType Information";
 	private static final Class<?> clazz = CProjectExpenseType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectExpenseTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";

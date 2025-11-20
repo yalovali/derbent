@@ -21,7 +21,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CActivityPriorityInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Activity Priority Information";
 	private static final Class<?> clazz = CActivityPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityPriorityInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".3";

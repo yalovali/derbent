@@ -16,7 +16,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Company Information";
 	static final Class<?> clazz = CCompany.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
@@ -29,7 +28,6 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Company Information
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "address"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));

@@ -18,7 +18,6 @@ import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 
 public class CTicketTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "TicketType Information";
 	private static final Class<?> clazz = CTicketType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";

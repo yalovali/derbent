@@ -20,7 +20,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CAssetTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "AssetType Information";
 	private static final Class<?> clazz = CAssetType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";

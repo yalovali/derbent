@@ -16,7 +16,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class COrderInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Order Information";
 	private static final Class<?> clazz = COrder.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".9";
@@ -28,7 +27,6 @@ public class COrderInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));

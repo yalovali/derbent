@@ -21,7 +21,6 @@ import tech.derbent.base.users.service.CUserService;
 
 public class CRiskInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Risk Information";
 	private static final Class<?> clazz = CRisk.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".10";

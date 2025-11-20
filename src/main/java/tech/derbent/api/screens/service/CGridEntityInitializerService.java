@@ -11,7 +11,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CGridEntityInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Grid Information";
 	private static final Class<?> clazz = CGridEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".10";

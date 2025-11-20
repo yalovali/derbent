@@ -21,7 +21,6 @@ import tech.derbent.base.users.service.CUserService;
 
 public class CComponentInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Component Information";
 	private static final Class<?> clazz = CComponent.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".30";

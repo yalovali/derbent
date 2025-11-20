@@ -18,7 +18,6 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
  * for workflow entity management. */
 public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Workflow Information";
 	private static final Class<?> clazz = CWorkflowEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".21";
@@ -30,7 +29,6 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "statusRelations"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));

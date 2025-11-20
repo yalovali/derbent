@@ -20,7 +20,6 @@ import tech.derbent.app.providers.providertype.domain.CProviderType;
 
 public class CProviderTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "ProviderType Information";
 	private static final Class<?> clazz = CProviderType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProviderTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";

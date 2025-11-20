@@ -17,7 +17,6 @@ import tech.derbent.app.teams.team.domain.CTeam;
 
 public class CTeamInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Team Information";
 	private static final Class<?> clazz = CTeam.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTeamInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".15";

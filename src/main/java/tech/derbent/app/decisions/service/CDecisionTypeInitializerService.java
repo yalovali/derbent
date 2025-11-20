@@ -20,7 +20,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Decision Type Information";
 	private static final Class<?> clazz = CDecisionType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".7";

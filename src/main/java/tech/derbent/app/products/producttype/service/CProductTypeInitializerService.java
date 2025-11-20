@@ -20,7 +20,6 @@ import tech.derbent.app.projects.domain.CProject;
 
 public class CProductTypeInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "ProductType Information";
 	private static final Class<?> clazz = CProductType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";

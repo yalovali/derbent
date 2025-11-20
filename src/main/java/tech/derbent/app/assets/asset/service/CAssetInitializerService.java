@@ -21,7 +21,6 @@ import tech.derbent.base.users.service.CUserService;
 
 public class CAssetInitializerService extends CInitializerServiceBase {
 
-	public static final String BASE_PANEL_NAME = "Asset Information";
 	private static final Class<?> clazz = CAsset.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".20";
