@@ -172,14 +172,20 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	}
 
 	/** Opens the add field dialog for creating a new screen field.
-	 * @param position
+	 * @param position the position to insert at (0 means at the end)
 	 * @throws Exception */
 	private void openAddFieldDialog(Integer position) throws Exception {
 		if ((getCurrentEntity() == null) || (getCurrentEntity().getId() == null)) {
 			CNotificationService.showWarning("Please save the screen first before adding fields");
 			return;
 		}
-		final CDetailLines newLine = detailLinesService.newEntity(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name");
+		// If position is 0 or null, add at the end
+		CDetailLines newLine;
+		if ((position != null) && (position > 0)) {
+			newLine = detailLinesService.insertLineBefore(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name", position);
+		} else {
+			newLine = detailLinesService.newEntity(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name");
+		}
 		final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(newLine, this::saveScreenLine, true, getCurrentEntity());
 		dialog.open();
 	}

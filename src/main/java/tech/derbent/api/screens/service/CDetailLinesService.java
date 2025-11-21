@@ -167,6 +167,32 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		}
 	}
 
+	/** Insert a new line before the specified line position.
+	 * @param screen          the parent screen
+	 * @param relationFieldName the relation field name
+	 * @param entityProperty  the entity property
+	 * @param beforePosition  the position to insert before (line order)
+	 * @return the new screen line */
+	@Transactional
+	public CDetailLines insertLineBefore(final CDetailSection screen, final String relationFieldName, final String entityProperty,
+			final Integer beforePosition) {
+		final CDetailLines newLine = new CDetailLines(screen, relationFieldName, entityProperty);
+		newLine.setMaxLength(255); // Default max length for text fields
+		newLine.setActive(true);
+		// Get all lines for this screen
+		final List<CDetailLines> lines = findByMaster(screen);
+		// Shift all lines at or after the insert position down by 1
+		for (final CDetailLines line : lines) {
+			if (line.getLineOrder() >= beforePosition) {
+				line.setLineOrder(line.getLineOrder() + 1);
+				save(line);
+			}
+		}
+		// Set the new line at the insert position
+		newLine.setLineOrder(beforePosition);
+		return newLine;
+	}
+
 	/** Create a new screen line with default values.
 	 * @param screen          the parent screen
 	 * @param fieldCaption    the field caption

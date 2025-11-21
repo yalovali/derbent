@@ -31,9 +31,11 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dataServiceBeanName"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "columnFields"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
+			scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
