@@ -87,6 +87,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 				if (selectedType.equals(CEntityFieldService.SECTION_START) || selectedType.equals(CEntityFieldService.SECTION_END)) {
 					// activate section tab
 					tabsOfDialog.setSelectedTab(tabSection);
+					updateEntityPropertyBasedOnClass();
 				} else {
 					// activate section tab
 					tabsOfDialog.setSelectedTab(tabEntity);
@@ -248,9 +249,14 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 		}
 		EntityFieldInfo info;
 		if (relationFieldName.equals(CEntityFieldService.SECTION_START)) {
+			getEntity().setProperty(CEntityFieldService.SECTION_START);
+			getEntity().setRelationFieldName(CEntityFieldService.SECTION_START);
+			// getEntity().setSectionName(CEntityFieldService.SECTION_START);
 			return;
-		}
-		if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
+		} else if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
+			getEntity().setProperty(CEntityFieldService.SECTION_END);
+			getEntity().setRelationFieldName(CEntityFieldService.SECTION_END);
+			getEntity().setSectionName(CEntityFieldService.SECTION_END);
 			return;
 		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), selectedProperty);

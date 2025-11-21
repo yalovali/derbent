@@ -143,10 +143,12 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	/** Default constructor for JPA. */
 	public CDetailLines() {
 		super(CDetailLines.class);
+		sectionAsTab = false;
 	}
 
 	public CDetailLines(final CDetailSection detail, final String relationFieldName, final String entityProperty) {
 		super(CDetailLines.class);
+		sectionAsTab = false;
 		detailSection = detail;
 		this.relationFieldName = relationFieldName;
 		this.entityProperty = entityProperty;

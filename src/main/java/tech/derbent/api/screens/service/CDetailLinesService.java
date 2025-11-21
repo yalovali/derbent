@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -68,6 +68,14 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 			LOGGER.error("Error creating section line for section: {}: {}", sectionName, e.getMessage());
 			throw new RuntimeException("Error creating section line for section: " + sectionName + ". " + e.getMessage());
 		}
+	}
+
+	public static CDetailLines createSectionEnd() {
+		final CDetailLines line = new CDetailLines();
+		line.setRelationFieldName(CEntityFieldService.SECTION_END);
+		line.setProperty(CEntityFieldService.SECTION_END);
+		line.setSectionName(CEntityFieldService.SECTION_END);
+		return line;
 	}
 
 	private final IDetailLinesRepository detailLinesRepository;

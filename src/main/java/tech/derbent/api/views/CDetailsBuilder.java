@@ -30,11 +30,6 @@ import tech.derbent.base.users.domain.CUser;
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
 
-	private static ApplicationContext applicationContext;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
-
-	public static ApplicationContext getApplicationContext() { return applicationContext; }
-
 	/** Helper class to track section processing state during recursive parsing. */
 	private static class SectionContext {
 
@@ -47,13 +42,18 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		}
 	}
 
+	private static ApplicationContext applicationContext;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
+
+	public static ApplicationContext getApplicationContext() { return applicationContext; }
+
 	/** Processes lines for a section between SECTION_START and SECTION_END markers.
-	 * @param context The section context tracking current position in lines
-	 * @param contentOwner The content owner
-	 * @param screen The detail section screen
-	 * @param user The current user
-	 * @param currentSection The current CPanelDetails section to add fields to
-	 * @param formBuilder The form builder for creating fields
+	 * @param context          The section context tracking current position in lines
+	 * @param contentOwner     The content owner
+	 * @param screen           The detail section screen
+	 * @param user             The current user
+	 * @param currentSection   The current CPanelDetails section to add fields to
+	 * @param formBuilder      The form builder for creating fields
 	 * @param mapSectionPanels Map to store section panels by name
 	 * @return The index of the SECTION_END line, or end of list if not found */
 	private static int processSectionLines(final SectionContext context, final IContentOwner contentOwner, final CDetailSection screen,
@@ -136,7 +136,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				final CPanelDetails section = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
 				mapSectionPanels.put(section.getName(), section);
 				// Add section to appropriate container (tabs or accordion)
-				if (user.getAttributeDisplaySectionsAsTabs()) {
+				if (user.getAttributeDisplaySectionsAsTabs() || line.getSectionAsTab()) {
 					tabsOfForm.add(line.getSectionName(), section);
 				} else {
 					formLayout.add(section);
