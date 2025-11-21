@@ -23,14 +23,16 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	)
 	private boolean attributeNonDeletable = true;
 	@Column (name = "color", nullable = true, length = 7)
-	@Size (max = 7)
+	@Size (max = 7, message = "Color code cannot exceed 7 characters")
 	@AMetaData (
 			displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", colorField = true,
 			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7
 	)
 	private String color = "#4A90E2";
 	@Column (name = "sort_order", nullable = false)
-	@NotNull
+	@NotNull (message = "Sort order is required")
+	@Min (value = 1, message = "Sort order must be at least 1")
+	@Max (value = 9999, message = "Sort order cannot exceed 9999")
 	@AMetaData (
 			displayName = "Sort Order", required = true, readOnly = false, defaultValue = "100", description = "Display order for type sorting",
 			hidden = false, order = 4
