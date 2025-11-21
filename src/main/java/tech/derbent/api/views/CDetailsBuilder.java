@@ -35,20 +35,53 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	public static ApplicationContext getApplicationContext() { return applicationContext; }
 
-	private static HasComponents processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CUser user) {
-		Check.notNull(line, "Line cannot be null");
-		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
-			if (line.getSectionAsTab() != null && line.getSectionAsTab()) {
-				TabSheet tabsOfForm = new TabSheet();
-				return tabsOfForm;
-			} else {
-				final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
-				return sectionPanel;
-			}
-		} else if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_END)) {
-			return null;
+	/** Helper class to track section processing state during recursive parsing. */
+	private static class SectionContext {
+
+		int currentIndex;
+		final List<CDetailLines> lines;
+
+		SectionContext(final List<CDetailLines> lines, final int startIndex) {
+			this.lines = lines;
+			this.currentIndex = startIndex;
 		}
-		return null;
+	}
+
+	/** Processes lines for a section between SECTION_START and SECTION_END markers.
+	 * @param context The section context tracking current position in lines
+	 * @param contentOwner The content owner
+	 * @param screen The detail section screen
+	 * @param user The current user
+	 * @param currentSection The current CPanelDetails section to add fields to
+	 * @param formBuilder The form builder for creating fields
+	 * @param mapSectionPanels Map to store section panels by name
+	 * @return The index of the SECTION_END line, or end of list if not found */
+	private static int processSectionLines(final SectionContext context, final IContentOwner contentOwner, final CDetailSection screen,
+			final CUser user, final CPanelDetails currentSection, final CFormBuilder<?> formBuilder,
+			final Map<String, CPanelDetails> mapSectionPanels) throws Exception {
+		while (context.currentIndex < context.lines.size()) {
+			final CDetailLines line = context.lines.get(context.currentIndex);
+			// Check for section end marker
+			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_END)) {
+				return context.currentIndex;
+			}
+			// Check for nested section start
+			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
+				// Create nested section panel
+				final CPanelDetails nestedSection = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
+				mapSectionPanels.put(nestedSection.getName(), nestedSection);
+				// Add nested section to current section's base layout
+				currentSection.getBaseLayout().add(nestedSection);
+				// Move to next line and process nested section content
+				context.currentIndex++;
+				context.currentIndex = processSectionLines(context, contentOwner, screen, user, nestedSection, formBuilder, mapSectionPanels);
+			} else {
+				// Regular field line - process it
+				currentSection.processLine(contentOwner, 0, screen, line, formBuilder);
+			}
+			context.currentIndex++;
+		}
+		return context.currentIndex;
 	}
 
 	CFormBuilder<?> formBuilder = null;
@@ -87,69 +120,36 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		final Class<?> screenClass = CEntityRegistry.getEntityClass(screen.getEntityType());
 		Check.notNull(screenClass, "Screen class cannot be null");
 		formBuilder = new CFormBuilder<>(null, screenClass, binder);
-		//
-		CPanelDetails currentSection = null;
-		final int counter = 0;
 		final CUser user = sessionService.getActiveUser().orElseThrow();
-		// screen.getScreenLines().size(); // Ensure lines are loaded
+		final List<CDetailLines> lines = screen.getScreenLines();
+		// Initialize tabs if user prefers sections as tabs
 		if (user.getAttributeDisplaySectionsAsTabs()) {
-			// LOGGER.debug("User '{}' prefers sections as tabs.", user.getUsername());
 			tabsOfForm = new TabSheet();
 			formLayout.add(tabsOfForm);
-		} else {
-			// LOGGER.debug("User '{}' prefers sections as accordion.", user.getUsername());
 		}
-		HasComponents base = null;
-		final List<CDetailLines> lines = screen.getScreenLines();
-		for (final CDetailLines line : lines) {
+		// Process all lines sequentially, handling sections with SECTION_START/SECTION_END
+		final SectionContext context = new SectionContext(lines, 0);
+		while (context.currentIndex < lines.size()) {
+			final CDetailLines line = lines.get(context.currentIndex);
 			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
-				base = processLine(counter, screen, line, user);
-			}
-			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
-				// no more current section. switch to base
-				currentSection = null;
-			}
-			if (currentSection != null) {
-				currentSection.processLine(contentOwner, counter, screen, line, getFormBuilder());
-				continue;
-			}
-			final Component component = processLine(counter, screen, line, user);
-			if (component instanceof CPanelDetails) {
+				// Create top-level section
+				final CPanelDetails section = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
+				mapSectionPanels.put(section.getName(), section);
+				// Add section to appropriate container (tabs or accordion)
 				if (user.getAttributeDisplaySectionsAsTabs()) {
-					tabsOfForm.add(line.getSectionName(), component);
+					tabsOfForm.add(line.getSectionName(), section);
 				} else {
-					formLayout.add(component);
+					formLayout.add(section);
 				}
-				currentSection = (CPanelDetails) component;
-				mapSectionPanels.put(currentSection.getName(), currentSection);
-			} else {
-				LOGGER.error("First create a section!" + " Line: {}", line.getFieldCaption());
+				// Process section content (move to next line and process until SECTION_END)
+				context.currentIndex++;
+				context.currentIndex = processSectionLines(context, contentOwner, screen, user, section, formBuilder, mapSectionPanels);
+			} else if (!line.getRelationFieldName().equals(CEntityFieldService.SECTION_END)) {
+				// Line outside of any section - log warning
+				LOGGER.warn("Line '{}' found outside of any section, skipping", line.getFieldCaption());
 			}
+			context.currentIndex++;
 		}
-		/*********************************/
-		for (final CDetailLines line : lines) {
-			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
-				// no more current section. switch to base
-				currentSection = null;
-			}
-			if (currentSection != null) {
-				currentSection.processLine(contentOwner, counter, screen, line, getFormBuilder());
-				continue;
-			}
-			final Component component = processLine(counter, screen, line, user);
-			if (component instanceof CPanelDetails) {
-				if (user.getAttributeDisplaySectionsAsTabs()) {
-					tabsOfForm.add(line.getSectionName(), component);
-				} else {
-					formLayout.add(component);
-				}
-				currentSection = (CPanelDetails) component;
-				mapSectionPanels.put(currentSection.getName(), currentSection);
-			} else {
-				LOGGER.error("First create a section!" + " Line: {}", line.getFieldCaption());
-			}
-		}
-		/***********************************/
 		return formLayout;
 	}
 
