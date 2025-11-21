@@ -25,7 +25,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	)
 	private LocalDateTime createdDate;
 	@Column (nullable = true, length = 2000)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = "Description cannot exceed " + CEntityConstants.MAX_LENGTH_DESCRIPTION + " characters")
 	@AMetaData (
 			displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Detailed description of the project",
 			hidden = false, order = 1, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
@@ -38,7 +38,8 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	)
 	private LocalDateTime lastModifiedDate;
 	@Column (nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@jakarta.validation.constraints.NotBlank (message = "Name is required")
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = "Name cannot exceed " + CEntityConstants.MAX_LENGTH_NAME + " characters")
 	@AMetaData (
 			displayName = "Name", required = true, readOnly = false, defaultValue = "", description = "Name", hidden = false, order = 0,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true
