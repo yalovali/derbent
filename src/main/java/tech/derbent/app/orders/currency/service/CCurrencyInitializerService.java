@@ -38,9 +38,11 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

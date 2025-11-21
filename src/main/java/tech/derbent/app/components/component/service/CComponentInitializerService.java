@@ -40,6 +40,7 @@ public class CComponentInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

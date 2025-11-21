@@ -34,6 +34,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
@@ -43,6 +44,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 			line.setProperty("Component:createProjectUserSettingsComponent");
 			line.setDataProviderBean("CProjectService");
 			detailSection.addScreenLine(line);
+			detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
