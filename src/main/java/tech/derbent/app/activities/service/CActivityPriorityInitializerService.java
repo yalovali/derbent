@@ -39,13 +39,16 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
+   scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.addScreenLine(CDetailLinesService.createSection("Behavior"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isDefault"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+   scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+   scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

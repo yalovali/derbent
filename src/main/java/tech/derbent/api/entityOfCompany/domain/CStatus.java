@@ -4,10 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.companies.domain.CCompany;
 
 /** CStatus - Abstract base entity for all status types in the system. Layer: Domain (MVC) This class provides common functionality for status
@@ -23,14 +26,16 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	)
 	private boolean attributeNonDeletable = true;
 	@Column (name = "color", nullable = true, length = 7)
-	@Size (max = 7)
+	@Size (max = 7, message = ValidationMessages.COLOR_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", colorField = true,
 			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7
 	)
 	private String color = "#4A90E2";
 	@Column (name = "sort_order", nullable = false)
-	@NotNull
+	@NotNull (message = ValidationMessages.SORT_ORDER_REQUIRED)
+	@Min (value = 1, message = ValidationMessages.SORT_ORDER_MIN)
+	@Max (value = 9999, message = ValidationMessages.SORT_ORDER_MAX)
 	@AMetaData (
 			displayName = "Sort Order", required = true, readOnly = false, defaultValue = "100", description = "Display order for type sorting",
 			hidden = false, order = 4

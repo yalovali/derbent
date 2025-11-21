@@ -6,11 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.validation.ValidationMessages;
 
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
@@ -25,7 +27,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	)
 	private LocalDateTime createdDate;
 	@Column (nullable = true, length = 2000)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.DESCRIPTION_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Detailed description of the project",
 			hidden = false, order = 1, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
@@ -38,7 +40,8 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	)
 	private LocalDateTime lastModifiedDate;
 	@Column (nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@NotBlank (message = ValidationMessages.NAME_REQUIRED)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.NAME_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Name", required = true, readOnly = false, defaultValue = "", description = "Name", hidden = false, order = 0,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true

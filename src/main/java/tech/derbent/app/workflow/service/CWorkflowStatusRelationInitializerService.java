@@ -36,9 +36,12 @@ public final class CWorkflowStatusRelationInitializerService extends CInitialize
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "fromStatus"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "toStatus"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "roles"));
+			detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
+			detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
+			detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

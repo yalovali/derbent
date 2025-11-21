@@ -4,10 +4,12 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.validation.ValidationMessages;
 
 /** CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB to provide database
  * functionality. */
@@ -20,14 +22,14 @@ public class CCompany extends CEntityNamed<CCompany> {
 	public static final String DEFAULT_ICON = "vaadin:office";
 	public static final String VIEW_NAME = "Company View";
 	@Column (name = "address", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.FIELD_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Address", required = false, readOnly = false, defaultValue = "", description = "Company address", hidden = false,
 			order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String address;
 	@Column (name = "company_logo_url", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.FIELD_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Company Logo URL", required = false, readOnly = false, defaultValue = "", description = "URL or path to company logo",
 			hidden = false, order = 11, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
@@ -56,6 +58,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 	)
 	private String defaultLanguage = "tr";
 	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+@Email (message = ValidationMessages.EMAIL_INVALID)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Email", required = false, readOnly = false, defaultValue = "", description = "Company email address", hidden = false,
@@ -69,6 +72,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 	)
 	private Boolean enableNotifications;
 	@Column (name = "notification_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+@Email (message = ValidationMessages.EMAIL_INVALID)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Notification Email", required = false, readOnly = false, defaultValue = "",

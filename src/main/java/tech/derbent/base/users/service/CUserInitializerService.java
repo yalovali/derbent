@@ -36,21 +36,26 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "login"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("System Access"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
 			line.setRelationFieldName("projectSettings");
 			line.setFieldCaption("projectSettings");
-			line.setProperty("Component:createUserProjectSettingsComponent");
+			line.setEntityProperty("Component:createUserProjectSettingsComponent");
 			line.setDataProviderBean("CUserService");
 			detailSection.addScreenLine(line);
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Organization"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyRole"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Profile"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "profilePictureData"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -58,8 +63,10 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeDisplaySectionsAsTabs"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

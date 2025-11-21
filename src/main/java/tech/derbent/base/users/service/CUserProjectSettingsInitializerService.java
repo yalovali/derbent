@@ -35,10 +35,13 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "user"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "role"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Permissions"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "permission"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
+   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

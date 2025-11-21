@@ -14,6 +14,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
+import tech.derbent.api.validation.ValidationMessages;
 
 /** CDetailLines - Domain entity representing individual lines/fields in a screen definition. Layer: Domain (MVC) Each line represents a field that
  * should be displayed in the screen view. */
@@ -29,7 +30,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return null; }
 
 	@Column (name = "data_provider_bean", nullable = true, length = 100)
-	@Size (max = 100, message = "Data provider bean cannot exceed 100 characters")
+	@Size (max = 100, message = ValidationMessages.DATA_PROVIDER_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Data Provider Bean", required = false, readOnly = false,
 			description = "Spring bean name for data provider (for comboboxes)", hidden = false, order = 11, maxLength = 100
@@ -44,7 +45,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	private String defaultValue;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "detailsection_id", nullable = false)
-	@NotNull (message = "Screen reference is required")
+	@NotNull (message = ValidationMessages.SCREEN_REFERENCE_REQUIRED)
 	@AMetaData (
 			displayName = "Screen Reference", required = true, readOnly = false, description = "Screen Reference", hidden = false, order = 1,
 			defaultValue = "1"
@@ -67,7 +68,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	)
 	private String fieldCaption;
 	@Column (name = "field_description", nullable = true, length = 500)
-	@Size (max = 500, message = "Field description cannot exceed 500 characters")
+	@Size (max = 500, message = ValidationMessages.FIELD_DESCRIPTION_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Field Description", required = false, readOnly = false, description = "Description or help text for this field",
 			hidden = false, order = 4, maxLength = 500
@@ -120,7 +121,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	)
 	private String relatedEntityType;
 	@Column (name = "relationFieldName", nullable = false, length = 100)
-	@Size (max = 100, message = "Relation Field Name cannot exceed 100 characters")
+	@Size (max = 100, message = ValidationMessages.RELATION_FIELD_NAME_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Relation Field", required = true, readOnly = false, description = "Relation Field is designed for", hidden = false,
 			order = 2, maxLength = 100, dataProviderBean = "none"
@@ -143,10 +144,12 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	/** Default constructor for JPA. */
 	public CDetailLines() {
 		super(CDetailLines.class);
+		sectionAsTab = false;
 	}
 
 	public CDetailLines(final CDetailSection detail, final String relationFieldName, final String entityProperty) {
 		super(CDetailLines.class);
+		sectionAsTab = false;
 		detailSection = detail;
 		this.relationFieldName = relationFieldName;
 		this.entityProperty = entityProperty;
@@ -221,7 +224,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public void setMaxLength(final Integer maxLength) { this.maxLength = maxLength; }
 
-	public void setProperty(final String entityProperty) { this.entityProperty = entityProperty; }
+	public void setEntityProperty(final String entityProperty) { this.entityProperty = entityProperty; }
 
 	public void setRelatedEntityType(final String relatedEntityType) { this.relatedEntityType = relatedEntityType; }
 

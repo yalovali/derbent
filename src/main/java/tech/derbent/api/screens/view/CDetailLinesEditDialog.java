@@ -87,6 +87,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 				if (selectedType.equals(CEntityFieldService.SECTION_START) || selectedType.equals(CEntityFieldService.SECTION_END)) {
 					// activate section tab
 					tabsOfDialog.setSelectedTab(tabSection);
+					updateEntityPropertyBasedOnClass();
 				} else {
 					// activate section tab
 					tabsOfDialog.setSelectedTab(tabEntity);
@@ -99,7 +100,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 				final String selectedProperty = event.getValue();
 				if ((selectedProperty != null) && !selectedProperty.isEmpty()) {
 					// Update the entity property based on the selected value
-					getEntity().setProperty(selectedProperty);
+					getEntity().setEntityProperty(selectedProperty);
 					updatePropertyDefaultValues(selectedProperty);
 				}
 			});
@@ -182,11 +183,11 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			// this class is a special case, we need to get all fields of the screen's entity
 			if (relationFieldName.equals(CEntityFieldService.SECTION_START)) {
 				cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION_START));
-				getEntity().setProperty(CEntityFieldService.SECTION_START);
+				getEntity().setEntityProperty(CEntityFieldService.SECTION_START);
 				return;
 			} else if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
 				cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION_END));
-				getEntity().setProperty(CEntityFieldService.SECTION_END);
+				getEntity().setEntityProperty(CEntityFieldService.SECTION_END);
 				return;
 			} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 				fieldProperties = CEntityFieldService.getEntitySimpleFields(screen.getEntityType(), null);
@@ -248,14 +249,32 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 		}
 		EntityFieldInfo info;
 		if (relationFieldName.equals(CEntityFieldService.SECTION_START)) {
+			getEntity().setEntityProperty(
+					getEntity().getEntityProperty().isEmpty() ? CEntityFieldService.SECTION_START : getEntity().getEntityProperty());
+			getEntity().setRelationFieldName(
+					getEntity().getRelationFieldName().isEmpty() ? CEntityFieldService.SECTION_START : getEntity().getRelationFieldName());
+			getEntity().setSectionName(getEntity().getSectionName().isEmpty() ? CEntityFieldService.SECTION_START : getEntity().getSectionName());
+			getEntity().setFieldCaption(getEntity().getFieldCaption().isEmpty() ? CEntityFieldService.SECTION_START : getEntity().getFieldCaption());
 			return;
-		}
-		if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
+		} else if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
+			getEntity()
+					.setEntityProperty(getEntity().getEntityProperty().isEmpty() ? CEntityFieldService.SECTION_END : getEntity().getEntityProperty());
+			getEntity().setRelationFieldName(
+					getEntity().getRelationFieldName().isEmpty() ? CEntityFieldService.SECTION_END : getEntity().getRelationFieldName());
+			getEntity().setSectionName(getEntity().getSectionName().isEmpty() ? CEntityFieldService.SECTION_END : getEntity().getSectionName());
+			getEntity().setFieldCaption(getEntity().getFieldCaption().isEmpty() ? CEntityFieldService.SECTION_END : getEntity().getFieldCaption());
 			return;
 		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), selectedProperty);
+			if (info == null) {
+				// field doesnot have default field "name" so just get the first field!
+				final List<EntityFieldInfo> fields = CEntityFieldService.getEntityFields(screen.getEntityType().toString());
+				Check.notEmpty(fields, "Fields must not be empty for entity type: " + screen.getEntityType().toString());
+				info = fields.get(0);
+			}
+			Check.notNull(info, "Field info must not be null for property: " + selectedProperty);
 		} else if (selectedProperty.startsWith(CEntityFieldService.COMPONENT + ":")) {
-			getEntity().setProperty(selectedProperty);
+			getEntity().setEntityProperty(selectedProperty);
 			getEntity().setDefaultValue(null);
 			getEntity().setMaxLength(0);
 			getEntity().setDataProviderBean(null);

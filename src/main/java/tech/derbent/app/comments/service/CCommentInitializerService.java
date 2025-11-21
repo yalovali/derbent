@@ -34,12 +34,15 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activity"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "important"));
+                        detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
                         detailSection.addScreenLine(CDetailLinesService.createSection("Author & Timing"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "author"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "eventDate"));
+                        detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
                         detailSection.addScreenLine(CDetailLinesService.createSection("System"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
+                        detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
                         detailSection.debug_printScreenInformation();
                         return detailSection;
                 } catch (final Exception e) {

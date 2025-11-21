@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -28,7 +28,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
 			Check.notNull(fieldInfo, "Field info not found for field: " + fieldName + " in class " + entityClass.getSimpleName());
 			final CDetailLines line = new CDetailLines();
-			line.setProperty(fieldInfo.getFieldName());
+			line.setEntityProperty(fieldInfo.getFieldName());
 			line.setDescription(fieldInfo.getDescription());
 			line.setFieldCaption(fieldInfo.getDisplayName());
 			line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
@@ -61,8 +61,30 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		try {
 			final CDetailLines line = new CDetailLines();
 			line.setRelationFieldName(CEntityFieldService.SECTION_START);
-			line.setProperty(CEntityFieldService.SECTION_START);
+			line.setEntityProperty(CEntityFieldService.SECTION_START);
 			line.setSectionName(sectionName);
+			return line;
+		} catch (Exception e) {
+			LOGGER.error("Error creating section line for section: {}: {}", sectionName, e.getMessage());
+			throw new RuntimeException("Error creating section line for section: " + sectionName + ". " + e.getMessage());
+		}
+	}
+
+	public static CDetailLines createSectionEnd() {
+		final CDetailLines line = new CDetailLines();
+		line.setRelationFieldName(CEntityFieldService.SECTION_END);
+		line.setEntityProperty(CEntityFieldService.SECTION_END);
+		line.setSectionName(CEntityFieldService.SECTION_END);
+		return line;
+	}
+
+	public static CDetailLines createTab(final String sectionName) {
+		try {
+			final CDetailLines line = new CDetailLines();
+			line.setRelationFieldName(CEntityFieldService.SECTION_START);
+			line.setEntityProperty(CEntityFieldService.SECTION_START);
+			// line.setSectionName(sectionName);
+			line.setSectionAsTab(true);
 			return line;
 		} catch (Exception e) {
 			LOGGER.error("Error creating section line for section: {}: {}", sectionName, e.getMessage());
@@ -118,6 +140,32 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	public void initializeNewEntity(final CDetailLines entity) {
 		super.initializeNewEntity(entity);
 		// Additional entity-specific initialization can be added here if needed
+	}
+
+	/** Insert a new line before the specified line position.
+	 * @param screen            the parent screen
+	 * @param relationFieldName the relation field name
+	 * @param entityProperty    the entity property
+	 * @param beforePosition    the position to insert before (line order)
+	 * @return the new screen line */
+	@Transactional
+	public CDetailLines insertLineBefore(final CDetailSection screen, final String relationFieldName, final String entityProperty,
+			final Integer beforePosition) {
+		final CDetailLines newLine = new CDetailLines(screen, relationFieldName, entityProperty);
+		newLine.setMaxLength(255); // Default max length for text fields
+		newLine.setActive(true);
+		// Get all lines for this screen
+		final List<CDetailLines> lines = findByMaster(screen);
+		// Shift all lines at or after the insert position down by 1
+		for (final CDetailLines line : lines) {
+			if (line.getLineOrder() >= beforePosition) {
+				line.setLineOrder(line.getLineOrder() + 1);
+				save(line);
+			}
+		}
+		// Set the new line at the insert position
+		newLine.setLineOrder(beforePosition);
+		return newLine;
 	}
 
 	@Transactional

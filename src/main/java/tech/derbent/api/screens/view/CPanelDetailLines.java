@@ -38,6 +38,8 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 
 	private void createLinesGrid() {
 		grid = new CGrid<CDetailLines>(CDetailLines.class);
+		// always selected
+		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);
 		grid.setHeightFull();
 		grid.addColumn(CDetailLines::getId).setHeader("Id").setWidth("50px");
 		grid.addColumn(CDetailLines::getLineOrder).setHeader("Order").setWidth("50px");
@@ -55,7 +57,12 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		addButton.addClickListener(e -> {
 			try {
-				openAddFieldDialog();
+				// get the position of the current item
+				Integer position = 0;
+				if (grid.asSingleSelect().getValue() != null) {
+					position = grid.asSingleSelect().getValue().getLineOrder();
+				}
+				openAddFieldDialog(position);
 			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -165,13 +172,20 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	}
 
 	/** Opens the add field dialog for creating a new screen field.
+	 * @param position the position to insert at (0 means at the end)
 	 * @throws Exception */
-	private void openAddFieldDialog() throws Exception {
+	private void openAddFieldDialog(Integer position) throws Exception {
 		if ((getCurrentEntity() == null) || (getCurrentEntity().getId() == null)) {
 			CNotificationService.showWarning("Please save the screen first before adding fields");
 			return;
 		}
-		final CDetailLines newLine = detailLinesService.newEntity(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name");
+		// If position is 0 or null, add at the end
+		CDetailLines newLine;
+		if ((position != null) && (position > 0)) {
+			newLine = detailLinesService.insertLineBefore(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name", position);
+		} else {
+			newLine = detailLinesService.newEntity(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name");
+		}
 		final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(newLine, this::saveScreenLine, true, getCurrentEntity());
 		dialog.open();
 	}
@@ -195,8 +209,10 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	private void refreshLinesGrid() {
 		final CDetailSection detailSection = getCurrentEntity();
 		if (detailSection != null) {
+			var currentValue = grid.asSingleSelect().getValue();
 			final List<CDetailLines> lines = detailLinesService.findByMaster(detailSection);
 			grid.setItems(lines);
+			grid.asSingleSelect().setValue(currentValue);
 		} else {
 			grid.setItems();
 		}
