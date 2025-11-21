@@ -35,11 +35,18 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	public static ApplicationContext getApplicationContext() { return applicationContext; }
 
-	private static Component processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CUser user) {
+	private static HasComponents processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CUser user) {
 		Check.notNull(line, "Line cannot be null");
-		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
-			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
-			return sectionPanel;
+		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
+			if (line.getSectionAsTab() != null && line.getSectionAsTab()) {
+				TabSheet tabsOfForm = new TabSheet();
+				return tabsOfForm;
+			} else {
+				final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
+				return sectionPanel;
+			}
+		} else if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_END)) {
+			return null;
 		}
 		return null;
 	}
@@ -92,9 +99,13 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		} else {
 			// LOGGER.debug("User '{}' prefers sections as accordion.", user.getUsername());
 		}
+		HasComponents base = null;
 		final List<CDetailLines> lines = screen.getScreenLines();
 		for (final CDetailLines line : lines) {
-			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
+			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
+				base = processLine(counter, screen, line, user);
+			}
+			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
 				// no more current section. switch to base
 				currentSection = null;
 			}
@@ -115,6 +126,30 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				LOGGER.error("First create a section!" + " Line: {}", line.getFieldCaption());
 			}
 		}
+		/*********************************/
+		for (final CDetailLines line : lines) {
+			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
+				// no more current section. switch to base
+				currentSection = null;
+			}
+			if (currentSection != null) {
+				currentSection.processLine(contentOwner, counter, screen, line, getFormBuilder());
+				continue;
+			}
+			final Component component = processLine(counter, screen, line, user);
+			if (component instanceof CPanelDetails) {
+				if (user.getAttributeDisplaySectionsAsTabs()) {
+					tabsOfForm.add(line.getSectionName(), component);
+				} else {
+					formLayout.add(component);
+				}
+				currentSection = (CPanelDetails) component;
+				mapSectionPanels.put(currentSection.getName(), currentSection);
+			} else {
+				LOGGER.error("First create a section!" + " Line: {}", line.getFieldCaption());
+			}
+		}
+		/***********************************/
 		return formLayout;
 	}
 
@@ -123,6 +158,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		Check.notNull(panel, "Panel cannot be null");
 		return panel.getComponentByName(componentName);
 	}
+
+	public CFormBuilder<?> getFormBuilder() { return formBuilder; }
 
 	public CPanelDetails getSectionPanel(final String sectionName) {
 		Check.notNull(sectionName, "Section name cannot be null");
@@ -147,9 +184,5 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	public void setCurrentEntity(final CEntityDB<?> entity) {
 		Check.notNull(getFormBuilder(), "Form builder cannot be null, first initialize it");
 		getFormBuilder().setCurrentEntity(entity);
-	}
-
-	public CFormBuilder<?> getFormBuilder() {
-		return formBuilder;
 	}
 }

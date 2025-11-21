@@ -60,8 +60,8 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	public static CDetailLines createSection(final String sectionName) {
 		try {
 			final CDetailLines line = new CDetailLines();
-			line.setRelationFieldName(CEntityFieldService.SECTION);
-			line.setProperty(CEntityFieldService.SECTION);
+			line.setRelationFieldName(CEntityFieldService.SECTION_START);
+			line.setProperty(CEntityFieldService.SECTION_START);
 			line.setSectionName(sectionName);
 			return line;
 		} catch (Exception e) {

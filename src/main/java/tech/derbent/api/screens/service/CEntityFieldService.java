@@ -207,8 +207,8 @@ public class CEntityFieldService {
 
 	public static final String COMPONENT = "Component";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityFieldService.class);
-	public static final String SECTION = "Section";
 	public static final String SECTION_END = "End of Section";
+	public static final String SECTION_START = "Section Start";
 	public static final String THIS_CLASS = "This Class";
 
 	public static EntityFieldInfo createFieldInfo(final AMetaData metaData) {
@@ -274,11 +274,11 @@ public class CEntityFieldService {
 			if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 				relationFieldName = screenClassName;
 				field = getEntityField(relationFieldName, line.getEntityProperty());
-			} else if (relationFieldName == CEntityFieldService.SECTION) {
+			} else if (relationFieldName == CEntityFieldService.SECTION_START) {
 				final EntityFieldInfo sectionInfo = new EntityFieldInfo();
-				sectionInfo.setFieldName(CEntityFieldService.SECTION);
-				sectionInfo.setFieldType(CEntityFieldService.SECTION);
-				sectionInfo.setJavaType(CEntityFieldService.SECTION);
+				sectionInfo.setFieldName(CEntityFieldService.SECTION_START);
+				sectionInfo.setFieldType(CEntityFieldService.SECTION_START);
+				sectionInfo.setJavaType(CEntityFieldService.SECTION_START);
 				sectionInfo.setDisplayName(line.getSectionName());
 				sectionInfo.setDescription(line.getSectionName());
 				sectionInfo.setFieldTypeClass(CEntityFieldService.class);

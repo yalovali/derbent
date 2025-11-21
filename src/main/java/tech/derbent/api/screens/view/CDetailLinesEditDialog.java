@@ -84,7 +84,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 				if ((selectedType == null) || selectedType.isEmpty()) {
 					return; // No
 				}
-				if (selectedType.equals(CEntityFieldService.SECTION)) {
+				if (selectedType.equals(CEntityFieldService.SECTION_START) || selectedType.equals(CEntityFieldService.SECTION_END)) {
 					// activate section tab
 					tabsOfDialog.setSelectedTab(tabSection);
 				} else {
@@ -156,9 +156,12 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 		Check.notNull(screen, "Screen must not be null");
 		// add additional field info for "this class"
 		final List<EntityFieldInfo> listOfAdditionalFields = new ArrayList<>();
-		final EntityFieldInfo infoSection = new EntityFieldInfo();
-		infoSection.setFieldName(CEntityFieldService.SECTION);
-		listOfAdditionalFields.add(infoSection);
+		final EntityFieldInfo infoSection_start = new EntityFieldInfo();
+		infoSection_start.setFieldName(CEntityFieldService.SECTION_START);
+		listOfAdditionalFields.add(infoSection_start);
+		final EntityFieldInfo infoSection_end = new EntityFieldInfo();
+		infoSection_end.setFieldName(CEntityFieldService.SECTION_END);
+		listOfAdditionalFields.add(infoSection_end);
 		// get all fields + additional "this class" field
 		final EntityFieldInfo infoThisClass = new EntityFieldInfo();
 		infoThisClass.setFieldName(CEntityFieldService.THIS_CLASS);
@@ -177,9 +180,13 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			LOGGER.debug("Selected field class: {}", relationFieldName);
 			List<EntityFieldInfo> fieldProperties = null;
 			// this class is a special case, we need to get all fields of the screen's entity
-			if (relationFieldName.equals(CEntityFieldService.SECTION)) {
-				cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION));
-				getEntity().setProperty(CEntityFieldService.SECTION);
+			if (relationFieldName.equals(CEntityFieldService.SECTION_START)) {
+				cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION_START));
+				getEntity().setProperty(CEntityFieldService.SECTION_START);
+				return;
+			} else if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
+				cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION_END));
+				getEntity().setProperty(CEntityFieldService.SECTION_END);
 				return;
 			} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 				fieldProperties = CEntityFieldService.getEntitySimpleFields(screen.getEntityType(), null);
@@ -197,7 +204,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 					fieldProperties = CEntityFieldService.getEntitySimpleFields(info.getJavaType(), null);
 				}
 			}
-			if (!relationFieldName.equals(CEntityFieldService.SECTION) && !relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
+			if (!relationFieldName.equals(CEntityFieldService.SECTION_START) && !relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 				// Ensure fieldProperties is not null before proceeding
 				Check.notNull(fieldProperties, "Field properties list must not be null");
 				final EntityFieldInfo info_data = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
@@ -240,7 +247,10 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			return;
 		}
 		EntityFieldInfo info;
-		if (relationFieldName.equals(CEntityFieldService.SECTION)) {
+		if (relationFieldName.equals(CEntityFieldService.SECTION_START)) {
+			return;
+		}
+		if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
 			return;
 		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), selectedProperty);

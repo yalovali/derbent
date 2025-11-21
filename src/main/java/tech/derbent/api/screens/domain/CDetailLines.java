@@ -126,7 +126,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 			order = 2, maxLength = 100, dataProviderBean = "none"
 	)
 	private String relationFieldName;
-	@Column (name = "is_required", nullable = false)
+	@Column (name = "isSectionAsTab", nullable = false)
 	@AMetaData (
 			displayName = "A Tab Section", required = false, readOnly = false, description = "Whether this section is a tab", hidden = false,
 			order = 6, defaultValue = "false"
