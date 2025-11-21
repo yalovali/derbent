@@ -79,17 +79,17 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	public void addScreenLine(final CDetailLines screenLine) {
 		Check.notNull(screenLine, "screenLine must not be null");
 		// check screen name dublicate
-		if (screenLine.getSectionName() != null) {
-			for (final CDetailLines line : detailLines) {
-				if (line.getSectionName() == null) {
-					continue;
-				}
-				if (line.getSectionName().equals(screenLine.getSectionName())) {
-					throw new IllegalArgumentException(
-							"A screen line with the name '" + screenLine.getSectionName() + "' already exists in this screen.");
-				}
-			}
-		}
+		// if (screenLine.getSectionName() != null) {
+		// for (final CDetailLines line : detailLines) {
+		// if (line.getSectionName() == null) {
+		// continue;
+		// }
+		// if (line.getSectionName().equals(screenLine.getSectionName())) {
+		// throw new IllegalArgumentException(
+		// "A screen line with the name '" + screenLine.getSectionName() + "' already exists in this screen.");
+		// }
+		// }
+		// }
 		if (screenLine.getLineOrder() == 0) {
 			// default line order is the next available number
 			screenLine.setLineOrder(detailLines.size() + 1);

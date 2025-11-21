@@ -45,7 +45,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
 			line.setRelationFieldName("projectSettings");
 			line.setFieldCaption("projectSettings");
-			line.setProperty("Component:createUserProjectSettingsComponent");
+			line.setEntityProperty("Component:createUserProjectSettingsComponent");
 			line.setDataProviderBean("CUserService");
 			detailSection.addScreenLine(line);
    detailSection.addScreenLine(CDetailLinesService.createSectionEnd());

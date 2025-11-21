@@ -36,7 +36,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-   scr.addScreenLine(CDetailLinesService.createSectionEnd());
+			scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
@@ -47,14 +47,14 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "remainingHours"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
-   scr.addScreenLine(CDetailLinesService.createSectionEnd());
+			scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.addScreenLine(CDetailLinesService.createSection("Financials"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "hourlyRate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
 			/******************/
-   scr.addScreenLine(CDetailLinesService.createSectionEnd());
+			scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
@@ -64,7 +64,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-   scr.addScreenLine(CDetailLinesService.createSectionEnd());
+			scr.addScreenLine(CDetailLinesService.createSectionEnd());
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

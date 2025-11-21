@@ -223,7 +223,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public void setMaxLength(final Integer maxLength) { this.maxLength = maxLength; }
 
-	public void setProperty(final String entityProperty) { this.entityProperty = entityProperty; }
+	public void setEntityProperty(final String entityProperty) { this.entityProperty = entityProperty; }
 
 	public void setRelatedEntityType(final String relatedEntityType) { this.relatedEntityType = relatedEntityType; }
 
