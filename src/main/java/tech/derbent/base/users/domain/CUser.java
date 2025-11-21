@@ -12,6 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
@@ -19,6 +21,7 @@ import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
@@ -59,24 +62,27 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@NotBlank (message = ValidationMessages.EMAIL_REQUIRED)
+	@Email (message = ValidationMessages.EMAIL_INVALID)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.EMAIL_MAX_LENGTH)
 	private String email;
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@AMetaData (
 			displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false,
 			order = 2, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
 	private String lastname;
 	@AMetaData (
 			displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false,
 			order = 3, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@NotBlank (message = ValidationMessages.FIELD_REQUIRED)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
 	private String login;
 	@Column (name = "password", nullable = true, length = 255)
-	@Size (max = 255)
+	@Size (max = 255, message = ValidationMessages.FIELD_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Password", required = false, readOnly = false, passwordField = true, description = "User password (stored as hash)",
 			hidden = false, order = 99, passwordRevealButton = false
@@ -87,7 +93,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
 	private String phone;
 	@AMetaData (
 			displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
