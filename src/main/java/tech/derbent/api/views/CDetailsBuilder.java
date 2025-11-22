@@ -123,7 +123,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				
 				if (Boolean.TRUE.equals(line.getSectionAsTab())) {
 					// Create a TabSheet container (can be at any level)
-					newContainer = new CDetailsTabSheet();
+					// TabSheet uses its caption and can contain fields, nested tabs, and panels
+					newContainer = new CDetailsTabSheet(line.getFieldCaption());
 				} else {
 					// Create an accordion panel
 					newContainer = new CPanelDetails(line.getSectionName(), line.getFieldCaption());
@@ -167,14 +168,21 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 					// Use the existing processLine method for CPanelDetails
 					((CPanelDetails) currentContainer).processLine(contentOwner, 0, screen, line, formBuilder);
 				} else if (currentContainer instanceof CDetailsTabSheet) {
-					// Fields inside TabSheet should go into CPanelDetails within the tab
-					// This shouldn't normally happen as TabSheet should contain CPanelDetails
-					LOGGER.warn("Field '{}' found directly in TabSheet, should be in a CPanelDetails section", line.getFieldCaption());
+					// Fields inside TabSheet are added directly to its base layout
+					// TabSheets can contain regular fields alongside tabs
+					try {
+						// Add field directly to TabSheet's base layout
+						formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, 
+							((CDetailsTabSheet) currentContainer).getBaseLayout(), 
+							new java.util.HashMap<>(), new java.util.HashMap<>());
+					} catch (Exception e) {
+						LOGGER.error("Error adding field '{}' to TabSheet", line.getFieldCaption(), e);
+					}
 				} else {
-					// Fields should always be inside CPanelDetails sections
+					// Fields should always be inside CPanelDetails or TabSheet sections
 					// This case shouldn't occur with properly configured screen definitions
 					// Log warning and skip the field (consistent with old behavior)
-					LOGGER.warn("Field '{}' found outside of CPanelDetails section, skipping", line.getFieldCaption());
+					LOGGER.warn("Field '{}' found outside of CPanelDetails/TabSheet section, skipping", line.getFieldCaption());
 				}
 			}
 		}
