@@ -8,16 +8,15 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IDetailsContainer;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.ui.component.CAccordion;
 import tech.derbent.api.ui.component.CDiv;
 import tech.derbent.api.ui.component.CHorizontalLayout;
-import tech.derbent.api.ui.component.CTab;
 import tech.derbent.api.ui.component.IFormContainerComponent;
-import tech.derbent.base.users.domain.CUser;
 
-public class CPanelDetails extends CDiv {
+public class CPanelDetails extends CDiv implements IDetailsContainer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelDetails.class);
 	private static final long serialVersionUID = 1L;
@@ -26,16 +25,16 @@ public class CPanelDetails extends CDiv {
 	final Map<String, CHorizontalLayout> horizontalLayoutMap;
 	private Component component = null; // call it with getFormContainerComponent
 
-	public CPanelDetails(final String name, final String title, final CUser user) {
+	/**
+	 * Creates a CPanelDetails with an accordion layout.
+	 * 
+	 * @param name the internal name of the panel
+	 * @param title the display title
+	 */
+	public CPanelDetails(final String name, final String title) {
 		super();
 		setWidthFull();
-		// set height minimum?
-		// setHeightUndefined();
-		if (user.getAttributeDisplaySectionsAsTabs()) {
-			component = new CTab(title);
-		} else {
-			component = new CAccordion(title);
-		}
+		component = new CAccordion(title);
 		this.name = name;
 		this.componentMap = new HashMap<>();
 		this.horizontalLayoutMap = new HashMap<>();
@@ -45,6 +44,23 @@ public class CPanelDetails extends CDiv {
 	// Override this method to customize the panel content creation
 	protected void createPanelContent() {}
 
+	@Override
+	public void addItem(Component component) {
+		getBaseLayout().add(component);
+	}
+
+	@Override
+	public void addItem(String name, Component component) {
+		// CPanelDetails doesn't use named items, so just add normally
+		addItem(component);
+	}
+
+	@Override
+	public Component asComponent() {
+		return this;
+	}
+
+	@Override
 	public VerticalLayout getBaseLayout() { return getFormContainerComponent().getBaseLayout(); }
 
 	public Component getComponentByName(final String componentName) {
