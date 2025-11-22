@@ -118,6 +118,10 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			final String relationField = line.getRelationFieldName();
 			
 			if (relationField.equals(CEntityFieldService.SECTION_START)) {
+				// Log section creation for debugging
+				LOGGER.debug("Creating section: {} (sectionAsTab: {}, depth: {})", 
+					line.getFieldCaption(), line.getSectionAsTab(), containerStack.size() - 1);
+				
 				// Create container based on whether this section is marked as a tab
 				// TabSheets can exist at any nesting level, not just top-level
 				IDetailsContainer newContainer;
@@ -126,10 +130,12 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 					// Create a TabSheet container (can be at any level)
 					// TabSheet uses its caption and can contain fields, nested tabs, and panels
 					newContainer = new CDetailsTabSheet(line.getFieldCaption());
+					LOGGER.debug("Created TabSheet: {}", line.getFieldCaption());
 				} else {
 					// Create an accordion panel
 					newContainer = new CPanelDetails(line.getSectionName(), line.getFieldCaption());
 					mapSectionPanels.put(line.getSectionName(), (CPanelDetails) newContainer);
+					LOGGER.debug("Created CPanelDetails: {}", line.getFieldCaption());
 				}
 				
 				// Add the new container to the current container
@@ -139,14 +145,17 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				if (isTopLevel) {
 					// Top-level sections: add to root container
 					currentContainer.addItem(line.getSectionName(), newContainer.asComponent());
+					LOGGER.debug("Added to root: {}", line.getFieldCaption());
 				} else {
 					// Nested sections: add based on parent type
 					if (currentContainer instanceof CPanelDetails) {
 						// Parent is accordion: add to its base layout
 						((CPanelDetails) currentContainer).getBaseLayout().add(newContainer.asComponent());
+						LOGGER.debug("Added to CPanelDetails base layout: {}", line.getFieldCaption());
 					} else if (currentContainer instanceof CDetailsTabSheet) {
 						// Parent is TabSheet: add as a named tab
 						currentContainer.addItem(line.getSectionName(), newContainer.asComponent());
+						LOGGER.debug("Added as tab to TabSheet: {}", line.getFieldCaption());
 					}
 				}
 				
@@ -156,7 +165,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			} else if (relationField.equals(CEntityFieldService.SECTION_END)) {
 				// Pop the current container from the stack
 				if (containerStack.size() > 1) {
-					containerStack.pop();
+					final IDetailsContainer popped = containerStack.pop();
+					LOGGER.debug("Popped container from stack (remaining depth: {})", containerStack.size() - 1);
 				} else {
 					LOGGER.warn("Unmatched SECTION_END marker at line {}", i);
 				}
