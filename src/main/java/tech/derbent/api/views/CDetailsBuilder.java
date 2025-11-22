@@ -117,11 +117,12 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			final String relationField = line.getRelationFieldName();
 			
 			if (relationField.equals(CEntityFieldService.SECTION_START)) {
-				// Create a new container based on whether it's a tab section
+				// Create container based on whether this section is marked as a tab
+				// TabSheets can exist at any nesting level, not just top-level
 				IDetailsContainer newContainer;
 				
 				if (Boolean.TRUE.equals(line.getSectionAsTab())) {
-					// Create a TabSheet container
+					// Create a TabSheet container (can be at any level)
 					newContainer = new CDetailsTabSheet();
 				} else {
 					// Create an accordion panel
@@ -131,7 +132,21 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				
 				// Add the new container to the current container
 				final IDetailsContainer currentContainer = containerStack.peek();
-				currentContainer.addItem(line.getSectionName(), newContainer.asComponent());
+				final boolean isTopLevel = (containerStack.size() == 1);
+				
+				if (isTopLevel) {
+					// Top-level sections: add to root container
+					currentContainer.addItem(line.getSectionName(), newContainer.asComponent());
+				} else {
+					// Nested sections: add based on parent type
+					if (currentContainer instanceof CPanelDetails) {
+						// Parent is accordion: add to its base layout
+						((CPanelDetails) currentContainer).getBaseLayout().add(newContainer.asComponent());
+					} else if (currentContainer instanceof CDetailsTabSheet) {
+						// Parent is TabSheet: add as a named tab
+						currentContainer.addItem(line.getSectionName(), newContainer.asComponent());
+					}
+				}
 				
 				// Push the new container onto the stack
 				containerStack.push(newContainer);
@@ -151,6 +166,10 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				if (currentContainer instanceof CPanelDetails) {
 					// Use the existing processLine method for CPanelDetails
 					((CPanelDetails) currentContainer).processLine(contentOwner, 0, screen, line, formBuilder);
+				} else if (currentContainer instanceof CDetailsTabSheet) {
+					// Fields inside TabSheet should go into CPanelDetails within the tab
+					// This shouldn't normally happen as TabSheet should contain CPanelDetails
+					LOGGER.warn("Field '{}' found directly in TabSheet, should be in a CPanelDetails section", line.getFieldCaption());
 				} else {
 					// Fields should always be inside CPanelDetails sections
 					// This case shouldn't occur with properly configured screen definitions
