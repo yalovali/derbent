@@ -23,7 +23,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.project
 			LEFT JOIN FETCH a.assignedTo
 			LEFT JOIN FETCH a.createdBy
-			LEFT JOIN FETCH a.entityType
+			LEFT JOIN FETCH a.entityType et
+			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
 			WHERE a.id = :id
 			""")
@@ -34,7 +35,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.project
 			LEFT JOIN FETCH a.assignedTo
 			LEFT JOIN FETCH a.createdBy
-			LEFT JOIN FETCH a.entityType
+			LEFT JOIN FETCH a.entityType et
+			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
 			WHERE a.project = :project
 			""")

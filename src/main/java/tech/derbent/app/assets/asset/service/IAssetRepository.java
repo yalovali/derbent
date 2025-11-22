@@ -13,7 +13,7 @@ public interface IAssetRepository extends IEntityOfProjectRepository<CAsset> {
 	long countByType(@Param ("entityType") CAssetType type);
 	@Override
 	@Query (
-		"SELECT r FROM CAsset r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType " + "WHERE r.id = :id"
+		"SELECT r FROM CAsset r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow " + "WHERE r.id = :id"
 	)
 	Optional<CAsset> findById(@Param ("id") Long id);
 }

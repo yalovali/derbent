@@ -13,6 +13,6 @@ public interface IProductRepository extends IEntityOfProjectRepository<CProduct>
 long countByType(@Param ("entityType") CProductType type);
 
 @Override
-@Query ("SELECT r FROM CProduct r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType WHERE r.id = :id")
+@Query ("SELECT r FROM CProduct r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow WHERE r.id = :id")
 Optional<CProduct> findById(@Param ("id") Long id);
 }
