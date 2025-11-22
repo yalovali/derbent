@@ -17,14 +17,11 @@ import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IDetailsContainer;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.ui.component.CDetailsTabSheet;
-import tech.derbent.api.ui.component.CHorizontalLayout;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
@@ -80,129 +77,77 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		
 		final List<CDetailLines> lines = screen.getScreenLines();
 		
-		// Stack to track nested containers
-		final Stack<IDetailsContainer> containerStack = new Stack<>();
+		// First pass: check if we need a master TabSheet (if any top-level section has Tab=True)
+		com.vaadin.flow.component.tabs.TabSheet masterTabSheet = null;
+		for (final CDetailLines line : lines) {
+			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START) && Boolean.TRUE.equals(line.getSectionAsTab())) {
+				// At least one top-level section needs tabs, create master TabSheet
+				masterTabSheet = new com.vaadin.flow.component.tabs.TabSheet();
+				formLayout.add(masterTabSheet);
+				LOGGER.debug("Created master TabSheet for sections with Tab=True");
+				break;
+			}
+		}
 		
-		// Root container - will hold all top-level container REFERENCES (not components)
-		// We'll convert to components at the end after they're fully populated
-		final List<IDetailsContainer> rootContainers = new java.util.ArrayList<>();
-		IDetailsContainer rootContainer = new IDetailsContainer() {
-			@Override
-			public void addItem(Component component) {
-				// Not used - root stores container references
-			}
-			
-			@Override
-			public void addItem(String name, Component component) {
-				// Not used - root stores container references  
-			}
-			
-			public void addContainer(IDetailsContainer container) {
-				rootContainers.add(container);
-			}
-			
-			@Override
-			public com.vaadin.flow.component.orderedlayout.VerticalLayout getBaseLayout() {
-				// Not used for root container
-				return null;
-			}
-			
-			@Override
-			public Component asComponent() {
-				// Not used for root container
-				return null;
-			}
-		};
+		// Stack to track nested CPanelDetails sections
+		final Stack<CPanelDetails> containerStack = new Stack<>();
 		
-		containerStack.push(rootContainer);
-		
-		// Process all lines using a simple iterative approach
+		// Process all lines iteratively
 		for (int i = 0; i < lines.size(); i++) {
 			final CDetailLines line = lines.get(i);
 			final String relationField = line.getRelationFieldName();
 			
 			if (relationField.equals(CEntityFieldService.SECTION_START)) {
-				// Log section creation for debugging
 				LOGGER.debug("Creating section: {} (sectionAsTab: {}, depth: {})", 
-					line.getFieldCaption(), line.getSectionAsTab(), containerStack.size() - 1);
+					line.getFieldCaption(), line.getSectionAsTab(), containerStack.size());
 				
-				// Create container based on whether this section is marked as a tab
-				// Tab=True → TabSheet, Tab=False → CPanelDetails
-				IDetailsContainer newContainer;
+				// ALL sections are CPanelDetails (accordions)
+				final CPanelDetails newSection = new CPanelDetails(line.getSectionName(), line.getFieldCaption());
+				mapSectionPanels.put(line.getSectionName(), newSection);
+				LOGGER.debug("Created CPanelDetails: {}", line.getFieldCaption());
 				
-				if (Boolean.TRUE.equals(line.getSectionAsTab())) {
-					// Create a TabSheet container
-					newContainer = new CDetailsTabSheet(line.getFieldCaption());
-					LOGGER.debug("Created TabSheet: {}", line.getFieldCaption());
-				} else {
-					// Create an accordion panel
-					newContainer = new CPanelDetails(line.getSectionName(), line.getFieldCaption());
-					mapSectionPanels.put(line.getSectionName(), (CPanelDetails) newContainer);
-					LOGGER.debug("Created CPanelDetails: {}", line.getFieldCaption());
-				}
-				
-				// Add the new container to the current container
-				final IDetailsContainer currentContainer = containerStack.peek();
-				final boolean isTopLevel = (containerStack.size() == 1);
-				
-				if (isTopLevel) {
-					// Top-level sections: store container reference (not component yet!)
-					rootContainers.add(newContainer);
-					LOGGER.debug("Added to root: {}", line.getFieldCaption());
-				} else {
-					// Nested sections: add to parent AFTER converting to component
-					if (currentContainer instanceof CPanelDetails) {
-						// Parent is accordion: add to its base layout
-						((CPanelDetails) currentContainer).getBaseLayout().add(newContainer.asComponent());
-						LOGGER.debug("Added to CPanelDetails base layout: {}", line.getFieldCaption());
-					} else if (currentContainer instanceof CDetailsTabSheet) {
-						// Parent is TabSheet: add as a named tab
-						currentContainer.addItem(line.getSectionName(), newContainer.asComponent());
-						LOGGER.debug("Added as tab to TabSheet: {}", line.getFieldCaption());
+				// Determine where to add this section
+				if (containerStack.isEmpty()) {
+					// Top-level section
+					if (Boolean.TRUE.equals(line.getSectionAsTab())) {
+						// Add as tab to master TabSheet
+						if (masterTabSheet != null) {
+							masterTabSheet.add(line.getFieldCaption(), newSection);
+							LOGGER.debug("Added CPanelDetails '{}' as tab to master TabSheet", line.getFieldCaption());
+						}
+					} else {
+						// Add directly to formLayout as accordion
+						formLayout.add(newSection);
+						LOGGER.debug("Added CPanelDetails '{}' directly to formLayout", line.getFieldCaption());
 					}
+				} else {
+					// Nested section: add to parent's base layout
+					final CPanelDetails parentSection = containerStack.peek();
+					parentSection.getBaseLayout().add(newSection);
+					LOGGER.debug("Added nested CPanelDetails '{}' to parent's base layout", line.getFieldCaption());
 				}
 				
-				// Push the new container onto the stack
-				containerStack.push(newContainer);
+				// Push onto stack for potential nesting
+				containerStack.push(newSection);
 				
 			} else if (relationField.equals(CEntityFieldService.SECTION_END)) {
-				// Pop the current container from the stack
-				if (containerStack.size() > 1) {
-					final IDetailsContainer popped = containerStack.pop();
-					LOGGER.debug("Popped container from stack (remaining depth: {})", containerStack.size() - 1);
+				// Pop the current section from stack
+				if (!containerStack.isEmpty()) {
+					containerStack.pop();
+					LOGGER.debug("Popped section from stack (remaining depth: {})", containerStack.size());
 				} else {
 					LOGGER.warn("Unmatched SECTION_END marker at line {}", i);
 				}
 				
 			} else {
-				// Regular field line - add to the current container
-				final IDetailsContainer currentContainer = containerStack.peek();
-				
-				if (currentContainer instanceof CPanelDetails) {
-					// Use the existing processLine method for CPanelDetails
-					((CPanelDetails) currentContainer).processLine(contentOwner, 0, screen, line, formBuilder);
-				} else if (currentContainer instanceof CDetailsTabSheet) {
-					// Fields inside TabSheet are added directly to its base layout
-					// TabSheets can contain regular fields alongside tabs
-					// Reuse component maps from the container or create new ones if needed
-					final Map<String, Component> componentMap = new java.util.HashMap<>();
-					final Map<String, CHorizontalLayout> horizontalLayoutMap = new java.util.HashMap<>();
-					formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, 
-						((CDetailsTabSheet) currentContainer).getBaseLayout(), 
-						componentMap, horizontalLayoutMap);
+				// Regular field line - add to current section
+				if (!containerStack.isEmpty()) {
+					final CPanelDetails currentSection = containerStack.peek();
+					currentSection.processLine(contentOwner, 0, screen, line, formBuilder);
 				} else {
-					// Fields should always be inside CPanelDetails or TabSheet sections
-					// This case shouldn't occur with properly configured screen definitions
-					// Log warning and skip the field (consistent with old behavior)
-					LOGGER.warn("Field '{}' found outside of CPanelDetails/TabSheet section, skipping", line.getFieldCaption());
+					LOGGER.warn("Field '{}' found outside of any section, skipping", line.getFieldCaption());
 				}
 			}
-		}
-		
-		// Add all root-level containers to the form layout
-		// Convert containers to components only AFTER they're fully populated
-		for (IDetailsContainer container : rootContainers) {
-			formLayout.add(container.asComponent());
 		}
 		
 		return formLayout;
