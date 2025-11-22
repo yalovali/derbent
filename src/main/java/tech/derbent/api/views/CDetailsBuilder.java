@@ -24,6 +24,7 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.ui.component.CDetailsTabSheet;
+import tech.derbent.api.ui.component.CHorizontalLayout;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
@@ -170,14 +171,12 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				} else if (currentContainer instanceof CDetailsTabSheet) {
 					// Fields inside TabSheet are added directly to its base layout
 					// TabSheets can contain regular fields alongside tabs
-					try {
-						// Add field directly to TabSheet's base layout
-						formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, 
-							((CDetailsTabSheet) currentContainer).getBaseLayout(), 
-							new java.util.HashMap<>(), new java.util.HashMap<>());
-					} catch (Exception e) {
-						LOGGER.error("Error adding field '{}' to TabSheet", line.getFieldCaption(), e);
-					}
+					// Reuse component maps from the container or create new ones if needed
+					final Map<String, Component> componentMap = new java.util.HashMap<>();
+					final Map<String, CHorizontalLayout> horizontalLayoutMap = new java.util.HashMap<>();
+					formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, 
+						((CDetailsTabSheet) currentContainer).getBaseLayout(), 
+						componentMap, horizontalLayoutMap);
 				} else {
 					// Fields should always be inside CPanelDetails or TabSheet sections
 					// This case shouldn't occur with properly configured screen definitions

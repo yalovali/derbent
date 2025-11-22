@@ -50,9 +50,10 @@ public class CDetailsTabSheet implements IDetailsContainer {
 
 	@Override
 	public Component asComponent() {
-		// If baseLayout has content, add it as the first tab
+		// Always return a consistent component structure
+		// If baseLayout has content, combine it with tabs
 		if (baseLayout.getComponentCount() > 0) {
-			// Create a wrapper to ensure base layout content appears first
+			// Create a wrapper to ensure base layout content appears before tabs
 			VerticalLayout wrapper = new VerticalLayout();
 			wrapper.setPadding(false);
 			wrapper.setMargin(false);
@@ -61,6 +62,7 @@ public class CDetailsTabSheet implements IDetailsContainer {
 			wrapper.add(tabSheet);
 			return wrapper;
 		}
+		// If no fields, just return the TabSheet
 		return tabSheet;
 	}
 
