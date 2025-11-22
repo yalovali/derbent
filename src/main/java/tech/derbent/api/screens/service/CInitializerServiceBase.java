@@ -145,6 +145,7 @@ public abstract class CInitializerServiceBase {
 		pageEntityService.save(page);
 	}
 
+	@SuppressWarnings ("unchecked")
 	protected static <EntityClass extends CEntityOfCompany<EntityClass>> void initializeCompanyEntity(final String[][] nameAndDescription,
 			final CEntityOfCompanyService<EntityClass> service, final CCompany company, final boolean minimal,
 			final ObjIntConsumer<EntityClass> customizer) throws Exception {
@@ -170,8 +171,8 @@ public abstract class CInitializerServiceBase {
 					statusItem.setEntityType(randomType);
 					final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 					final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(statusItem);
-					Check.notEmpty(initialStatuses,
-							"No valid initial statuses found for " + item.getClass().getSimpleName() + ". Cannot initialize status for new entity.");
+					Check.notEmpty(initialStatuses, "No valid initial statuses found for " + item.getClass().getSimpleName()
+							+ ". Ca	nnot initialize status for new entity.");
 					if (!initialStatuses.isEmpty()) {
 						statusItem.setStatus(initialStatuses.get(0));
 					}

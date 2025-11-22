@@ -16,6 +16,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.base.session.service.ISessionService;
 
+@SuppressWarnings ("rawtypes")
 public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implements IPageServiceImplementer {
 
 	private static final long serialVersionUID = 1L;

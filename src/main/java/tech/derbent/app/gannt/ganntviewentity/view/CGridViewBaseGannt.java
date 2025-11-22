@@ -1,9 +1,12 @@
 package tech.derbent.app.gannt.ganntviewentity.view;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.data.provider.Query;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -15,9 +18,10 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.ganntitem.domain.CGanntItem;
 import tech.derbent.app.gannt.ganntviewentity.view.components.CGanntGrid;
-import tech.derbent.app.gannt.projectgannt.service.CPageServiceProjectGannt;
 import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.page.view.CDynamicPageRouter;
 import tech.derbent.base.session.service.ISessionService;
 
 /* display a Gannt chart for any entity of project type */
@@ -26,6 +30,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CGridViewBaseGannt.class);
 	private static final long serialVersionUID = 1L;
 	protected final CActivityService activityService;
+	private CDynamicPageRouter currentEntityPageRouter;
 	protected CEnhancedBinder<CProjectItem<?>> entityBinder;
 	protected final CMeetingService meetingService;
 	protected final CPageEntityService pageEntityService;
@@ -37,6 +42,14 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		this.activityService = activityService;
 		this.meetingService = meetingService;
 		this.pageEntityService = pageEntityService;
+		CDetailSectionService detailSectionService = CSpringContext.getBean(CDetailSectionService.class);
+		// CGridEntityService gridEntityService = CSpringContext.getBean(CGridEntityService.class);
+		this.currentEntityPageRouter = new CDynamicPageRouter(pageEntityService, sessionService, detailSectionService, null);
+		getBaseDetailsLayout().add(currentEntityPageRouter);
+		// currentEntityPageRouter.setHeight("50%");
+		getBaseDetailsLayout().add(currentEntityPageRouter);
+		// NO CRUD toolbar for Gantt view
+		crudToolbar.setVisible(false); // no CRUD toolbar for Gantt view
 	}
 
 	@Override
@@ -60,6 +73,21 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	 * @return The master view section as CMasterViewSectionGannt */
 	protected CMasterViewSectionGannt<EntityClass> getGanttMasterViewSection() {
 		return (CMasterViewSectionGannt<EntityClass>) masterViewSection;
+	}
+
+	private void locateGanntEntityInDynamicPage(CProjectItem<?> ganntEntity) {
+		try {
+			LOGGER.debug("Creating dynamic page for Gantt entity: {}", ganntEntity.getName());
+			CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
+			final Field viewNameField = ganntEntity.getClass().getField("VIEW_NAME");
+			final String entityViewName = (String) viewNameField.get(null);
+			final CPageEntity page = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null)).orElseThrow();
+			Check.notNull(page, "Screen service cannot be null");
+			//
+			currentEntityPageRouter.loadSpecificPage(page.getId(), ganntEntity.getId(), true);
+		} catch (Exception e) {
+			CNotificationService.showException("Error creating dynamic page for entity", e);
+		}
 	}
 
 	/** Locates a CGanttItem in the grid that wraps the given actual entity. This is needed after save operations to restore selection to the saved
@@ -93,7 +121,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 				return null;
 			}
 			// Fetch all items and search for matching entity
-			final java.util.Optional<CGanntItem> matchingItem = dataProvider.fetch(new com.vaadin.flow.data.provider.Query<>()).filter(item -> {
+			final Optional<CGanntItem> matchingItem = dataProvider.fetch(new Query<>()).filter(item -> {
 				return item.getEntityType().equals(entityTypeName) && item.getEntityId().equals(entityId);
 			}).findFirst();
 			if (matchingItem.isPresent()) {
@@ -110,33 +138,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	}
 
 	@Override
-	public void onEntitySaved(final EntityClass entity) throws Exception {
-		LOGGER.debug("Entity saved, refreshing grid");
-		// Get the current actual entity from page service before refresh
-		CProjectItem<?> savedActualEntity = null;
-		if (getPageService() instanceof CPageServiceProjectGannt) {
-			savedActualEntity = ((CPageServiceProjectGannt) getPageService()).getCurrentActualEntity();
-		}
-		// Refresh the grid - this will reload all data
-		refreshGrid();
-		// After refresh, locate and select the saved entity in the grid
-		if (savedActualEntity != null) {
-			final CGanntItem ganttItemToSelect = locateGanttItemForEntity(savedActualEntity);
-			if (ganttItemToSelect != null) {
-				// Set this as the current entity and update the form
-				setCurrentEntity(ganttItemToSelect);
-				populateForm();
-			} else {
-				LOGGER.warn("Could not locate saved entity in refreshed grid");
-				// Just populate the form with current state
-				populateForm();
-			}
-		} else {
-			populateForm();
-		}
-		// Note: Success notification is shown in CPageServiceProjectGannt.actionSave()
-		navigateToClass();
-	}
+	public void onEntitySaved(final EntityClass entity) throws Exception {}
 
 	/** Override to handle CGanttItem selection - it's a DTO wrapper, not the actual entity. Selection is logged but no form editing occurs since
 	 * CGanttItem is read-only. */
@@ -148,11 +150,6 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		if (value != null) {
 			Check.instanceOf(value, CGanntItem.class, "Selected item is not a CGanttItem");
 			setCurrentEntity(value);
-			// Clear the cached entity in page service to force refresh from the selected item
-			// This ensures details update correctly when switching between different gantt items
-			if (getPageService() instanceof CPageServiceProjectGannt) {
-				((CPageServiceProjectGannt) getPageService()).setCurrentActualEntity(null);
-			}
 			populateForm();
 			return;
 		} else {
@@ -197,43 +194,13 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		}
 	}
 
-	@SuppressWarnings ("unchecked")
 	@Override
 	protected void updateDetailsComponent() throws Exception {
 		LOGGER.debug("Updating details component for Gantt view");
-		getBaseDetailsLayout().removeAll();
-		// First, try to get the actual entity from the page service
-		// This is necessary for new entities that haven't been wrapped in CGanttItem yet
 		CProjectItem<?> ganntEntity = null;
-		if (getPageService() instanceof CPageServiceProjectGannt) {
-			ganntEntity = ((CPageServiceProjectGannt) getPageService()).getCurrentActualEntity();
-		}
-		// If we don't have an entity from page service, try to get it from the current CGanttItem
-		if (ganntEntity == null) {
-			if (getCurrentEntity() == null) {
-				LOGGER.debug("No current entity to display in details component");
-				return;
-			}
-			// fetch fresh entity for the gantt item
+		if (getCurrentEntity() != null) {
 			ganntEntity = ((CGanntItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
 		}
-		if (ganntEntity == null) {
-			LOGGER.warn("Gantt item entity is null, cannot populate details form.");
-			return;
-		} else {
-			ganntEntity = CGanntItem.getGanntItemById(ganntEntity.getId(), ganntEntity, activityService, meetingService);
-		}
-		entityBinder = new CEnhancedBinder<CProjectItem<?>>((Class<CProjectItem<?>>) ganntEntity.getClass());
-		final Field viewNameField = ganntEntity.getClass().getField("VIEW_NAME");
-		final String entityViewName = (String) viewNameField.get(null);
-		buildScreen(entityViewName, entityBinder);
-		// final CVerticalLayout formLayout = CFormBuilder.buildForm(ganttEntity.getClass(), entityBinder, null, this);
-		// getBaseDetailsLayout().add(formLayout);
-		entityBinder.readBean(ganntEntity);
-		crudToolbar.setCurrentEntity(ganntEntity);
-		// Update the page service with the current actual entity
-		if (getPageService() instanceof CPageServiceProjectGannt) {
-			((CPageServiceProjectGannt) getPageService()).setCurrentActualEntity(ganntEntity);
-		}
+		locateGanntEntityInDynamicPage(ganntEntity);
 	}
 }

@@ -2,7 +2,6 @@ package tech.derbent.api.entityOfCompany.service;
 
 import org.springframework.stereotype.Repository;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 
 /** CProjectItemStatusRepository - Repository interface for CProjectItemStatus entities. Layer: Data Access (MVC) Provides data access operations for
  * activity status management. */

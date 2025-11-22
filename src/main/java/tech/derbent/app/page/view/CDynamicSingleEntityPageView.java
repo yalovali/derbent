@@ -7,10 +7,8 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.ui.component.CCrudToolbar;
-import tech.derbent.api.ui.component.CFlexLayout;
-import tech.derbent.api.ui.component.CVerticalLayout;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
@@ -19,64 +17,47 @@ import tech.derbent.base.session.service.ISessionService;
  * where there is only one item per user or per project or per application wide. Only works with pageEntity.getGridEntity().getAttributeNone() ==
  * true */
 @PermitAll
-public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
+public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicSingleEntityPageView.class);
 	private static final long serialVersionUID = 1L;
-	// Configuration options for CRUD toolbar
-	private boolean enableDeleteButton = false;
-	private boolean enableNewButton = false;
-	private boolean enableReloadButton = true;
-	private boolean enableSaveButton = true;
 
 	public CDynamicSingleEntityPageView(final CPageEntity pageEntity, final ISessionService sessionService,
-			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService) throws Exception {
-		super(pageEntity, sessionService, detailSectionService, gridEntityService);
-		// Validate that this page entity is configured for single entity display
-		validateSingleEntityConfiguration();
-		LOGGER.debug("Creating single entity dynamic page view for: {}", pageEntity.getPageTitle());
-	}
-
-	/** Hook method for customizing the CRUD toolbar after creation. Configures button visibility based on the enableXxxButton flags set via
-	 * setCrudToolbarButtonConfig().
-	 * @param toolbar the toolbar to configure */
-	@Override
-	protected void configureCrudToolbar(final CCrudToolbar toolbar) {
-		// Configure button visibility based on our settings using the new API
-		if (toolbar != null) {
-			toolbar.configureButtonVisibility(enableNewButton, enableSaveButton, enableDeleteButton, enableReloadButton);
-			LOGGER.debug("CRUD toolbar buttons configured for single entity view - Delete: {}, New: {}, Save: {}, Reload: {}", enableDeleteButton,
-					enableNewButton, enableSaveButton, enableReloadButton);
+			final CDetailSectionService detailSectionService) throws Exception {
+		super(pageEntity, sessionService, detailSectionService);
+		try {
+			initializePage();
+		} catch (Exception e) {
+			CNotificationService.showException("Failed to initialize dynamic page view with sections for: " + pageEntity.getPageTitle(), e);
 		}
 	}
 
-	/** Create only the details section in full view (no grid) */
-	private void createDetailsSection() {
-		Check.notNull(getPageEntity().getDetailSection(), "Detail section cannot be null");
-		// Create details layout that takes full space
-		baseDetailsLayout = CFlexLayout.forEntityPage();
-		baseDetailsLayout.setSizeFull();
-		final Scroller detailsScroller = new Scroller();
-		detailsScroller.setContent(baseDetailsLayout);
-		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-		detailsScroller.setSizeFull();
-		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
-		detailsBase.add(detailsScroller);
-		detailsBase.setSizeFull();
-		// Add details directly to this component (no split layout)
-		add(detailsBase);
-		LOGGER.debug("Created single entity details section with detail section: {}", getPageEntity().getDetailSection().getName());
+	@Override
+	protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
-	// Helper methods are no longer needed since we can access protected fields/methods directly
+
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/** Override to create only details section without grid/master section */
 	private void createSingleEntityLayout() {
 		try {
-			// Initialize the entity service for the configured entity type
 			initializeEntityService();
-			// Create only the details section, no grid
-			createDetailsSection();
-			// Load and display the single entity
+			final Scroller detailsScroller = new Scroller();
+			detailsScroller.setContent(baseDetailsLayout);
+			detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+			detailsScroller.setSizeFull();
+			// Create toolbar with minimal constructor and configure
+			crudToolbar = new CCrudToolbar();
+			crudToolbar.setPageBase(this);
+			configureCrudToolbar(crudToolbar);
+			add(crudToolbar);
+			add(detailsScroller);
 			loadAndDisplaySingleEntity();
 		} catch (Exception e) {
 			LOGGER.error("Failed to create single entity layout for page: {}", getPageEntity().getPageTitle(), e);
@@ -84,70 +65,55 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 		}
 	}
 
-	/** Override the parent's createGridAndDetailSections to create only details section */
+	/** Override the parent's createGridAndDetailSections to create only details section
+	 * @throws Exception */
 	@Override
-	protected void initializePage() {
-		setSizeFull();
-		// Set page title for browser tab only if pageTitle is not empty
+	protected void initializePage() throws Exception {
+		super.initializePage();
 		if (getPageEntity().getPageTitle() != null && !getPageEntity().getPageTitle().trim().isEmpty()) {
 			getElement().executeJs("document.title = $0", getPageEntity().getPageTitle());
 		}
-		// Create single entity layout instead of grid and details
 		createSingleEntityLayout();
-		LOGGER.debug("Single entity dynamic page view initialized for: {}", getPageEntity().getPageTitle());
 	}
 
 	/** Loads the single entity from the data source and displays it. Shows warning if more than 1 item is returned and displays the first item. */
 	private void loadAndDisplaySingleEntity() {
 		try {
-			// Get the entity service and load all entities
-			if (entityService == null) {
-				LOGGER.error("Entity service is null, cannot load single entity");
-				return;
-			}
 			List<? extends CEntityDB<?>> entities = entityService.findAll();
-			if (entities == null || entities.isEmpty()) {
-				LOGGER.warn("No entities found for single entity page: {}", getPageEntity().getPageTitle());
-				return;
-			}
-			if (entities.size() > 1) {
-				LOGGER.warn("Single entity page {} has {} entities in data source, showing first item only", getPageEntity().getPageTitle(),
-						entities.size());
-			}
-			// Always show the first entity
-			CEntityDB<?> firstEntity = entities.get(0);
-			setCurrentEntity(firstEntity);
-			LOGGER.debug("Displaying single entity: {} with ID: {}", firstEntity.getClass().getSimpleName(), firstEntity.getId());
-			// Populate the details with the first entity
-			populateForm();
+			Check.notEmpty(entities, "No entities found for single entity page.");
+			CEntityDB<?> entity = entities.get(0);
+			onEntitySelected(entity);
 		} catch (Exception e) {
 			LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
 		}
 	}
 
-	/** Configure CRUD toolbar buttons.
-	 * @param enableDelete Enable/disable delete button
-	 * @param enableNew    Enable/disable new button
-	 * @param enableSave   Enable/disable save button
-	 * @param enableReload Enable/disable reload/cancel button */
-	public void setCrudToolbarButtonConfig(boolean enableDelete, boolean enableNew, boolean enableSave, boolean enableReload) {
-		enableDeleteButton = enableDelete;
-		enableNewButton = enableNew;
-		enableSaveButton = enableSave;
-		enableReloadButton = enableReload;
-		LOGGER.debug("CRUD toolbar configured - Delete: {}, New: {}, Save: {}, Reload: {}", enableDelete, enableNew, enableSave, enableReload);
+	@Override
+	protected void locateItemById(Long pageItemId) {
+		try {
+			if (pageItemId == null) {
+				return;
+			}
+			Check.notNull(pageItemId, "Page item ID cannot be null");
+			LOGGER.debug("Locating item by ID: {}", pageItemId);
+			final CEntityDB<?> entity = entityService.getById(pageItemId).orElse(null);
+			Check.notNull(entity, "No entity found for ID: " + pageItemId);
+			onEntitySelected(entity);
+		} catch (final Exception e) {
+			LOGGER.error("Error locating item by ID {}: {}", pageItemId, e.getMessage());
+			throw new IllegalStateException("Error locating item by ID " + pageItemId + ": " + e.getMessage());
+		}
 	}
 
-	/** Validates that the page entity is properly configured for single entity display. Throws exception if
-	 * pageEntity.getGridEntity().getAttributeNone() != true */
-	private void validateSingleEntityConfiguration() {
-		Check.notNull(getPageEntity(), "pageEntity cannot be null");
-		Check.notNull(getPageEntity().getGridEntity(), "pageEntity.getGridEntity() cannot be null");
-		if (!getPageEntity().getGridEntity().getAttributeNone()) {
-			throw new IllegalArgumentException(
-					"CDynamicSingleEntityPageView can only be used with pageEntity where gridEntity.attributeNone is true. " + "Current value: "
-							+ getPageEntity().getGridEntity().getAttributeNone() + " for page: " + getPageEntity().getPageTitle());
-		}
-		LOGGER.debug("Single entity configuration validated for page: {}", getPageEntity().getPageTitle());
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntityDeleted(CEntityDB entity) throws Exception {
+		loadAndDisplaySingleEntity();
+	}
+
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntitySaved(CEntityDB entity) throws Exception {
+		onEntitySelected(entity);
 	}
 }

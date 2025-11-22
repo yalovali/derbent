@@ -45,7 +45,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
 		Check.notNull(detailSectionService, "CDetailSectionService cannot be null");
-		Check.notNull(gridEntityService, "CGridEntityService cannot be null");
+		// Check.notNull(gridEntityService, "CGridEntityService cannot be null");
 		this.pageEntityService = pageEntityService;
 		this.sessionService = sessionService;
 		this.detailSectionService = detailSectionService;
@@ -56,7 +56,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
 		try {
-			loadSpecificPage(pageEntityId, pageItemId);
+			loadSpecificPage(pageEntityId, pageItemId, false);
 		} catch (Exception e) {
 			LOGGER.error("Error loading dynamic page for entity ID {}: {}", pageEntityId, e.getMessage());
 			e.printStackTrace();
@@ -70,7 +70,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	/** Load a specific page by entity ID.
 	 * @param pageItemId
 	 * @throws Exception */
-	private void loadSpecificPage(Long pageEntityId, Long pageItemId) throws Exception {
+	public void loadSpecificPage(Long pageEntityId, Long pageItemId, boolean AsDetailComponent) throws Exception {
 		Check.notNull(pageEntityId, "Page entity ID cannot be null");
 		LOGGER.debug("Loading specific page for entity ID: {}", pageEntityId);
 		currentPageEntity =
@@ -82,14 +82,19 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			CDynamicPageBase page = null;
 			// Check if this page has grid and detail sections configured
 			if (currentPageEntity.getGridEntity().getAttributeNone() == false) {
-				LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", currentPageEntity.getPageTitle());
-				page = new CDynamicPageViewWithSections(currentPageEntity, sessionService, detailSectionService, gridEntityService);
+				if (AsDetailComponent) {
+					LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", currentPageEntity.getPageTitle());
+					page = new CDynamicSingleEntityPageView(currentPageEntity, sessionService, detailSectionService);
+				} else {
+					LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", currentPageEntity.getPageTitle());
+					page = new CDynamicPageViewWithSections(currentPageEntity, sessionService, detailSectionService, gridEntityService);
+				}
 			} else {
 				LOGGER.debug("Creating standard dynamic page view for: {}", currentPageEntity.getPageTitle());
 				page = new CDynamicPageViewWithoutGrid(null, currentPageEntity, sessionService, detailSectionService);
 			}
+			Check.notNull(page, "Dynamic page view cannot be null after instantiation");
 			page.locateItemById(pageItemId);
-			Check.notNull(page, "Dynamic page view cannot be null");
 			removeAll();
 			add(page);
 		} catch (Exception e) {

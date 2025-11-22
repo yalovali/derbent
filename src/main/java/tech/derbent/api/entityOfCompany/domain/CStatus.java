@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.companies.domain.CCompany;
 

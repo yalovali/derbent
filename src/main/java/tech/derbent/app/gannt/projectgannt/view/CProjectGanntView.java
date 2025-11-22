@@ -58,6 +58,11 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	}
 
 	@Override
+	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
@@ -79,8 +84,4 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	public void setCurrentEntity(CEntityDB<?> entity) {
 		super.setCurrentEntity(entity);
 	}
-
-	@Override
-	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
-	return null; }
 }

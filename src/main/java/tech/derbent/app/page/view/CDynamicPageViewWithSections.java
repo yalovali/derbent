@@ -15,7 +15,6 @@ import tech.derbent.api.ui.component.CComponentDetailsMasterToolbar;
 import tech.derbent.api.ui.component.CCrudToolbar;
 import tech.derbent.api.ui.component.CFlexLayout;
 import tech.derbent.api.ui.component.CVerticalLayout;
-import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
@@ -26,13 +25,10 @@ import tech.derbent.base.users.domain.CUser;
 /** Enhanced dynamic page view that supports grid and detail sections for database-defined pages. This view displays content stored in CPageEntity
  * instances with configurable grid and detail sections. */
 @PermitAll
-public class CDynamicPageViewWithSections extends CDynamicPageBase implements ICrudToolbarOwnerPage {
+public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit {
 
-	public static final String DEFAULT_COLOR = "#341b00";
-	public static final String DEFAULT_ICON = "vaadin:database";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
-	private CCrudToolbar crudToolbar;
 	// State tracking for performance optimization
 	protected CComponentGridEntity grid;
 	private final CGridEntityService gridEntityService;
@@ -137,11 +133,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 	@Override
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 
-	/** Get the CRUD toolbar for this view. Used by page services to control button states.
-	 * @return the CRUD toolbar, or null if not initialized */
-	@Override
-	public CCrudToolbar getCrudToolbar() { return crudToolbar; }
-
 	@Override
 	protected void initializePage() throws Exception {
 		try {
@@ -191,27 +182,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 		}
 	}
 
-	@SuppressWarnings ("rawtypes")
-	@Override
-	public void onEntityCreated(CEntityDB entity) throws Exception {
-		try {
-			LOGGER.debug("Entity created notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
-			Check.notNull(entity, "Created entity cannot be null");
-			// Rebuild details layout for the new entity if it doesn't exist yet
-			if ((currentEntityViewName == null) || (currentEntityType == null)) {
-				LOGGER.debug("Rebuilding details for newly created entity");
-				rebuildEntityDetails(entity.getClass());
-			}
-			// Set the current entity and populate form
-			setCurrentEntity(entity);
-			populateForm();
-			CNotificationService.showSuccess("New " + getEntityClass().getSimpleName() + " created. Fill in the details and click Save.");
-		} catch (final Exception e) {
-			LOGGER.error("Error handling entity created notification:" + e.getMessage());
-			throw e;
-		}
-	}
-
 	// Implementation of CEntityUpdateListener
 	@SuppressWarnings ("rawtypes")
 	@Override
@@ -228,12 +198,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 			LOGGER.error("Error handling entity deleted notification:" + e.getMessage());
 			throw e;
 		}
-	}
-
-	@SuppressWarnings ("rawtypes")
-	@Override
-	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {
-		// TODO Auto-generated method stub
 	}
 
 	@SuppressWarnings ("rawtypes")
@@ -261,32 +225,10 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase implements IC
 
 	/** Handle entity selection events from the grid. */
 	private void onEntitySelected(final CComponentGridEntity.SelectionChangeEvent event) throws Exception {
-		try {
-			LOGGER.debug("Entity selection changed event received: {}", event);
-			Check.notNull(event, "Selection change event cannot be null");
-			final CEntityDB<?> selectedEntity = event.getSelectedItem();
-			setCurrentEntity(selectedEntity);
-			if (selectedEntity == null) {
-				// No selection - clear details
-				clearEntityDetails();
-				populateForm();
-			} else {
-				setCurrentEntity(selectedEntity);
-				// Rebuild details if VIEW_NAME changed or not yet built
-				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
-					try {
-						rebuildEntityDetails(selectedEntity.getClass());
-					} catch (final Exception rebuildException) {
-						LOGGER.error("Error rebuilding entity details, will attempt to populate with current binder: {}",
-								rebuildException.getMessage());
-					}
-				}
-				// Always attempt to populate form, even if rebuild failed
-				populateForm();
-			}
-		} catch (final Exception e) {
-			CNotificationService.showException("Error handling entity selection", e);
-		}
+		LOGGER.debug("Entity selection changed event received: {}", event);
+		Check.notNull(event, "Selection change event cannot be null");
+		final CEntityDB<?> selectedEntity = event.getSelectedItem();
+		onEntitySelected(selectedEntity);
 	}
 
 	/** Refresh the grid to show updated data. */
