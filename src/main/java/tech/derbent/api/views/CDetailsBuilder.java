@@ -84,17 +84,21 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		final Stack<IDetailsContainer> containerStack = new Stack<>();
 		
 		// Root container - will hold all top-level items
-		// We'll add its contents directly to formLayout at the end
-		final List<Component> rootItems = new java.util.ArrayList<>();
+		// Store containers, not their components, so we can populate them first
+		final List<IDetailsContainer> rootContainers = new java.util.ArrayList<>();
 		IDetailsContainer rootContainer = new IDetailsContainer() {
 			@Override
 			public void addItem(Component component) {
-				rootItems.add(component);
+				// Not used - root stores containers, not components
 			}
 			
 			@Override
 			public void addItem(String name, Component component) {
-				rootItems.add(component);
+				// Not used - root stores containers, not components
+			}
+			
+			public void addContainer(IDetailsContainer container) {
+				rootContainers.add(container);
 			}
 			
 			@Override
@@ -143,8 +147,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				final boolean isTopLevel = (containerStack.size() == 1);
 				
 				if (isTopLevel) {
-					// Top-level sections: add to root container
-					currentContainer.addItem(line.getSectionName(), newContainer.asComponent());
+					// Top-level sections: store container reference, convert to component later
+					rootContainers.add(newContainer);
 					LOGGER.debug("Added to root: {}", line.getFieldCaption());
 				} else {
 					// Nested sections: add based on parent type
@@ -196,9 +200,10 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			}
 		}
 		
-		// Add all root-level items to the form layout
-		for (Component item : rootItems) {
-			formLayout.add(item);
+		// Add all root-level containers to the form layout
+		// Convert containers to components only after they're fully populated
+		for (IDetailsContainer container : rootContainers) {
+			formLayout.add(container.asComponent());
 		}
 		
 		return formLayout;
