@@ -24,8 +24,8 @@ public class CDetailsTabSheet implements IDetailsContainer {
 
 	@Override
 	public void addItem(Component component) {
-		// TabSheet requires a name, so use component class name as fallback
-		addItem(component.getClass().getSimpleName(), component);
+		// TabSheet requires a name, so throw an exception to require explicit naming
+		throw new UnsupportedOperationException("TabSheet requires a name for each item. Use addItem(String name, Component component) instead.");
 	}
 
 	@Override

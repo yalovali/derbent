@@ -51,7 +51,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			final HasComponents detailsLayout) throws Exception {
 		Check.notNull(screen, "Screen cannot be null");
 		Check.notNull(binder, "Binder cannot be null");
-		Check.notNull(applicationContext, "Application context cannot be null");
+		Check.notNull(applicationContext, "Details name cannot be null");
 		
 		if (detailsLayout != null) {
 			formLayout = detailsLayout;
@@ -120,7 +120,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				// Create a new container based on whether it's a tab section
 				IDetailsContainer newContainer;
 				
-				if (line.getSectionAsTab() != null && line.getSectionAsTab()) {
+				if (Boolean.TRUE.equals(line.getSectionAsTab())) {
 					// Create a TabSheet container
 					newContainer = new CDetailsTabSheet();
 				} else {
@@ -152,9 +152,10 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 					// Use the existing processLine method for CPanelDetails
 					((CPanelDetails) currentContainer).processLine(contentOwner, 0, screen, line, formBuilder);
 				} else {
-					// For other containers (like root or TabSheet), add fields to their base layout
-					// This shouldn't normally happen as fields should be inside CPanelDetails
-					LOGGER.warn("Field '{}' found outside of CPanelDetails section", line.getFieldCaption());
+					// Fields should always be inside CPanelDetails sections
+					// This case shouldn't occur with properly configured screen definitions
+					// Log warning and skip the field (consistent with old behavior)
+					LOGGER.warn("Field '{}' found outside of CPanelDetails section, skipping", line.getFieldCaption());
 				}
 			}
 		}
