@@ -71,7 +71,10 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	 * @param pageItemId
 	 * @throws Exception */
 	public void loadSpecificPage(Long pageEntityId, Long pageItemId, boolean AsDetailComponent) throws Exception {
-		Check.notNull(pageEntityId, "Page entity ID cannot be null");
+		if (pageEntityId == null || pageItemId == null) {
+			LOGGER.warn("Page entity ID or page item ID is null. Cannot load specific page.");
+			return;
+		}
 		LOGGER.debug("Loading specific page for entity ID: {}", pageEntityId);
 		currentPageEntity =
 				pageEntityService.getById(pageEntityId).orElseThrow(() -> new IllegalStateException("No page found for ID: " + pageEntityId));
@@ -83,14 +86,11 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			// Check if this page has grid and detail sections configured
 			if (currentPageEntity.getGridEntity().getAttributeNone() == false) {
 				if (AsDetailComponent) {
-					LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", currentPageEntity.getPageTitle());
 					page = new CDynamicSingleEntityPageView(currentPageEntity, sessionService, detailSectionService);
 				} else {
-					LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", currentPageEntity.getPageTitle());
 					page = new CDynamicPageViewWithSections(currentPageEntity, sessionService, detailSectionService, gridEntityService);
 				}
 			} else {
-				LOGGER.debug("Creating standard dynamic page view for: {}", currentPageEntity.getPageTitle());
 				page = new CDynamicPageViewWithoutGrid(null, currentPageEntity, sessionService, detailSectionService);
 			}
 			Check.notNull(page, "Dynamic page view cannot be null after instantiation");

@@ -15,7 +15,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 
 	static final Logger LOGGER = LoggerFactory.getLogger(IPageServiceHasStatusAndWorkflow.class);
 
-	default void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
+	default void actionChangeStatus(final CProjectItemStatus newStatus) {
 		try {
 			final EntityClass entity = getView().getCurrentEntity();
 			if (entity == null) {
@@ -61,12 +61,13 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 			CNotificationService.showInfo(String.format("Status changed to '%s'", newStatus.getName()));
 		} catch (final Exception e) {
 			LOGGER.error("Error changing status: {}", e.getMessage(), e);
-			CNotificationService.showError("Failed to change status: " + e.getMessage());
-			throw e;
+			CNotificationService.showException("Failed to change status.", e);
+			// throw e;
 		}
 	}
 
 	default List<CProjectItemStatus> getAvailableStatusesForProjectItem() {
+		LOGGER.debug("Retrieving available statuses for current entity");
 		final EntityClass entity = getView().getCurrentEntity();
 		if (entity == null) {
 			LOGGER.warn("No current entity for retrieving available statuses");

@@ -22,8 +22,8 @@ public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject
 	Optional<EntityClass> findByNameAndProject(@Param ("name") String name, @Param ("project") CProject project);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project")
 	List<EntityClass> listByProject(@Param ("project") CProject project);
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.project.id = :pid")
-	List<EntityClass> listByProjectId(@Param ("pid") Long pid);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project")
 	Page<EntityClass> listByProject(@Param ("project") CProject project, Pageable pageable);
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.project.id = :pid")
+	List<EntityClass> listByProjectId(@Param ("pid") Long pid);
 }

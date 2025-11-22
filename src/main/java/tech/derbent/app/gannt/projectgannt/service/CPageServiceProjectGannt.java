@@ -28,7 +28,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 	}
 
 	@Override
-	public void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {}
+	public void actionChangeStatus(final CProjectItemStatus newStatus) {}
 
 	@Override
 	public void actionCreate() throws Exception {}

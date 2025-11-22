@@ -105,30 +105,31 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	 * @param item the project item entity
 	 * @return list of valid next statuses */
 	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
-		Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
-		final List<CProjectItemStatus> validStatuses = new ArrayList<>();
-		final CWorkflowEntity workflow = item.getWorkflow();
-		Check.notNull(workflow, "Workflow cannot be null for project item");
-		final CProjectItemStatus currentStatus = item.getStatus();
-		if (currentStatus != null) {
-			validStatuses.add(item.getStatus()); // Always include current status
-		} else {
-			// For new items without a status, return initial statuses from the workflow
-			// LOGGER.debug("Getting initial statuses for new project item with workflow: {}", workflow.getName());
-			final Optional<CProjectItemStatus> initialStatus = getInitialStatusFromWorkflow(workflow);
-			initialStatus.ifPresent(validStatuses::add);
-			return validStatuses;
-		}
 		try {
+			Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
+			final List<CProjectItemStatus> validStatuses = new ArrayList<>();
+			final CWorkflowEntity workflow = item.getWorkflow();
+			Check.notNull(workflow, "Workflow cannot be null for project item");
+			final CProjectItemStatus currentStatus = item.getStatus();
+			if (currentStatus != null) {
+				validStatuses.add(item.getStatus()); // Always include current status
+			} else {
+				// For new items without a status, return initial statuses from the workflow
+				// LOGGER.debug("Getting initial statuses for new project item with workflow: {}", workflow.getName());
+				final Optional<CProjectItemStatus> initialStatus = getInitialStatusFromWorkflow(workflow);
+				initialStatus.ifPresent(validStatuses::add);
+				return validStatuses;
+			}
 			// Get workflow relations to find valid next statuses
 			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
 			// Find relations where fromStatus matches current status and exclude current status from valid next statuses
 			relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
 					.distinct().filter(r -> !r.getId().equals(currentStatus.getId())).forEach(validStatuses::add);
+			return validStatuses;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving valid next statuses for project item {}: {}", item.toString(), e.getMessage());
+			throw e;
 		}
-		return validStatuses;
 	}
 
 	/** Initializes a new activity status with default values. Most common fields are initialized by super class.

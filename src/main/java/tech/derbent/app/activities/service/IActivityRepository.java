@@ -18,18 +18,32 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :type")
 	long countByType(@Param ("entityType") CActivityType type);
 	@Override
-	@Query (
-		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project LEFT JOIN FETCH a.assignedTo LEFT JOIN FETCH a.createdBy LEFT JOIN FETCH a.entityType LEFT JOIN FETCH a.status WHERE a.id = :id"
-	)
+	@Query ("""
+			SELECT a FROM #{#entityName} a
+			LEFT JOIN FETCH a.project
+			LEFT JOIN FETCH a.assignedTo
+			LEFT JOIN FETCH a.createdBy
+			LEFT JOIN FETCH a.entityType
+			LEFT JOIN FETCH a.status
+			WHERE a.id = :id
+			""")
 	Optional<CActivity> findById(@Param ("id") Long id);
 	@Override
-	@Query (
-		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project LEFT JOIN FETCH a.assignedTo LEFT JOIN FETCH a.createdBy LEFT JOIN FETCH a.entityType LEFT JOIN FETCH a.status WHERE a.project = :project"
-	)
+	@Query ("""
+			SELECT a FROM #{#entityName} a
+			LEFT JOIN FETCH a.project
+			LEFT JOIN FETCH a.assignedTo
+			LEFT JOIN FETCH a.createdBy
+			LEFT JOIN FETCH a.entityType
+			LEFT JOIN FETCH a.status
+			WHERE a.project = :project
+			""")
 	Page<CActivity> listByProject(@Param ("project") CProject project, Pageable pageable);
 	// find all activities of projects where the user's company owns the project
-	@Query (
-		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project p WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)"
-	)
+	@Query ("""
+			SELECT a FROM #{#entityName} a
+			LEFT JOIN FETCH a.project p
+			WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
+			""")
 	List<CActivity> listByUser(@Param ("user") CUser user);
 }

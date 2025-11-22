@@ -209,7 +209,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	@Override
 	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
-		return getEntityType() != null ? getEntityType().getWorkflow() : null;
+		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
+		return entityType.getWorkflow();
 	}
 
 	@Override

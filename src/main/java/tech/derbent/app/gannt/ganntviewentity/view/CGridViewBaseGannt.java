@@ -77,6 +77,10 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 
 	private void locateGanntEntityInDynamicPage(CProjectItem<?> ganntEntity) {
 		try {
+			if (ganntEntity == null) {
+				currentEntityPageRouter.loadSpecificPage(null, null, true);
+				return;
+			}
 			LOGGER.debug("Creating dynamic page for Gantt entity: {}", ganntEntity.getName());
 			CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
 			final Field viewNameField = ganntEntity.getClass().getField("VIEW_NAME");

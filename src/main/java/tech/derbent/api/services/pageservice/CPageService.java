@@ -43,7 +43,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * method to implement workflow-aware status validation.
 	 * @param newStatus the new status selected by the user
 	 * @throws Exception if the status change fails */
-	public void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
+	public void actionChangeStatus(final CProjectItemStatus newStatus) {
 		LOGGER.debug("Base actionChangeStatus called - entity type does not support workflow status changes");
 	}
 
