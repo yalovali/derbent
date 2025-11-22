@@ -83,18 +83,18 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		// Stack to track nested containers
 		final Stack<IDetailsContainer> containerStack = new Stack<>();
 		
-		// Root container - will hold all top-level items
-		// Store containers, not their components, so we can populate them first
+		// Root container - will hold all top-level container REFERENCES (not components)
+		// We'll convert to components at the end after they're fully populated
 		final List<IDetailsContainer> rootContainers = new java.util.ArrayList<>();
 		IDetailsContainer rootContainer = new IDetailsContainer() {
 			@Override
 			public void addItem(Component component) {
-				// Not used - root stores containers, not components
+				// Not used - root stores container references
 			}
 			
 			@Override
 			public void addItem(String name, Component component) {
-				// Not used - root stores containers, not components
+				// Not used - root stores container references  
 			}
 			
 			public void addContainer(IDetailsContainer container) {
@@ -127,12 +127,11 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 					line.getFieldCaption(), line.getSectionAsTab(), containerStack.size() - 1);
 				
 				// Create container based on whether this section is marked as a tab
-				// TabSheets can exist at any nesting level, not just top-level
+				// Tab=True → TabSheet, Tab=False → CPanelDetails
 				IDetailsContainer newContainer;
 				
 				if (Boolean.TRUE.equals(line.getSectionAsTab())) {
-					// Create a TabSheet container (can be at any level)
-					// TabSheet uses its caption and can contain fields, nested tabs, and panels
+					// Create a TabSheet container
 					newContainer = new CDetailsTabSheet(line.getFieldCaption());
 					LOGGER.debug("Created TabSheet: {}", line.getFieldCaption());
 				} else {
@@ -147,11 +146,11 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				final boolean isTopLevel = (containerStack.size() == 1);
 				
 				if (isTopLevel) {
-					// Top-level sections: store container reference, convert to component later
+					// Top-level sections: store container reference (not component yet!)
 					rootContainers.add(newContainer);
 					LOGGER.debug("Added to root: {}", line.getFieldCaption());
 				} else {
-					// Nested sections: add based on parent type
+					// Nested sections: add to parent AFTER converting to component
 					if (currentContainer instanceof CPanelDetails) {
 						// Parent is accordion: add to its base layout
 						((CPanelDetails) currentContainer).getBaseLayout().add(newContainer.asComponent());
@@ -201,7 +200,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		}
 		
 		// Add all root-level containers to the form layout
-		// Convert containers to components only after they're fully populated
+		// Convert containers to components only AFTER they're fully populated
 		for (IDetailsContainer container : rootContainers) {
 			formLayout.add(container.asComponent());
 		}
