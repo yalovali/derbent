@@ -34,11 +34,11 @@ public class CTeamInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "teamManager"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Team Members"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "members"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

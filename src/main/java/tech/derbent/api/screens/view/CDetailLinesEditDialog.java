@@ -84,7 +84,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 				if ((selectedType == null) || selectedType.isEmpty()) {
 					return; // No
 				}
-				if (selectedType.equals(CEntityFieldService.SECTION_START) || selectedType.equals(CEntityFieldService.SECTION_END)) {
+				if (selectedType.equals(CEntityFieldService.SECTION_START)) {
 					// activate section tab
 					tabsOfDialog.setSelectedTab(tabSection);
 					updateEntityPropertyBasedOnClass();
@@ -160,10 +160,6 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 		final EntityFieldInfo infoSection_start = new EntityFieldInfo();
 		infoSection_start.setFieldName(CEntityFieldService.SECTION_START);
 		listOfAdditionalFields.add(infoSection_start);
-		final EntityFieldInfo infoSection_end = new EntityFieldInfo();
-		infoSection_end.setFieldName(CEntityFieldService.SECTION_END);
-		listOfAdditionalFields.add(infoSection_end);
-		// get all fields + additional "this class" field
 		final EntityFieldInfo infoThisClass = new EntityFieldInfo();
 		infoThisClass.setFieldName(CEntityFieldService.THIS_CLASS);
 		listOfAdditionalFields.add(infoThisClass);
@@ -184,10 +180,6 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			if (relationFieldName.equals(CEntityFieldService.SECTION_START)) {
 				cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION_START));
 				getEntity().setEntityProperty(CEntityFieldService.SECTION_START);
-				return;
-			} else if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
-				cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION_END));
-				getEntity().setEntityProperty(CEntityFieldService.SECTION_END);
 				return;
 			} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 				fieldProperties = CEntityFieldService.getEntitySimpleFields(screen.getEntityType(), null);
@@ -255,14 +247,6 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 					getEntity().getRelationFieldName().isEmpty() ? CEntityFieldService.SECTION_START : getEntity().getRelationFieldName());
 			getEntity().setSectionName(getEntity().getSectionName().isEmpty() ? CEntityFieldService.SECTION_START : getEntity().getSectionName());
 			getEntity().setFieldCaption(getEntity().getFieldCaption().isEmpty() ? CEntityFieldService.SECTION_START : getEntity().getFieldCaption());
-			return;
-		} else if (relationFieldName.equals(CEntityFieldService.SECTION_END)) {
-			getEntity()
-					.setEntityProperty(getEntity().getEntityProperty().isEmpty() ? CEntityFieldService.SECTION_END : getEntity().getEntityProperty());
-			getEntity().setRelationFieldName(
-					getEntity().getRelationFieldName().isEmpty() ? CEntityFieldService.SECTION_END : getEntity().getRelationFieldName());
-			getEntity().setSectionName(getEntity().getSectionName().isEmpty() ? CEntityFieldService.SECTION_END : getEntity().getSectionName());
-			getEntity().setFieldCaption(getEntity().getFieldCaption().isEmpty() ? CEntityFieldService.SECTION_END : getEntity().getFieldCaption());
 			return;
 		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), selectedProperty);

@@ -36,7 +36,7 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isAdmin"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isUser"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isGuest"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

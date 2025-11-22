@@ -36,11 +36,11 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "finalStatus"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			scr.addScreenLine(CDetailLinesService.createSectionEnd());
+			
 			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CDetailLinesService.createSectionEnd());
+			
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

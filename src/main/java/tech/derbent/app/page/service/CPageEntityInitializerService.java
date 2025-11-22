@@ -36,22 +36,22 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "pageTitle"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "icon"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Layout Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridEntity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "detailSection"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "content"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Security & Behavior"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requiresAuthentication"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeShowInQuickToolbar"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeReadonly"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

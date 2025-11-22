@@ -41,18 +41,18 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyLogoUrl"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryColor"));
 			// Business Operations
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Business Operations"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursStart"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursEnd"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTimezone"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultLanguage"));
 			// Notification Settings
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Notification Settings"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableNotifications"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notificationEmail"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

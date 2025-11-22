@@ -34,33 +34,33 @@ public class COrderInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "orderNumber"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "orderDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requiredDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "deliveryDate"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Financials"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currency"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Provider"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "providerCompanyName"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "providerContactName"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "providerEmail"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "deliveryAddress"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Responsibility"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requestor"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "responsible"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

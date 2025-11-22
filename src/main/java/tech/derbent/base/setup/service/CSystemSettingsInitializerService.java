@@ -38,45 +38,45 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "applicationVersion"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "applicationDescription"));
 			// Security
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Security"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "accountLockoutDurationMinutes"));
 			// File Management
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("File Management"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "allowedFileExtensions"));
 			// Auto-Login
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Auto-Login"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "autoLoginEnabled"));
 			// Backup
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Backup and Maintenance"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableAutomaticBackups"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "backupRetentionDays"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "backupScheduleCron"));
 			// Caching
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Caching"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableCaching"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cacheTtlMinutes"));
 			// Database
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Database"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "databaseConnectionPoolSize"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "databaseName"));
 			// UI/Theming
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("UI and Theming"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultSystemTheme"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableDarkMode"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultLoginView"));
 			// Additional
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-   detailSection.addScreenLine(CDetailLinesService.createSectionEnd());
+   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

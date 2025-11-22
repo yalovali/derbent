@@ -70,14 +70,6 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		}
 	}
 
-	public static CDetailLines createSectionEnd() {
-		final CDetailLines line = new CDetailLines();
-		line.setRelationFieldName(CEntityFieldService.SECTION_END);
-		line.setEntityProperty(CEntityFieldService.SECTION_END);
-		line.setSectionName(CEntityFieldService.SECTION_END);
-		return line;
-	}
-
 	public static CDetailLines createTab(final String sectionName) {
 		try {
 			final CDetailLines line = new CDetailLines();

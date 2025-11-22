@@ -30,11 +30,11 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createSection("Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionDBName"));
-			scr.addScreenLine(CDetailLinesService.createSectionEnd());
+			
 			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CDetailLinesService.createSectionEnd());
+			
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
