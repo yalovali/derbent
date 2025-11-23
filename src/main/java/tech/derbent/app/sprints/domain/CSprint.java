@@ -1,8 +1,9 @@
 package tech.derbent.app.sprints.domain;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Size;
@@ -20,9 +22,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
-import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
@@ -30,13 +30,14 @@ import tech.derbent.base.users.domain.CUser;
 
 /**
  * CSprint - Domain entity representing a sprint in agile development.
- * A sprint is a time-boxed iteration containing selected activities and meetings.
+ * A sprint is a time-boxed iteration containing selected project items (activities, meetings, etc).
  * Layer: Domain (MVC)
  * Inherits from CProjectItem to provide project association and workflow support.
  */
 @Entity
 @Table(name = "csprint")
 @AttributeOverride(name = "id", column = @Column(name = "sprint_id"))
+@AssociationOverride(name = "status", joinColumns = @JoinColumn(name = "sprint_status_id"))
 public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem {
 
 	public static final String DEFAULT_COLOR = "#28a745";
@@ -97,7 +98,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	)
 	private String color = DEFAULT_COLOR;
 
-	// Type Management - using CSprintStatus
+	// Type Management - using CSprintType
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "entitytype_id", nullable = true)
 	@AMetaData(
@@ -107,47 +108,29 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			description = "Type/category of the sprint", 
 			hidden = false,
 			order = 2, 
-			dataProviderBean = "CSprintStatusService", 
+			dataProviderBean = "CSprintTypeService", 
 			setBackgroundFromColor = true, 
 			useIcon = true
 	)
-	private CSprintStatus entityType;
+	private CSprintType entityType;
 
-	// Sprint Activities - Many-to-Many relationship
+	// Sprint Items - Sorted list of project items (activities, meetings, etc.)
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
-			name = "csprint_activities", 
+			name = "csprint_items", 
 			joinColumns = @JoinColumn(name = "sprint_id"), 
-			inverseJoinColumns = @JoinColumn(name = "activity_id")
+			inverseJoinColumns = @JoinColumn(name = "item_id")
 	)
+	@OrderColumn(name = "item_order")
 	@AMetaData(
-			displayName = "Activities", 
+			displayName = "Sprint Items", 
 			required = false, 
 			readOnly = false, 
-			description = "Activities included in this sprint",
+			description = "Project items (activities, meetings, etc.) included in this sprint",
 			hidden = false, 
-			order = 30, 
-			dataProviderBean = "CActivityService"
+			order = 30
 	)
-	private Set<CActivity> activities = new HashSet<>();
-
-	// Sprint Meetings - Many-to-Many relationship
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(
-			name = "csprint_meetings", 
-			joinColumns = @JoinColumn(name = "sprint_id"), 
-			inverseJoinColumns = @JoinColumn(name = "meeting_id")
-	)
-	@AMetaData(
-			displayName = "Meetings", 
-			required = false, 
-			readOnly = false, 
-			description = "Meetings scheduled in this sprint",
-			hidden = false, 
-			order = 31, 
-			dataProviderBean = "CMeetingService"
-	)
-	private Set<CMeeting> meetings = new HashSet<>();
+	private List<CProjectItem<?>> items = new ArrayList<>();
 
 	// Calculated field for display - stored as transient
 	@Transient
@@ -155,7 +138,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			displayName = "Item Count", 
 			required = false, 
 			readOnly = true, 
-			description = "Total number of activities and meetings in this sprint",
+			description = "Total number of items in this sprint",
 			hidden = false, 
 			order = 32
 	)
@@ -194,11 +177,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		if (color == null || color.isEmpty()) {
 			color = DEFAULT_COLOR;
 		}
-		if (activities == null) {
-			activities = new HashSet<>();
-		}
-		if (meetings == null) {
-			meetings = new HashSet<>();
+		if (items == null) {
+			items = new ArrayList<>();
 		}
 		if (startDate == null) {
 			startDate = LocalDate.now();
@@ -259,72 +239,43 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @param typeEntity the type entity to set */
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
-		Check.instanceOf(typeEntity, CSprintStatus.class, "Type entity must be an instance of CSprintStatus");
-		entityType = (CSprintStatus) typeEntity;
+		Check.instanceOf(typeEntity, CSprintType.class, "Type entity must be an instance of CSprintType");
+		entityType = (CSprintType) typeEntity;
 		updateLastModified();
 	}
 
-	public Set<CActivity> getActivities() {
-		return activities != null ? activities : new HashSet<>();
+	public List<CProjectItem<?>> getItems() {
+		return items != null ? items : new ArrayList<>();
 	}
 
-	public void setActivities(final Set<CActivity> activities) {
-		this.activities = activities != null ? activities : new HashSet<>();
+	public void setItems(final List<CProjectItem<?>> items) {
+		this.items = items != null ? items : new ArrayList<>();
 		updateLastModified();
 	}
 
-	public Set<CMeeting> getMeetings() {
-		return meetings != null ? meetings : new HashSet<>();
-	}
-
-	public void setMeetings(final Set<CMeeting> meetings) {
-		this.meetings = meetings != null ? meetings : new HashSet<>();
-		updateLastModified();
-	}
-
-	/** Add an activity to this sprint.
-	 * @param activity the activity to add */
-	public void addActivity(final CActivity activity) {
-		if (activity != null) {
-			getActivities().add(activity);
+	/** Add a project item to this sprint.
+	 * @param item the project item to add */
+	public void addItem(final CProjectItem<?> item) {
+		if (item != null) {
+			getItems().add(item);
 			updateLastModified();
 		}
 	}
 
-	/** Remove an activity from this sprint.
-	 * @param activity the activity to remove */
-	public void removeActivity(final CActivity activity) {
-		if (activity != null) {
-			getActivities().remove(activity);
+	/** Remove a project item from this sprint.
+	 * @param item the project item to remove */
+	public void removeItem(final CProjectItem<?> item) {
+		if (item != null) {
+			getItems().remove(item);
 			updateLastModified();
 		}
 	}
 
-	/** Add a meeting to this sprint.
-	 * @param meeting the meeting to add */
-	public void addMeeting(final CMeeting meeting) {
-		if (meeting != null) {
-			getMeetings().add(meeting);
-			updateLastModified();
-		}
-	}
-
-	/** Remove a meeting from this sprint.
-	 * @param meeting the meeting to remove */
-	public void removeMeeting(final CMeeting meeting) {
-		if (meeting != null) {
-			getMeetings().remove(meeting);
-			updateLastModified();
-		}
-	}
-
-	/** Get the total number of items (activities + meetings) in this sprint.
+	/** Get the total number of items in this sprint.
 	 * This is a calculated field for UI display.
-	 * @return total count of activities and meetings */
+	 * @return total count of project items */
 	public Integer getItemCount() {
-		int activityCount = (activities != null) ? activities.size() : 0;
-		int meetingCount = (meetings != null) ? meetings.size() : 0;
-		return activityCount + meetingCount;
+		return (items != null) ? items.size() : 0;
 	}
 
 	/** Set the item count (for framework use only - calculated automatically).
@@ -372,14 +323,19 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	@Override
 	public Integer getProgressPercentage() {
-		// Calculate progress based on completed activities
-		if (activities == null || activities.isEmpty()) {
+		// Calculate progress based on completed items
+		if (items == null || items.isEmpty()) {
 			return 0;
 		}
-		long completedCount = activities.stream()
-				.filter(CActivity::isCompleted)
+		long completedCount = items.stream()
+				.filter(item -> {
+					if (item.getStatus() != null && item.getStatus().getFinalStatus()) {
+						return true;
+					}
+					return false;
+				})
 				.count();
-		return (int) ((completedCount * 100) / activities.size());
+		return (int) ((completedCount * 100) / items.size());
 	}
 
 	// IHasStatusAndWorkflow implementation
@@ -409,6 +365,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		if (getCreatedBy() != null) {
 			getCreatedBy().getLogin(); // Trigger creator loading
 		}
-		// Note: activities and meetings collections will be initialized if accessed
+		// Note: items collection will be initialized if accessed
 	}
 }

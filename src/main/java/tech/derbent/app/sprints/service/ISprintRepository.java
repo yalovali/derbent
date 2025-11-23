@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.app.sprints.domain.CSprintStatus;
+import tech.derbent.app.sprints.domain.CSprintType;
 
 /**
  * ISprintRepository - Repository interface for CSprint entity.
@@ -16,11 +16,11 @@ import tech.derbent.app.sprints.domain.CSprintStatus;
  */
 public interface ISprintRepository extends IProjectItemRespository<CSprint> {
 
-	/** Counts the number of sprints that use the specified sprint status.
-	 * @param type the sprint status type
-	 * @return count of sprints using this status */
+	/** Counts the number of sprints that use the specified sprint type.
+	 * @param type the sprint type
+	 * @return count of sprints using this type */
 	@Query("SELECT COUNT(s) FROM #{#entityName} s WHERE s.entityType = :entityType")
-	long countByType(@Param("entityType") CSprintStatus type);
+	long countByType(@Param("entityType") CSprintType type);
 
 	@Override
 	@Query("""

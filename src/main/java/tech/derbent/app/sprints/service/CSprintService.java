@@ -2,7 +2,6 @@ package tech.derbent.app.sprints.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,10 +10,8 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.app.sprints.domain.CSprintStatus;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -27,12 +24,12 @@ import tech.derbent.base.session.service.ISessionService;
 public class CSprintService extends CProjectItemService<CSprint> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintService.class);
-	private final CSprintStatusService entityTypeService;
+	private final CSprintTypeService entityTypeService;
 
 	public CSprintService(final ISprintRepository repository, final Clock clock, final ISessionService sessionService,
-			final CSprintStatusService sprintStatusService, final CProjectItemStatusService projectItemStatusService) {
+			final CSprintTypeService sprintTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
-		this.entityTypeService = sprintStatusService;
+		this.entityTypeService = sprintTypeService;
 	}
 
 	@Override

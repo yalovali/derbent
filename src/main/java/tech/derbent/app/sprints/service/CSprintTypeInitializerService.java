@@ -16,20 +16,16 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.sprints.domain.CSprintStatus;
+import tech.derbent.app.sprints.domain.CSprintType;
 
-/**
- * CSprintStatusInitializerService - Initializer service for sprint status types.
- * Creates UI configuration and sample data for sprint statuses.
- */
-public class CSprintStatusInitializerService extends CInitializerServiceBase {
+public class CSprintTypeInitializerService extends CInitializerServiceBase {
 
-	private static final Class<?> clazz = CSprintStatus.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintStatusInitializerService.class);
+	private static final Class<?> clazz = CSprintType.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".8";
-	private static final String menuTitle = MenuTitle_TYPES + ".Sprint Status";
-	private static final String pageDescription = "Manage sprint status categories";
-	private static final String pageTitle = "Sprint Status Management";
+	private static final String menuTitle = MenuTitle_TYPES + ".Sprint Types";
+	private static final String pageDescription = "Manage sprint type categories";
+	private static final String pageTitle = "Sprint Type Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -44,15 +40,15 @@ public class CSprintStatusInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-
+   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating sprint status view.");
+			LOGGER.error("Error creating sprint type view.");
 			throw e;
 		}
 	}
@@ -74,15 +70,15 @@ public class CSprintStatusInitializerService extends CInitializerServiceBase {
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
-						"Planning", "Sprint planning phase"
+						"Planning Sprint", "Sprint planning and preparation phase"
 				}, {
-						"Active", "Sprint is currently in progress"
+						"Development Sprint", "Active development and implementation sprint"
 				}, {
-						"Review", "Sprint review and retrospective"
+						"Testing Sprint", "Quality assurance and testing focused sprint"
 				}, {
-						"Completed", "Sprint has been completed"
+						"Release Sprint", "Final preparations and release activities"
 				}, {
-						"Cancelled", "Sprint was cancelled"
+						"Hardening Sprint", "Bug fixing and system stabilization sprint"
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
