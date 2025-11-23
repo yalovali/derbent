@@ -92,7 +92,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
 			// Create sprints
-			final int sprintCount = minimal ? 2 : 3;
+			final int sprintCount = minimal ? 1 : 2;
 			for (int i = 1; i <= sprintCount; i++) {
 				final CSprintType sprintType = sprintTypeService.getRandom(project);
 				final CUser assignedUser = userService.getRandom();
@@ -104,23 +104,17 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				sprint.setStartDate(LocalDate.now().plusWeeks((i - 1) * 2));
 				sprint.setEndDate(LocalDate.now().plusWeeks(i * 2));
 				// Add random activities and meetings to sprint
-				final List<CActivity> activities = activityService.listByProject(project);
-				if (!activities.isEmpty()) {
-					// Add 2-4 random activities
-					final int activityCount = minimal ? 2 : (3 + (int) (Math.random() * 2));
-					for (int j = 0; j < Math.min(activityCount, activities.size()); j++) {
-						final CActivity activity = activities.get((int) (Math.random() * activities.size()));
-						sprint.addItem(activity);
-					}
+				CActivity activity = activityService.getRandom(project);
+				if (activity != null) {
+					sprint.addItem(activity);
 				}
-				final List<CMeeting> meetings = meetingService.listByProject(project);
-				if (!meetings.isEmpty()) {
-					// Add 1-2 random meetings
-					final int meetingCount = minimal ? 1 : (1 + (int) (Math.random() * 2));
-					for (int j = 0; j < Math.min(meetingCount, meetings.size()); j++) {
-						final CMeeting meeting = meetings.get((int) (Math.random() * meetings.size()));
-						sprint.addItem(meeting);
-					}
+				activity = activityService.getRandom(project);
+				if (activity != null) {
+					sprint.addItem(activity);
+				}
+				CMeeting meeting = meetingService.getRandom(project);
+				if (meeting != null) {
+					sprint.addItem(meeting);
 				}
 				sprintService.save(sprint);
 				LOGGER.debug("Created sample sprint: {} with {} items", sprint.getName(), sprint.getItemCount());
