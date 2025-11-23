@@ -123,13 +123,32 @@ public final class CColorUtils {
 
 	public static String getColorFromEntity(final CEntity<?> entity) throws Exception {
 		Check.notNull(entity, "entity cannot be null");
+		// First check for known entity types with color support
 		if (entity instanceof CTypeEntity) {
 			final CTypeEntity<?> typeEntity = (CTypeEntity<?>) entity;
 			return typeEntity.getColor();
 		} else if (entity instanceof CStatus) {
 			final CStatus statusEntity = (CStatus) entity;
 			return statusEntity.getColor();
-		} else if (entity instanceof CEntityDB) {
+		}
+		// Try to use reflection to get color for other entity types (CRole, CNonProjectType, CPageEntity, etc.)
+		try {
+			final Method getColorMethod = entity.getClass().getMethod("getColor");
+			final Object colorValue = getColorMethod.invoke(entity);
+			if (colorValue instanceof String) {
+				final String color = (String) colorValue;
+				if ((color != null) && !color.isEmpty()) {
+					return color;
+				}
+			}
+		} catch (final NoSuchMethodException e) {
+			// Entity doesn't have a getColor() method, try using static icon color
+			LOGGER.debug("Entity {} does not have getColor() method, using static color", entity.getClass().getSimpleName());
+		} catch (final Exception e) {
+			LOGGER.warn("Error invoking getColor() on entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
+		}
+		// Fallback to static icon color if available
+		if (entity instanceof CEntityDB) {
 			return getStaticIconColorCode(entity.getClass());
 		}
 		final String errorMsg = String.format("Entity of type %s does not support color extraction", entity.getClass().getSimpleName());
