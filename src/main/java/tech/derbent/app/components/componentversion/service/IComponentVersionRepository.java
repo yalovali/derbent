@@ -13,6 +13,6 @@ public interface IComponentVersionRepository extends IEntityOfProjectRepository<
 long countByType(@Param ("entityType") CComponentVersionType type);
 
 @Override
-@Query ("SELECT r FROM CComponentVersion r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType LEFT JOIN FETCH r.component WHERE r.id = :id")
+@Query ("SELECT r FROM CComponentVersion r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH r.component WHERE r.id = :id")
 Optional<CComponentVersion> findById(@Param ("id") Long id);
 }

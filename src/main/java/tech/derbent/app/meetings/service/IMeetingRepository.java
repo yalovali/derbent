@@ -15,7 +15,8 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 	@Query ("""
 			   SELECT DISTINCT m FROM #{#entityName} m
 			   LEFT JOIN FETCH m.project
-			   LEFT JOIN FETCH m.entityType
+			   LEFT JOIN FETCH m.entityType et
+			   LEFT JOIN FETCH et.workflow
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.responsible
 			   LEFT JOIN FETCH m.relatedActivity
@@ -28,7 +29,8 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 	@Query ("""
 			   SELECT m FROM #{#entityName} m
 			   LEFT JOIN FETCH m.project
-			   LEFT JOIN FETCH m.entityType
+			   LEFT JOIN FETCH m.entityType et
+			   LEFT JOIN FETCH et.workflow
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.responsible
 			   LEFT JOIN FETCH m.relatedActivity

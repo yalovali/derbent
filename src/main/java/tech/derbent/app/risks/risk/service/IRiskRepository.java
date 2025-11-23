@@ -14,7 +14,7 @@ public interface IRiskRepository extends IEntityOfProjectRepository<CRisk> {
 	@Override
 	@Query (
 		"SELECT r FROM CRisk r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy "
-				+ "LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType " + "WHERE r.id = :id"
+				+ "LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow " + "WHERE r.id = :id"
 	)
 	Optional<CRisk> findById(@Param ("id") Long id);
 }

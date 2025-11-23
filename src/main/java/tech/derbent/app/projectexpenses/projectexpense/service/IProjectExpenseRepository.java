@@ -13,7 +13,7 @@ public interface IProjectExpenseRepository extends IEntityOfProjectRepository<CP
 	long countByType(@Param ("entityType") CProjectExpenseType type);
 	@Override
 	@Query (
-		"SELECT r FROM CProjectExpense r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType " + "WHERE r.id = :id"
+		"SELECT r FROM CProjectExpense r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow " + "WHERE r.id = :id"
 	)
 	Optional<CProjectExpense> findById(@Param ("id") Long id);
 }
