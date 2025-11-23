@@ -128,7 +128,7 @@ public final class CColorUtils {
 			final CTypeEntity<?> typeEntity = (CTypeEntity<?>) entity;
 			return typeEntity.getColor();
 		} else if (entity instanceof CStatus) {
-			final CStatus statusEntity = (CStatus) entity;
+			final CStatus<?> statusEntity = (CStatus<?>) entity;
 			return statusEntity.getColor();
 		}
 		// Try to use reflection to get color for other entity types (CRole, CNonProjectType, CPageEntity, etc.)

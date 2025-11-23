@@ -10,15 +10,10 @@ import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.app.sprints.domain.CSprint;
 
-/**
- * CPageServiceSprint - Page service for Sprint management UI.
- * Handles UI events and interactions for sprint views.
- */
+/** CPageServiceSprint - Page service for Sprint management UI. Handles UI events and interactions for sprint views. */
 public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> implements IPageServiceHasStatusAndWorkflow<CSprint> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
-	private static final long serialVersionUID = 1L;
-
 	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;
 
@@ -33,9 +28,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> impleme
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() {
-		return projectItemStatusService;
-	}
+	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
 	public void on_description_blur(final Component component, final Object value) {
 		LOGGER.info("function: on_description_blur for Component type: {}",
