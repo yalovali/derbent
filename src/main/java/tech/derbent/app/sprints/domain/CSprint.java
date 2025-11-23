@@ -41,7 +41,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@JoinTable (name = "csprint_activities", joinColumns = @JoinColumn (name = "sprint_id"), inverseJoinColumns = @JoinColumn (name = "activity_id"))
 	@AMetaData (
 			displayName = "Activities", required = false, readOnly = false, description = "Activities included in this sprint", hidden = false,
-			order = 30, useDualListSelector = true
+			order = 30, useDualListSelector = true, dataProviderBean = "CActivityService"
 	)
 	private Set<CActivity> activities = new HashSet<>();
 	// Sprint Color for UI display
@@ -78,12 +78,21 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			order = 32
 	)
 	private Integer itemCount;
+	// Unified items field for displaying all sprint items (activities and meetings) in a single component
+	// This is a transient field that combines activities and meetings for UI display
+	@Transient
+	@AMetaData (
+			displayName = "Sprint Items", required = false, readOnly = false,
+			description = "All items (activities and meetings) included in this sprint", hidden = false, order = 33,
+			useGridSelection = true, dataProviderBean = "CSprintService", dataProviderMethod = "getAllProjectItemsForCurrentProject"
+	)
+	private List<CProjectItem<?>> items;
 	// Sprint Meetings - Meetings included in this sprint
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (name = "csprint_meetings", joinColumns = @JoinColumn (name = "sprint_id"), inverseJoinColumns = @JoinColumn (name = "meeting_id"))
 	@AMetaData (
 			displayName = "Meetings", required = false, readOnly = false, description = "Meetings included in this sprint", hidden = false,
-			order = 31, useDualListSelector = true
+			order = 31, useDualListSelector = true, dataProviderBean = "CMeetingService"
 	)
 	private Set<CMeeting> meetings = new HashSet<>();
 	@Column (nullable = true)
