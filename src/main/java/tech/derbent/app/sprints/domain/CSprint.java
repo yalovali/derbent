@@ -2,7 +2,9 @@ package tech.derbent.app.sprints.domain;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -12,7 +14,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Size;
@@ -22,7 +23,9 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
+import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
@@ -114,24 +117,41 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	)
 	private CSprintType entityType;
 
-	// Sprint Items - Sorted list of project items (activities, meetings, etc.)
+	// Sprint Activities - Activities included in this sprint
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
-			name = "csprint_items", 
+			name = "csprint_activities", 
 			joinColumns = @JoinColumn(name = "sprint_id"), 
-			inverseJoinColumns = @JoinColumn(name = "item_id")
+			inverseJoinColumns = @JoinColumn(name = "activity_id")
 	)
-	@OrderColumn(name = "item_order")
 	@AMetaData(
-			displayName = "Sprint Items", 
+			displayName = "Activities", 
 			required = false, 
 			readOnly = false, 
-			description = "Project items (activities, meetings, etc.) included in this sprint",
+			description = "Activities included in this sprint",
 			hidden = false, 
 			order = 30,
 			useDualListSelector = true
 	)
-	private List<CProjectItem<?>> items = new ArrayList<>();
+	private Set<CActivity> activities = new HashSet<>();
+
+	// Sprint Meetings - Meetings included in this sprint
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+			name = "csprint_meetings", 
+			joinColumns = @JoinColumn(name = "sprint_id"), 
+			inverseJoinColumns = @JoinColumn(name = "meeting_id")
+	)
+	@AMetaData(
+			displayName = "Meetings", 
+			required = false, 
+			readOnly = false, 
+			description = "Meetings included in this sprint",
+			hidden = false, 
+			order = 31,
+			useDualListSelector = true
+	)
+	private Set<CMeeting> meetings = new HashSet<>();
 
 	// Calculated field for display - stored as transient
 	@Transient
@@ -178,8 +198,11 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		if (color == null || color.isEmpty()) {
 			color = DEFAULT_COLOR;
 		}
-		if (items == null) {
-			items = new ArrayList<>();
+		if (activities == null) {
+			activities = new HashSet<>();
+		}
+		if (meetings == null) {
+			meetings = new HashSet<>();
 		}
 		if (startDate == null) {
 			startDate = LocalDate.now();
@@ -245,38 +268,148 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
-	public List<CProjectItem<?>> getItems() {
-		return items != null ? items : new ArrayList<>();
+	/** Gets the activities in this sprint.
+	 * @return set of activities */
+	public Set<CActivity> getActivities() {
+		return activities != null ? activities : new HashSet<>();
 	}
 
-	public void setItems(final List<CProjectItem<?>> items) {
-		this.items = items != null ? items : new ArrayList<>();
+	/** Sets the activities in this sprint.
+	 * @param activities the activities to set */
+	public void setActivities(final Set<CActivity> activities) {
+		this.activities = activities != null ? activities : new HashSet<>();
 		updateLastModified();
 	}
 
-	/** Add a project item to this sprint.
-	 * @param item the project item to add */
-	public void addItem(final CProjectItem<?> item) {
-		if (item != null) {
-			getItems().add(item);
+	/** Gets the meetings in this sprint.
+	 * @return set of meetings */
+	public Set<CMeeting> getMeetings() {
+		return meetings != null ? meetings : new HashSet<>();
+	}
+
+	/** Sets the meetings in this sprint.
+	 * @param meetings the meetings to set */
+	public void setMeetings(final Set<CMeeting> meetings) {
+		this.meetings = meetings != null ? meetings : new HashSet<>();
+		updateLastModified();
+	}
+
+	/** Get all sprint items (activities and meetings combined) as a list.
+	 * This is a convenience method for backward compatibility.
+	 * @return combined list of all sprint items */
+	public List<CProjectItem<?>> getItems() {
+		final List<CProjectItem<?>> allItems = new ArrayList<>();
+		if (activities != null) {
+			allItems.addAll(activities);
+		}
+		if (meetings != null) {
+			allItems.addAll(meetings);
+		}
+		return allItems;
+	}
+
+	/** Set sprint items from a list.
+	 * This method attempts to separate items by type into activities and meetings.
+	 * For backward compatibility only - prefer using setActivities/setMeetings directly.
+	 * @param items the items to set */
+	public void setItems(final List<CProjectItem<?>> items) {
+		if (activities == null) {
+			activities = new HashSet<>();
+		} else {
+			activities.clear();
+		}
+		if (meetings == null) {
+			meetings = new HashSet<>();
+		} else {
+			meetings.clear();
+		}
+		
+		if (items != null) {
+			for (final CProjectItem<?> item : items) {
+				if (item instanceof CActivity) {
+					activities.add((CActivity) item);
+				} else if (item instanceof CMeeting) {
+					meetings.add((CMeeting) item);
+				}
+			}
+		}
+		updateLastModified();
+	}
+
+	/** Add an activity to this sprint.
+	 * @param activity the activity to add */
+	public void addActivity(final CActivity activity) {
+		if (activity != null) {
+			getActivities().add(activity);
 			updateLastModified();
 		}
 	}
 
+	/** Remove an activity from this sprint.
+	 * @param activity the activity to remove */
+	public void removeActivity(final CActivity activity) {
+		if (activity != null) {
+			getActivities().remove(activity);
+			updateLastModified();
+		}
+	}
+
+	/** Add a meeting to this sprint.
+	 * @param meeting the meeting to add */
+	public void addMeeting(final CMeeting meeting) {
+		if (meeting != null) {
+			getMeetings().add(meeting);
+			updateLastModified();
+		}
+	}
+
+	/** Remove a meeting from this sprint.
+	 * @param meeting the meeting to remove */
+	public void removeMeeting(final CMeeting meeting) {
+		if (meeting != null) {
+			getMeetings().remove(meeting);
+			updateLastModified();
+		}
+	}
+
+	/** Add a project item to this sprint.
+	 * This method determines the type and adds to the appropriate collection.
+	 * @param item the project item to add */
+	public void addItem(final CProjectItem<?> item) {
+		if (item != null) {
+			if (item instanceof CActivity) {
+				addActivity((CActivity) item);
+			} else if (item instanceof CMeeting) {
+				addMeeting((CMeeting) item);
+			}
+		}
+	}
+
 	/** Remove a project item from this sprint.
+	 * This method determines the type and removes from the appropriate collection.
 	 * @param item the project item to remove */
 	public void removeItem(final CProjectItem<?> item) {
 		if (item != null) {
-			getItems().remove(item);
-			updateLastModified();
+			if (item instanceof CActivity) {
+				removeActivity((CActivity) item);
+			} else if (item instanceof CMeeting) {
+				removeMeeting((CMeeting) item);
+			}
 		}
 	}
 
 	/** Get the total number of items in this sprint.
 	 * This is a calculated field for UI display.
-	 * @return total count of project items */
+	 * @return total count of activities and meetings */
 	public Integer getItemCount() {
-		return (items != null) ? items.size() : 0;
+		int count = 0;
+		if (activities != null) {
+			count += activities.size();
+		}
+		if (meetings != null) {
+			count += meetings.size();
+		}
+		return count;
 	}
 
 	/** Set the item count (for framework use only - calculated automatically).
@@ -324,19 +457,19 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	@Override
 	public Integer getProgressPercentage() {
-		// Calculate progress based on completed items
-		if (items == null || items.isEmpty()) {
+		// Calculate progress based on completed activities
+		if (activities == null || activities.isEmpty()) {
 			return 0;
 		}
-		long completedCount = items.stream()
-				.filter(item -> {
-					if (item.getStatus() != null && item.getStatus().getFinalStatus()) {
+		long completedCount = activities.stream()
+				.filter(activity -> {
+					if (activity.getStatus() != null && activity.getStatus().getFinalStatus()) {
 						return true;
 					}
 					return false;
 				})
 				.count();
-		return (int) ((completedCount * 100) / items.size());
+		return (int) ((completedCount * 100) / activities.size());
 	}
 
 	// IHasStatusAndWorkflow implementation
@@ -366,6 +499,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		if (getCreatedBy() != null) {
 			getCreatedBy().getLogin(); // Trigger creator loading
 		}
-		// Note: items collection will be initialized if accessed
+		// Note: activities and meetings collections will be initialized if accessed
 	}
 }
