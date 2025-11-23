@@ -126,8 +126,10 @@ public final class CColorUtils {
 		if (entity instanceof CTypeEntity) {
 			final CTypeEntity<?> typeEntity = (CTypeEntity<?>) entity;
 			return typeEntity.getColor();
-		}
-		if (entity instanceof CEntityDB) {
+		} else if (entity instanceof CStatus) {
+			final CStatus statusEntity = (CStatus) entity;
+			return statusEntity.getColor();
+		} else if (entity instanceof CEntityDB) {
 			return getStaticIconColorCode(entity.getClass());
 		}
 		final String errorMsg = String.format("Entity of type %s does not support color extraction", entity.getClass().getSimpleName());
