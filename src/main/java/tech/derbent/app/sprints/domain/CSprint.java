@@ -128,7 +128,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			readOnly = false, 
 			description = "Project items (activities, meetings, etc.) included in this sprint",
 			hidden = false, 
-			order = 30
+			order = 30,
+			useDualListSelector = true
 	)
 	private List<CProjectItem<?>> items = new ArrayList<>();
 
