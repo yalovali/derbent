@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import tech.derbent.api.components.CColorAwareComboBox;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -25,7 +25,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	private ICrudToolbarOwnerPage pageBase;
 	private CButton refreshButton;
 	private CButton saveButton;
-	private ComboBox<CProjectItemStatus> statusComboBox; // Workflow status selector
+	private CColorAwareComboBox<CProjectItemStatus> statusComboBox; // Workflow status selector
 	// Supplier to provide available statuses for the current context (set by the page)
 	private Supplier<List<CProjectItemStatus>> statusProvider;
 
@@ -119,8 +119,7 @@ public class CCrudToolbar extends HorizontalLayout {
 				return;
 			}
 			final CProjectItem<?> projectItem = (CProjectItem<?>) currentEntity;
-			statusComboBox = new ComboBox<>();
-			statusComboBox.setItemLabelGenerator(s -> s != null ? s.toString() : "");
+			statusComboBox = new CColorAwareComboBox<>(CProjectItemStatus.class);
 			statusComboBox.setWidth("220px");
 			statusComboBox.setClearButtonVisible(false);
 			statusComboBox.setItems(statuses);
