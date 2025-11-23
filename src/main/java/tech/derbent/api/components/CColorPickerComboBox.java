@@ -132,13 +132,25 @@ public class CColorPickerComboBox extends Composite<CHorizontalLayout>
 	@Override
 	public String getValue() { return colorField.getValue(); }
 
-	/** Updates the preview div with the selected color */
+	/** Updates the preview div with the selected color and sets the combobox background color */
 	private void updatePreview(String colorValue) {
 		if (colorValue != null && !colorValue.trim().isEmpty()) {
+			// Update preview div
 			previewDiv.getStyle().set("background-color", colorValue).set("width", "40px").set("height", "36px").set("border", "2px solid #ddd")
 					.set("border-radius", "6px").set("margin-left", "8px").set("display", "inline-block").set("vertical-align", "top")
 					.set("box-shadow", "0 1px 3px rgba(0,0,0,0.1)").set("flex-shrink", "0");
 			previewDiv.setTitle("Current color: " + colorValue.toUpperCase());
+			
+			// Set the combobox input field background color
+			colorField.getElement().getStyle().set("--vaadin-input-field-background", colorValue);
+			
+			// Calculate and apply contrasting text color for readability
+			String textColor = CColorUtils.getContrastTextColor(colorValue);
+			colorField.getElement().getStyle().set("color", textColor);
+		} else {
+			// Clear styles when no color is selected
+			colorField.getElement().getStyle().remove("--vaadin-input-field-background");
+			colorField.getElement().getStyle().remove("color");
 		}
 	}
 
