@@ -143,6 +143,65 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		setAllowCustomValue(false);
 		setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
 		configureColorRenderer();
+		setupSelectedValueDisplay();
+	}
+
+	/** Sets up a value change listener to update the prefix component with the selected item's icon and applies styling to show the color. This ensures
+	 * the selected value also displays with color and icon, not just the dropdown items. */
+	private void setupSelectedValueDisplay() {
+		addValueChangeListener(event -> {
+			final T selectedItem = event.getValue();
+			if (selectedItem == null) {
+				// Clear the prefix component and styling when no item is selected
+				setPrefixComponent(null);
+				getElement().getStyle().remove("--vaadin-input-field-background");
+				getElement().getStyle().remove("color");
+				return;
+			}
+			try {
+				if (selectedItem instanceof CEntityNamed) {
+					// Get the icon for the selected entity
+					final com.vaadin.flow.component.icon.Icon icon = CColorUtils.getIconForEntity(selectedItem);
+					if (icon != null) {
+						CColorUtils.styleIcon(icon);
+						// Apply color to the icon if entity has color
+						try {
+							final String color = CColorUtils.getColorFromEntity(selectedItem);
+							if ((color != null) && !color.isEmpty()) {
+								icon.getElement().getStyle().set("color", color);
+							}
+						} catch (final Exception colorEx) {
+							// Entity doesn't have color, ignore
+						}
+						setPrefixComponent(icon);
+					} else {
+						setPrefixComponent(null);
+					}
+					// Apply background color to the entire combobox input field if entity has color
+					try {
+						final String backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
+						if ((backgroundColor != null) && !backgroundColor.isEmpty()) {
+							// Apply background color to the input field
+							getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
+							// Calculate and apply contrasting text color
+							if (autoContrast) {
+								final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
+								getElement().getStyle().set("color", textColor);
+							}
+						}
+					} catch (final Exception colorEx) {
+						// Entity doesn't have color, keep default styling
+						getElement().getStyle().remove("--vaadin-input-field-background");
+						getElement().getStyle().remove("color");
+					}
+				}
+			} catch (final Exception e) {
+				LOGGER.warn("Failed to create selected value display for entity {}: {}", selectedItem.getClass().getSimpleName(), e.getMessage());
+				setPrefixComponent(null);
+				getElement().getStyle().remove("--vaadin-input-field-background");
+				getElement().getStyle().remove("color");
+			}
+		});
 	}
 	// Getter and setter methods for styling configuration
 
