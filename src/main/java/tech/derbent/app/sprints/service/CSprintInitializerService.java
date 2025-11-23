@@ -55,7 +55,8 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			
 			scr.addScreenLine(CDetailLinesService.createSection("Sprint Items"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "items"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "meetings"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "itemCount"));
 			
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
