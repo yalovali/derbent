@@ -64,7 +64,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	)
 	private LocalTime endTime;
 	// Type Management - concrete implementation of parent's typeEntity
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
