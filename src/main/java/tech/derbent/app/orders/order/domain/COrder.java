@@ -234,37 +234,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (currency != null) {
-			currency.getName(); // Trigger currency loading
-		}
-		if (entityType != null) {
-			entityType.getName(); // Trigger order type loading
-		}
-		if (requestor != null) {
-			requestor.getLogin(); // Trigger requestor loading
-		}
-		if (responsible != null) {
-			responsible.getLogin(); // Trigger responsible user loading
-		}
-		if (status != null) {
-			status.getName(); // Trigger status loading
-		}
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-		// Note: approvals collection will be initialized if accessed
-	}
-
 	/** Remove an approval from this order.
 	 * @param approval the approval to remove */
 	public void removeApproval(final COrderApproval approval) {

@@ -27,7 +27,4 @@ public class CAssetType extends CTypeEntity<CAssetType> {
 	public CAssetType(final String name, final CProject project) {
 		super(CAssetType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

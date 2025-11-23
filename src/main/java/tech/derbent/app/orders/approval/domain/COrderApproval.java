@@ -83,20 +83,6 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	// Getters and setters
 	public COrder getOrder() { return order; }
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (approvalStatus != null) {
-			approvalStatus.getName(); // Trigger approval status loading
-		}
-		if (approver != null) {
-			approver.getLogin(); // Trigger approver loading
-		}
-		if (order != null) {
-			order.getName(); // Trigger order loading
-		}
-	}
-
 	public void setApprovalDate(final LocalDateTime approvalDate) {
 		this.approvalDate = approvalDate;
 		updateLastModified();

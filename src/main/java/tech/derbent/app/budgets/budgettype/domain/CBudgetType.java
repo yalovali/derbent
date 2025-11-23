@@ -27,7 +27,4 @@ public class CBudgetType extends CTypeEntity<CBudgetType> {
 	public CBudgetType(final String name, final CProject project) {
 		super(CBudgetType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

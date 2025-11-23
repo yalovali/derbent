@@ -56,14 +56,6 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 
 	public Boolean getIsUser() { return isUser; }
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CNonProjectType)
-		if (getCompany() != null) {
-			getCompany().getName(); // Trigger company loading
-		}
-	}
-
 	// Convenience boolean methods
 	public boolean isAdmin() { return Boolean.TRUE.equals(isAdmin); }
 

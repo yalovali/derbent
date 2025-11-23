@@ -228,9 +228,4 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	public boolean hasParent() {
 		return (parentId != null) && (parentType != null);
 	}
-
-	@Override
-	public void initializeAllFields() {
-		// No entity relationships to initialize in this entity
-	}
 }

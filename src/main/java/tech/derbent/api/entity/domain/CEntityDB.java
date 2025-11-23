@@ -94,7 +94,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return ProxyUtils.getUserClass(getClass()).hashCode();
 	}
 
-	public abstract void initializeAllFields();
+	public void initializeAllFields() {}
 
 	protected void initializeDefaults() {}
 

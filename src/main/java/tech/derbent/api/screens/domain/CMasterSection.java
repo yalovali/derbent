@@ -47,18 +47,4 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	public void setSectionDBName(final String sectionDBName) { this.sectionDBName = sectionDBName; }
 
 	public void setSectionType(final String sectionType) { this.sectionType = sectionType; }
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
 }

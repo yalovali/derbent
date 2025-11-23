@@ -50,7 +50,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 		this.sessionService = sessionService;
 		this.detailSectionService = detailSectionService;
 		this.gridEntityService = gridEntityService;
-		LOGGER.info("CDynamicPageRouter initialized with grid and detail section support");
+		// LOGGER.info("CDynamicPageRouter initialized with grid and detail section support");
 	}
 
 	@Override
@@ -65,14 +65,18 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 
 	/** Implementation of IPageTitleProvider - provides the page title from the current CPageEntity */
 	@Override
-	public String getPageTitle() { return currentPageEntity != null ? currentPageEntity.getPageTitle() : null; }
+	public String getPageTitle() {
+		Check.notNull(currentPageEntity, "Current page entity cannot be null when getting page title");
+		return currentPageEntity.getPageTitle();
+	}
 
 	/** Load a specific page by entity ID.
 	 * @param pageItemId
 	 * @throws Exception */
 	public void loadSpecificPage(Long pageEntityId, Long pageItemId, boolean AsDetailComponent) throws Exception {
-		if (pageEntityId == null || pageItemId == null) {
-			LOGGER.warn("Page entity ID or page item ID is null. Cannot load specific page.");
+		if (pageEntityId == null) {
+			LOGGER.debug("No page entity ID provided, clearing dynamic page router content.");
+			removeAll();
 			return;
 		}
 		LOGGER.debug("Loading specific page for entity ID: {}", pageEntityId);
@@ -94,7 +98,10 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 				page = new CDynamicPageViewWithoutGrid(null, currentPageEntity, sessionService, detailSectionService);
 			}
 			Check.notNull(page, "Dynamic page view cannot be null after instantiation");
-			page.locateItemById(pageItemId);
+			if (pageItemId != null) {
+				// Locate specific item on the page or just load it
+				page.locateItemById(pageItemId);
+			}
 			removeAll();
 			add(page);
 		} catch (Exception e) {

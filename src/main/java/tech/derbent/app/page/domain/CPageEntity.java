@@ -138,6 +138,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	public CGridEntity getGridEntity() { return gridEntity; }
 
+	@Override
 	public String getIcon() { return icon; }
 
 	public String getMenuOrder() { return menuOrder; }
@@ -151,27 +152,6 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public boolean getRequiresAuthentication() { return requiresAuthentication; }
 
 	public String getRoute() { return "cdynamicpagerouter/page:" + getId(); }
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (detailSection != null) {
-			detailSection.getName(); // Trigger detail section loading
-		}
-		if (gridEntity != null) {
-			gridEntity.getName(); // Trigger grid entity loading
-		}
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
 
 	@Override
 	protected void initializeDefaults() {

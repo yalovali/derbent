@@ -24,12 +24,10 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	public static final String DEFAULT_COLOR = "#FFB300";
 	public static final String DEFAULT_ICON = "vaadin:ticket";
 	public static final String VIEW_NAME = "Ticket View";
-
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Ticket Type", required = false, readOnly = false, 
-			description = "Type category of the ticket", hidden = false, order = 2,
+			displayName = "Ticket Type", required = false, readOnly = false, description = "Type category of the ticket", hidden = false, order = 2,
 			dataProviderBean = "CTicketTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CTicketType entityType;
@@ -55,27 +53,14 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	}
 
 	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+	}
+
+	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CTicketType.class, "Type entity must be an instance of CTicketType");
 		entityType = (CTicketType) typeEntity;
 		updateLastModified();
-	}
-
-	@Override
-	public void initializeAllFields() {
-		if (getProject() != null) {
-			getProject().getName();
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin();
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin();
-		}
-	}
-
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
 	}
 }

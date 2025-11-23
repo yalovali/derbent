@@ -27,11 +27,6 @@ class CAbstractServiceValidationTest {
 		public TestEntity(String name) {
 			super(TestEntity.class, name);
 		}
-
-		@Override
-		public void initializeAllFields() {
-			// No lazy fields to initialize in test entity
-		}
 	}
 
 	/** Concrete service implementation for testing. */

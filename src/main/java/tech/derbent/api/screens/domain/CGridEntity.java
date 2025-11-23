@@ -9,8 +9,8 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.app.projects.domain.CProject;
 
 @Entity
 @Table (name = "cgridentity")
@@ -100,20 +100,6 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public List<String> getColumnFields() { return columnFields; }
 
 	public String getDataServiceBeanName() { return dataServiceBeanName; }
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
 
 	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
 

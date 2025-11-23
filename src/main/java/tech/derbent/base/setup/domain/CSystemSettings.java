@@ -340,11 +340,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public String getSystemEmailFrom() { return systemEmailFrom; }
 
 	@Override
-	public void initializeAllFields() {
-		// No entity relationships to initialize in this entity
-	}
-
-	@Override
 	protected void initializeDefaults() {
 		if (maxFileUploadSizeMb == null) {
 			maxFileUploadSizeMb = new BigDecimal("50.0");

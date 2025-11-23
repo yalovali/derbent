@@ -188,14 +188,6 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public String getSectionName() { return sectionName; }
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (detailSection != null) {
-			detailSection.getName(); // Trigger detail section loading
-		}
-	}
-
 	public void printLine() {
 		System.out.println(
 				"CDetailLines{" + "id=" + getId() + ", lineOrder=" + lineOrder + ", fieldCaption='" + fieldCaption + '\'' + ", entityProperty='"
@@ -210,6 +202,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public void setDetailSection(final CDetailSection screen) { detailSection = screen; }
 
+	public void setEntityProperty(final String entityProperty) { this.entityProperty = entityProperty; }
+
 	public void setFieldCaption(final String fieldCaption) { this.fieldCaption = fieldCaption; }
 
 	public void setIsCaptionVisible(Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
@@ -223,8 +217,6 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	public void setLineOrder(final Integer lineOrder) { this.lineOrder = lineOrder; }
 
 	public void setMaxLength(final Integer maxLength) { this.maxLength = maxLength; }
-
-	public void setEntityProperty(final String entityProperty) { this.entityProperty = entityProperty; }
 
 	public void setRelatedEntityType(final String relatedEntityType) { this.relatedEntityType = relatedEntityType; }
 

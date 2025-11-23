@@ -17,10 +17,7 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.users.domain.CUser;
 
-/**
- * CTeam - Team entity for grouping users
- * Represents a team of users with a manager, associated with a company
- */
+/** CTeam - Team entity for grouping users Represents a team of users with a manager, associated with a company */
 @Entity
 @Table (name = "\"cteam\"")
 @AttributeOverride (name = "id", column = @Column (name = "team_id"))
@@ -29,45 +26,34 @@ public class CTeam extends CEntityNamed<CTeam> {
 	public static final String DEFAULT_COLOR = "#3F51B5";
 	public static final String DEFAULT_ICON = "vaadin:group";
 	public static final String VIEW_NAME = "Teams View";
-
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "company_id", nullable = false)
 	@AMetaData (
-			displayName = "Company", required = true, readOnly = false,
-			description = "Company this team belongs to", hidden = false, order = 2,
+			displayName = "Company", required = true, readOnly = false, description = "Company this team belongs to", hidden = false, order = 2,
 			dataProviderBean = "CCompanyService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CCompany company;
-
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "team_manager_id", nullable = true)
-	@AMetaData (
-			displayName = "Team Manager", required = false, readOnly = false,
-			description = "Manager responsible for this team", hidden = false, order = 3,
-			dataProviderBean = "CUserService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CUser teamManager;
-
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Description", required = false, readOnly = false,
-			description = "Detailed description of the team", hidden = false, order = 10, maxLength = 2000
+			displayName = "Description", required = false, readOnly = false, description = "Detailed description of the team", hidden = false,
+			order = 10, maxLength = 2000
 	)
 	private String description;
-
 	@ManyToMany (fetch = FetchType.LAZY)
-	@JoinTable (
-			name = "cteam_members",
-			joinColumns = @JoinColumn (name = "team_id"),
-			inverseJoinColumns = @JoinColumn (name = "user_id")
-	)
+	@JoinTable (name = "cteam_members", joinColumns = @JoinColumn (name = "team_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
-			displayName = "Team Members", required = false, readOnly = false,
-			description = "Users who are members of this team", hidden = false, order = 20,
-			useDualListSelector = true, dataProviderBean = "CUserService"
+			displayName = "Team Members", required = false, readOnly = false, description = "Users who are members of this team", hidden = false,
+			order = 20, useDualListSelector = true, dataProviderBean = "CUserService"
 	)
 	private Set<CUser> members = new HashSet<>();
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "team_manager_id", nullable = true)
+	@AMetaData (
+			displayName = "Team Manager", required = false, readOnly = false, description = "Manager responsible for this team", hidden = false,
+			order = 3, dataProviderBean = "CUserService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CUser teamManager;
 
 	/** Default constructor for JPA. */
 	public CTeam() {
@@ -99,20 +85,6 @@ public class CTeam extends CEntityNamed<CTeam> {
 	}
 
 	public CUser getTeamManager() { return teamManager; }
-
-	@Override
-	public void initializeAllFields() {
-		if (company != null) {
-			company.getName();
-		}
-		if (teamManager != null) {
-			teamManager.getLogin();
-		}
-		// Initialize members collection
-		if (members != null) {
-			members.size();
-		}
-	}
 
 	public void removeMember(final CUser user) {
 		if (user != null) {

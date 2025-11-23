@@ -47,18 +47,4 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 	}
 
 	public void setRequiresApproval(final Boolean requiresApproval) { this.requiresApproval = requiresApproval; }
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
 }

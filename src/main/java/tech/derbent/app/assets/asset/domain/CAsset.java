@@ -53,19 +53,6 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	}
 
 	@Override
-	public void initializeAllFields() {
-		if (getProject() != null) {
-			getProject().getName();
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin();
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin();
-		}
-	}
-
-	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 	}

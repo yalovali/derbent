@@ -90,15 +90,6 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	public List<CUserProjectSettings> getUserSettings() { return userSettings; }
 
 	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (company != null) {
-			company.getName(); // Trigger company loading
-		}
-		// Note: userSettings is a collection and will be initialized if accessed
-	}
-
-	@Override
 	public boolean matches(final String searchText) {
 		if ((searchText == null) || searchText.trim().isEmpty()) {
 			return true; // Empty search matches all

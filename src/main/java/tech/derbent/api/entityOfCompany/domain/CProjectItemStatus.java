@@ -57,9 +57,6 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 		return Objects.hash(super.hashCode(), finalStatus);
 	}
 
-	@Override
-	public void initializeAllFields() {}
-
 	public void setFinalStatus(final Boolean finalStatus) { this.finalStatus = finalStatus; }
 
 	@Override

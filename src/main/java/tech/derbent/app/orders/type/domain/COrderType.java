@@ -29,18 +29,4 @@ public class COrderType extends CTypeEntity<COrderType> {
 	public COrderType(final String name, final CProject project) {
 		super(COrderType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
 }

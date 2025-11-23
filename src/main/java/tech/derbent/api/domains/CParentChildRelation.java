@@ -67,9 +67,4 @@ public class CParentChildRelation extends CEntityDB<CParentChildRelation> {
 		return "CParentChildRelation{" + "id=" + getId() + ", childId=" + childId + ", childType='" + childType + '\'' + ", parentId=" + parentId
 				+ ", parentType='" + parentType + '\'' + '}';
 	}
-
-	@Override
-	public void initializeAllFields() {
-		// No entity relationships to initialize in this entity
-	}
 }

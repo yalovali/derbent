@@ -27,7 +27,4 @@ public class CTicketType extends CTypeEntity<CTicketType> {
 	public CTicketType(final String name, final CProject project) {
 		super(CTicketType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

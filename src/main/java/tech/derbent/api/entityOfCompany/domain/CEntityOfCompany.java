@@ -33,12 +33,5 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 
 	public CCompany getCompany() { return company; }
 
-	@Override
-	public void initializeAllFields() {
-		if (company != null) {
-			company.getName(); // Trigger company loading
-		}
-	}
-
 	public void setCompany(final CCompany company) { this.company = company; }
 }

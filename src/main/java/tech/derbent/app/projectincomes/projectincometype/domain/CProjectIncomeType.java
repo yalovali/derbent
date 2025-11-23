@@ -27,7 +27,4 @@ public class CProjectIncomeType extends CTypeEntity<CProjectIncomeType> {
 	public CProjectIncomeType(final String name, final CProject project) {
 		super(CProjectIncomeType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

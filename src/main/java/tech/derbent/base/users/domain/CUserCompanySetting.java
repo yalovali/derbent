@@ -100,20 +100,6 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	public String getUserName() { return user != null ? user.getName() : "Unknown User"; }
 
-	@Override
-	public void initializeAllFields() {
-		// Access lazy fields to trigger loading within transaction
-		if (user != null) {
-			user.getLogin(); // Trigger user loading
-		}
-		if (company != null) {
-			company.getName(); // Trigger company loading
-		}
-		if (role != null) {
-			role.getName(); // Trigger role loading
-		}
-	}
-
 	/** Check if this user has company admin privileges.
 	 * @return true if user is company owner or admin */
 	public boolean isCompanyAdmin() { return isOwner() || isAdmin(); }

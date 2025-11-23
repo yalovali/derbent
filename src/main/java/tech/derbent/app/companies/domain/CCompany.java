@@ -58,7 +58,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 	)
 	private String defaultLanguage = "tr";
 	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-@Email (message = ValidationMessages.EMAIL_INVALID)
+	@Email (message = ValidationMessages.EMAIL_INVALID)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Email", required = false, readOnly = false, defaultValue = "", description = "Company email address", hidden = false,
@@ -72,7 +72,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 	)
 	private Boolean enableNotifications;
 	@Column (name = "notification_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-@Email (message = ValidationMessages.EMAIL_INVALID)
+	@Email (message = ValidationMessages.EMAIL_INVALID)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Notification Email", required = false, readOnly = false, defaultValue = "",
@@ -159,11 +159,6 @@ public class CCompany extends CEntityNamed<CCompany> {
 	public String getWorkingHoursEnd() { return workingHoursEnd; }
 
 	public String getWorkingHoursStart() { return workingHoursStart; }
-
-	@Override
-	public void initializeAllFields() {
-		// No lazy-loaded entity relationships to initialize
-	}
 
 	/** Initialize default configuration values. */
 	@Override

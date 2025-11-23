@@ -24,13 +24,11 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	public static final String DEFAULT_COLOR = "#78909C";
 	public static final String DEFAULT_ICON = "vaadin:handshake";
 	public static final String VIEW_NAME = "Provider View";
-
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Provider Type", required = false, readOnly = false, 
-			description = "Type category of the provider", hidden = false, order = 2,
-			dataProviderBean = "CProviderTypeService", setBackgroundFromColor = true, useIcon = true
+			displayName = "Provider Type", required = false, readOnly = false, description = "Type category of the provider", hidden = false,
+			order = 2, dataProviderBean = "CProviderTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProviderType entityType;
 
@@ -55,27 +53,14 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	}
 
 	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+	}
+
+	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CProviderType.class, "Type entity must be an instance of CProviderType");
 		entityType = (CProviderType) typeEntity;
 		updateLastModified();
-	}
-
-	@Override
-	public void initializeAllFields() {
-		if (getProject() != null) {
-			getProject().getName();
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin();
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin();
-		}
-	}
-
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
 	}
 }

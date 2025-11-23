@@ -82,23 +82,6 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public CWorkflowEntity getWorkflowEntity() { return workflowentity; }
 
-	@Override
-	public void initializeAllFields() {
-		// initialize lazily loaded fields
-		if (workflowentity != null) {
-			workflowentity.getName();
-		}
-		if (fromStatus != null) {
-			fromStatus.getName();
-		}
-		if (toStatus != null) {
-			toStatus.getName();
-		}
-		if (roles != null) {
-			roles.forEach(role -> role.getName());
-		}
-	}
-
 	public void setFromStatus(final CProjectItemStatus fromStatus) { this.fromStatus = fromStatus; }
 
 	public void setInitialStatus(Boolean initialStatus) { this.initialStatus = initialStatus != null ? initialStatus : Boolean.FALSE; }

@@ -182,14 +182,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	@Override
-	public void initializeAllFields() {
-		super.initializeAllFields();
-		if (companyRole != null) {
-			companyRole.getName(); // Trigger company role loading
-		}
-	}
-
-	@Override
 	public boolean matches(final String searchText) {
 		if (searchText == null || searchText.trim().isEmpty()) {
 			return true; // Empty search matches all

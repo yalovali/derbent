@@ -131,20 +131,6 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 
 	public String getScreenTitle() { return screenTitle; }
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
-
 	/** Helper method to remove a screen line */
 	public void removeScreenLine(final CDetailLines screenLine) {
 		detailLines.remove(screenLine);

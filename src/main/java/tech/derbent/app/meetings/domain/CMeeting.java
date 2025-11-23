@@ -45,7 +45,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			hidden = false, order = 7, maxLength = 4000
 	)
 	private String agenda;
-	@ManyToMany (fetch = FetchType.LAZY)
+	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
 			displayName = "Attendees", required = false, readOnly = false, description = "Users who actually attended the meeting", hidden = false,
@@ -94,21 +94,21 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			description = "Notes and minutes from the meeting", hidden = false, order = 11, maxLength = 4000
 	)
 	private String minutes;
-	@ManyToMany (fetch = FetchType.LAZY)
+	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (name = "cmeeting_participants", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
 			displayName = "Participants", required = false, readOnly = false, description = "Users invited to participate in the meeting",
 			hidden = false, order = 13, dataProviderBean = "CUserService"
 	)
 	private Set<CUser> participants = new HashSet<>();
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "related_activity_id", nullable = true)
 	@AMetaData (
 			displayName = "Related Activity", required = false, readOnly = false, description = "Project activity related to this meeting",
 			hidden = false, order = 8, dataProviderBean = "CActivityService"
 	)
 	private CActivity relatedActivity;
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "responsible_id", nullable = true)
 	@AMetaData (
 			displayName = "Responsible", required = false, readOnly = false,
@@ -211,34 +211,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
-	}
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (entityType != null) {
-			entityType.getName(); // Trigger meeting type loading
-		}
-		if (relatedActivity != null) {
-			relatedActivity.getName(); // Trigger related activity loading
-		}
-		if (responsible != null) {
-			responsible.getLogin(); // Trigger responsible user loading
-		}
-		if (status != null) {
-			status.getName(); // Trigger status loading
-		}
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-		// Note: attendees and participants collections will be initialized if accessed
 	}
 
 	/** Check if a user is an attendee of this meeting.

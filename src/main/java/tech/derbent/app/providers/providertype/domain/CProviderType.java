@@ -27,7 +27,4 @@ public class CProviderType extends CTypeEntity<CProviderType> {
 	public CProviderType(final String name, final CProject project) {
 		super(CProviderType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

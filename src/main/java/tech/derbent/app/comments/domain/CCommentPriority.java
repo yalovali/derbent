@@ -55,20 +55,6 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	public Integer getPriorityLevel() { return priorityLevel; }
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
-
 	public boolean isDefault() { return Boolean.TRUE.equals(isDefault); }
 
 	public void setDefault(final Boolean isDefault) { this.isDefault = isDefault; }

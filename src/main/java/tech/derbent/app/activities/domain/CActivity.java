@@ -262,31 +262,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (getEntityType() != null) {
-			getEntityType().getName(); // Trigger activity type loading
-		}
-		if (priority != null) {
-			priority.getName(); // Trigger priority loading
-		}
-		if (status != null) {
-			status.getName(); // Trigger status loading
-		}
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-		// Note: comments collection will be initialized if accessed
-	}
-
 	/** Initialize default values for the activity. */
 	@Override
 	protected void initializeDefaults() {

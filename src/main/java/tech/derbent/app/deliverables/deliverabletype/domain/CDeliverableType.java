@@ -27,7 +27,4 @@ public class CDeliverableType extends CTypeEntity<CDeliverableType> {
 	public CDeliverableType(final String name, final CProject project) {
 		super(CDeliverableType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

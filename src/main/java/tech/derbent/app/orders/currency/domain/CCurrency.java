@@ -47,20 +47,6 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 
 	public String getCurrencySymbol() { return currencySymbol; }
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
-
 	public void setCurrencyCode(final String currencyCode) {
 		this.currencyCode = currencyCode;
 		updateLastModified();

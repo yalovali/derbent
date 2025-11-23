@@ -27,31 +27,48 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public static final String DEFAULT_COLOR = "#003444";
 	public static final String DEFAULT_ICON = "vaadin:warning";
 	public static final String VIEW_NAME = "Risks View";
-
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk", hidden = false, order = 20,
+			maxLength = 1000
+	)
+	private String cause;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk",
-			hidden = false, order = 2, dataProviderBean = "CRiskTypeService", setBackgroundFromColor = true, useIcon = true
+			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk", hidden = false, order = 2,
+			dataProviderBean = "CRiskTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CRiskType entityType;
-
-	@Enumerated (EnumType.STRING)
-	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
 	@AMetaData (
-			displayName = "Severity", required = true, readOnly = false, defaultValue = "LOW",
-			description = "Severity level of the risk", hidden = false, order = 10, useRadioButtons = false
+			displayName = "Impact", required = false, readOnly = false, description = "Potential impact if risk occurs", hidden = false, order = 21,
+			maxLength = 1000
 	)
-	private ERiskSeverity riskSeverity;
-
-	@Enumerated (EnumType.STRING)
-	@Column (name = "risk_likelihood", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
+	private String impact;
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Likelihood", required = false, readOnly = false, defaultValue = "POSSIBLE",
-			description = "Probability of risk occurring", hidden = false, order = 11, useRadioButtons = false
+			displayName = "Mitigation", required = false, readOnly = false, description = "Strategy to mitigate or reduce the risk", hidden = false,
+			order = 22, maxLength = 2000
 	)
-	private ERiskLikelihood riskLikelihood;
-
+	private String mitigation;
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Action Plan", required = false, readOnly = false, description = "Detailed action plan to address the risk", hidden = false,
+			order = 23, maxLength = 2000
+	)
+	private String plan;
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Result", required = false, readOnly = false, description = "Outcome or result of risk management", hidden = false,
+			order = 24, maxLength = 1000
+	)
+	private String result;
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_criticality", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
@@ -59,46 +76,20 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			description = "Overall importance/criticality of the risk", hidden = false, order = 12, useRadioButtons = false
 	)
 	private ERiskCriticality riskCriticality;
-
-	@Column (nullable = true, length = 1000)
-	@Size (max = 1000)
+	@Enumerated (EnumType.STRING)
+	@Column (name = "risk_likelihood", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
-			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk",
-			hidden = false, order = 20, maxLength = 1000
+			displayName = "Likelihood", required = false, readOnly = false, defaultValue = "POSSIBLE", description = "Probability of risk occurring",
+			hidden = false, order = 11, useRadioButtons = false
 	)
-	private String cause;
-
-	@Column (nullable = true, length = 1000)
-	@Size (max = 1000)
+	private ERiskLikelihood riskLikelihood;
+	@Enumerated (EnumType.STRING)
+	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
-			displayName = "Impact", required = false, readOnly = false, description = "Potential impact if risk occurs",
-			hidden = false, order = 21, maxLength = 1000
+			displayName = "Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk",
+			hidden = false, order = 10, useRadioButtons = false
 	)
-	private String impact;
-
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Mitigation", required = false, readOnly = false, description = "Strategy to mitigate or reduce the risk",
-			hidden = false, order = 22, maxLength = 2000
-	)
-	private String mitigation;
-
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Action Plan", required = false, readOnly = false, description = "Detailed action plan to address the risk",
-			hidden = false, order = 23, maxLength = 2000
-	)
-	private String plan;
-
-	@Column (nullable = true, length = 1000)
-	@Size (max = 1000)
-	@AMetaData (
-			displayName = "Result", required = false, readOnly = false, description = "Outcome or result of risk management",
-			hidden = false, order = 24, maxLength = 1000
-	)
-	private String result;
+	private ERiskSeverity riskSeverity;
 
 	/** Default constructor for JPA. */
 	public CRisk() {
@@ -134,20 +125,6 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
-	}
-
-	@Override
-	public void initializeAllFields() {
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
 	}
 
 	@Override

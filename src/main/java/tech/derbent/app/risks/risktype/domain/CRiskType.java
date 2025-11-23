@@ -27,7 +27,4 @@ public class CRiskType extends CTypeEntity<CRiskType> {
 	public CRiskType(final String name, final CProject project) {
 		super(CRiskType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

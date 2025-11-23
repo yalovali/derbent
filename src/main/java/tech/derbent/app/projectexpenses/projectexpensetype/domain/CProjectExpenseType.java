@@ -27,7 +27,4 @@ public class CProjectExpenseType extends CTypeEntity<CProjectExpenseType> {
 	public CProjectExpenseType(final String name, final CProject project) {
 		super(CProjectExpenseType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

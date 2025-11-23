@@ -27,7 +27,4 @@ public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 	public CMilestoneType(final String name, final CProject project) {
 		super(CMilestoneType.class, name, project);
 	}
-
-	@Override
-	public void initializeAllFields() {}
 }

@@ -67,20 +67,6 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	public Integer getPriorityLevel() { return priorityLevel; }
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
-
 	/** Convenience method to check if this is the default priority.
 	 * @return true if this is the default priority, false otherwise */
 	public boolean isDefault() { return Boolean.TRUE.equals(isDefault); }

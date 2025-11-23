@@ -11,8 +11,8 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpenseType;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
@@ -24,13 +24,11 @@ public class CProjectExpense extends CProjectItem<CProjectExpense> implements IH
 	public static final String DEFAULT_COLOR = "#EF5350";
 	public static final String DEFAULT_ICON = "vaadin:money-withdraw";
 	public static final String VIEW_NAME = "Project Expense View";
-
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "ProjectExpense Type", required = false, readOnly = false, 
-			description = "Type category of the projectexpense", hidden = false, order = 2,
-			dataProviderBean = "CProjectExpenseTypeService", setBackgroundFromColor = true, useIcon = true
+			displayName = "ProjectExpense Type", required = false, readOnly = false, description = "Type category of the projectexpense",
+			hidden = false, order = 2, dataProviderBean = "CProjectExpenseTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProjectExpenseType entityType;
 
@@ -55,27 +53,14 @@ public class CProjectExpense extends CProjectItem<CProjectExpense> implements IH
 	}
 
 	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+	}
+
+	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CProjectExpenseType.class, "Type entity must be an instance of CProjectExpenseType");
 		entityType = (CProjectExpenseType) typeEntity;
 		updateLastModified();
-	}
-
-	@Override
-	public void initializeAllFields() {
-		if (getProject() != null) {
-			getProject().getName();
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin();
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin();
-		}
-	}
-
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
 	}
 }

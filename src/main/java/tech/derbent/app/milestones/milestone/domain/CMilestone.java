@@ -11,8 +11,8 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.milestones.milestonetype.domain.CMilestoneType;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
@@ -24,13 +24,11 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 	public static final String DEFAULT_COLOR = "#4A90E2";
 	public static final String DEFAULT_ICON = "vaadin:flag";
 	public static final String VIEW_NAME = "Milestone View";
-
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Milestone Type", required = false, readOnly = false, 
-			description = "Type category of the milestone", hidden = false, order = 2,
-			dataProviderBean = "CMilestoneTypeService", setBackgroundFromColor = true, useIcon = true
+			displayName = "Milestone Type", required = false, readOnly = false, description = "Type category of the milestone", hidden = false,
+			order = 2, dataProviderBean = "CMilestoneTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CMilestoneType entityType;
 
@@ -55,27 +53,14 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 	}
 
 	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+	}
+
+	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CMilestoneType.class, "Type entity must be an instance of CMilestoneType");
 		entityType = (CMilestoneType) typeEntity;
 		updateLastModified();
-	}
-
-	@Override
-	public void initializeAllFields() {
-		if (getProject() != null) {
-			getProject().getName();
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin();
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin();
-		}
-	}
-
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
 	}
 }

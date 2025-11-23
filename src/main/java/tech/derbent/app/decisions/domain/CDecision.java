@@ -135,27 +135,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 		return super.hashCode();
 	}
 
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (accountableUser != null) {
-			accountableUser.getLogin(); // Trigger accountable user loading
-		}
-		if (entityType != null) {
-			entityType.getName(); // Trigger type loading
-		}
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
-
 	public void setAccountableUser(final CUser accountableUser) {
 		this.accountableUser = accountableUser;
 		updateLastModified();

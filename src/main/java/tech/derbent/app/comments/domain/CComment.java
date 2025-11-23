@@ -113,20 +113,11 @@ public class CComment extends CEvent<CComment> {
 
 	public String getCommentText() { return commentText; }
 
+	public Boolean getImportant() { return important; }
+
 	public CCommentPriority getPriority() { return priority; }
 
 	public String getPriorityName() { return (priority != null) ? priority.getName() : "Normal"; }
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (activity != null) {
-			activity.getName(); // Trigger activity loading
-		}
-		if (priority != null) {
-			priority.getName(); // Trigger priority loading
-		}
-	}
 
 	@Override
 	protected void initializeDefaults() {
@@ -135,8 +126,6 @@ public class CComment extends CEvent<CComment> {
 			commentText = "";
 		}
 	}
-
-	public Boolean getImportant() { return important; }
 
 	public Boolean isImportant() { return important; }
 
