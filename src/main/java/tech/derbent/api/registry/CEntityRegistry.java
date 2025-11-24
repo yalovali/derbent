@@ -14,6 +14,7 @@ public class CEntityRegistry {
 	private static final Map<String, String> defaultColorsByName = new ConcurrentHashMap<>();
 	private static final Map<Class<?>, String> defaultIcons = new ConcurrentHashMap<>();
 	private static final Map<String, String> defaultIconsByName = new ConcurrentHashMap<>();
+	// changed key type from Class<?> to String to match usages (simple name -> class)
 	private static final Map<String, Class<?>> entityClasses = new ConcurrentHashMap<>();
 	private static volatile boolean initialized = false;
 	private static final Map<Class<?>, Class<?>> initializerServices = new ConcurrentHashMap<>();
@@ -127,10 +128,6 @@ public class CEntityRegistry {
 			Check.notNull(registrable.getEntityClass(), "Entity class cannot be null");
 			Check.notNull(registrable.getServiceClass(), "Service class cannot be null");
 			Check.notBlank(registrable.getSimpleName(), "Simple name cannot be blank");
-			Check.notNull(registrable.getInitializerServiceClass(), "Initializer service class cannot be null");
-			Check.notNull(registrable.getPageServiceClass(), "Page service class cannot be null" + " for entity: " + registrable.getSimpleName());
-			Check.notBlank(registrable.getDefaultIconName(), "Default icon name cannot be blank");
-			Check.notBlank(registrable.getDefaultColor(), "Default color cannot be blank");
 			final Class<?> entityClass = registrable.getEntityClass();
 			final String simpleName = registrable.getSimpleName();
 			final Class<?> serviceClass = registrable.getServiceClass();
@@ -140,13 +137,33 @@ public class CEntityRegistry {
 			serviceClasses.put(simpleName, serviceClass);
 			serviceClassesByEntity.put(entityClass, serviceClass);
 			serviceClassesByName.put(serviceClass.getSimpleName(), serviceClass);
-			initializerServices.put(entityClass, registrable.getInitializerServiceClass());
-			pageServiceClasses.put(entityClass, registrable.getPageServiceClass());
-			pageServiceClassesByName.put(registrable.getPageServiceClass().getSimpleName(), registrable.getPageServiceClass());
-			defaultIcons.put(entityClass, registrable.getDefaultIconName());
-			defaultIconsByName.put(entityClass.getName(), registrable.getDefaultIconName());
-			defaultColors.put(entityClass, registrable.getDefaultColor());
-			defaultColorsByName.put(entityClass.getName(), registrable.getDefaultColor());
+
+			// Optional initializer service
+			final Class<?> initializer = registrable.getInitializerServiceClass();
+			if (initializer != null) {
+				initializerServices.put(entityClass, initializer);
+			}
+
+			// Optional page service
+			final Class<?> pageService = registrable.getPageServiceClass();
+			if (pageService != null) {
+				pageServiceClasses.put(entityClass, pageService);
+				pageServiceClassesByName.put(pageService.getSimpleName(), pageService);
+			}
+
+			// Optional default icon
+			final String defaultIconName = registrable.getDefaultIconName();
+			if (defaultIconName != null && !defaultIconName.isBlank()) {
+				defaultIcons.put(entityClass, defaultIconName);
+				defaultIconsByName.put(entityClass.getName(), defaultIconName);
+			}
+
+			// Optional default color
+			final String defaultColor = registrable.getDefaultColor();
+			if (defaultColor != null && !defaultColor.isBlank()) {
+				defaultColors.put(entityClass, defaultColor);
+				defaultColorsByName.put(entityClass.getName(), defaultColor);
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Error registering entity: {}", e.getMessage(), e);
 			throw new RuntimeException("Failed to register entity", e);
