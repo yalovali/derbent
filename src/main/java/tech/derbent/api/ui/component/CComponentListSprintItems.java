@@ -146,7 +146,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 			
 		} catch (final Exception ex) {
 			LOGGER.error("Error handling add operation", ex);
-			CNotificationService.showError("Error adding item: " + ex.getMessage());
+			CNotificationService.showException("Error adding item", ex);
 		}
 	}
 
@@ -230,7 +230,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 				
 			} catch (Exception ex) {
 				LOGGER.error("Error creating sprint item", ex);
-				CNotificationService.showError("Error adding item: " + ex.getMessage());
+				CNotificationService.showException("Error adding item", ex);
 			}
 		});
 		
@@ -285,7 +285,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 			
 		} catch (Exception e) {
 			LOGGER.error("Error loading available items", e);
-			CNotificationService.showError("Error loading items: " + e.getMessage());
+			CNotificationService.showException("Error loading items", e);
 		}
 	}
 

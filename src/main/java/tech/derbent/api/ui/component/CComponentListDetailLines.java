@@ -8,6 +8,7 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.view.CDetailLinesEditDialog;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
 /**
@@ -120,7 +121,7 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailL
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Error opening CDetailLinesEditDialog", e);
-			throw new RuntimeException("Error opening edit dialog: " + e.getMessage(), e);
+			CNotificationService.showException("Error opening edit dialog", e);
 		}
 	}
 

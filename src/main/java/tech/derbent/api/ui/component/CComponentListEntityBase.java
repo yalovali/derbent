@@ -191,7 +191,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 			updateButtonStates(item != null);
 		} catch (final Exception ex) {
 			LOGGER.error("Error processing selection change", ex);
-			CNotificationService.showError("Error processing selection: " + ex.getMessage());
+			CNotificationService.showException("Error processing selection", ex);
 		}
 	}
 
@@ -247,7 +247,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 			
 		} catch (final Exception ex) {
 			LOGGER.error("Error handling add operation", ex);
-			CNotificationService.showError("Error adding item: " + ex.getMessage());
+			CNotificationService.showException("Error adding item", ex);
 		}
 	}
 
@@ -263,7 +263,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 			openEditDialog(item, this::handleSave, false);
 		} catch (final Exception ex) {
 			LOGGER.error("Error opening edit dialog", ex);
-			CNotificationService.showError("Error editing item: " + ex.getMessage());
+			CNotificationService.showException("Error editing item", ex);
 		}
 	}
 
@@ -283,7 +283,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 			CNotificationService.showDeleteSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error deleting item", e);
-			CNotificationService.showDeleteError();
+			CNotificationService.showException("Error deleting item", e);
 		}
 	}
 
@@ -300,7 +300,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 			refreshGrid();
 		} catch (final Exception e) {
 			LOGGER.error("Error moving item up", e);
-			CNotificationService.showError("Error moving item: " + e.getMessage());
+			CNotificationService.showException("Error moving item up", e);
 		}
 	}
 
@@ -317,7 +317,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 			refreshGrid();
 		} catch (final Exception e) {
 			LOGGER.error("Error moving item down", e);
-			CNotificationService.showError("Error moving item: " + e.getMessage());
+			CNotificationService.showException("Error moving item down", e);
 		}
 	}
 
@@ -353,7 +353,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 			CNotificationService.showSaveSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error saving entity", e);
-			CNotificationService.showError("Error saving item: " + e.getMessage());
+			CNotificationService.showException("Error saving item", e);
 		}
 	}
 
