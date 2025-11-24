@@ -45,6 +45,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	
+	// Item type constants
+	private static final String ITEM_TYPE_ACTIVITY = "CActivity";
+	private static final String ITEM_TYPE_MEETING = "CMeeting";
+	
 	// Services for loading items
 	private final CActivityService activityService;
 	private final CMeetingService meetingService;
@@ -121,13 +125,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 
 	@Override
 	protected CSprintItem createNewEntity() {
-		Check.notNull(currentSprint, "Current sprint cannot be null when creating new entity");
-		Check.notNull(currentSprint.getId(), "Current sprint must be saved before adding items");
-		
-		LOGGER.debug("Creating new CSprintItem entity for sprint: {}", currentSprint.getId());
-		
-		// Don't create here - will be created after user selects type and item in dialog
-		return null;
+		// Sprint items are created through the custom add dialog
+		// This method should not be called directly
+		throw new UnsupportedOperationException(
+			"Sprint items must be created through the type selection dialog. Use handleAdd() instead.");
 	}
 
 	@Override
@@ -169,7 +170,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		
 		// Type selection
 		final ComboBox<String> typeComboBox = new ComboBox<>("Item Type");
-		typeComboBox.setItems("CActivity", "CMeeting");
+		typeComboBox.setItems(ITEM_TYPE_ACTIVITY, ITEM_TYPE_MEETING);
 		typeComboBox.setPlaceholder("Select type...");
 		typeComboBox.setRequired(true);
 		typeComboBox.setWidthFull();
@@ -264,10 +265,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		try {
 			List<? extends CProjectItem<?>> items;
 			
-			if ("CActivity".equals(type)) {
+			if (ITEM_TYPE_ACTIVITY.equals(type)) {
 				items = activityService.listByProject(project);
 				LOGGER.debug("Loaded {} activities", items.size());
-			} else if ("CMeeting".equals(type)) {
+			} else if (ITEM_TYPE_MEETING.equals(type)) {
 				items = meetingService.listByProject(project);
 				LOGGER.debug("Loaded {} meetings", items.size());
 			} else {
@@ -276,7 +277,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 				return;
 			}
 			
-			// Cast to List<CProjectItem<?>>
+			// Cast is safe because both CActivity and CMeeting extend CProjectItem
 			@SuppressWarnings("unchecked")
 			List<CProjectItem<?>> projectItems = (List<CProjectItem<?>>) items;
 			
@@ -291,10 +292,23 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 	@Override
 	protected void openEditDialog(final CSprintItem entity, final Consumer<CSprintItem> saveCallback, final boolean isNew) {
 		Check.notNull(entity, "Entity cannot be null when opening edit dialog");
-		Check.notNull(saveCallback, "Save callback cannot be null");
 		
-		LOGGER.debug("Edit operation not supported for sprint items - use add to create new items");
-		CNotificationService.showWarning("Sprint items cannot be edited directly. Delete and add a new item instead.");
+		LOGGER.warn("Edit operation not supported for sprint items - ID: {}", entity.getId());
+		CNotificationService.showWarning(
+			"Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
+		
+		// Sprint items are simple references (itemId + itemType)
+		// There's nothing meaningful to edit - users should delete and re-add instead
+	}
+
+	@Override
+	protected void handleDoubleClick(final CSprintItem item) {
+		// Override to prevent edit dialog from opening on double-click
+		Check.notNull(item, "Double-clicked item cannot be null");
+		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
+		selectedItem = item;
+		updateButtonStates(true);
+		// Don't call openEditDialog - just select the item
 	}
 
 	@Override
