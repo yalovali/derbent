@@ -2,19 +2,14 @@ package tech.derbent.app.sprints.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
@@ -30,16 +25,11 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintService.class);
 	private final CSprintTypeService entityTypeService;
-	private final CActivityService activityService;
-	private final CMeetingService meetingService;
 
 	public CSprintService(final ISprintRepository repository, final Clock clock, final ISessionService sessionService,
-			final CSprintTypeService sprintTypeService, final CProjectItemStatusService projectItemStatusService,
-			final CActivityService activityService, final CMeetingService meetingService) {
+			final CSprintTypeService sprintTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.entityTypeService = sprintTypeService;
-		this.activityService = activityService;
-		this.meetingService = meetingService;
 	}
 
 	@Override
@@ -85,21 +75,5 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		entity.setColor(CSprint.DEFAULT_COLOR);
 
 		LOGGER.debug("Sprint initialization complete with default values");
-	}
-
-	/** Get all project items (activities and meetings) for the current project.
-	 * This method is used as a data provider for the unified items field.
-	 * @return list of all project items (activities and meetings) */
-	public List<CProjectItem<?>> getAllProjectItemsForCurrentProject() {
-		final List<CProjectItem<?>> allItems = new ArrayList<>();
-		
-		// Add all activities from current project
-		allItems.addAll(activityService.findAll());
-		
-		// Add all meetings from current project
-		allItems.addAll(meetingService.findAll());
-		
-		LOGGER.debug("Retrieved {} total project items for current project", allItems.size());
-		return allItems;
 	}
 }

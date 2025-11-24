@@ -469,18 +469,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			return "Unknown Item: " + String.valueOf(item);
 		});
-		// Bind with converter for Set fields - CComponentFieldSelection works with List but entity fields may be Set
-		if ("Set".equals(fieldInfo.getJavaType())) {
-			LOGGER.debug("Binding Set field '{}' with List<->Set converter", fieldInfo.getFieldName());
-			binder.forField(dualListSelector)
-					.withConverter(
-							list -> list != null ? new LinkedHashSet<>(list) : null, // List to Set
-							set -> set != null ? new ArrayList<>(set) : null // Set to List
-					)
-					.bind(fieldInfo.getFieldName());
-		} else {
-			safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
-		}
+		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
 		return dualListSelector;
 	}
 
