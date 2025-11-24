@@ -25,7 +25,6 @@ import tech.derbent.base.users.service.CUserService;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
-
 	static final Class<?> clazz = CSprint.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".3";
@@ -48,8 +47,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			scr.addScreenLine(CDetailLinesService.createSection("Sprint Items"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "meetings"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sprintItems"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "itemCount"));
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
@@ -112,7 +110,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				if (activity != null) {
 					sprint.addItem(activity);
 				}
-				CMeeting meeting = meetingService.getRandom(project);
+				final CMeeting meeting = meetingService.getRandom(project);
 				if (meeting != null) {
 					sprint.addItem(meeting);
 				}

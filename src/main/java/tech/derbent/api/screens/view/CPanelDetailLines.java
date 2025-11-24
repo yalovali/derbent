@@ -20,13 +20,12 @@ import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 
 public class CPanelDetailLines extends CPanelDetailSectionBase {
-
 	private static final long serialVersionUID = 1L;
 	private final CDetailLinesService detailLinesService;
 	private CGrid<CDetailLines> grid;
 	private CDetailLines selectedLine;
 
-	public CPanelDetailLines(IContentOwner parentContent, final CDetailSection currentEntity,
+	public CPanelDetailLines(final IContentOwner parentContent, final CDetailSection currentEntity,
 			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService,
 			final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService)
 			throws Exception {
@@ -174,7 +173,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	/** Opens the add field dialog for creating a new screen field.
 	 * @param position the position to insert at (0 means at the end)
 	 * @throws Exception */
-	private void openAddFieldDialog(Integer position) throws Exception {
+	private void openAddFieldDialog(final Integer position) throws Exception {
 		if ((getCurrentEntity() == null) || (getCurrentEntity().getId() == null)) {
 			CNotificationService.showWarning("Please save the screen first before adding fields");
 			return;
@@ -209,7 +208,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	private void refreshLinesGrid() {
 		final CDetailSection detailSection = getCurrentEntity();
 		if (detailSection != null) {
-			var currentValue = grid.asSingleSelect().getValue();
+			final var currentValue = grid.asSingleSelect().getValue();
 			final List<CDetailLines> lines = detailLinesService.findByMaster(detailSection);
 			grid.setItems(lines);
 			grid.asSingleSelect().setValue(currentValue);
