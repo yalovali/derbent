@@ -18,6 +18,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasColorAndIcon;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -30,7 +31,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "csprint")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_id"))
-public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem {
+public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasColorAndIcon {
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
@@ -173,6 +174,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		return activities;
 	}
 
+	@Override
 	public String getColor() { return color; }
 
 	@Override
@@ -368,6 +370,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
+	@Override
 	public void setColor(final String color) {
 		this.color = color;
 		updateLastModified();
