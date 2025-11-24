@@ -15,6 +15,7 @@ import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -155,5 +156,79 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	 */
 	public CSprintItem findBySprintIdAndItemId(final Long sprintId, final Long itemId) {
 		return ((ISprintItemRepository) repository).findBySprintIdAndItemId(sprintId, itemId);
+	}
+
+	/**
+	 * Move a sprint item up in the order (decrease order number).
+	 * @param sprintItem the sprint item to move up
+	 */
+	public void moveItemUp(final CSprintItem sprintItem) {
+		if (sprintItem == null || sprintItem.getSprint() == null) {
+			LOGGER.warn("Cannot move up - sprint item or sprint is null");
+			return;
+		}
+
+		final List<CSprintItem> items = findBySprintId(sprintItem.getSprint().getId());
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(sprintItem.getId()) && i > 0) {
+				// Swap orders with previous item
+				final CSprintItem previousItem = items.get(i - 1);
+				final Integer currentOrder = sprintItem.getItemOrder();
+				final Integer previousOrder = previousItem.getItemOrder();
+				sprintItem.setItemOrder(previousOrder);
+				previousItem.setItemOrder(currentOrder);
+				save(sprintItem);
+				save(previousItem);
+				LOGGER.debug("Moved sprint item {} up from order {} to {}", sprintItem.getId(), currentOrder, previousOrder);
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Move a sprint item down in the order (increase order number).
+	 * @param sprintItem the sprint item to move down
+	 */
+	public void moveItemDown(final CSprintItem sprintItem) {
+		if (sprintItem == null || sprintItem.getSprint() == null) {
+			LOGGER.warn("Cannot move down - sprint item or sprint is null");
+			return;
+		}
+
+		final List<CSprintItem> items = findBySprintId(sprintItem.getSprint().getId());
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(sprintItem.getId()) && i < (items.size() - 1)) {
+				// Swap orders with next item
+				final CSprintItem nextItem = items.get(i + 1);
+				final Integer currentOrder = sprintItem.getItemOrder();
+				final Integer nextOrder = nextItem.getItemOrder();
+				sprintItem.setItemOrder(nextOrder);
+				nextItem.setItemOrder(currentOrder);
+				save(sprintItem);
+				save(nextItem);
+				LOGGER.debug("Moved sprint item {} down from order {} to {}", sprintItem.getId(), currentOrder, nextOrder);
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Create a new sprint item for the given sprint.
+	 * @param sprint the sprint
+	 * @param item the project item to add
+	 * @return the new sprint item
+	 */
+	public CSprintItem newSprintItem(final CSprint sprint, final CProjectItem<?> item) {
+		if (sprint == null || item == null) {
+			LOGGER.warn("Cannot create sprint item - sprint or item is null");
+			return null;
+		}
+
+		final List<CSprintItem> existingItems = findBySprintId(sprint.getId());
+		final int nextOrder = existingItems.size() + 1;
+
+		final CSprintItem sprintItem = new CSprintItem(sprint, item, nextOrder);
+		LOGGER.debug("Created new sprint item for sprint {} with order {}", sprint.getId(), nextOrder);
+		return sprintItem;
 	}
 }
