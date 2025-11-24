@@ -48,6 +48,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> {
 	private Long itemId;
 
 	@Column(name = "item_order", nullable = false)
+	@NotNull(message = "Item order is required")
 	@AMetaData(
 			displayName = "Order", required = true, readOnly = false,
 			description = "Display order of this item in the sprint", hidden = false, order = 3,
@@ -56,6 +57,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> {
 	private Integer itemOrder = 0;
 
 	@Column(name = "item_type", nullable = false, length = 50)
+	@NotNull(message = "Item type is required")
 	@AMetaData(
 			displayName = "Item Type", required = true, readOnly = false,
 			description = "Type of the project item (CActivity, CMeeting, etc.)", hidden = false, order = 4,
