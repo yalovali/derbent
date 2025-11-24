@@ -10,6 +10,7 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasColorAndIcon;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.app.projects.domain.CProject;
@@ -19,7 +20,7 @@ import tech.derbent.app.projects.domain.CProject;
 		"menu_title", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "pageentity_id"))
-public class CPageEntity extends CProjectItem<CPageEntity> {
+public class CPageEntity extends CProjectItem<CPageEntity> implements IHasColorAndIcon {
 
 	public static final String DEFAULT_COLOR = "#6f42c1";
 	public static final String DEFAULT_ICON = "vaadin:file";
@@ -130,6 +131,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	public boolean getAttributeShowInQuickToolbar() { return attributeShowInQuickToolbar; }
 
+	@Override
 	public String getColor() { return color; }
 
 	public String getContent() { return content; }
@@ -179,6 +181,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	public void setAttributeShowInQuickToolbar(boolean showInQuickToolbar) { attributeShowInQuickToolbar = showInQuickToolbar; }
 
+	@Override
 	public void setColor(String color) { this.color = color; }
 
 	public void setContent(String content) { this.content = content; }
