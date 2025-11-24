@@ -38,8 +38,14 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	
 	// Sprint Items - Ordered collection of activities and meetings included in this sprint
 	// Uses OneToMany pattern with CSprintItem join entity for proper ordering
+	// Similar to CDetailLines pattern in CDetailSection
 	@OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OrderBy("itemOrder ASC")
+	@AMetaData(
+			displayName = "Sprint Items", required = false, readOnly = false,
+			description = "Items (activities, meetings, etc.) included in this sprint", 
+			hidden = false, order = 30
+	)
 	private List<CSprintItem> sprintItems = new ArrayList<>();
 	
 	// Sprint Color for UI display
@@ -135,6 +141,19 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public void addMeeting(final CMeeting meeting) {
 		if (meeting != null) {
 			final CSprintItem sprintItem = new CSprintItem(this, meeting, sprintItems.size() + 1);
+			sprintItems.add(sprintItem);
+			updateLastModified();
+		}
+	}
+
+	/** Add a sprint item to this sprint.
+	 * @param sprintItem the sprint item to add */
+	public void addSprintItem(final CSprintItem sprintItem) {
+		if (sprintItem != null) {
+			sprintItem.setSprint(this);
+			if (sprintItem.getItemOrder() == null || sprintItem.getItemOrder() == 0) {
+				sprintItem.setItemOrder(sprintItems.size() + 1);
+			}
 			sprintItems.add(sprintItem);
 			updateLastModified();
 		}
