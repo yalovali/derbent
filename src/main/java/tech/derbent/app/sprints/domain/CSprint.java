@@ -36,19 +36,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
 	public static final String VIEW_NAME = "Sprints View";
-	
-	// Sprint Items - Ordered collection of activities and meetings included in this sprint
-	// Uses OneToMany pattern with CSprintItem join entity for proper ordering
-	// Similar to CDetailLines pattern in CDetailSection
-	@OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@OrderBy("itemOrder ASC")
-	@AMetaData(
-			displayName = "Sprint Items", required = false, readOnly = false,
-			description = "Items (activities, meetings, etc.) included in this sprint", 
-			hidden = false, order = 30
-	)
-	private List<CSprintItem> sprintItems = new ArrayList<>();
-	
 	// Sprint Color for UI display
 	@Column (nullable = true, length = 7)
 	@Size (max = 7)
@@ -83,7 +70,17 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			order = 32
 	)
 	private Integer itemCount;
-	
+	// Sprint Items - Ordered collection of activities and meetings included in this sprint
+	// Uses OneToMany pattern with CSprintItem join entity for proper ordering
+	// Similar to CDetailLines pattern in CDetailSection
+	@OneToMany (mappedBy = "sprint", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OrderBy ("itemOrder ASC")
+	@AMetaData (
+			displayName = "Sprint Items", required = false, readOnly = false,
+			description = "Items (activities, meetings, etc.) included in this sprint", hidden = false, order = 30,
+			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "view"
+	)
+	private List<CSprintItem> sprintItems = new ArrayList<>();
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint",
@@ -195,9 +192,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	/** Get the total number of items in this sprint. This is a calculated field for UI display.
 	 * @return total count of sprint items */
-	public Integer getItemCount() {
-		return sprintItems != null ? sprintItems.size() : 0;
-	}
+	public Integer getItemCount() { return sprintItems != null ? sprintItems.size() : 0; }
 
 	/** Get all sprint items (activities and meetings combined) as a list. This is a convenience method for backward compatibility.
 	 * @return combined list of all sprint items */
@@ -250,9 +245,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	/** Gets the sprint items collection.
 	 * @return list of sprint items */
-	public List<CSprintItem> getSprintItems() {
-		return sprintItems != null ? sprintItems : new ArrayList<>();
-	}
+	public List<CSprintItem> getSprintItems() { return sprintItems != null ? sprintItems : new ArrayList<>(); }
 
 	@Override
 	public LocalDate getStartDate() { return startDate; }

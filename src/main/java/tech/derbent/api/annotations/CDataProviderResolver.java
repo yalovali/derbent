@@ -13,17 +13,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.CSessionService;
 
 @Service
 public final class CDataProviderResolver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataProviderResolver.class);
+
+	public static Object resolveBean(final String beanName, final IContentOwner contentOwner) throws Exception {
+		Object bean;
+		// paramBeanName is ok now
+		if ("context".equals(beanName)) {
+			// just the content owner
+			bean = contentOwner;
+		} else if ("session".equals(beanName)) {
+			bean = CSpringContext.getBean(CSessionService.class);
+		} else if ("view".equals(beanName)) {
+			Check.instanceOf(contentOwner, IPageServiceImplementer.class,
+					"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
+			bean = ((IPageServiceImplementer) contentOwner).getPageService();
+		} else {
+			// Get bean from Spring context
+			bean = CSpringContext.getBean(beanName);
+		}
+		Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName);
+		return bean;
+	}
+
 	private final ApplicationContext applicationContext;
 	/** Cache for resolved bean instances to improve performance. Key format: "beanName" or "className" */
 	private final Map<String, Object> beanCache = new ConcurrentHashMap<>();
@@ -106,29 +129,7 @@ public final class CDataProviderResolver {
 				there_is_param = true;
 				paramValue = resolveParamValue(contentOwner, fieldInfo);
 			}
-			Object bean;
-			// paramBeanName is ok now
-			if ("context".equals(beanName)) {
-				// just the content owner
-				bean = contentOwner;
-			} else if ("session".equals(beanName)) {
-				bean = getBeanFromCache("CSessionService", () -> {
-					Check.isTrue(applicationContext.containsBean("CSessionService"),
-							"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
-					return applicationContext.getBean("CSessionService");
-				});
-			} else if ("view".equals(beanName)) {
-				Check.instanceOf(contentOwner, IPageServiceImplementer.class,
-						"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
-				bean = ((IPageServiceImplementer) contentOwner).getPageService();
-			} else {
-				// Get bean from Spring context with caching
-				bean = getBeanFromCache(beanName, () -> {
-					Check.isTrue(applicationContext.containsBean(beanName),
-							"Parameter Bean '" + beanName + "' not found in application context of beans:" + getAvailableServiceBeans());
-					return applicationContext.getBean(beanName);
-				});
-			}
+			Object bean = resolveBean(beanName, contentOwner);
 			Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName + " field: " + fieldInfo.getFieldName());
 			Object result;
 			if (there_is_param) {

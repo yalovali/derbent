@@ -3,6 +3,7 @@ package tech.derbent.app.sprints.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
@@ -24,6 +25,20 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> impleme
 			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
+		}
+	}
+
+	public Component createSpritActivitiesComponent() {
+		try {
+			Component component = new Div("safdfasfsaf");
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create project user settings component.");
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading project user settings component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
 		}
 	}
 
