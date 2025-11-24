@@ -128,7 +128,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		// Sprint items are created through the custom add dialog
 		// This method should not be called directly
 		throw new UnsupportedOperationException(
-			"Sprint items must be created through the type selection dialog. Use handleAdd() instead.");
+			"Sprint items must be created through the type selection dialog.");
 	}
 
 	@Override
@@ -306,7 +306,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		// Override to prevent edit dialog from opening on double-click
 		Check.notNull(item, "Double-clicked item cannot be null");
 		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
-		selectedItem = item;
+		setSelectedItem(item);
 		updateButtonStates(true);
 		// Don't call openEditDialog - just select the item
 	}
