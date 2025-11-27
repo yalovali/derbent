@@ -12,8 +12,10 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
@@ -34,8 +36,9 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <li>Move up/down for reordering</li>
  * <li>Selection management</li>
  * </ul>
- */
-public class CComponentListSprintItems extends CComponentListEntityBase<CSprintItem, CSprint> {
+ * <p>
+ * Implements IContentOwner to receive automatic entity updates from the form builder's binder when a sprint is selected. */
+public class CComponentListSprintItems extends CComponentListEntityBase<CSprintItem, CSprint> implements IContentOwner {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	// Item type constants
@@ -305,6 +308,57 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 			refreshGrid();
 		} else {
 			clearGrid();
+		}
+	}
+
+	// ==================== IContentOwner Interface Implementation ====================
+
+	/** Creates a new entity instance. This operation is not supported for CComponentListSprintItems because sprint items are created through the type
+	 * selection dialog, not directly.
+	 * @return Never returns - always throws UnsupportedOperationException
+	 * @throws UnsupportedOperationException always - use openItemSelectionDialog() to add sprint items */
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("Sprint items must be created through the type selection dialog. Use openItemSelectionDialog().");
+	}
+
+	/** Returns the current sprint entity.
+	 * @return The current sprint being edited */
+	@Override
+	public CEntityDB<?> getCurrentEntity() { return currentSprint; }
+
+	/** Returns the current sprint ID as a string.
+	 * @return The ID string or null if no sprint is set */
+	@Override
+	public String getCurrentEntityIdString() {
+		return currentSprint != null && currentSprint.getId() != null ? currentSprint.getId().toString() : null;
+	}
+
+	/** Populates the component by refreshing the grid with sprint items. This method is called automatically by CFormBuilder when the binder's entity
+	 * changes. */
+	@Override
+	public void populateForm() {
+		LOGGER.debug("populateForm called - refreshing sprint items grid");
+		if ((currentSprint != null) && (currentSprint.getId() != null)) {
+			refreshGrid();
+		} else {
+			clearGrid();
+		}
+	}
+
+	/** Sets the current entity for this component. Called by CFormBuilder when the binder's entity changes. If the entity is a CSprint, it will be
+	 * set as the current sprint and the grid will be refreshed.
+	 * @param entity The entity to set (expected to be CSprint) */
+	@Override
+	public void setCurrentEntity(final CEntityDB<?> entity) {
+		if (entity == null) {
+			LOGGER.debug("setCurrentEntity called with null - clearing sprint");
+			setCurrentSprint(null);
+		} else if (entity instanceof CSprint) {
+			LOGGER.debug("setCurrentEntity called with CSprint - setting current sprint");
+			setCurrentSprint((CSprint) entity);
+		} else {
+			LOGGER.warn("setCurrentEntity called with unexpected entity type: {} - ignoring", entity.getClass().getSimpleName());
 		}
 	}
 }
