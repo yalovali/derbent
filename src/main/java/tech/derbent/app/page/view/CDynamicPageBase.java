@@ -100,6 +100,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	 * The page service is created once during construction and cached for the lifetime of the page. This avoids the performance overhead of
 	 * recreating the service instance on every call.
 	 * @return the cached page service instance */
+	@Override
 	public CPageService<?> getPageService() { return pageService; }
 
 	/** Implementation of IPageTitleProvider - provides the page title from the CPageEntity */
@@ -134,6 +135,14 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	}
 
 	protected abstract void locateItemById(Long pageItemId);
+
+	@Override
+	public void populateForm() throws Exception {
+		super.populateForm();
+		if (pageService != null) {
+			pageService.populateForm();
+		}
+	}
 
 	@SuppressWarnings ({
 			"unchecked"

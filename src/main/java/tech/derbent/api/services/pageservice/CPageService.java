@@ -22,6 +22,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
@@ -337,6 +338,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	protected EntityClass getCurrentEntity() { return getView().getCurrentEntity(); }
 
+	public CProject getCurrentProject() { return getSessionService().getActiveProject().orElse(null); }
+
 	protected DatePicker getDatePicker(final String fieldName) {
 		return getComponent(fieldName, DatePicker.class);
 	}
@@ -361,6 +364,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	}
 
 	public IPageServiceImplementer<EntityClass> getView() { return view; }
+
+	public void populateForm() {
+		// TODO Auto-generated method stub
+	}
 
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"

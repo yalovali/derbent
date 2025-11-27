@@ -2,6 +2,7 @@ package tech.derbent.api.ui.component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
@@ -327,8 +328,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			}
 			if (value != null) {
 				selectedItems.addAll(value);
-				LOGGER.debug("Selected items loaded from binder: {}",
-						selectedItems.stream().map(Object::toString).collect(java.util.stream.Collectors.joining(", ")));
+				LOGGER.debug("Selected items loaded from binder: {}", selectedItems.stream().map(Object::toString).collect(Collectors.joining(", ")));
 			}
 			refreshGrid();
 		} catch (Exception e) {
@@ -345,7 +345,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 			// Set items as list (typed at runtime)
 			@SuppressWarnings ("unchecked")
-			final List<DetailEntity> items = rawList.stream().map(e -> (DetailEntity) e).collect(java.util.stream.Collectors.toList());
+			final List<DetailEntity> items = rawList.stream().map(e -> (DetailEntity) e).collect(Collectors.toList());
 			setSourceItems(items);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to update source items for field {}: {}", fieldInfo.getFieldName(), e.getMessage());

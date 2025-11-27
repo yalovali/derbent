@@ -9,29 +9,44 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.CComponentListSprintItems;
+import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
 
 /** CPageServiceSprint - Page service for Sprint management UI. Handles UI events and interactions for sprint views. */
 public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> implements IPageServiceHasStatusAndWorkflow<CSprint> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
+	private CActivityService activityService;
+	// private CComponentFieldSelection<CSprint, CActivity> componentFieldSelection;
+	private CComponentListSprintItems componentItemsSelection;
+	private CMeetingService meetingService;
 	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;
+	private CSprintItemService sprintItemService;
 
 	public CPageServiceSprint(final IPageServiceImplementer<CSprint> view) {
 		super(view);
 		// Initialize the service from Spring context
 		try {
 			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			activityService = CSpringContext.getBean(CActivityService.class);
+			meetingService = CSpringContext.getBean(CMeetingService.class);
+			sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 		} catch (Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
 	}
 
+	private void createFormFields() throws Exception {
+		componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
+	}
+
 	public Component createSpritActivitiesComponent() {
 		try {
-			Component component = new Div("safdfasfsaf");
-			return component;
+			createFormFields();
+			return componentItemsSelection;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create project user settings component.");
 			// Fallback to simple div with error message
@@ -63,5 +78,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> impleme
 	public void on_status_change(final Component component, final Object value) {
 		LOGGER.info("function: on_status_change for Component type: {}",
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
+	}
+
+	@Override
+	public void populateForm() {
+		try {
+			// componentItemsSelection.setCurrentSprint(getCurrentEntity());
+		} catch (Exception e) {
+			LOGGER.error("Failed to populate form fields for sprint page service.", e);
+		}
 	}
 }
