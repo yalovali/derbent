@@ -14,6 +14,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
+import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.validation.ValidationMessages;
 
 /** CDetailLines - Domain entity representing individual lines/fields in a screen definition. Layer: Domain (MVC) Each line represents a field that
@@ -21,7 +22,7 @@ import tech.derbent.api.validation.ValidationMessages;
 @Entity
 @Table (name = "cdetaillines")
 @AttributeOverride (name = "id", column = @Column (name = "detaillines_id"))
-public class CDetailLines extends CEntityDB<CDetailLines> {
+public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEntity {
 
 	public static final String DEFAULT_COLOR = "#a76100";
 	public static final String DEFAULT_ICON = "vaadin:connect";
@@ -176,7 +177,9 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public Boolean getIsRequired() { return isRequired; }
 
-	public Integer getitemOrder() { return itemOrder; }
+	public Integer getitemOrder() {
+		return itemOrder;
+	}
 
 	public Integer getMaxLength() { return maxLength; }
 
@@ -214,7 +217,9 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public void setIsRequired(final Boolean isRequired) { this.isRequired = isRequired; }
 
-	public void setitemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
+	public void setitemOrder(final Integer itemOrder) {
+		this.itemOrder = itemOrder;
+	}
 
 	public void setMaxLength(final Integer maxLength) { this.maxLength = maxLength; }
 

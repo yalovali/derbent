@@ -15,16 +15,14 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
-/**
- * CDetailLinesService - Service class for managing detail lines.
- * Provides business logic for detail line operations within a detail section.
- *
- * <p>Follows the common naming conventions for child entity services:
+/** CDetailLinesService - Service class for managing detail lines. Provides business logic for detail line operations within a detail section.
+ * <p>
+ * Follows the common naming conventions for child entity services:
  * <ul>
- *   <li>{@code findByMaster(M master)} - Find all items by master entity</li>
- *   <li>{@code findActiveByMaster(M master)} - Find active items by master entity</li>
- *   <li>{@code countByMaster(M master)} - Count items by master entity</li>
- *   <li>{@code getNextItemOrder(M master)} - Get next order number for new items</li>
+ * <li>{@code findByMaster(M master)} - Find all items by master entity</li>
+ * <li>{@code findActiveByMaster(M master)} - Find active items by master entity</li>
+ * <li>{@code countByMaster(M master)} - Count items by master entity</li>
+ * <li>{@code getNextItemOrder(M master)} - Get next order number for new items</li>
  * </ul>
  */
 @Service
@@ -145,9 +143,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 
 	/** Get the typed repository for this service.
 	 * @return the IDetailLinesRepository */
-	private IDetailLinesRepository getTypedRepository() {
-		return (IDetailLinesRepository) repository;
-	}
+	private IDetailLinesRepository getTypedRepository() { return (IDetailLinesRepository) repository; }
 
 	@Override
 	public void initializeNewEntity(final CDetailLines entity) {
@@ -182,17 +178,21 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 	}
 
 	@Override
-	public void moveItemDown(final CDetailLines detailLine) {
-		final List<CDetailLines> lines = findByMaster(detailLine.getDetailSection());
-		for (int i = 0; i < lines.size(); i++) {
-			if (lines.get(i).getId().equals(detailLine.getId()) && (i < (lines.size() - 1))) {
+	public void moveItemDown(final CDetailLines childItem) {
+		if ((childItem == null)) {
+			LOGGER.warn("Cannot move down - sprint item or sprint is null");
+			return;
+		}
+		final List<CDetailLines> items = findByMaster(childItem.getDetailSection());
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(childItem.getId()) && (i < (items.size() - 1))) {
 				// Swap orders
-				final CDetailLines nextLine = lines.get(i + 1);
-				final Integer currentOrder = detailLine.getitemOrder();
+				final CDetailLines nextLine = items.get(i + 1);
+				final Integer currentOrder = childItem.getitemOrder();
 				final Integer nextOrder = nextLine.getitemOrder();
-				detailLine.setitemOrder(nextOrder);
+				childItem.setitemOrder(nextOrder);
 				nextLine.setitemOrder(currentOrder);
-				save(detailLine);
+				save(childItem);
 				save(nextLine);
 				break;
 			}
@@ -200,19 +200,23 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 	}
 
 	@Override
-	public void moveItemUp(final CDetailLines detailLine) {
-		if (detailLine.getitemOrder() > 1) {
+	public void moveItemUp(final CDetailLines childItem) {
+		if (childItem == null) {
+			LOGGER.warn("Cannot move up - item is null");
+			return;
+		}
+		if (childItem.getitemOrder() > 1) {
 			// Find the line with the previous order
-			final List<CDetailLines> lines = findByMaster(detailLine.getDetailSection());
+			final List<CDetailLines> lines = findByMaster(childItem.getDetailSection());
 			for (int i = 0; i < lines.size(); i++) {
-				if (lines.get(i).getId().equals(detailLine.getId()) && (i > 0)) {
+				if (lines.get(i).getId().equals(childItem.getId()) && (i > 0)) {
 					// Swap orders
 					final CDetailLines previousLine = lines.get(i - 1);
-					final Integer currentOrder = detailLine.getitemOrder();
+					final Integer currentOrder = childItem.getitemOrder();
 					final Integer previousOrder = previousLine.getitemOrder();
-					detailLine.setitemOrder(previousOrder);
+					childItem.setitemOrder(previousOrder);
 					previousLine.setitemOrder(currentOrder);
-					save(detailLine);
+					save(childItem);
 					save(previousLine);
 					break;
 				}

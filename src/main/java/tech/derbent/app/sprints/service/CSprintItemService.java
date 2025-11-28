@@ -19,15 +19,13 @@ import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
-/**
- * CSprintItemService - Service class for managing sprint items.
- * Provides business logic for sprint item operations and dynamic item loading.
- *
- * <p>Follows the common naming conventions for child entity services:
+/** CSprintItemService - Service class for managing sprint items. Provides business logic for sprint item operations and dynamic item loading.
+ * <p>
+ * Follows the common naming conventions for child entity services:
  * <ul>
- *   <li>{@code findByMaster(M master)} - Find all items by master entity</li>
- *   <li>{@code findByMasterId(Long id)} - Find all items by master ID</li>
- *   <li>{@code findByMasterIdWithItems(Long id)} - Find with eager loaded transient data</li>
+ * <li>{@code findByMaster(M master)} - Find all items by master entity</li>
+ * <li>{@code findByMasterId(Long id)} - Find all items by master ID</li>
+ * <li>{@code findByMasterIdWithItems(Long id)} - Find with eager loaded transient data</li>
  * </ul>
  */
 @Service
@@ -73,14 +71,6 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		return getTypedRepository().findByMasterId(masterId);
 	}
 
-	/** Find a sprint item by sprint ID and item ID.
-	 * @param masterId the sprint ID
-	 * @param itemId   the item ID
-	 * @return the sprint item, or null if not found */
-	public CSprintItem findByMasterIdAndItemId(final Long masterId, final Long itemId) {
-		return getTypedRepository().findByMasterIdAndItemId(masterId, itemId);
-	}
-
 	/** Find all sprint items for a specific sprint and load their project items.
 	 * @param masterId the sprint ID
 	 * @return list of sprint items with loaded project items */
@@ -88,12 +78,6 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		final List<CSprintItem> sprintItems = findByMasterId(masterId);
 		loadItems(sprintItems);
 		return sprintItems;
-	}
-
-	/** Get the typed repository for this service.
-	 * @return the ISprintItemRepository */
-	private ISprintItemRepository getTypedRepository() {
-		return (ISprintItemRepository) repository;
 	}
 
 	@Override
@@ -111,6 +95,10 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
+
+	/** Get the typed repository for this service.
+	 * @return the ISprintItemRepository */
+	private ISprintItemRepository getTypedRepository() { return (ISprintItemRepository) repository; }
 
 	/** Load the project item for a sprint item based on itemId and itemType. This method dynamically loads the item at runtime.
 	 * @param sprintItem the sprint item to load the item for */
@@ -161,55 +149,32 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	}
 
 	/** Move a sprint item down in the order (increase order number).
-	 * @param sprintItem the sprint item to move down */
+	 * @param childItem the sprint item to move down */
 	@Override
-	public void moveItemDown(final CSprintItem sprintItem) {
-		if ((sprintItem == null) || (sprintItem.getSprint() == null)) {
+	public void moveItemDown(final CSprintItem childItem) {
+		if ((childItem == null)) {
 			LOGGER.warn("Cannot move down - sprint item or sprint is null");
 			return;
 		}
-		final List<CSprintItem> items = findByMasterId(sprintItem.getSprint().getId());
+		final List<CSprintItem> items = findByMaster(childItem.getSprint());
 		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getId().equals(sprintItem.getId()) && (i < (items.size() - 1))) {
+			if (items.get(i).getId().equals(childItem.getId()) && (i < (items.size() - 1))) {
 				// Swap orders with next item
 				final CSprintItem nextItem = items.get(i + 1);
-				final Integer currentOrder = sprintItem.getItemOrder();
+				final Integer currentOrder = childItem.getItemOrder();
 				final Integer nextOrder = nextItem.getItemOrder();
-				sprintItem.setItemOrder(nextOrder);
+				childItem.setItemOrder(nextOrder);
 				nextItem.setItemOrder(currentOrder);
-				save(sprintItem);
+				save(childItem);
 				save(nextItem);
-				LOGGER.debug("Moved sprint item {} down from order {} to {}", sprintItem.getId(), currentOrder, nextOrder);
 				break;
 			}
 		}
 	}
 
 	/** Move a sprint item up in the order (decrease order number).
-	 * @param sprintItem the sprint item to move up */
+	 * @param childItem the sprint item to move up */
 	@Override
-	public void moveItemUp(final CSprintItem sprintItem) {
-		if ((sprintItem == null) || (sprintItem.getSprint() == null)) {
-			LOGGER.warn("Cannot move up - sprint item or sprint is null");
-			return;
-		}
-		final List<CSprintItem> items = findByMasterId(sprintItem.getSprint().getId());
-		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getId().equals(sprintItem.getId()) && (i > 0)) {
-				// Swap orders with previous item
-				final CSprintItem previousItem = items.get(i - 1);
-				final Integer currentOrder = sprintItem.getItemOrder();
-				final Integer previousOrder = previousItem.getItemOrder();
-				sprintItem.setItemOrder(previousOrder);
-				previousItem.setItemOrder(currentOrder);
-				save(sprintItem);
-				save(previousItem);
-				LOGGER.debug("Moved sprint item {} up from order {} to {}", sprintItem.getId(), currentOrder, previousOrder);
-				break;
-			}
-		}
-	}
-
 	/** Create a new sprint item for the given sprint (master).
 	 * @param master the sprint
 	 * @param item   the project item to add
