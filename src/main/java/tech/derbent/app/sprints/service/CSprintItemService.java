@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
@@ -20,7 +19,17 @@ import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
-/** CSprintItemService - Service class for managing sprint items. Provides business logic for sprint item operations and dynamic item loading. */
+/**
+ * CSprintItemService - Service class for managing sprint items.
+ * Provides business logic for sprint item operations and dynamic item loading.
+ *
+ * <p>Follows the common naming conventions for child entity services:
+ * <ul>
+ *   <li>{@code findByMaster(M master)} - Find all items by master entity</li>
+ *   <li>{@code findByMasterId(Long id)} - Find all items by master ID</li>
+ *   <li>{@code findByMasterIdWithItems(Long id)} - Find with eager loaded transient data</li>
+ * </ul>
+ */
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable, IOrderedEntityService<CSprintItem> {
@@ -39,34 +48,52 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	 * @param itemType the item type (e.g., "CActivity", "CMeeting")
 	 * @return list of sprint items */
 	public List<CSprintItem> findByItemType(final String itemType) {
-		return ((ISprintItemRepository) repository).findByItemType(itemType);
+		return getTypedRepository().findByItemType(itemType);
 	}
 
+	/** Find all sprint items for a specific sprint (master entity).
+	 * @param master the sprint entity
+	 * @return list of sprint items ordered by itemOrder */
 	@Transactional (readOnly = true)
-	public List<CDetailLines> findByMaster(final CSprint master) {
+	public List<CSprintItem> findByMaster(final CSprint master) {
 		Check.notNull(master, "Master cannot be null");
 		if (master.getId() == null) {
-			// new instance, no lines yet
+			// new instance, no items yet
 			return List.of();
 		}
-		return ((ISprintItemRepository) repository).findByMaster(master);
+		return getTypedRepository().findByMaster(master);
+	}
+
+	/** Find all sprint items by sprint (master) ID.
+	 * @param masterId the sprint ID
+	 * @return list of sprint items ordered by itemOrder */
+	@Transactional (readOnly = true)
+	public List<CSprintItem> findByMasterId(final Long masterId) {
+		Check.notNull(masterId, "Master ID cannot be null");
+		return getTypedRepository().findByMasterId(masterId);
 	}
 
 	/** Find a sprint item by sprint ID and item ID.
-	 * @param sprintId the sprint ID
+	 * @param masterId the sprint ID
 	 * @param itemId   the item ID
 	 * @return the sprint item, or null if not found */
-	public CSprintItem findBySprintIdAndItemId(final Long sprintId, final Long itemId) {
-		return ((ISprintItemRepository) repository).findBySprintIdAndItemId(sprintId, itemId);
+	public CSprintItem findByMasterIdAndItemId(final Long masterId, final Long itemId) {
+		return getTypedRepository().findByMasterIdAndItemId(masterId, itemId);
 	}
 
-	/** Find all sprint items for a specific sprint and load their items.
-	 * @param sprintId the sprint ID
-	 * @return list of sprint items with loaded items */
-	public List<CSprintItem> findBySprintIdWithItems(final Long sprintId) {
-		final List<CSprintItem> sprintItems = findBySprintId(sprintId);
+	/** Find all sprint items for a specific sprint and load their project items.
+	 * @param masterId the sprint ID
+	 * @return list of sprint items with loaded project items */
+	public List<CSprintItem> findByMasterIdWithItems(final Long masterId) {
+		final List<CSprintItem> sprintItems = findByMasterId(masterId);
 		loadItems(sprintItems);
 		return sprintItems;
+	}
+
+	/** Get the typed repository for this service.
+	 * @return the ISprintItemRepository */
+	private ISprintItemRepository getTypedRepository() {
+		return (ISprintItemRepository) repository;
 	}
 
 	@Override
@@ -141,7 +168,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 			LOGGER.warn("Cannot move down - sprint item or sprint is null");
 			return;
 		}
-		final List<CSprintItem> items = findBySprintId(sprintItem.getSprint().getId());
+		final List<CSprintItem> items = findByMasterId(sprintItem.getSprint().getId());
 		for (int i = 0; i < items.size(); i++) {
 			if (items.get(i).getId().equals(sprintItem.getId()) && (i < (items.size() - 1))) {
 				// Swap orders with next item
@@ -166,7 +193,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 			LOGGER.warn("Cannot move up - sprint item or sprint is null");
 			return;
 		}
-		final List<CSprintItem> items = findBySprintId(sprintItem.getSprint().getId());
+		final List<CSprintItem> items = findByMasterId(sprintItem.getSprint().getId());
 		for (int i = 0; i < items.size(); i++) {
 			if (items.get(i).getId().equals(sprintItem.getId()) && (i > 0)) {
 				// Swap orders with previous item
@@ -183,19 +210,19 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		}
 	}
 
-	/** Create a new sprint item for the given sprint.
-	 * @param sprint the sprint
+	/** Create a new sprint item for the given sprint (master).
+	 * @param master the sprint
 	 * @param item   the project item to add
 	 * @return the new sprint item */
-	public CSprintItem newSprintItem(final CSprint sprint, final CProjectItem<?> item) {
-		if ((sprint == null) || (item == null)) {
-			LOGGER.warn("Cannot create sprint item - sprint or item is null");
+	public CSprintItem newSprintItem(final CSprint master, final CProjectItem<?> item) {
+		if ((master == null) || (item == null)) {
+			LOGGER.warn("Cannot create sprint item - master or item is null");
 			return null;
 		}
-		final List<CSprintItem> existingItems = findBySprintId(sprint.getId());
+		final List<CSprintItem> existingItems = findByMasterId(master.getId());
 		final int nextOrder = existingItems.size() + 1;
-		final CSprintItem sprintItem = new CSprintItem(sprint, item, nextOrder);
-		LOGGER.debug("Created new sprint item for sprint {} with order {}", sprint.getId(), nextOrder);
+		final CSprintItem sprintItem = new CSprintItem(master, item, nextOrder);
+		LOGGER.debug("Created new sprint item for master {} with order {}", master.getId(), nextOrder);
 		return sprintItem;
 	}
 }

@@ -17,31 +17,40 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.sprints.domain.CSprint;
 
-/** CComponentListEntityBase - Generic base component for managing ordered lists of entities with CRUD operations.
- * <p>
- * Features:
+/**
+ * CComponentListEntityBase - Generic base component for managing ordered lists of child entities
+ * within a master (parent) entity context, with full CRUD operations.
+ *
+ * <p>This component follows the Master-Detail pattern where:
  * <ul>
- * <li>Grid display with selectable items</li>
- * <li>CRUD operations (Create, Read, Update, Delete)</li>
- * <li>Move up/down functionality for ordering</li>
- * <li>Add/Edit with dialog support</li>
- * <li>Toolbar with action buttons</li>
- * <li>Notification handling</li>
- * <li>Service-based data access</li>
+ *   <li>MasterEntity is the parent (e.g., CSprint, CDetailSection)</li>
+ *   <li>ChildEntity is the child (e.g., CSprintItem, CDetailLines)</li>
  * </ul>
- * <p>
- * Subclasses must implement:
+ *
+ * <p>Features:
  * <ul>
- * <li>{@link #configureGrid(CGrid)} - Configure grid columns and appearance</li>
- * <li>{@link #createNewEntity()} - Create a new entity instance</li>
- * <li>{@link #openEditDialog(Object, Consumer, boolean)} - Open edit dialog for entity</li>
- * <li>{@link #getMasterEntity()} - Get the master/parent entity</li>
- * <li>{@link #getNextOrder()} - Get the next order number for new items</li>
+ *   <li>Grid display with selectable items</li>
+ *   <li>CRUD operations (Create, Read, Update, Delete)</li>
+ *   <li>Move up/down functionality for ordering</li>
+ *   <li>Add/Edit with dialog support</li>
+ *   <li>Toolbar with action buttons</li>
+ *   <li>Notification handling</li>
+ *   <li>Service-based data access</li>
  * </ul>
- * @param <ChildEntity>  The entity type extending CEntityDB
- * @param <MasterEntity> The master/parent entity type */
+ *
+ * <p>Subclasses must implement:
+ * <ul>
+ *   <li>{@link #configureGrid(CGrid)} - Configure grid columns and appearance</li>
+ *   <li>{@link #createNewEntity()} - Create a new entity instance</li>
+ *   <li>{@link #openEditDialog(Object, Consumer, boolean)} - Open edit dialog for entity</li>
+ *   <li>{@link #loadItems(CEntityDB)} - Load child items for master entity</li>
+ *   <li>{@link #getNextOrder()} - Get the next order number for new items</li>
+ * </ul>
+ *
+ * @param <MasterEntity> The master/parent entity type
+ * @param <ChildEntity>  The child entity type extending CEntityDB
+ */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<MasterEntity>, ChildEntity extends CEntityDB<ChildEntity>>
 		extends VerticalLayout implements IContentOwner {
 
@@ -53,6 +62,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<Ma
 	protected final Class<ChildEntity> entityClass;
 	// Components
 	protected CGrid<ChildEntity> grid;
+	protected final Class<MasterEntity> masterEntityClass;
 	protected MasterEntity masterEntity;
 	protected Button moveDownButton;
 	protected Button moveUpButton;
@@ -60,19 +70,26 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<Ma
 	protected ChildEntity selectedItem;
 	protected HorizontalLayout toolbar;
 
-	/** Constructor for the entity list component.
-	 * @param title        The title to display above the grid
-	 * @param entityClass  The class of the entity type
-	 * @param childService The service for CRUD operations */
-	protected CComponentListEntityBase(final String title, final Class<ChildEntity> entityClass,
+	/**
+	 * Constructor for the entity list component.
+	 *
+	 * @param title             The title to display above the grid
+	 * @param masterEntityClass The class of the master entity type
+	 * @param entityClass       The class of the child entity type
+	 * @param childService      The service for CRUD operations
+	 */
+	protected CComponentListEntityBase(final String title, final Class<MasterEntity> masterEntityClass, final Class<ChildEntity> entityClass,
 			final IOrderedEntityService<ChildEntity> childService) {
 		super();
 		Check.notBlank(title, "Title cannot be blank");
+		Check.notNull(masterEntityClass, "Master entity class cannot be null");
 		Check.notNull(entityClass, "Entity class cannot be null");
 		Check.notNull(childService, "Entity service cannot be null");
+		this.masterEntityClass = masterEntityClass;
 		this.entityClass = entityClass;
 		this.childService = childService;
-		LOGGER.debug("Creating CComponentListEntityBase for entity class: {}", entityClass.getSimpleName());
+		LOGGER.debug("Creating CComponentListEntityBase for entity class: {} with master: {}", entityClass.getSimpleName(),
+				masterEntityClass.getSimpleName());
 		// Initialize UI components
 		initializeComponents(title);
 	}
@@ -355,19 +372,40 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<Ma
 		grid.asSingleSelect().setValue(currentValue);
 	}
 
-	/** Sets the current entity for this component. Called by CFormBuilder when the binder's entity changes. If the entity is a CSprint, it will be
-	 * set as the current sprint and the grid will be refreshed.
-	 * @param entity The entity to set (expected to be CSprint) */
+	/**
+	 * Sets the current master entity for this component.
+	 * Called by CFormBuilder when the binder's entity changes.
+	 *
+	 * @param entity The entity to set (expected to be of type MasterEntity)
+	 */
 	@Override
+	@SuppressWarnings ("unchecked")
 	public void setCurrentEntity(final CEntityDB<?> entity) {
 		if (entity == null) {
-			LOGGER.debug("setCurrentEntity called with null - clearing sprint");
+			LOGGER.debug("setCurrentEntity called with null - clearing grid");
+			this.masterEntity = null;
 			clearGrid();
-		} else if (entity instanceof CSprint) {
-			LOGGER.debug("setCurrentEntity called with CSprint - setting current sprint");
+		} else if (masterEntityClass.isInstance(entity)) {
+			LOGGER.debug("setCurrentEntity called with {} - setting master entity", entity.getClass().getSimpleName());
+			this.masterEntity = (MasterEntity) entity;
 			refreshGrid();
 		} else {
-			LOGGER.warn("setCurrentEntity called with unexpected entity type: {} - ignoring", entity.getClass().getSimpleName());
+			LOGGER.warn("setCurrentEntity called with unexpected entity type: {} (expected {}) - ignoring", entity.getClass().getSimpleName(),
+					masterEntityClass.getSimpleName());
+		}
+	}
+
+	/**
+	 * Set the master entity directly.
+	 *
+	 * @param master The master entity to set
+	 */
+	protected void setMasterEntity(final MasterEntity master) {
+		this.masterEntity = master;
+		if (master == null) {
+			clearGrid();
+		} else if (master.getId() != null) {
+			refreshGrid();
 		}
 	}
 

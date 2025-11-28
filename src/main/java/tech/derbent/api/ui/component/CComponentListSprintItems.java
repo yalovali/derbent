@@ -44,8 +44,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	// Master entity
-	// private CSprint currentSprint;
 	// Services for loading items
 	private final CMeetingService meetingService;
 
@@ -55,7 +53,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	 * @param meetingService    The service for loading meetings */
 	public CComponentListSprintItems(final CSprintItemService sprintItemService, final CActivityService activityService,
 			final CMeetingService meetingService) {
-		super("Sprint Items", CSprintItem.class, sprintItemService);
+		super("Sprint Items", CSprint.class, CSprintItem.class, sprintItemService);
 		Check.notNull(sprintItemService, "SprintItemService cannot be null");
 		Check.notNull(activityService, "ActivityService cannot be null");
 		Check.notNull(meetingService, "MeetingService cannot be null");
@@ -101,7 +99,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			return 1;
 		}
 		final CSprintItemService service = (CSprintItemService) childService;
-		final List<CSprintItem> items = service.findBySprintId(getMasterEntity().getId());
+		final List<CSprintItem> items = service.findByMasterId(getMasterEntity().getId());
 		final int nextOrder = items.size() + 1;
 		LOGGER.debug("Next item order for sprint {}: {}", getMasterEntity().getId(), nextOrder);
 		return nextOrder;
@@ -159,7 +157,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			return List.of();
 		}
 		final CSprintItemService service = (CSprintItemService) childService;
-		final List<CSprintItem> items = service.findBySprintIdWithItems(master.getId());
+		final List<CSprintItem> items = service.findByMasterIdWithItems(master.getId());
 		Check.notNull(items, "Loaded sprint items cannot be null");
 		LOGGER.debug("Loaded {} sprint items", items.size());
 		return items;
