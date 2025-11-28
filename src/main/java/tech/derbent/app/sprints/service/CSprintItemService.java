@@ -175,6 +175,27 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	/** Move a sprint item up in the order (decrease order number).
 	 * @param childItem the sprint item to move up */
 	@Override
+	public void moveItemUp(final CSprintItem childItem) {
+		if (childItem == null) {
+			LOGGER.warn("Cannot move up - sprint item is null");
+			return;
+		}
+		final List<CSprintItem> items = findByMaster(childItem.getSprint());
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(childItem.getId()) && (i > 0)) {
+				// Swap orders with previous item
+				final CSprintItem previousItem = items.get(i - 1);
+				final Integer currentOrder = childItem.getItemOrder();
+				final Integer previousOrder = previousItem.getItemOrder();
+				childItem.setItemOrder(previousOrder);
+				previousItem.setItemOrder(currentOrder);
+				save(childItem);
+				save(previousItem);
+				break;
+			}
+		}
+	}
+
 	/** Create a new sprint item for the given sprint (master).
 	 * @param master the sprint
 	 * @param item   the project item to add

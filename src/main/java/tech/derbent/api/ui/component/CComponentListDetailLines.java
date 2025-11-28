@@ -44,7 +44,7 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 		Check.notNull(grid, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CDetailLines");
 		grid.addColumn(CDetailLines::getId).setHeader("Id").setWidth("50px");
-		grid.addColumn(CDetailLines::getitemOrder).setHeader("Order").setWidth("50px");
+		grid.addColumn(CDetailLines::getItemOrder).setHeader("Order").setWidth("50px");
 		grid.addColumn(CDetailLines::getFieldCaption).setHeader("Caption").setAutoWidth(true);
 		grid.addColumn(CDetailLines::getEntityProperty).setHeader("Field Name").setAutoWidth(true);
 		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setHeader("Required").setWidth("80px");
@@ -61,7 +61,7 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 		// Get the position of the current item if selected, otherwise add at end
 		Integer position = 0;
 		if (selectedItem != null) {
-			position = selectedItem.getitemOrder();
+			position = selectedItem.getItemOrder();
 			LOGGER.debug("Inserting before position: {}", position);
 			try {
 				return service.insertLineBefore(master, CEntityFieldService.THIS_CLASS, "name", position);

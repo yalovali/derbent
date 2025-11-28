@@ -167,13 +167,13 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		final List<CDetailLines> lines = findByMaster(master);
 		// Shift all lines at or after the insert position down by 1
 		for (final CDetailLines line : lines) {
-			if (line.getitemOrder() >= beforePosition) {
-				line.setitemOrder(line.getitemOrder() + 1);
+			if (line.getItemOrder() >= beforePosition) {
+				line.setItemOrder(line.getItemOrder() + 1);
 				save(line);
 			}
 		}
 		// Set the new line at the insert position
-		newLine.setitemOrder(beforePosition);
+		newLine.setItemOrder(beforePosition);
 		return newLine;
 	}
 
@@ -188,10 +188,10 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			if (items.get(i).getId().equals(childItem.getId()) && (i < (items.size() - 1))) {
 				// Swap orders
 				final CDetailLines nextLine = items.get(i + 1);
-				final Integer currentOrder = childItem.getitemOrder();
-				final Integer nextOrder = nextLine.getitemOrder();
-				childItem.setitemOrder(nextOrder);
-				nextLine.setitemOrder(currentOrder);
+				final Integer currentOrder = childItem.getItemOrder();
+				final Integer nextOrder = nextLine.getItemOrder();
+				childItem.setItemOrder(nextOrder);
+				nextLine.setItemOrder(currentOrder);
 				save(childItem);
 				save(nextLine);
 				break;
@@ -205,17 +205,17 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			LOGGER.warn("Cannot move up - item is null");
 			return;
 		}
-		if (childItem.getitemOrder() > 1) {
+		if (childItem.getItemOrder() > 1) {
 			// Find the line with the previous order
 			final List<CDetailLines> lines = findByMaster(childItem.getDetailSection());
 			for (int i = 0; i < lines.size(); i++) {
 				if (lines.get(i).getId().equals(childItem.getId()) && (i > 0)) {
 					// Swap orders
 					final CDetailLines previousLine = lines.get(i - 1);
-					final Integer currentOrder = childItem.getitemOrder();
-					final Integer previousOrder = previousLine.getitemOrder();
-					childItem.setitemOrder(previousOrder);
-					previousLine.setitemOrder(currentOrder);
+					final Integer currentOrder = childItem.getItemOrder();
+					final Integer previousOrder = previousLine.getItemOrder();
+					childItem.setItemOrder(previousOrder);
+					previousLine.setItemOrder(currentOrder);
 					save(childItem);
 					save(previousLine);
 					break;
@@ -231,7 +231,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 	 * @return new detail line with next available order */
 	public CDetailLines newEntity(final CDetailSection master, final String relationFieldName, final String entityProperty) {
 		final CDetailLines detailLine = new CDetailLines(master, relationFieldName, entityProperty);
-		detailLine.setitemOrder(getNextItemOrder(master));
+		detailLine.setItemOrder(getNextItemOrder(master));
 		detailLine.setMaxLength(255); // Default max length for text fields
 		detailLine.setActive(true);
 		return detailLine;
@@ -244,7 +244,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		final List<CDetailLines> lines = findByMaster(master);
 		for (int i = 0; i < lines.size(); i++) {
 			final CDetailLines line = lines.get(i);
-			line.setitemOrder(i + 1);
+			line.setItemOrder(i + 1);
 			save(line);
 		}
 	}

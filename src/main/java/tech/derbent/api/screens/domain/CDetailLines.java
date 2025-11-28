@@ -177,9 +177,9 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 
 	public Boolean getIsRequired() { return isRequired; }
 
-	public Integer getitemOrder() {
-		return itemOrder;
-	}
+	/** {@inheritDoc} */
+	@Override
+	public Integer getItemOrder() { return itemOrder; }
 
 	public Integer getMaxLength() { return maxLength; }
 
@@ -217,9 +217,9 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 
 	public void setIsRequired(final Boolean isRequired) { this.isRequired = isRequired; }
 
-	public void setitemOrder(final Integer itemOrder) {
-		this.itemOrder = itemOrder;
-	}
+	/** {@inheritDoc} */
+	@Override
+	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
 	public void setMaxLength(final Integer maxLength) { this.maxLength = maxLength; }
 

@@ -48,14 +48,14 @@ import tech.derbent.api.utils.Check;
  * <li>{@link #getNextOrder()} - Get the next order number for new items</li>
  * </ul>
  * @param <MasterEntity> The master/parent entity type
- * @param <ChildEntity>  The child entity type extending CEntityDB */
-public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends IOrderedEntity> extends VerticalLayout
-		implements IContentOwner {
+ * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
+public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
+		extends VerticalLayout implements IContentOwner {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
 	protected Button addButton;
-	protected final IOrderedEntityService<MasterEntity, ChildEntity> childService;
+	protected final IOrderedEntityService<ChildEntity> childService;
 	protected Button deleteButton;
 	protected final Class<ChildEntity> entityClass;
 	// Components
@@ -219,12 +219,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	/** Handle save operation. Saves the entity and refreshes the grid.
 	 * @param entity The entity to save */
-	@SuppressWarnings ("unchecked")
 	protected void handleSave(final ChildEntity entity) {
 		try {
 			Check.notNull(entity, "Entity to save cannot be null");
 			LOGGER.debug("Saving entity: {}", entity.getId() != null ? entity.getId() : "new");
-			((CAbstractService<?>) childService).save((CEntityDB<?>) entity);
+			childService.save(entity);
 			refreshGrid();
 			grid.asSingleSelect().clear();
 			CNotificationService.showSaveSuccess();
@@ -296,13 +295,12 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 
 	/** Handle delete button click. Deletes the selected item after confirmation. */
-	@SuppressWarnings ("unchecked")
 	protected void on_addDeleteButton_clicked() {
 		Check.notNull(selectedItem, "No item selected for deletion");
 		Check.notNull(selectedItem.getId(), "Cannot delete unsaved item");
 		try {
 			LOGGER.debug("Deleting item: {}", selectedItem.getId());
-			((CAbstractService<ChildEntity>) childService).delete(selectedItem);
+			childService.delete(selectedItem);
 			refreshGrid();
 			grid.asSingleSelect().clear();
 			CNotificationService.showDeleteSuccess();
