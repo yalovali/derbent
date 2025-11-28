@@ -90,9 +90,9 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 		// }
 		// }
 		// }
-		if (screenLine.getitemOrder() == 0) {
+		if (screenLine.getItemOrder() == 0) {
 			// default line order is the next available number
-			screenLine.setitemOrder(detailLines.size() + 1);
+			screenLine.setItemOrder(detailLines.size() + 1);
 		}
 		detailLines.add(screenLine);
 		screenLine.setDetailSection(this);
