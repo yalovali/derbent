@@ -15,6 +15,18 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
+/**
+ * CDetailLinesService - Service class for managing detail lines.
+ * Provides business logic for detail line operations within a detail section.
+ *
+ * <p>Follows the common naming conventions for child entity services:
+ * <ul>
+ *   <li>{@code findByMaster(M master)} - Find all items by master entity</li>
+ *   <li>{@code findActiveByMaster(M master)} - Find active items by master entity</li>
+ *   <li>{@code countByMaster(M master)} - Count items by master entity</li>
+ *   <li>{@code getNextItemOrder(M master)} - Get next order number for new items</li>
+ * </ul>
+ */
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDetailLinesService extends CAbstractService<CDetailLines> implements IOrderedEntityService<CDetailLines> {
@@ -84,11 +96,8 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		}
 	}
 
-	private final IDetailLinesRepository detailLinesRepository;
-
 	public CDetailLinesService(final IDetailLinesRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		detailLinesRepository = repository;
 	}
 
 	@Override
@@ -96,21 +105,24 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		return super.checkDeleteAllowed(entity);
 	}
 
-	/** Count the number of lines for a screen.
-	 * @param screen the screen
+	/** Count the number of lines for a master section.
+	 * @param master the detail section
 	 * @return the count of lines */
-	public Long countByScreen(final CDetailSection screen) {
-		return detailLinesRepository.countByScreen(screen);
+	public Long countByMaster(final CDetailSection master) {
+		return getTypedRepository().countByMaster(master);
 	}
 
-	/** Find active screen lines by screen ordered by line order.
-	 * @param screen the screen
-	 * @return list of active screen lines ordered by line order */
+	/** Find active lines by master section, ordered by itemOrder.
+	 * @param master the detail section
+	 * @return list of active lines ordered by itemOrder */
 	@Transactional (readOnly = true)
-	public List<CDetailLines> findActiveByScreen(final CDetailSection screen) {
-		return detailLinesRepository.findActiveByScreen(screen);
+	public List<CDetailLines> findActiveByMaster(final CDetailSection master) {
+		return getTypedRepository().findActiveByMaster(master);
 	}
 
+	/** Find all lines by master section, ordered by itemOrder.
+	 * @param master the detail section
+	 * @return list of lines ordered by itemOrder */
 	@Transactional (readOnly = true)
 	public List<CDetailLines> findByMaster(final CDetailSection master) {
 		Check.notNull(master, "Master cannot be null");
@@ -118,14 +130,23 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			// new instance, no lines yet
 			return List.of();
 		}
-		return detailLinesRepository.findByMaster(master);
+		return getTypedRepository().findByMaster(master);
 	}
 
 	@Override
 	protected Class<CDetailLines> getEntityClass() { return CDetailLines.class; }
 
-	public Integer getNextitemOrder(final CDetailSection screen) {
-		return detailLinesRepository.getNextitemOrder(screen);
+	/** Get the next item order number for new items in a section.
+	 * @param master the detail section
+	 * @return the next available order number */
+	public Integer getNextItemOrder(final CDetailSection master) {
+		return getTypedRepository().getNextItemOrder(master);
+	}
+
+	/** Get the typed repository for this service.
+	 * @return the IDetailLinesRepository */
+	private IDetailLinesRepository getTypedRepository() {
+		return (IDetailLinesRepository) repository;
 	}
 
 	@Override
@@ -135,19 +156,19 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 	}
 
 	/** Insert a new line before the specified line position.
-	 * @param screen            the parent screen
+	 * @param master            the parent section
 	 * @param relationFieldName the relation field name
 	 * @param entityProperty    the entity property
 	 * @param beforePosition    the position to insert before (line order)
-	 * @return the new screen line */
+	 * @return the new detail line */
 	@Transactional
-	public CDetailLines insertLineBefore(final CDetailSection screen, final String relationFieldName, final String entityProperty,
+	public CDetailLines insertLineBefore(final CDetailSection master, final String relationFieldName, final String entityProperty,
 			final Integer beforePosition) {
-		final CDetailLines newLine = new CDetailLines(screen, relationFieldName, entityProperty);
+		final CDetailLines newLine = new CDetailLines(master, relationFieldName, entityProperty);
 		newLine.setMaxLength(255); // Default max length for text fields
 		newLine.setActive(true);
-		// Get all lines for this screen
-		final List<CDetailLines> lines = findByMaster(screen);
+		// Get all lines for this master
+		final List<CDetailLines> lines = findByMaster(master);
 		// Shift all lines at or after the insert position down by 1
 		for (final CDetailLines line : lines) {
 			if (line.getitemOrder() >= beforePosition) {
@@ -161,17 +182,17 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 	}
 
 	@Override
-	public void moveItemDown(final CDetailLines screenLine) {
-		final List<CDetailLines> lines = findByMaster(screenLine.getDetailSection());
+	public void moveItemDown(final CDetailLines detailLine) {
+		final List<CDetailLines> lines = findByMaster(detailLine.getDetailSection());
 		for (int i = 0; i < lines.size(); i++) {
-			if (lines.get(i).getId().equals(screenLine.getId()) && (i < (lines.size() - 1))) {
+			if (lines.get(i).getId().equals(detailLine.getId()) && (i < (lines.size() - 1))) {
 				// Swap orders
 				final CDetailLines nextLine = lines.get(i + 1);
-				final Integer currentOrder = screenLine.getitemOrder();
+				final Integer currentOrder = detailLine.getitemOrder();
 				final Integer nextOrder = nextLine.getitemOrder();
-				screenLine.setitemOrder(nextOrder);
+				detailLine.setitemOrder(nextOrder);
 				nextLine.setitemOrder(currentOrder);
-				save(screenLine);
+				save(detailLine);
 				save(nextLine);
 				break;
 			}
@@ -179,19 +200,19 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 	}
 
 	@Override
-	public void moveItemUp(final CDetailLines screenLine) {
-		if (screenLine.getitemOrder() > 1) {
+	public void moveItemUp(final CDetailLines detailLine) {
+		if (detailLine.getitemOrder() > 1) {
 			// Find the line with the previous order
-			final List<CDetailLines> lines = findByMaster(screenLine.getDetailSection());
+			final List<CDetailLines> lines = findByMaster(detailLine.getDetailSection());
 			for (int i = 0; i < lines.size(); i++) {
-				if (lines.get(i).getId().equals(screenLine.getId()) && (i > 0)) {
+				if (lines.get(i).getId().equals(detailLine.getId()) && (i > 0)) {
 					// Swap orders
 					final CDetailLines previousLine = lines.get(i - 1);
-					final Integer currentOrder = screenLine.getitemOrder();
+					final Integer currentOrder = detailLine.getitemOrder();
 					final Integer previousOrder = previousLine.getitemOrder();
-					screenLine.setitemOrder(previousOrder);
+					detailLine.setitemOrder(previousOrder);
 					previousLine.setitemOrder(currentOrder);
-					save(screenLine);
+					save(detailLine);
 					save(previousLine);
 					break;
 				}
@@ -199,19 +220,24 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		}
 	}
 
-	public CDetailLines newEntity(final CDetailSection screen, final String relationFieldName, final String entityProperty) {
-		final CDetailLines screenLine = new CDetailLines(screen, relationFieldName, entityProperty);
-		screenLine.setitemOrder(getNextitemOrder(screen));
-		screenLine.setMaxLength(255); // Default max length for text fields
-		screenLine.setActive(true);
-		return screenLine;
+	/** Create a new entity for the master section.
+	 * @param master            the parent section
+	 * @param relationFieldName the relation field name
+	 * @param entityProperty    the entity property
+	 * @return new detail line with next available order */
+	public CDetailLines newEntity(final CDetailSection master, final String relationFieldName, final String entityProperty) {
+		final CDetailLines detailLine = new CDetailLines(master, relationFieldName, entityProperty);
+		detailLine.setitemOrder(getNextItemOrder(master));
+		detailLine.setMaxLength(255); // Default max length for text fields
+		detailLine.setActive(true);
+		return detailLine;
 	}
 
-	/** Reorder all lines for a screen to ensure sequential numbering.
-	 * @param screen the screen to reorder lines for */
+	/** Reorder all lines for a master section to ensure sequential numbering.
+	 * @param master the section to reorder lines for */
 	@Transactional
-	public void reorderLines(final CDetailSection screen) {
-		final List<CDetailLines> lines = findByMaster(screen);
+	public void reorderLines(final CDetailSection master) {
+		final List<CDetailLines> lines = findByMaster(master);
 		for (int i = 0; i < lines.size(); i++) {
 			final CDetailLines line = lines.get(i);
 			line.setitemOrder(i + 1);

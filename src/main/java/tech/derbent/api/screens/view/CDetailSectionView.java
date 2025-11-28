@@ -56,7 +56,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 		grid.addColumn(screen -> screen.getActive() ? "Active" : "Inactive", "Status", null);
 		grid.addColumn(screen -> {
 			try {
-				return String.valueOf(screenLinesService.countByScreen(screen));
+				return String.valueOf(screenLinesService.countByMaster(screen));
 			} catch (final Exception e) {
 				return "0";
 			}

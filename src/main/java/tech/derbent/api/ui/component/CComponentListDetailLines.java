@@ -76,7 +76,7 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 	protected Integer getNextOrder() {
 		Check.notNull(currentSection, "Current section cannot be null when getting next order");
 		final CDetailLinesService service = (CDetailLinesService) childService;
-		final Integer nextOrder = service.getNextitemOrder(currentSection);
+		final Integer nextOrder = service.getNextItemOrder(currentSection);
 		LOGGER.debug("Next line order for section {}: {}", currentSection.getId() != null ? currentSection.getId() : "null", nextOrder);
 		return nextOrder;
 	}

@@ -101,7 +101,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			return 1;
 		}
 		final CSprintItemService service = (CSprintItemService) childService;
-		final List<CSprintItem> items = service.findBySprintId(getMasterEntity().getId());
+		final List<CSprintItem> items = service.findByMasterId(getMasterEntity().getId());
 		final int nextOrder = items.size() + 1;
 		LOGGER.debug("Next item order for sprint {}: {}", getMasterEntity().getId(), nextOrder);
 		return nextOrder;
@@ -159,7 +159,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			return List.of();
 		}
 		final CSprintItemService service = (CSprintItemService) childService;
-		final List<CSprintItem> items = service.findBySprintIdWithItems(master.getId());
+		final List<CSprintItem> items = service.findByMasterIdWithItems(master.getId());
 		Check.notNull(items, "Loaded sprint items cannot be null");
 		LOGGER.debug("Loaded {} sprint items", items.size());
 		return items;
