@@ -39,16 +39,17 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <p>
  * Implements IContentOwner to receive automatic entity updates from the form builder's binder when a sprint is selected. */
 public class CComponentListSprintItems extends CComponentListEntityBase<CSprintItem, CSprint> implements IContentOwner {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
-	private static final long serialVersionUID = 1L;
+
 	// Item type constants
 	private static final String ITEM_TYPE_ACTIVITY = "CActivity";
 	private static final String ITEM_TYPE_MEETING = "CMeeting";
-	// Services for loading items
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
+	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	private final CMeetingService meetingService;
 	// Master entity
 	private CSprint currentSprint;
+	// Services for loading items
+	private final CMeetingService meetingService;
 
 	/** Constructor for CComponentListSprintItems.
 	 * @param sprintItemService The service for CSprintItem operations
@@ -93,8 +94,29 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		throw new UnsupportedOperationException("Sprint items must be created through the type selection dialog.");
 	}
 
+	/** Creates a new entity instance. This operation is not supported for CComponentListSprintItems because sprint items are created through the type
+	 * selection dialog, not directly.
+	 * @return Never returns - always throws UnsupportedOperationException
+	 * @throws UnsupportedOperationException always - use openItemSelectionDialog() to add sprint items */
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("Sprint items must be created through the type selection dialog. Use openItemSelectionDialog().");
+	}
+
 	@Override
 	protected String getAddButtonLabel() { return "Add Sprint Item"; }
+
+	/** Returns the current sprint entity.
+	 * @return The current sprint being edited */
+	@Override
+	public CEntityDB<?> getCurrentEntity() { return currentSprint; }
+
+	/** Returns the current sprint ID as a string.
+	 * @return The ID string or null if no sprint is set */
+	@Override
+	public String getCurrentEntityIdString() {
+		return currentSprint != null && currentSprint.getId() != null ? currentSprint.getId().toString() : null;
+	}
 
 	/** Get the current sprint.
 	 * @return The current sprint */
@@ -299,41 +321,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		LOGGER.debug("Item selection dialog opened");
 	}
 
-	/** Set the current sprint being edited.
-	 * @param sprint The sprint */
-	public void setCurrentSprint(final CSprint sprint) {
-		LOGGER.debug("Setting current sprint: {}", sprint != null ? sprint.getId() : "null");
-		this.currentSprint = sprint;
-		if ((sprint != null) && (sprint.getId() != null)) {
-			refreshGrid();
-		} else {
-			clearGrid();
-		}
-	}
-
-	// ==================== IContentOwner Interface Implementation ====================
-
-	/** Creates a new entity instance. This operation is not supported for CComponentListSprintItems because sprint items are created through the type
-	 * selection dialog, not directly.
-	 * @return Never returns - always throws UnsupportedOperationException
-	 * @throws UnsupportedOperationException always - use openItemSelectionDialog() to add sprint items */
-	@Override
-	public CEntityDB<?> createNewEntityInstance() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException("Sprint items must be created through the type selection dialog. Use openItemSelectionDialog().");
-	}
-
-	/** Returns the current sprint entity.
-	 * @return The current sprint being edited */
-	@Override
-	public CEntityDB<?> getCurrentEntity() { return currentSprint; }
-
-	/** Returns the current sprint ID as a string.
-	 * @return The ID string or null if no sprint is set */
-	@Override
-	public String getCurrentEntityIdString() {
-		return currentSprint != null && currentSprint.getId() != null ? currentSprint.getId().toString() : null;
-	}
-
 	/** Populates the component by refreshing the grid with sprint items. This method is called automatically by CFormBuilder when the binder's entity
 	 * changes. */
 	@Override
@@ -361,4 +348,17 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 			LOGGER.warn("setCurrentEntity called with unexpected entity type: {} - ignoring", entity.getClass().getSimpleName());
 		}
 	}
+
+	/** Set the current sprint being edited.
+	 * @param sprint The sprint */
+	public void setCurrentSprint(final CSprint sprint) {
+		LOGGER.debug("Setting current sprint: {}", sprint != null ? sprint.getId() : "null");
+		this.currentSprint = sprint;
+		if ((sprint != null) && (sprint.getId() != null)) {
+			refreshGrid();
+		} else {
+			clearGrid();
+		}
+	}
+	// ==================== IContentOwner Interface Implementation ====================
 }
