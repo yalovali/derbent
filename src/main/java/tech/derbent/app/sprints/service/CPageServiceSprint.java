@@ -82,10 +82,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> impleme
 
 	@Override
 	public void populateForm() {
-		try {
-			// componentItemsSelection.setCurrentSprint(getCurrentEntity());
-		} catch (Exception e) {
-			LOGGER.error("Failed to populate form fields for sprint page service.", e);
-		}
+		// IContentOwner implementation in CComponentListSprintItems handles this automatically.
+		// CFormBuilder.populateForm() iterates through all components implementing IContentOwner
+		// and calls setCurrentEntity() and populateForm() on them, so no manual call is needed here.
+		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
 	}
 }
