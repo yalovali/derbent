@@ -13,11 +13,11 @@ public interface IDetailLinesRepository extends IAbstractRepository<CDetailLines
 	Long countByScreen(@Param ("detailSection") CDetailSection detailSection);
 	@Query (
 		"SELECT a FROM #{#entityName} a  LEFT JOIN FETCH detailSection " + "WHERE a.detailSection = :detailSection AND a.active = true "
-				+ "ORDER BY a.lineOrder ASC"
+				+ "ORDER BY a.itemOrder ASC"
 	)
 	List<CDetailLines> findActiveByScreen(@Param ("detailSection") CDetailSection detailSection);
-	@Query ("SELECT a FROM #{#entityName} a LEFT JOIN FETCH detailSection " + "WHERE a.detailSection = :detailSection " + "ORDER BY a.lineOrder ASC")
-	List<CDetailLines> findByMaster(@Param ("detailSection") CDetailSection detailSection);
-	@Query ("SELECT COALESCE(MAX(a.lineOrder), 0) + 1 FROM #{#entityName} a WHERE a.detailSection = :detailSection")
-	Integer getNextLineOrder(@Param ("detailSection") CDetailSection detailSection);
+	@Query ("SELECT a FROM #{#entityName} a LEFT JOIN FETCH detailSection " + "WHERE a.detailSection = :master " + "ORDER BY a.itemOrder ASC")
+	List<CDetailLines> findByMaster(@Param ("detailSection") CDetailSection master);
+	@Query ("SELECT COALESCE(MAX(a.itemOrder), 0) + 1 FROM #{#entityName} a WHERE a.detailSection = :detailSection")
+	Integer getNextitemOrder(@Param ("detailSection") CDetailSection detailSection);
 }

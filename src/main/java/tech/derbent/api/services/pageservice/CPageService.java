@@ -348,7 +348,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public CAbstractService<EntityClass> getEntityService() {
 		Check.notNull(getView(), "View is not set in page service");
-		return getView().getEntityService();
+		return getView().getChildService();
 	}
 
 	public EntityClass getPreviousEntity() { return previousEntity; }

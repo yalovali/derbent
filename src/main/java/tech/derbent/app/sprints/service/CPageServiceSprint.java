@@ -9,10 +9,12 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.CComponentListEntityBase;
 import tech.derbent.api.ui.component.CComponentListSprintItems;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
+import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CPageServiceSprint - Page service for Sprint management UI. Handles UI events and interactions for sprint views. */
 public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> implements IPageServiceHasStatusAndWorkflow<CSprint> {
@@ -20,7 +22,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> impleme
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
 	private CActivityService activityService;
 	// private CComponentFieldSelection<CSprint, CActivity> componentFieldSelection;
-	private CComponentListSprintItems componentItemsSelection;
+	private CComponentListEntityBase<CSprint, CSprintItem> componentItemsSelection;
 	private CMeetingService meetingService;
 	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;

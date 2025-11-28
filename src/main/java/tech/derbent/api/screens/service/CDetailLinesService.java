@@ -17,7 +17,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CDetailLinesService extends CAbstractService<CDetailLines> {
+public class CDetailLinesService extends CAbstractService<CDetailLines> implements IOrderedEntityService<CDetailLines> {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(CDetailLinesService.class);
 
@@ -124,8 +124,8 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	@Override
 	protected Class<CDetailLines> getEntityClass() { return CDetailLines.class; }
 
-	public Integer getNextLineOrder(final CDetailSection screen) {
-		return detailLinesRepository.getNextLineOrder(screen);
+	public Integer getNextitemOrder(final CDetailSection screen) {
+		return detailLinesRepository.getNextitemOrder(screen);
 	}
 
 	@Override
@@ -150,27 +150,27 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		final List<CDetailLines> lines = findByMaster(screen);
 		// Shift all lines at or after the insert position down by 1
 		for (final CDetailLines line : lines) {
-			if (line.getLineOrder() >= beforePosition) {
-				line.setLineOrder(line.getLineOrder() + 1);
+			if (line.getitemOrder() >= beforePosition) {
+				line.setitemOrder(line.getitemOrder() + 1);
 				save(line);
 			}
 		}
 		// Set the new line at the insert position
-		newLine.setLineOrder(beforePosition);
+		newLine.setitemOrder(beforePosition);
 		return newLine;
 	}
 
-	@Transactional
-	public void moveLineDown(final CDetailLines screenLine) {
+	@Override
+	public void moveItemDown(final CDetailLines screenLine) {
 		final List<CDetailLines> lines = findByMaster(screenLine.getDetailSection());
 		for (int i = 0; i < lines.size(); i++) {
 			if (lines.get(i).getId().equals(screenLine.getId()) && (i < (lines.size() - 1))) {
 				// Swap orders
 				final CDetailLines nextLine = lines.get(i + 1);
-				final Integer currentOrder = screenLine.getLineOrder();
-				final Integer nextOrder = nextLine.getLineOrder();
-				screenLine.setLineOrder(nextOrder);
-				nextLine.setLineOrder(currentOrder);
+				final Integer currentOrder = screenLine.getitemOrder();
+				final Integer nextOrder = nextLine.getitemOrder();
+				screenLine.setitemOrder(nextOrder);
+				nextLine.setitemOrder(currentOrder);
 				save(screenLine);
 				save(nextLine);
 				break;
@@ -178,19 +178,19 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		}
 	}
 
-	@Transactional
-	public void moveLineUp(final CDetailLines screenLine) {
-		if (screenLine.getLineOrder() > 1) {
+	@Override
+	public void moveItemUp(final CDetailLines screenLine) {
+		if (screenLine.getitemOrder() > 1) {
 			// Find the line with the previous order
 			final List<CDetailLines> lines = findByMaster(screenLine.getDetailSection());
 			for (int i = 0; i < lines.size(); i++) {
 				if (lines.get(i).getId().equals(screenLine.getId()) && (i > 0)) {
 					// Swap orders
 					final CDetailLines previousLine = lines.get(i - 1);
-					final Integer currentOrder = screenLine.getLineOrder();
-					final Integer previousOrder = previousLine.getLineOrder();
-					screenLine.setLineOrder(previousOrder);
-					previousLine.setLineOrder(currentOrder);
+					final Integer currentOrder = screenLine.getitemOrder();
+					final Integer previousOrder = previousLine.getitemOrder();
+					screenLine.setitemOrder(previousOrder);
+					previousLine.setitemOrder(currentOrder);
 					save(screenLine);
 					save(previousLine);
 					break;
@@ -199,14 +199,9 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		}
 	}
 
-	/** Create a new screen line with default values.
-	 * @param screen          the parent screen
-	 * @param fieldCaption    the field caption
-	 * @param entityFieldName the entity field name
-	 * @return the new screen line */
 	public CDetailLines newEntity(final CDetailSection screen, final String relationFieldName, final String entityProperty) {
 		final CDetailLines screenLine = new CDetailLines(screen, relationFieldName, entityProperty);
-		screenLine.setLineOrder(getNextLineOrder(screen));
+		screenLine.setitemOrder(getNextitemOrder(screen));
 		screenLine.setMaxLength(255); // Default max length for text fields
 		screenLine.setActive(true);
 		return screenLine;
@@ -219,7 +214,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		final List<CDetailLines> lines = findByMaster(screen);
 		for (int i = 0; i < lines.size(); i++) {
 			final CDetailLines line = lines.get(i);
-			line.setLineOrder(i + 1);
+			line.setitemOrder(i + 1);
 			save(line);
 		}
 	}

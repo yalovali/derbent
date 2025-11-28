@@ -12,10 +12,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
@@ -38,7 +36,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * </ul>
  * <p>
  * Implements IContentOwner to receive automatic entity updates from the form builder's binder when a sprint is selected. */
-public class CComponentListSprintItems extends CComponentListEntityBase<CSprintItem, CSprint> implements IContentOwner {
+public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem> {
 
 	// Item type constants
 	private static final String ITEM_TYPE_ACTIVITY = "CActivity";
@@ -47,7 +45,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
 	// Master entity
-	private CSprint currentSprint;
+	// private CSprint currentSprint;
 	// Services for loading items
 	private final CMeetingService meetingService;
 
@@ -87,69 +85,26 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		}).setHeader("Status").setWidth("120px");
 	}
 
+	/** Populates the component by refreshing the grid with sprint items. This method is called automatically by CFormBuilder when the binder's entity
+	 * changes. */
 	@Override
 	protected CSprintItem createNewEntity() {
-		// Sprint items are created through the custom add dialog
-		// This method should not be called directly
-		throw new UnsupportedOperationException("Sprint items must be created through the type selection dialog.");
+		Check.fail("Not used in this context - the component handles entity creation via the selection dialog");
+		return null;
 	}
-
-	/** Creates a new entity instance. This operation is not supported for CComponentListSprintItems because sprint items are created through the type
-	 * selection dialog, not directly.
-	 * @return Never returns - always throws UnsupportedOperationException
-	 * @throws UnsupportedOperationException always - use openItemSelectionDialog() to add sprint items */
-	@Override
-	public CEntityDB<?> createNewEntityInstance() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException("Sprint items must be created through the type selection dialog. Use openItemSelectionDialog().");
-	}
-
-	/** Returns the current sprint entity.
-	 * @return The current sprint being edited */
-	@Override
-	public CEntityDB<?> getCurrentEntity() { return currentSprint; }
-
-	/** Returns the current sprint ID as a string.
-	 * @return The ID string or null if no sprint is set */
-	@Override
-	public String getCurrentEntityIdString() {
-		return currentSprint != null && currentSprint.getId() != null ? currentSprint.getId().toString() : null;
-	}
-
-	/** Get the current sprint.
-	 * @return The current sprint */
-	public CSprint getCurrentSprint() { return currentSprint; }
-
-	@Override
-	protected CSprint getMasterEntity() { return currentSprint; }
 
 	@Override
 	protected Integer getNextOrder() {
-		Check.notNull(currentSprint, "Current sprint cannot be null when getting next order");
-		if (currentSprint.getId() == null) {
+		Check.notNull(getMasterEntity(), "Current sprint cannot be null when getting next order");
+		if (getMasterEntity().getId() == null) {
 			LOGGER.debug("Sprint is new, starting order at 1");
 			return 1;
 		}
-		final CSprintItemService service = (CSprintItemService) entityService;
-		final List<CSprintItem> items = service.findBySprintId(currentSprint.getId());
+		final CSprintItemService service = (CSprintItemService) childService;
+		final List<CSprintItem> items = service.findBySprintId(getMasterEntity().getId());
 		final int nextOrder = items.size() + 1;
-		LOGGER.debug("Next item order for sprint {}: {}", currentSprint.getId(), nextOrder);
+		LOGGER.debug("Next item order for sprint {}: {}", getMasterEntity().getId(), nextOrder);
 		return nextOrder;
-	}
-
-	@Override
-	protected void on_addButton_clicked() {
-		try {
-			LOGGER.debug("Add button clicked for sprint items");
-			// Check master entity is valid
-			final CSprint master = getMasterEntity();
-			Check.notNull(master, "Master sprint cannot be null when adding items");
-			Check.notNull(master.getId(), "Master sprint must be saved before adding items");
-			// Open type and item selection dialog
-			openItemSelectionDialog();
-		} catch (final Exception ex) {
-			LOGGER.error("Error handling add operation", ex);
-			CNotificationService.showException("Error adding item", ex);
-		}
 	}
 
 	@Override
@@ -168,9 +123,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 	protected void loadAvailableItems(final String type, final ComboBox<CProjectItem<?>> comboBox) {
 		Check.notNull(type, "Type cannot be null");
 		Check.notNull(comboBox, "ComboBox cannot be null");
-		Check.notNull(currentSprint, "Current sprint cannot be null");
-		Check.notNull(currentSprint.getProject(), "Sprint project cannot be null");
-		final CProject project = currentSprint.getProject();
+		Check.notNull(getMasterEntity(), "Current sprint cannot be null");
+		Check.notNull(getMasterEntity().getProject(), "Sprint project cannot be null");
+		final CProject project = getMasterEntity().getProject();
 		LOGGER.debug("Loading available items of type {} for project {}", type, project.getId());
 		try {
 			List<? extends CProjectItem<?>> items;
@@ -203,7 +158,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 			LOGGER.debug("Master sprint is new, returning empty list");
 			return List.of();
 		}
-		final CSprintItemService service = (CSprintItemService) entityService;
+		final CSprintItemService service = (CSprintItemService) childService;
 		final List<CSprintItem> items = service.findBySprintIdWithItems(master.getId());
 		Check.notNull(items, "Loaded sprint items cannot be null");
 		LOGGER.debug("Loaded {} sprint items", items.size());
@@ -211,21 +166,19 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 	}
 
 	@Override
-	protected void moveItemDown(final CSprintItem item) {
-		Check.notNull(item, "Item to move down cannot be null");
-		Check.notNull(item.getId(), "Item must be saved before moving");
-		LOGGER.debug("Moving CSprintItem down: {}", item.getId());
-		final CSprintItemService service = (CSprintItemService) entityService;
-		service.moveItemDown(item);
-	}
-
-	@Override
-	protected void moveItemUp(final CSprintItem item) {
-		Check.notNull(item, "Item to move up cannot be null");
-		Check.notNull(item.getId(), "Item must be saved before moving");
-		LOGGER.debug("Moving CSprintItem up: {}", item.getId());
-		final CSprintItemService service = (CSprintItemService) entityService;
-		service.moveItemUp(item);
+	protected void on_addButton_clicked() {
+		try {
+			LOGGER.debug("Add button clicked for sprint items");
+			// Check master entity is valid
+			final CSprint master = getMasterEntity();
+			Check.notNull(master, "Master sprint cannot be null when adding items");
+			Check.notNull(master.getId(), "Master sprint must be saved before adding items");
+			// Open type and item selection dialog
+			openItemSelectionDialog();
+		} catch (final Exception ex) {
+			LOGGER.error("Error handling add operation", ex);
+			CNotificationService.showException("Error adding item", ex);
+		}
 	}
 
 	@Override
@@ -240,9 +193,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 
 	/** Open the item selection dialog to choose type and item to add. */
 	protected void openItemSelectionDialog() {
-		Check.notNull(currentSprint, "Current sprint cannot be null when opening selection dialog");
-		Check.notNull(currentSprint.getProject(), "Sprint must have a project");
-		LOGGER.debug("Opening item selection dialog for sprint: {}", currentSprint.getId());
+		Check.notNull(getMasterEntity(), "Current sprint cannot be null when opening selection dialog");
+		Check.notNull(getMasterEntity().getProject(), "Sprint must have a project");
+		LOGGER.debug("Opening item selection dialog for sprint: {}", getMasterEntity().getId());
 		final Dialog dialog = new Dialog();
 		dialog.setHeaderTitle("Select Item to Add");
 		dialog.setWidth("600px");
@@ -295,7 +248,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 				LOGGER.debug("Creating sprint item: type={}, itemId={}", type, item.getId());
 				// Create sprint item
 				final CSprintItem sprintItem = new CSprintItem();
-				sprintItem.setSprint(currentSprint);
+				sprintItem.setSprint(getMasterEntity());
 				sprintItem.setItemId(item.getId());
 				sprintItem.setItemType(type);
 				sprintItem.setItemOrder(getNextOrder());
@@ -317,45 +270,4 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		dialog.open();
 		LOGGER.debug("Item selection dialog opened");
 	}
-
-	/** Populates the component by refreshing the grid with sprint items. This method is called automatically by CFormBuilder when the binder's entity
-	 * changes. */
-	@Override
-	public void populateForm() {
-		LOGGER.debug("populateForm called - refreshing sprint items grid");
-		if ((currentSprint != null) && (currentSprint.getId() != null)) {
-			refreshGrid();
-		} else {
-			clearGrid();
-		}
-	}
-
-	/** Sets the current entity for this component. Called by CFormBuilder when the binder's entity changes. If the entity is a CSprint, it will be
-	 * set as the current sprint and the grid will be refreshed.
-	 * @param entity The entity to set (expected to be CSprint) */
-	@Override
-	public void setCurrentEntity(final CEntityDB<?> entity) {
-		if (entity == null) {
-			LOGGER.debug("setCurrentEntity called with null - clearing sprint");
-			setCurrentSprint(null);
-		} else if (entity instanceof CSprint) {
-			LOGGER.debug("setCurrentEntity called with CSprint - setting current sprint");
-			setCurrentSprint((CSprint) entity);
-		} else {
-			LOGGER.warn("setCurrentEntity called with unexpected entity type: {} - ignoring", entity.getClass().getSimpleName());
-		}
-	}
-
-	/** Set the current sprint being edited.
-	 * @param sprint The sprint */
-	public void setCurrentSprint(final CSprint sprint) {
-		LOGGER.debug("Setting current sprint: {}", sprint != null ? sprint.getId() : "null");
-		this.currentSprint = sprint;
-		if ((sprint != null) && (sprint.getId() != null)) {
-			refreshGrid();
-		} else {
-			clearGrid();
-		}
-	}
-	// ==================== IContentOwner Interface Implementation ====================
 }

@@ -90,7 +90,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	public Class<?> getEntityClass() { return entityClass; }
 
 	@Override
-	public CAbstractService<?> getEntityService() { return entityService; }
+	public CAbstractService<?> getChildService() { return entityService; }
 
 	/** Get the page entity this view represents. */
 	public CPageEntity getPageEntity() { return pageEntity; }

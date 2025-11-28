@@ -56,7 +56,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	public List<String> getEntityFields() { return EntityFields; }
 
 	@Override
-	public CAbstractService<EntityClass> getEntityService() { return entityService; }
+	public CAbstractService<EntityClass> getChildService() { return entityService; }
 
 	/** Override this method in subclasses to provide local context values specific to this accordion panel.
 	 * @param contextName the context name to resolve

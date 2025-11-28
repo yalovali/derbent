@@ -13,8 +13,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.sprints.domain.CSprint;
 
 /** CComponentListEntityBase - Generic base component for managing ordered lists of entities with CRUD operations.
  * <p>
@@ -37,41 +40,45 @@ import tech.derbent.api.utils.Check;
  * <li>{@link #getMasterEntity()} - Get the master/parent entity</li>
  * <li>{@link #getNextOrder()} - Get the next order number for new items</li>
  * </ul>
- * @param <T> The entity type extending CEntityDB
- * @param <M> The master/parent entity type */
-public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends CEntityDB<M>> extends VerticalLayout {
+ * @param <ChildEntity>  The entity type extending CEntityDB
+ * @param <MasterEntity> The master/parent entity type */
+public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<MasterEntity>, ChildEntity extends CEntityDB<ChildEntity>>
+		extends VerticalLayout implements IContentOwner {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
 	protected Button addButton;
+	protected final IOrderedEntityService<ChildEntity> childService;
 	protected Button deleteButton;
-	protected final Class<T> entityClass;
-	protected final CAbstractService<T> entityService;
+	protected final Class<ChildEntity> entityClass;
 	// Components
-	protected CGrid<T> grid;
+	protected CGrid<ChildEntity> grid;
+	protected MasterEntity masterEntity;
 	protected Button moveDownButton;
 	protected Button moveUpButton;
 	// Data management
-	protected T selectedItem;
+	protected ChildEntity selectedItem;
 	protected HorizontalLayout toolbar;
 
 	/** Constructor for the entity list component.
-	 * @param title         The title to display above the grid
-	 * @param entityClass   The class of the entity type
-	 * @param entityService The service for CRUD operations */
-	protected CComponentListEntityBase(final String title, final Class<T> entityClass, final CAbstractService<T> entityService) {
+	 * @param title        The title to display above the grid
+	 * @param entityClass  The class of the entity type
+	 * @param childService The service for CRUD operations */
+	protected CComponentListEntityBase(final String title, final Class<ChildEntity> entityClass,
+			final IOrderedEntityService<ChildEntity> childService) {
 		super();
 		Check.notBlank(title, "Title cannot be blank");
 		Check.notNull(entityClass, "Entity class cannot be null");
-		Check.notNull(entityService, "Entity service cannot be null");
+		Check.notNull(childService, "Entity service cannot be null");
 		this.entityClass = entityClass;
-		this.entityService = entityService;
+		this.childService = childService;
 		LOGGER.debug("Creating CComponentListEntityBase for entity class: {}", entityClass.getSimpleName());
 		// Initialize UI components
 		initializeComponents(title);
 	}
 
 	/** Clear the grid. */
+	@SuppressWarnings ("unchecked")
 	public void clearGrid() {
 		LOGGER.debug("Clearing grid");
 		grid.setItems();
@@ -81,7 +88,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 
 	/** Configure the grid columns and appearance. Subclasses must implement this to define their specific columns.
 	 * @param grid The grid to configure */
-	protected abstract void configureGrid(CGrid<T> grid);
+	protected abstract void configureGrid(CGrid<ChildEntity> grid);
 
 	/** Create and configure the grid component. */
 	protected void createGrid() {
@@ -98,9 +105,16 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 		LOGGER.debug("Grid created and configured for {}", entityClass.getSimpleName());
 	}
 
-	/** Create a new entity instance. Subclasses must implement this to create appropriate entity instances.
-	 * @return A new entity instance */
-	protected abstract T createNewEntity();
+	protected abstract ChildEntity createNewEntity();
+
+	/** Creates a new entity instance. This operation is not supported for CComponentListSprintItems because sprint items are created through the type
+	 * selection dialog, not directly.
+	 * @return Never returns - always throws UnsupportedOperationException
+	 * @throws UnsupportedOperationException always - use openItemSelectionDialog() to add sprint items */
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("Sprint items must be created through the type selection dialog. Use openItemSelectionDialog().");
+	}
 
 	/** Create the toolbar with action buttons. */
 	protected void createToolbar(String titleText) {
@@ -133,61 +147,39 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 
 	/** Get the entity service.
 	 * @return The service */
-	public CAbstractService<T> getEntityService() { return entityService; }
+	@SuppressWarnings ("unchecked")
+	@Override
+	public CAbstractService<ChildEntity> getChildService() { return (CAbstractService<ChildEntity>) childService; }
+
+	/** Returns the current sprint entity.
+	 * @return The current sprint being edited */
+	@Override
+	public CEntityDB<?> getCurrentEntity() { return getMasterEntity(); }
+
+	/** Returns the current sprint ID as a string.
+	 * @return The ID string or null if no sprint is set */
+	@Override
+	public String getCurrentEntityIdString() {
+		return getMasterEntity() != null && getMasterEntity().getId() != null ? getMasterEntity().getId().toString() : null;
+	}
 
 	/** Get the grid component.
 	 * @return The grid */
-	public CGrid<T> getGrid() { return grid; }
+	public CGrid<ChildEntity> getGrid() { return grid; }
 
-	/** Get the master/parent entity that owns these items. Subclasses must implement this.
-	 * @return The master entity */
-	protected abstract M getMasterEntity();
+	protected MasterEntity getMasterEntity() { return masterEntity; }
+
 	/** Get the next order number for a new item. Subclasses must implement this to provide appropriate ordering.
 	 * @return The next order number */
 	protected abstract Integer getNextOrder();
 
 	/** Get the currently selected item.
 	 * @return The selected item, or null if none selected */
-	public T getSelectedItem() { return selectedItem; }
-
-	/** Handle add button click. Creates a new entity and opens the edit dialog. */
-	protected void on_addButton_clicked() {
-		try {
-			LOGGER.debug("Add button clicked");
-			// Check master entity is valid
-			final M master = getMasterEntity();
-			Check.notNull(master, "Master entity cannot be null when adding items");
-			Check.notNull(master.getId(), "Master entity must be saved before adding items");
-			// Create new entity
-			final T newEntity = createNewEntity();
-			Check.notNull(newEntity, "Created entity cannot be null");
-			// Open edit dialog
-			openEditDialog(newEntity, this::handleSave, true);
-		} catch (final Exception ex) {
-			LOGGER.error("Error handling add operation", ex);
-			CNotificationService.showException("Error adding item", ex);
-		}
-	}
-
-	/** Handle delete button click. Deletes the selected item after confirmation. */
-	protected void on_addDeleteButton_clicked() {
-		Check.notNull(selectedItem, "No item selected for deletion");
-		Check.notNull(selectedItem.getId(), "Cannot delete unsaved item");
-		try {
-			LOGGER.debug("Deleting item: {}", selectedItem.getId());
-			entityService.delete(selectedItem);
-			refreshGrid();
-			grid.asSingleSelect().clear();
-			CNotificationService.showDeleteSuccess();
-		} catch (final Exception e) {
-			LOGGER.error("Error deleting item", e);
-			CNotificationService.showException("Error deleting item", e);
-		}
-	}
+	public ChildEntity getSelectedItem() { return selectedItem; }
 
 	/** Handle double-click on a grid item. Opens the edit dialog by default.
 	 * @param item The double-clicked item */
-	protected void handleDoubleClick(final T item) {
+	protected void handleDoubleClick(final ChildEntity item) {
 		try {
 			Check.notNull(item, "Double-clicked item cannot be null");
 			LOGGER.debug("Double-clicked item: {}", item.getId());
@@ -202,7 +194,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 
 	/** Handle edit operation for selected item.
 	 * @param item The item to edit */
-	protected void handleEdit(final T item) {
+	protected void handleEdit(final ChildEntity item) {
 		try {
 			Check.notNull(item, "Item to edit cannot be null");
 			LOGGER.debug("Opening edit dialog for item: {}", item.getId());
@@ -210,6 +202,101 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 		} catch (final Exception ex) {
 			LOGGER.error("Error opening edit dialog", ex);
 			CNotificationService.showException("Error editing item", ex);
+		}
+	}
+
+	/** Handle save operation. Saves the entity and refreshes the grid.
+	 * @param entity The entity to save */
+	@SuppressWarnings ("unchecked")
+	protected void handleSave(final ChildEntity entity) {
+		try {
+			Check.notNull(entity, "Entity to save cannot be null");
+			LOGGER.debug("Saving entity: {}", entity.getId() != null ? entity.getId() : "new");
+			((CAbstractService<ChildEntity>) childService).save(entity);
+			refreshGrid();
+			grid.asSingleSelect().clear();
+			CNotificationService.showSaveSuccess();
+		} catch (final Exception e) {
+			LOGGER.error("Error saving entity", e);
+			CNotificationService.showException("Error saving item", e);
+		}
+	}
+
+	/** Handle selection change in the grid.
+	 * @param item The selected item (can be null) */
+	protected void handleSelectionChange(final ChildEntity item) {
+		try {
+			LOGGER.debug("Selection changed to: {}", item != null ? item.getId() : "null");
+			selectedItem = item;
+			updateButtonStates(item != null);
+		} catch (final Exception ex) {
+			LOGGER.error("Error processing selection change", ex);
+			CNotificationService.showException("Error processing selection", ex);
+		}
+	}
+
+	/** Initialize all UI components.
+	 * @param titleText The title text to display */
+	protected void initializeComponents(final String titleText) {
+		setSpacing(true);
+		setPadding(false);
+		setWidthFull();
+		createGrid();
+		createToolbar(titleText);
+		add(toolbar, grid);
+		LOGGER.debug("UI components initialized for {}", entityClass.getSimpleName());
+	}
+
+	/** Load items for the given master entity. Subclasses must implement this to define how items are loaded.
+	 * @param master The master/parent entity
+	 * @return List of items to display */
+	protected abstract List<ChildEntity> loadItems(MasterEntity master);
+
+	protected void moveItemDown(final ChildEntity item) {
+		Check.notNull(item, "Item to move down cannot be null");
+		childService.moveItemDown(item);
+	}
+
+	protected void moveItemUp(final ChildEntity item) {
+		Check.notNull(item, "Item to move up cannot be null");
+		Check.notNull(item.getId(), "Item must be saved before moving");
+		LOGGER.debug("Moving CSprintItem up: {}", item.getId());
+		childService.moveItemUp(item);
+	}
+
+	/** Handle add button click. Creates a new entity and opens the edit dialog. */
+	protected void on_addButton_clicked() {
+		try {
+			LOGGER.debug("Add button clicked");
+			// Check master entity is valid
+			final MasterEntity master = getMasterEntity();
+			Check.notNull(master, "Master entity cannot be null when adding items");
+			Check.notNull(master.getId(), "Master entity must be saved before adding items");
+			// Create new entity
+			final ChildEntity newEntity = createNewEntity();
+			Check.notNull(newEntity, "Created entity cannot be null");
+			// Open edit dialog
+			openEditDialog(newEntity, this::handleSave, true);
+		} catch (final Exception ex) {
+			LOGGER.error("Error handling add operation", ex);
+			CNotificationService.showException("Error adding item", ex);
+		}
+	}
+
+	/** Handle delete button click. Deletes the selected item after confirmation. */
+	@SuppressWarnings ("unchecked")
+	protected void on_addDeleteButton_clicked() {
+		Check.notNull(selectedItem, "No item selected for deletion");
+		Check.notNull(selectedItem.getId(), "Cannot delete unsaved item");
+		try {
+			LOGGER.debug("Deleting item: {}", selectedItem.getId());
+			((CAbstractService<ChildEntity>) childService).delete(selectedItem);
+			refreshGrid();
+			grid.asSingleSelect().clear();
+			CNotificationService.showDeleteSuccess();
+		} catch (final Exception e) {
+			LOGGER.error("Error deleting item", e);
+			CNotificationService.showException("Error deleting item", e);
 		}
 	}
 
@@ -239,78 +326,54 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 		}
 	}
 
-	/** Handle save operation. Saves the entity and refreshes the grid.
-	 * @param entity The entity to save */
-	protected void handleSave(final T entity) {
-		try {
-			Check.notNull(entity, "Entity to save cannot be null");
-			LOGGER.debug("Saving entity: {}", entity.getId() != null ? entity.getId() : "new");
-			entityService.save(entity);
-			refreshGrid();
-			grid.asSingleSelect().clear();
-			CNotificationService.showSaveSuccess();
-		} catch (final Exception e) {
-			LOGGER.error("Error saving entity", e);
-			CNotificationService.showException("Error saving item", e);
-		}
-	}
-
-	/** Handle selection change in the grid.
-	 * @param item The selected item (can be null) */
-	protected void handleSelectionChange(final T item) {
-		try {
-			LOGGER.debug("Selection changed to: {}", item != null ? item.getId() : "null");
-			selectedItem = item;
-			updateButtonStates(item != null);
-		} catch (final Exception ex) {
-			LOGGER.error("Error processing selection change", ex);
-			CNotificationService.showException("Error processing selection", ex);
-		}
-	}
-
-	/** Initialize all UI components.
-	 * @param titleText The title text to display */
-	protected void initializeComponents(final String titleText) {
-		setSpacing(true);
-		setPadding(false);
-		setWidthFull();
-		createGrid();
-		createToolbar(titleText);
-		add(toolbar, grid);
-		LOGGER.debug("UI components initialized for {}", entityClass.getSimpleName());
-	}
-
-	/** Load items for the given master entity. Subclasses must implement this to define how items are loaded.
-	 * @param master The master/parent entity
-	 * @return List of items to display */
-	protected abstract List<T> loadItems(M master);
-	/** Move an item down in the order. Subclasses can override to implement specific ordering logic.
-	 * @param item The item to move down */
-	protected abstract void moveItemDown(T item);
-	/** Move an item up in the order. Subclasses can override to implement specific ordering logic.
-	 * @param item The item to move up */
-	protected abstract void moveItemUp(T item);
 	/** Open an edit dialog for the entity. Subclasses must implement this to provide appropriate edit dialogs.
 	 * @param entity       The entity to edit
 	 * @param saveCallback Callback to invoke when saving
 	 * @param isNew        True if this is a new entity */
-	protected abstract void openEditDialog(T entity, Consumer<T> saveCallback, boolean isNew);
+	protected abstract void openEditDialog(ChildEntity entity, Consumer<ChildEntity> saveCallback, boolean isNew);
+
+	@Override
+	public void populateForm() {
+		LOGGER.debug("populateForm called - refreshing sprint items grid");
+		if ((getMasterEntity() != null) && (getMasterEntity().getId() != null)) {
+			refreshGrid();
+		} else {
+			clearGrid();
+		}
+	}
 
 	/** Refresh the grid to show updated data. */
+	@Override
 	public void refreshGrid() {
-		final M master = getMasterEntity();
+		final MasterEntity master = getMasterEntity();
 		Check.notNull(master, "Master entity cannot be null when refreshing grid");
-		final T currentValue = grid.asSingleSelect().getValue();
-		final List<T> items = loadItems(master);
+		final ChildEntity currentValue = grid.asSingleSelect().getValue();
+		final List<ChildEntity> items = loadItems(master);
 		Check.notNull(items, "Loaded items cannot be null");
 		LOGGER.debug("Refreshing grid with {} items", items.size());
 		grid.setItems(items);
 		grid.asSingleSelect().setValue(currentValue);
 	}
 
+	/** Sets the current entity for this component. Called by CFormBuilder when the binder's entity changes. If the entity is a CSprint, it will be
+	 * set as the current sprint and the grid will be refreshed.
+	 * @param entity The entity to set (expected to be CSprint) */
+	@Override
+	public void setCurrentEntity(final CEntityDB<?> entity) {
+		if (entity == null) {
+			LOGGER.debug("setCurrentEntity called with null - clearing sprint");
+			clearGrid();
+		} else if (entity instanceof CSprint) {
+			LOGGER.debug("setCurrentEntity called with CSprint - setting current sprint");
+			refreshGrid();
+		} else {
+			LOGGER.warn("setCurrentEntity called with unexpected entity type: {} - ignoring", entity.getClass().getSimpleName());
+		}
+	}
+
 	/** Set the currently selected item.
 	 * @param item The item to select */
-	public void setSelectedItem(final T item) {
+	public void setSelectedItem(final ChildEntity item) {
 		grid.asSingleSelect().setValue(item);
 	}
 

@@ -98,14 +98,14 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 			defaultValue = "false"
 	)
 	private Boolean isRequired = false;
-	@Column (name = "lineOrder", nullable = false)
+	@Column (name = "itemOrder", nullable = false)
 	@Min (value = 1, message = "Line order must be at least 1")
 	@Max (value = 999, message = "Line order cannot exceed 999")
 	@AMetaData (
 			displayName = "Line Order", required = true, readOnly = false, description = "Order of this line in the screen (1-999)", hidden = false,
 			order = 1, defaultValue = "0"
 	)
-	private Integer lineOrder = 0;
+	private Integer itemOrder = 0;
 	@Column (name = "max_length", nullable = true)
 	@Min (value = 0, message = "Max length must be at least 1")
 	@Max (value = 10000, message = "Max length cannot exceed 10000")
@@ -176,7 +176,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public Boolean getIsRequired() { return isRequired; }
 
-	public Integer getLineOrder() { return lineOrder; }
+	public Integer getitemOrder() { return itemOrder; }
 
 	public Integer getMaxLength() { return maxLength; }
 
@@ -190,7 +190,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public void printLine() {
 		System.out.println(
-				"CDetailLines{" + "id=" + getId() + ", lineOrder=" + lineOrder + ", fieldCaption='" + fieldCaption + '\'' + ", entityProperty='"
+				"CDetailLines{" + "id=" + getId() + ", itemOrder=" + itemOrder + ", fieldCaption='" + fieldCaption + '\'' + ", entityProperty='"
 						+ entityProperty + '\'' + ", relationFieldName='" + relationFieldName + '\'' + ", sectionName='" + sectionName + '\'' + '}');
 	}
 
@@ -214,7 +214,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public void setIsRequired(final Boolean isRequired) { this.isRequired = isRequired; }
 
-	public void setLineOrder(final Integer lineOrder) { this.lineOrder = lineOrder; }
+	public void setitemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
 	public void setMaxLength(final Integer maxLength) { this.maxLength = maxLength; }
 
@@ -231,7 +231,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	@Override
 	public String toString() {
-		return String.format("CDetailLines{id=%d, lineOrder=%d, fieldCaption='%s', entityProperty='%s'}", getId(), lineOrder, fieldCaption,
+		return String.format("CDetailLines{id=%d, itemOrder=%d, fieldCaption='%s', entityProperty='%s'}", getId(), itemOrder, fieldCaption,
 				entityProperty);
 	}
 }

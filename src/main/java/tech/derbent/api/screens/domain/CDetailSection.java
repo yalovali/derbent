@@ -40,7 +40,7 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	)
 	private Boolean defaultSection = true;
 	@OneToMany (mappedBy = "detailSection", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@OrderBy ("lineOrder ASC")
+	@OrderBy ("itemOrder ASC")
 	private List<CDetailLines> detailLines = new ArrayList<>();
 	@Column (name = "entity_type", nullable = false, length = 100)
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")
@@ -90,9 +90,9 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 		// }
 		// }
 		// }
-		if (screenLine.getLineOrder() == 0) {
+		if (screenLine.getitemOrder() == 0) {
 			// default line order is the next available number
-			screenLine.setLineOrder(detailLines.size() + 1);
+			screenLine.setitemOrder(detailLines.size() + 1);
 		}
 		detailLines.add(screenLine);
 		screenLine.setDetailSection(this);

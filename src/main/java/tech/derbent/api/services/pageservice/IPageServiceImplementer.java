@@ -19,7 +19,7 @@ public interface IPageServiceImplementer<EntityClass extends CEntityDB<EntityCla
 	CDetailsBuilder getDetailsBuilder();
 	Class<?> getEntityClass();
 	@Override
-	CAbstractService<EntityClass> getEntityService();
+	CAbstractService<EntityClass> getChildService();
 	CPageService<EntityClass> getPageService();
 	ISessionService getSessionService();
 

@@ -13,6 +13,7 @@ import tech.derbent.api.ui.component.CComponentListDetailLines;
 import tech.derbent.api.utils.Check;
 
 public class CPanelDetailLines extends CPanelDetailSectionBase {
+
 	private static final long serialVersionUID = 1L;
 	private final CComponentListDetailLines listComponent;
 
@@ -22,26 +23,11 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 			throws Exception {
 		super("Screen Lines", parentContent, beanValidationBinder, entityService);
 		Check.notNull(screenLinesService, "Detail lines service cannot be null");
-		
 		LOGGER.debug("Creating CPanelDetailLines with CComponentListDetailLines");
-		
 		// Create the list component
 		listComponent = new CComponentListDetailLines(screenLinesService);
-		
 		initPanel();
 		createScreenLinesLayout();
-	}
-
-	private void createScreenLinesLayout() {
-		// Simply add the list component to the panel content
-		addToContent(listComponent);
-		
-		// Populate with current entity if available
-		if (getCurrentEntity() != null) {
-			listComponent.setCurrentSection(getCurrentEntity());
-		}
-		
-		LOGGER.debug("Screen lines layout created with CComponentListDetailLines");
 	}
 
 	@Override
@@ -50,26 +36,30 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		return null;
 	}
 
+	private void createScreenLinesLayout() {
+		// Simply add the list component to the panel content
+		addToContent(listComponent);
+		// Populate with current entity if available
+		if (getCurrentEntity() != null) {
+			listComponent.setCurrentEntity(getCurrentEntity());
+		}
+		LOGGER.debug("Screen lines layout created with CComponentListDetailLines");
+	}
+
+	/** Get the list component for external access if needed.
+	 * @return The list component */
+	public CComponentListDetailLines getListComponent() { return listComponent; }
+
 	@Override
 	public void populateForm(final CDetailSection entity) {
 		super.populateForm(entity);
 		Check.notNull(listComponent, "List component cannot be null");
-		
 		LOGGER.debug("Populating form with entity: {}", entity != null ? entity.getId() : "null");
-		listComponent.setCurrentSection(entity);
+		listComponent.setCurrentEntity(entity);
 	}
 
 	@Override
 	protected void updatePanelEntityFields() {
 		setEntityFields(List.of());
-	}
-
-	/**
-	 * Get the list component for external access if needed.
-	 * 
-	 * @return The list component
-	 */
-	public CComponentListDetailLines getListComponent() {
-		return listComponent;
 	}
 }

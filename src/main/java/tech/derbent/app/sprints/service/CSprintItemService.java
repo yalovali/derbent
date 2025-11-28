@@ -7,9 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.screens.domain.CDetailLines;
+import tech.derbent.api.screens.service.IOrderedEntityService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
@@ -19,7 +23,8 @@ import tech.derbent.base.session.service.ISessionService;
 /** CSprintItemService - Service class for managing sprint items. Provides business logic for sprint item operations and dynamic item loading. */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable {
+public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable, IOrderedEntityService<CSprintItem> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintItemService.class);
 	@Autowired
 	private CActivityService activityService;
@@ -37,11 +42,14 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		return ((ISprintItemRepository) repository).findByItemType(itemType);
 	}
 
-	/** Find all sprint items for a specific sprint.
-	 * @param sprintId the sprint ID
-	 * @return list of sprint items */
-	public List<CSprintItem> findBySprintId(final Long sprintId) {
-		return ((ISprintItemRepository) repository).findBySprintIdOrderByItemOrderAsc(sprintId);
+	@Transactional (readOnly = true)
+	public List<CDetailLines> findByMaster(final CSprint master) {
+		Check.notNull(master, "Master cannot be null");
+		if (master.getId() == null) {
+			// new instance, no lines yet
+			return List.of();
+		}
+		return ((ISprintItemRepository) repository).findByMaster(master);
 	}
 
 	/** Find a sprint item by sprint ID and item ID.
@@ -127,6 +135,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 
 	/** Move a sprint item down in the order (increase order number).
 	 * @param sprintItem the sprint item to move down */
+	@Override
 	public void moveItemDown(final CSprintItem sprintItem) {
 		if ((sprintItem == null) || (sprintItem.getSprint() == null)) {
 			LOGGER.warn("Cannot move down - sprint item or sprint is null");
@@ -151,6 +160,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 
 	/** Move a sprint item up in the order (decrease order number).
 	 * @param sprintItem the sprint item to move up */
+	@Override
 	public void moveItemUp(final CSprintItem sprintItem) {
 		if ((sprintItem == null) || (sprintItem.getSprint() == null)) {
 			LOGGER.warn("Cannot move up - sprint item or sprint is null");

@@ -115,7 +115,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	protected abstract String getDisplayText(RelationalClass settings, String fieldType);
 
 	@Override
-	public CAbstractService<MasterClass> getEntityService() { return entityService; }
+	public CAbstractService<MasterClass> getChildService() { return entityService; }
 
 	@Override
 	public void initPanel() throws Exception {

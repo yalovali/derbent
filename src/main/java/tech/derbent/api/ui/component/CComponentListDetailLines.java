@@ -23,7 +23,7 @@ import tech.derbent.api.utils.Check;
  * <li>Selection management</li>
  * </ul>
  */
-public class CComponentListDetailLines extends CComponentListEntityBase<CDetailLines, CDetailSection> {
+public class CComponentListDetailLines extends CComponentListEntityBase<CDetailSection, CDetailLines> {
 
 	private static final long serialVersionUID = 1L;
 	// Master entity
@@ -42,7 +42,7 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailL
 		Check.notNull(grid, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CDetailLines");
 		grid.addColumn(CDetailLines::getId).setHeader("Id").setWidth("50px");
-		grid.addColumn(CDetailLines::getLineOrder).setHeader("Order").setWidth("50px");
+		grid.addColumn(CDetailLines::getitemOrder).setHeader("Order").setWidth("50px");
 		grid.addColumn(CDetailLines::getFieldCaption).setHeader("Caption").setAutoWidth(true);
 		grid.addColumn(CDetailLines::getEntityProperty).setHeader("Field Name").setAutoWidth(true);
 		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setHeader("Required").setWidth("80px");
@@ -54,11 +54,11 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailL
 		Check.notNull(currentSection, "Current section cannot be null when creating new entity");
 		Check.notNull(currentSection.getId(), "Current section must be saved before adding detail lines");
 		LOGGER.debug("Creating new CDetailLines entity for section: {}", currentSection.getId());
-		final CDetailLinesService service = (CDetailLinesService) entityService;
+		final CDetailLinesService service = (CDetailLinesService) childService;
 		// Get the position of the current item if selected, otherwise add at end
 		Integer position = 0;
 		if (selectedItem != null) {
-			position = selectedItem.getLineOrder();
+			position = selectedItem.getitemOrder();
 			LOGGER.debug("Inserting before position: {}", position);
 			try {
 				return service.insertLineBefore(currentSection, CEntityFieldService.THIS_CLASS, "name", position);
@@ -72,18 +72,11 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailL
 		return service.newEntity(currentSection, CEntityFieldService.THIS_CLASS, "name");
 	}
 
-	/** Get the current detail section.
-	 * @return The current section */
-	public CDetailSection getCurrentSection() { return currentSection; }
-
-	@Override
-	protected CDetailSection getMasterEntity() { return currentSection; }
-
 	@Override
 	protected Integer getNextOrder() {
 		Check.notNull(currentSection, "Current section cannot be null when getting next order");
-		final CDetailLinesService service = (CDetailLinesService) entityService;
-		final Integer nextOrder = service.getNextLineOrder(currentSection);
+		final CDetailLinesService service = (CDetailLinesService) childService;
+		final Integer nextOrder = service.getNextitemOrder(currentSection);
 		LOGGER.debug("Next line order for section {}: {}", currentSection.getId() != null ? currentSection.getId() : "null", nextOrder);
 		return nextOrder;
 	}
@@ -96,29 +89,11 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailL
 			LOGGER.debug("Master section is new, returning empty list");
 			return List.of();
 		}
-		final CDetailLinesService service = (CDetailLinesService) entityService;
+		final CDetailLinesService service = (CDetailLinesService) childService;
 		final List<CDetailLines> lines = service.findByMaster(master);
 		Check.notNull(lines, "Loaded lines cannot be null");
 		LOGGER.debug("Loaded {} detail lines", lines.size());
 		return lines;
-	}
-
-	@Override
-	protected void moveItemDown(final CDetailLines item) {
-		Check.notNull(item, "Item to move down cannot be null");
-		Check.notNull(item.getId(), "Item must be saved before moving");
-		LOGGER.debug("Moving CDetailLines down: {}", item.getId());
-		final CDetailLinesService service = (CDetailLinesService) entityService;
-		service.moveLineDown(item);
-	}
-
-	@Override
-	protected void moveItemUp(final CDetailLines item) {
-		Check.notNull(item, "Item to move up cannot be null");
-		Check.notNull(item.getId(), "Item must be saved before moving");
-		LOGGER.debug("Moving CDetailLines up: {}", item.getId());
-		final CDetailLinesService service = (CDetailLinesService) entityService;
-		service.moveLineUp(item);
 	}
 
 	@Override
@@ -133,18 +108,6 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailL
 		} catch (final Exception e) {
 			LOGGER.error("Error opening CDetailLinesEditDialog", e);
 			CNotificationService.showException("Error opening edit dialog", e);
-		}
-	}
-
-	/** Set the current detail section being edited.
-	 * @param section The detail section */
-	public void setCurrentSection(final CDetailSection section) {
-		LOGGER.debug("Setting current section: {}", section != null ? section.getId() : "null");
-		this.currentSection = section;
-		if (section != null && section.getId() != null) {
-			refreshGrid();
-		} else {
-			clearGrid();
 		}
 	}
 }
