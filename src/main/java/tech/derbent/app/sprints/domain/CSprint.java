@@ -78,7 +78,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@AMetaData (
 			displayName = "Sprint Items", required = false, readOnly = false,
 			description = "Items (activities, meetings, etc.) included in this sprint", hidden = false, order = 30,
-			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "view"
+			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "view", captionVisible = false
 	)
 	private List<CSprintItem> sprintItems = new ArrayList<>();
 	@Column (nullable = true)
@@ -229,7 +229,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		if (activities == null || activities.isEmpty()) {
 			return 0;
 		}
-		long completedCount = activities.stream().filter(activity -> {
+		final long completedCount = activities.stream().filter(activity -> {
 			if (activity.getStatus() != null && activity.getStatus().getFinalStatus()) {
 				return true;
 			}

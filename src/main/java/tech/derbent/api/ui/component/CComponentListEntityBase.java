@@ -40,20 +40,20 @@ import tech.derbent.api.utils.Check;
  * @param <T> The entity type extending CEntityDB
  * @param <M> The master/parent entity type */
 public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends CEntityDB<M>> extends VerticalLayout {
+
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
-	// Components
-	protected CGrid<T> grid;
-	protected H3 title;
-	protected HorizontalLayout toolbar;
 	protected Button addButton;
 	protected Button deleteButton;
-	protected Button moveUpButton;
-	protected Button moveDownButton;
-	// Data management
-	protected T selectedItem;
 	protected final Class<T> entityClass;
 	protected final CAbstractService<T> entityService;
+	// Components
+	protected CGrid<T> grid;
+	protected Button moveDownButton;
+	protected Button moveUpButton;
+	// Data management
+	protected T selectedItem;
+	protected HorizontalLayout toolbar;
 
 	/** Constructor for the entity list component.
 	 * @param title         The title to display above the grid
@@ -103,31 +103,33 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 	protected abstract T createNewEntity();
 
 	/** Create the toolbar with action buttons. */
-	protected void createToolbar() {
+	protected void createToolbar(String titleText) {
+		final CHorizontalLayout buttonLayout = new CHorizontalLayout();
+		buttonLayout.setSizeUndefined();
 		toolbar = new HorizontalLayout();
 		toolbar.setSpacing(true);
+		// Create title
+		final H3 title = new H3(titleText);
+		title.setWidthFull();
 		// Create buttons
-		addButton = new Button(getAddButtonLabel(), VaadinIcon.PLUS.create());
+		addButton = new Button(VaadinIcon.PLUS.create());
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		addButton.addClickListener(e -> handleAdd());
-		deleteButton = new Button("Delete", VaadinIcon.TRASH.create());
+		addButton.addClickListener(e -> on_addButton_clicked());
+		deleteButton = new Button(VaadinIcon.TRASH.create());
 		deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		deleteButton.addClickListener(e -> handleDelete());
+		deleteButton.addClickListener(e -> on_addDeleteButton_clicked());
 		deleteButton.setEnabled(false);
-		moveUpButton = new Button("Move Up", VaadinIcon.ARROW_UP.create());
-		moveUpButton.addClickListener(e -> handleMoveUp());
+		moveUpButton = new Button(VaadinIcon.ARROW_UP.create());
+		moveUpButton.addClickListener(e -> on_moveUpButton_clicked());
 		moveUpButton.setEnabled(false);
-		moveDownButton = new Button("Move Down", VaadinIcon.ARROW_DOWN.create());
-		moveDownButton.addClickListener(e -> handleMoveDown());
+		moveDownButton = new Button(VaadinIcon.ARROW_DOWN.create());
+		moveDownButton.addClickListener(e -> on_moveDownButton_clicked());
 		moveDownButton.setEnabled(false);
-		// Add buttons to toolbar
-		toolbar.add(addButton, deleteButton, moveUpButton, moveDownButton);
+		//
+		buttonLayout.add(addButton, deleteButton, moveUpButton, moveDownButton);
+		toolbar.add(buttonLayout, title);
 		LOGGER.debug("Toolbar created with CRUD buttons");
 	}
-
-	/** Get the label for the add button. Override to customize.
-	 * @return The button label */
-	protected String getAddButtonLabel() { return "Add"; }
 
 	/** Get the entity service.
 	 * @return The service */
@@ -140,7 +142,6 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 	/** Get the master/parent entity that owns these items. Subclasses must implement this.
 	 * @return The master entity */
 	protected abstract M getMasterEntity();
-
 	/** Get the next order number for a new item. Subclasses must implement this to provide appropriate ordering.
 	 * @return The next order number */
 	protected abstract Integer getNextOrder();
@@ -150,7 +151,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 	public T getSelectedItem() { return selectedItem; }
 
 	/** Handle add button click. Creates a new entity and opens the edit dialog. */
-	protected void handleAdd() {
+	protected void on_addButton_clicked() {
 		try {
 			LOGGER.debug("Add button clicked");
 			// Check master entity is valid
@@ -169,7 +170,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 	}
 
 	/** Handle delete button click. Deletes the selected item after confirmation. */
-	protected void handleDelete() {
+	protected void on_addDeleteButton_clicked() {
 		Check.notNull(selectedItem, "No item selected for deletion");
 		Check.notNull(selectedItem.getId(), "Cannot delete unsaved item");
 		try {
@@ -213,7 +214,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 	}
 
 	/** Handle move down button click. Moves the selected item down in the order. */
-	protected void handleMoveDown() {
+	protected void on_moveDownButton_clicked() {
 		Check.notNull(selectedItem, "No item selected for move down");
 		try {
 			LOGGER.debug("Moving item down: {}", selectedItem.getId());
@@ -226,7 +227,7 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 	}
 
 	/** Handle move up button click. Moves the selected item up in the order. */
-	protected void handleMoveUp() {
+	protected void on_moveUpButton_clicked() {
 		Check.notNull(selectedItem, "No item selected for move up");
 		try {
 			LOGGER.debug("Moving item up: {}", selectedItem.getId());
@@ -273,14 +274,9 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 		setSpacing(true);
 		setPadding(false);
 		setWidthFull();
-		// Create title
-		title = new H3(titleText);
-		// Create grid
 		createGrid();
-		// Create toolbar
-		createToolbar();
-		// Add components to layout
-		add(title, toolbar, grid);
+		createToolbar(titleText);
+		add(toolbar, grid);
 		LOGGER.debug("UI components initialized for {}", entityClass.getSimpleName());
 	}
 
@@ -288,15 +284,12 @@ public abstract class CComponentListEntityBase<T extends CEntityDB<T>, M extends
 	 * @param master The master/parent entity
 	 * @return List of items to display */
 	protected abstract List<T> loadItems(M master);
-
 	/** Move an item down in the order. Subclasses can override to implement specific ordering logic.
 	 * @param item The item to move down */
 	protected abstract void moveItemDown(T item);
-
 	/** Move an item up in the order. Subclasses can override to implement specific ordering logic.
 	 * @param item The item to move up */
 	protected abstract void moveItemUp(T item);
-
 	/** Open an edit dialog for the entity. Subclasses must implement this to provide appropriate edit dialogs.
 	 * @param entity       The entity to edit
 	 * @param saveCallback Callback to invoke when saving

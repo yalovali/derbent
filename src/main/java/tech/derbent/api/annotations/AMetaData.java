@@ -15,6 +15,8 @@ public @interface AMetaData {
 
 	boolean autoSelectFirst() default false;
 
+	boolean captionVisible() default true;
+
 	boolean clearOnEmptyData() default false;
 
 	boolean colorField() default false;

@@ -247,6 +247,7 @@ public class CEntityFieldService {
 			info.setUseIcon(metaData.useIcon());
 			info.setUseDualListSelector(metaData.useDualListSelector());
 			info.setUseGridSelection(metaData.useGridSelection());
+			info.setIsCaptionVisible(metaData.captionVisible());
 			return info;
 		} catch (final Exception e) {
 			throw e;

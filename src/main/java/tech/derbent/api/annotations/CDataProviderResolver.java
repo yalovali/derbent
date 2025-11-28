@@ -111,7 +111,6 @@ public final class CDataProviderResolver {
 		}
 	}
 
-	@SuppressWarnings ("rawtypes")
 	public Object resolveMethodAnnotations(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
 			boolean there_is_param = false;
@@ -129,7 +128,7 @@ public final class CDataProviderResolver {
 				there_is_param = true;
 				paramValue = resolveParamValue(contentOwner, fieldInfo);
 			}
-			Object bean = resolveBean(beanName, contentOwner);
+			final Object bean = resolveBean(beanName, contentOwner);
 			Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName + " field: " + fieldInfo.getFieldName());
 			Object result;
 			if (there_is_param) {

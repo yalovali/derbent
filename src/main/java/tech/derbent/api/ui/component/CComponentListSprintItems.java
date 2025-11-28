@@ -103,9 +103,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 		throw new UnsupportedOperationException("Sprint items must be created through the type selection dialog. Use openItemSelectionDialog().");
 	}
 
-	@Override
-	protected String getAddButtonLabel() { return "Add Sprint Item"; }
-
 	/** Returns the current sprint entity.
 	 * @return The current sprint being edited */
 	@Override
@@ -140,7 +137,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprintI
 	}
 
 	@Override
-	protected void handleAdd() {
+	protected void on_addButton_clicked() {
 		try {
 			LOGGER.debug("Add button clicked for sprint items");
 			// Check master entity is valid
