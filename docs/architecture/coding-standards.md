@@ -825,6 +825,130 @@ private CActivity parent;
 private CProject project;
 ```
 
+## Child Entity Repository Standards (Master-Detail Pattern)
+
+### 5. **Consistent Naming for Child Entity Repositories** (Mandatory)
+
+When creating repositories for child entities (entities that belong to a parent/master entity), use consistent method naming to ensure uniformity across the project.
+
+#### Standard Method Names
+
+| Method Pattern | Purpose | Example |
+|----------------|---------|---------|
+| `findByMaster(M master)` | Find all children by master entity | `findByMaster(CDetailSection master)` |
+| `findByMasterId(Long id)` | Find all children by master ID | `findByMasterId(Long sprintId)` |
+| `findActiveByMaster(M master)` | Find active children by master | `findActiveByMaster(CDetailSection master)` |
+| `countByMaster(M master)` | Count children by master entity | `countByMaster(CDetailSection master)` |
+| `getNextItemOrder(M master)` | Get next order number for new items | `getNextItemOrder(CDetailSection master)` |
+| `findByMasterIdAndItemId(Long, Long)` | Find specific child by both IDs | `findByMasterIdAndItemId(Long sprintId, Long itemId)` |
+
+#### ✅ Correct Repository Interface Example
+
+```java
+public interface ISprintItemRepository extends IAbstractRepository<CSprintItem> {
+
+    /** Find all sprint items for a master (sprint), ordered by itemOrder. */
+    @Query("SELECT e FROM #{#entityName} e WHERE e.sprint = :master ORDER BY e.itemOrder ASC")
+    List<CSprintItem> findByMaster(@Param("master") CSprint master);
+
+    /** Find all sprint items by master ID, ordered by itemOrder. */
+    @Query("SELECT e FROM #{#entityName} e WHERE e.sprint.id = :masterId ORDER BY e.itemOrder ASC")
+    List<CSprintItem> findByMasterId(@Param("masterId") Long masterId);
+
+    /** Count children by master. */
+    @Query("SELECT COUNT(e) FROM #{#entityName} e WHERE e.sprint = :master")
+    Long countByMaster(@Param("master") CSprint master);
+
+    /** Get next item order. */
+    @Query("SELECT COALESCE(MAX(e.itemOrder), 0) + 1 FROM #{#entityName} e WHERE e.sprint = :master")
+    Integer getNextItemOrder(@Param("master") CSprint master);
+}
+```
+
+#### ❌ Incorrect - Entity-Specific Naming
+
+```java
+// DON'T use entity-specific names
+List<CSprintItem> findBySprintId(Long sprintId);        // ❌ Use findByMasterId
+List<CSprintItem> findBySprintIdOrderByItemOrderAsc();  // ❌ Use findByMasterId (already ordered)
+Long countByScreen(CDetailSection screen);              // ❌ Use countByMaster
+Integer getNextitemOrder(CDetailSection section);       // ❌ Use getNextItemOrder (camelCase!)
+```
+
+### JPQL Query Standards
+
+#### Entity Alias Convention
+Always use `e` as the entity alias in JPQL queries for consistency:
+
+```java
+// ✅ Correct - use 'e' as entity alias
+@Query("SELECT e FROM #{#entityName} e WHERE e.master = :master ORDER BY e.itemOrder ASC")
+
+// ❌ Incorrect - inconsistent aliases
+@Query("SELECT a FROM #{#entityName} a WHERE a.master = :master")  // Don't use 'a'
+@Query("SELECT si FROM #{#entityName} si WHERE si.sprint = :sprint")  // Don't use 'si'
+```
+
+#### Parameter Naming Convention
+Use generic names like `master` instead of entity-specific names:
+
+```java
+// ✅ Correct - generic parameter name
+@Query("SELECT e FROM #{#entityName} e WHERE e.detailSection = :master")
+List<CDetailLines> findByMaster(@Param("master") CDetailSection master);
+
+// ❌ Incorrect - entity-specific parameter name
+@Query("SELECT e FROM #{#entityName} e WHERE e.detailSection = :detailSection")
+List<CDetailLines> findByMaster(@Param("detailSection") CDetailSection master);
+```
+
+#### JOIN FETCH Syntax
+Always use explicit `e.` prefix for JOINed fields:
+
+```java
+// ✅ Correct
+@Query("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.detailSection WHERE e.detailSection = :master")
+
+// ❌ Incorrect - missing entity prefix
+@Query("SELECT e FROM #{#entityName} e LEFT JOIN FETCH detailSection WHERE e.detailSection = :master")
+```
+
+### Service Method Standards
+
+Services should provide consistent methods that match repository patterns:
+
+```java
+@Service
+public class CSprintItemService extends CAbstractService<CSprintItem> 
+        implements IOrderedEntityService<CSprintItem> {
+    
+    /** Get typed repository. */
+    private ISprintItemRepository getTypedRepository() {
+        return (ISprintItemRepository) repository;
+    }
+    
+    /** Find by master entity. */
+    public List<CSprintItem> findByMaster(CSprint master) {
+        Check.notNull(master, "Master cannot be null");
+        if (master.getId() == null) return List.of();
+        return getTypedRepository().findByMaster(master);
+    }
+    
+    /** Find by master ID. */
+    public List<CSprintItem> findByMasterId(Long masterId) {
+        Check.notNull(masterId, "Master ID cannot be null");
+        return getTypedRepository().findByMasterId(masterId);
+    }
+    
+    /** Find by master ID with eager loading of transient data. */
+    public List<CSprintItem> findByMasterIdWithItems(Long masterId) {
+        List<CSprintItem> items = findByMasterId(masterId);
+        loadItems(items);  // Load transient data
+        return items;
+    }
+}
+```
+
 ## Related Documentation
 
 - [Entity Inheritance Patterns](entity-inheritance-patterns.md)
