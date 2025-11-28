@@ -41,6 +41,11 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			line.setEntityProperty(fieldInfo.getFieldName());
 			line.setDescription(fieldInfo.getDescription());
 			line.setFieldCaption(fieldInfo.getDisplayName());
+			line.setIsCaptionVisible(fieldInfo.getIsCaptionVisible());
+			line.setIsHidden(fieldInfo.isHidden());
+			line.setIsRequired(fieldInfo.isRequired());
+			line.setIsReadonly(fieldInfo.isReadOnly());
+			line.setMaxLength(fieldInfo.getMaxLength());
 			line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
 			return line;
 		} catch (Exception e) {

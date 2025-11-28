@@ -46,21 +46,21 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	@JoinColumn (name = "company_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
-			displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false, order = 2,
+			displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false, 
 			dataProviderBean = "context", dataProviderMethod = "getAvailableCompanyForUser"
 	)
 	private CCompany company;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
-			displayName = "Role", required = false, readOnly = false, description = "User's role within the company", hidden = false, order = 3,
+			displayName = "Role", required = false, readOnly = false, description = "User's role within the company", hidden = false, 
 			dataProviderBean = "context", dataProviderMethod = "getAvailableCompanyRolesForUser", setBackgroundFromColor = true, useIcon = true
 	)
 	private CUserCompanyRole role;
 	@ManyToOne
 	@JoinColumn (name = "user_id", nullable = false)
 	@AMetaData (
-			displayName = "User", required = true, readOnly = false, description = "User in this company relationship", hidden = false, order = 1,
+			displayName = "User", required = true, readOnly = false, description = "User in this company relationship", hidden = false, 
 			dataProviderBean = "context", dataProviderMethod = "getAvailableUsersForCompany"
 	)
 	private CUser user;

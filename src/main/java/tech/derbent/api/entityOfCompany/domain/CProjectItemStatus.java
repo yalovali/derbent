@@ -22,7 +22,7 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
 			displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false",
-			description = "Indicates if this is a final status (completed/cancelled)", hidden = true, order = 4
+			description = "Indicates if this is a final status (completed/cancelled)", hidden = true
 	)
 	private Boolean finalStatus = Boolean.FALSE;
 

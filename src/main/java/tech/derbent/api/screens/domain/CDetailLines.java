@@ -34,22 +34,21 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	@Size (max = 100, message = ValidationMessages.DATA_PROVIDER_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Data Provider Bean", required = false, readOnly = false,
-			description = "Spring bean name for data provider (for comboboxes)", hidden = false, order = 11, maxLength = 100
+			description = "Spring bean name for data provider (for comboboxes)", hidden = false, maxLength = 100
 	)
 	private String dataProviderBean;
 	@Column (name = "default_value", nullable = true, length = 255)
 	@Size (max = 255, message = "Default value cannot exceed 255 characters")
 	@AMetaData (
 			displayName = "Default Value", required = false, readOnly = false, description = "Default value for this field", hidden = false,
-			order = 9, maxLength = 255
+			maxLength = 255
 	)
 	private String defaultValue;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "detailsection_id", nullable = false)
 	@NotNull (message = ValidationMessages.SCREEN_REFERENCE_REQUIRED)
 	@AMetaData (
-			displayName = "Screen Reference", required = true, readOnly = false, description = "Screen Reference", hidden = false, order = 1,
-			defaultValue = "1"
+			displayName = "Screen Reference", required = true, readOnly = false, description = "Screen Reference", hidden = false, defaultValue = "1"
 	)
 	private CDetailSection detailSection;
 	@Column (name = "entity_property", nullable = false, length = 100)
@@ -57,7 +56,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	@NotNull (message = "Field propery name is required")
 	@AMetaData (
 			displayName = "Field Property", required = true, readOnly = false, description = "Name of the property in the entity", hidden = false,
-			order = 3, maxLength = 100, dataProviderBean = "none"
+			maxLength = 100, dataProviderBean = "none"
 	)
 	private String entityProperty;
 	@Column (name = "field_caption", nullable = false, length = 255)
@@ -65,37 +64,37 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	@NotNull (message = "Field caption is required")
 	@AMetaData (
 			displayName = "Field Caption", required = true, readOnly = false, description = "Caption/label to display for this field", hidden = false,
-			order = 2, maxLength = 255
+			maxLength = 255
 	)
 	private String fieldCaption;
 	@Column (name = "field_description", nullable = true, length = 500)
 	@Size (max = 500, message = ValidationMessages.FIELD_DESCRIPTION_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Field Description", required = false, readOnly = false, description = "Description or help text for this field",
-			hidden = false, order = 4, maxLength = 500
+			hidden = false, maxLength = 500
 	)
 	private String fieldDescription;
 	@Column (name = "is_caption_visible", nullable = false)
 	@AMetaData (
 			displayName = "Caption Visible", required = false, readOnly = false, description = "Whether the caption is visible", hidden = false,
-			order = 10, defaultValue = "false"
+			defaultValue = "false"
 	)
 	private Boolean isCaptionVisible = true;
 	@Column (name = "is_hidden", nullable = false)
 	@AMetaData (
-			displayName = "Hidden", required = false, readOnly = false, description = "Whether this field is hidden", hidden = false, order = 8,
+			displayName = "Hidden", required = false, readOnly = false, description = "Whether this field is hidden", hidden = false,
 			defaultValue = "false"
 	)
 	private Boolean isHidden = false;
 	@Column (name = "is_readonly", nullable = false)
 	@AMetaData (
-			displayName = "Read Only", required = false, readOnly = false, description = "Whether this field is read-only", hidden = false, order = 9,
+			displayName = "Read Only", required = false, readOnly = false, description = "Whether this field is read-only", hidden = false,
 			defaultValue = "false"
 	)
 	private Boolean isReadonly = false;
 	@Column (name = "is_required", nullable = false)
 	@AMetaData (
-			displayName = "Required", required = false, readOnly = false, description = "Whether this field is required", hidden = false, order = 6,
+			displayName = "Required", required = false, readOnly = false, description = "Whether this field is required", hidden = false,
 			defaultValue = "false"
 	)
 	private Boolean isRequired = false;
@@ -104,40 +103,38 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	@Max (value = 999, message = "Line order cannot exceed 999")
 	@AMetaData (
 			displayName = "Line Order", required = true, readOnly = false, description = "Order of this line in the screen (1-999)", hidden = false,
-			order = 1, defaultValue = "0"
+			defaultValue = "0"
 	)
 	private Integer itemOrder = 0;
 	@Column (name = "max_length", nullable = true)
-	@Min (value = 0, message = "Max length must be at least 1")
+	@Min (value = -1, message = "Min length must be at least 1")
 	@Max (value = 10000, message = "Max length cannot exceed 10000")
-	@AMetaData (
-			displayName = "Max Length", required = false, readOnly = false, description = "Maximum length for text fields", hidden = false, order = 12
-	)
+	@AMetaData (displayName = "Max Length", required = false, readOnly = false, description = "Maximum length for text fields", hidden = false)
 	private Integer maxLength = 0;
 	@Column (name = "related_entity_type", nullable = true, length = 100)
 	@Size (max = 100, message = "Related entity type cannot exceed 100 characters")
 	@AMetaData (
 			displayName = "Related Entity Type", required = false, readOnly = false, description = "Type of related entity for reference fields",
-			hidden = false, order = 10, maxLength = 100
+			hidden = false, maxLength = 100
 	)
 	private String relatedEntityType;
 	@Column (name = "relationFieldName", nullable = false, length = 100)
 	@Size (max = 100, message = ValidationMessages.RELATION_FIELD_NAME_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Relation Field", required = true, readOnly = false, description = "Relation Field is designed for", hidden = false,
-			order = 2, maxLength = 100, dataProviderBean = "none"
+			maxLength = 100, dataProviderBean = "none"
 	)
 	private String relationFieldName;
 	@Column (name = "isSectionAsTab", nullable = false)
 	@AMetaData (
 			displayName = "A Tab Section", required = false, readOnly = false, description = "Whether this section is a tab", hidden = false,
-			order = 6, defaultValue = "false"
+			defaultValue = "false"
 	)
 	private Boolean sectionAsTab;
 	@Column (name = "sectionName", nullable = true, length = 100)
 	@Size (max = 100, message = "Name cannot exceed 100 characters")
 	@AMetaData (
-			displayName = "Field Property", required = false, readOnly = false, description = "Section of entries below", hidden = false, order = 3,
+			displayName = "Field Property", required = false, readOnly = false, description = "Section of entries below", hidden = false,
 			maxLength = 100
 	)
 	private String sectionName;
@@ -190,12 +187,6 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	public Boolean getSectionAsTab() { return sectionAsTab; }
 
 	public String getSectionName() { return sectionName; }
-
-	public void printLine() {
-		System.out.println(
-				"CDetailLines{" + "id=" + getId() + ", itemOrder=" + itemOrder + ", fieldCaption='" + fieldCaption + '\'' + ", entityProperty='"
-						+ entityProperty + '\'' + ", relationFieldName='" + relationFieldName + '\'' + ", sectionName='" + sectionName + '\'' + '}');
-	}
 
 	public void setDataProviderBean(final String dataProviderBean) { this.dataProviderBean = dataProviderBean; }
 

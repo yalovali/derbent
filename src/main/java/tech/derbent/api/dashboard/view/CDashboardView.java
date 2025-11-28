@@ -35,7 +35,7 @@ import tech.derbent.base.users.service.CUserService;
  * per project. Provides a comprehensive overview of the system's current state. */
 @Route ("cdashboardview")
 @PageTitle ("Home")
-@Menu (order = 0, icon = "class:tech.derbent.api.dashboard.view.CDashboardView", title = "Home")
+@Menu ( icon = "class:tech.derbent.api.dashboard.view.CDashboardView", title = "Home")
 @PermitAll
 public final class CDashboardView extends CAbstractPage {
 

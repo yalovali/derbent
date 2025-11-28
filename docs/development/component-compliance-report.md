@@ -66,7 +66,7 @@ All entity fields have @AMetaData:
     readOnly = false,
     description = "The sprint this item belongs to",
     hidden = false,
-    order = 1,
+    
     dataProviderBean = "CSprintService"
 )
 ```

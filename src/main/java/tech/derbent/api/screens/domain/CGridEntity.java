@@ -59,19 +59,19 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "false",
-			description = "Whether this grid entity cannot be deleted by users", hidden = false, order = 4
+			description = "Whether this grid entity cannot be deleted by users", hidden = false
 	)
 	private boolean attributeNonDeletable = false;
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "None Grid", required = false, readOnly = false, defaultValue = "false",
-			description = "This grid is not displayed, use for details only one pagers", hidden = false, order = 4
+			description = "This grid is not displayed, use for details only one pagers", hidden = false
 	)
 	private boolean attributeNone = false;
 	@Column (name = "column_fields", nullable = true, length = 1000)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Column Fields", required = false, readOnly = false, description = "List of fields with order", hidden = false, order = 300,
+			displayName = "Column Fields", required = false, readOnly = false, description = "List of fields with order", hidden = false,
 			maxLength = 100, useDualListSelector = true, dataProviderBean = "CGridEntityService", dataProviderMethod = "getFieldNames",
 			dataProviderParamBean = "context", dataProviderParamMethod = "getCurrentEntity"
 	)
@@ -79,8 +79,8 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	@Column (name = "data_service_bean_name", nullable = false, length = 100)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Data Service Bean", required = true, readOnly = false, description = "Data Service Bean", hidden = false, order = 2,
-			maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBeans"
+			displayName = "Data Service Bean", required = true, readOnly = false, description = "Data Service Bean", hidden = false, maxLength = 100,
+			dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBeans"
 	)
 	private String dataServiceBeanName;
 

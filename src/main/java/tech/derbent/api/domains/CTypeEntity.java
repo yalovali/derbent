@@ -22,27 +22,27 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "true",
-			description = "Whether this type entity cannot be deleted by users (system configuration)", hidden = false, order = 82
+			description = "Whether this type entity cannot be deleted by users (system configuration)", hidden = false
 	)
 	private boolean attributeNonDeletable = true;
 	@Column (name = "color", nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (
 			displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", colorField = true,
-			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7
+			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, maxLength = 7
 	)
 	private String color = "#4A90E2";
 	@Column (name = "sort_order", nullable = false)
 	@NotNull
 	@AMetaData (
 			displayName = "Sort Order", required = true, readOnly = false, defaultValue = "100", description = "Display order for type sorting",
-			hidden = false, order = 4
+			hidden = false
 	)
 	private Integer sortOrder = 100;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "workflow_id", nullable = true)
 	@AMetaData (
-			displayName = "Workflow", required = false, readOnly = false, description = "Workflow for this type", hidden = false, order = 5,
+			displayName = "Workflow", required = false, readOnly = false, description = "Workflow for this type", hidden = false,
 			dataProviderBean = "CWorkflowEntityService"
 	)
 	private CWorkflowEntity workflow;

@@ -25,19 +25,19 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	@Column (name = "approval_date", nullable = true)
 	@AMetaData (
 			displayName = "Approval Date", required = false, readOnly = false, description = "Date and time when approval was given or rejected",
-			hidden = false, order = 5
+			hidden = false
 	)
 	private LocalDateTime approvalDate;
 	@Column (name = "approval_level", nullable = false)
 	@AMetaData (
 			displayName = "Approval Level", required = true, readOnly = false, defaultValue = "1",
-			description = "Sequential approval level (1 = first approval, 2 = second, etc.)", hidden = false, order = 7, min = 1, max = 10
+			description = "Sequential approval level (1 = first approval, 2 = second, etc.)", hidden = false, min = 1, max = 10
 	)
 	private Integer approvalLevel = 1;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "approval_status_id", nullable = false)
 	@AMetaData (
-			displayName = "Status", required = true, readOnly = false, description = "Current approval status", hidden = false, order = 4,
+			displayName = "Status", required = true, readOnly = false, description = "Current approval status", hidden = false,
 			dataProviderBean = "CApprovalStatusService"
 	)
 	private CApprovalStatus approvalStatus;
@@ -45,20 +45,20 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	@JoinColumn (name = "approver_id", nullable = true)
 	@AMetaData (
 			displayName = "Approver", required = false, readOnly = false, description = "User responsible for this approval", hidden = false,
-			order = 3, dataProviderBean = "CUserService"
+			dataProviderBean = "CUserService"
 	)
 	private CUser approver;
 	@Column (name = "comments", nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Approval comments or rejection reasons", hidden = false,
-			order = 6, maxLength = 1000
+			maxLength = 1000
 	)
 	private String comments;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "order_id", nullable = false)
 	@AMetaData (
-			displayName = "Order", required = true, readOnly = false, description = "The order this approval belongs to", hidden = false, order = 2,
+			displayName = "Order", required = true, readOnly = false, description = "The order this approval belongs to", hidden = false,
 			dataProviderBean = "COrderService"
 	)
 	private COrder order;

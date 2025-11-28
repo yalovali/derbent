@@ -28,7 +28,7 @@ public class CProjectExpense extends CProjectItem<CProjectExpense> implements IH
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "ProjectExpense Type", required = false, readOnly = false, description = "Type category of the projectexpense",
-			hidden = false, order = 2, dataProviderBean = "CProjectExpenseTypeService", setBackgroundFromColor = true, useIcon = true
+			hidden = false,  dataProviderBean = "CProjectExpenseTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProjectExpenseType entityType;
 

@@ -32,14 +32,14 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	@Column (name = "is_active", nullable = false)
 	@AMetaData (
 			displayName = "Is Active", required = true, readOnly = false, defaultValue = "true",
-			description = "Indicates if this workflow is currently active", hidden = false, order = 3
+			description = "Indicates if this workflow is currently active", hidden = false
 	)
 	private Boolean isActive = Boolean.TRUE;
 	// lets keep it layzily loaded to avoid loading all status relations at once
 	@OneToMany (mappedBy = "workflowentity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Status Transitions", required = false, readOnly = false, description = "Status transitions for this workflow",
-			hidden = false, order = 10, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent",
+			hidden = false, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent",
 			dataProviderParamBean = "context", dataProviderParamMethod = "getCurrentEntity"
 	)
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();

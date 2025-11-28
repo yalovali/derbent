@@ -19,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:file-o", title = "Settings.Assets")
+@Menu ( icon = "vaadin:file-o", title = "Settings.Assets")
 @PermitAll
 public class CAssetService extends CProjectItemService<CAsset> implements IEntityRegistrable {
 

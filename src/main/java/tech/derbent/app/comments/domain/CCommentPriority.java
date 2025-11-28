@@ -22,13 +22,13 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 	@Column (name = "is_default", nullable = false)
 	@AMetaData (
 			displayName = "Is Default", required = false, readOnly = false, defaultValue = "false",
-			description = "Indicates if this is the default priority", hidden = false, order = 7
+			description = "Indicates if this is the default priority", hidden = false
 	)
 	private Boolean isDefault = false;
 	@Column (name = "priority_level", nullable = false, length = 20)
 	@AMetaData (
 			displayName = "Priority Level", required = false, readOnly = false, defaultValue = "3", description = "Priority level of the comment",
-			hidden = false, order = 2, useRadioButtons = false, setBackgroundFromColor = true
+			hidden = false, useRadioButtons = false, setBackgroundFromColor = true
 	)
 	private Integer priorityLevel = 3; // Default to normal priority
 

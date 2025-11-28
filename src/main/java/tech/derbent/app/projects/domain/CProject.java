@@ -35,10 +35,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
 	public static final String VIEW_NAME = "Projects View";
 	// Many projects can belong to one company
-	@AMetaData (
-			displayName = "Company", required = true, readOnly = false, description = "The company this project belongs to", hidden = false,
-			order = 20
-	)
+	@AMetaData (displayName = "Company", required = true, readOnly = false, description = "The company this project belongs to", hidden = false)
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
@@ -47,7 +44,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "User Settings", required = false, readOnly = false, description = "User project settings for this project", hidden = false,
-			order = 10, createComponentMethod = "createProjectUserSettingsComponent"
+			createComponentMethod = "createProjectUserSettingsComponent"
 	)
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
 

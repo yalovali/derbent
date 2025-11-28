@@ -20,14 +20,14 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	@Column (name = "section_db_name", nullable = true, length = 200)
 	@Size (max = 200)
 	@AMetaData (
-			displayName = "Section DB Name", required = true, readOnly = false, description = "Section DB Name", hidden = false, order = 10,
+			displayName = "Section DB Name", required = true, readOnly = false, description = "Section DB Name", hidden = false, 
 			maxLength = 200
 	)
 	private String sectionDBName;
 	@Column (name = "section_type", nullable = false, length = 200)
 	@Size (max = 200)
 	@AMetaData (
-			displayName = "Section Type", required = true, readOnly = false, description = "Section Type", hidden = false, order = 10,
+			displayName = "Section Type", required = true, readOnly = false, description = "Section Type", hidden = false, 
 			maxLength = 200, dataProviderBean = "CMasterSectionService", dataProviderMethod = "getAvailableTypes"
 	)
 	private String sectionType;

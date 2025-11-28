@@ -28,7 +28,7 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Provider Type", required = false, readOnly = false, description = "Type category of the provider", hidden = false,
-			order = 2, dataProviderBean = "CProviderTypeService", setBackgroundFromColor = true, useIcon = true
+			 dataProviderBean = "CProviderTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProviderType entityType;
 

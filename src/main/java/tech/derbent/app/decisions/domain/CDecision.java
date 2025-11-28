@@ -39,37 +39,33 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@JoinColumn (name = "accountable_user_id", nullable = true)
 	@AMetaData (
 			displayName = "Accountable Personnel", required = false, readOnly = false, description = "User accountable for this decision",
-			hidden = false, order = 5, dataProviderBean = "CUserService"
+			hidden = false, dataProviderBean = "CUserService"
 	)
 	private CUser accountableUser;
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Decision Type", required = false, readOnly = false, description = "Category or type of the decision", hidden = false,
-			order = 2
-	)
+	@AMetaData (displayName = "Decision Type", required = false, readOnly = false, description = "Category or type of the decision", hidden = false)
 	private CDecisionType entityType;
 	// Cost Estimation
 	@Column (name = "estimated_cost", nullable = true, precision = 19, scale = 2)
 	@DecimalMin (value = "0.0", inclusive = true)
 	@AMetaData (
 			displayName = "Estimated Cost", required = false, readOnly = false, description = "Estimated cost impact of the decision", hidden = false,
-			order = 3, min = 0.0
+			min = 0.0
 	)
 	private BigDecimal estimatedCost;
 	// Decision Implementation Date
 	@Column (name = "implementation_date", nullable = true)
 	@AMetaData (
 			displayName = "Implementation Date", required = false, readOnly = false,
-			description = "Date when the decision was or will be implemented", hidden = false, order = 7
+			description = "Date when the decision was or will be implemented", hidden = false
 	)
 	private LocalDateTime implementationDate;
 	// Decision Review Date
 	@Column (name = "review_date", nullable = true)
 	@AMetaData (
-			displayName = "Review Date", required = false, readOnly = false, description = "Date when the decision will be reviewed", hidden = false,
-			order = 8
+			displayName = "Review Date", required = false, readOnly = false, description = "Date when the decision will be reviewed", hidden = false
 	)
 	private LocalDateTime reviewDate;
 

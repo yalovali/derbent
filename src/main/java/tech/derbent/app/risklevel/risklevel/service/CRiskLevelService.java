@@ -15,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:level-up", title = "Settings.Risk Levels")
+@Menu ( icon = "vaadin:level-up", title = "Settings.Risk Levels")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskLevelService extends CProjectItemService<CRiskLevel> implements IEntityRegistrable {
 

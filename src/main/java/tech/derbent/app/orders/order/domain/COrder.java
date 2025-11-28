@@ -42,20 +42,18 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@DecimalMax (value = "99999999999.99", message = "Actual cost cannot exceed 99,999,999,999.99")
 	@AMetaData (
 			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Actual cost of the order",
-			hidden = false, order = 42
+			hidden = false
 	)
 	private BigDecimal actualCost = BigDecimal.ZERO;
 	// Approval Management (One-to-Many relationship)
 	@OneToMany (mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@AMetaData (
-			displayName = "Approvals", required = false, readOnly = true, description = "Approval records for this order", hidden = false, order = 70
-	)
+	@AMetaData (displayName = "Approvals", required = false, readOnly = true, description = "Approval records for this order", hidden = false)
 	private List<COrderApproval> approvals = new ArrayList<>();
 	// Financial Information
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "currency_id", nullable = false)
 	@AMetaData (
-			displayName = "Currency", required = true, readOnly = false, description = "Currency for the order cost", hidden = false, order = 40,
+			displayName = "Currency", required = true, readOnly = false, description = "Currency for the order cost", hidden = false,
 			dataProviderBean = "CCurrencyService"
 	)
 	private CCurrency currency;
@@ -63,22 +61,18 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@Size (max = 500)
 	@AMetaData (
 			displayName = "Delivery Address", required = false, readOnly = false, description = "Address where the order should be delivered",
-			hidden = false, order = 61, maxLength = 500
+			hidden = false, maxLength = 500
 	)
 	private String deliveryAddress;
 	@Column (name = "delivery_date", nullable = true)
-	@AMetaData (
-			displayName = "Delivery Date", required = false, readOnly = false, description = "Actual or planned delivery date", hidden = false,
-			order = 52
-	)
+	@AMetaData (displayName = "Delivery Date", required = false, readOnly = false, description = "Actual or planned delivery date", hidden = false)
 	private LocalDate deliveryDate;
 	// Order Type and Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = false)
 	@AMetaData (
 			displayName = "Order Type", required = true, readOnly = false,
-			description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, order = 2,
-			dataProviderBean = "COrderTypeService"
+			description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, dataProviderBean = "COrderTypeService"
 	)
 	private COrderType entityType;
 	@Column (name = "estimated_cost", nullable = true, precision = 15, scale = 2)
@@ -86,21 +80,19 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@DecimalMax (value = "99999999999.99", message = "Estimated cost cannot exceed 99,999,999,999.99")
 	@AMetaData (
 			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Estimated cost of the order",
-			hidden = false, order = 41
+			hidden = false
 	)
 	private BigDecimal estimatedCost = BigDecimal.ZERO;
 	// Date Management
 	@Column (name = "order_date", nullable = false)
-	@AMetaData (
-			displayName = "Order Date", required = true, readOnly = false, description = "Date when the order was created", hidden = false, order = 50
-	)
+	@AMetaData (displayName = "Order Date", required = true, readOnly = false, description = "Date when the order was created", hidden = false)
 	private LocalDate orderDate;
 	// Additional Details
 	@Column (name = "order_number", nullable = true, length = 50)
 	@Size (max = 50)
 	@AMetaData (
 			displayName = "Order Number", required = false, readOnly = false, description = "External order reference number", hidden = false,
-			order = 60, maxLength = 50
+			maxLength = 50
 	)
 	private String orderNumber;
 	// Provider Information
@@ -108,49 +100,49 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@Size (max = 200)
 	@AMetaData (
 			displayName = "Provider Company", required = true, readOnly = false, description = "Name of the company providing goods or services",
-			hidden = false, order = 10, maxLength = 200
+			hidden = false, maxLength = 200
 	)
 	private String providerCompanyName;
 	@Column (name = "provider_contact_name", nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Provider Contact", required = false, readOnly = false, description = "Contact person at the provider company",
-			hidden = false, order = 11, maxLength = 100
+			hidden = false, maxLength = 100
 	)
 	private String providerContactName;
 	@Column (name = "provider_email", nullable = true, length = 150)
 	@Size (max = 150)
 	@AMetaData (
 			displayName = "Provider Email", required = false, readOnly = false, description = "Email address of the provider contact", hidden = false,
-			order = 12, maxLength = 150
+			maxLength = 150
 	)
 	private String providerEmail;
 	// Requestor and Responsibility
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "requestor_id", nullable = false)
 	@AMetaData (
-			displayName = "Requestor", required = true, readOnly = false, description = "User who requested this order", hidden = false, order = 20,
+			displayName = "Requestor", required = true, readOnly = false, description = "User who requested this order", hidden = false,
 			dataProviderBean = "CUserService"
 	)
 	private CUser requestor;
 	@Column (name = "required_date", nullable = true)
 	@AMetaData (
 			displayName = "Required Date", required = false, readOnly = false, description = "Date when the order is required to be completed",
-			hidden = false, order = 51
+			hidden = false
 	)
 	private LocalDate requiredDate;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "responsible_id", nullable = true)
 	@AMetaData (
 			displayName = "Responsible", required = false, readOnly = false, description = "User responsible for managing this order", hidden = false,
-			order = 21, dataProviderBean = "CUserService"
+			dataProviderBean = "CUserService"
 	)
 	private CUser responsible;
 	// Status Management
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "order_status_id", nullable = false)
 	@AMetaData (
-			displayName = "Status", required = true, readOnly = false, description = "Current status of the order", hidden = false, order = 30,
+			displayName = "Status", required = true, readOnly = false, description = "Current status of the order", hidden = false,
 			dataProviderBean = "CProjectItemStatusService"
 	)
 	private CProjectItemStatus status;

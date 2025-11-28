@@ -28,7 +28,7 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Milestone Type", required = false, readOnly = false, description = "Type category of the milestone", hidden = false,
-			order = 2, dataProviderBean = "CMilestoneTypeService", setBackgroundFromColor = true, useIcon = true
+			 dataProviderBean = "CMilestoneTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CMilestoneType entityType;
 

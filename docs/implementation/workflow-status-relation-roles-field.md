@@ -31,7 +31,7 @@ private CUserProjectRole role;
     readOnly = false,
     description = "The user roles allowed to make this transition (allowed transition roles)", 
     hidden = false, 
-    order = 4,
+    
     setBackgroundFromColor = true, 
     useIcon = true, 
     dataProviderBean = "CUserProjectRoleService", 

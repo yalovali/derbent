@@ -19,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:file-o", title = "Settings.Deliverables")
+@Menu ( icon = "vaadin:file-o", title = "Settings.Deliverables")
 @PermitAll
 public class CDeliverableService extends CProjectItemService<CDeliverable> implements IEntityRegistrable {
 

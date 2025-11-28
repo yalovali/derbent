@@ -71,7 +71,7 @@ Use `@AMetaData` for automatic UI generation:
     readOnly = false,                  // Editable in forms
     description = "Activity name",     // Tooltip/help text
     hidden = false,                    // Visible in UI
-    order = 10,                        // Field display order
+                            // Field display order
     maxLength = 255,                   // Max input length
     dataProviderBean = "CUserService"  // For ComboBox data source
 )

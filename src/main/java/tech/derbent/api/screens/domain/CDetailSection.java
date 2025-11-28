@@ -29,14 +29,14 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "false",
-			description = "Whether this detail section cannot be deleted by users", hidden = false, order = 5
+			description = "Whether this detail section cannot be deleted by users", hidden = false
 	)
 	private boolean attributeNonDeletable = false;
 	// change nullable to false in future versions after data migration
 	@Column (name = "defaultSection", nullable = true)
 	@AMetaData (
 			displayName = "Default For Type", required = false, readOnly = false, description = "Whether this entity definition is default",
-			hidden = false, order = 20, defaultValue = "true"
+			hidden = false, defaultValue = "true"
 	)
 	private Boolean defaultSection = true;
 	@OneToMany (mappedBy = "detailSection", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -46,21 +46,21 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")
 	@AMetaData (
 			displayName = "Entity Type", required = true, readOnly = false, description = "Type of entity this screen is designed for",
-			hidden = false, order = 2, maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBaseTypes"
+			hidden = false, maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBaseTypes"
 	)
 	private String entityType;
 	@Column (name = "header_text", nullable = true, length = 500)
 	@Size (max = 500, message = "Header text cannot exceed 500 characters")
 	@AMetaData (
 			displayName = "Header Text", required = false, readOnly = false, description = "Header text to display at the top of the screen",
-			hidden = false, order = 4, maxLength = 500
+			hidden = false, maxLength = 500
 	)
 	private String headerText;
 	@Column (name = "screen_title", nullable = true, length = 255)
 	@Size (max = 255, message = "Screen title cannot exceed 255 characters")
 	@AMetaData (
 			displayName = "Screen Title", required = false, readOnly = false, description = "Title to display for this screen view", hidden = false,
-			order = 3, maxLength = 255
+			maxLength = 255
 	)
 	private String screenTitle;
 
@@ -76,26 +76,14 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	// Getters and Setters
 
 	/** Helper method to add a screen line */
-	public void addScreenLine(final CDetailLines screenLine) {
-		Check.notNull(screenLine, "screenLine must not be null");
-		// check screen name dublicate
-		// if (screenLine.getSectionName() != null) {
-		// for (final CDetailLines line : detailLines) {
-		// if (line.getSectionName() == null) {
-		// continue;
-		// }
-		// if (line.getSectionName().equals(screenLine.getSectionName())) {
-		// throw new IllegalArgumentException(
-		// "A screen line with the name '" + screenLine.getSectionName() + "' already exists in this screen.");
-		// }
-		// }
-		// }
-		if (screenLine.getItemOrder() == 0) {
+	public void addScreenLine(final CDetailLines detailLine) {
+		Check.notNull(detailLine, "screenLine must not be null");
+		if (detailLine.getItemOrder() == 0) {
 			// default line order is the next available number
-			screenLine.setItemOrder(detailLines.size() + 1);
+			detailLine.setItemOrder(detailLines.size() + 1);
 		}
-		detailLines.add(screenLine);
-		screenLine.setDetailSection(this);
+		detailLines.add(detailLine);
+		detailLine.setDetailSection(this);
 	}
 
 	public void debug_printScreenInformation() {

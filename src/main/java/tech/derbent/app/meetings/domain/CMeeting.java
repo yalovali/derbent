@@ -42,32 +42,27 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Size (max = 4000)
 	@AMetaData (
 			displayName = "Agenda", required = false, readOnly = false, defaultValue = "", description = "Meeting agenda and topics to be discussed",
-			hidden = false, order = 7, maxLength = 4000
+			hidden = false, maxLength = 4000
 	)
 	private String agenda;
 	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
 			displayName = "Attendees", required = false, readOnly = false, description = "Users who actually attended the meeting", hidden = false,
-			order = 12, dataProviderBean = "CUserService"
+			dataProviderBean = "CUserService"
 	)
 	private Set<CUser> attendees = new HashSet<>();
 	@Column (name = "end_date", nullable = true)
-	@AMetaData (
-			displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false, order = 5
-	)
+	@AMetaData (displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false)
 	private LocalDate endDate;
 	@Column (name = "endTime", nullable = true)
-	@AMetaData (
-			displayName = "End Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false,
-			order = 4
-	)
+	@AMetaData (displayName = "End Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false)
 	private LocalTime endTime;
 	// Type Management - concrete implementation of parent's typeEntity
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
+			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false,
 			dataProviderBean = "CMeetingTypeService"
 	)
 	private CMeetingType entityType;
@@ -75,57 +70,52 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
 			displayName = "Linked Element", required = false, readOnly = false, defaultValue = "",
-			description = "Reference to external documents, systems, or elements", hidden = false, order = 14,
-			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			description = "Reference to external documents, systems, or elements", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String linkedElement;
 	@Column (name = "location", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
 			displayName = "Location", required = false, readOnly = false, defaultValue = "",
-			description = "Physical or virtual location of the meeting", hidden = false, order = 6,
-			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			description = "Physical or virtual location of the meeting", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String location;
 	@Column (name = "minutes", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
 			displayName = "Meeting Minutes", required = false, readOnly = false, defaultValue = "",
-			description = "Notes and minutes from the meeting", hidden = false, order = 11, maxLength = 4000
+			description = "Notes and minutes from the meeting", hidden = false, maxLength = 4000
 	)
 	private String minutes;
 	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (name = "cmeeting_participants", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
 			displayName = "Participants", required = false, readOnly = false, description = "Users invited to participate in the meeting",
-			hidden = false, order = 13, dataProviderBean = "CUserService"
+			hidden = false, dataProviderBean = "CUserService"
 	)
 	private Set<CUser> participants = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "related_activity_id", nullable = true)
 	@AMetaData (
 			displayName = "Related Activity", required = false, readOnly = false, description = "Project activity related to this meeting",
-			hidden = false, order = 8, dataProviderBean = "CActivityService"
+			hidden = false, dataProviderBean = "CActivityService"
 	)
 	private CActivity relatedActivity;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "responsible_id", nullable = true)
 	@AMetaData (
 			displayName = "Responsible", required = false, readOnly = false,
-			description = "Person responsible for organizing and leading the meeting", hidden = false, order = 10, dataProviderBean = "CUserService"
+			description = "Person responsible for organizing and leading the meeting", hidden = false, dataProviderBean = "CUserService"
 	)
 	private CUser responsible;
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
-			hidden = false, order = 40
+			hidden = false
 	)
 	private LocalDate startDate;
 	@Column (name = "startTime", nullable = true)
-	@AMetaData (
-			displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false,
-			order = 4
-	)
+	@AMetaData (displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false)
 	private LocalTime startTime;
 
 	/** Default constructor for JPA. */

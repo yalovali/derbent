@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -799,10 +798,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				return false;
 			}
 			return true;
-		}).sorted(Comparator.comparingInt(field -> {
-			final AMetaData metaData = field.getAnnotation(AMetaData.class);
-			return metaData != null ? metaData.order() : Integer.MAX_VALUE;
-		})).collect(Collectors.toList());
+		}).collect(Collectors.toList());
+		// .sorted(Comparator.comparingInt(field -> {
+		// final AMetaData metaData = field.getAnnotation(AMetaData.class);
+		// return metaData != null ? metaData.order() : Integer.MAX_VALUE;
 	}
 
 	private static List<String> getVaadinIconNames() {

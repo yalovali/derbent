@@ -44,7 +44,7 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
 @AMetaData(
     displayName = "Risk Name",  // Copilot fills in appropriate name
     required = true,
-    order = 10
+    
 )
 private String name;
 ```
@@ -201,7 +201,7 @@ Show Copilot one example, it generates similar code:
 @AMetaData(
     displayName = "Risk Name",
     required = true,
-    order = 10,
+    
     maxLength = 255
 )
 private String name;
@@ -308,7 +308,7 @@ CUser user = userService.findUser();
 **Solution**: Provide example in comment:
 ```java
 // Use @AMetaData annotation like this example:
-// @AMetaData(displayName = "Name", required = true, order = 10)
+// @AMetaData(displayName = "Name", required = true, )
 @Column(nullable = false)
 @AMetaData(
 ```

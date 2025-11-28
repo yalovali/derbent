@@ -21,14 +21,14 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "true",
-			description = "Whether this type entity cannot be deleted by users (system configuration)", hidden = false, order = 82
+			description = "Whether this type entity cannot be deleted by users (system configuration)", hidden = false
 	)
 	private boolean attributeNonDeletable = true;
 	@Column (name = "color", nullable = true, length = 7)
 	@Size (max = 7, message = ValidationMessages.COLOR_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", colorField = true,
-			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7
+			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, maxLength = 7
 	)
 	private String color = "#4A90E2";
 	@Column (name = "sort_order", nullable = false)
@@ -37,37 +37,37 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	@Max (value = 9999, message = ValidationMessages.SORT_ORDER_MAX)
 	@AMetaData (
 			displayName = "Sort Order", required = true, readOnly = false, defaultValue = "100", description = "Display order for type sorting",
-			hidden = false, order = 4
+			hidden = false
 	)
 	private Integer sortOrder = 100;
 	@Column (name = "statusTypeCancelled", nullable = false)
 	@AMetaData (
 			displayName = "Is Cancelled Status", required = true, readOnly = false, defaultValue = "false",
-			description = "Indicates if this status represents a cancelled state", hidden = true, order = 2
+			description = "Indicates if this status represents a cancelled state", hidden = true
 	)
 	private Boolean statusTypeCancelled = Boolean.FALSE;
 	@Column (name = "statusTypeClosed", nullable = false)
 	@AMetaData (
 			displayName = "Is Closed Status", required = true, readOnly = false, defaultValue = "false",
-			description = "Indicates if this status represents a closed state", hidden = true, order = 4
+			description = "Indicates if this status represents a closed state", hidden = true
 	)
 	private Boolean statusTypeClosed = Boolean.FALSE;
 	@Column (name = "statusTypeCompleted", nullable = false)
 	@AMetaData (
 			displayName = "Is Completed Status", required = true, readOnly = false, defaultValue = "false",
-			description = "Indicates if this status represents a completed state", hidden = true, order = 5
+			description = "Indicates if this status represents a completed state", hidden = true
 	)
 	private Boolean statusTypeCompleted = Boolean.FALSE;
 	@Column (name = "statusTypeInprogress", nullable = false)
 	@AMetaData (
 			displayName = "Is In Progress Status", required = true, readOnly = false, defaultValue = "false",
-			description = "Indicates if this status represents an in-progress state", hidden = true, order = 6
+			description = "Indicates if this status represents an in-progress state", hidden = true
 	)
 	private Boolean statusTypeInprogress = Boolean.FALSE;
 	@Column (name = "statusTypePause", nullable = false)
 	@AMetaData (
 			displayName = "Is Paused Status", required = true, readOnly = false, defaultValue = "false",
-			description = "Indicates if this status represents a paused state", hidden = true, order = 7
+			description = "Indicates if this status represents a paused state", hidden = true
 	)
 	private Boolean statusTypePause = Boolean.FALSE;
 

@@ -28,7 +28,7 @@ public class CProjectIncome extends CProjectItem<CProjectIncome> implements IHas
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "ProjectIncome Type", required = false, readOnly = false, description = "Type category of the projectincome",
-			hidden = false, order = 2, dataProviderBean = "CProjectIncomeTypeService", setBackgroundFromColor = true, useIcon = true
+			hidden = false,  dataProviderBean = "CProjectIncomeTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProjectIncomeType entityType;
 

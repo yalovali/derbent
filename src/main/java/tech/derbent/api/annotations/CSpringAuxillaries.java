@@ -23,11 +23,9 @@ public final class CSpringAuxillaries {
 	public static List<Field> getAMetaDataFields(final Class<?> entityClass) {
 		return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> !java.lang.reflect.Modifier.isStatic(field.getModifiers()))
 				.filter(field -> field.getAnnotation(AMetaData.class) != null).filter(field -> !field.getAnnotation(AMetaData.class).hidden())
-				.sorted((f1, f2) -> {
-					final AMetaData meta1 = f1.getAnnotation(AMetaData.class);
-					final AMetaData meta2 = f2.getAnnotation(AMetaData.class);
-					return Integer.compare(meta1.order(), meta2.order());
-				}).collect(Collectors.toList());
+				.collect(Collectors.toList());
+		/* .sorted((f1, f2) -> { final AMetaData meta1 = f1.getAnnotation(AMetaData.class); final AMetaData meta2 = f2.getAnnotation(AMetaData.class);
+		 * return Integer.compare(meta1.order(), meta2.order()); }) */
 	}
 
 	/** Retrieves the @Route path value of a given class, if present.

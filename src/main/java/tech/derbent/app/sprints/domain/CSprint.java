@@ -41,7 +41,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@Size (max = 7)
 	@AMetaData (
 			displayName = "Color", required = false, readOnly = false, defaultValue = DEFAULT_COLOR,
-			description = "Color code for sprint visualization (hex format)", hidden = false, order = 20, colorField = true
+			description = "Color code for sprint visualization (hex format)", hidden = false, colorField = true
 	)
 	private String color = DEFAULT_COLOR;
 	// Sprint Basic Information
@@ -49,26 +49,23 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Description", required = false, readOnly = false, defaultValue = "",
-			description = "Detailed description of the sprint goals and objectives", hidden = false, order = 3, maxLength = 2000
+			description = "Detailed description of the sprint goals and objectives", hidden = false, maxLength = 2000
 	)
 	private String description;
 	@Column (nullable = true)
-	@AMetaData (displayName = "End Date", required = true, readOnly = false, description = "Sprint end date", hidden = false, order = 11)
+	@AMetaData (displayName = "End Date", required = true, readOnly = false, description = "Sprint end date", hidden = false)
 	private LocalDate endDate;
 	// Type Management - using CSprintType
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Sprint Type", required = false, readOnly = false, description = "Type/category of the sprint", hidden = false, order = 2,
+			displayName = "Sprint Type", required = false, readOnly = false, description = "Type/category of the sprint", hidden = false,
 			dataProviderBean = "CSprintTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CSprintType entityType;
 	// Calculated field for display - stored as transient
 	@Transient
-	@AMetaData (
-			displayName = "Item Count", required = false, readOnly = true, description = "Total number of items in this sprint", hidden = false,
-			order = 32
-	)
+	@AMetaData (displayName = "Item Count", required = false, readOnly = true, description = "Total number of items in this sprint", hidden = false)
 	private Integer itemCount;
 	// Sprint Items - Ordered collection of activities and meetings included in this sprint
 	// Uses OneToMany pattern with CSprintItem join entity for proper ordering
@@ -77,14 +74,13 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@OrderBy ("itemOrder ASC")
 	@AMetaData (
 			displayName = "Sprint Items", required = false, readOnly = false,
-			description = "Items (activities, meetings, etc.) included in this sprint", hidden = false, order = 30,
+			description = "Items (activities, meetings, etc.) included in this sprint", hidden = false,
 			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "view", captionVisible = false
 	)
 	private List<CSprintItem> sprintItems = new ArrayList<>();
 	@Column (nullable = true)
 	@AMetaData (
-			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint",
-			hidden = false, order = 40
+			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint", hidden = false
 	)
 	private LocalDate startDate;
 

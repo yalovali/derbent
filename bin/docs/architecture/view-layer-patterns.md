@@ -172,7 +172,7 @@ Forms are automatically generated from entity metadata:
     required = true,
     readOnly = false,
     description = "Name of the activity",
-    order = 10,
+    
     maxLength = 255
 )
 private String name;

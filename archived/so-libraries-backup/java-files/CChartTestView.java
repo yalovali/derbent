@@ -30,7 +30,7 @@ import tech.derbent.api.views.components.CVerticalLayout;
 @AnonymousAllowed
 @Route (value = "chart", autoLayout = false)
 @PageTitle ("Chart Test View")
-@Menu (order = 100.1, icon = "class:tech.derbent.base.setup.view.CSystemSettingsView", title = "Chart Test")
+@Menu (.1, icon = "class:tech.derbent.base.setup.view.CSystemSettingsView", title = "Chart Test")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CChartTestView extends Main {
 

@@ -27,7 +27,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Ticket Type", required = false, readOnly = false, description = "Type category of the ticket", hidden = false, order = 2,
+			displayName = "Ticket Type", required = false, readOnly = false, description = "Type category of the ticket", hidden = false, 
 			dataProviderBean = "CTicketTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CTicketType entityType;

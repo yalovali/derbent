@@ -27,7 +27,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Asset Type", required = false, readOnly = false, description = "Type category of the asset", hidden = false, order = 2,
+			displayName = "Asset Type", required = false, readOnly = false, description = "Type category of the asset", hidden = false, 
 			dataProviderBean = "CAssetTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CAssetType entityType;

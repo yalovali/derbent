@@ -20,7 +20,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:clipboard-check", title = "Settings.Risks")
+@Menu ( icon = "vaadin:clipboard-check", title = "Settings.Risks")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable {
 

@@ -29,7 +29,7 @@ public class CTeam extends CEntityNamed<CTeam> {
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "company_id", nullable = false)
 	@AMetaData (
-			displayName = "Company", required = true, readOnly = false, description = "Company this team belongs to", hidden = false, order = 2,
+			displayName = "Company", required = true, readOnly = false, description = "Company this team belongs to", hidden = false, 
 			dataProviderBean = "CCompanyService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CCompany company;
@@ -37,21 +37,21 @@ public class CTeam extends CEntityNamed<CTeam> {
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Description", required = false, readOnly = false, description = "Detailed description of the team", hidden = false,
-			order = 10, maxLength = 2000
+			 maxLength = 2000
 	)
 	private String description;
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (name = "cteam_members", joinColumns = @JoinColumn (name = "team_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
 			displayName = "Team Members", required = false, readOnly = false, description = "Users who are members of this team", hidden = false,
-			order = 20, useDualListSelector = true, dataProviderBean = "CUserService"
+			 useDualListSelector = true, dataProviderBean = "CUserService"
 	)
 	private Set<CUser> members = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "team_manager_id", nullable = true)
 	@AMetaData (
 			displayName = "Team Manager", required = false, readOnly = false, description = "Manager responsible for this team", hidden = false,
-			order = 3, dataProviderBean = "CUserService", setBackgroundFromColor = true, useIcon = true
+			 dataProviderBean = "CUserService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CUser teamManager;
 

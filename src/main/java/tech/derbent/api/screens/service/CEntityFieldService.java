@@ -48,7 +48,6 @@ public class CEntityFieldService {
 		private Boolean isCaptionVisible = true;
 		private String javaType;
 		private int maxLength = 255;
-		private int order = 999;
 		private boolean passwordField;
 		private boolean passwordRevealButton;
 		private String placeholder = "";
@@ -91,8 +90,6 @@ public class CEntityFieldService {
 		public String getJavaType() { return javaType; }
 
 		public int getMaxLength() { return maxLength; }
-
-		public int getOrder() { return order; }
 
 		public String getPlaceholder() { return placeholder; }
 
@@ -174,8 +171,6 @@ public class CEntityFieldService {
 
 		public void setMaxLength(final int maxLength) { this.maxLength = maxLength; }
 
-		public void setOrder(final int order) { this.order = order; }
-
 		public void setPasswordField(final boolean passwordField) { this.passwordField = passwordField; }
 
 		public void setPasswordRevealButton(final boolean passwordRevealButton) { this.passwordRevealButton = passwordRevealButton; }
@@ -224,7 +219,6 @@ public class CEntityFieldService {
 			info.setReadOnly(metaData.readOnly());
 			info.setHidden(metaData.hidden());
 			info.setImageData(metaData.imageData());
-			info.setOrder(metaData.order());
 			info.setMaxLength(metaData.maxLength());
 			info.setDefaultValue(metaData.defaultValue());
 			info.setDataProviderBean(metaData.dataProviderBean());
@@ -315,7 +309,6 @@ public class CEntityFieldService {
 			Check.notNull(info, "Field info not found for field: " + line.getEntityProperty() + " in class " + field.getType().getSimpleName());
 			return info;
 		} catch (final Exception e) {
-			line.printLine();
 			throw e;
 		}
 	}
@@ -550,7 +543,6 @@ public class CEntityFieldService {
 		LOGGER.debug("Required: {}", fieldInfo.isRequired());
 		LOGGER.debug("Read Only: {}", fieldInfo.isReadOnly());
 		LOGGER.debug("Hidden: {}", fieldInfo.isHidden());
-		LOGGER.debug("Order: {}", fieldInfo.getOrder());
 		LOGGER.debug("Max Length: {}", fieldInfo.getMaxLength());
 		LOGGER.debug("Default Value: {}", fieldInfo.getDefaultValue());
 		LOGGER.debug("Data Provider Bean: {}", fieldInfo.getDataProviderBean());

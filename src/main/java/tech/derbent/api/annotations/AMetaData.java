@@ -53,8 +53,6 @@ public @interface AMetaData {
 
 	double min() default Double.MIN_VALUE;
 
-	int order() default 100;
-
 	boolean passwordField() default false;
 
 	boolean passwordRevealButton() default false;

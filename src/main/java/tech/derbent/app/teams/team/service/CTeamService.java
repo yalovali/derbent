@@ -22,7 +22,7 @@ import tech.derbent.base.users.domain.CUser;
  */
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:group", title = "Settings.Teams")
+@Menu ( icon = "vaadin:group", title = "Settings.Teams")
 @PermitAll
 @Transactional
 public class CTeamService extends CEntityNamedService<CTeam> implements IEntityRegistrable {

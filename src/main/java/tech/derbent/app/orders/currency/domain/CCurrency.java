@@ -24,13 +24,13 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	@Size (max = 3, min = 3, message = "Currency code must be exactly 3 characters")
 	@AMetaData (
 			displayName = "Currency Code", required = true, readOnly = false, description = "ISO 4217 currency code (e.g., USD, EUR, GBP)",
-			hidden = false, order = 2, maxLength = 3
+			hidden = false,  maxLength = 3
 	)
 	private String currencyCode;
 	@Column (name = "currency_symbol", nullable = true, length = 5)
 	@Size (max = 5)
 	@AMetaData (
-			displayName = "Symbol", required = false, readOnly = false, description = "Currency symbol (e.g., $, €, £)", hidden = false, order = 3,
+			displayName = "Symbol", required = false, readOnly = false, description = "Currency symbol (e.g., $, €, £)", hidden = false, 
 			maxLength = 5
 	)
 	private String currencySymbol;

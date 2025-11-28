@@ -29,7 +29,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Max (value = 1440, message = "Lockout duration cannot exceed 1440 minutes")
 	@AMetaData (
 			displayName = "Account Lockout Duration (Minutes)", required = true, readOnly = false, defaultValue = "15",
-			description = "Account lockout duration after failed attempts", hidden = false, order = 7
+			description = "Account lockout duration after failed attempts", hidden = false
 	)
 	private Integer accountLockoutDurationMinutes = 15;
 	@Column (name = "allowed_file_extensions", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
@@ -37,14 +37,14 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@AMetaData (
 			displayName = "Allowed File Extensions", required = false, readOnly = false,
 			defaultValue = ".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.zip", description = "Comma-separated list of allowed file extensions",
-			hidden = false, order = 11, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String allowedFileExtensions = ".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.zip";
 	@Column (name = "application_description", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
 			displayName = "Application Description", required = false, readOnly = false, defaultValue = "Comprehensive project management solution",
-			description = "Brief description of the application", hidden = false, order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			description = "Brief description of the application", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String applicationDescription = "Comprehensive project management solution";
 	// Application Configuration
@@ -52,21 +52,21 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Application Name", required = true, readOnly = false, defaultValue = "Derbent Project Management",
-			description = "Name of the application", hidden = false, order = 1, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Name of the application", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String applicationName = "Derbent Project Management";
 	@Column (name = "application_version", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Application Version", required = true, readOnly = false, defaultValue = "1.0.0",
-			description = "Current version of the application", hidden = false, order = 2, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Current version of the application", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String applicationVersion = "1.0.0";
 	// Auto-Login Settings
 	@Column (name = "auto_login_enabled", nullable = false)
 	@AMetaData (
 			displayName = "Auto Login Enabled", required = true, readOnly = false, defaultValue = "false",
-			description = "Enable automatic login after 2 seconds", hidden = false, order = 30
+			description = "Enable automatic login after 2 seconds", hidden = false
 	)
 	private Boolean autoLoginEnabled = Boolean.FALSE;
 	@Column (name = "backup_retention_days", nullable = false)
@@ -74,14 +74,14 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Max (value = 365, message = "Backup retention cannot exceed 365 days")
 	@AMetaData (
 			displayName = "Backup Retention (Days)", required = true, readOnly = false, defaultValue = "30",
-			description = "Number of days to retain backups", hidden = false, order = 24
+			description = "Number of days to retain backups", hidden = false
 	)
 	private Integer backupRetentionDays = 30;
 	@Column (name = "backup_schedule_cron", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Backup Schedule (Cron)", required = false, readOnly = false, defaultValue = "0 2 * * *",
-			description = "Cron expression for backup schedule", hidden = false, order = 23, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Cron expression for backup schedule", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String backupScheduleCron = "0 2 * * *";
 	@Column (name = "cache_ttl_minutes", nullable = false)
@@ -89,7 +89,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Max (value = 1440, message = "Cache TTL cannot exceed 1440 minutes")
 	@AMetaData (
 			displayName = "Cache TTL (Minutes)", required = true, readOnly = false, defaultValue = "30",
-			description = "Cache time-to-live in minutes", hidden = false, order = 21
+			description = "Cache time-to-live in minutes", hidden = false
 	)
 	private Integer cacheTtlMinutes = 30;
 	@Column (name = "database_connection_pool_size", nullable = false)
@@ -97,7 +97,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Max (value = 100, message = "Connection pool size cannot exceed 100")
 	@AMetaData (
 			displayName = "Database Connection Pool Size", required = true, readOnly = false, defaultValue = "10",
-			description = "Maximum database connections in pool", hidden = false, order = 19
+			description = "Maximum database connections in pool", hidden = false
 	)
 	private Integer databaseConnectionPoolSize = 10;
 	// Database and Performance Settings
@@ -107,14 +107,14 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@jakarta.validation.constraints.NotBlank (message = "Database name cannot be blank")
 	@AMetaData (
 			displayName = "Database Name", required = true, readOnly = false, defaultValue = "derbent",
-			description = "Name of the database to connect to", hidden = false, order = 17, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Name of the database to connect to", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String databaseName = "derbent";
 	@Column (name = "default_login_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Default Login View", required = false, readOnly = false, defaultValue = "home",
-			description = "Default view to navigate to after login", hidden = false, order = 31, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Default view to navigate to after login", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String defaultLoginView = "home";
 	// UI and Theming Settings
@@ -122,52 +122,52 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Default System Theme", required = true, readOnly = false, defaultValue = "lumo",
-			description = "Default UI theme for the application", hidden = false, order = 27, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Default UI theme for the application", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String defaultSystemTheme = "lumo";
 	// Backup and Maintenance Settings
 	@Column (name = "enable_automatic_backups", nullable = false)
 	@AMetaData (
 			displayName = "Enable Automatic Backups", required = true, readOnly = false, defaultValue = "true",
-			description = "Enable scheduled database backups", hidden = false, order = 22
+			description = "Enable scheduled database backups", hidden = false
 	)
 	private Boolean enableAutomaticBackups = Boolean.TRUE;
 	@Column (name = "enable_caching", nullable = false)
 	@AMetaData (
 			displayName = "Enable Caching", required = true, readOnly = false, defaultValue = "true",
-			description = "Enable application-level caching", hidden = false, order = 20
+			description = "Enable application-level caching", hidden = false
 	)
 	private Boolean enableCaching = Boolean.TRUE;
 	@Column (name = "enable_dark_mode", nullable = false)
 	@AMetaData (
 			displayName = "Enable Dark Mode", required = true, readOnly = false, defaultValue = "true",
-			description = "Allow users to switch to dark mode", hidden = false, order = 28
+			description = "Allow users to switch to dark mode", hidden = false
 	)
 	private Boolean enableDarkMode = Boolean.TRUE;
 	@Column (name = "enable_database_logging", nullable = false)
 	@AMetaData (
 			displayName = "Enable Database Logging", required = true, readOnly = false, defaultValue = "false",
-			description = "Enable detailed database query logging", hidden = false, order = 18
+			description = "Enable detailed database query logging", hidden = false
 	)
 	private Boolean enableDatabaseLogging = Boolean.FALSE;
 	@Column (name = "enable_file_versioning", nullable = false)
 	@AMetaData (
 			displayName = "Enable File Versioning", required = true, readOnly = false, defaultValue = "true",
-			description = "Enable file version tracking", hidden = false, order = 13
+			description = "Enable file version tracking", hidden = false
 	)
 	private Boolean enableFileVersioning = Boolean.TRUE;
 	@Column (name = "file_storage_path", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
 			displayName = "File Storage Path", required = false, readOnly = false, defaultValue = "./uploads",
-			description = "Base path for file storage", hidden = false, order = 12, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			description = "Base path for file storage", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String fileStoragePath = "./uploads";
 	@Column (name = "last_visited_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Last Visited View", required = false, readOnly = false, defaultValue = "home",
-			description = "Last visited view route for quick access", hidden = false, order = 32, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Last visited view route for quick access", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String lastVisitedView = "home";
 	@Column (name = "maintenance_message", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
@@ -175,13 +175,13 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@AMetaData (
 			displayName = "Maintenance Message", required = false, readOnly = false,
 			defaultValue = "System is under maintenance. Please try again later.", description = "Message displayed during maintenance",
-			hidden = false, order = 26, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String maintenanceMessage = "System is under maintenance. Please try again later.";
 	@Column (name = "maintenance_mode_enabled", nullable = false)
 	@AMetaData (
 			displayName = "Maintenance Mode", required = true, readOnly = false, defaultValue = "false", description = "Enable maintenance mode",
-			hidden = false, order = 25
+			hidden = false
 	)
 	private Boolean maintenanceModeEnabled = Boolean.FALSE;
 	// File Management Settings
@@ -189,7 +189,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@DecimalMin (value = "0.1", message = "Max file size must be at least 0.1 MB")
 	@AMetaData (
 			displayName = "Max File Upload Size (MB)", required = true, readOnly = false, defaultValue = "50.0",
-			description = "Maximum file upload size in megabytes", hidden = false, order = 10
+			description = "Maximum file upload size in megabytes", hidden = false
 	)
 	private BigDecimal maxFileUploadSizeMb = new BigDecimal("50.0");
 	@Column (name = "max_login_attempts", nullable = false)
@@ -197,7 +197,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Max (value = 10, message = "Max login attempts cannot exceed 10")
 	@AMetaData (
 			displayName = "Max Login Attempts", required = true, readOnly = false, defaultValue = "3",
-			description = "Maximum failed login attempts before lockout", hidden = false, order = 6
+			description = "Maximum failed login attempts before lockout", hidden = false
 	)
 	private Integer maxLoginAttempts = 3;
 	@Column (name = "password_expiry_days", nullable = true)
@@ -205,13 +205,13 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Max (value = 365, message = "Password expiry cannot exceed 365 days")
 	@AMetaData (
 			displayName = "Password Expiry (Days)", required = false, readOnly = false, defaultValue = "90",
-			description = "Password expiration in days (null for no expiry)", hidden = false, order = 9
+			description = "Password expiration in days (null for no expiry)", hidden = false
 	)
 	private Integer passwordExpiryDays = 90;
 	@Column (name = "require_strong_passwords", nullable = false)
 	@AMetaData (
 			displayName = "Require Strong Passwords", required = true, readOnly = false, defaultValue = "true",
-			description = "Enforce strong password requirements", hidden = false, order = 8
+			description = "Enforce strong password requirements", hidden = false
 	)
 	private Boolean requireStrongPasswords = Boolean.TRUE;
 	// Security and Session Settings
@@ -220,49 +220,46 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Max (value = 1440, message = "Session timeout cannot exceed 1440 minutes (24 hours)")
 	@AMetaData (
 			displayName = "Session Timeout (Minutes)", required = true, readOnly = false, defaultValue = "60",
-			description = "User session timeout in minutes", hidden = false, order = 5
+			description = "User session timeout in minutes", hidden = false
 	)
 	private Integer sessionTimeoutMinutes = 60;
 	@Column (name = "show_system_info", nullable = false)
 	@AMetaData (
 			displayName = "Show System Info", required = true, readOnly = false, defaultValue = "true",
-			description = "Display system information to administrators", hidden = false, order = 29
+			description = "Display system information to administrators", hidden = false
 	)
 	private Boolean showSystemInfo = Boolean.TRUE;
 	@Column (name = "smtp_port", nullable = false)
 	@Min (value = 1, message = "SMTP port must be positive")
 	@Max (value = 65535, message = "SMTP port must be valid")
-	@AMetaData (
-			displayName = "SMTP Port", required = true, readOnly = false, defaultValue = "587", description = "SMTP server port", hidden = false,
-			order = 15
-	)
+	@AMetaData (displayName = "SMTP Port", required = true, readOnly = false, defaultValue = "587", description = "SMTP server port", hidden = false)
 	private Integer smtpPort = 587;
 	// Email Configuration
 	@Column (name = "smtp_server", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "SMTP Server", required = false, readOnly = false, defaultValue = "localhost", description = "SMTP server hostname",
-			hidden = false, order = 14, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String smtpServer = "localhost";
 	@Column (name = "smtp_use_tls", nullable = false)
 	@AMetaData (
 			displayName = "SMTP Use TLS", required = true, readOnly = false, defaultValue = "true", description = "Use TLS for SMTP connection",
-			hidden = false, order = 16
+			hidden = false
 	)
 	private Boolean smtpUseTls = Boolean.TRUE;
 	@Column (name = "support_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Support Email", required = false, readOnly = false, defaultValue = "support@derbent.tech",
-			description = "Support contact email", hidden = false, order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Support contact email", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String supportEmail = "support@derbent.tech";
 	@Column (name = "system_email_from", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "System Email From", required = false, readOnly = false, defaultValue = "noreply@derbent.tech",
-			description = "Default from email address", hidden = false, order = 17, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Default from email address", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String systemEmailFrom = "noreply@derbent.tech";
 

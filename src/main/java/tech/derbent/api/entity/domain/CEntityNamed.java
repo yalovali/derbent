@@ -10,8 +10,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 
 @MappedSuperclass
@@ -23,27 +23,27 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	@Column (name = "created_date", nullable = true)
 	@AMetaData (
 			displayName = "Created Date", required = false, readOnly = true, description = "Date and time when the activity was created",
-			hidden = false, order = 80
+			hidden = false
 	)
 	private LocalDateTime createdDate;
 	@Column (nullable = true, length = 2000)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.DESCRIPTION_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Detailed description of the project",
-			hidden = false, order = 1, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String description;
 	@Column (name = "last_modified_date", nullable = true)
 	@AMetaData (
 			displayName = "Last Modified", required = false, readOnly = true, description = "Date and time when the activity was last modified",
-			hidden = false, order = 81
+			hidden = false
 	)
 	private LocalDateTime lastModifiedDate;
 	@Column (nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@NotBlank (message = ValidationMessages.NAME_REQUIRED)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.NAME_MAX_LENGTH)
 	@AMetaData (
-			displayName = "Name", required = true, readOnly = false, defaultValue = "", description = "Name", hidden = false, order = 0,
+			displayName = "Name", required = true, readOnly = false, defaultValue = "", description = "Name", hidden = false,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true
 	)
 	private String name;

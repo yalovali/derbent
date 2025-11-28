@@ -19,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:file-o", title = "Settings.Milestones")
+@Menu ( icon = "vaadin:file-o", title = "Settings.Milestones")
 @PermitAll
 public class CMilestoneService extends CProjectItemService<CMilestone> implements IEntityRegistrable {
 

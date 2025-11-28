@@ -27,14 +27,12 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Product Type", required = false, readOnly = false, description = "Type category of the product", hidden = false, order = 2,
+			displayName = "Product Type", required = false, readOnly = false, description = "Type category of the product", hidden = false,
 			dataProviderBean = "CProductTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProductType entityType;
 	@Column (nullable = true, length = 100)
-	@AMetaData (
-			displayName = "Product Code", required = false, readOnly = false, description = "Unique product code or SKU", hidden = false, order = 3
-	)
+	@AMetaData (displayName = "Product Code", required = false, readOnly = false, description = "Unique product code or SKU", hidden = false)
 	private String productCode;
 
 	/** Default constructor for JPA. */

@@ -17,26 +17,26 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "true",
-			description = "Whether this type entity cannot be deleted by users (system configuration)", hidden = false, order = 82
+			description = "Whether this type entity cannot be deleted by users (system configuration)", hidden = false
 	)
 	private boolean attributeNonDeletable = true;
 	@Column (name = "color", nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (
 			displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", colorField = true,
-			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7
+			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, maxLength = 7
 	)
 	private String color = "#4A90E2";
 	// Many risks belong to one project
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "company_id", nullable = false)
-	@AMetaData (displayName = "Company", required = true, readOnly = true, description = "Company of this entity", hidden = false, order = 10)
+	@AMetaData (displayName = "Company", required = true, readOnly = true, description = "Company of this entity", hidden = false)
 	private CCompany company;
 	@Column (name = "sort_order", nullable = false)
 	@NotNull
 	@AMetaData (
 			displayName = "Sort Order", required = true, readOnly = false, defaultValue = "100", description = "Display order for type sorting",
-			hidden = false, order = 4
+			hidden = false
 	)
 	private Integer sortOrder = 100;
 

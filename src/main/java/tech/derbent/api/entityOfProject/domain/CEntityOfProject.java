@@ -20,13 +20,13 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	@JoinColumn (name = "assigned_to_id", nullable = true)
 	@AMetaData (
 			displayName = "Assigned To", required = false, readOnly = false, description = "User assigned to this activity", hidden = false,
-			order = 10, dataProviderBean = "CUserService"
+			dataProviderBean = "CUserService"
 	)
 	private CUser assignedTo;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "created_by_id", nullable = true)
 	@AMetaData (
-			displayName = "Created By", required = false, readOnly = true, description = "User who created this activity", hidden = false, order = 11,
+			displayName = "Created By", required = false, readOnly = true, description = "User who created this activity", hidden = false,
 			dataProviderBean = "CUserService"
 	)
 	private CUser createdBy;
@@ -34,7 +34,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "project_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	@AMetaData (displayName = "Project", required = true, readOnly = true, description = "Project of this entity", hidden = false, order = 10)
+	@AMetaData (displayName = "Project", required = true, readOnly = true, description = "Project of this entity", hidden = false)
 	private CProject project;
 
 	/** Default constructor for JPA. */

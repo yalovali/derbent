@@ -23,12 +23,12 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	@Column (name = "active", nullable = false)
 	@AMetaData (
 			displayName = "Active", required = false, readOnly = false, description = "Whether this entity definition is active", hidden = false,
-			order = 20, defaultValue = "true"
+			defaultValue = "true"
 	)
 	private Boolean active = true;
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
-	@AMetaData (displayName = "#", required = false, readOnly = true, description = "No", hidden = false, order = 0)
+	@AMetaData (displayName = "#", required = false, readOnly = true, description = "No", hidden = false)
 	protected Long id;
 
 	/** Default constructor for JPA. */

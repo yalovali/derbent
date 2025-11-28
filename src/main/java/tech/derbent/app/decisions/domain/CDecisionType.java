@@ -27,7 +27,7 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 	@NotNull
 	@AMetaData (
 			displayName = "Requires Approval", required = true, readOnly = false, defaultValue = "false",
-			description = "Whether decisions of this type require approval to proceed", hidden = false, order = 7
+			description = "Whether decisions of this type require approval to proceed", hidden = false
 	)
 	private Boolean requiresApproval = false;
 

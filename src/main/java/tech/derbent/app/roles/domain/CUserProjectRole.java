@@ -24,19 +24,19 @@ public class CUserProjectRole extends CRole<CUserProjectRole> {
 	@Column (name = "is_admin", nullable = false)
 	@AMetaData (
 			displayName = "Is Admin", required = true, readOnly = false, defaultValue = "false",
-			description = "Whether this role has admin privileges in the project", hidden = false, order = 10
+			description = "Whether this role has admin privileges in the project", hidden = false
 	)
 	private Boolean isAdmin = Boolean.FALSE;
 	@Column (name = "is_guest", nullable = false)
 	@AMetaData (
 			displayName = "Is Guest", required = true, readOnly = false, defaultValue = "false",
-			description = "Whether this role has guest-level privileges", hidden = false, order = 12
+			description = "Whether this role has guest-level privileges", hidden = false
 	)
 	private Boolean isGuest = Boolean.FALSE;
 	@Column (name = "is_user", nullable = false)
 	@AMetaData (
 			displayName = "Is User", required = true, readOnly = false, defaultValue = "true",
-			description = "Whether this role has standard user privileges", hidden = false, order = 11
+			description = "Whether this role has standard user privileges", hidden = false
 	)
 	private Boolean isUser = Boolean.TRUE;
 

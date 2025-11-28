@@ -16,21 +16,18 @@ import tech.derbent.base.users.domain.CUser;
 @MappedSuperclass
 public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
 
-	// Event timestamp - when the event occurred
-	@Column (name = "event_date", nullable = false)
-	@AMetaData (
-			displayName = "Event Date", required = true, readOnly = true, description = "Date and time when the event occurred", hidden = false,
-			order = 90
-	)
-	private LocalDateTime eventDate;
 	// Author of the event
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "author_id", nullable = false)
 	@AMetaData (
-			displayName = "Author", required = true, readOnly = true, description = "User who created this event", hidden = false, order = 91,
+			displayName = "Author", required = true, readOnly = true, description = "User who created this event", hidden = false,
 			dataProviderBean = "CUserService"
 	)
 	private CUser author;
+	// Event timestamp - when the event occurred
+	@Column (name = "event_date", nullable = false)
+	@AMetaData (displayName = "Event Date", required = true, readOnly = true, description = "Date and time when the event occurred", hidden = false)
+	private LocalDateTime eventDate;
 
 	/** Default constructor for JPA. */
 	protected CEvent() {

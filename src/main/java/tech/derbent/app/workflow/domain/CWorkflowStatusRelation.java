@@ -32,14 +32,14 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 	@JoinColumn (name = "from_status_id", nullable = false)
 	@AMetaData (
 			displayName = "From Status", required = true, readOnly = false, description = "The status from which the transition starts",
-			hidden = false, order = 1, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService"
+			hidden = false, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService"
 	)
 	private CProjectItemStatus fromStatus;
 	// Field to indicate if this is an initial status (used when creating new items)
 	@Column (name = "is_initial_status", nullable = false)
 	@AMetaData (
 			displayName = "Is Initial Status", required = false, readOnly = false, defaultValue = "false",
-			description = "Indicates if this status is an initial/start status for new items", hidden = false, order = 5
+			description = "Indicates if this status is an initial/start status for new items", hidden = false
 	)
 	private Boolean initialStatus = Boolean.FALSE;
 	@ManyToMany (fetch = FetchType.LAZY)
@@ -49,22 +49,22 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 	)
 	@AMetaData (
 			displayName = "User Roles", required = false, readOnly = false,
-			description = "The user roles allowed to make this transition (allowed transition roles)", hidden = false, order = 4,
-			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserProjectRoleService", useGridSelection = true
+			description = "The user roles allowed to make this transition (allowed transition roles)", hidden = false, setBackgroundFromColor = true,
+			useIcon = true, dataProviderBean = "CUserProjectRoleService", useGridSelection = true
 	)
 	private List<CUserProjectRole> roles = new ArrayList<>();
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "to_status_id", nullable = false)
 	@AMetaData (
 			displayName = "To Status", required = true, readOnly = false, description = "The status to which the transition goes", hidden = false,
-			order = 2, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService"
+			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService"
 	)
 	private CProjectItemStatus toStatus;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "workflow_id", nullable = false)
 	@AMetaData (
 			displayName = "Workflow", required = true, readOnly = false, description = "The workflow this status relation belongs to", hidden = false,
-			order = 3, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CWorkflowEntityService"
+			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CWorkflowEntityService"
 	)
 	private CWorkflowEntity workflowentity;
 

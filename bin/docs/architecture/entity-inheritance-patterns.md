@@ -68,13 +68,13 @@ public abstract class CEntity<EntityClass> {
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 @AMetaData(displayName = "#", required = false, readOnly = true, 
-           description = "No", hidden = false, order = 0)
+           description = "No", hidden = false, )
 private Long id;
 
 @Column(name = "is_active", nullable = false)
 @AMetaData(displayName = "Active", required = false, readOnly = false,
            description = "Whether this entity definition is active", 
-           hidden = false, order = 20, defaultValue = "true")
+           hidden = false,  defaultValue = "true")
 private Boolean isActive = true;
 ```
 
@@ -113,7 +113,7 @@ public class CSystemConfig extends CEntityDB<CSystemConfig> {
 @Column(nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 @Size(max = CEntityConstants.MAX_LENGTH_NAME)
 @AMetaData(displayName = "Name", required = true, readOnly = false,
-           defaultValue = "", description = "Name", hidden = false, order = 0,
+           defaultValue = "", description = "Name", hidden = false, 
            maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true)
 private String name;
 
@@ -121,19 +121,19 @@ private String name;
 @Size(max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 @AMetaData(displayName = "Description", required = false, readOnly = false,
            defaultValue = "", description = "Detailed description of the project",
-           hidden = false, order = 1, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+           hidden = false,  maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 private String description;
 
 @Column(name = "created_date", nullable = true)
 @AMetaData(displayName = "Created Date", required = false, readOnly = true,
            description = "Date and time when the activity was created",
-           hidden = false, order = 80)
+           hidden = false, )
 private LocalDateTime createdDate;
 
 @Column(name = "last_modified_date", nullable = true)
 @AMetaData(displayName = "Last Modified", required = false, readOnly = true,
            description = "Date and time when the activity was last modified",
-           hidden = false, order = 81)
+           hidden = false, )
 private LocalDateTime lastModifiedDate;
 ```
 
@@ -173,21 +173,21 @@ public class CCompany extends CEntityNamed<CCompany> {
 @JoinColumn(name = "project_id", nullable = false)
 @OnDelete(action = OnDeleteAction.CASCADE)
 @AMetaData(displayName = "Project", required = true, readOnly = true,
-           description = "Project of this entity", hidden = false, order = 10)
+           description = "Project of this entity", hidden = false, )
 private CProject project;
 
 @ManyToOne(fetch = FetchType.EAGER)
 @JoinColumn(name = "assigned_to_id", nullable = true)
 @AMetaData(displayName = "Assigned To", required = false, readOnly = false,
            description = "User assigned to this activity", hidden = false,
-           order = 10, dataProviderBean = "CUserService")
+            dataProviderBean = "CUserService")
 private CUser assignedTo;
 
 @ManyToOne(fetch = FetchType.EAGER)
 @JoinColumn(name = "created_by_id", nullable = true)
 @AMetaData(displayName = "Created By", required = false, readOnly = true,
            description = "User who created this activity", hidden = false, 
-           order = 11, dataProviderBean = "CUserService")
+            dataProviderBean = "CUserService")
 private CUser createdBy;
 ```
 
@@ -228,12 +228,12 @@ public class CActivityType extends CEntityOfProject<CActivityType> {
 ```java
 @Column(name = "parent_id", nullable = true)
 @AMetaData(displayName = "Parent #", required = false, readOnly = true,
-           description = "ID of the parent entity", hidden = true, order = 62)
+           description = "ID of the parent entity", hidden = true, )
 private Long parentId;
 
 @Column(name = "parent_type", nullable = true)
 @AMetaData(displayName = "Parent Type", required = false, readOnly = true,
-           description = "Type of the parent entity", hidden = true, order = 61)
+           description = "Type of the parent entity", hidden = true, )
 private String parentType;
 ```
 
@@ -265,21 +265,21 @@ public class CActivity extends CProjectItem<CActivity> {
     @AMetaData(displayName = "Acceptance Criteria", required = false,
                readOnly = false, defaultValue = "",
                description = "Criteria that must be met for completion",
-               hidden = false, order = 70, maxLength = 2000)
+               hidden = false,  maxLength = 2000)
     private String acceptanceCriteria;
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "status_id", nullable = true)
     @AMetaData(displayName = "Status", required = false, readOnly = false,
                description = "Current status of the activity",
-               hidden = false, order = 20, dataProviderBean = "CProjectItemStatusService")
+               hidden = false,  dataProviderBean = "CProjectItemStatusService")
     private CProjectItemStatus status;
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "type_id", nullable = true)
     @AMetaData(displayName = "Type", required = false, readOnly = false,
                description = "Type/category of the activity",
-               hidden = false, order = 21, dataProviderBean = "CActivityTypeService")
+               hidden = false,  dataProviderBean = "CActivityTypeService")
     private CActivityType type;
     
     // Additional fields, constructors, getters, setters
@@ -351,7 +351,7 @@ public class CActivity extends CProjectItem<CActivity> {
     readOnly = false,                // Editable
     description = "Brief title",     // Tooltip
     hidden = false,                  // Visible in forms
-    order = 10,                      // Field order
+                          // Field order
     maxLength = 100,                 // Max input length
     dataProviderBean = "MyService"   // For ComboBox data
 )
@@ -520,13 +520,13 @@ public class CDecision extends CProjectItem<CDecision> {
     
     @Column(nullable = false)
     @AMetaData(displayName = "Decision Date", required = true,
-               description = "Date when decision was made", order = 20)
+               description = "Date when decision was made", )
     private LocalDate decisionDate;
     
     @Column(nullable = true, length = 1000)
     @AMetaData(displayName = "Rationale", required = false,
                description = "Reasoning behind the decision", 
-               order = 30, maxLength = 1000)
+                maxLength = 1000)
     private String rationale;
     
     protected CDecision() {

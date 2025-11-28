@@ -19,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:file-o", title = "Settings.Providers")
+@Menu ( icon = "vaadin:file-o", title = "Settings.Providers")
 @PermitAll
 public class CProviderService extends CProjectItemService<CProvider> implements IEntityRegistrable {
 

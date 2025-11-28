@@ -30,21 +30,21 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
-			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk", hidden = false, order = 20,
+			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk", hidden = false, 
 			maxLength = 1000
 	)
 	private String cause;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk", hidden = false, order = 2,
+			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk", hidden = false, 
 			dataProviderBean = "CRiskTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CRiskType entityType;
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
-			displayName = "Impact", required = false, readOnly = false, description = "Potential impact if risk occurs", hidden = false, order = 21,
+			displayName = "Impact", required = false, readOnly = false, description = "Potential impact if risk occurs", hidden = false, 
 			maxLength = 1000
 	)
 	private String impact;
@@ -52,42 +52,42 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Mitigation", required = false, readOnly = false, description = "Strategy to mitigate or reduce the risk", hidden = false,
-			order = 22, maxLength = 2000
+			 maxLength = 2000
 	)
 	private String mitigation;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Action Plan", required = false, readOnly = false, description = "Detailed action plan to address the risk", hidden = false,
-			order = 23, maxLength = 2000
+			 maxLength = 2000
 	)
 	private String plan;
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
 			displayName = "Result", required = false, readOnly = false, description = "Outcome or result of risk management", hidden = false,
-			order = 24, maxLength = 1000
+			 maxLength = 1000
 	)
 	private String result;
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_criticality", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Criticality", required = false, readOnly = false, defaultValue = "MODERATE",
-			description = "Overall importance/criticality of the risk", hidden = false, order = 12, useRadioButtons = false
+			description = "Overall importance/criticality of the risk", hidden = false,  useRadioButtons = false
 	)
 	private ERiskCriticality riskCriticality;
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_likelihood", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Likelihood", required = false, readOnly = false, defaultValue = "POSSIBLE", description = "Probability of risk occurring",
-			hidden = false, order = 11, useRadioButtons = false
+			hidden = false,  useRadioButtons = false
 	)
 	private ERiskLikelihood riskLikelihood;
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk",
-			hidden = false, order = 10, useRadioButtons = false
+			hidden = false,  useRadioButtons = false
 	)
 	private ERiskSeverity riskSeverity;
 

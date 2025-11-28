@@ -8,6 +8,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -32,28 +34,30 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	@NotNull (message = "Project item ID is required")
 	@AMetaData (
 			displayName = "Item ID", required = true, readOnly = false, description = "ID of the project item (activity, meeting, etc.)",
-			hidden = false, order = 2
+			hidden = false
 	)
 	private Long itemId;
-	@Column (name = "item_order", nullable = false)
+	@Column (name = "itemOrder", nullable = false)
+	@Min (value = 1, message = "Line order must be at least 1")
+	@Max (value = 999, message = "Line order cannot exceed 999")
 	@NotNull (message = "Item order is required")
 	@AMetaData (
 			displayName = "Order", required = true, readOnly = false, description = "Display order of this item in the sprint", hidden = false,
-			order = 3, defaultValue = "0"
+			defaultValue = "0"
 	)
 	private Integer itemOrder = 0;
 	@Column (name = "item_type", nullable = false, length = 50)
 	@NotNull (message = "Item type is required")
 	@AMetaData (
 			displayName = "Item Type", required = true, readOnly = false, description = "Type of the project item (CActivity, CMeeting, etc.)",
-			hidden = false, order = 4, maxLength = 50
+			hidden = false, maxLength = 50
 	)
 	private String itemType;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "sprint_id", nullable = false)
 	@NotNull (message = "Sprint reference is required")
 	@AMetaData (
-			displayName = "Sprint", required = true, readOnly = false, description = "The sprint this item belongs to", hidden = false, order = 1,
+			displayName = "Sprint", required = true, readOnly = false, description = "The sprint this item belongs to", hidden = false,
 			dataProviderBean = "CSprintService"
 	)
 	private CSprint sprint;
@@ -112,6 +116,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 
 	public Long getItemId() { return itemId; }
 
+	@Override
 	public Integer getItemOrder() { return itemOrder; }
 
 	public String getItemType() { return itemType; }
@@ -130,6 +135,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 
 	public void setItemId(final Long itemId) { this.itemId = itemId; }
 
+	@Override
 	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
 	public void setItemType(final String itemType) { this.itemType = itemType; }

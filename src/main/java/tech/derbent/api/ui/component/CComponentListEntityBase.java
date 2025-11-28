@@ -159,7 +159,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	/** Get the entity service.
 	 * @return The service */
-	@SuppressWarnings ("unchecked")
 	@Override
 	public CAbstractService<?> getChildService() { return (CAbstractService<?>) childService; }
 

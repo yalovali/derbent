@@ -33,7 +33,7 @@ public class CComment extends CEvent<CComment> {
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id", nullable = false)
 	@AMetaData (
-			displayName = "Activity", required = true, readOnly = false, description = "Activity this comment belongs to", hidden = false, order = 2,
+			displayName = "Activity", required = true, readOnly = false, description = "Activity this comment belongs to", hidden = false,
 			dataProviderBean = "CActivityService"
 	)
 	private CActivity activity;
@@ -41,7 +41,7 @@ public class CComment extends CEvent<CComment> {
 	@Column (name = "comment_text", nullable = false, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
-			displayName = "Comment Text", required = true, readOnly = false, description = "The comment content text", hidden = false, order = 1,
+			displayName = "Comment Text", required = true, readOnly = false, description = "The comment content text", hidden = false,
 			maxLength = 4000
 	)
 	private String commentText;
@@ -49,14 +49,14 @@ public class CComment extends CEvent<CComment> {
 	@Column (name = "is_important", nullable = false)
 	@AMetaData (
 			displayName = "Important", required = false, readOnly = false, defaultValue = "false", description = "Mark this comment as important",
-			hidden = false, order = 4
+			hidden = false
 	)
 	private Boolean important = Boolean.FALSE;
 	// Priority of the comment
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "priority_id", nullable = true)
 	@AMetaData (
-			displayName = "Priority", required = false, readOnly = false, description = "Priority level of this comment", hidden = false, order = 3,
+			displayName = "Priority", required = false, readOnly = false, description = "Priority level of this comment", hidden = false,
 			dataProviderBean = "CCommentPriorityService"
 	)
 	private CCommentPriority priority;

@@ -15,7 +15,7 @@
  * @AMetaData(
  *     displayName = "Activity Name",
  *     required = true,
- *     order = 10,
+ *     
  *     maxLength = 255
  * )
  * private String name;

@@ -19,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:file-o", title = "Settings.Tickets")
+@Menu ( icon = "vaadin:file-o", title = "Settings.Tickets")
 @PermitAll
 public class CTicketService extends CProjectItemService<CTicket> implements IEntityRegistrable {
 

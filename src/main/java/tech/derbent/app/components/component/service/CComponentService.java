@@ -19,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:file-o", title = "Settings.Components")
+@Menu ( icon = "vaadin:file-o", title = "Settings.Components")
 @PermitAll
 public class CComponentService extends CProjectItemService<CComponent> implements IEntityRegistrable {
 

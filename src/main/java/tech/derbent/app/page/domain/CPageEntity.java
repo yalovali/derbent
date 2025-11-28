@@ -28,40 +28,40 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasColorA
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "false",
-			description = "Whether this page entity cannot be deleted by users", hidden = false, order = 82
+			description = "Whether this page entity cannot be deleted by users", hidden = false
 	)
 	private boolean attributeNonDeletable = false;
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Read Only", required = false, readOnly = false, defaultValue = "false",
-			description = "Whether this page entity is read-only and cannot be modified", hidden = false, order = 81
+			description = "Whether this page entity is read-only and cannot be modified", hidden = false
 	)
 	private boolean attributeReadonly = false;
 	@Column (name = "attributeShowInQuickToolbar", nullable = false)
 	@AMetaData (
 			displayName = "Show in Quick Toolbar", required = false, readOnly = false, defaultValue = "false",
-			description = "Whether this page should appear as a button in the quick access toolbar", hidden = false, order = 85
+			description = "Whether this page should appear as a button in the quick access toolbar", hidden = false
 	)
 	private boolean attributeShowInQuickToolbar = false;
 	@Column (name = "color", nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (
 			displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", colorField = true,
-			description = "Hex color code (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7
+			description = "Hex color code (e.g., #4A90E2)", hidden = false, maxLength = 7
 	)
 	private String color = "#4A90E2";
 	@Column (nullable = true, length = 10000)
 	@Size (max = 10000)
 	@AMetaData (
 			displayName = "Page Content", required = false, readOnly = false, defaultValue = "", description = "HTML content of the page",
-			hidden = false, order = 90, maxLength = 10000
+			hidden = false, maxLength = 10000
 	)
 	private String content;
 	@ManyToOne
 	@JoinColumn (name = "detail_section_id")
 	@AMetaData (
 			displayName = "Detail Section", required = false, readOnly = false, description = "Detail section configuration for this page",
-			hidden = false, order = 99
+			hidden = false
 	)
 	private CDetailSection detailSection;
 	@ManyToOne
@@ -69,48 +69,48 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasColorA
 	@AMetaData (
 			displayName = "Grid Entity", required = false, readOnly = false, description = "Grid entity configuration for this page", hidden = false,
 			dataProviderMethod = "listForComboboxSelectorByProject", dataProviderBean = "CGridEntityService", dataProviderParamBean = "session",
-			dataProviderParamMethod = "getActiveProject", order = 98
+			dataProviderParamMethod = "getActiveProject"
 	)
 	private CGridEntity gridEntity;
 	@Column (nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Icon", required = true, readOnly = false, defaultValue = "vaadin:file", description = "Icon for the page menu item",
-			hidden = false, order = 70, maxLength = 100, useIcon = true
+			hidden = false, maxLength = 100, useIcon = true
 	)
 	private String icon;
 	@Column (nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Menu Order", required = true, readOnly = false, defaultValue = "1.1", description = "Menu Order", hidden = false,
-			order = 70, maxLength = 100
+			maxLength = 100
 	)
 	private String menuOrder;
 	@Column (name = "menu_title", nullable = false, length = 100)
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Menu Title", required = true, readOnly = false, defaultValue = "Project.Page",
-			description = "Use like, Project.Page, separate parent with . ", hidden = false, order = 70, maxLength = 100
+			description = "Use like, Project.Page, separate parent with . ", hidden = false, maxLength = 100
 	)
 	private String menuTitle;
 	@Column (name = "page_service", nullable = true, length = 200)
 	@AMetaData (
 			displayName = "Page Service", required = false, readOnly = false, defaultValue = "",
-			description = "Backend service associated with this page", hidden = true, order = 100, maxLength = 200,
-			dataProviderMethod = "getPageServiceList", dataProviderBean = "CPageServiceUtility"
+			description = "Backend service associated with this page", hidden = true, maxLength = 200, dataProviderMethod = "getPageServiceList",
+			dataProviderBean = "CPageServiceUtility"
 	)
 	private String pageService;
 	@Column (nullable = false, length = 100)
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Page Title", required = true, readOnly = false, defaultValue = "Title of Page", description = "Title of Page",
-			hidden = false, order = 70, maxLength = 100
+			hidden = false, maxLength = 100
 	)
 	private String pageTitle;
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Requires Authentication", required = false, readOnly = false, defaultValue = "true",
-			description = "Whether this page requires user authentication", hidden = false, order = 80
+			description = "Whether this page requires user authentication", hidden = false
 	)
 	private boolean requiresAuthentication = true;
 

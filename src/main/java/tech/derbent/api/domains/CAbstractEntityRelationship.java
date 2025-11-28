@@ -15,27 +15,27 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 	@Column (name = "active", nullable = false)
 	@AMetaData (
 			displayName = "Active", required = true, readOnly = false, defaultValue = "true",
-			description = "Whether this relationship is currently active", hidden = false, order = 102
+			description = "Whether this relationship is currently active", hidden = false
 	)
 	private Boolean active = Boolean.TRUE;
 	@Column (name = "granted_by_user_id", nullable = true)
 	@AMetaData (
 			displayName = "Granted By", required = false, readOnly = true, description = "ID of the user who granted this relationship",
-			hidden = false, order = 103
+			hidden = false
 	)
 	private Long grantedByUserId;
 	@Column (name = "ownership_level", nullable = false, length = 50)
 	@Size (max = 50)
 	@AMetaData (
 			displayName = "Ownership Level", required = true, readOnly = false, defaultValue = "MEMBER",
-			description = "Level of ownership/privileges in this relationship", hidden = false, order = 100
+			description = "Level of ownership/privileges in this relationship", hidden = false
 	)
 	private String ownershipLevel = "MEMBER";
 	@Column (name = "privileges", nullable = true, length = 500)
 	@Size (max = 500)
 	@AMetaData (
 			displayName = "Privileges", required = false, readOnly = false, defaultValue = "",
-			description = "Comma-separated list of specific privileges", hidden = false, order = 101
+			description = "Comma-separated list of specific privileges", hidden = false
 	)
 	private String privileges;
 

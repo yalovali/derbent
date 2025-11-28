@@ -19,7 +19,7 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> {
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Risk Level", required = false, readOnly = false, defaultValue = "1", description = "Numeric risk level indicator (1-10)",
-			hidden = false, order = 2
+			hidden = false
 	)
 	private Integer riskLevel;
 

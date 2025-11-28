@@ -24,14 +24,14 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	@Column (name = "is_default", nullable = false)
 	@AMetaData (
 			displayName = "Is Default", required = false, readOnly = false, defaultValue = "false",
-			description = "Indicates if this is the default priority", hidden = false, order = 7
+			description = "Indicates if this is the default priority", hidden = false
 	)
 	private Boolean isDefault = false;
 	/** Priority level for the activity (1=Highest, 5=Lowest). */
 	@Column (name = "priority_level", nullable = false)
 	@AMetaData (
 			displayName = "Priority Level", required = false, readOnly = false, defaultValue = "3",
-			description = "Priority level (1=Highest, 5=Lowest)", hidden = false, order = 2
+			description = "Priority level (1=Highest, 5=Lowest)", hidden = false
 	)
 	private Integer priorityLevel = 3;
 

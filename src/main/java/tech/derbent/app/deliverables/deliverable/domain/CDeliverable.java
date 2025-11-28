@@ -28,7 +28,7 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Deliverable Type", required = false, readOnly = false, description = "Type category of the deliverable", hidden = false,
-			order = 2, dataProviderBean = "CDeliverableTypeService", setBackgroundFromColor = true, useIcon = true
+			 dataProviderBean = "CDeliverableTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CDeliverableType entityType;
 

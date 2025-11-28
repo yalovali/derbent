@@ -105,7 +105,7 @@ All non-nullable entity fields must have appropriate Jakarta Validation annotati
 @Size(max = 50, message = "Item type must not exceed 50 characters")
 @AMetaData(
     displayName = "Item Type", required = true, readOnly = false,
-    description = "Type of the project item", hidden = false, order = 4,
+    description = "Type of the project item", hidden = false, 
     maxLength = 50
 )
 private String itemType;

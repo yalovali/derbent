@@ -25,14 +25,14 @@ public class CCompany extends CEntityNamed<CCompany> {
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.FIELD_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Address", required = false, readOnly = false, defaultValue = "", description = "Company address", hidden = false,
-			order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String address;
 	@Column (name = "company_logo_url", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.FIELD_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Company Logo URL", required = false, readOnly = false, defaultValue = "", description = "URL or path to company logo",
-			hidden = false, order = 11, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String companyLogoUrl;
 	// Company Configuration Settings
@@ -40,21 +40,21 @@ public class CCompany extends CEntityNamed<CCompany> {
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Company Theme", required = false, readOnly = false, defaultValue = "lumo-light",
-			description = "Default theme for company users", hidden = false, order = 10, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Default theme for company users", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String companyTheme = "lumo-light";
 	@Column (name = "company_timezone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Company Timezone", required = false, readOnly = false, defaultValue = "Europe/Istanbul",
-			description = "Default timezone for company operations", hidden = false, order = 15, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Default timezone for company operations", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String companyTimezone = "Europe/Istanbul";
 	@Column (name = "default_language", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Default Language", required = false, readOnly = false, defaultValue = "tr",
-			description = "Default language code for company users", hidden = false, order = 16, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Default language code for company users", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String defaultLanguage = "tr";
 	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
@@ -62,13 +62,13 @@ public class CCompany extends CEntityNamed<CCompany> {
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Email", required = false, readOnly = false, defaultValue = "", description = "Company email address", hidden = false,
-			order = 5, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String email;
 	@Column (name = "enable_notifications", nullable = false)
 	@AMetaData (
 			displayName = "Enable Notifications", required = true, readOnly = false, defaultValue = "false",
-			description = "Enable email and system notifications for company", hidden = false, order = 17
+			description = "Enable email and system notifications for company", hidden = false
 	)
 	private Boolean enableNotifications;
 	@Column (name = "notification_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
@@ -76,49 +76,49 @@ public class CCompany extends CEntityNamed<CCompany> {
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Notification Email", required = false, readOnly = false, defaultValue = "",
-			description = "Primary email for company notifications", hidden = false, order = 18, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Primary email for company notifications", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String notificationEmail;
 	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Company phone number", hidden = false,
-			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String phone;
 	@Column (name = "primary_color", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Primary Color", required = false, readOnly = false, defaultValue = "#1976d2", colorField = true,
-			description = "Primary brand color for the company", hidden = false, order = 12, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Primary brand color for the company", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String primaryColor = "#1976d2";
 	@Column (name = "tax_number", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Tax Number", required = false, readOnly = false, defaultValue = "", description = "Company tax identification number",
-			hidden = false, order = 7, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String taxNumber;
 	@Column (name = "website", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Website", required = false, readOnly = false, defaultValue = "", description = "Company website URL", hidden = false,
-			order = 6, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String website;
 	@Column (name = "working_hours_end", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Working Hours End", required = false, readOnly = false, defaultValue = "17:00",
-			description = "Company working hours end time", hidden = false, order = 14, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Company working hours end time", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String workingHoursEnd = "17:00";
 	@Column (name = "working_hours_start", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Working Hours Start", required = false, readOnly = false, defaultValue = "09:00",
-			description = "Company working hours start time", hidden = false, order = 13, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Company working hours start time", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String workingHoursStart = "09:00";
 

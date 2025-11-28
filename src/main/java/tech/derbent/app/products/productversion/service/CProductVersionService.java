@@ -20,7 +20,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (order = 0, icon = "vaadin:file-o", title = "Settings.ProductVersions")
+@Menu ( icon = "vaadin:file-o", title = "Settings.ProductVersions")
 @PermitAll
 public class CProductVersionService extends CProjectItemService<CProductVersion> implements IEntityRegistrable {
 

@@ -41,25 +41,25 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@OrderColumn (name = "item_index")
 	@AMetaData (
 			displayName = "Activities", required = false, readOnly = false, description = "" + "List of activities created by this user",
-			hidden = true, order = 100, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "listByUser"
+			hidden = true, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "listByUser"
 	)
 	private List<CActivity> activities;
 	@Column (name = "attribute_display_sections_as_tabs", nullable = true)
 	@AMetaData (
 			displayName = "Display Sections As Tabs", required = false, readOnly = false, defaultValue = "true",
-			description = "Whether to display user interface sections as tabs", hidden = false, order = 50
+			description = "Whether to display user interface sections as tabs", hidden = false
 	)
 	private Boolean attributeDisplaySectionsAsTabs;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_role_id", nullable = true)
 	@AMetaData (
 			displayName = "Company Role", required = false, readOnly = false, description = "User's role within the company", hidden = false,
-			order = 16, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserCompanyRoleService"
+			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserCompanyRoleService"
 	)
 	private CUserCompanyRole companyRole;
 	@AMetaData (
 			displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false,
-			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@NotBlank (message = ValidationMessages.EMAIL_REQUIRED)
@@ -69,13 +69,13 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@AMetaData (
 			displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false,
-			order = 2, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
 	private String lastname;
 	@AMetaData (
 			displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false,
-			order = 3, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@NotBlank (message = ValidationMessages.FIELD_REQUIRED)
@@ -85,11 +85,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@Size (max = 255, message = ValidationMessages.FIELD_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Password", required = false, readOnly = false, passwordField = true, description = "User password (stored as hash)",
-			hidden = false, order = 99, passwordRevealButton = false
+			hidden = false, passwordRevealButton = false
 	)
 	private String password; // Encoded password
 	@AMetaData (
-			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false, order = 5,
+			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
@@ -97,14 +97,14 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	private String phone;
 	@AMetaData (
 			displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
-			description = "User's profile picture stored as binary data", hidden = false, order = 11, imageData = true
+			description = "User's profile picture stored as binary data", hidden = false, imageData = true
 	)
 	@Column (name = "profile_picture_data", nullable = true, length = 10000, columnDefinition = "bytea")
 	private byte[] profilePictureData;
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Project Settings", required = false, readOnly = true, description = "User's project memberships and roles", hidden = false,
-			order = 20, createComponentMethod = "createUserProjectSettingsComponent"
+			createComponentMethod = "createUserProjectSettingsComponent"
 	)
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
 

@@ -25,29 +25,27 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	public static final String DEFAULT_ICON = "vaadin:tasks";
 	public static final String VIEW_NAME = "User Settings View";
 	@Column
-	@AMetaData (
-			displayName = "Permissions", required = false, readOnly = false, description = "User's project permission", hidden = false, order = 13
-	)
+	@AMetaData (displayName = "Permissions", required = false, readOnly = false, description = "User's project permission", hidden = false)
 	private String permission;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "project_id", nullable = false)
 	@AMetaData (
-			displayName = "Project", required = false, readOnly = false, description = "User's project", hidden = false, order = 5,
+			displayName = "Project", required = false, readOnly = false, description = "User's project", hidden = false,
 			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "context", dataProviderMethod = "getAvailableProjects"
 	)
 	private CProject project;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
-			displayName = "Project Role", required = false, readOnly = false, description = "User's role in this project", hidden = false, order = 5,
+			displayName = "Project Role", required = false, readOnly = false, description = "User's role in this project", hidden = false,
 			dataProviderBean = "CUserProjectRoleService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CUserProjectRole role;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "user_id", nullable = false)
 	@AMetaData (
-			displayName = "User", required = false, readOnly = false, description = "Project user", hidden = false, order = 3,
-			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "context", dataProviderMethod = "getAvailableUsers"
+			displayName = "User", required = false, readOnly = false, description = "Project user", hidden = false, setBackgroundFromColor = true,
+			useIcon = true, dataProviderBean = "context", dataProviderMethod = "getAvailableUsers"
 	)
 	private CUser user;
 

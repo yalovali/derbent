@@ -14,7 +14,7 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_id", nullable = true)
 	@AMetaData (
-			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false, order = 15,
+			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false, 
 			setBackgroundFromColor = true, useIcon = true
 	)
 	private CCompany company;

@@ -18,16 +18,16 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	// Hierarchical Structure Support
 	@Column (name = "parent_id", nullable = true)
-	@AMetaData (displayName = "Parent #", required = false, readOnly = true, description = "ID of the parent entity", hidden = true, order = 62)
+	@AMetaData (displayName = "Parent #", required = false, readOnly = true, description = "ID of the parent entity", hidden = true)
 	private Long parentId;
 	@Column (name = "parent_type", nullable = true)
-	@AMetaData (displayName = "Parent Type", required = false, readOnly = true, description = "Type of the parent entity", hidden = true, order = 61)
+	@AMetaData (displayName = "Parent Type", required = false, readOnly = true, description = "Type of the parent entity", hidden = true)
 	private String parentType;
 	// Status and Priority Management
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cprojectitemstatus_id", nullable = true)
 	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30,
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false,
 			dataProviderBean = "view", dataProviderMethod = "getAvailableStatusesForProjectItem", setBackgroundFromColor = true, useIcon = true
 	)
 	protected CProjectItemStatus status;

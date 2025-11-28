@@ -46,7 +46,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
-			description = "Criteria that must be met for the activity to be considered complete", hidden = false, order = 70, maxLength = 2000
+			description = "Criteria that must be met for the activity to be considered complete", hidden = false, maxLength = 2000
 	)
 	private String acceptanceCriteria;
 	// Basic Activity Information
@@ -55,7 +55,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
 	@AMetaData (
 			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Actual cost spent on this activity", hidden = false, order = 51
+			description = "Actual cost spent on this activity", hidden = false
 	)
 	private BigDecimal actualCost = BigDecimal.ZERO;
 	@Column (nullable = true, precision = 10, scale = 2)
@@ -63,26 +63,24 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@DecimalMax (value = "9999.99", message = "Actual hours cannot exceed 9999.99")
 	@AMetaData (
 			displayName = "Actual Hours", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Actual time spent on this activity in hours", hidden = false, order = 21
+			description = "Actual time spent on this activity in hours", hidden = false
 	)
 	private BigDecimal actualHours = BigDecimal.ZERO;
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private List<CComment> comments = new ArrayList<>();
 	@Column (name = "completion_date", nullable = true)
-	@AMetaData (
-			displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false, order = 42
-	)
+	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
 	private LocalDate completionDate;
 	@Column (nullable = true)
-	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false, order = 41)
+	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
 	private LocalDate dueDate;
 	// Type Management - concrete implementation of parent's typeEntity
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
-			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityType entityType;
 	// Budget Management
@@ -91,7 +89,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@DecimalMax (value = "999999.99", message = "Estimated cost cannot exceed 999999.99")
 	@AMetaData (
 			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Estimated cost to complete this activity", hidden = false, order = 50
+			description = "Estimated cost to complete this activity", hidden = false
 	)
 	private BigDecimal estimatedCost;
 	// Time Tracking
@@ -100,7 +98,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@DecimalMax (value = "9999.99", message = "Estimated hours cannot exceed 9999.99")
 	@AMetaData (
 			displayName = "Estimated Hours", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Estimated time in hours to complete this activity", hidden = false, order = 20
+			description = "Estimated time in hours to complete this activity", hidden = false
 	)
 	private BigDecimal estimatedHours;
 	@Column (nullable = true, precision = 10, scale = 2)
@@ -108,20 +106,20 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@DecimalMax (value = "9999.99", message = "Hourly rate cannot exceed 9999.99")
 	@AMetaData (
 			displayName = "Hourly Rate", required = false, readOnly = false, defaultValue = "0.00", description = "Hourly rate for cost calculation",
-			hidden = false, order = 52
+			hidden = false
 	)
 	private BigDecimal hourlyRate;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments",
-			hidden = false, order = 71, maxLength = 2000
+			hidden = false, maxLength = 2000
 	)
 	private String notes;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
-			displayName = "Priority", required = false, readOnly = false, description = "Priority level of the activity", hidden = false, order = 31,
+			displayName = "Priority", required = false, readOnly = false, description = "Priority level of the activity", hidden = false,
 			dataProviderBean = "CActivityPriorityService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityPriority priority;
@@ -130,7 +128,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
 	@AMetaData (
 			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0", description = "Completion percentage (0-100)",
-			hidden = false, order = 32
+			hidden = false
 	)
 	private Integer progressPercentage = 0;
 	@Column (nullable = true, precision = 10, scale = 2)
@@ -138,20 +136,20 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@DecimalMax (value = "9999.99", message = "Remaining hours cannot exceed 9999.99")
 	@AMetaData (
 			displayName = "Remaining Hours", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Estimated remaining time in hours", hidden = false, order = 22
+			description = "Estimated remaining time in hours", hidden = false
 	)
 	private BigDecimal remainingHours;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the activity",
-			hidden = false, order = 72, maxLength = 2000
+			hidden = false, maxLength = 2000
 	)
 	private String results;
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
-			hidden = false, order = 40
+			hidden = false
 	)
 	private LocalDate startDate;
 
