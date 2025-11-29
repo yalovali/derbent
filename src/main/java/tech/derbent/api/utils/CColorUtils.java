@@ -26,20 +26,24 @@ import tech.derbent.base.users.domain.CUser;
 
 public final class CColorUtils {
 
-	/** Color for Cancel buttons */
-	public static final String CRUD_CANCEL_COLOR = "#6c757d";
+	// ===========================================
+	// Solaris/CDE Color Constants for CRUD buttons
+	// ===========================================
+
+	/** Color for Cancel buttons - CDE Dark Gray */
+	public static final String CRUD_CANCEL_COLOR = "#8E8E8E";
 	/** Icon for Cancel buttons */
 	public static final String CRUD_CANCEL_ICON = "vaadin:close";
 	/** Icon for Clone/Copy buttons */
 	public static final String CRUD_CLONE_ICON = "vaadin:copy";
 	// CRUD Button Color Constants
-	/** Color for Create/New buttons */
-	public static final String CRUD_CREATE_COLOR = "#28a745";
+	/** Color for Create/New buttons - CDE Green */
+	public static final String CRUD_CREATE_COLOR = "#4B7F82";
 	// CRUD Button Icon Constants
 	/** Icon for Create/New buttons */
 	public static final String CRUD_CREATE_ICON = "vaadin:plus";
-	/** Color for Delete/Remove buttons */
-	public static final String CRUD_DELETE_COLOR = "#dc3545";
+	/** Color for Delete/Remove buttons - OpenWindows Border Dark */
+	public static final String CRUD_DELETE_COLOR = "#91856C";
 	/** Icon for Delete/Remove buttons */
 	public static final String CRUD_DELETE_ICON = "vaadin:trash";
 	/** Icon for Edit/Update buttons */
@@ -50,18 +54,18 @@ public final class CColorUtils {
 	public static final String CRUD_LAYOUT_HORIZONTAL_ICON = "vaadin:grid-h";
 	/** Icon for Layout toggle buttons */
 	public static final String CRUD_LAYOUT_VERTICAL_ICON = "vaadin:grid-v";
-	/** Color for Read/View buttons */
-	public static final String CRUD_READ_COLOR = "#17a2b8";
-	/** Color for Save buttons */
-	public static final String CRUD_SAVE_COLOR = "#007bff";
+	/** Color for Read/View buttons - OpenWindows Selection Blue */
+	public static final String CRUD_READ_COLOR = "#4966B0";
+	/** Color for Save buttons - CDE Purple */
+	public static final String CRUD_SAVE_COLOR = "#6B5FA7";
 	/** Icon for Save buttons */
 	public static final String CRUD_SAVE_ICON = "vaadin:check";
-	/** Color for Update/Edit buttons */
-	public static final String CRUD_UPDATE_COLOR = "#ffc107";
+	/** Color for Update/Edit buttons - CDE Yellow */
+	public static final String CRUD_UPDATE_COLOR = "#FFEAAA";
 	/** Icon for View/Read buttons */
 	public static final String CRUD_VIEW_ICON = "vaadin:eye";
-	/** Default color for status entities without color */
-	public static final String DEFAULT_COLOR = "#95a5a6";
+	/** Default color for status entities without color - OpenWindows Disabled Gray */
+	public static final String DEFAULT_COLOR = "#A9A08B";
 	/** Default text color for light backgrounds */
 	public static final String DEFAULT_DARK_TEXT = "black";
 	private static final String DEFAULT_ICON_MARGIN = "6px";
@@ -362,10 +366,35 @@ public final class CColorUtils {
 	}
 
 	public static List<String> getWebColors() {
-		// Common hex color constants for color picker
+		// Common hex color constants for color picker - includes Solaris/CDE palette
 		final List<String> colors = new ArrayList<>();
+		// Solaris/CDE Colors (prioritized for themed UI)
+		colors.add("#EDE8D1"); // OpenWindows Base Background
+		colors.add("#FFFBEA"); // OpenWindows 3D Light
+		colors.add("#C3B79F"); // OpenWindows 3D Shadow
+		colors.add("#91856C"); // OpenWindows Border Dark
+		colors.add("#F0E5C0"); // OpenWindows Menu Background
+		colors.add("#E4D9B4"); // OpenWindows Button Face
+		colors.add("#4966B0"); // OpenWindows Selection Blue
+		colors.add("#A9A08B"); // OpenWindows Disabled Gray
+		colors.add("#F5E8A2"); // OpenWindows Highlight Yellow
+		colors.add("#B5B5B5"); // CDE Background Gray
+		colors.add("#D9D9D9"); // CDE Light Gray
+		colors.add("#8E8E8E"); // CDE Dark Gray
+		colors.add("#6B5FA7"); // CDE Purple
+		colors.add("#4B4382"); // CDE Titlebar Purple
+		colors.add("#8377C5"); // CDE Active Purple
+		colors.add("#4B7F82"); // CDE Green
+		colors.add("#6CAFB0"); // CDE Light Green
+		colors.add("#FFEAAA"); // CDE Yellow
+		colors.add("#FFEFD5"); // X11 Papayawhip
+		colors.add("#FFDEAD"); // X11 Navajowhite
+		colors.add("#F5DEB3"); // X11 Wheat
+		colors.add("#D2B48C"); // X11 Tan
+		colors.add("#FAEBD7"); // X11 AntiqueWhite
+		colors.add("#DEB887"); // X11 Burlywood
+		// Standard web colors
 		colors.add("#F0F8FF"); // AliceBlue
-		colors.add("#FAEBD7"); // AntiqueWhite
 		colors.add("#00FFFF"); // Aqua
 		colors.add("#7FFFD4"); // Aquamarine
 		colors.add("#F0FFFF"); // Azure
@@ -376,15 +405,12 @@ public final class CColorUtils {
 		colors.add("#0000FF"); // Blue
 		colors.add("#8A2BE2"); // BlueViolet
 		colors.add("#A52A2A"); // Brown
-		colors.add("#DEB887"); // BurlyWood
 		colors.add("#5F9EA0"); // CadetBlue
 		colors.add("#7FFF00"); // Chartreuse
 		colors.add("#D2691E"); // Chocolate
 		colors.add("#FF7F50"); // Coral
 		colors.add("#6495ED"); // CornflowerBlue
 		colors.add("#FFF8DC"); // Cornsilk
-		colors.add("#DC143C"); // Crimson
-		colors.add("#00FFFF"); // Cyan
 		colors.add("#00008B"); // DarkBlue
 		colors.add("#008B8B"); // DarkCyan
 		colors.add("#B8860B"); // DarkGoldenRod
@@ -393,11 +419,6 @@ public final class CColorUtils {
 		colors.add("#BDB76B"); // DarkKhaki
 		colors.add("#8B008B"); // DarkMagenta
 		colors.add("#556B2F"); // DarkOliveGreen
-		colors.add("#f39c12");
-		colors.add("#d012d7"); // DarkOrchid
-		colors.add("#e74c3c"); // DarkRed
-		colors.add("#27ae60"); // DarkSalmon
-		colors.add("#95a5a6"); // DarkSeaGreen
 		return colors;
 	}
 

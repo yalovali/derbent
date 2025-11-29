@@ -33,7 +33,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "sprint_id"))
 public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasColorAndIcon {
 
-	public static final String DEFAULT_COLOR = "#28a745";
+	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - time-boxed work
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
 	public static final String ENTITY_TITLE_PLURAL = "Sprints";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint";

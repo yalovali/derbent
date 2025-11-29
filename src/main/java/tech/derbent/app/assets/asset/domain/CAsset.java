@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "asset_id"))
 public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflow<CAsset> {
 
-	public static final String DEFAULT_COLOR = "#FF6B6B";
+	public static final String DEFAULT_COLOR = "#D9D9D9"; // CDE Light Gray - owned items
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
 	public static final String ENTITY_TITLE_PLURAL = "Assets";
 	public static final String ENTITY_TITLE_SINGULAR = "Asset";

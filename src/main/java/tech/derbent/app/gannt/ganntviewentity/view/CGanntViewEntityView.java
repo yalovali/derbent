@@ -22,7 +22,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PermitAll
 public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity> {
 
-	public static final String DEFAULT_COLOR = "#fd7e14";
+	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - gantt chart view
 	public static final String DEFAULT_ICON = "vaadin:chart-timeline";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Gannt View Entity Settings View";

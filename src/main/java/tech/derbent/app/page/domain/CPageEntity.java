@@ -22,7 +22,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "pageentity_id"))
 public class CPageEntity extends CProjectItem<CPageEntity> implements IHasColorAndIcon {
 
-	public static final String DEFAULT_COLOR = "#6f42c1";
+	public static final String DEFAULT_COLOR = "#FAEBD7"; // X11 AntiqueWhite - navigation pages
 	public static final String DEFAULT_ICON = "vaadin:file";
 	public static final String ENTITY_TITLE_PLURAL = "Page Entities";
 	public static final String ENTITY_TITLE_SINGULAR = "Page Entity";

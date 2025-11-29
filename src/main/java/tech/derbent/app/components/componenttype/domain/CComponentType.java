@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "ccomponenttype_id"))
 public class CComponentType extends CTypeEntity<CComponentType> {
 
-public static final String DEFAULT_COLOR = "#795548";
+public static final String DEFAULT_COLOR = "#F0E5C0"; // OpenWindows Menu Background - component types
 public static final String DEFAULT_ICON = "vaadin:cogs";
 public static final String ENTITY_TITLE_PLURAL = "Component Types";
 public static final String ENTITY_TITLE_SINGULAR = "Component Type";

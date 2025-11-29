@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "ccomponentversiontype_id"))
 public class CComponentVersionType extends CTypeEntity<CComponentVersionType> {
 
-public static final String DEFAULT_COLOR = "#6D4C41";
+public static final String DEFAULT_COLOR = "#F0E5C0"; // OpenWindows Menu Background - version types
 public static final String DEFAULT_ICON = "vaadin:tag";
 public static final String ENTITY_TITLE_PLURAL = "Component Version Types";
 public static final String ENTITY_TITLE_SINGULAR = "Component Version Type";

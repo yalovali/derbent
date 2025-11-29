@@ -12,7 +12,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "ganntview_id"))
 public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 
-	public static final String DEFAULT_COLOR = "#fd7e14";
+	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - gantt view
 	public static final String DEFAULT_ICON = "vaadin:timeline";
 	public static final String ENTITY_TITLE_PLURAL = "Gantt View Entities";
 	public static final String ENTITY_TITLE_SINGULAR = "Gantt View Entity";

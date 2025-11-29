@@ -31,7 +31,7 @@ import tech.derbent.base.users.service.CUserService;
 @PermitAll // When security is enabled, allow all authenticated users
 public final class CDashboardView extends CAbstractPage {
 
-	public static final String DEFAULT_COLOR = "#17a2b8";
+	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - main dashboard
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Dashboard View";

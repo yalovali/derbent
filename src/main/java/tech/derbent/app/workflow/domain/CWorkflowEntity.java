@@ -26,7 +26,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cworkflowentity_id"))
 public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
-	public static final String DEFAULT_COLOR = "#6c757d";
+	public static final String DEFAULT_COLOR = "#C3B79F"; // OpenWindows 3D Shadow - process flows
 	public static final String DEFAULT_ICON = "vaadin:automation";
 	public static final String ENTITY_TITLE_PLURAL = "Workflows";
 	public static final String ENTITY_TITLE_SINGULAR = "Workflow";

@@ -34,7 +34,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
 public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder> {
 
-	public static final String DEFAULT_COLOR = "#fd7e14";
+	public static final String DEFAULT_COLOR = "#D2B48C"; // X11 Tan - purchase orders
 	public static final String DEFAULT_ICON = "vaadin:invoice";
 	public static final String ENTITY_TITLE_PLURAL = "Orders";
 	public static final String ENTITY_TITLE_SINGULAR = "Order";

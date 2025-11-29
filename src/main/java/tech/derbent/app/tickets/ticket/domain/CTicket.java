@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "ticket_id"))
 public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkflow<CTicket> {
 
-	public static final String DEFAULT_COLOR = "#FFB300";
+	public static final String DEFAULT_COLOR = "#3A5791"; // Darker blue - support items
 	public static final String DEFAULT_ICON = "vaadin:ticket";
 	public static final String ENTITY_TITLE_PLURAL = "Tickets";
 	public static final String ENTITY_TITLE_SINGULAR = "Ticket";

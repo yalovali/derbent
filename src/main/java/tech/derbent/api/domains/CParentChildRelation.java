@@ -16,7 +16,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 })
 public class CParentChildRelation extends CEntityDB<CParentChildRelation> {
 
-	public static final String DEFAULT_COLOR = "#6c757d";
+	public static final String DEFAULT_COLOR = "#C3B79F"; // OpenWindows 3D Shadow - relations
 	public static final String DEFAULT_ICON = "vaadin:connect";
 	public static final String VIEW_NAME = "Parent-Child Relation View";
 	@NotNull

@@ -23,7 +23,7 @@ import tech.derbent.api.screens.service.IOrderedEntity;
 @AttributeOverride (name = "id", column = @Column (name = "sprint_item_id"))
 public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntity {
 
-	public static final String DEFAULT_COLOR = "#28a745";
+	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - sprint items
 	public static final String DEFAULT_ICON = "vaadin:list-ol";
 	public static final String ENTITY_TITLE_PLURAL = "Sprint Items";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint Item";

@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cmilestonetype_id"))
 public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 
-	public static final String DEFAULT_COLOR = "#2196F3";
+	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - milestone types
 	public static final String DEFAULT_ICON = "vaadin:flag";
 	public static final String ENTITY_TITLE_PLURAL = "Milestone Types";
 	public static final String ENTITY_TITLE_SINGULAR = "Milestone Type";
