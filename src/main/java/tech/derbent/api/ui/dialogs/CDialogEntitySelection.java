@@ -40,9 +40,18 @@ import tech.derbent.api.utils.Check;
  * <li>Selected item count indicator</li>
  * <li>Reset button for clearing selection</li>
  * <li>Selected items persist across grid filtering</li>
+ * <li>Support for already-selected items with two modes: hide or show as pre-selected</li>
  * </ul>
  * @param <EntityClass> The entity type being selected */
 public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CDialog {
+
+	/** Mode for handling already selected items in the dialog */
+	public enum AlreadySelectedMode {
+		/** Hide already selected items from the available items list */
+		HIDE_ALREADY_SELECTED,
+		/** Show already selected items in the grid, pre-selected (visually marked) */
+		SHOW_AS_SELECTED
+	}
 
 	/** Entity type configuration for the dialog */
 	public static class EntityTypeConfig<E extends CEntityDB<E>> {
@@ -80,6 +89,10 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	}
 
 	private static final long serialVersionUID = 1L;
+	// Already selected items configuration
+	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
+	private final AlreadySelectedMode alreadySelectedMode;
+	private final ItemsProvider<EntityClass> alreadySelectedProvider;
 	private List<EntityClass> allItems = new ArrayList<>();
 	private CButton buttonCancel;
 	private CButton buttonReset;
@@ -115,16 +128,33 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	 * @param multiSelect   True for multi-select, false for single-select */
 	public CDialogEntitySelection(final String title, final List<EntityTypeConfig<?>> entityTypes, final ItemsProvider<EntityClass> itemsProvider,
 			final Consumer<List<EntityClass>> onSelection, final boolean multiSelect) {
+		this(title, entityTypes, itemsProvider, onSelection, multiSelect, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+	}
+
+	/** Creates an entity selection dialog with support for already-selected items.
+	 * @param title                   Dialog title
+	 * @param entityTypes             Available entity types for selection
+	 * @param itemsProvider           Provider for loading items based on entity type
+	 * @param onSelection             Callback when selection is confirmed
+	 * @param multiSelect             True for multi-select, false for single-select
+	 * @param alreadySelectedProvider Provider for already-selected items (can be null). Returns items that are already members of the container.
+	 * @param alreadySelectedMode     Mode for handling already-selected items */
+	public CDialogEntitySelection(final String title, final List<EntityTypeConfig<?>> entityTypes, final ItemsProvider<EntityClass> itemsProvider,
+			final Consumer<List<EntityClass>> onSelection, final boolean multiSelect, final ItemsProvider<EntityClass> alreadySelectedProvider,
+			final AlreadySelectedMode alreadySelectedMode) {
 		super();
 		Check.notBlank(title, "Dialog title cannot be blank");
 		Check.notEmpty(entityTypes, "Entity types cannot be empty");
 		Check.notNull(itemsProvider, "Items provider cannot be null");
 		Check.notNull(onSelection, "Selection callback cannot be null");
+		Check.notNull(alreadySelectedMode, "Already selected mode cannot be null");
 		this.dialogTitle = title;
 		this.entityTypes = entityTypes;
 		this.itemsProvider = itemsProvider;
 		this.onSelection = onSelection;
 		this.multiSelect = multiSelect;
+		this.alreadySelectedProvider = alreadySelectedProvider;
+		this.alreadySelectedMode = alreadySelectedMode;
 		try {
 			setupDialog();
 			// Override default width from CDialog
@@ -508,6 +538,8 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		currentEntityType = config;
 		// Clear selection when entity type changes
 		selectedItems.clear();
+		// Load already selected items if provider is available
+		loadAlreadySelectedItems(config);
 		updateSelectionIndicator();
 		// Cache reflection methods for the entity type
 		cacheReflectionMethods(config.getEntityClass());
@@ -517,6 +549,8 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		try {
 			allItems = itemsProvider.getItems(config);
 			LOGGER.debug("Loaded {} items for entity type {}", allItems.size(), config.getDisplayName());
+			// Handle already selected items based on mode
+			processAlreadySelectedItems();
 			// Update status filter options
 			updateStatusFilterOptions();
 			// Apply filters and refresh grid
@@ -620,4 +654,72 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		}
 		comboBoxStatusFilter.setItems(statuses);
 	}
+
+	/** Loads already selected items from the provider if available.
+	 * @param config The current entity type configuration */
+	private void loadAlreadySelectedItems(final EntityTypeConfig<?> config) {
+		alreadySelectedItems = new ArrayList<>();
+		if (alreadySelectedProvider == null) {
+			return;
+		}
+		try {
+			final List<EntityClass> items = alreadySelectedProvider.getItems(config);
+			if (items != null) {
+				alreadySelectedItems = new ArrayList<>(items);
+				LOGGER.debug("Loaded {} already selected items for entity type {}", alreadySelectedItems.size(), config.getDisplayName());
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error loading already selected items for entity type {}", config.getDisplayName(), e);
+			alreadySelectedItems = new ArrayList<>();
+		}
+	}
+
+	/** Process already selected items based on the configured mode. This method either filters out already selected items from allItems
+	 * (HIDE_ALREADY_SELECTED mode) or adds them to selectedItems to show them as pre-selected (SHOW_AS_SELECTED mode). */
+	private void processAlreadySelectedItems() {
+		if (alreadySelectedItems.isEmpty()) {
+			return;
+		}
+		// Create a set of already selected item IDs for efficient lookup
+		final Set<Object> alreadySelectedIds = new HashSet<>();
+		for (final EntityClass item : alreadySelectedItems) {
+			if (item.getId() != null) {
+				alreadySelectedIds.add(item.getId());
+			}
+		}
+		switch (alreadySelectedMode) {
+			case HIDE_ALREADY_SELECTED:
+				// Filter out already selected items from the available items list
+				final List<EntityClass> filteredItems = new ArrayList<>();
+				for (final EntityClass item : allItems) {
+					if ((item.getId() == null) || !alreadySelectedIds.contains(item.getId())) {
+						filteredItems.add(item);
+					}
+				}
+				final int removedCount = allItems.size() - filteredItems.size();
+				allItems = filteredItems;
+				LOGGER.debug("Hidden {} already selected items from available items list", removedCount);
+				break;
+			case SHOW_AS_SELECTED:
+				// Pre-select the already selected items (they will be visually marked in the grid)
+				for (final EntityClass item : allItems) {
+					if ((item.getId() != null) && alreadySelectedIds.contains(item.getId())) {
+						selectedItems.add(item);
+					}
+				}
+				LOGGER.debug("Pre-selected {} already selected items", selectedItems.size());
+				updateSelectionIndicator();
+				break;
+			default:
+				break;
+		}
+	}
+
+	/** Returns the already selected mode configured for this dialog.
+	 * @return The AlreadySelectedMode */
+	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
+
+	/** Returns the list of already selected items.
+	 * @return List of already selected items (can be empty, never null) */
+	public List<EntityClass> getAlreadySelectedItems() { return new ArrayList<>(alreadySelectedItems); }
 }
