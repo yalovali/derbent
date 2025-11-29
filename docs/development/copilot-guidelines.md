@@ -183,14 +183,68 @@ Copilot learns from consistent naming:
 
 ```java
 // Good patterns Copilot recognizes
-private CActivityService activityService;      // Service fields
-private final IActivityRepository repository;  // Repository fields
-private CGrid<CActivity> grid;                 // Component fields
-private TextField nameField;                    // Form fields
-private ComboBox<CStatus> statusComboBox;      // ComboBox fields
+
+// UI Component fields - typeName convention
+private CButton buttonAdd;           // button{Name}
+private CButton buttonDelete;        // button{Name}
+private CDialog dialogConfirmation;  // dialog{Name}
+private CVerticalLayout layoutMain;  // layout{Name}
+private CGrid<CActivity> gridItems;  // grid{Name}
+private ComboBox<CStatus> comboBoxStatus;  // comboBox{Name}
+private TextField textFieldName;     // textField{Name}
+
+// Service fields
+private CActivityService activityService;
+private final IActivityRepository repository;
+
+// Form fields
+private TextField nameField;
+private ComboBox<CStatus> statusComboBox;
 ```
 
-### Tip 4: Leverage Examples
+### Tip 4: Use Event Handler Naming Pattern
+
+Copilot recognizes the `on_{componentName}_{eventType}` pattern:
+
+```java
+// Event handlers - Copilot suggests consistent implementations
+protected void on_buttonAdd_clicked() {
+    // Handle add button click
+}
+
+protected void on_buttonDelete_clicked() {
+    // Handle delete button click
+}
+
+protected void on_gridItems_doubleClicked(CEntity item) {
+    // Handle grid item double-click
+}
+
+protected void on_comboBoxStatus_selected(String status) {
+    // Handle status selection
+}
+```
+
+### Tip 5: Use Factory Methods for Components
+
+Copilot recognizes the `create_{componentName}` pattern:
+
+```java
+// Factory methods - Copilot suggests consistent implementations
+protected CButton create_buttonAdd() {
+    final CButton button = new CButton(VaadinIcon.PLUS.create());
+    button.addClickListener(e -> on_buttonAdd_clicked());
+    return button;
+}
+
+protected CButton create_buttonDelete() {
+    final CButton button = new CButton(VaadinIcon.TRASH.create());
+    button.addClickListener(e -> on_buttonDelete_clicked());
+    return button;
+}
+```
+
+### Tip 6: Leverage Examples
 
 Show Copilot one example, it generates similar code:
 

@@ -277,6 +277,266 @@ For each new component or feature:
 - [ ] Appropriate logging at DEBUG and ERROR levels
 - [ ] Follows CComponentListEntityBase pattern (if list component)
 
+## 11. Field and Component Naming Convention
+
+### Rule: Use TypeName Format for Component Fields
+
+All component fields must follow the `typeName` naming convention where:
+- First part is the type (lowercased)
+- Second part is the descriptive name (capitalized)
+
+This makes it immediately clear what type of component a field is and what its purpose is.
+
+**Format**: `{type}{Name}` - e.g., `buttonAdd`, `dialogEntitySelection`, `comboBoxStatus`
+
+#### ✅ CORRECT
+```java
+// Buttons
+private CButton buttonAdd;
+private CButton buttonDelete;
+private CButton buttonMoveUp;
+private CButton buttonMoveDown;
+private CButton buttonSave;
+private CButton buttonCancel;
+
+// Dialogs
+private CDialog dialogEntitySelection;
+private CDialog dialogConfirmation;
+private CDialogWarning dialogWarning;
+
+// Layouts
+private CVerticalLayout layoutMain;
+private CHorizontalLayout layoutToolbar;
+private CHorizontalLayout layoutButtons;
+
+// Other components
+private ComboBox<String> comboBoxStatus;
+private TextField textFieldName;
+private CGrid<CEntity> gridItems;
+```
+
+#### ❌ INCORRECT
+```java
+// Inconsistent naming
+private CButton addBtn;           // ❌ Should be buttonAdd
+private CButton btn_delete;       // ❌ Should be buttonDelete
+private Button addButton;         // ❌ Use CButton, and name should be buttonAdd
+private CDialog selectionDlg;     // ❌ Should be dialogSelection
+private ComboBox statusCB;        // ❌ Should be comboBoxStatus
+```
+
+## 12. Event Handler Naming Convention
+
+### Rule: Use on_xxx_eventType Pattern for Event Handlers
+
+All event handlers must follow the `on_{componentName}_{eventType}` naming convention.
+
+**Format**: `on_{componentName}_{eventType}()` - e.g., `on_buttonAdd_clicked()`, `on_comboBoxStatus_selected()`
+
+Common event types:
+- `clicked` - for button clicks
+- `selected` - for selection events (combobox, grid, etc.)
+- `changed` - for value change events
+- `doubleClicked` - for double-click events
+- `closed` - for dialog close events
+
+#### ✅ CORRECT
+```java
+protected void on_buttonAdd_clicked() {
+    // Handle add button click
+}
+
+protected void on_buttonDelete_clicked() {
+    // Handle delete button click
+}
+
+protected void on_comboBoxStatus_selected(String status) {
+    // Handle status selection
+}
+
+protected void on_gridItems_doubleClicked(CEntity item) {
+    // Handle grid item double-click
+}
+
+protected void on_dialogSelection_closed() {
+    // Handle dialog close
+}
+```
+
+#### ❌ INCORRECT
+```java
+// Lambda consumers - hard to read and override
+button.addClickListener(e -> {
+    // Long complex logic here...
+    doThis();
+    doThat();
+    andThis();
+});
+
+// Vague method names
+private void handleAdd() { }        // ❌ Should be on_buttonAdd_clicked
+private void onDeleteClick() { }    // ❌ Should be on_buttonDelete_clicked
+private void processSelection() { } // ❌ Should be on_xxx_selected
+```
+
+### Rule: Avoid Complex Lambda Functions
+
+Never put complex logic directly in lambda event listeners. Instead, delegate to named methods that can be easily overridden in subclasses.
+
+**❌ INCORRECT - Hard to read and override:**
+```java
+buttonAdd.addClickListener(e -> {
+    try {
+        Check.notNull(entity, "Entity cannot be null");
+        final CEntity newEntity = createNewEntity();
+        service.save(newEntity);
+        refreshGrid();
+        CNotificationService.showSaveSuccess();
+    } catch (final Exception ex) {
+        LOGGER.error("Error adding entity", ex);
+        CNotificationService.showException("Error adding entity", ex);
+    }
+});
+```
+
+**✅ CORRECT - Delegating to named method:**
+```java
+buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
+
+// Separate method that can be easily overridden
+protected void on_buttonAdd_clicked() {
+    try {
+        Check.notNull(entity, "Entity cannot be null");
+        final CEntity newEntity = createNewEntity();
+        service.save(newEntity);
+        refreshGrid();
+        CNotificationService.showSaveSuccess();
+    } catch (final Exception ex) {
+        LOGGER.error("Error adding entity", ex);
+        CNotificationService.showException("Error adding entity", ex);
+    }
+}
+```
+
+## 13. Component Creation Pattern with Factory Methods
+
+### Rule: Use create_xxx Factory Methods for Button Creation
+
+When creating buttons and other components in a base class, use factory methods following the `create_{componentName}` pattern. This allows subclasses to easily override the creation without duplicating event wiring.
+
+**Format**: `create_{componentName}()` - e.g., `create_buttonAdd()`, `create_buttonDelete()`
+
+#### ✅ CORRECT - Base class with factory pattern:
+```java
+public abstract class CComponentListBase {
+    protected CButton buttonAdd;
+    protected CButton buttonDelete;
+
+    protected void createToolbar() {
+        buttonAdd = create_buttonAdd();
+        buttonDelete = create_buttonDelete();
+        toolbar.add(buttonAdd, buttonDelete);
+    }
+
+    /** Factory method for add button - can be overridden by subclasses. */
+    protected CButton create_buttonAdd() {
+        final CButton button = new CButton(VaadinIcon.PLUS.create());
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        button.addClickListener(e -> on_buttonAdd_clicked());
+        return button;
+    }
+
+    /** Factory method for delete button - can be overridden by subclasses. */
+    protected CButton create_buttonDelete() {
+        final CButton button = new CButton(VaadinIcon.TRASH.create());
+        button.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        button.addClickListener(e -> on_buttonDelete_clicked());
+        button.setEnabled(false);
+        return button;
+    }
+
+    /** Handle add button click - can be overridden by subclasses. */
+    protected void on_buttonAdd_clicked() {
+        // Default implementation
+    }
+}
+```
+
+#### Subclass override example:
+```java
+public class CComponentListSprintItems extends CComponentListBase {
+
+    @Override
+    protected CButton create_buttonAdd() {
+        // Custom button with different icon for sprint item selection
+        final CButton button = new CButton(VaadinIcon.LIST_SELECT.create());
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        button.setTooltipText("Add items to sprint");
+        button.addClickListener(e -> on_buttonAdd_clicked());
+        return button;
+    }
+
+    @Override
+    protected void on_buttonAdd_clicked() {
+        // Custom implementation - opens entity selection dialog instead
+        openEntitySelectionDialog();
+    }
+}
+```
+
+## 14. Component Inheritance Rules
+
+### Rule: All Custom Components Must Extend C-Prefixed Base Classes
+
+All custom components must extend the appropriate C-prefixed base class from the project. Never use raw Vaadin components directly.
+
+| Vaadin Component | Use Instead |
+|------------------|-------------|
+| `Button` | `CButton` |
+| `Dialog` | `CDialog` or extend it |
+| `VerticalLayout` | `CVerticalLayout` |
+| `HorizontalLayout` | `CHorizontalLayout` |
+| `Grid<T>` | `CGrid<T>` |
+| `TextField` | `CTextField` |
+| `FormLayout` | `CFormLayout` |
+| `FlexLayout` | `CFlexLayout` |
+| `TabSheet` | `CTabSheet` |
+| `Tab` | `CTab` |
+| `Div` | `CDiv` |
+| `Span` | `CSpan` |
+| `H3` | `CH3` |
+| `Accordion` | `CAccordion` |
+| `Scroller` | `CScroller` |
+
+#### ✅ CORRECT
+```java
+// Using C-prefixed components
+private final CButton buttonAdd = new CButton(VaadinIcon.PLUS.create());
+private final CVerticalLayout layoutMain = new CVerticalLayout();
+private final CHorizontalLayout layoutToolbar = new CHorizontalLayout();
+private final CGrid<CEntity> gridItems = new CGrid<>(CEntity.class);
+```
+
+#### ❌ INCORRECT
+```java
+// Using raw Vaadin components directly
+private final Button addButton = new Button(VaadinIcon.PLUS.create());  // ❌
+private final VerticalLayout mainLayout = new VerticalLayout();          // ❌
+private final HorizontalLayout toolbar = new HorizontalLayout();         // ❌
+private final Grid<CEntity> itemGrid = new Grid<>(CEntity.class);        // ❌
+```
+
+### Rule: All Dialogs Must Extend CDialog
+
+When creating custom dialogs, always extend `CDialog` and implement the required abstract methods:
+- `getDialogTitleString()` - Returns the dialog header title
+- `getFormTitleString()` - Returns the form title
+- `getFormIcon()` - Returns the icon for the dialog
+- `setupContent()` - Sets up the dialog content
+- `setupButtons()` - Sets up the dialog buttons
+
+**Exception**: Complex utility dialogs like `CDialogEntitySelection` that have their own initialization pattern may extend `Dialog` directly but must follow all other naming conventions.
+
 ## Enforcement
 
 These standards should be enforced through:
@@ -285,5 +545,5 @@ These standards should be enforced through:
 3. Team coding guidelines
 4. Automated checks where possible
 
-**Last Updated:** 2025-11-24
-**Version:** 1.0
+**Last Updated:** 2025-11-29
+**Version:** 1.1
