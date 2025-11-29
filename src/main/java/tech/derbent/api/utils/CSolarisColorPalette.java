@@ -40,6 +40,9 @@ public final class CSolarisColorPalette {
 	/** Selection Blue - Classic selection highlight (#4966B0) */
 	public static final String OPENWIN_SELECTION_BLUE = "#4966B0";
 
+	/** Selection Blue Dark - Darker blue for secondary items (#3A5791) */
+	public static final String OPENWIN_SELECTION_BLUE_DARK = "#3A5791";
+
 	/** Text Black - Standard text color (#000000) */
 	public static final String OPENWIN_TEXT_BLACK = "#000000";
 
@@ -48,6 +51,9 @@ public final class CSolarisColorPalette {
 
 	/** Highlight Yellow - Very Solaris yellow (#F5E8A2) */
 	public static final String OPENWIN_HIGHLIGHT_YELLOW = "#F5E8A2";
+
+	/** Border Darker - Darker olive border variant (#7A6E58) */
+	public static final String OPENWIN_BORDER_DARKER = "#7A6E58";
 
 	// ===========================================
 	// CDE Primary Colors (Gray Scale)
@@ -148,7 +154,7 @@ public final class CSolarisColorPalette {
 	public static final String ENTITY_ACTIVITY = OPENWIN_SELECTION_BLUE;
 
 	/** Tickets - Slightly darker blue for support items */
-	public static final String ENTITY_TICKET = "#3A5791";
+	public static final String ENTITY_TICKET = OPENWIN_SELECTION_BLUE_DARK;
 
 	/** Decisions - Border Dark for authoritative decisions */
 	public static final String ENTITY_DECISION = OPENWIN_BORDER_DARK;
@@ -188,7 +194,7 @@ public final class CSolarisColorPalette {
 	public static final String ENTITY_RISK = OPENWIN_BORDER_DARK;
 
 	/** Risk Levels - Darker variant for severity */
-	public static final String ENTITY_RISK_LEVEL = "#7A6E58";
+	public static final String ENTITY_RISK_LEVEL = OPENWIN_BORDER_DARKER;
 
 	// Products & Components (OpenWindows Button Face - constructive)
 	/** Products - Button Face for product entities */
