@@ -379,7 +379,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		textFieldIdFilter.setValueChangeMode(ValueChangeMode.LAZY);
 		textFieldIdFilter.setValueChangeTimeout(300);
 		textFieldIdFilter.setWidth("100px");
-		textFieldIdFilter.addValueChangeListener(e -> applyFilters());
+		textFieldIdFilter.addValueChangeListener(e -> on_textFieldIdFilter_changed());
 		// Name filter
 		textFieldNameFilter = new TextField("Name");
 		textFieldNameFilter.setPlaceholder("Filter by name...");
@@ -388,7 +388,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		textFieldNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
 		textFieldNameFilter.setValueChangeTimeout(300);
 		textFieldNameFilter.setWidth("200px");
-		textFieldNameFilter.addValueChangeListener(e -> applyFilters());
+		textFieldNameFilter.addValueChangeListener(e -> on_textFieldNameFilter_changed());
 		// Description filter
 		textFieldDescriptionFilter = new TextField("Description");
 		textFieldDescriptionFilter.setPlaceholder("Filter by description...");
@@ -397,13 +397,13 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		textFieldDescriptionFilter.setValueChangeMode(ValueChangeMode.LAZY);
 		textFieldDescriptionFilter.setValueChangeTimeout(300);
 		textFieldDescriptionFilter.setWidth("200px");
-		textFieldDescriptionFilter.addValueChangeListener(e -> applyFilters());
+		textFieldDescriptionFilter.addValueChangeListener(e -> on_textFieldDescriptionFilter_changed());
 		// Status filter
 		comboBoxStatusFilter = new ComboBox<>("Status");
 		comboBoxStatusFilter.setPlaceholder("All statuses");
 		comboBoxStatusFilter.setClearButtonVisible(true);
 		comboBoxStatusFilter.setWidth("150px");
-		comboBoxStatusFilter.addValueChangeListener(e -> applyFilters());
+		comboBoxStatusFilter.addValueChangeListener(e -> on_comboBoxStatusFilter_changed());
 		// Clear filters button
 		final CButton buttonClearFilters = new CButton(VaadinIcon.CLOSE_CIRCLE.create());
 		buttonClearFilters.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -504,7 +504,6 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		comboBoxStatusFilter.clear();
 		applyFilters();
 	}
-	// Helper methods
 
 	/** Handle reset button click. */
 	protected void on_buttonReset_clicked() {
@@ -527,6 +526,46 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		LOGGER.debug("Confirming selection of {} items", selectedItems.size());
 		onSelection.accept(new ArrayList<>(selectedItems));
 		close();
+	}
+
+	/** Handle status filter combobox value change. */
+	protected void on_comboBoxStatusFilter_changed() {
+		try {
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error applying status filter", e);
+			CNotificationService.showException("Error applying filter", e);
+		}
+	}
+
+	/** Handle description filter text field value change. */
+	protected void on_textFieldDescriptionFilter_changed() {
+		try {
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error applying description filter", e);
+			CNotificationService.showException("Error applying filter", e);
+		}
+	}
+
+	/** Handle ID filter text field value change. */
+	protected void on_textFieldIdFilter_changed() {
+		try {
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error applying ID filter", e);
+			CNotificationService.showException("Error applying filter", e);
+		}
+	}
+
+	/** Handle name filter text field value change. */
+	protected void on_textFieldNameFilter_changed() {
+		try {
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error applying name filter", e);
+			CNotificationService.showException("Error applying filter", e);
+		}
 	}
 
 	/** Handle entity type combobox change. */
