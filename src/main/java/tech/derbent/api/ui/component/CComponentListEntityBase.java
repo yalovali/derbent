@@ -15,6 +15,7 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.screens.service.IOrderedEntityService;
+import tech.derbent.api.ui.dialogs.CEntitySelectionDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
@@ -54,6 +55,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
 	protected Button addButton;
+	protected Button addFromListButton;
 	protected final IOrderedEntityService<ChildEntity> childService;
 	protected Button deleteButton;
 	protected final Class<ChildEntity> entityClass;
@@ -405,5 +407,76 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		deleteButton.setEnabled(hasSelection);
 		moveUpButton.setEnabled(hasSelection);
 		moveDownButton.setEnabled(hasSelection);
+	}
+
+	/**
+	 * Adds an "Add From List" button to the toolbar that opens an entity selection dialog.
+	 * This method creates a button that allows users to select items from a list of available
+	 * entity types using a dialog with search/filter capabilities.
+	 * <p>
+	 * The button is added to the toolbar alongside the existing add button.
+	 *
+	 * @param dialogTitle   The title of the selection dialog
+	 * @param entityTypes   List of entity type configurations for the dialog
+	 * @param itemsProvider Provider for loading items based on entity type
+	 * @param multiSelect   True for multi-select, false for single-select
+	 * @param onItemsSelected Callback invoked when items are selected from the dialog
+	 */
+	@SuppressWarnings ({"unchecked", "rawtypes"})
+	protected void addButtonFromList(final String dialogTitle, final List<CEntitySelectionDialog.EntityTypeConfig<?>> entityTypes,
+			final CEntitySelectionDialog.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected) {
+		Check.notBlank(dialogTitle, "Dialog title cannot be blank");
+		Check.notEmpty(entityTypes, "Entity types cannot be empty");
+		Check.notNull(itemsProvider, "Items provider cannot be null");
+		Check.notNull(onItemsSelected, "Selection callback cannot be null");
+		LOGGER.debug("Adding 'Add From List' button with {} entity types", entityTypes.size());
+		// Create the button
+		addFromListButton = new Button(VaadinIcon.LIST_SELECT.create());
+		addFromListButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		addFromListButton.setTooltipText("Add from list");
+		addFromListButton.addClickListener(e -> {
+			try {
+				LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
+				// Use raw types for dialog creation due to complex generic constraints
+				final CEntitySelectionDialog dialog =
+						new CEntitySelectionDialog(dialogTitle, entityTypes, itemsProvider, (Consumer) onItemsSelected, multiSelect);
+				dialog.open();
+			} catch (final Exception ex) {
+				LOGGER.error("Error opening entity selection dialog", ex);
+				CNotificationService.showException("Error opening selection dialog", ex);
+			}
+		});
+		// Add to toolbar after the existing add button
+		if (toolbar != null) {
+			final var children = toolbar.getChildren().toList();
+			if (!children.isEmpty() && children.get(0) instanceof HorizontalLayout) {
+				final HorizontalLayout buttonLayout = (HorizontalLayout) children.get(0);
+				// Add after the addButton (first button)
+				buttonLayout.addComponentAtIndex(1, addFromListButton);
+			}
+		}
+	}
+
+	/**
+	 * Creates an entity type configuration for use with addButtonFromList.
+	 *
+	 * @param displayName The display name for the entity type
+	 * @param entityClass The entity class
+	 * @param service     The service for the entity type
+	 * @param <T>         The entity type
+	 * @return EntityTypeConfig instance
+	 */
+	protected static <T extends CEntityDB<T>> CEntitySelectionDialog.EntityTypeConfig<T> createEntityTypeConfig(final String displayName,
+			final Class<T> entityClass, final CAbstractService<T> service) {
+		return new CEntitySelectionDialog.EntityTypeConfig<>(displayName, entityClass, service);
+	}
+
+	/**
+	 * Gets the add from list button, if created.
+	 *
+	 * @return The add from list button, or null if not created
+	 */
+	public Button getAddFromListButton() {
+		return addFromListButton;
 	}
 }

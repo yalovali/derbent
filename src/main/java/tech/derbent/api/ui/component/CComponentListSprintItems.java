@@ -1,5 +1,6 @@
 package tech.derbent.api.ui.component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -14,9 +15,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.ui.dialogs.CEntitySelectionDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
@@ -60,6 +64,70 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		this.activityService = activityService;
 		this.meetingService = meetingService;
 		LOGGER.debug("CComponentListSprintItems created");
+		// Setup the "Add From List" button with entity selection dialog
+		setupAddFromListButton();
+	}
+
+	/**
+	 * Sets up the "Add From List" button that opens the new entity selection dialog
+	 * with multi-select support and search/filter capabilities.
+	 */
+	@SuppressWarnings ("unchecked")
+	private void setupAddFromListButton() {
+		// Create entity type configurations
+		final List<CEntitySelectionDialog.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
+		entityTypes.add(new CEntitySelectionDialog.EntityTypeConfig<>("Activities", CActivity.class, activityService));
+		entityTypes.add(new CEntitySelectionDialog.EntityTypeConfig<>("Meetings", CMeeting.class, meetingService));
+		// Create items provider that loads items based on entity type
+		final CEntitySelectionDialog.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
+			try {
+				final CProject project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
+				if (project == null) {
+					LOGGER.warn("No project available for loading items");
+					return new ArrayList<>();
+				}
+				if (config.getEntityClass() == CActivity.class) {
+					return (List<CProjectItem<?>>) (List<?>) activityService.listByProject(project);
+				} else if (config.getEntityClass() == CMeeting.class) {
+					return (List<CProjectItem<?>>) (List<?>) meetingService.listByProject(project);
+				}
+				return new ArrayList<>();
+			} catch (final Exception e) {
+				LOGGER.error("Error loading items for entity type: {}", config.getDisplayName(), e);
+				return new ArrayList<>();
+			}
+		};
+		// Add the button from list with multi-select support
+		addButtonFromList("Select Items to Add to Sprint", entityTypes, itemsProvider, true, selectedItems -> {
+			LOGGER.debug("Selected {} items from entity selection dialog", selectedItems.size());
+			int addedCount = 0;
+			for (final Object obj : selectedItems) {
+				if (!(obj instanceof CProjectItem)) {
+					continue;
+				}
+				final CProjectItem<?> item = (CProjectItem<?>) obj;
+				try {
+					// Determine item type
+					final String itemType = item.getClass().getSimpleName();
+					// Create sprint item
+					final CSprintItem sprintItem = new CSprintItem();
+					sprintItem.setSprint(getMasterEntity());
+					sprintItem.setItemId(item.getId());
+					sprintItem.setItemType(itemType);
+					sprintItem.setItemOrder(getNextOrder() + addedCount);
+					sprintItem.setItem(item);
+					// Save
+					childService.save(sprintItem);
+					addedCount++;
+				} catch (final Exception e) {
+					LOGGER.error("Error adding item {} to sprint", item.getId(), e);
+				}
+			}
+			if (addedCount > 0) {
+				refreshGrid();
+				CNotificationService.showSuccess(addedCount + " items added to sprint");
+			}
+		});
 	}
 
 	@Override
