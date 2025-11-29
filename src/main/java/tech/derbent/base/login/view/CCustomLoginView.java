@@ -180,9 +180,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		// Add click listener to login button
 		loginButton.addClickListener(e -> handleLogin());
 		loginButton.setMinWidth("120px");
-// Database reset button setup
-resetDbButton.addClickListener(e -> on_buttonResetDb_clicked());
-resetDbMinimalButton.addClickListener(e -> on_buttonResetDbMinimal_clicked());
+		// Database reset button setup
+		resetDbButton.addClickListener(e -> on_buttonResetDb_clicked());
+		resetDbMinimalButton.addClickListener(e -> on_buttonResetDbMinimal_clicked());
 		// Chart test button setup
 		// chartTestButton.addClickListener(e -> { getUI().ifPresent(ui -> ui.navigate("chart"));});
 		// chartTestButton.setMinWidth("120px");

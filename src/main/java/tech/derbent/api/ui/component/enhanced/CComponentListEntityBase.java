@@ -202,10 +202,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Creates a new entity instance. This operation is not supported for some components that handle entity creation through a selection dialog, not
 	 * directly.
 	 * @return Never returns - always throws UnsupportedOperationException
-	 * @throws UnsupportedOperationException always - use the appropriate selection dialog or override on_addButton_clicked() */
+	 * @throws UnsupportedOperationException always - use the appropriate selection dialog or override on_buttonAdd_clicked() */
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException("Entity items must be created through a selection dialog. Override on_addButton_clicked() method.");
+		throw new UnsupportedOperationException("Entity items must be created through a selection dialog. Override on_buttonAdd_clicked() method.");
 	}
 
 	/** Create the toolbar with action buttons. */
