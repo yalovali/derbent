@@ -422,11 +422,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param itemsProvider Provider for loading items based on entity type
 	 * @param multiSelect   True for multi-select, false for single-select
 	 * @param onItemsSelected Callback invoked when items are selected from the dialog
-	 * @param <T>           The type of entities that can be selected
 	 */
-	@SuppressWarnings ("unchecked")
-	protected <T extends CEntityDB<T>> void addButtonFromList(final String dialogTitle, final List<CEntitySelectionDialog.EntityTypeConfig<?>> entityTypes,
-			final CEntitySelectionDialog.ItemsProvider<T> itemsProvider, final boolean multiSelect, final Consumer<List<T>> onItemsSelected) {
+	@SuppressWarnings ({"unchecked", "rawtypes"})
+	protected void addButtonFromList(final String dialogTitle, final List<CEntitySelectionDialog.EntityTypeConfig<?>> entityTypes,
+			final CEntitySelectionDialog.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected) {
 		Check.notBlank(dialogTitle, "Dialog title cannot be blank");
 		Check.notEmpty(entityTypes, "Entity types cannot be empty");
 		Check.notNull(itemsProvider, "Items provider cannot be null");
@@ -439,8 +438,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		addFromListButton.addClickListener(e -> {
 			try {
 				LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
-				final CEntitySelectionDialog<T> dialog =
-						new CEntitySelectionDialog<>(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect);
+				// Use raw types for dialog creation due to complex generic constraints
+				final CEntitySelectionDialog dialog =
+						new CEntitySelectionDialog(dialogTitle, entityTypes, itemsProvider, (Consumer) onItemsSelected, multiSelect);
 				dialog.open();
 			} catch (final Exception ex) {
 				LOGGER.error("Error opening entity selection dialog", ex);
