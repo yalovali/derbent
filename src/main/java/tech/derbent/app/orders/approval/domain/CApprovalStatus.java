@@ -14,6 +14,8 @@ public class CApprovalStatus extends CStatus<CApprovalStatus> {
 
 	public static final String DEFAULT_COLOR = "#A9A08B"; // OpenWindows Disabled Gray - status
 	public static final String DEFAULT_ICON = "vaadin:check";
+	public static final String ENTITY_TITLE_PLURAL = "Approval Statuses";
+	public static final String ENTITY_TITLE_SINGULAR = "Approval Status";
 	public static final String VIEW_NAME = "Approval Status View";
 
 	/** Default constructor for JPA. */

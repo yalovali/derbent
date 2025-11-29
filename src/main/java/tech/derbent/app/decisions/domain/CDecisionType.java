@@ -20,8 +20,10 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cdecisiontype_id"))
 public class CDecisionType extends CTypeEntity<CDecisionType> {
 
-	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - decision types
-	public static final String DEFAULT_ICON = "vaadin:gavel";
+	public static final String DEFAULT_COLOR = "#17a2b8";
+	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Decision Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Decision Type";
 	public static final String VIEW_NAME = "Decision Types View";
 	@Column (name = "requires_approval", nullable = false)
 	@NotNull

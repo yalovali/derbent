@@ -16,8 +16,10 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingtype_id"))
 public class CMeetingType extends CTypeEntity<CMeetingType> {
 
-	public static final String DEFAULT_COLOR = "#FFEAAA"; // CDE Yellow - meeting types
-	public static final String DEFAULT_ICON = "vaadin:calendar";
+	public static final String DEFAULT_COLOR = "#17a2b8";
+	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Meeting Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Meeting Type";
 	public static final String VIEW_NAME = "Meeting Types View";
 
 	/** Default constructor for JPA. */

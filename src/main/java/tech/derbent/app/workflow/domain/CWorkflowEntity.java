@@ -28,6 +28,8 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
 	public static final String DEFAULT_COLOR = "#C3B79F"; // OpenWindows 3D Shadow - process flows
 	public static final String DEFAULT_ICON = "vaadin:automation";
+	public static final String ENTITY_TITLE_PLURAL = "Workflows";
+	public static final String ENTITY_TITLE_SINGULAR = "Workflow";
 	public static final String VIEW_NAME = "Workflow View";
 	@Column (name = "is_active", nullable = false)
 	@AMetaData (

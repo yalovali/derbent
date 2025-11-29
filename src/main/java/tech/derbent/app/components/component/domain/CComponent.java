@@ -23,6 +23,8 @@ public class CComponent extends CProjectItem<CComponent> implements IHasStatusAn
 
 	public static final String DEFAULT_COLOR = "#F0E5C0"; // OpenWindows Menu Background - component parts
 	public static final String DEFAULT_ICON = "vaadin:cogs";
+	public static final String ENTITY_TITLE_PLURAL = "Components";
+	public static final String ENTITY_TITLE_SINGULAR = "Component";
 	public static final String VIEW_NAME = "Components View";
 	@Column (nullable = true, length = 100)
 	@AMetaData (

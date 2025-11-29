@@ -17,6 +17,8 @@ public class CDeliverableType extends CTypeEntity<CDeliverableType> {
 
 	public static final String DEFAULT_COLOR = "#FFFBEA"; // OpenWindows 3D Light - deliverable types
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
+	public static final String ENTITY_TITLE_PLURAL = "Deliverable Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Deliverable Type";
 	public static final String VIEW_NAME = "Deliverable Type Management";
 
 	/** Default constructor for JPA. */

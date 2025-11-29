@@ -37,6 +37,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public static final String DEFAULT_COLOR = "#FFEAAA"; // CDE Yellow - calendar events
 	public static final String DEFAULT_ICON = "vaadin:calendar";
+	public static final String ENTITY_TITLE_PLURAL = "Meetings";
+	public static final String ENTITY_TITLE_SINGULAR = "Meeting";
 	public static final String VIEW_NAME = "Meetings View";
 	@Column (name = "agenda", nullable = true, length = 4000)
 	@Size (max = 4000)

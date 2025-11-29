@@ -18,6 +18,8 @@ public class CSprintType extends CTypeEntity<CSprintType> {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - sprint types
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
+	public static final String ENTITY_TITLE_PLURAL = "Sprint Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Sprint Type";
 	public static final String VIEW_NAME = "Sprint Types View";
 
 	/** Default constructor for JPA. */

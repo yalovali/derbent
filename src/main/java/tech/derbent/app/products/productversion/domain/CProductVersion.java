@@ -24,6 +24,8 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 
 	public static final String DEFAULT_COLOR = "#E4D9B4"; // OpenWindows Button Face - product versions
 	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Product Versions";
+	public static final String ENTITY_TITLE_SINGULAR = "Product Version";
 	public static final String VIEW_NAME = "Product Versions View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

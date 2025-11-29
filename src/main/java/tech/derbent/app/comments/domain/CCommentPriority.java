@@ -18,6 +18,8 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 	public static final String DEFAULT_COLOR = "#F5E8A2"; // OpenWindows Highlight Yellow - comment priority
 	public static final String DEFAULT_ICON = "vaadin:star";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriority.class);
+	public static final String ENTITY_TITLE_PLURAL = "Comment Priorities";
+	public static final String ENTITY_TITLE_SINGULAR = "Comment Priority";
 	public static final String VIEW_NAME = "Comment Priority View";
 	@Column (name = "is_default", nullable = false)
 	@AMetaData (

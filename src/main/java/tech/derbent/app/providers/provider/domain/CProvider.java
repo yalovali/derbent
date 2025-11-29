@@ -23,6 +23,8 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 
 	public static final String DEFAULT_COLOR = "#B5B5B5"; // CDE Background Gray - external providers
 	public static final String DEFAULT_ICON = "vaadin:handshake";
+	public static final String ENTITY_TITLE_PLURAL = "Providers";
+	public static final String ENTITY_TITLE_SINGULAR = "Provider";
 	public static final String VIEW_NAME = "Provider View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

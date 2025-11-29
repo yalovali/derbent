@@ -23,6 +23,8 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 
 	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - key achievements
 	public static final String DEFAULT_ICON = "vaadin:flag";
+	public static final String ENTITY_TITLE_PLURAL = "Milestones";
+	public static final String ENTITY_TITLE_SINGULAR = "Milestone";
 	public static final String VIEW_NAME = "Milestone View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

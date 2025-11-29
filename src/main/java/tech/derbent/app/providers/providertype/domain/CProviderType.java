@@ -17,6 +17,8 @@ public class CProviderType extends CTypeEntity<CProviderType> {
 
 	public static final String DEFAULT_COLOR = "#B5B5B5"; // CDE Background Gray - provider types
 	public static final String DEFAULT_ICON = "vaadin:handshake";
+	public static final String ENTITY_TITLE_PLURAL = "Provider Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Provider Type";
 	public static final String VIEW_NAME = "Provider Type Management";
 
 	/** Default constructor for JPA. */

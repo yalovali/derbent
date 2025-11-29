@@ -26,6 +26,8 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - caution
 	public static final String DEFAULT_ICON = "vaadin:warning";
+	public static final String ENTITY_TITLE_PLURAL = "Risks";
+	public static final String ENTITY_TITLE_SINGULAR = "Risk";
 	public static final String VIEW_NAME = "Risks View";
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)

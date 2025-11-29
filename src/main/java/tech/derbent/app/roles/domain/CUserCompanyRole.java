@@ -19,6 +19,8 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 	public static final String DEFAULT_COLOR = "#8E8E8E"; // CDE Dark Gray - company roles
 	public static final String DEFAULT_ICON = "vaadin:building";
 	public static final int MAX_LENGTH_NAME = 255;
+	public static final String ENTITY_TITLE_PLURAL = "User Company Roles";
+	public static final String ENTITY_TITLE_SINGULAR = "User Company Role";
 	public static final String VIEW_NAME = "User Company Roles View";
 	// Boolean attributes for company role types
 	@Column (name = "is_admin", nullable = false)

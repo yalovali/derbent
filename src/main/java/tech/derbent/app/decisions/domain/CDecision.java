@@ -33,6 +33,8 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
+	public static final String ENTITY_TITLE_PLURAL = "Decisions";
+	public static final String ENTITY_TITLE_SINGULAR = "Decision";
 	public static final String VIEW_NAME = "Decisions View";
 	// Accountable Personnel
 	@ManyToOne (fetch = FetchType.EAGER)

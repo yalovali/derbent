@@ -17,6 +17,8 @@ public class CBudgetType extends CTypeEntity<CBudgetType> {
 
 	public static final String DEFAULT_COLOR = "#DEB887"; // X11 Burlywood - budget types
 	public static final String DEFAULT_ICON = "vaadin:dollar";
+	public static final String ENTITY_TITLE_PLURAL = "Budget Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Budget Type";
 	public static final String VIEW_NAME = "Budget Type Management";
 
 	/** Default constructor for JPA. */

@@ -24,6 +24,8 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasColorA
 
 	public static final String DEFAULT_COLOR = "#FAEBD7"; // X11 AntiqueWhite - navigation pages
 	public static final String DEFAULT_ICON = "vaadin:file";
+	public static final String ENTITY_TITLE_PLURAL = "Page Entities";
+	public static final String ENTITY_TITLE_SINGULAR = "Page Entity";
 	public static final String VIEW_NAME = "Pages View";
 	@Column (nullable = false)
 	@AMetaData (

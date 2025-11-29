@@ -26,8 +26,10 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 @AttributeOverride (name = "id", column = @Column (name = "cusercompanysetting_id"))
 public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompanySetting> {
 
-	public static final String DEFAULT_COLOR = "#8E8E8E"; // CDE Dark Gray - user settings
-	public static final String DEFAULT_ICON = "vaadin:cog";
+	public static final String DEFAULT_COLOR = "#DC143C";
+	public static final String DEFAULT_ICON = "vaadin:tasks";
+	public static final String ENTITY_TITLE_PLURAL = "User Company Settings";
+	public static final String ENTITY_TITLE_SINGULAR = "User Company Setting";
 	public static final String VIEW_NAME = "User Company Settings View";
 
 	// Static helper methods for bidirectional relationship management

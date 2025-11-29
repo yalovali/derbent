@@ -17,6 +17,8 @@ public class CComponentVersionType extends CTypeEntity<CComponentVersionType> {
 
 public static final String DEFAULT_COLOR = "#F0E5C0"; // OpenWindows Menu Background - version types
 public static final String DEFAULT_ICON = "vaadin:tag";
+public static final String ENTITY_TITLE_PLURAL = "Component Version Types";
+public static final String ENTITY_TITLE_SINGULAR = "Component Version Type";
 public static final String VIEW_NAME = "Component Version Type Management";
 
 public CComponentVersionType() {

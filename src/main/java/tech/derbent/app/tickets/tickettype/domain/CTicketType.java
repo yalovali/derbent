@@ -17,6 +17,8 @@ public class CTicketType extends CTypeEntity<CTicketType> {
 
 	public static final String DEFAULT_COLOR = "#3A5791"; // Darker blue - ticket types
 	public static final String DEFAULT_ICON = "vaadin:ticket";
+	public static final String ENTITY_TITLE_PLURAL = "Ticket Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Ticket Type";
 	public static final String VIEW_NAME = "Ticket Type Management";
 
 	/** Default constructor for JPA. */

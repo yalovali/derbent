@@ -23,6 +23,8 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 
 	public static final String DEFAULT_COLOR = "#D9D9D9"; // CDE Light Gray - owned items
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
+	public static final String ENTITY_TITLE_PLURAL = "Assets";
+	public static final String ENTITY_TITLE_SINGULAR = "Asset";
 	public static final String VIEW_NAME = "Asset View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

@@ -15,8 +15,10 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "crisktype_id"))
 public class CRiskType extends CTypeEntity<CRiskType> {
 
-	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - risk types
-	public static final String DEFAULT_ICON = "vaadin:warning";
+	public static final String DEFAULT_COLOR = "#a712b8";
+	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Risk Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Risk Type";
 	public static final String VIEW_NAME = "Risk Type Management";
 
 	/** Default constructor for JPA. */
