@@ -9,50 +9,44 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 /** CAccordion - Enhanced base class for accordion components. Layer: View (MVC) Provides common accordion functionality with standardized styling and
  * behavior. */
 public class CTab extends Accordion implements IFormContainerComponent {
-
 	private static final long serialVersionUID = 1L;
 	private final String accordionTitle;
 	private final VerticalLayout baseLayout = new VerticalLayout();
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	/** Constructor for CAccordion.
-	 * @param title the title of the accordion panel */
 	public CTab(final String title) {
 		super();
-		// LOGGER.debug("Creating CAccordion with title: {}", title);
 		accordionTitle = title;
+		initializeComponent();
+	}
+
+	public void addToContent(final Component... components) {
+		baseLayout.add(components);
+	}
+
+	public void clearContent() {
+		baseLayout.removeAll();
+	}
+
+	public void closePanel() {
+		close();
+	}
+
+	public String getAccordionTitle() { return accordionTitle; }
+
+	@Override
+	public VerticalLayout getBaseLayout() { return baseLayout; }
+
+	private void initializeComponent() {
+		add(accordionTitle, baseLayout);
 		addClassName("c-accordion");
-		// getStyle().("min-width", "300px"); setWidthFull(); setMin
-		add(title, baseLayout);
+		setSizeFull();
 		baseLayout.setWidthFull();
 		baseLayout.setPadding(false);
 		baseLayout.setMargin(false);
 		baseLayout.setClassName("c-accordion-content-layout");
 	}
 
-	/** Convenience method to add components to the base layout.
-	 * @param components the components to add */
-	public void addToContent(final Component... components) {
-		baseLayout.add(components);
-	}
-
-	/** Convenience method to remove all components from the base layout. */
-	public void clearContent() {
-		baseLayout.removeAll();
-	}
-
-	/** Convenience method to close this accordion panel. */
-	public void closePanel() {
-		close();
-	}
-
-	/** Gets the title of this accordion.
-	 * @return the accordion title */
-	public String getAccordionTitle() { return accordionTitle; }
-
-	public VerticalLayout getBaseLayout() { return baseLayout; }
-
-	/** Convenience method to open this accordion panel (index 0). */
 	public void openPanel() {
 		open(0);
 	}
@@ -61,8 +55,6 @@ public class CTab extends Accordion implements IFormContainerComponent {
 		baseLayout.removeAll();
 	}
 
-	/** Convenience method to set spacing for the base layout.
-	 * @param spacing whether to enable spacing */
 	public void setContentSpacing(final boolean spacing) {
 		baseLayout.setSpacing(spacing);
 	}

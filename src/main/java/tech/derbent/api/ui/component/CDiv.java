@@ -15,22 +15,22 @@ public class CDiv extends Div {
 
 	public CDiv() {
 		super();
-		initializeDiv();
+		initializeComponent();
 	}
 
 	/** Constructor with initial components. */
 	public CDiv(final Component... components) {
 		super(components);
-		initializeDiv();
+		initializeComponent();
 	}
 
 	public CDiv(final String text) {
 		super(text);
-		initializeDiv();
+		initializeComponent();
 	}
 
 	/** Common initialization for all CDiv instances. */
-	protected void initializeDiv() {
+	protected void initializeComponent() {
 		CAuxillaries.setId(this);
 		addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
 		setWidthFull();

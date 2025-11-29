@@ -10,7 +10,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.TabSheet;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -20,12 +19,12 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.CDiv;
+import tech.derbent.api.ui.component.CTabSheet;
 import tech.derbent.api.ui.dialogs.CDBEditDialog;
 import tech.derbent.api.utils.Check;
 
 /** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
 public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
-
 	private static final long serialVersionUID = 1L;
 	private final CEnhancedBinder<CDetailLines> binder;
 	private ComboBox<String> cmbFieldClass;
@@ -41,7 +40,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 	private Span tabEntitySpan;
 	private Tab tabSection;
 	private Span tabSectionSpan;
-	private TabSheet tabsOfDialog;
+	private CTabSheet tabsOfDialog;
 
 	public CDetailLinesEditDialog(final CDetailLines entity, final Consumer<CDetailLines> onSave, final boolean isNew, final CDetailSection screen)
 			throws Exception {
@@ -51,7 +50,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 		formEntity = new CFormBuilder<CDetailLines>();
 		formSection = new CFormBuilder<CDetailLines>();
 		formClassType = new CFormBuilder<CDetailLines>();
-		tabsOfDialog = new TabSheet();
+		tabsOfDialog = new CTabSheet();
 		tabEntitySpan = new Span();
 		tabSectionSpan = new Span();
 		tabSection = tabsOfDialog.add("X", tabSectionSpan);

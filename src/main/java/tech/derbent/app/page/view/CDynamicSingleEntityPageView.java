@@ -3,11 +3,11 @@ package tech.derbent.app.page.view;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.CCrudToolbar;
+import tech.derbent.api.ui.component.CScroller;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
@@ -18,7 +18,6 @@ import tech.derbent.base.session.service.ISessionService;
  * true */
 @PermitAll
 public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicSingleEntityPageView.class);
 	private static final long serialVersionUID = 1L;
 
@@ -48,10 +47,8 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 	private void createSingleEntityLayout() {
 		try {
 			initializeEntityService();
-			final Scroller detailsScroller = new Scroller();
+			final CScroller detailsScroller = new CScroller();
 			detailsScroller.setContent(baseDetailsLayout);
-			detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-			detailsScroller.setSizeFull();
 			// Create toolbar with minimal constructor and configure
 			crudToolbar = new CCrudToolbar();
 			crudToolbar.setPageBase(this);
@@ -70,7 +67,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 	@Override
 	protected void initializePage() throws Exception {
 		super.initializePage();
-		if (getPageEntity().getPageTitle() != null && !getPageEntity().getPageTitle().trim().isEmpty()) {
+		if ((getPageEntity().getPageTitle() != null) && !getPageEntity().getPageTitle().trim().isEmpty()) {
 			getElement().executeJs("document.title = $0", getPageEntity().getPageTitle());
 		}
 		createSingleEntityLayout();

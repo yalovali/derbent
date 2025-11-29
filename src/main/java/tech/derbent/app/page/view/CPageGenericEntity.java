@@ -3,7 +3,6 @@ package tech.derbent.app.page.view;
 import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -18,6 +17,7 @@ import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.ui.component.CComponentDetailsMasterToolbar;
 import tech.derbent.api.ui.component.CCrudToolbar;
 import tech.derbent.api.ui.component.CFlexLayout;
+import tech.derbent.api.ui.component.CScroller;
 import tech.derbent.api.ui.component.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
@@ -29,7 +29,6 @@ import tech.derbent.base.session.service.ISessionService;
  * @param <EntityClass> The entity type this page manages */
 public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityClass>> extends CPageBaseProjectAware
 		implements IEntityUpdateListener<EntityClass>, ILayoutChangeListener {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageGenericEntity.class);
 	private static final long serialVersionUID = 1L;
 	// Current state
@@ -83,7 +82,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	public void actionRefresh() {
 		try {
-			if (getCurrentEntity() != null && ((CEntityDB<?>) getCurrentEntity()).getId() != null) {
+			if ((getCurrentEntity() != null) && (((CEntityDB<?>) getCurrentEntity()).getId() != null)) {
 				EntityClass reloaded = entityService.getById(((CEntityDB<?>) getCurrentEntity()).getId()).orElse(null);
 				if (reloaded != null) {
 					populateEntityDetails(reloaded);
@@ -114,8 +113,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Checks if existing components can be reused for the given entity view */
 	private boolean canReuseExistingComponents(String entityViewName, Class<?> entityType) {
-		return currentEntityViewName != null && currentEntityType != null && currentEntityViewName.equals(entityViewName)
-				&& currentEntityType.equals(entityType) && currentBinder != null && crudToolbar != null;
+		return (currentEntityViewName != null) && (currentEntityType != null) && currentEntityViewName.equals(entityViewName)
+				&& currentEntityType.equals(entityType) && (currentBinder != null) && (crudToolbar != null);
 	}
 
 	/** Clears entity details and resets state */
@@ -146,10 +145,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	private void createDetailsSection() {
 		baseDetailsLayout = CFlexLayout.forEntityPage();
-		final Scroller detailsScroller = new Scroller();
+		final CScroller detailsScroller = new CScroller();
 		// FLEX LAYOUT///////////////////
 		detailsScroller.setContent(baseDetailsLayout);
-		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
 		detailsBase.add(detailsScroller);
 		initSplitLayout(detailsBase);

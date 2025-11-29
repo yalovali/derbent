@@ -90,7 +90,7 @@ public class CButton extends Button {
 	/** Default constructor for CButton. */
 	public CButton() {
 		super();
-		initializeButton();
+		initializeComponent();
 	}
 
 	/** Constructor with text, icon and click listener.
@@ -99,7 +99,7 @@ public class CButton extends Button {
 	 * @param clickListener the click event listener */
 	public CButton(final String text, final Icon icon) {
 		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM));
-		initializeButton();
+		initializeComponent();
 	}
 
 	/** Constructor with text, icon and click listener.
@@ -108,11 +108,11 @@ public class CButton extends Button {
 	 * @param clickListener the click event listener */
 	public CButton(final String text, final Icon icon, final ComponentEventListener<ClickEvent<Button>> clickListener) {
 		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM), clickListener == null ? e -> {} : clickListener);
-		initializeButton();
+		initializeComponent();
 	}
 
 	/** Common initialization for all CButton instances. This method can be overridden by subclasses to provide additional initialization. */
-	protected void initializeButton() {
+	protected void initializeComponent() {
 		CAuxillaries.setId(this);
 	}
 }

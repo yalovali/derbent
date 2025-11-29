@@ -24,7 +24,6 @@ import tech.derbent.api.utils.Check;
 public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHorizontalLayout
 		implements HasValue<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>>,
 		HasValueAndElement<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>> {
-
 	private static final String DEFAULT_GRID_HEIGHT = "250px";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentFieldSelection.class);
 	private static final long serialVersionUID = 1L;
@@ -49,8 +48,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		this(null, null, null, "Available Items", "Selected Items");
 	}
 
-	public CComponentFieldSelection(CDataProviderResolver dataProviderResolver, IContentOwner contentOwner, EntityFieldInfo fieldInfo,
-			String availableTitle, String selectedTitle) {
+	public CComponentFieldSelection(final CDataProviderResolver dataProviderResolver, final IContentOwner contentOwner,
+			final EntityFieldInfo fieldInfo, final String availableTitle, final String selectedTitle) {
 		super();
 		Check.notBlank(availableTitle, "Available title cannot be null or blank");
 		Check.notBlank(selectedTitle, "Selected title cannot be null or blank");
@@ -62,13 +61,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	private void addSelectedItem() {
 		LOGGER.debug("Adding selected item from available grid");
-		DetailEntity selected = availableGrid.asSingleSelect().getValue();
+		final DetailEntity selected = availableGrid.asSingleSelect().getValue();
 		Check.notNull(selected, "No item selected to add");
-		int selectionIndex = notselectedItems.indexOf(selected);
-		DetailEntity currentSelection = selectedGrid.asSingleSelect().getValue();
+		final int selectionIndex = notselectedItems.indexOf(selected);
+		final DetailEntity currentSelection = selectedGrid.asSingleSelect().getValue();
 		if (currentSelection != null) {
 			// Insert below the current selection
-			int insertIndex = selectedItems.indexOf(currentSelection) + 1;
+			final int insertIndex = selectedItems.indexOf(currentSelection) + 1;
 			selectedItems.add(insertIndex, selected);
 			LOGGER.debug("Inserted item below selection at index: {}", insertIndex);
 		} else {
@@ -83,7 +82,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	@Override
-	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<List<DetailEntity>>> listener) {
+	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<List<DetailEntity>>> listener) {
 		Check.notNull(listener, "ValueChangeListener cannot be null");
 		listeners.add(listener);
 		return () -> listeners.remove(listener);
@@ -95,7 +94,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.debug("Clearing all selected items");
 			selectedItems.clear();
 			populateForm();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to clear selected items:" + e.getMessage());
 			throw e;
 		}
@@ -106,7 +105,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	 * @param grid   The Grid to configure (must not be null)
 	 * @param header The column header text
 	 * @throws IllegalArgumentException if grid is null */
-	private void configureGridColumn(Grid<DetailEntity> grid, String header) {
+	private void configureGridColumn(final Grid<DetailEntity> grid, final String header) {
 		Check.notNull(grid, "Grid cannot be null");
 		grid.addComponentColumn(item -> {
 			try {
@@ -119,19 +118,19 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 					try {
 						// Use CEntityLabel for colored rendering with icon
 						return new CEntityLabel((CEntityNamed<?>) item);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Failed to create CEntityLabel for entity: {}", item, e);
 						throw new IllegalStateException("Failed to render entity with color: " + item, e);
 					}
 				} else {
 					// Fall back to text rendering for non-entity types
-					String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
+					final String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
 					return new Span(text);
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// Log error and provide fallback rendering
 				LOGGER.error("Error rendering item in field selection: {}", item, e);
-				String fallbackText = item != null ? item.toString() : "Error";
+				final String fallbackText = item != null ? item.toString() : "Error";
 				return new Span(fallbackText);
 			}
 		}).setHeader(CColorUtils.createStyledHeader(header, "#1565C0")).setAutoWidth(true).setFlexGrow(1);
@@ -140,8 +139,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	/** Creates and configures a grid for field selection with common styling and behavior.
 	 * @param header The header text for the grid column
 	 * @return Configured Grid instance */
-	private Grid<DetailEntity> createAndSetupGrid(String header) {
-		Grid<DetailEntity> grid = new Grid<>();
+	private Grid<DetailEntity> createAndSetupGrid(final String header) {
+		final Grid<DetailEntity> grid = new Grid<>();
 		CGrid.setupGrid(grid);
 		grid.setHeight(DEFAULT_GRID_HEIGHT);
 		configureGridColumn(grid, header);
@@ -151,13 +150,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	/** Fires a value change event to listeners. */
 	private void fireValueChangeEvent() {
 		LOGGER.debug("Firing value change event - old value size: {}, new value size: {}", currentValue.size(), selectedItems.size());
-		List<DetailEntity> oldValue = currentValue;
-		List<DetailEntity> newValue = getValue();
+		final List<DetailEntity> oldValue = currentValue;
+		final List<DetailEntity> newValue = getValue();
 		currentValue = new ArrayList<>(newValue);
 		if (!oldValue.equals(newValue)) {
 			LOGGER.info("Value changed from {} to {} selected items - notifying {} listeners", oldValue.size(), newValue.size(), listeners.size());
-			ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
-
+			final ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -189,17 +187,17 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	@Override
 	public List<DetailEntity> getValue() { return new ArrayList<>(selectedItems); }
 
-	private void initializeUI(String availableTitle, String selectedTitle) {
+	private void initializeUI(final String availableTitle, final String selectedTitle) {
 		// LOGGER.debug("Initializing field selection UI with titles: '{}' and '{}'", availableTitle, selectedTitle);
 		Check.notBlank(availableTitle, "Available title cannot be null or blank");
 		Check.notBlank(selectedTitle, "Selected title cannot be null or blank");
 		setSpacing(true);
 		setWidthFull();
 		// Create left and right sections
-		CVerticalLayout leftLayout = new CVerticalLayout(false, false, false);
-		CVerticalLayout rightLayout = new CVerticalLayout(false, false, false);
-		leftLayout.setWidth("50%");
-		rightLayout.setWidth("50%");
+		final CVerticalLayout leftLayout = new CVerticalLayout(false, false, false);
+		final CVerticalLayout rightLayout = new CVerticalLayout(false, false, false);
+		// leftLayout.setWidth("50%");
+		// rightLayout.setWidth("50%");
 		availableGrid = createAndSetupGrid("Available Items");
 		selectedGrid = createAndSetupGrid("Selected Items");
 		leftLayout.add(availableGrid);
@@ -209,7 +207,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		addButton.setEnabled(false);
 		addButton.setTooltipText("Add selected item to the list");
-		CHorizontalLayout controlButtons = new CHorizontalLayout(addButton);
+		final CHorizontalLayout controlButtons = new CHorizontalLayout(addButton);
 		controlButtons.setSpacing(true);
 		leftLayout.add(controlButtons);
 		// Order buttons with icons
@@ -223,7 +221,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		removeButton.setEnabled(false);
 		removeButton.setTooltipText("Remove selected item from the list");
-		CHorizontalLayout orderButtons = new CHorizontalLayout(removeButton, upButton, downButton);
+		final CHorizontalLayout orderButtons = new CHorizontalLayout(removeButton, upButton, downButton);
 		orderButtons.setSpacing(true);
 		rightLayout.add(orderButtons);
 		// Add layouts to main component
@@ -243,10 +241,10 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	/** Moves the selected item down in the order. */
 	private void moveDown() {
 		LOGGER.debug("Moving selected item down in order");
-		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
+		final DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		if (selected != null) {
-			int index = selectedItems.indexOf(selected);
-			if (index < selectedItems.size() - 1) {
+			final int index = selectedItems.indexOf(selected);
+			if (index < (selectedItems.size() - 1)) {
 				selectedItems.remove(index);
 				selectedItems.add(index + 1, selected);
 				populateForm();
@@ -257,9 +255,9 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	private void moveUp() {
 		LOGGER.debug("Moving selected item up in order");
-		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
+		final DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		if (selected != null) {
-			int index = selectedItems.indexOf(selected);
+			final int index = selectedItems.indexOf(selected);
 			if (index > 0) {
 				selectedItems.remove(index);
 				selectedItems.add(index - 1, selected);
@@ -282,10 +280,10 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			notselectedItems.addAll(sourceItems);
 			notselectedItems.removeIf(nulledItem -> {
 				try {
-					String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(nulledItem) : nulledItem.toString();
-					boolean isSelected = selectedItems.stream().anyMatch(searchItem -> {
+					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(nulledItem) : nulledItem.toString();
+					final boolean isSelected = selectedItems.stream().anyMatch(searchItem -> {
 						try {
-							String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(searchItem) : searchItem.toString();
+							final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(searchItem) : searchItem.toString();
 							return labelA.equals(labelB);
 						} catch (final Exception compareEx) {
 							LOGGER.error("Error comparing items during removal: {} vs {}", nulledItem, searchItem, compareEx);
@@ -311,16 +309,16 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	private void removeSelectedItem() {
 		LOGGER.debug("Removing selected item from selected grid");
-		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
+		final DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		Check.notNull(selected, "No item selected to remove");
-		int selectionIndex = selectedItems.indexOf(selected);
+		final int selectionIndex = selectedItems.indexOf(selected);
 		selectedItems.remove(selected);
 		populateForm();
 		selectedGrid.asSingleSelect().setValue(selectionIndex < selectedItems.size() ? selectedItems.get(selectionIndex)
 				: (selectedItems.isEmpty() ? null : selectedItems.get(selectedItems.size() - 1)));
 	}
 
-	public void setItemLabelGenerator(ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
+	public void setItemLabelGenerator(final ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
 		try {
 			this.itemLabelGenerator = itemLabelGenerator != null ? itemLabelGenerator : Object::toString;
 			// Refresh grids to use new label generator
@@ -331,25 +329,25 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			configureGridColumn(selectedGrid, "Selected Items");
 			// Refresh data
 			populateForm();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to set item label generator:" + e.getMessage());
 			throw e;
 		}
 	}
 
 	@Override
-	public void setReadOnly(boolean readOnly) {
+	public void setReadOnly(final boolean readOnly) {
 		LOGGER.debug("Setting read-only mode to: {}", readOnly);
 		this.readOnly = readOnly;
 		updateButtonStates();
 	}
 
 	@Override
-	public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
 		// Could be implemented if needed
 	}
 
-	public void setSourceItems(List<DetailEntity> items) {
+	public void setSourceItems(final List<DetailEntity> items) {
 		try {
 			Check.notNull(items, "Source items list cannot be null");
 			LOGGER.info("Setting {} source items for selection component", items.size());
@@ -357,16 +355,16 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			sourceItems.addAll(items);
 			sourceItems.sort((a, b) -> {
 				try {
-					String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : a.toString();
-					String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : b.toString();
+					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : a.toString();
+					final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : b.toString();
 					return labelA.compareToIgnoreCase(labelB);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
 					return 0; // Treat as equal on error
 				}
 			});
 			populateForm();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to set source items: {}", e.getMessage(), e);
 			throw e;
 		}
@@ -378,12 +376,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		availableGrid.addItemDoubleClickListener(event -> {
 			try {
 				LOGGER.debug("Handling double-click on available grid");
-				DetailEntity item = event.getItem();
-				if (item != null && !readOnly) {
+				final DetailEntity item = event.getItem();
+				if ((item != null) && !readOnly) {
 					availableGrid.asSingleSelect().setValue(item);
 					addSelectedItem();
 				}
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("Error handling double-click on available grid", ex);
 			}
 		});
@@ -391,12 +389,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		selectedGrid.addItemDoubleClickListener(event -> {
 			try {
 				LOGGER.debug("Handling double-click on selected grid");
-				DetailEntity item = event.getItem();
-				if (item != null && !readOnly) {
+				final DetailEntity item = event.getItem();
+				if ((item != null) && !readOnly) {
 					selectedGrid.asSingleSelect().setValue(item);
 					removeSelectedItem();
 				}
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("Error handling double-click on selected grid", ex);
 			}
 		});
@@ -408,12 +406,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		// Enable/disable buttons based on selection - Use asSingleSelect() for consistent behavior
 		availableGrid.asSingleSelect().addValueChangeListener(e -> {
 			LOGGER.debug("Available grid selection changed");
-			boolean hasSelection = e.getValue() != null && !readOnly;
+			final boolean hasSelection = (e.getValue() != null) && !readOnly;
 			addButton.setEnabled(hasSelection);
 		});
 		selectedGrid.asSingleSelect().addValueChangeListener(e -> {
 			LOGGER.debug("Selected grid selection changed");
-			boolean hasSelection = e.getValue() != null && !readOnly;
+			final boolean hasSelection = (e.getValue() != null) && !readOnly;
 			removeButton.setEnabled(hasSelection);
 			upButton.setEnabled(hasSelection);
 			downButton.setEnabled(hasSelection);
@@ -422,7 +420,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		addButton.addClickListener(e -> {
 			try {
 				addSelectedItem();
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("Error adding item to selected grid", ex);
 				throw new IllegalStateException("Failed to add item", ex);
 			}
@@ -430,7 +428,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		removeButton.addClickListener(e -> {
 			try {
 				removeSelectedItem();
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("Error removing item from selected grid", ex);
 				throw new IllegalStateException("Failed to remove item", ex);
 			}
@@ -438,7 +436,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		upButton.addClickListener(e -> {
 			try {
 				moveUp();
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("Error moving item up", ex);
 				throw new IllegalStateException("Failed to move item up", ex);
 			}
@@ -446,7 +444,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		downButton.addClickListener(e -> {
 			try {
 				moveDown();
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("Error moving item down", ex);
 				throw new IllegalStateException("Failed to move item down", ex);
 			}
@@ -456,13 +454,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	@Override
-	public void setValue(List<DetailEntity> value) {
+	public void setValue(final List<DetailEntity> value) {
 		try {
 			LOGGER.info("Binder triggered setValue on CComponentFieldSelection - reading {} selected items from entity field",
 					value != null ? value.size() : 0);
 			selectedItems.clear();
 			// Only update source items if dataProviderResolver is available
-			if (dataProviderResolver != null && fieldInfo != null) {
+			if ((dataProviderResolver != null) && (fieldInfo != null)) {
 				updateSourceItems();
 			}
 			if (value != null) {
@@ -472,7 +470,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 						selectedItems.stream().map(Object::toString).collect(java.util.stream.Collectors.joining(", ")));
 			}
 			populateForm();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to set value in CComponentFieldSelection: {}", e.getMessage(), e);
 		}
 	}

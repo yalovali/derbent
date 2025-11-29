@@ -20,11 +20,11 @@ public class CFormLayout extends FormLayout {
 	/** Default constructor. */
 	public CFormLayout() {
 		super();
-		initializeFormLayout();
+		initializeComponent();
 	}
 
 	/** Common initialization for all CFormLayout instances. */
-	protected void initializeFormLayout() {
+	protected void initializeComponent() {
 		CAuxillaries.setId(this);
 		// Set default responsive behavior
 		setResponsiveSteps(new ResponsiveStep("0", 1), new ResponsiveStep("500px", 2));

@@ -3,7 +3,6 @@ package tech.derbent.app.page.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -14,6 +13,7 @@ import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.ui.component.CComponentDetailsMasterToolbar;
 import tech.derbent.api.ui.component.CCrudToolbar;
 import tech.derbent.api.ui.component.CFlexLayout;
+import tech.derbent.api.ui.component.CScroller;
 import tech.derbent.api.ui.component.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -26,7 +26,6 @@ import tech.derbent.base.users.domain.CUser;
  * instances with configurable grid and detail sections. */
 @PermitAll
 public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
 	// State tracking for performance optimization
@@ -43,7 +42,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 		this.gridEntityService = gridEntityService;
 		try {
 			initializePage();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showException("Failed to initialize dynamic page view with sections for: " + pageEntity.getPageTitle(), e);
 		}
 	}
@@ -51,11 +50,9 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 	/** Create the details section. */
 	private void createDetailsSection() {
 		splitLayout.addToSecondary(splitBottomLayout);
-		final Scroller detailsScroller = new Scroller();
+		final CScroller detailsScroller = new CScroller();
 		splitBottomLayout.add(detailsScroller);
 		detailsScroller.setContent(baseDetailsLayout);
-		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-		detailsScroller.setSizeFull();
 	}
 
 	/** Create the master (grid) section. */
@@ -162,7 +159,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 	}
 
 	@Override
-	protected void locateItemById(Long pageItemId) {
+	protected void locateItemById(final Long pageItemId) {
 		try {
 			if (pageItemId == null) {
 				return;
@@ -211,7 +208,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			// Select the saved entity in the grid to maintain selection after save
 			// Only select if not already selected to avoid triggering selection change loop
 			final CEntityDB<?> currentSelection = grid.getSelectedItem();
-			if (currentSelection == null || !entity.getId().equals(currentSelection.getId())) {
+			if ((currentSelection == null) || !entity.getId().equals(currentSelection.getId())) {
 				grid.selectEntity(entity);
 				LOGGER.debug("Selected saved entity in grid: {}", entity.getId());
 			} else {
@@ -253,10 +250,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 				if (crudToolbar != null) {
 					crudToolbar.setCurrentEntity(null);
 				}
-			} else {
-				if (crudToolbar != null) {
-					crudToolbar.setCurrentEntity(entity);
-				}
+			} else if (crudToolbar != null) {
+				crudToolbar.setCurrentEntity(entity);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error setting current entity in toolbar:" + e.getMessage());

@@ -9,10 +9,9 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.api.registry.CEntityRegistry;
 
 public class CAuxillaries {
-
 	public static final Logger LOGGER = LoggerFactory.getLogger(CAuxillaries.class);
 
-	public static String formatWidthPx(int i) {
+	public static String formatWidthPx(final int i) {
 		if (i <= 0) {
 			return null;
 		}
@@ -92,7 +91,7 @@ public class CAuxillaries {
 
 	public static Class<?> getInitializerService(final String entityType) {
 		Check.notBlank(entityType, "Entity type must not be empty");
-		Class<?> clazz = CEntityRegistry.getEntityClass(entityType);
+		final Class<?> clazz = CEntityRegistry.getEntityClass(entityType);
 		return CEntityRegistry.getInitializerService(clazz);
 	}
 
@@ -118,7 +117,7 @@ public class CAuxillaries {
 		try {
 			Check.notBlank(methodName, "methodName is blank");
 			Check.notNull(target, "target is null");
-			Class<?>[] paramTypes = new Class<?>[args.length];
+			final Class<?>[] paramTypes = new Class<?>[args.length];
 			for (int i = 0; i < args.length; i++) {
 				paramTypes[i] = args[i] != null ? args[i].getClass() : Object.class;
 			}
@@ -220,7 +219,10 @@ public class CAuxillaries {
 
 	public static void setId(final Component component) {
 		Check.notNull(component, "component is null");
+		// set this class name to lower case and set as class name
 		final String id = generateId(component);
 		component.setId(id);
+		// component.setClassName(id);
+		component.addClassName(component.getClass().getSimpleName().toLowerCase());
 	}
 }

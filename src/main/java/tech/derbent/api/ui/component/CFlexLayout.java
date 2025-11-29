@@ -19,10 +19,10 @@ public class CFlexLayout extends FlexLayout {
 	/** Default constructor. */
 	public CFlexLayout() {
 		super();
-		initializeFlexLayout();
+		initializeComponent();
 	}
 
-	private void initializeFlexLayout() {
+	private void initializeComponent() {
 		setSizeFull();
 		setWidthFull();
 	}

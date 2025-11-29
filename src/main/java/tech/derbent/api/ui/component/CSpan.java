@@ -7,7 +7,7 @@ public class CSpan extends Span {
 
 	private static final long serialVersionUID = 1L;
 
-	private void initComponent() {
+	private void initializeComponent() {
 		getStyle().set("margin", "0px");
 		getStyle().set("padding", "0px");
 		getStyle().set("text-align", "center");
@@ -15,17 +15,17 @@ public class CSpan extends Span {
 
 	public CSpan() {
 		this("");
-		initComponent();
+		initializeComponent();
 	}
 
 	public CSpan(String text) {
 		super(text);
-		initComponent();
+		initializeComponent();
 	}
 
 	public CSpan(String text, int i) {
 		super(text);
-		initComponent();
+		initializeComponent();
 		setWidth(CAuxillaries.formatWidthPx(i));
 	}
 }

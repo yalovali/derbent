@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationContextAware;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.tabs.TabSheet;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.PersistenceUtil;
 import tech.derbent.api.annotations.CFormBuilder;
@@ -22,6 +21,7 @@ import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.ui.component.CTabSheet;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
@@ -29,7 +29,6 @@ import tech.derbent.base.users.domain.CUser;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
-
 	private static ApplicationContext applicationContext;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
 
@@ -48,7 +47,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	private HasComponents formLayout = null;
 	private final Map<String, CPanelDetails> mapSectionPanels;
 	private final ISessionService sessionService;
-	private TabSheet tabsOfForm;
+	private CTabSheet tabsOfForm;
 
 	public CDetailsBuilder(final ISessionService sessionService) {
 		Check.notNull(sessionService, "Session service cannot be null");
@@ -87,7 +86,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		// screen.getScreenLines().size(); // Ensure lines are loaded
 		if (user.getAttributeDisplaySectionsAsTabs()) {
 			// LOGGER.debug("User '{}' prefers sections as tabs.", user.getUsername());
-			tabsOfForm = new TabSheet();
+			tabsOfForm = new CTabSheet();
 			formLayout.add(tabsOfForm);
 		} else {
 			// LOGGER.debug("User '{}' prefers sections as accordion.", user.getUsername());
