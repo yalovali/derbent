@@ -75,12 +75,13 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			}
 			return "Item " + item.getItemId();
 		}).setHeader("Name").setAutoWidth(true);
-		grid.addColumn(item -> {
+		// Use addStatusColumn to display status with color and icon
+		grid.addStatusColumn(item -> {
 			if ((item.getItem() != null) && (item.getItem().getStatus() != null)) {
-				return item.getItem().getStatus().getName();
+				return item.getItem().getStatus();
 			}
-			return "";
-		}).setHeader("Status").setWidth("120px");
+			return null;
+		}, "Status", "status");
 	}
 
 	/** Populates the component by refreshing the grid with sprint items. This method is called automatically by CFormBuilder when the binder's entity
