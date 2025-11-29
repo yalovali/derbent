@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cassettype_id"))
 public class CAssetType extends CTypeEntity<CAssetType> {
 
-	public static final String DEFAULT_COLOR = "#FF5722";
+	public static final String DEFAULT_COLOR = "#D9D9D9"; // CDE Light Gray - asset types
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
 	public static final String VIEW_NAME = "Asset Type Management";
 

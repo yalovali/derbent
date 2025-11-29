@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "budget_id"))
 public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkflow<CBudget> {
 
-	public static final String DEFAULT_COLOR = "#66BB6A";
+	public static final String DEFAULT_COLOR = "#DEB887"; // X11 Burlywood - financial planning
 	public static final String DEFAULT_ICON = "vaadin:dollar";
 	public static final String VIEW_NAME = "Budget View";
 	@ManyToOne (fetch = FetchType.EAGER)

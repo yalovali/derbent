@@ -37,7 +37,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem {
 
-	public static final String DEFAULT_COLOR = "#DC143C";
+	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 	public final static String VIEW_NAME = "Activities View";

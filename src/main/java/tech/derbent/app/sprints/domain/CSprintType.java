@@ -16,7 +16,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride(name = "id", column = @Column(name = "csprinttype_id"))
 public class CSprintType extends CTypeEntity<CSprintType> {
 
-	public static final String DEFAULT_COLOR = "#28a745";
+	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - sprint types
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
 	public static final String VIEW_NAME = "Sprint Types View";
 

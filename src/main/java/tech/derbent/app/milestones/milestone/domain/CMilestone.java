@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "milestone_id"))
 public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAndWorkflow<CMilestone> {
 
-	public static final String DEFAULT_COLOR = "#4A90E2";
+	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - key achievements
 	public static final String DEFAULT_ICON = "vaadin:flag";
 	public static final String VIEW_NAME = "Milestone View";
 	@ManyToOne (fetch = FetchType.EAGER)

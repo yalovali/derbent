@@ -21,8 +21,8 @@ import tech.derbent.app.roles.domain.CUserProjectRole;
 @AttributeOverride (name = "id", column = @Column (name = "cuserprojectsettings_id"))
 public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
-	public static final String DEFAULT_COLOR = "#DC143C";
-	public static final String DEFAULT_ICON = "vaadin:tasks";
+	public static final String DEFAULT_COLOR = "#8E8E8E"; // CDE Dark Gray - project settings
+	public static final String DEFAULT_ICON = "vaadin:cog";
 	public static final String VIEW_NAME = "User Settings View";
 	@Column
 	@AMetaData (displayName = "Permissions", required = false, readOnly = false, description = "User's project permission", hidden = false)

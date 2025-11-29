@@ -25,8 +25,8 @@ import tech.derbent.app.roles.domain.CUserProjectRole;
 @AttributeOverride (name = "id", column = @Column (name = "cworkflowstatusrelation_id"))
 public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> {
 
-	public static final String DEFAULT_COLOR = "#DC143C";
-	public static final String DEFAULT_ICON = "vaadin:tasks";
+	public static final String DEFAULT_COLOR = "#C3B79F"; // OpenWindows 3D Shadow - workflow transitions
+	public static final String DEFAULT_ICON = "vaadin:connect";
 	public static final String VIEW_NAME = "Workflow Status Relations View";
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "from_status_id", nullable = false)

@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cprojectincometype_id"))
 public class CProjectIncomeType extends CTypeEntity<CProjectIncomeType> {
 
-	public static final String DEFAULT_COLOR = "#8BC34A";
+	public static final String DEFAULT_COLOR = "#F5DEB3"; // X11 Wheat - income types
 	public static final String DEFAULT_ICON = "vaadin:money-deposit";
 	public static final String VIEW_NAME = "Project Income Type Management";
 

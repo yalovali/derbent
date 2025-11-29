@@ -31,7 +31,7 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 public class CProject extends CEntityNamed<CProject> implements ISearchable {
 
-	public static final String DEFAULT_COLOR = "#905300";
+	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - organizational entity
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
 	public static final String VIEW_NAME = "Projects View";
 	// Many projects can belong to one company

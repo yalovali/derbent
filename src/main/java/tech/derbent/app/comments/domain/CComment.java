@@ -25,8 +25,8 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "comment_id"))
 public class CComment extends CEvent<CComment> {
 
-	public static final String DEFAULT_COLOR = "#1CF43F";
-	public static final String DEFAULT_ICON = "vaadin:tasks";
+	public static final String DEFAULT_COLOR = "#F5E8A2"; // OpenWindows Highlight Yellow - discussion
+	public static final String DEFAULT_ICON = "vaadin:comment";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
 	public static final String VIEW_NAME = "Comments View";
 	// Activity this comment belongs to

@@ -14,8 +14,8 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "master_section_id"))
 public class CMasterSection extends CEntityOfProject<CMasterSection> {
 
-	public static final String DEFAULT_COLOR = "#000a0e";
-	public static final String DEFAULT_ICON = "vaadin:cloud";
+	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - master sections
+	public static final String DEFAULT_ICON = "vaadin:table";
 	public static final String VIEW_NAME = "Master Section View";
 	@Column (name = "section_db_name", nullable = true, length = 200)
 	@Size (max = 200)

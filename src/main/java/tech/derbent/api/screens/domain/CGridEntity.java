@@ -53,8 +53,8 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 		}
 	}
 
-	public static final String DEFAULT_COLOR = "#d57d00";
-	public static final String DEFAULT_ICON = "vaadin:code";
+	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - grid configuration
+	public static final String DEFAULT_ICON = "vaadin:grid";
 	public static final String VIEW_NAME = "Grid View";
 	@Column (nullable = false)
 	@AMetaData (

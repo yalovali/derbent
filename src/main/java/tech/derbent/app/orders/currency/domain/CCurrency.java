@@ -17,7 +17,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "currency_id"))
 public class CCurrency extends CEntityOfProject<CCurrency> {
 
-	public static final String DEFAULT_COLOR = "#ffc107";
+	public static final String DEFAULT_COLOR = "#FFEFD5"; // X11 Papayawhip - monetary units
 	public static final String DEFAULT_ICON = "vaadin:dollar";
 	public static final String VIEW_NAME = "Currency View";
 	@Column (name = "currency_code", nullable = false, length = 3, unique = false)

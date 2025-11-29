@@ -25,7 +25,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PermitAll
 public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
-	public static final String DEFAULT_COLOR = "#31701F";
+	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - gantt project
 	public static final String DEFAULT_ICON = "vaadin:progressbar";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "GanntEntity View";

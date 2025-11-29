@@ -24,7 +24,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
 public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk> {
 
-	public static final String DEFAULT_COLOR = "#003444";
+	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - caution
 	public static final String DEFAULT_ICON = "vaadin:warning";
 	public static final String VIEW_NAME = "Risks View";
 	@Column (nullable = true, length = 1000)

@@ -35,7 +35,7 @@ import tech.derbent.base.users.domain.CUser;
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
 public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem {
 
-	public static final String DEFAULT_COLOR = "#fd7e14";
+	public static final String DEFAULT_COLOR = "#FFEAAA"; // CDE Yellow - calendar events
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String VIEW_NAME = "Meetings View";
 	@Column (name = "agenda", nullable = true, length = 4000)

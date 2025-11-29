@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "component_id"))
 public class CComponent extends CProjectItem<CComponent> implements IHasStatusAndWorkflow<CComponent> {
 
-	public static final String DEFAULT_COLOR = "#795548";
+	public static final String DEFAULT_COLOR = "#F0E5C0"; // OpenWindows Menu Background - component parts
 	public static final String DEFAULT_ICON = "vaadin:cogs";
 	public static final String VIEW_NAME = "Components View";
 	@Column (nullable = true, length = 100)

@@ -16,7 +16,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cuserprojectrole_id"))
 public class CUserProjectRole extends CRole<CUserProjectRole> {
 
-	public static final String DEFAULT_COLOR = "#10341d";
+	public static final String DEFAULT_COLOR = "#8E8E8E"; // CDE Dark Gray - project roles
 	public static final String DEFAULT_ICON = "vaadin:book";
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "User Project Roles View";

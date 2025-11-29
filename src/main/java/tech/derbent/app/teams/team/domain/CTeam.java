@@ -23,7 +23,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "team_id"))
 public class CTeam extends CEntityNamed<CTeam> {
 
-	public static final String DEFAULT_COLOR = "#3F51B5";
+	public static final String DEFAULT_COLOR = "#4B7F82"; // CDE Green - collaborative/people
 	public static final String DEFAULT_ICON = "vaadin:group";
 	public static final String VIEW_NAME = "Teams View";
 	@ManyToOne (fetch = FetchType.EAGER)

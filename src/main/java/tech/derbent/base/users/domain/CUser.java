@@ -33,7 +33,7 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator {
 
-	public static final String DEFAULT_COLOR = "#00546d";
+	public static final String DEFAULT_COLOR = "#6CAFB0"; // CDE Light Green - individual people
 	public static final String DEFAULT_ICON = "vaadin:user";
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";

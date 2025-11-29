@@ -12,7 +12,7 @@ import tech.derbent.app.companies.domain.CCompany;
 @AttributeOverride (name = "id", column = @Column (name = "approval_status_id"))
 public class CApprovalStatus extends CStatus<CApprovalStatus> {
 
-	public static final String DEFAULT_COLOR = "#28a745";
+	public static final String DEFAULT_COLOR = "#A9A08B"; // OpenWindows Disabled Gray - status
 	public static final String DEFAULT_ICON = "vaadin:check";
 	public static final String VIEW_NAME = "Approval Status View";
 

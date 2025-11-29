@@ -14,8 +14,8 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "order_type_id"))
 public class COrderType extends CTypeEntity<COrderType> {
 
-	public static final String DEFAULT_COLOR = "#17a2b8";
-	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String DEFAULT_COLOR = "#D2B48C"; // X11 Tan - order types
+	public static final String DEFAULT_ICON = "vaadin:invoice";
 	public static final String VIEW_NAME = "Order Type View";
 
 	/** Default constructor for JPA. */

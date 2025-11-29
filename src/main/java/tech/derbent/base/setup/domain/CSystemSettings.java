@@ -21,7 +21,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 @AttributeOverride (name = "id", column = @Column (name = "system_settings_id"))
 public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
-	public static final String DEFAULT_COLOR = "#DC143C";
+	public static final String DEFAULT_COLOR = "#C3B79F"; // OpenWindows 3D Shadow - system settings
 	public static final String DEFAULT_ICON = "vaadin:sliders";
 	public static final String VIEW_NAME = "System Settings View";
 	@Column (name = "account_lockout_duration_minutes", nullable = false)

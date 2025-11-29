@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "provider_id"))
 public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndWorkflow<CProvider> {
 
-	public static final String DEFAULT_COLOR = "#78909C";
+	public static final String DEFAULT_COLOR = "#B5B5B5"; // CDE Background Gray - external providers
 	public static final String DEFAULT_ICON = "vaadin:handshake";
 	public static final String VIEW_NAME = "Provider View";
 	@ManyToOne (fetch = FetchType.EAGER)
