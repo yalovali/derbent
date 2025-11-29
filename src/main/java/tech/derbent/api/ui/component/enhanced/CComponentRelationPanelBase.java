@@ -1,4 +1,5 @@
 package tech.derbent.api.ui.component.enhanced;
+import tech.derbent.api.ui.notifications.CNotificationService;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -12,8 +13,6 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.dialogs.CDialogConfirmation;
-import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -88,24 +87,19 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 		Check.notNull(selected, "Please select a setting to delete.");
 		try {
 			final String confirmationMessage = getDeleteConfirmationMessage(selected);
-			new CDialogConfirmation(confirmationMessage, () -> {
+			CNotificationService.showConfirmationDialog(confirmationMessage, () -> {
 				try {
 					deleteRelation(selected);
 					populateForm();
 					LOGGER.info("Deleted relation: {}", selected);
 				} catch (final Exception e) {
 					LOGGER.error("Error deleting relation.");
-					try {
-						new CDialogWarning("Failed to delete relation: " + e.getMessage()).open();
-					} catch (final Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					CNotificationService.showWarning("Failed to delete relation: " + e.getMessage());
 				}
-			}).open();
+			});
 		} catch (final Exception e) {
 			LOGGER.error("Failed to show delete confirmation.");
-			new CDialogWarning("Failed to delete relation").open();
+			CNotificationService.showWarning("Failed to delete relation");
 		}
 	}
 
@@ -145,12 +139,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					openAddDialog();
 				} catch (final Exception ex) {
 					LOGGER.error("Error opening add dialog: {}", ex.getMessage(), ex);
-					try {
-						new CDialogWarning("Failed to open add dialog: " + ex.getMessage()).open();
-					} catch (final Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					CNotificationService.showWarning("Failed to open add dialog: " + ex.getMessage());
 				}
 			});
 			editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
@@ -158,7 +147,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					openEditDialog();
 				} catch (final Exception ex) {
 					LOGGER.error("Error opening edit dialog: {}", ex.getMessage(), ex);
-					new CDialogWarning("Failed to open edit dialog: " + ex.getMessage()).open();
+					CNotificationService.showWarning("Failed to open edit dialog: " + ex.getMessage());
 				}
 			});
 			editButton.setEnabled(false);
@@ -166,8 +155,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				try {
 					deleteSelected();
 				} catch (final Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					LOGGER.error("Error deleting: {}", e1.getMessage(), e1);
 				}
 			});
 			deleteButton.setEnabled(false);
@@ -198,7 +186,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					openEditDialog();
 				} catch (final Exception ex) {
 					LOGGER.error("Error opening edit dialog on double-click: {}", ex.getMessage(), ex);
-					new CDialogWarning("Failed to open edit dialog: " + ex.getMessage()).open();
+					CNotificationService.showWarning("Failed to open edit dialog: " + ex.getMessage());
 				}
 			}
 		});

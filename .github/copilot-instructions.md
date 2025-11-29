@@ -359,6 +359,157 @@ docs/                   # Essential documentation
 - **Entity classes extend CEntityDB<T>** for database entities
 - **Views extend appropriate CAbstract*Page** base classes
 
+### UI Component Naming Standards (MANDATORY - No Exceptions)
+
+#### 1. Field Naming Convention: typeName Format
+ALL UI component fields MUST follow the `{type}{Name}` convention:
+
+```java
+// ✅ CORRECT - typeName format
+private CButton buttonAdd;              // button{Name}
+private CButton buttonDelete;           // button{Name}
+private CButton buttonSave;             // button{Name}
+private CButton buttonMoveUp;           // button{Name}
+private CButton buttonMoveDown;         // button{Name}
+private CDialog dialogConfirmation;     // dialog{Name}
+private CDialog dialogEntitySelection;  // dialog{Name}
+private CVerticalLayout layoutMain;     // layout{Name}
+private CHorizontalLayout layoutToolbar; // layout{Name}
+private CGrid<CEntity> gridItems;       // grid{Name}
+private ComboBox<String> comboBoxStatus; // comboBox{Name}
+private TextField textFieldName;        // textField{Name}
+
+// ❌ WRONG - Do NOT use these patterns
+private CButton addBtn;                 // Wrong: use buttonAdd
+private CButton btn_delete;             // Wrong: use buttonDelete  
+private Button addButton;               // Wrong: use CButton buttonAdd
+private CDialog selectionDlg;           // Wrong: use dialogSelection
+private HorizontalLayout toolbar;       // Wrong: use CHorizontalLayout layoutToolbar
+private Grid<CEntity> grid;             // Wrong: use CGrid gridItems
+```
+
+#### 2. Event Handler Naming Convention: on_xxx_eventType
+ALL event handlers MUST follow the `on_{componentName}_{eventType}` pattern:
+
+```java
+// ✅ CORRECT - on_componentName_eventType format
+protected void on_buttonAdd_clicked() {
+    // Handle add button click
+}
+
+protected void on_buttonDelete_clicked() {
+    // Handle delete button click
+}
+
+protected void on_buttonMoveUp_clicked() {
+    // Handle move up button click
+}
+
+protected void on_gridItems_selected(CEntity item) {
+    // Handle grid selection
+}
+
+protected void on_gridItems_doubleClicked(CEntity item) {
+    // Handle grid double-click
+}
+
+protected void on_comboBoxStatus_changed(String status) {
+    // Handle status change
+}
+
+protected void on_dialogConfirmation_closed() {
+    // Handle dialog close
+}
+
+// ❌ WRONG - Do NOT use these patterns
+private void handleAdd() { }            // Wrong: use on_buttonAdd_clicked
+private void onDeleteClick() { }        // Wrong: use on_buttonDelete_clicked
+private void processSelection() { }     // Wrong: use on_xxx_selected
+private void handleDoubleClick() { }    // Wrong: use on_gridItems_doubleClicked
+```
+
+#### 3. Factory Method Naming Convention: create_xxx
+ALL component factory methods MUST follow the `create_{componentName}` pattern:
+
+```java
+// ✅ CORRECT - create_componentName format
+protected CButton create_buttonAdd() {
+    final CButton button = new CButton(VaadinIcon.PLUS.create());
+    button.addClickListener(e -> on_buttonAdd_clicked());
+    return button;
+}
+
+protected CButton create_buttonDelete() {
+    final CButton button = new CButton(VaadinIcon.TRASH.create());
+    button.addClickListener(e -> on_buttonDelete_clicked());
+    return button;
+}
+
+protected CDialog create_dialogConfirmation() {
+    // Create and return dialog
+}
+
+// ❌ WRONG - Do NOT use these patterns
+protected CButton createAddButton() { }     // Wrong: use create_buttonAdd
+protected CButton getDeleteButton() { }     // Wrong: use create_buttonDelete
+protected void setupButtons() { }           // Wrong: use create_xxx for each button
+```
+
+#### 4. Component Inheritance: Always Use C-Prefixed Components
+NEVER use raw Vaadin components. ALWAYS use C-prefixed wrappers:
+
+| ❌ Vaadin Component | ✅ Use Instead |
+|---------------------|----------------|
+| `Button` | `CButton` |
+| `Dialog` | `CDialog` |
+| `VerticalLayout` | `CVerticalLayout` |
+| `HorizontalLayout` | `CHorizontalLayout` |
+| `Grid<T>` | `CGrid<T>` |
+| `TextField` | `CTextField` |
+| `FormLayout` | `CFormLayout` |
+| `FlexLayout` | `CFlexLayout` |
+| `TabSheet` | `CTabSheet` |
+| `Tab` | `CTab` |
+| `Div` | `CDiv` |
+| `Span` | `CSpan` |
+| `H3` | `CH3` |
+| `Scroller` | `CScroller` |
+
+#### 5. Avoid Lambda Consumers - Use Named Methods
+NEVER put complex logic in lambda expressions. ALWAYS delegate to named event handlers:
+
+```java
+// ❌ WRONG - Complex lambda (hard to read, hard to override)
+buttonAdd.addClickListener(e -> {
+    try {
+        Check.notNull(entity, "Entity cannot be null");
+        final CEntity newEntity = createNewEntity();
+        service.save(newEntity);
+        refreshGrid();
+        CNotificationService.showSaveSuccess();
+    } catch (final Exception ex) {
+        LOGGER.error("Error adding entity", ex);
+        CNotificationService.showException("Error adding entity", ex);
+    }
+});
+
+// ✅ CORRECT - Delegate to named method
+buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
+
+protected void on_buttonAdd_clicked() {
+    try {
+        Check.notNull(entity, "Entity cannot be null");
+        final CEntity newEntity = createNewEntity();
+        service.save(newEntity);
+        refreshGrid();
+        CNotificationService.showSaveSuccess();
+    } catch (final Exception ex) {
+        LOGGER.error("Error adding entity", ex);
+        CNotificationService.showException("Error adding entity", ex);
+    }
+}
+```
+
 ### Notification Standards (CRITICAL - ALWAYS Follow)
 **NEVER use direct Vaadin Notification.show() calls or manual dialog instantiation. ALWAYS use the unified notification system:**
 

@@ -7,13 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -29,7 +27,7 @@ import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
-import tech.derbent.api.ui.dialogs.CDialogInformation;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
@@ -182,41 +180,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		// Add click listener to login button
 		loginButton.addClickListener(e -> handleLogin());
 		loginButton.setMinWidth("120px");
-		// Database reset button setup
-		resetDbButton.addClickListener(e -> {
-			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", evt -> {
-						try {
-							final CDataInitializer init = new CDataInitializer(sessionService);
-							init.reloadForced(false); // veya empty check’li bir metod yaz
-							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-							CDialogInformation info = new CDialogInformation("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-							info.open();
-							populateForm();
-							// UI.getCurrent().getPage().reload();
-						} catch (final Exception ex) {
-							Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
-						}
-					}, "Vazgeç", evt -> {});
-			dialog.open();
-		});
-		resetDbMinimalButton.addClickListener(e -> {
-			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", evt -> {
-						try {
-							final CDataInitializer init = new CDataInitializer(sessionService);
-							init.reloadForced(true); // veya empty check’li bir metod yaz
-							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-							CDialogInformation info = new CDialogInformation("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-							info.open();
-							populateForm();
-							// UI.getCurrent().getPage().reload();
-						} catch (final Exception ex) {
-							Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
-						}
-					}, "Vazgeç", evt -> {});
-			dialog.open();
-		});
+// Database reset button setup
+resetDbButton.addClickListener(e -> on_buttonResetDb_clicked());
+resetDbMinimalButton.addClickListener(e -> on_buttonResetDbMinimal_clicked());
 		// Chart test button setup
 		// chartTestButton.addClickListener(e -> { getUI().ifPresent(ui -> ui.navigate("chart"));});
 		// chartTestButton.setMinWidth("120px");
@@ -251,5 +217,45 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private void showError(final String message) {
 		errorMessage.setText(message);
+	}
+
+	/** Handle reset database button click. */
+	private void on_buttonResetDb_clicked() {
+		try {
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> {
+						try {
+							final CDataInitializer init = new CDataInitializer(sessionService);
+							init.reloadForced(false);
+							CNotificationService.showSuccess("Sample data yeniden yüklendi.");
+							CNotificationService.showInfoDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+							populateForm();
+						} catch (final Exception ex) {
+							CNotificationService.showException("Hata", ex);
+						}
+					});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
+	}
+
+	/** Handle reset database minimal button click. */
+	private void on_buttonResetDbMinimal_clicked() {
+		try {
+			CNotificationService.showConfirmationDialog(
+					"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", () -> {
+						try {
+							final CDataInitializer init = new CDataInitializer(sessionService);
+							init.reloadForced(true);
+							CNotificationService.showSuccess("Minimum örnek veri yeniden yüklendi.");
+							CNotificationService.showInfoDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+							populateForm();
+						} catch (final Exception ex) {
+							CNotificationService.showException("Hata", ex);
+						}
+					});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
 	}
 }

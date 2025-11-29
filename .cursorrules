@@ -22,7 +22,92 @@ Exceptions:
 - Interfaces: Use "I" prefix (`IActivityRepository`)
 - Tests: Keep C-prefix (`CActivityTest`)
 
-### 2. Package Structure
+### 2. UI Component Field Naming (typeName Convention - MANDATORY)
+ALL UI component fields MUST follow `{type}{Name}` format:
+```java
+// ✅ CORRECT
+private CButton buttonAdd;              // button{Name}
+private CButton buttonDelete;           // button{Name}
+private CButton buttonMoveUp;           // button{Name}
+private CDialog dialogConfirmation;     // dialog{Name}
+private CVerticalLayout layoutMain;     // layout{Name}
+private CHorizontalLayout layoutToolbar; // layout{Name}
+private CGrid<CEntity> gridItems;       // grid{Name}
+private ComboBox<String> comboBoxStatus; // comboBox{Name}
+private TextField textFieldName;        // textField{Name}
+
+// ❌ WRONG - Do NOT use
+private CButton addBtn;                 // Wrong!
+private CButton btn_delete;             // Wrong!
+private Button addButton;               // Wrong! Use CButton buttonAdd
+private HorizontalLayout toolbar;       // Wrong! Use CHorizontalLayout layoutToolbar
+```
+
+### 3. Event Handler Naming (on_xxx_eventType - MANDATORY)
+ALL event handlers MUST follow `on_{componentName}_{eventType}` pattern:
+```java
+// ✅ CORRECT
+protected void on_buttonAdd_clicked() { }
+protected void on_buttonDelete_clicked() { }
+protected void on_buttonMoveUp_clicked() { }
+protected void on_gridItems_selected(CEntity item) { }
+protected void on_gridItems_doubleClicked(CEntity item) { }
+protected void on_comboBoxStatus_changed(String status) { }
+
+// ❌ WRONG - Do NOT use
+private void handleAdd() { }            // Wrong!
+private void onDeleteClick() { }        // Wrong!
+private void processSelection() { }     // Wrong!
+```
+
+### 4. Factory Method Naming (create_xxx - MANDATORY)
+ALL component factory methods MUST follow `create_{componentName}` pattern:
+```java
+// ✅ CORRECT
+protected CButton create_buttonAdd() {
+    final CButton button = new CButton(VaadinIcon.PLUS.create());
+    button.addClickListener(e -> on_buttonAdd_clicked());
+    return button;
+}
+
+protected CButton create_buttonDelete() {
+    final CButton button = new CButton(VaadinIcon.TRASH.create());
+    button.addClickListener(e -> on_buttonDelete_clicked());
+    return button;
+}
+
+// ❌ WRONG - Do NOT use
+protected CButton createAddButton() { }     // Wrong!
+protected CButton getDeleteButton() { }     // Wrong!
+```
+
+### 5. Never Use Lambda for Complex Logic
+ALWAYS delegate to named methods:
+```java
+// ❌ WRONG - Complex lambda (hard to read, hard to override)
+buttonAdd.addClickListener(e -> {
+    // Long complex logic here...
+    doThis();
+    doThat();
+});
+
+// ✅ CORRECT - Delegate to named method
+buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
+```
+
+### 6. Always Use C-Prefixed Components
+NEVER use raw Vaadin components:
+| ❌ Wrong | ✅ Correct |
+|----------|-----------|
+| `Button` | `CButton` |
+| `Dialog` | `CDialog` |
+| `VerticalLayout` | `CVerticalLayout` |
+| `HorizontalLayout` | `CHorizontalLayout` |
+| `Grid<T>` | `CGrid<T>` |
+| `TextField` | `CTextField` |
+| `FormLayout` | `CFormLayout` |
+
+### 7. Package Structure
 ```
 tech.derbent.{module}.{layer}
 - module: activities, users, projects, etc.
@@ -34,13 +119,13 @@ Example:
 - `tech.derbent.activities.service.CActivityService`
 - `tech.derbent.activities.view.CActivityView`
 
-### 3. Inheritance Patterns
+### 8. Inheritance Patterns
 Follow established base classes:
 - Entities: Extend `CEntityDB<T>`, `CProjectItem<T>`, etc.
 - Services: Extend `CAbstractService<T>`
 - Views: Extend `CAbstractEntityDBPage<T>`
 
-### 4. Notification System (CRITICAL)
+### 9. Notification System (CRITICAL)
 NEVER use direct Vaadin Notification.show(). ALWAYS use:
 ```java
 @Autowired
@@ -58,7 +143,7 @@ CNotifications.showSuccess("Message");
 CNotifications.showError("Message");
 ```
 
-### 5. Type Safety
+### 10. Type Safety
 Always use generics:
 ```java
 // ✅ Correct
@@ -93,39 +178,28 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 ./run-playwright-tests.sh comprehensive # Full test suite
 ```
 
-## File Locations
+## Validation Checklist
 
-### Documentation
-- Architecture: `docs/architecture/`
-- Development guides: `docs/development/`
-- Testing: `docs/testing/`
-- Archived docs: `docs/archive/`
-
-### Code Organization
-- Core framework: `src/main/java/tech/derbent/api/`
-- Business modules: `src/main/java/tech/derbent/app/`
-- Base/infrastructure: `src/main/java/tech/derbent/base/`
-
-## Key References
-- Coding standards: `docs/architecture/coding-standards.md`
-- Project structure: `docs/development/project-structure.md`
-- Getting started: `docs/development/getting-started.md`
-- Full guidelines: `.github/copilot-instructions.md`
-
-## Quick Tips
-1. Run `source ./setup-java-env.sh` at start of each session
-2. Use C-prefix for ALL custom classes
-3. Use CNotificationService for user messages
-4. Run `mvn spotless:apply` before committing
-5. Check existing patterns before adding new code
-6. Follow domain/service/view package structure
+Before completing any task:
+1. ✅ All custom classes have C-prefix
+2. ✅ UI fields follow typeName convention (buttonAdd, gridItems, etc.)
+3. ✅ Event handlers follow on_xxx_eventType pattern
+4. ✅ Factory methods follow create_xxx pattern
+5. ✅ No complex lambda - delegates to named methods
+6. ✅ Uses C-prefixed components (not raw Vaadin)
+7. ✅ No raw types - generics used everywhere
+8. ✅ CNotificationService used (not Notification.show)
+9. ✅ Code formatted with `mvn spotless:apply`
+10. ✅ Project compiles: `mvn clean compile`
 
 ## Common Mistakes to Avoid
+❌ Wrong field names (addBtn instead of buttonAdd)
+❌ Wrong handler names (handleAdd instead of on_buttonAdd_clicked)
+❌ Complex logic in lambda expressions
+❌ Using raw Vaadin components (Button instead of CButton)
 ❌ Missing C-prefix on custom classes
-❌ Using raw types (missing generics)
 ❌ Direct Notification.show() calls
-❌ Inconsistent package structure
 ❌ Forgetting to format with spotless
 
 ## For Complete Guidelines
-See `.github/copilot-instructions.md` (468 lines) for comprehensive documentation.
+See `.github/copilot-instructions.md` for comprehensive documentation.

@@ -16,7 +16,6 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.dialogs.CDialogConfirmation;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
@@ -64,7 +63,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 		Check.notNull(getRelations, "Get relations supplier cannot be null");
 		Check.notNull(setRelations, "Set relations consumer cannot be null");
 		final String confirmMessage = createDeleteConfirmationMessage(selected);
-		new CDialogConfirmation(confirmMessage, () -> {
+		CNotificationService.showConfirmationDialog(confirmMessage, () -> {
 			final List<RelationEntity> relations = getRelations.get();
 			relations.remove(selected);
 			setRelations.accept(relations);
@@ -72,7 +71,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 				saveEntity.run();
 			}
 			refresh();
-		}).open();
+		});
 	}
 
 	/** Abstract method to get the relationship entity class */

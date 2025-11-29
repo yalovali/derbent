@@ -5,18 +5,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -32,7 +28,9 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
 /**
- * CEntitySelectionDialog - Dialog for selecting entities from a grid with search/filter capabilities.
+ * CDialogEntitySelection - Dialog for selecting entities from a grid with search/filter capabilities.
+ * <p>
+ * Extends CDialog to follow the standard dialog pattern in the application.
  * <p>
  * Features:
  * <ul>
@@ -47,9 +45,8 @@ import tech.derbent.api.utils.Check;
  *
  * @param <EntityClass> The entity type being selected
  */
-public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> extends Dialog {
+public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> extends CDialog {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogEntitySelection.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Entity type configuration for the dialog */
@@ -85,16 +82,20 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		List<T> getItems(EntityTypeConfig<?> config);
 	}
 
-	// Dialog components
-	private com.vaadin.flow.component.grid.Grid<EntityClass> grid;
-	private ComboBox<EntityTypeConfig<?>> entityTypeComboBox;
-	private TextField idFilter;
-	private TextField nameFilter;
-	private TextField descriptionFilter;
-	private ComboBox<String> statusFilter;
-	private Span selectedCountLabel;
-	private Button resetButton;
-	private Button selectButton;
+	// Dialog configuration
+	private final String dialogTitle;
+
+	// Dialog components - following typeName convention
+	private com.vaadin.flow.component.grid.Grid<EntityClass> gridItems;
+	private ComboBox<EntityTypeConfig<?>> comboBoxEntityType;
+	private TextField textFieldIdFilter;
+	private TextField textFieldNameFilter;
+	private TextField textFieldDescriptionFilter;
+	private ComboBox<String> comboBoxStatusFilter;
+	private Span labelSelectedCount;
+	private CButton buttonReset;
+	private CButton buttonSelect;
+	private CButton buttonCancel;
 
 	// Configuration
 	private final boolean multiSelect;
@@ -127,115 +128,135 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		Check.notEmpty(entityTypes, "Entity types cannot be empty");
 		Check.notNull(itemsProvider, "Items provider cannot be null");
 		Check.notNull(onSelection, "Selection callback cannot be null");
+		this.dialogTitle = title;
 		this.entityTypes = entityTypes;
 		this.itemsProvider = itemsProvider;
 		this.onSelection = onSelection;
 		this.multiSelect = multiSelect;
-		setupDialog(title);
-	}
-
-	private void setupDialog(final String title) {
-		setHeaderTitle(title);
-		setModal(true);
-		setCloseOnEsc(true);
-		setCloseOnOutsideClick(false);
-		setWidth("900px");
-		setHeight("700px");
-		setResizable(true);
-		final VerticalLayout mainLayout = new CVerticalLayout(true, true, false);
-		mainLayout.setSizeFull();
-		// Entity type selector
-		final HorizontalLayout typeLayout = createEntityTypeSelector();
-		mainLayout.add(typeLayout);
-		// Search toolbar
-		final HorizontalLayout searchToolbar = createSearchToolbar();
-		mainLayout.add(searchToolbar);
-		// Selection indicator and reset
-		final HorizontalLayout selectionIndicator = createSelectionIndicator();
-		mainLayout.add(selectionIndicator);
-		// Grid
-		createGrid();
-		mainLayout.add(grid);
-		mainLayout.setFlexGrow(1, grid);
-		add(mainLayout);
-		// Footer buttons
-		setupFooterButtons();
-		// Apply styling
-		applyDialogStyling();
-		// Select first entity type if available
-		if (!entityTypes.isEmpty()) {
-			entityTypeComboBox.setValue(entityTypes.get(0));
+		try {
+			setupDialog();
+			// Override default width from CDialog
+			setWidth("900px");
+			setHeight("700px");
+			setResizable(true);
+			// Select first entity type if available
+			if (!entityTypes.isEmpty()) {
+				comboBoxEntityType.setValue(entityTypes.get(0));
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error setting up entity selection dialog", e);
+			CNotificationService.showException("Error creating dialog", e);
 		}
 	}
 
-	private HorizontalLayout createEntityTypeSelector() {
-		final HorizontalLayout layout = new CHorizontalLayout();
+	@Override
+	public String getDialogTitleString() {
+		return dialogTitle;
+	}
+
+	@Override
+	protected Icon getFormIcon() {
+		return VaadinIcon.LIST_SELECT.create();
+	}
+
+	@Override
+	protected String getFormTitleString() {
+		return "Select Items";
+	}
+
+	@Override
+	protected void setupContent() {
+		// Entity type selector
+		final HorizontalLayout layoutEntityType = create_layoutEntityTypeSelector();
+		mainLayout.add(layoutEntityType);
+		// Search toolbar
+		final HorizontalLayout layoutSearchToolbar = create_layoutSearchToolbar();
+		mainLayout.add(layoutSearchToolbar);
+		// Selection indicator and reset
+		final HorizontalLayout layoutSelectionIndicator = create_layoutSelectionIndicator();
+		mainLayout.add(layoutSelectionIndicator);
+		// Grid
+		create_gridItems();
+		mainLayout.add(gridItems);
+		mainLayout.setFlexGrow(1, gridItems);
+		// Make the layout fill available space
+		mainLayout.setSizeFull();
+	}
+
+	@Override
+	protected void setupButtons() {
+		buttonSelect = create_buttonSelect();
+		buttonCancel = create_buttonCancel();
+		buttonLayout.add(buttonSelect, buttonCancel);
+	}
+
+	/** Factory method for entity type selector layout. */
+	protected HorizontalLayout create_layoutEntityTypeSelector() {
+		final CHorizontalLayout layout = new CHorizontalLayout();
 		layout.setWidthFull();
 		layout.setAlignItems(FlexComponent.Alignment.CENTER);
-		entityTypeComboBox = new ComboBox<>("Entity Type");
-		entityTypeComboBox.setItems(entityTypes);
-		entityTypeComboBox.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
-		entityTypeComboBox.setWidthFull();
-		entityTypeComboBox.setRequired(true);
-		entityTypeComboBox.addValueChangeListener(e -> {
-			if (e.getValue() != null) {
-				onEntityTypeChanged(e.getValue());
-			}
-		});
-		layout.add(entityTypeComboBox);
+		comboBoxEntityType = new ComboBox<>("Entity Type");
+		comboBoxEntityType.setItems(entityTypes);
+		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
+		comboBoxEntityType.setWidthFull();
+		comboBoxEntityType.setRequired(true);
+		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_changed(e.getValue()));
+		layout.add(comboBoxEntityType);
 		return layout;
 	}
 
-	private HorizontalLayout createSearchToolbar() {
-		final HorizontalLayout toolbar = new CHorizontalLayout();
+	/** Factory method for search toolbar layout. */
+	protected HorizontalLayout create_layoutSearchToolbar() {
+		final CHorizontalLayout toolbar = new CHorizontalLayout();
 		toolbar.setWidthFull();
 		toolbar.setSpacing(true);
 		toolbar.setPadding(false);
 		toolbar.setAlignItems(FlexComponent.Alignment.END);
 		// ID filter
-		idFilter = new TextField("ID");
-		idFilter.setPlaceholder("Filter by ID...");
-		idFilter.setPrefixComponent(VaadinIcon.KEY.create());
-		idFilter.setClearButtonVisible(true);
-		idFilter.setValueChangeMode(ValueChangeMode.LAZY);
-		idFilter.setValueChangeTimeout(300);
-		idFilter.setWidth("100px");
-		idFilter.addValueChangeListener(e -> applyFilters());
+		textFieldIdFilter = new TextField("ID");
+		textFieldIdFilter.setPlaceholder("Filter by ID...");
+		textFieldIdFilter.setPrefixComponent(VaadinIcon.KEY.create());
+		textFieldIdFilter.setClearButtonVisible(true);
+		textFieldIdFilter.setValueChangeMode(ValueChangeMode.LAZY);
+		textFieldIdFilter.setValueChangeTimeout(300);
+		textFieldIdFilter.setWidth("100px");
+		textFieldIdFilter.addValueChangeListener(e -> applyFilters());
 		// Name filter
-		nameFilter = new TextField("Name");
-		nameFilter.setPlaceholder("Filter by name...");
-		nameFilter.setPrefixComponent(VaadinIcon.SEARCH.create());
-		nameFilter.setClearButtonVisible(true);
-		nameFilter.setValueChangeMode(ValueChangeMode.LAZY);
-		nameFilter.setValueChangeTimeout(300);
-		nameFilter.setWidth("200px");
-		nameFilter.addValueChangeListener(e -> applyFilters());
+		textFieldNameFilter = new TextField("Name");
+		textFieldNameFilter.setPlaceholder("Filter by name...");
+		textFieldNameFilter.setPrefixComponent(VaadinIcon.SEARCH.create());
+		textFieldNameFilter.setClearButtonVisible(true);
+		textFieldNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
+		textFieldNameFilter.setValueChangeTimeout(300);
+		textFieldNameFilter.setWidth("200px");
+		textFieldNameFilter.addValueChangeListener(e -> applyFilters());
 		// Description filter
-		descriptionFilter = new TextField("Description");
-		descriptionFilter.setPlaceholder("Filter by description...");
-		descriptionFilter.setPrefixComponent(VaadinIcon.FILE_TEXT.create());
-		descriptionFilter.setClearButtonVisible(true);
-		descriptionFilter.setValueChangeMode(ValueChangeMode.LAZY);
-		descriptionFilter.setValueChangeTimeout(300);
-		descriptionFilter.setWidth("200px");
-		descriptionFilter.addValueChangeListener(e -> applyFilters());
+		textFieldDescriptionFilter = new TextField("Description");
+		textFieldDescriptionFilter.setPlaceholder("Filter by description...");
+		textFieldDescriptionFilter.setPrefixComponent(VaadinIcon.FILE_TEXT.create());
+		textFieldDescriptionFilter.setClearButtonVisible(true);
+		textFieldDescriptionFilter.setValueChangeMode(ValueChangeMode.LAZY);
+		textFieldDescriptionFilter.setValueChangeTimeout(300);
+		textFieldDescriptionFilter.setWidth("200px");
+		textFieldDescriptionFilter.addValueChangeListener(e -> applyFilters());
 		// Status filter
-		statusFilter = new ComboBox<>("Status");
-		statusFilter.setPlaceholder("All statuses");
-		statusFilter.setClearButtonVisible(true);
-		statusFilter.setWidth("150px");
-		statusFilter.addValueChangeListener(e -> applyFilters());
+		comboBoxStatusFilter = new ComboBox<>("Status");
+		comboBoxStatusFilter.setPlaceholder("All statuses");
+		comboBoxStatusFilter.setClearButtonVisible(true);
+		comboBoxStatusFilter.setWidth("150px");
+		comboBoxStatusFilter.addValueChangeListener(e -> applyFilters());
 		// Clear filters button
-		final Button clearFiltersButton = new Button(VaadinIcon.CLOSE_CIRCLE.create());
-		clearFiltersButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		clearFiltersButton.setTooltipText("Clear all filters");
-		clearFiltersButton.addClickListener(e -> clearFilters());
-		toolbar.add(idFilter, nameFilter, descriptionFilter, statusFilter, clearFiltersButton);
+		final CButton buttonClearFilters = new CButton(VaadinIcon.CLOSE_CIRCLE.create());
+		buttonClearFilters.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		buttonClearFilters.setTooltipText("Clear all filters");
+		buttonClearFilters.addClickListener(e -> on_buttonClearFilters_clicked());
+		toolbar.add(textFieldIdFilter, textFieldNameFilter, textFieldDescriptionFilter, comboBoxStatusFilter, buttonClearFilters);
 		return toolbar;
 	}
 
-	private HorizontalLayout createSelectionIndicator() {
-		final HorizontalLayout layout = new CHorizontalLayout();
+	/** Factory method for selection indicator layout. */
+	protected HorizontalLayout create_layoutSelectionIndicator() {
+		final CHorizontalLayout layout = new CHorizontalLayout();
 		layout.setWidthFull();
 		layout.setAlignItems(FlexComponent.Alignment.CENTER);
 		layout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
@@ -243,77 +264,171 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		final Icon selectedIcon = VaadinIcon.CHECK_SQUARE.create();
 		selectedIcon.setSize("16px");
 		selectedIcon.setColor("#1976D2");
-		selectedCountLabel = new Span("0 selected");
-		selectedCountLabel.getStyle().set("font-weight", "500").set("color", "#1976D2").set("margin-right", "10px");
+		labelSelectedCount = new Span("0 selected");
+		labelSelectedCount.getStyle().set("font-weight", "500").set("color", "#1976D2").set("margin-right", "10px");
 		// Reset button
-		resetButton = new Button("Reset", VaadinIcon.REFRESH.create());
-		resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-		resetButton.setTooltipText("Clear all selected items");
-		resetButton.addClickListener(e -> resetSelection());
-		resetButton.setEnabled(false);
-		layout.add(selectedIcon, selectedCountLabel, resetButton);
+		buttonReset = new CButton("Reset", VaadinIcon.REFRESH.create());
+		buttonReset.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+		buttonReset.setTooltipText("Clear all selected items");
+		buttonReset.addClickListener(e -> on_buttonReset_clicked());
+		buttonReset.setEnabled(false);
+		layout.add(selectedIcon, labelSelectedCount, buttonReset);
 		return layout;
 	}
 
-	@SuppressWarnings ({"unchecked", "rawtypes"})
-	private void createGrid() {
+	/** Factory method for grid. */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	protected void create_gridItems() {
 		// Create Grid using Object type with auto-columns disabled, then cast.
 		// Type safety is maintained by controlling all items in the grid through itemsProvider.
 		final com.vaadin.flow.component.grid.Grid rawGrid = new com.vaadin.flow.component.grid.Grid<>(Object.class, false);
-		grid = (com.vaadin.flow.component.grid.Grid<EntityClass>) rawGrid;
-		grid.setSizeFull();
-		grid.setMinHeight("300px");
+		gridItems = (com.vaadin.flow.component.grid.Grid<EntityClass>) rawGrid;
+		gridItems.setSizeFull();
+		gridItems.setMinHeight("300px");
 		// Apply CGrid-like styling
-		grid.addThemeVariants(com.vaadin.flow.component.grid.GridVariant.LUMO_NO_BORDER, com.vaadin.flow.component.grid.GridVariant.LUMO_ROW_STRIPES,
-				com.vaadin.flow.component.grid.GridVariant.LUMO_COMPACT);
+		gridItems.addThemeVariants(com.vaadin.flow.component.grid.GridVariant.LUMO_NO_BORDER,
+				com.vaadin.flow.component.grid.GridVariant.LUMO_ROW_STRIPES, com.vaadin.flow.component.grid.GridVariant.LUMO_COMPACT);
 		// Configure selection mode
 		if (multiSelect) {
-			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
-			grid.asMultiSelect().addValueChangeListener(e -> {
-				// Add new selections, but don't remove items that were previously selected
-				// This allows selections to persist across filtering
-				for (final EntityClass item : e.getValue()) {
-					if (!selectedItems.contains(item)) {
-						selectedItems.add(item);
-					}
-				}
-				updateSelectionIndicator();
-			});
+			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
+			gridItems.asMultiSelect().addValueChangeListener(e -> on_gridItems_multiSelected(e.getValue()));
 		} else {
-			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-			grid.asSingleSelect().addValueChangeListener(e -> {
-				selectedItems.clear();
-				if (e.getValue() != null) {
-					selectedItems.add(e.getValue());
-				}
-				updateSelectionIndicator();
-			});
+			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
+			gridItems.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelected(e.getValue()));
 		}
 		// Add click listener to toggle selection in multi-select mode
 		if (multiSelect) {
-			grid.addItemClickListener(e -> {
-				final EntityClass item = e.getItem();
-				if (selectedItems.contains(item)) {
-					selectedItems.remove(item);
-					grid.deselect(item);
-				} else {
-					selectedItems.add(item);
-					grid.select(item);
-				}
-				updateSelectionIndicator();
-			});
+			gridItems.addItemClickListener(e -> on_gridItems_clicked(e.getItem()));
 		}
 	}
 
+	/** Factory method for select button. */
+	protected CButton create_buttonSelect() {
+		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), e -> on_buttonSelect_clicked());
+		button.setEnabled(false);
+		return button;
+	}
+
+	/** Factory method for cancel button. */
+	protected CButton create_buttonCancel() {
+		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), e -> on_buttonCancel_clicked());
+	}
+
+	// Event handlers following on_xxx_eventType convention
+
+	/** Handle entity type combobox change. */
+	protected void on_comboBoxEntityType_changed(final EntityTypeConfig<?> config) {
+		if (config == null) {
+			return;
+		}
+		LOGGER.debug("Entity type changed to: {}", config.getDisplayName());
+		currentEntityType = config;
+		// Clear selection when entity type changes
+		selectedItems.clear();
+		updateSelectionIndicator();
+		// Cache reflection methods for the entity type
+		cacheReflectionMethods(config.getEntityClass());
+		// Configure grid columns for the new entity type
+		configureGridColumns();
+		// Load items
+		try {
+			allItems = itemsProvider.getItems(config);
+			LOGGER.debug("Loaded {} items for entity type {}", allItems.size(), config.getDisplayName());
+			// Update status filter options
+			updateStatusFilterOptions();
+			// Apply filters and refresh grid
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error loading items for entity type {}", config.getDisplayName(), e);
+			CNotificationService.showException("Error loading items", e);
+			allItems = new ArrayList<>();
+			gridItems.setItems(allItems);
+		}
+	}
+
+	/** Handle grid multi-select value change. */
+	protected void on_gridItems_multiSelected(final Set<EntityClass> value) {
+		// Add new selections, but don't remove items that were previously selected
+		// This allows selections to persist across filtering
+		for (final EntityClass item : value) {
+			if (!selectedItems.contains(item)) {
+				selectedItems.add(item);
+			}
+		}
+		updateSelectionIndicator();
+	}
+
+	/** Handle grid single-select value change. */
+	protected void on_gridItems_singleSelected(final EntityClass value) {
+		selectedItems.clear();
+		if (value != null) {
+			selectedItems.add(value);
+		}
+		updateSelectionIndicator();
+	}
+
+	/** Handle grid item click (for toggle in multi-select mode). */
+	protected void on_gridItems_clicked(final EntityClass item) {
+		if (selectedItems.contains(item)) {
+			selectedItems.remove(item);
+			gridItems.deselect(item);
+		} else {
+			selectedItems.add(item);
+			gridItems.select(item);
+		}
+		updateSelectionIndicator();
+	}
+
+	/** Handle clear filters button click. */
+	protected void on_buttonClearFilters_clicked() {
+		textFieldIdFilter.clear();
+		textFieldNameFilter.clear();
+		textFieldDescriptionFilter.clear();
+		comboBoxStatusFilter.clear();
+		applyFilters();
+	}
+
+	/** Handle reset button click. */
+	protected void on_buttonReset_clicked() {
+		selectedItems.clear();
+		if (multiSelect) {
+			gridItems.deselectAll();
+		} else {
+			gridItems.asSingleSelect().clear();
+		}
+		updateSelectionIndicator();
+		LOGGER.debug("Selection reset");
+	}
+
+	/** Handle select button click. */
+	protected void on_buttonSelect_clicked() {
+		if (selectedItems.isEmpty()) {
+			CNotificationService.showWarning("Please select at least one item");
+			return;
+		}
+		LOGGER.debug("Confirming selection of {} items", selectedItems.size());
+		onSelection.accept(new ArrayList<>(selectedItems));
+		close();
+	}
+
+	/** Handle cancel button click. */
+	protected void on_buttonCancel_clicked() {
+		close();
+	}
+
+	// Helper methods
+
 	private void configureGridColumns() {
 		// Clear existing columns
-		grid.getColumns().forEach(grid::removeColumn);
+		gridItems.getColumns().forEach(gridItems::removeColumn);
 		if (currentEntityType == null) {
 			return;
 		}
 		// Add selection indicator column for multi-select
 		if (multiSelect) {
-			grid.addComponentColumn(item -> {
+			gridItems.addComponentColumn(item -> {
 				if (selectedItems.contains(item)) {
 					return CColorUtils.createStyledIcon("vaadin:check-square-o", "#4CAF50");
 				} else {
@@ -322,15 +437,15 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 			}).setHeader("").setWidth("40px").setFlexGrow(0);
 		}
 		// ID column
-		grid.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setHeader("ID").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
+		gridItems.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setHeader("ID").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
 				.setSortable(true).setKey("id");
 		// Name column - use cached method
-		grid.addColumn(this::getEntityName).setHeader("Name").setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name");
+		gridItems.addColumn(this::getEntityName).setHeader("Name").setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name");
 		// Description column - use cached method
-		grid.addColumn(this::getEntityDescription).setHeader("Description").setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true)
+		gridItems.addColumn(this::getEntityDescription).setHeader("Description").setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true)
 				.setKey("description");
 		// Status column with color support for CProjectItem entities
-		grid.addComponentColumn(item -> {
+		gridItems.addComponentColumn(item -> {
 			final CGridCell statusCell = new CGridCell();
 			statusCell.setShowIcon(true);
 			if (item instanceof CProjectItem) {
@@ -353,50 +468,6 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 			}
 			return statusCell;
 		}).setHeader("Status").setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status");
-	}
-
-	private void setupFooterButtons() {
-		selectButton = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), e -> confirmSelection());
-		selectButton.setEnabled(false);
-		final CButton cancelButton = CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), e -> close());
-		final HorizontalLayout buttonLayout = new CHorizontalLayout();
-		buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-		buttonLayout.add(selectButton, cancelButton);
-		getFooter().add(buttonLayout);
-	}
-
-	private void applyDialogStyling() {
-		getElement().getStyle().set("border", "2px solid #1976D2");
-		getElement().getStyle().set("border-radius", "12px");
-		getElement().getStyle().set("box-shadow", "0 4px 20px rgba(25, 118, 210, 0.3)");
-		getElement().getStyle().set("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)");
-	}
-
-	@SuppressWarnings ("unchecked")
-	private void onEntityTypeChanged(final EntityTypeConfig<?> config) {
-		LOGGER.debug("Entity type changed to: {}", config.getDisplayName());
-		currentEntityType = config;
-		// Clear selection when entity type changes
-		selectedItems.clear();
-		updateSelectionIndicator();
-		// Cache reflection methods for the entity type
-		cacheReflectionMethods(config.getEntityClass());
-		// Configure grid columns for the new entity type
-		configureGridColumns();
-		// Load items
-		try {
-			allItems = itemsProvider.getItems(config);
-			LOGGER.debug("Loaded {} items for entity type {}", allItems.size(), config.getDisplayName());
-			// Update status filter options
-			updateStatusFilterOptions();
-			// Apply filters and refresh grid
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error loading items for entity type {}", config.getDisplayName(), e);
-			CNotificationService.showException("Error loading items", e);
-			allItems = new ArrayList<>();
-			grid.setItems(allItems);
-		}
 	}
 
 	/**
@@ -487,14 +558,14 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 				}
 			}
 		}
-		statusFilter.setItems(statuses);
+		comboBoxStatusFilter.setItems(statuses);
 	}
 
 	private void applyFilters() {
-		final String idValue = idFilter.getValue();
-		final String nameValue = nameFilter.getValue();
-		final String descValue = descriptionFilter.getValue();
-		final String statusValue = statusFilter.getValue();
+		final String idValue = textFieldIdFilter.getValue();
+		final String nameValue = textFieldNameFilter.getValue();
+		final String descValue = textFieldDescriptionFilter.getValue();
+		final String statusValue = comboBoxStatusFilter.getValue();
 		final List<EntityClass> filtered = new ArrayList<>();
 		for (final EntityClass item : allItems) {
 			boolean matches = true;
@@ -547,52 +618,23 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 				filtered.add(item);
 			}
 		}
-		grid.setItems(filtered);
+		gridItems.setItems(filtered);
 		// Restore visual selection state for already selected items
 		if (multiSelect) {
 			for (final EntityClass item : filtered) {
 				if (selectedItems.contains(item)) {
-					grid.select(item);
+					gridItems.select(item);
 				}
 			}
 		}
 		LOGGER.debug("Applied filters - showing {} of {} items", filtered.size(), allItems.size());
 	}
 
-	private void clearFilters() {
-		idFilter.clear();
-		nameFilter.clear();
-		descriptionFilter.clear();
-		statusFilter.clear();
-		applyFilters();
-	}
-
-	private void resetSelection() {
-		selectedItems.clear();
-		if (multiSelect) {
-			grid.deselectAll();
-		} else {
-			grid.asSingleSelect().clear();
-		}
-		updateSelectionIndicator();
-		LOGGER.debug("Selection reset");
-	}
-
 	private void updateSelectionIndicator() {
 		final int count = selectedItems.size();
-		selectedCountLabel.setText(count + " selected");
-		resetButton.setEnabled(count > 0);
-		selectButton.setEnabled(count > 0);
-	}
-
-	private void confirmSelection() {
-		if (selectedItems.isEmpty()) {
-			CNotificationService.showWarning("Please select at least one item");
-			return;
-		}
-		LOGGER.debug("Confirming selection of {} items", selectedItems.size());
-		onSelection.accept(new ArrayList<>(selectedItems));
-		close();
+		labelSelectedCount.setText(count + " selected");
+		buttonReset.setEnabled(count > 0);
+		buttonSelect.setEnabled(count > 0);
 	}
 
 	/**

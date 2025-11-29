@@ -20,7 +20,6 @@ import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
-import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.base.users.domain.CUser;
@@ -140,7 +139,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 				handleProfilePictureUpload(metadata, data);
 			} catch (final IOException e) {
 				LOGGER.error("Error handling profile picture upload", e);
-				new CDialogWarning("Failed to upload profile picture: " + e.getMessage()).open();
+				CNotificationService.showWarning("Failed to upload profile picture: " + e.getMessage());
 			}
 		};
 		final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);
@@ -156,7 +155,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 		});
 		profilePictureUpload.addFileRejectedListener(event -> {
 			LOGGER.error("Profile picture upload rejected: {}", event.getErrorMessage());
-			new CDialogWarning("Failed to upload profile picture: " + event.getErrorMessage()).open();
+			CNotificationService.showWarning("Failed to upload profile picture: " + event.getErrorMessage());
 		});
 		// Delete button
 		deleteProfilePictureButton = CButton.createError("Remove Picture", null, e -> deleteProfilePicture());
@@ -270,7 +269,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 			super.save();
 		} catch (final Exception e) {
 			LOGGER.error("Error saving user profile", e);
-			new CDialogWarning("Failed to save profile: " + e.getMessage()).open();
+			CNotificationService.showWarning("Failed to save profile: " + e.getMessage());
 		}
 	}
 
