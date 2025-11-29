@@ -2,7 +2,6 @@ package tech.derbent.api.ui.component;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.Button;

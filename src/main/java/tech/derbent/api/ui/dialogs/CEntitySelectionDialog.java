@@ -106,6 +106,10 @@ public class CEntitySelectionDialog<T extends CEntityDB<T>> extends Dialog {
 	private final Set<T> selectedItems = new HashSet<>();
 	private List<T> allItems = new ArrayList<>();
 	private EntityTypeConfig<?> currentEntityType;
+	// Cached reflection methods for performance
+	private java.lang.reflect.Method cachedGetNameMethod;
+	private java.lang.reflect.Method cachedGetDescriptionMethod;
+	private java.lang.reflect.Method cachedGetStatusMethod;
 
 	/**
 	 * Creates an entity selection dialog.
@@ -251,11 +255,12 @@ public class CEntitySelectionDialog<T extends CEntityDB<T>> extends Dialog {
 		return layout;
 	}
 
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ({"unchecked", "rawtypes"})
 	private void createGrid() {
-		// Create a Grid with Object type and cast to T 
-		// This is safe because we control all the items that go into the grid
-		grid = (com.vaadin.flow.component.grid.Grid<T>) (Object) new com.vaadin.flow.component.grid.Grid<>(Object.class, false);
+		// Create Grid using Object type with auto-columns disabled, then cast.
+		// Type safety is maintained by controlling all items in the grid through itemsProvider.
+		final com.vaadin.flow.component.grid.Grid rawGrid = new com.vaadin.flow.component.grid.Grid<>(Object.class, false);
+		grid = (com.vaadin.flow.component.grid.Grid<T>) rawGrid;
 		grid.setSizeFull();
 		grid.setMinHeight("300px");
 		// Apply CGrid-like styling
@@ -319,52 +324,32 @@ public class CEntitySelectionDialog<T extends CEntityDB<T>> extends Dialog {
 		// ID column
 		grid.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setHeader("ID").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
 				.setSortable(true).setKey("id");
-		// Name column - check if entity has getName method
-		grid.addColumn(item -> {
-			try {
-				final java.lang.reflect.Method method = item.getClass().getMethod("getName");
-				final Object result = method.invoke(item);
-				return result != null ? result.toString() : "";
-			} catch (final Exception e) {
-				return "";
-			}
-		}).setHeader("Name").setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name");
-		// Description column - check if entity has getDescription method
-		grid.addColumn(item -> {
-			try {
-				final java.lang.reflect.Method method = item.getClass().getMethod("getDescription");
-				final Object result = method.invoke(item);
-				return result != null ? result.toString() : "";
-			} catch (final Exception e) {
-				return "";
-			}
-		}).setHeader("Description").setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true).setKey("description");
+		// Name column - use cached method
+		grid.addColumn(this::getEntityName).setHeader("Name").setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name");
+		// Description column - use cached method
+		grid.addColumn(this::getEntityDescription).setHeader("Description").setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true)
+				.setKey("description");
 		// Status column with color support for CProjectItem entities
 		grid.addComponentColumn(item -> {
 			final CGridCell statusCell = new CGridCell();
 			statusCell.setShowIcon(true);
-			try {
-				if (item instanceof CProjectItem) {
-					final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-					if (projectItem.getStatus() != null) {
-						statusCell.setStatusValue(projectItem.getStatus());
-					} else {
-						statusCell.setText("No Status");
-					}
+			if (item instanceof CProjectItem) {
+				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
+				if (projectItem.getStatus() != null) {
+					statusCell.setStatusValue(projectItem.getStatus());
 				} else {
-					// Try to get status via reflection
-					final java.lang.reflect.Method method = item.getClass().getMethod("getStatus");
-					final Object status = method.invoke(item);
-					if (status instanceof CEntityDB) {
-						statusCell.setStatusValue((CEntityDB<?>) status);
-					} else if (status != null) {
-						statusCell.setText(status.toString());
-					} else {
-						statusCell.setText("N/A");
-					}
+					statusCell.setText("No Status");
 				}
-			} catch (final Exception e) {
-				statusCell.setText("N/A");
+			} else {
+				// Use cached method
+				final Object status = getEntityStatus(item);
+				if (status instanceof CEntityDB) {
+					statusCell.setStatusValue((CEntityDB<?>) status);
+				} else if (status != null) {
+					statusCell.setText(status.toString());
+				} else {
+					statusCell.setText("N/A");
+				}
 			}
 			return statusCell;
 		}).setHeader("Status").setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status");
@@ -394,6 +379,8 @@ public class CEntitySelectionDialog<T extends CEntityDB<T>> extends Dialog {
 		// Clear selection when entity type changes
 		selectedItems.clear();
 		updateSelectionIndicator();
+		// Cache reflection methods for the entity type
+		cacheReflectionMethods(config.getEntityClass());
 		// Configure grid columns for the new entity type
 		configureGridColumns();
 		// Load items
@@ -412,28 +399,92 @@ public class CEntitySelectionDialog<T extends CEntityDB<T>> extends Dialog {
 		}
 	}
 
+	/**
+	 * Caches reflection methods for the current entity type for better performance.
+	 */
+	private void cacheReflectionMethods(final Class<?> entityClass) {
+		try {
+			cachedGetNameMethod = entityClass.getMethod("getName");
+		} catch (final NoSuchMethodException e) {
+			cachedGetNameMethod = null;
+		}
+		try {
+			cachedGetDescriptionMethod = entityClass.getMethod("getDescription");
+		} catch (final NoSuchMethodException e) {
+			cachedGetDescriptionMethod = null;
+		}
+		try {
+			cachedGetStatusMethod = entityClass.getMethod("getStatus");
+		} catch (final NoSuchMethodException e) {
+			cachedGetStatusMethod = null;
+		}
+	}
+
+	/**
+	 * Gets name from entity using cached method.
+	 */
+	private String getEntityName(final T item) {
+		if (cachedGetNameMethod == null) {
+			return "";
+		}
+		try {
+			final Object result = cachedGetNameMethod.invoke(item);
+			return result != null ? result.toString() : "";
+		} catch (final Exception e) {
+			return "";
+		}
+	}
+
+	/**
+	 * Gets description from entity using cached method.
+	 */
+	private String getEntityDescription(final T item) {
+		if (cachedGetDescriptionMethod == null) {
+			return "";
+		}
+		try {
+			final Object result = cachedGetDescriptionMethod.invoke(item);
+			return result != null ? result.toString() : "";
+		} catch (final Exception e) {
+			return "";
+		}
+	}
+
+	/**
+	 * Gets status from entity using cached method.
+	 */
+	private Object getEntityStatus(final T item) {
+		if (cachedGetStatusMethod == null) {
+			return null;
+		}
+		try {
+			return cachedGetStatusMethod.invoke(item);
+		} catch (final Exception e) {
+			return null;
+		}
+	}
+
 	private void updateStatusFilterOptions() {
 		final Set<String> statuses = new HashSet<>();
 		for (final T item : allItems) {
-			try {
-				if (item instanceof CProjectItem) {
-					final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-					if (projectItem.getStatus() != null) {
-						statuses.add(projectItem.getStatus().getName());
-					}
-				} else {
-					final java.lang.reflect.Method method = item.getClass().getMethod("getStatus");
-					final Object status = method.invoke(item);
-					if (status instanceof CEntityDB) {
+			if (item instanceof CProjectItem) {
+				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
+				if (projectItem.getStatus() != null) {
+					statuses.add(projectItem.getStatus().getName());
+				}
+			} else {
+				final Object status = getEntityStatus(item);
+				if (status instanceof CEntityDB) {
+					try {
 						final java.lang.reflect.Method nameMethod = status.getClass().getMethod("getName");
 						final Object name = nameMethod.invoke(status);
 						if (name != null) {
 							statuses.add(name.toString());
 						}
+					} catch (final Exception e) {
+						// Ignore - status may not have getName
 					}
 				}
-			} catch (final Exception e) {
-				// Ignore - entity may not have status
 			}
 		}
 		statusFilter.setItems(statuses);
@@ -454,54 +505,41 @@ public class CEntitySelectionDialog<T extends CEntityDB<T>> extends Dialog {
 					matches = false;
 				}
 			}
-			// Name filter
+			// Name filter - use cached method
 			if (matches && (nameValue != null) && !nameValue.isBlank()) {
-				try {
-					final java.lang.reflect.Method method = item.getClass().getMethod("getName");
-					final Object result = method.invoke(item);
-					final String name = result != null ? result.toString() : "";
-					if (!name.toLowerCase().contains(nameValue.toLowerCase())) {
-						matches = false;
-					}
-				} catch (final Exception e) {
+				final String name = getEntityName(item);
+				if (!name.toLowerCase().contains(nameValue.toLowerCase())) {
 					matches = false;
 				}
 			}
-			// Description filter
+			// Description filter - use cached method
 			if (matches && (descValue != null) && !descValue.isBlank()) {
-				try {
-					final java.lang.reflect.Method method = item.getClass().getMethod("getDescription");
-					final Object result = method.invoke(item);
-					final String desc = result != null ? result.toString() : "";
-					if (!desc.toLowerCase().contains(descValue.toLowerCase())) {
-						matches = false;
-					}
-				} catch (final Exception e) {
+				final String desc = getEntityDescription(item);
+				if (!desc.toLowerCase().contains(descValue.toLowerCase())) {
 					matches = false;
 				}
 			}
 			// Status filter
 			if (matches && (statusValue != null) && !statusValue.isBlank()) {
-				try {
-					String statusName = null;
-					if (item instanceof CProjectItem) {
-						final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-						if (projectItem.getStatus() != null) {
-							statusName = projectItem.getStatus().getName();
-						}
-					} else {
-						final java.lang.reflect.Method method = item.getClass().getMethod("getStatus");
-						final Object status = method.invoke(item);
-						if (status instanceof CEntityDB) {
+				String statusName = null;
+				if (item instanceof CProjectItem) {
+					final CProjectItem<?> projectItem = (CProjectItem<?>) item;
+					if (projectItem.getStatus() != null) {
+						statusName = projectItem.getStatus().getName();
+					}
+				} else {
+					final Object status = getEntityStatus(item);
+					if (status instanceof CEntityDB) {
+						try {
 							final java.lang.reflect.Method nameMethod = status.getClass().getMethod("getName");
 							final Object name = nameMethod.invoke(status);
 							statusName = name != null ? name.toString() : null;
+						} catch (final Exception e) {
+							statusName = null;
 						}
 					}
-					if ((statusName == null) || !statusName.equals(statusValue)) {
-						matches = false;
-					}
-				} catch (final Exception e) {
+				}
+				if ((statusName == null) || !statusName.equals(statusValue)) {
 					matches = false;
 				}
 			}
