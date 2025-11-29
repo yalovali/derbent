@@ -21,8 +21,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.view.CAbstractPage;
-import tech.derbent.api.ui.component.CH3;
-import tech.derbent.api.ui.dialogs.CExceptionDialog;
+import tech.derbent.api.ui.component.basic.CH3;
+import tech.derbent.api.ui.dialogs.CDialogException;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -415,7 +415,7 @@ public final class CDashboardView extends CAbstractPage {
 		LOGGER.error("handleError called with message: {}, exception: {}", message, exception != null ? exception.getMessage() : "null");
 		try {
 			if ((message != null) && (exception != null)) {
-				final CExceptionDialog dialog = new CExceptionDialog(exception);
+				final CDialogException dialog = new CDialogException(exception);
 				if (dialog != null) {
 					dialog.open();
 				}

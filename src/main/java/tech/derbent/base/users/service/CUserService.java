@@ -28,7 +28,7 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.ui.component.CComponentUserProjectSettings;
+import tech.derbent.api.ui.component.enhanced.CComponentUserProjectSettings;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;

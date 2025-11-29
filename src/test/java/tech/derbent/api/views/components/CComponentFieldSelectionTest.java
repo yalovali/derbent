@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import tech.derbent.api.ui.component.CComponentFieldSelection;
+import tech.derbent.api.ui.component.enhanced.CComponentFieldSelection;
 
 /** Unit tests for CComponentFieldSelection to verify List-based functionality and ordering preservation. */
 public class CComponentFieldSelectionTest {

@@ -10,7 +10,7 @@ import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.ui.component.CVerticalLayout;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;

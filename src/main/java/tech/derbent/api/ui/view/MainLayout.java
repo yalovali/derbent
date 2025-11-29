@@ -34,9 +34,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.interfaces.IPageTitleProvider;
-import tech.derbent.api.ui.component.CHierarchicalSideMenu;
-import tech.derbent.api.ui.component.CViewToolbar;
-import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.component.enhanced.CHierarchicalSideMenu;
+import tech.derbent.api.ui.component.enhanced.CViewToolbar;
+import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
@@ -47,7 +47,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
-import tech.derbent.base.users.view.CUserProfileDialog;
+import tech.derbent.base.users.view.CDialogUserProfile;
 
 /** The main layout is a top-level placeholder for other views. It provides a side navigation menu and a user menu. */
 // vaadin applayout is used to create a layout with a side navigation menu it consists of
@@ -226,17 +226,17 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			final var currentUserOptional = sessionService.getActiveUser();
 			if (currentUserOptional.isEmpty()) {
 				LOGGER.warn("No active user found in session");
-				new CWarningDialog("Unable to load user profile. Please try logging in again.").open();
+				new CDialogWarning("Unable to load user profile. Please try logging in again.").open();
 				return;
 			}
 			final CUser currentCUser = currentUserOptional.get();
 			// Create and open profile dialog
-			final CUserProfileDialog profileDialog = new CUserProfileDialog(currentCUser, this::saveUserProfile, passwordEncoder);
+			final CDialogUserProfile profileDialog = new CDialogUserProfile(currentCUser, this::saveUserProfile, passwordEncoder);
 			profileDialog.open();
 			LOGGER.debug("User profile dialog opened successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error opening user profile dialog", e);
-			new CWarningDialog("Failed to open profile dialog: " + e.getMessage()).open();
+			new CDialogWarning("Failed to open profile dialog: " + e.getMessage()).open();
 		}
 	}
 

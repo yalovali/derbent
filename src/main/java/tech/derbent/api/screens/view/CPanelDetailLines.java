@@ -9,7 +9,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CViewsService;
-import tech.derbent.api.ui.component.CComponentListDetailLines;
+import tech.derbent.api.ui.component.enhanced.CComponentListDetailLines;
 import tech.derbent.api.utils.Check;
 
 public class CPanelDetailLines extends CPanelDetailSectionBase {

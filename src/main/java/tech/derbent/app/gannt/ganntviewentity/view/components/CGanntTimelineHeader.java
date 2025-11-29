@@ -12,9 +12,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
-import tech.derbent.api.ui.component.CButton;
-import tech.derbent.api.ui.component.CHorizontalLayout;
-import tech.derbent.api.ui.component.CVerticalLayout;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 

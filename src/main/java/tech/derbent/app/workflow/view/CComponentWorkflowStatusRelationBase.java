@@ -6,7 +6,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.ui.component.CComponentRelationPanelBase;
+import tech.derbent.api.ui.component.enhanced.CComponentRelationPanelBase;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.roles.service.CUserProjectRoleService;

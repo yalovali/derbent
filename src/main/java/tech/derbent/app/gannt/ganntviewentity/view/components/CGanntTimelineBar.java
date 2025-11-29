@@ -3,8 +3,8 @@ package tech.derbent.app.gannt.ganntviewentity.view.components;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import com.vaadin.flow.component.html.Div;
-import tech.derbent.api.ui.component.CDiv;
-import tech.derbent.api.ui.component.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.app.gannt.ganntitem.domain.CGanntItem;
 

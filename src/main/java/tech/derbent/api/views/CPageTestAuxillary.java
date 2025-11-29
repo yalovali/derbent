@@ -15,9 +15,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.ui.component.CButton;
-import tech.derbent.api.ui.component.CDiv;
-import tech.derbent.api.ui.component.CFlexLayout;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CFlexLayout;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.views.CPageTestAuxillaryService.RouteEntry;
 

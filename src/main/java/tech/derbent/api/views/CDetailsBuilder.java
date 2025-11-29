@@ -21,7 +21,7 @@ import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.ui.component.CTabSheet;
+import tech.derbent.api.ui.component.basic.CTabSheet;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;

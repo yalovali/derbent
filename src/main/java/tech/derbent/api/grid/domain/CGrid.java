@@ -23,7 +23,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CGridCell;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.ui.component.CPictureSelector;
+import tech.derbent.api.ui.component.enhanced.CPictureSelector;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;

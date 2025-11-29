@@ -1,6 +1,6 @@
 package tech.derbent.app.gannt.ganntviewentity.view;
 
-import tech.derbent.api.ui.component.CDiv;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.app.gannt.ganntviewentity.domain.CGanntViewEntity;
 
 public class CGanntView extends CDiv {

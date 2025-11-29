@@ -6,10 +6,10 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import tech.derbent.api.components.CColorPickerComboBox;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.ui.component.CDiv;
-import tech.derbent.api.ui.component.CVerticalLayout;
+import tech.derbent.api.ui.component.basic.CColorPickerComboBox;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 
 /** Demo page to showcase the CColorPickerComboBox component with background color functionality */
 @Route("color-picker-demo")

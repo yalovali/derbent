@@ -21,7 +21,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.api.ui.component.CEntityLabel;
+import tech.derbent.api.ui.component.basic.CEntityLabel;
 import tech.derbent.api.utils.Check;
 
 /** Generic dual list selector component for selecting and ordering items from a source list. This component provides a two-panel interface with

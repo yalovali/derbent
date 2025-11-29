@@ -8,7 +8,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
-public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CDBEditDialog<EntityClass> {
+public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CDialogDBEdit<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
 

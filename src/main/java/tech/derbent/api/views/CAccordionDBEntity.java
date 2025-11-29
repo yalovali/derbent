@@ -7,7 +7,7 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.ui.component.CAccordion;
+import tech.derbent.api.ui.component.basic.CAccordion;
 
 public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CAccordion implements IContentOwner {
 

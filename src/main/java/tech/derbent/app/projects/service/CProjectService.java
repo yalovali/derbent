@@ -13,7 +13,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.ui.component.CComponentProjectUserSettings;
+import tech.derbent.api.ui.component.enhanced.CComponentProjectUserSettings;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;

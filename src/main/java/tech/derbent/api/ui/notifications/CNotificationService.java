@@ -5,11 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import tech.derbent.api.ui.dialogs.CConfirmationDialog;
-import tech.derbent.api.ui.dialogs.CExceptionDialog;
-import tech.derbent.api.ui.dialogs.CInformationDialog;
-import tech.derbent.api.ui.dialogs.CMessageWithDetailsDialog;
-import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.dialogs.CDialogConfirmation;
+import tech.derbent.api.ui.dialogs.CDialogException;
+import tech.derbent.api.ui.dialogs.CDialogInformation;
+import tech.derbent.api.ui.dialogs.CDialogMessageWithDetails;
+import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.utils.Check;
 
 /** CNotificationService - Centralized service for all notifications and user messages. Provides consistent styling, positioning, and behavior for: -
@@ -32,7 +32,7 @@ public class CNotificationService {
 		Check.notBlank(message, "Message cannot be empty");
 		Check.notNull(exception, "Exception cannot be null");
 		LOGGER.debug("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
-		final CMessageWithDetailsDialog dialog = new CMessageWithDetailsDialog(message, exception);
+		final CDialogMessageWithDetails dialog = new CDialogMessageWithDetails(message, exception);
 		dialog.open();
 	}
 
@@ -41,7 +41,7 @@ public class CNotificationService {
 	public static void showConfirmationDialog(final String message, final Runnable onConfirm) throws Exception {
 		Check.notBlank(message, "Confirmation message cannot be empty");
 		LOGGER.debug("Showing confirmation dialog: {}", message);
-		final CConfirmationDialog dialog = new CConfirmationDialog(message, onConfirm);
+		final CDialogConfirmation dialog = new CDialogConfirmation(message, onConfirm);
 		dialog.open();
 	}
 
@@ -53,7 +53,7 @@ public class CNotificationService {
 		LOGGER.debug("Showing confirmation dialog: {} with confirm text: {}", message, confirmText);
 		// Note: Current CConfirmationDialog doesn't support custom button text
 		// Using standard confirmation for now - this could be enhanced later
-		final CConfirmationDialog dialog = new CConfirmationDialog(message, onConfirm);
+		final CDialogConfirmation dialog = new CDialogConfirmation(message, onConfirm);
 		dialog.open();
 	}
 	// Convenience methods for common operations
@@ -101,7 +101,7 @@ public class CNotificationService {
 	public static void showErrorDialog(final Exception exception) {
 		Check.notNull(exception, "Exception cannot be null");
 		LOGGER.debug("Showing error dialog for exception: {}", exception.getClass().getSimpleName());
-		final CExceptionDialog dialog = new CExceptionDialog(exception);
+		final CDialogException dialog = new CDialogException(exception);
 		dialog.open();
 	}
 
@@ -109,7 +109,7 @@ public class CNotificationService {
 	public static void showErrorDialog(final String message) {
 		Check.notBlank(message, "Error dialog message cannot be empty");
 		LOGGER.debug("Showing error dialog: {}", message);
-		final CExceptionDialog dialog = new CExceptionDialog(new RuntimeException(message));
+		final CDialogException dialog = new CDialogException(new RuntimeException(message));
 		dialog.open();
 	}
 
@@ -125,7 +125,7 @@ public class CNotificationService {
 	public static void showInfoDialog(final String message) {
 		Check.notBlank(message, "Info dialog message cannot be empty");
 		LOGGER.debug("Showing info dialog: {}", message);
-		final CInformationDialog dialog = new CInformationDialog(message);
+		final CDialogInformation dialog = new CDialogInformation(message);
 		dialog.open();
 	}
 
@@ -169,7 +169,7 @@ public class CNotificationService {
 	public static void showWarningDialog(final String message) {
 		Check.notBlank(message, "Warning dialog message cannot be empty");
 		LOGGER.debug("Showing warning dialog: {}", message);
-		final CWarningDialog dialog = new CWarningDialog(message);
+		final CDialogWarning dialog = new CDialogWarning(message);
 		dialog.open();
 	}
 }

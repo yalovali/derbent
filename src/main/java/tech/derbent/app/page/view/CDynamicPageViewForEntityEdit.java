@@ -2,8 +2,8 @@ package tech.derbent.app.page.view;
 
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.ui.component.CCrudToolbar;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
+import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;

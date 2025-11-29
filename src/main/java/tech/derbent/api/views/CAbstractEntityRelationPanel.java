@@ -15,8 +15,8 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.ui.component.CButton;
-import tech.derbent.api.ui.dialogs.CConfirmationDialog;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.dialogs.CDialogConfirmation;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
@@ -26,7 +26,6 @@ import tech.derbent.api.utils.Check;
  * @param <RelationEntity> The relationship entity type (e.g., CUserProjectSettings) */
 public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityDB<ParentEntity>, RelationEntity extends CEntityDB<RelationEntity>>
 		extends CAccordionDBEntity<ParentEntity> {
-
 	private static final long serialVersionUID = 1L;
 	protected Supplier<List<RelationEntity>> getRelations;
 	protected final Grid<RelationEntity> grid = new Grid<>(getRelationEntityClass(), false);
@@ -65,7 +64,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 		Check.notNull(getRelations, "Get relations supplier cannot be null");
 		Check.notNull(setRelations, "Set relations consumer cannot be null");
 		final String confirmMessage = createDeleteConfirmationMessage(selected);
-		new CConfirmationDialog(confirmMessage, () -> {
+		new CDialogConfirmation(confirmMessage, () -> {
 			final List<RelationEntity> relations = getRelations.get();
 			relations.remove(selected);
 			setRelations.accept(relations);
@@ -92,8 +91,10 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 
 	/** Abstract method to open the add dialog */
 	protected abstract void on_actionOpenAddDialog();
+
 	/** Abstract method to open the edit dialog */
 	protected abstract void on_actionOpenEditDialog();
+
 	/** Abstract method to handle relation save events */
 	protected abstract void onRelationSaved(final RelationEntity relation);
 

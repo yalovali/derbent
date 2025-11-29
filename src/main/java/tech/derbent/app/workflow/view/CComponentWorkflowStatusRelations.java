@@ -5,7 +5,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
@@ -45,10 +45,10 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 	@Override
 	protected void openAddDialog() throws Exception {
 		try {
-			new CWorkflowStatusRelationDialog(this, (CWorkflowEntityService) entityService, statusService, workflowStatusRelationService, null,
+			new CDialogWorkflowStatusRelation(this, (CWorkflowEntityService) entityService, statusService, workflowStatusRelationService, null,
 					getCurrentEntity(), this::onSettingsSaved).open();
 		} catch (Exception e) {
-			new CWarningDialog("Failed to open add dialog: " + e.getMessage()).open();
+			new CDialogWarning("Failed to open add dialog: " + e.getMessage()).open();
 			throw e;
 		}
 	}
@@ -56,10 +56,10 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 	@Override
 	protected void openEditDialog() throws Exception {
 		try {
-			new CWorkflowStatusRelationDialog(this, (CWorkflowEntityService) entityService, statusService, workflowStatusRelationService,
+			new CDialogWorkflowStatusRelation(this, (CWorkflowEntityService) entityService, statusService, workflowStatusRelationService,
 					getSelectedRelation(), getCurrentEntity(), this::onSettingsSaved).open();
 		} catch (Exception e) {
-			new CWarningDialog("Failed to open edit dialog: " + e.getMessage()).open();
+			new CDialogWarning("Failed to open edit dialog: " + e.getMessage()).open();
 			throw e;
 		}
 	}

@@ -26,10 +26,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import tech.derbent.api.config.CDataInitializer;
-import tech.derbent.api.ui.component.CButton;
-import tech.derbent.api.ui.component.CDiv;
-import tech.derbent.api.ui.component.CHorizontalLayout;
-import tech.derbent.api.ui.dialogs.CInformationDialog;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.dialogs.CDialogInformation;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
@@ -190,7 +190,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(false); // veya empty check’li bir metod yaz
 							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-							CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+							CDialogInformation info = new CDialogInformation("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 							info.open();
 							populateForm();
 							// UI.getCurrent().getPage().reload();
@@ -207,7 +207,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(true); // veya empty check’li bir metod yaz
 							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-							CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+							CDialogInformation info = new CDialogInformation("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 							info.open();
 							populateForm();
 							// UI.getCurrent().getPage().reload();

@@ -7,7 +7,7 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
-import tech.derbent.api.ui.component.CVerticalLayout;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 
 public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout {
 

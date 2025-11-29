@@ -2,7 +2,7 @@ package tech.derbent.api.views.components;
 
 import java.util.Arrays;
 import java.util.List;
-import tech.derbent.api.ui.component.CComponentFieldSelection;
+import tech.derbent.api.ui.component.enhanced.CComponentFieldSelection;
 
 /** Manual test class to demonstrate CComponentFieldSelection with Grid implementation. This test creates a simple standalone instance of the
  * component to verify the Grid-based implementation works correctly. Run this test to visually inspect the component structure. */

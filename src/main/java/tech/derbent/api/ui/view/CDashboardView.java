@@ -17,7 +17,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.view.CAbstractPage;
-import tech.derbent.api.ui.component.CDashboardStatCard;
+import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectService;

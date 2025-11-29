@@ -10,11 +10,11 @@ import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
-import tech.derbent.api.ui.component.CAccordion;
-import tech.derbent.api.ui.component.CDiv;
-import tech.derbent.api.ui.component.CHorizontalLayout;
-import tech.derbent.api.ui.component.CTab;
 import tech.derbent.api.ui.component.IFormContainerComponent;
+import tech.derbent.api.ui.component.basic.CAccordion;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CTab;
 import tech.derbent.base.users.domain.CUser;
 
 public class CPanelDetails extends CDiv {

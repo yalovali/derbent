@@ -19,10 +19,10 @@ import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.entity.view.CAbstractPage;
-import tech.derbent.api.ui.component.CButton;
-import tech.derbent.api.ui.dialogs.CConfirmationDialog;
-import tech.derbent.api.ui.dialogs.CInformationDialog;
-import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.dialogs.CDialogConfirmation;
+import tech.derbent.api.ui.dialogs.CDialogInformation;
+import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.domain.CSystemSettings;
@@ -220,7 +220,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.debug("cancelChanges called for CSystemSettingsView");
 			if (currentSettings == null) {
 				LOGGER.warn("No current settings available to revert to");
-				new CWarningDialog("No settings loaded to revert to.").open();
+				new CDialogWarning("No settings loaded to revert to.").open();
 				return;
 			}
 			// Reload the current settings from the database to revert any unsaved changes
@@ -259,7 +259,7 @@ public class CSystemSettingsView extends CAbstractPage {
 						final CDataInitializer init = new CDataInitializer(sessionService);
 						init.reloadForced(false);
 						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-						final CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						final CDialogInformation info = new CDialogInformation("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 						info.open();
 						// UI.getCurrent().getPage().reload();
 					} catch (final Exception ex) {
@@ -276,7 +276,7 @@ public class CSystemSettingsView extends CAbstractPage {
 						final CDataInitializer init = new CDataInitializer(sessionService);
 						init.reloadForced(true);
 						Notification.show("Minimum örnek veri yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-						final CInformationDialog info = new CInformationDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						final CDialogInformation info = new CDialogInformation("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 						info.open();
 						// UI.getCurrent().getPage().reload();
 					} catch (final Exception ex) {
@@ -352,7 +352,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			return;
 		}
 		// Show confirmation dialog
-		final var confirmDialog = new CConfirmationDialog(
+		final var confirmDialog = new CDialogConfirmation(
 				"Are you sure you want to reset ALL system settings to default values? "
 						+ "This will affect application behavior, security settings, and file management. " + "This action cannot be undone.",
 				() -> performReset());
@@ -375,7 +375,7 @@ public class CSystemSettingsView extends CAbstractPage {
 	/** Shows a warning dialog with the specified message.
 	 * @param message the warning message */
 	private void showWarningDialog(final String message) {
-		final var warningDialog = new CWarningDialog(message);
+		final var warningDialog = new CDialogWarning(message);
 		warningDialog.open();
 	}
 
@@ -413,7 +413,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			}
 			testResults.append("\nConfiguration appears to be valid.");
 			// Show test results
-			final var testDialog = new CInformationDialog(testResults.toString());
+			final var testDialog = new CDialogInformation(testResults.toString());
 			testDialog.open();
 			LOGGER.info("Configuration test completed successfully");
 		} catch (final Exception e) {
