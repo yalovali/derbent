@@ -1,11 +1,9 @@
 package tech.derbent.base.setup.view;
 
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -20,9 +18,6 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.dialogs.CDialogConfirmation;
-import tech.derbent.api.ui.dialogs.CDialogInformation;
-import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.domain.CSystemSettings;
@@ -154,7 +149,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.debug("System settings form created successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating system settings form", e);
-			Notification.show("Error creating form: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			CNotificationService.showException("Error creating form", e);
 		}
 	}
 
@@ -182,7 +177,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.debug("System settings view initialized successfully (data loading deferred)");
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing system settings view", e);
-			Notification.show("Error initializing view: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			CNotificationService.showException("Error initializing view", e);
 		}
 	}
 
@@ -211,7 +206,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			errorDiv.addClassName("error-message");
 			errorDiv.add(new Paragraph("Error loading system settings: " + e.getMessage()));
 			formContainer.add(errorDiv);
-			Notification.show("Error loading system settings: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			CNotificationService.showException("Error loading system settings", e);
 		}
 	}
 
@@ -220,7 +215,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.debug("cancelChanges called for CSystemSettingsView");
 			if (currentSettings == null) {
 				LOGGER.warn("No current settings available to revert to");
-				new CDialogWarning("No settings loaded to revert to.").open();
+				CNotificationService.showWarning("No settings loaded to revert to.");
 				return;
 			}
 			// Reload the current settings from the database to revert any unsaved changes
@@ -229,7 +224,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			// Refresh the form with the original values
 			binder.readBean(currentSettings);
 			// Show confirmation that changes were cancelled
-			Notification.show("Changes cancelled - form reverted to saved state", 3000, Notification.Position.TOP_CENTER);
+			CNotificationService.showInfo("Changes cancelled - form reverted to saved state");
 			LOGGER.info("Changes cancelled successfully, form reverted to saved state");
 		} catch (final Exception e) {
 			CNotificationService.showException("Error cancelling changes", e);
@@ -244,7 +239,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			currentSettings = systemSettingsService.getOrCreateSystemSettings();
 			// Refresh form
 			binder.readBean(currentSettings);
-			Notification.show("Settings reloaded from database", 2000, Notification.Position.TOP_CENTER);
+			CNotificationService.showInfo("Settings reloaded from database");
 			LOGGER.info("System settings reloaded successfully");
 		} catch (final Exception e) {
 			CNotificationService.showException("Error reloading system settings", e);
@@ -253,37 +248,39 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	/** Reloads the system settings from the database. */
 	private void on_actionResetDatabase() {
-		final ConfirmDialog dialog =
-				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", e -> {
-					try {
-						final CDataInitializer init = new CDataInitializer(sessionService);
-						init.reloadForced(false);
-						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-						final CDialogInformation info = new CDialogInformation("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-						info.open();
-						// UI.getCurrent().getPage().reload();
-					} catch (final Exception ex) {
-						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
-					}
-				}, "Vazgeç", e -> {});
-		dialog.open();
+		try {
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> {
+						try {
+							final CDataInitializer init = new CDataInitializer(sessionService);
+							init.reloadForced(false);
+							CNotificationService.showSuccess("Sample data yeniden yüklendi.");
+							CNotificationService.showInfoDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						} catch (final Exception ex) {
+							CNotificationService.showException("Hata", ex);
+						}
+					});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
 	}
 
 	private void on_actionResetDatabaseMinimal() {
-		final ConfirmDialog dialog = new ConfirmDialog("Onay",
-				"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", e -> {
-					try {
-						final CDataInitializer init = new CDataInitializer(sessionService);
-						init.reloadForced(true);
-						Notification.show("Minimum örnek veri yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-						final CDialogInformation info = new CDialogInformation("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-						info.open();
-						// UI.getCurrent().getPage().reload();
-					} catch (final Exception ex) {
-						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
-					}
-				}, "Vazgeç", e -> {});
-		dialog.open();
+		try {
+			CNotificationService.showConfirmationDialog(
+					"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", () -> {
+						try {
+							final CDataInitializer init = new CDataInitializer(sessionService);
+							init.reloadForced(true);
+							CNotificationService.showSuccess("Minimum örnek veri yeniden yüklendi.");
+							CNotificationService.showInfoDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						} catch (final Exception ex) {
+							CNotificationService.showException("Hata", ex);
+						}
+					});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
 	}
 
 	/** Saves the current system settings with validation. */
@@ -291,7 +288,7 @@ public class CSystemSettingsView extends CAbstractPage {
 		LOGGER.debug("saveSettings called for CSystemSettings");
 		try {
 			if (currentSettings == null) {
-				showWarningDialog("System settings could not be loaded. Please refresh the page.");
+				CNotificationService.showWarning("System settings could not be loaded. Please refresh the page.");
 				return;
 			}
 			// Validate form
@@ -326,11 +323,11 @@ public class CSystemSettingsView extends CAbstractPage {
 			currentSettings = updatedSettings;
 			// Refresh form with new values
 			binder.readBean(currentSettings);
-			Notification.show("System settings reset to defaults successfully", 3000, Notification.Position.TOP_CENTER);
+			CNotificationService.showSuccess("System settings reset to defaults successfully");
 			LOGGER.info("System settings reset to defaults successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error resetting system settings to defaults", e);
-			Notification.show("Error resetting settings: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			CNotificationService.showException("Error resetting settings", e);
 		}
 	}
 
@@ -348,15 +345,14 @@ public class CSystemSettingsView extends CAbstractPage {
 	private void resetToDefaults() throws Exception {
 		LOGGER.debug("resetToDefaults called for CSystemSettings");
 		if (currentSettings == null) {
-			showWarningDialog("System settings could not be loaded. Please refresh the page.");
+			CNotificationService.showWarning("System settings could not be loaded. Please refresh the page.");
 			return;
 		}
 		// Show confirmation dialog
-		final var confirmDialog = new CDialogConfirmation(
+		CNotificationService.showConfirmationDialog(
 				"Are you sure you want to reset ALL system settings to default values? "
 						+ "This will affect application behavior, security settings, and file management. " + "This action cannot be undone.",
 				() -> performReset());
-		confirmDialog.open();
 	}
 
 	/** Sets the session service. This is called after bean creation via configuration class.
@@ -372,19 +368,12 @@ public class CSystemSettingsView extends CAbstractPage {
 		// No specific toolbar needed for this view
 	}
 
-	/** Shows a warning dialog with the specified message.
-	 * @param message the warning message */
-	private void showWarningDialog(final String message) {
-		final var warningDialog = new CDialogWarning(message);
-		warningDialog.open();
-	}
-
 	/** Tests the current configuration settings. Performs various checks to validate the configuration. */
 	private void testConfiguration() {
 		LOGGER.debug("testConfiguration called");
 		try {
 			if (currentSettings == null) {
-				showWarningDialog("System settings could not be loaded. Please refresh the page.");
+				CNotificationService.showWarning("System settings could not be loaded. Please refresh the page.");
 				return;
 			}
 			// Perform configuration tests
@@ -413,8 +402,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			}
 			testResults.append("\nConfiguration appears to be valid.");
 			// Show test results
-			final var testDialog = new CDialogInformation(testResults.toString());
-			testDialog.open();
+			CNotificationService.showInfoDialog(testResults.toString());
 			LOGGER.info("Configuration test completed successfully");
 		} catch (final Exception e) {
 			CNotificationService.showException("Error testing configuration: " + e.getMessage(), e);

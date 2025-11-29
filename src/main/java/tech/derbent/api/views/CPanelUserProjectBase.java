@@ -11,8 +11,6 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.dialogs.CDialogConfirmation;
-import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -50,15 +48,15 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	protected void deleteSelected() throws Exception {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 		if (selected == null) {
-			new CDialogWarning("Please select a relationship to delete.").open();
+			CNotificationService.showWarning("Please select a relationship to delete.");
 			return;
 		}
 		if ((getSettings == null)) {
-			new CDialogWarning("Settings handlers are not available. Please refresh the page.").open();
+			CNotificationService.showWarning("Settings handlers are not available. Please refresh the page.");
 			return;
 		}
 		final String confirmMessage = createDeleteConfirmationMessage(selected);
-		new CDialogConfirmation(confirmMessage, () -> {
+		CNotificationService.showConfirmationDialog(confirmMessage, () -> {
 			// Use service layer to properly handle lazy-loaded collections and transactions
 			final CProject project = selected.getProject();
 			final CUser user = selected.getUser();
@@ -67,7 +65,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 				LOGGER.debug("Successfully removed user {} from project {}", user, project);
 			} catch (final Exception e) {
 				LOGGER.error("Error removing user from project.");
-				new CDialogWarning("Failed to remove user from project: " + e.getMessage()).open();
+				CNotificationService.showWarning("Failed to remove user from project: " + e.getMessage());
 				return;
 			}
 			// Refresh the view after successful deletion
@@ -75,7 +73,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 				saveEntity.run();
 			}
 			refresh();
-		}).open();
+		});
 	}
 
 	/** Gets the permission as a formatted string */
@@ -160,7 +158,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 		if (selected == null) {
 			final String message = String.format("Please select an item to %s.", actionName);
-			new CDialogWarning(message).open();
+			CNotificationService.showWarning(message);
 			return false;
 		}
 		return true;
@@ -171,7 +169,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	 * @return true if projectService is available, false otherwise */
 	protected boolean validateServiceAvailability(final String serviceName) {
 		if (entityService == null) {
-			new CDialogWarning(serviceName + " service is not available. Please try again later.").open();
+			CNotificationService.showWarning(serviceName + " service is not available. Please try again later.");
 			return false;
 		}
 		return true;

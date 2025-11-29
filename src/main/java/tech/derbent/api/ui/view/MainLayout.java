@@ -36,7 +36,6 @@ import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.ui.component.enhanced.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.enhanced.CViewToolbar;
-import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
@@ -48,6 +47,7 @@ import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.base.users.view.CDialogUserProfile;
+import tech.derbent.api.ui.notifications.CNotificationService;
 
 /** The main layout is a top-level placeholder for other views. It provides a side navigation menu and a user menu. */
 // vaadin applayout is used to create a layout with a side navigation menu it consists of
@@ -226,7 +226,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			final var currentUserOptional = sessionService.getActiveUser();
 			if (currentUserOptional.isEmpty()) {
 				LOGGER.warn("No active user found in session");
-				new CDialogWarning("Unable to load user profile. Please try logging in again.").open();
+				CNotificationService.showWarning("Unable to load user profile. Please try logging in again.");
 				return;
 			}
 			final CUser currentCUser = currentUserOptional.get();
@@ -236,7 +236,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			LOGGER.debug("User profile dialog opened successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error opening user profile dialog", e);
-			new CDialogWarning("Failed to open profile dialog: " + e.getMessage()).open();
+			CNotificationService.showWarning("Failed to open profile dialog: " + e.getMessage());
 		}
 	}
 

@@ -5,14 +5,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -64,8 +58,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		this.activityService = activityService;
 		this.meetingService = meetingService;
 		LOGGER.debug("CComponentListSprintItems created");
-		// Setup the "Add From List" button with entity selection dialog
-		setupAddFromListButton();
 	}
 
 	@Override
@@ -91,7 +83,14 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	protected CButton create_buttonAdd() {}
+	protected CButton create_buttonAdd() {
+		// Use the base class implementation but with a list select icon
+		final CButton buttonAdd = new CButton(VaadinIcon.LIST_SELECT.create());
+		buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonAdd.setTooltipText("Add items to sprint");
+		buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
+		return buttonAdd;
+	}
 
 	/** Populates the component by refreshing the grid with sprint items. This method is called automatically by CFormBuilder when the binder's entity
 	 * changes. */
@@ -116,46 +115,13 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	protected void handleDoubleClick(final CSprintItem item) {
+	protected void on_gridItems_doubleClicked(final CSprintItem item) {
 		// Override to prevent edit dialog from opening on double-click
 		Check.notNull(item, "Double-clicked item cannot be null");
 		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
 		setSelectedItem(item);
 		updateButtonStates(true);
 		// Don't call openEditDialog - just select the item
-	}
-
-	/** Load available items for the selected type.
-	 * @param type     The item type
-	 * @param comboBox The combo box to populate */
-	protected void loadAvailableItems(final String type, final ComboBox<CProjectItem<?>> comboBox) {
-		Check.notNull(type, "Type cannot be null");
-		Check.notNull(comboBox, "ComboBox cannot be null");
-		Check.notNull(getMasterEntity(), "Current sprint cannot be null");
-		Check.notNull(getMasterEntity().getProject(), "Sprint project cannot be null");
-		final CProject project = getMasterEntity().getProject();
-		LOGGER.debug("Loading available items of type {} for project {}", type, project.getId());
-		try {
-			List<? extends CProjectItem<?>> items;
-			if (ITEM_TYPE_ACTIVITY.equals(type)) {
-				items = activityService.listByProject(project);
-				LOGGER.debug("Loaded {} activities", items.size());
-			} else if (ITEM_TYPE_MEETING.equals(type)) {
-				items = meetingService.listByProject(project);
-				LOGGER.debug("Loaded {} meetings", items.size());
-			} else {
-				LOGGER.warn("Unknown item type: {}", type);
-				CNotificationService.showWarning("Unknown item type: " + type);
-				return;
-			}
-			// Cast is safe because both CActivity and CMeeting extend CProjectItem
-			@SuppressWarnings ("unchecked")
-			final List<CProjectItem<?>> projectItems = (List<CProjectItem<?>>) items;
-			comboBox.setItems(projectItems);
-		} catch (final Exception e) {
-			LOGGER.error("Error loading available items", e);
-			CNotificationService.showException("Error loading items", e);
-		}
 	}
 
 	@Override
@@ -174,7 +140,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	protected void on_addButton_clicked() {
+	protected void on_buttonAdd_clicked() {
 		try {
 			String dialogTitle = "Select Items to Add to Sprint";
 			// Create entity type configurations
@@ -201,7 +167,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				}
 			};
 			LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
-			Consumer onItemsSelected = selectedItems -> {
+			final Consumer<List<?>> onItemsSelected = selectedItems -> {
 				LOGGER.debug("Selected {} items from entity selection dialog", selectedItems.size());
 				int addedCount = 0;
 				for (final Object obj : selectedItems) {
@@ -248,85 +214,5 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
 		// Sprint items are simple references (itemId + itemType)
 		// There's nothing meaningful to edit - users should delete and re-add instead
-	}
-
-	/** Open the item selection dialog to choose type and item to add. */
-	protected void openItemSelectionDialog() {
-		Check.notNull(getMasterEntity(), "Current sprint cannot be null when opening selection dialog");
-		Check.notNull(getMasterEntity().getProject(), "Sprint must have a project");
-		LOGGER.debug("Opening item selection dialog for sprint: {}", getMasterEntity().getId());
-		final Dialog dialog = new Dialog();
-		dialog.setHeaderTitle("Select Item to Add");
-		dialog.setWidth("600px");
-		// Create form layout
-		final VerticalLayout layout = new VerticalLayout();
-		layout.setSpacing(true);
-		layout.setPadding(false);
-		// Type selection
-		final ComboBox<String> typeComboBox = new ComboBox<>("Item Type");
-		typeComboBox.setItems(ITEM_TYPE_ACTIVITY, ITEM_TYPE_MEETING);
-		typeComboBox.setPlaceholder("Select type...");
-		typeComboBox.setRequired(true);
-		typeComboBox.setWidthFull();
-		// Item selection
-		final ComboBox<CProjectItem<?>> itemComboBox = new ComboBox<>("Item");
-		itemComboBox.setPlaceholder("Select item...");
-		itemComboBox.setRequired(true);
-		itemComboBox.setWidthFull();
-		itemComboBox.setEnabled(false);
-		itemComboBox.setItemLabelGenerator(item -> {
-			if (item == null) {
-				return "";
-			}
-			return item.getName() + " (ID: " + item.getId() + ")";
-		});
-		// When type is selected, load available items
-		typeComboBox.addValueChangeListener(e -> {
-			final String selectedType = e.getValue();
-			if (selectedType != null) {
-				LOGGER.debug("Type selected: {}", selectedType);
-				loadAvailableItems(selectedType, itemComboBox);
-				itemComboBox.setEnabled(true);
-			} else {
-				itemComboBox.setEnabled(false);
-				itemComboBox.clear();
-			}
-		});
-		layout.add(typeComboBox, itemComboBox);
-		// Create buttons
-		final Button saveButton = new Button("Add", VaadinIcon.CHECK.create());
-		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		saveButton.addClickListener(e -> {
-			final String type = typeComboBox.getValue();
-			final CProjectItem<?> item = itemComboBox.getValue();
-			if ((type == null) || (item == null)) {
-				CNotificationService.showWarning("Please select both type and item");
-				return;
-			}
-			try {
-				LOGGER.debug("Creating sprint item: type={}, itemId={}", type, item.getId());
-				// Create sprint item
-				final CSprintItem sprintItem = new CSprintItem();
-				sprintItem.setSprint(getMasterEntity());
-				sprintItem.setItemId(item.getId());
-				sprintItem.setItemType(type);
-				sprintItem.setItemOrder(getNextOrder());
-				sprintItem.setItem(item);
-				// Save
-				handleSave(sprintItem);
-				dialog.close();
-			} catch (final Exception ex) {
-				LOGGER.error("Error creating sprint item", ex);
-				CNotificationService.showException("Error adding item", ex);
-			}
-		});
-		final Button cancelButton = new Button("Cancel", e -> dialog.close());
-		final HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancelButton);
-		buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-		buttonLayout.setWidthFull();
-		dialog.add(layout);
-		dialog.getFooter().add(buttonLayout);
-		dialog.open();
-		LOGGER.debug("Item selection dialog opened");
 	}
 }

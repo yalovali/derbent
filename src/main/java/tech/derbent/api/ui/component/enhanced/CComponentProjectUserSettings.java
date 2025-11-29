@@ -3,7 +3,6 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.List;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectService;
 import tech.derbent.app.projects.view.CDialogProjectUserSettings;
@@ -11,6 +10,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.ui.notifications.CNotificationService;
 
 /** Component for managing users within a project (Project->User direction). This component displays all users assigned to a specific project and
  * allows: - Adding new user assignments - Editing existing user roles/permissions - Removing user assignments The component automatically updates
@@ -48,7 +48,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, null, getCurrentEntity(),
 					this::onSettingsSaved).open();
 		} catch (Exception e) {
-			new CDialogWarning("Failed to open add dialog: " + e.getMessage()).open();
+			CNotificationService.showWarning("Failed to open add dialog: " + e.getMessage());
 			throw e;
 		}
 	}
@@ -59,7 +59,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, getSelectedSetting(),
 					getCurrentEntity(), this::onSettingsSaved).open();
 		} catch (Exception e) {
-			new CDialogWarning("Failed to open edit dialog: " + e.getMessage()).open();
+			CNotificationService.showWarning("Failed to open edit dialog: " + e.getMessage());
 			throw e;
 		}
 	}

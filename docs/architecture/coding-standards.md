@@ -110,6 +110,50 @@ private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 private Boolean isActive;
 private Boolean isDeletable;
 private Boolean isCompleted;
+
+// UI Component fields - typeName convention
+private CButton buttonAdd;           // {type}{Name} format
+private CButton buttonDelete;
+private CDialog dialogConfirmation;
+private CVerticalLayout layoutMain;
+private CGrid<CEntity> gridItems;
+private ComboBox<String> comboBoxStatus;
+```
+
+### UI Component Field Naming (typeName Convention)
+
+All UI component fields must follow the `typeName` naming convention:
+
+| Pattern | Example | Description |
+|---------|---------|-------------|
+| `button{Name}` | `buttonAdd`, `buttonDelete` | For all buttons |
+| `dialog{Name}` | `dialogConfirmation`, `dialogSelection` | For dialogs |
+| `layout{Name}` | `layoutMain`, `layoutToolbar` | For layouts |
+| `grid{Name}` | `gridItems`, `gridUsers` | For grids |
+| `comboBox{Name}` | `comboBoxStatus`, `comboBoxType` | For combo boxes |
+| `textField{Name}` | `textFieldName`, `textFieldSearch` | For text fields |
+
+### Event Handler Naming Convention
+
+All event handlers must follow the `on_{componentName}_{eventType}` pattern:
+
+```java
+// Event handlers - on_{componentName}_{eventType} format
+protected void on_buttonAdd_clicked() { }
+protected void on_buttonDelete_clicked() { }
+protected void on_comboBoxStatus_selected(String status) { }
+protected void on_gridItems_doubleClicked(CEntity item) { }
+```
+
+### Factory Method Pattern for Components
+
+Use `create_{componentName}` pattern for component factory methods:
+
+```java
+// Factory methods - create_{componentName} format
+protected CButton create_buttonAdd() { }
+protected CButton create_buttonDelete() { }
+protected CDialog create_dialogConfirmation() { }
 ```
 
 ### Methods
