@@ -16,7 +16,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PermitAll
 public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
-	public static final String DEFAULT_COLOR = "#4b2900";
+	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - dashboard pages
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithoutGrid.class);
 	private static final long serialVersionUID = 1L;

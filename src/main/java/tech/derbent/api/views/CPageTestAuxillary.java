@@ -27,7 +27,7 @@ import tech.derbent.api.views.CPageTestAuxillaryService.RouteEntry;
 @PermitAll
 public class CPageTestAuxillary extends Main {
 
-	public static final String DEFAULT_COLOR = "#31701F";
+	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - test pages
 	public static final String DEFAULT_ICON = "vaadin:progressbar";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Test View";

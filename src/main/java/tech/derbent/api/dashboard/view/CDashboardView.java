@@ -39,7 +39,7 @@ import tech.derbent.base.users.service.CUserService;
 @PermitAll
 public final class CDashboardView extends CAbstractPage {
 
-	public static final String DEFAULT_COLOR = "var(--lumo-primary-color)";
+	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - home dashboard
 	public static final String DEFAULT_ICON = "vaadin:home";
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;

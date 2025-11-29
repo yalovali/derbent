@@ -19,7 +19,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "order_approval_id"))
 public class COrderApproval extends CEntityNamed<COrderApproval> {
 
-	public static final String DEFAULT_COLOR = "#28a745";
+	public static final String DEFAULT_COLOR = "#A9A08B"; // OpenWindows Disabled Gray - approvals
 	public static final String DEFAULT_ICON = "vaadin:check";
 	public static final String ENTITY_TITLE_PLURAL = "Order Approvals";
 	public static final String ENTITY_TITLE_SINGULAR = "Order Approval";

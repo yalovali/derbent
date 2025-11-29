@@ -11,7 +11,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase implements ICrudToolbarOwnerPage {
 
-	public static final String DEFAULT_COLOR = "#341b00";
+	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - entity edit
 	public static final String DEFAULT_ICON = "vaadin:database";
 	private static final long serialVersionUID = 1L;
 	protected CCrudToolbar crudToolbar;

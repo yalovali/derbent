@@ -30,7 +30,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
 public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision> {
 
-	public static final String DEFAULT_COLOR = "#e83e8c";
+	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 	public static final String ENTITY_TITLE_PLURAL = "Decisions";

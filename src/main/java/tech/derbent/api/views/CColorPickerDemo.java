@@ -17,7 +17,7 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 @AnonymousAllowed
 public class CColorPickerDemo extends Main {
 
-	public static final String DEFAULT_COLOR = "#9C27B0";
+	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - color picker demo
 	public static final String DEFAULT_ICON = "vaadin:paintbrush";
 	private static final long serialVersionUID = 1L;
 

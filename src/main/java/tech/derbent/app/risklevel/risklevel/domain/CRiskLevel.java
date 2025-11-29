@@ -13,7 +13,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "risklevel_id"))
 public class CRiskLevel extends CProjectItem<CRiskLevel> {
 
-	public static final String DEFAULT_COLOR = "#9C27B0";
+	public static final String DEFAULT_COLOR = "#7A6E58"; // Darker border - risk levels
 	public static final String DEFAULT_ICON = "vaadin:chart-3d";
 	public static final String ENTITY_TITLE_PLURAL = "Risk Levels";
 	public static final String ENTITY_TITLE_SINGULAR = "Risk Level";
