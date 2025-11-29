@@ -98,31 +98,72 @@ public final class CSolarisColorPalette {
 	// CDE Yellows (Alerts)
 	// ===========================================
 
-	/** CDE Yellow - Alert/warning yellow (#FFEAAA) */
+	/** CDE Yellow - Alert/warning yellow (#FFEAAA) - LIGHT, use DARK version for icons */
 	public static final String CDE_YELLOW = "#FFEAAA";
+
+	/** CDE Yellow Dark - Darker amber for better visibility (#D4A84B) */
+	public static final String CDE_YELLOW_DARK = "#D4A84B";
 
 	// ===========================================
 	// X11 Solaris Named Colors
 	// From /usr/openwin/lib/X11/rgb.txt
 	// ===========================================
 
-	/** Papayawhip - Light peachy cream (#FFEFD5) */
+	/** Papayawhip - Light peachy cream (#FFEFD5) - LIGHT */
 	public static final String X11_PAPAYAWHIP = "#FFEFD5";
 
-	/** Navajowhite - Warm tan (#FFDEAD) */
+	/** Navajowhite - Warm tan (#FFDEAD) - LIGHT */
 	public static final String X11_NAVAJOWHITE = "#FFDEAD";
 
-	/** Wheat - Light wheat color (#F5DEB3) */
+	/** Wheat - Light wheat color (#F5DEB3) - LIGHT */
 	public static final String X11_WHEAT = "#F5DEB3";
 
 	/** Tan - Classic tan (#D2B48C) */
 	public static final String X11_TAN = "#D2B48C";
 
-	/** AntiqueWhite - Warm white (#FAEBD7) */
+	/** AntiqueWhite - Warm white (#FAEBD7) - LIGHT */
 	public static final String X11_ANTIQUEWHITE = "#FAEBD7";
 
 	/** Burlywood - Wood-like tan (#DEB887) */
 	public static final String X11_BURLYWOOD = "#DEB887";
+
+	// ===========================================
+	// Darker Alternatives for Menu/Icon Visibility
+	// These colors provide better contrast on gray backgrounds
+	// ===========================================
+
+	/** Peru - Darker brown for financial entities (#CD853F) */
+	public static final String X11_PERU = "#CD853F";
+
+	/** Sienna - Darker reddish-brown for expenses (#A0522D) */
+	public static final String X11_SIENNA = "#A0522D";
+
+	/** SaddleBrown - Dark brown for budgets (#8B4513) */
+	public static final String X11_SADDLEBROWN = "#8B4513";
+
+	/** Goldenrod - Medium gold/yellow for meetings (#DAA520) */
+	public static final String X11_GOLDENROD = "#DAA520";
+
+	/** DarkGoldenrod - Darker gold for comments (#B8860B) */
+	public static final String X11_DARKGOLDENROD = "#B8860B";
+
+	/** Olive - Darker olive for components (#808000) */
+	public static final String X11_OLIVE = "#808000";
+
+	/** OliveDrab - Military olive for products (#6B8E23) */
+	public static final String X11_OLIVEDRAB = "#6B8E23";
+
+	/** RosyBrown - Muted brownish-pink for deliverables (#BC8F8F) */
+	public static final String X11_ROSYBROWN = "#BC8F8F";
+
+	/** DarkKhaki - Muted khaki for pages (#BDB76B) */
+	public static final String X11_DARKKHAKI = "#BDB76B";
+
+	/** SlateGray - Blue-gray for assets (#708090) */
+	public static final String X11_SLATEGRAY = "#708090";
+
+	/** DimGray - Dark neutral gray for providers (#696969) */
+	public static final String X11_DIMGRAY = "#696969";
 
 	// ===========================================
 	// Entity-Specific Solaris Colors
@@ -166,28 +207,28 @@ public final class CSolarisColorPalette {
 	/** Status - Disabled Gray for state indicators */
 	public static final String ENTITY_STATUS = OPENWIN_DISABLED_GRAY;
 
-	// Finances (X11 Tan/Burlywood - money/value)
-	/** Budgets - Burlywood for financial planning */
-	public static final String ENTITY_BUDGET = X11_BURLYWOOD;
+	// Finances (Darker tans/browns - money/value)
+	/** Budgets - SaddleBrown for financial planning - darker for visibility */
+	public static final String ENTITY_BUDGET = X11_SADDLEBROWN;
 
-	/** Orders - Tan for purchase orders */
-	public static final String ENTITY_ORDER = X11_TAN;
+	/** Orders - Peru for purchase orders - darker for visibility */
+	public static final String ENTITY_ORDER = X11_PERU;
 
-	/** Expenses - Navajowhite for outgoing money */
-	public static final String ENTITY_EXPENSE = X11_NAVAJOWHITE;
+	/** Expenses - Sienna for outgoing money - darker for visibility */
+	public static final String ENTITY_EXPENSE = X11_SIENNA;
 
-	/** Income - Wheat for incoming money */
-	public static final String ENTITY_INCOME = X11_WHEAT;
+	/** Income - DarkGoldenrod for incoming money - darker for visibility */
+	public static final String ENTITY_INCOME = X11_DARKGOLDENROD;
 
-	/** Currency - Papayawhip for monetary units */
-	public static final String ENTITY_CURRENCY = X11_PAPAYAWHIP;
+	/** Currency - Peru for monetary units - darker for visibility */
+	public static final String ENTITY_CURRENCY = X11_PERU;
 
-	// Meetings & Calendar (CDE Yellow - alerts/events)
-	/** Meetings - CDE Yellow for calendar events */
-	public static final String ENTITY_MEETING = CDE_YELLOW;
+	// Meetings & Calendar (Darker yellows/golds - alerts/events)
+	/** Meetings - Goldenrod for calendar events - darker for visibility */
+	public static final String ENTITY_MEETING = X11_GOLDENROD;
 
-	/** Comments - Highlight Yellow for discussion */
-	public static final String ENTITY_COMMENT = OPENWIN_HIGHLIGHT_YELLOW;
+	/** Comments - DarkGoldenrod for discussion - darker for visibility */
+	public static final String ENTITY_COMMENT = X11_DARKGOLDENROD;
 
 	// Risks & Warnings (OpenWindows Border Dark - caution)
 	/** Risks - Border Dark for risk items */
@@ -196,29 +237,29 @@ public final class CSolarisColorPalette {
 	/** Risk Levels - Darker variant for severity */
 	public static final String ENTITY_RISK_LEVEL = OPENWIN_BORDER_DARKER;
 
-	// Products & Components (OpenWindows Button Face - constructive)
-	/** Products - Button Face for product entities */
-	public static final String ENTITY_PRODUCT = OPENWIN_BUTTON_FACE;
+	// Products & Components (Darker olives/browns - constructive)
+	/** Products - OliveDrab for product entities - darker for visibility */
+	public static final String ENTITY_PRODUCT = X11_OLIVEDRAB;
 
-	/** Components - Menu Background for component parts */
-	public static final String ENTITY_COMPONENT = OPENWIN_MENU_BACKGROUND;
+	/** Components - Olive for component parts - darker for visibility */
+	public static final String ENTITY_COMPONENT = X11_OLIVE;
 
-	/** Deliverables - 3D Light for deliverable items */
-	public static final String ENTITY_DELIVERABLE = OPENWIN_3D_LIGHT;
+	/** Deliverables - RosyBrown for deliverable items - darker for visibility */
+	public static final String ENTITY_DELIVERABLE = X11_ROSYBROWN;
 
-	// Assets & Resources (CDE Gray tones)
-	/** Assets - CDE Light Gray for owned items */
-	public static final String ENTITY_ASSET = CDE_LIGHT_GRAY;
+	// Assets & Resources (Darker gray tones for visibility)
+	/** Assets - SlateGray for owned items - darker for visibility */
+	public static final String ENTITY_ASSET = X11_SLATEGRAY;
 
-	/** Providers - CDE Background Gray for external providers */
-	public static final String ENTITY_PROVIDER = CDE_BACKGROUND_GRAY;
+	/** Providers - DimGray for external providers - darker for visibility */
+	public static final String ENTITY_PROVIDER = X11_DIMGRAY;
 
-	// Companies & Organizations (CDE/OpenWindows blend)
-	/** Companies - Base Background for top-level organization */
-	public static final String ENTITY_COMPANY = OPENWIN_BASE_BACKGROUND;
+	// Companies & Organizations (Darker tones for visibility)
+	/** Companies - Border Dark for top-level organization - darker for visibility */
+	public static final String ENTITY_COMPANY = OPENWIN_BORDER_DARK;
 
-	/** Pages - AntiqueWhite for navigation pages */
-	public static final String ENTITY_PAGE = X11_ANTIQUEWHITE;
+	/** Pages - DarkKhaki for navigation pages - darker for visibility */
+	public static final String ENTITY_PAGE = X11_DARKKHAKI;
 
 	// Dashboard & Views (CDE Purple tones)
 	/** Dashboard - CDE Purple for main dashboard */
@@ -227,15 +268,15 @@ public final class CSolarisColorPalette {
 	/** Gantt - CDE Titlebar Purple for timeline views */
 	public static final String ENTITY_GANTT = CDE_TITLEBAR_PURPLE;
 
-	// System & Settings (OpenWindows 3D elements)
-	/** System Settings - 3D Shadow for configuration */
-	public static final String ENTITY_SYSTEM_SETTINGS = OPENWIN_3D_SHADOW;
+	// System & Settings (Darker elements for visibility)
+	/** System Settings - Border Dark for configuration - darker for visibility */
+	public static final String ENTITY_SYSTEM_SETTINGS = OPENWIN_BORDER_DARK;
 
-	/** Grid Entity - Border Dark for grid configuration */
-	public static final String ENTITY_GRID = OPENWIN_BORDER_DARK;
+	/** Grid Entity - Border Darker for grid configuration - darker for visibility */
+	public static final String ENTITY_GRID = OPENWIN_BORDER_DARKER;
 
-	/** Detail Section - Menu Background for form sections */
-	public static final String ENTITY_DETAIL_SECTION = OPENWIN_MENU_BACKGROUND;
+	/** Detail Section - Olive for form sections - darker for visibility */
+	public static final String ENTITY_DETAIL_SECTION = X11_OLIVE;
 
 	// Private constructor to prevent instantiation
 	private CSolarisColorPalette() {
