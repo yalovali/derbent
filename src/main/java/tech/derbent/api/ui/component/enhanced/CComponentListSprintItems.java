@@ -36,6 +36,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <p>
  * Implements IContentOwner to receive automatic entity updates from the form builder's binder when a sprint is selected. */
 public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem> {
+
 	// Item type constants
 	private static final String ITEM_TYPE_ACTIVITY = "CActivity";
 	private static final String ITEM_TYPE_MEETING = "CMeeting";
@@ -100,6 +101,13 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		return null;
 	}
 
+	private List<CDialogEntitySelection.EntityTypeConfig<?>> getDialogEntityTypes() {
+		final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
+		entityTypes.add(new CDialogEntitySelection.EntityTypeConfig<>(ITEM_TYPE_ACTIVITY, CActivity.class, activityService));
+		entityTypes.add(new CDialogEntitySelection.EntityTypeConfig<>(ITEM_TYPE_MEETING, CMeeting.class, meetingService));
+		return entityTypes;
+	}
+
 	@Override
 	protected Integer getNextOrder() {
 		Check.notNull(getMasterEntity(), "Current sprint cannot be null when getting next order");
@@ -114,14 +122,27 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		return nextOrder;
 	}
 
-	@Override
-	protected void on_gridItems_doubleClicked(final CSprintItem item) {
-		// Override to prevent edit dialog from opening on double-click
-		Check.notNull(item, "Double-clicked item cannot be null");
-		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
-		setSelectedItem(item);
-		updateButtonStates(true);
-		// Don't call openEditDialog - just select the item
+	private CDialogEntitySelection.ItemsProvider<CProjectItem<?>> itemProvider() {
+		@SuppressWarnings ("unchecked")
+		final CDialogEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
+			try {
+				final CProject project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
+				if (project == null) {
+					LOGGER.warn("No project available for loading items");
+					return new ArrayList<>();
+				}
+				if (config.getEntityClass() == CActivity.class) {
+					return (List<CProjectItem<?>>) (List<?>) activityService.listByProject(project);
+				} else if (config.getEntityClass() == CMeeting.class) {
+					return (List<CProjectItem<?>>) (List<?>) meetingService.listByProject(project);
+				}
+				return new ArrayList<>();
+			} catch (final Exception e) {
+				LOGGER.error("Error loading items for entity type: {}", config.getDisplayName(), e);
+				return new ArrayList<>();
+			}
+		};
+		return itemsProvider;
 	}
 
 	@Override
@@ -143,62 +164,13 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	protected void on_buttonAdd_clicked() {
 		try {
 			String dialogTitle = "Select Items to Add to Sprint";
-			// Create entity type configurations
-			final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
-			entityTypes.add(new CDialogEntitySelection.EntityTypeConfig<>("Activities", CActivity.class, activityService));
-			entityTypes.add(new CDialogEntitySelection.EntityTypeConfig<>("Meetings", CMeeting.class, meetingService));
-			// Create items provider that loads items based on entity type
-			final CDialogEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
-				try {
-					final CProject project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
-					if (project == null) {
-						LOGGER.warn("No project available for loading items");
-						return new ArrayList<>();
-					}
-					if (config.getEntityClass() == CActivity.class) {
-						return (List<CProjectItem<?>>) (List<?>) activityService.listByProject(project);
-					} else if (config.getEntityClass() == CMeeting.class) {
-						return (List<CProjectItem<?>>) (List<?>) meetingService.listByProject(project);
-					}
-					return new ArrayList<>();
-				} catch (final Exception e) {
-					LOGGER.error("Error loading items for entity type: {}", config.getDisplayName(), e);
-					return new ArrayList<>();
-				}
-			};
 			LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
-			final Consumer<List<?>> onItemsSelected = selectedItems -> {
-				LOGGER.debug("Selected {} items from entity selection dialog", selectedItems.size());
-				int addedCount = 0;
-				for (final Object obj : selectedItems) {
-					if (!(obj instanceof CProjectItem)) {
-						continue;
-					}
-					final CProjectItem<?> item = (CProjectItem<?>) obj;
-					try {
-						// Determine item type
-						final String itemType = item.getClass().getSimpleName();
-						// Create sprint item
-						final CSprintItem sprintItem = new CSprintItem();
-						sprintItem.setSprint(getMasterEntity());
-						sprintItem.setItemId(item.getId());
-						sprintItem.setItemType(itemType);
-						sprintItem.setItemOrder(getNextOrder() + addedCount);
-						sprintItem.setItem(item);
-						// Save
-						childService.save(sprintItem);
-						addedCount++;
-					} catch (final Exception e) {
-						LOGGER.error("Error adding item {} to sprint", item.getId(), e);
-					}
-				}
-				if (addedCount > 0) {
-					refreshGrid();
-					CNotificationService.showSuccess(addedCount + " items added to sprint");
-				}
-			};
-			// Use raw types for dialog creation due to complex generic constraints
-			final CDialogEntitySelection dialog = new CDialogEntitySelection(dialogTitle, entityTypes, itemsProvider, onItemsSelected, true);
+			// Create entity type configurations
+			@SuppressWarnings ({
+					"rawtypes", "unchecked"
+			})
+			CDialogEntitySelection<CProjectItem<?>> dialog =
+					new CDialogEntitySelection(dialogTitle, getDialogEntityTypes(), itemProvider(), onItemsSelected(), true);
 			dialog.open();
 		} catch (final Exception ex) {
 			LOGGER.error("Error opening entity selection dialog", ex);
@@ -207,12 +179,54 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
+	protected void on_gridItems_doubleClicked(final CSprintItem item) {
+		// Override to prevent edit dialog from opening on double-click
+		Check.notNull(item, "Double-clicked item cannot be null");
+		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
+		setSelectedItem(item);
+		updateButtonStates(true);
+		// Don't call openEditDialog - just select the item
+	}
+
+	private Consumer<List<?>> onItemsSelected() {
+		final Consumer<List<?>> onItemsSelected = selectedItems -> {
+			LOGGER.debug("Selected {} items from entity selection dialog", selectedItems.size());
+			int addedCount = 0;
+			for (final Object obj : selectedItems) {
+				if (!(obj instanceof CProjectItem)) {
+					continue;
+				}
+				final CProjectItem<?> item = (CProjectItem<?>) obj;
+				try {
+					// Determine item type
+					final String itemType = item.getClass().getSimpleName();
+					// Create sprint item
+					final CSprintItem sprintItem = new CSprintItem();
+					sprintItem.setSprint(getMasterEntity());
+					sprintItem.setItemId(item.getId());
+					sprintItem.setItemType(itemType);
+					sprintItem.setItemOrder(getNextOrder() + addedCount);
+					sprintItem.setItem(item);
+					// Save
+					childService.save(sprintItem);
+					addedCount++;
+				} catch (final Exception e) {
+					LOGGER.error("Error adding item {} to sprint", item.getId(), e);
+				}
+			}
+			if (addedCount > 0) {
+				refreshGrid();
+				CNotificationService.showSuccess(addedCount + " items added to sprint");
+			}
+		};
+		return onItemsSelected;
+	}
+
+	@Override
 	protected void openEditDialog(final CSprintItem entity, final Consumer<CSprintItem> saveCallback, final boolean isNew) {
 		Check.notNull(entity, "Entity cannot be null when opening edit dialog");
 		LOGGER.warn("Edit operation not supported for sprint items - ID: {}", entity.getId());
 		CNotificationService
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
-		// Sprint items are simple references (itemId + itemType)
-		// There's nothing meaningful to edit - users should delete and re-add instead
 	}
 }

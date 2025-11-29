@@ -27,6 +27,7 @@ public final class CDataProviderResolver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataProviderResolver.class);
 
+	@SuppressWarnings ("rawtypes")
 	public static Object resolveBean(final String beanName, final IContentOwner contentOwner) throws Exception {
 		Object bean;
 		// paramBeanName is ok now

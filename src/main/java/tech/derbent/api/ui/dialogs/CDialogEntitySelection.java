@@ -1,13 +1,14 @@
 package tech.derbent.api.ui.dialogs;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -22,13 +23,11 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CGridCell;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
-import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
-/**
- * CDialogEntitySelection - Dialog for selecting entities from a grid with search/filter capabilities.
+/** CDialogEntitySelection - Dialog for selecting entities from a grid with search/filter capabilities.
  * <p>
  * Extends CDialog to follow the standard dialog pattern in the application.
  * <p>
@@ -42,12 +41,8 @@ import tech.derbent.api.utils.Check;
  * <li>Reset button for clearing selection</li>
  * <li>Selected items persist across grid filtering</li>
  * </ul>
- *
- * @param <EntityClass> The entity type being selected
- */
-public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> extends CDialog {
-
-	private static final long serialVersionUID = 1L;
+ * @param <EntityClass> The entity type being selected */
+public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CDialog {
 
 	/** Entity type configuration for the dialog */
 	public static class EntityTypeConfig<E extends CEntityDB<E>> {
@@ -72,7 +67,9 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		public CAbstractService<E> getService() { return service; }
 
 		@Override
-		public String toString() { return displayName; }
+		public String toString() {
+			return displayName;
+		}
 	}
 
 	/** Callback for getting items based on entity type */
@@ -82,45 +79,40 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		List<T> getItems(EntityTypeConfig<?> config);
 	}
 
-	// Dialog configuration
-	private final String dialogTitle;
-
-	// Dialog components - following typeName convention
-	private com.vaadin.flow.component.grid.Grid<EntityClass> gridItems;
-	private ComboBox<EntityTypeConfig<?>> comboBoxEntityType;
-	private TextField textFieldIdFilter;
-	private TextField textFieldNameFilter;
-	private TextField textFieldDescriptionFilter;
-	private ComboBox<String> comboBoxStatusFilter;
-	private Span labelSelectedCount;
+	private static final long serialVersionUID = 1L;
+	private List<EntityClass> allItems = new ArrayList<>();
+	private CButton buttonCancel;
 	private CButton buttonReset;
 	private CButton buttonSelect;
-	private CButton buttonCancel;
-
+	private java.lang.reflect.Method cachedGetDescriptionMethod;
+	// Cached reflection methods for performance
+	private Method cachedGetNameMethod;
+	private Method cachedGetStatusMethod;
+	private ComboBox<EntityTypeConfig<?>> comboBoxEntityType;
+	private ComboBox<String> comboBoxStatusFilter;
+	private EntityTypeConfig<?> currentEntityType;
+	// Dialog configuration
+	private final String dialogTitle;
+	private final List<EntityTypeConfig<?>> entityTypes;
+	// Dialog components - following typeName convention
+	private Grid<EntityClass> gridItems;
+	private final ItemsProvider<EntityClass> itemsProvider;
+	private Span labelSelectedCount;
 	// Configuration
 	private final boolean multiSelect;
-	private final List<EntityTypeConfig<?>> entityTypes;
 	private final Consumer<List<EntityClass>> onSelection;
-	private final ItemsProvider<EntityClass> itemsProvider;
-
 	// Selection state - persists across filtering
 	private final Set<EntityClass> selectedItems = new HashSet<>();
-	private List<EntityClass> allItems = new ArrayList<>();
-	private EntityTypeConfig<?> currentEntityType;
-	// Cached reflection methods for performance
-	private java.lang.reflect.Method cachedGetNameMethod;
-	private java.lang.reflect.Method cachedGetDescriptionMethod;
-	private java.lang.reflect.Method cachedGetStatusMethod;
+	private TextField textFieldDescriptionFilter;
+	private TextField textFieldIdFilter;
+	private TextField textFieldNameFilter;
 
-	/**
-	 * Creates an entity selection dialog.
-	 *
+	/** Creates an entity selection dialog.
 	 * @param title         Dialog title
 	 * @param entityTypes   Available entity types for selection
 	 * @param itemsProvider Provider for loading items based on entity type
 	 * @param onSelection   Callback when selection is confirmed
-	 * @param multiSelect   True for multi-select, false for single-select
-	 */
+	 * @param multiSelect   True for multi-select, false for single-select */
 	public CDialogEntitySelection(final String title, final List<EntityTypeConfig<?>> entityTypes, final ItemsProvider<EntityClass> itemsProvider,
 			final Consumer<List<EntityClass>> onSelection, final boolean multiSelect) {
 		super();
@@ -149,45 +141,182 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		}
 	}
 
-	@Override
-	public String getDialogTitleString() {
-		return dialogTitle;
+	private void applyFilters() {
+		final String idValue = textFieldIdFilter.getValue();
+		final String nameValue = textFieldNameFilter.getValue();
+		final String descValue = textFieldDescriptionFilter.getValue();
+		final String statusValue = comboBoxStatusFilter.getValue();
+		final List<EntityClass> filtered = new ArrayList<>();
+		for (final EntityClass item : allItems) {
+			boolean matches = true;
+			// ID filter
+			if ((idValue != null) && !idValue.isBlank()) {
+				final String itemId = item.getId() != null ? item.getId().toString() : "";
+				if (!itemId.toLowerCase().contains(idValue.toLowerCase())) {
+					matches = false;
+				}
+			}
+			// Name filter - use cached method
+			if (matches && (nameValue != null) && !nameValue.isBlank()) {
+				final String name = getEntityName(item);
+				if (!name.toLowerCase().contains(nameValue.toLowerCase())) {
+					matches = false;
+				}
+			}
+			// Description filter - use cached method
+			if (matches && (descValue != null) && !descValue.isBlank()) {
+				final String desc = getEntityDescription(item);
+				if (!desc.toLowerCase().contains(descValue.toLowerCase())) {
+					matches = false;
+				}
+			}
+			// Status filter
+			if (matches && (statusValue != null) && !statusValue.isBlank()) {
+				String statusName = null;
+				if (item instanceof CProjectItem) {
+					final CProjectItem<?> projectItem = (CProjectItem<?>) item;
+					if (projectItem.getStatus() != null) {
+						statusName = projectItem.getStatus().getName();
+					}
+				} else {
+					final Object status = getEntityStatus(item);
+					if (status instanceof CEntityDB) {
+						try {
+							final java.lang.reflect.Method nameMethod = status.getClass().getMethod("getName");
+							final Object name = nameMethod.invoke(status);
+							statusName = name != null ? name.toString() : null;
+						} catch (final Exception e) {
+							statusName = null;
+						}
+					}
+				}
+				if ((statusName == null) || !statusName.equals(statusValue)) {
+					matches = false;
+				}
+			}
+			if (matches) {
+				filtered.add(item);
+			}
+		}
+		gridItems.setItems(filtered);
+		// Restore visual selection state for already selected items
+		if (multiSelect) {
+			for (final EntityClass item : filtered) {
+				if (selectedItems.contains(item)) {
+					gridItems.select(item);
+				}
+			}
+		}
+		LOGGER.debug("Applied filters - showing {} of {} items", filtered.size(), allItems.size());
 	}
 
-	@Override
-	protected Icon getFormIcon() {
-		return VaadinIcon.LIST_SELECT.create();
+	/** Caches reflection methods for the current entity type for better performance. */
+	private void cacheReflectionMethods(final Class<?> entityClass) {
+		try {
+			cachedGetNameMethod = entityClass.getMethod("getName");
+		} catch (final NoSuchMethodException e) {
+			cachedGetNameMethod = null;
+		}
+		try {
+			cachedGetDescriptionMethod = entityClass.getMethod("getDescription");
+		} catch (final NoSuchMethodException e) {
+			cachedGetDescriptionMethod = null;
+		}
+		try {
+			cachedGetStatusMethod = entityClass.getMethod("getStatus");
+		} catch (final NoSuchMethodException e) {
+			cachedGetStatusMethod = null;
+		}
 	}
 
-	@Override
-	protected String getFormTitleString() {
-		return "Select Items";
+	private void configureGridColumns() {
+		// Clear existing columns
+		gridItems.getColumns().forEach(gridItems::removeColumn);
+		if (currentEntityType == null) {
+			return;
+		}
+		// Add selection indicator column for multi-select
+		if (multiSelect) {
+			gridItems.addComponentColumn(item -> {
+				if (selectedItems.contains(item)) {
+					return CColorUtils.createStyledIcon("vaadin:check-square-o", "#4CAF50");
+				} else {
+					return CColorUtils.createStyledIcon("vaadin:thin-square", "#9E9E9E");
+				}
+			}).setHeader("").setWidth("40px").setFlexGrow(0);
+		}
+		// ID column
+		gridItems.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setHeader("ID").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
+				.setSortable(true).setKey("id");
+		// Name column - use cached method
+		gridItems.addColumn(this::getEntityName).setHeader("Name").setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name");
+		// Description column - use cached method
+		gridItems.addColumn(this::getEntityDescription).setHeader("Description").setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true)
+				.setKey("description");
+		// Status column with color support for CProjectItem entities
+		gridItems.addComponentColumn(item -> {
+			final CGridCell statusCell = new CGridCell();
+			statusCell.setShowIcon(true);
+			if (item instanceof CProjectItem) {
+				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
+				if (projectItem.getStatus() != null) {
+					statusCell.setStatusValue(projectItem.getStatus());
+				} else {
+					statusCell.setText("No Status");
+				}
+			} else {
+				// Use cached method
+				final Object status = getEntityStatus(item);
+				if (status instanceof CEntityDB) {
+					statusCell.setStatusValue((CEntityDB<?>) status);
+				} else if (status != null) {
+					statusCell.setText(status.toString());
+				} else {
+					statusCell.setText("N/A");
+				}
+			}
+			return statusCell;
+		}).setHeader("Status").setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status");
 	}
 
-	@Override
-	protected void setupContent() {
-		// Entity type selector
-		final HorizontalLayout layoutEntityType = create_layoutEntityTypeSelector();
-		mainLayout.add(layoutEntityType);
-		// Search toolbar
-		final HorizontalLayout layoutSearchToolbar = create_layoutSearchToolbar();
-		mainLayout.add(layoutSearchToolbar);
-		// Selection indicator and reset
-		final HorizontalLayout layoutSelectionIndicator = create_layoutSelectionIndicator();
-		mainLayout.add(layoutSelectionIndicator);
-		// Grid
-		create_gridItems();
-		mainLayout.add(gridItems);
-		mainLayout.setFlexGrow(1, gridItems);
-		// Make the layout fill available space
-		mainLayout.setSizeFull();
+	/** Factory method for cancel button. */
+	protected CButton create_buttonCancel() {
+		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), e -> on_buttonCancel_clicked());
 	}
 
-	@Override
-	protected void setupButtons() {
-		buttonSelect = create_buttonSelect();
-		buttonCancel = create_buttonCancel();
-		buttonLayout.add(buttonSelect, buttonCancel);
+	/** Factory method for select button. */
+	protected CButton create_buttonSelect() {
+		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), e -> on_buttonSelect_clicked());
+		button.setEnabled(false);
+		return button;
+	}
+
+	/** Factory method for grid. */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	protected void create_gridItems() {
+		// Create Grid using Object type with auto-columns disabled, then cast.
+		// Type safety is maintained by controlling all items in the grid through itemsProvider.
+		final com.vaadin.flow.component.grid.Grid rawGrid = new com.vaadin.flow.component.grid.Grid<>(Object.class, false);
+		gridItems = rawGrid;
+		gridItems.setSizeFull();
+		gridItems.setMinHeight("300px");
+		// Apply CGrid-like styling
+		gridItems.addThemeVariants(com.vaadin.flow.component.grid.GridVariant.LUMO_NO_BORDER,
+				com.vaadin.flow.component.grid.GridVariant.LUMO_ROW_STRIPES, com.vaadin.flow.component.grid.GridVariant.LUMO_COMPACT);
+		// Configure selection mode
+		if (multiSelect) {
+			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
+			gridItems.asMultiSelect().addValueChangeListener(e -> on_gridItems_multiSelected(e.getValue()));
+		} else {
+			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
+			gridItems.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelected(e.getValue()));
+		}
+		// Add click listener to toggle selection in multi-select mode
+		if (multiSelect) {
+			gridItems.addItemClickListener(e -> on_gridItems_clicked(e.getItem()));
+		}
 	}
 
 	/** Factory method for entity type selector layout. */
@@ -276,47 +405,99 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		return layout;
 	}
 
-	/** Factory method for grid. */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	protected void create_gridItems() {
-		// Create Grid using Object type with auto-columns disabled, then cast.
-		// Type safety is maintained by controlling all items in the grid through itemsProvider.
-		final com.vaadin.flow.component.grid.Grid rawGrid = new com.vaadin.flow.component.grid.Grid<>(Object.class, false);
-		gridItems = (com.vaadin.flow.component.grid.Grid<EntityClass>) rawGrid;
-		gridItems.setSizeFull();
-		gridItems.setMinHeight("300px");
-		// Apply CGrid-like styling
-		gridItems.addThemeVariants(com.vaadin.flow.component.grid.GridVariant.LUMO_NO_BORDER,
-				com.vaadin.flow.component.grid.GridVariant.LUMO_ROW_STRIPES, com.vaadin.flow.component.grid.GridVariant.LUMO_COMPACT);
-		// Configure selection mode
-		if (multiSelect) {
-			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
-			gridItems.asMultiSelect().addValueChangeListener(e -> on_gridItems_multiSelected(e.getValue()));
-		} else {
-			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-			gridItems.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelected(e.getValue()));
+	@Override
+	public String getDialogTitleString() { return dialogTitle; }
+
+	/** Gets description from entity using cached method. */
+	private String getEntityDescription(final EntityClass item) {
+		if (cachedGetDescriptionMethod == null) {
+			return "";
 		}
-		// Add click listener to toggle selection in multi-select mode
-		if (multiSelect) {
-			gridItems.addItemClickListener(e -> on_gridItems_clicked(e.getItem()));
+		try {
+			final Object result = cachedGetDescriptionMethod.invoke(item);
+			return result != null ? result.toString() : "";
+		} catch (final Exception e) {
+			return "";
 		}
 	}
-
-	/** Factory method for select button. */
-	protected CButton create_buttonSelect() {
-		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), e -> on_buttonSelect_clicked());
-		button.setEnabled(false);
-		return button;
-	}
-
-	/** Factory method for cancel button. */
-	protected CButton create_buttonCancel() {
-		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), e -> on_buttonCancel_clicked());
-	}
-
 	// Event handlers following on_xxx_eventType convention
+
+	/** Gets name from entity using cached method. */
+	private String getEntityName(final EntityClass item) {
+		if (cachedGetNameMethod == null) {
+			return "";
+		}
+		try {
+			final Object result = cachedGetNameMethod.invoke(item);
+			return result != null ? result.toString() : "";
+		} catch (final Exception e) {
+			return "";
+		}
+	}
+
+	/** Gets status from entity using cached method. */
+	private Object getEntityStatus(final EntityClass item) {
+		if (cachedGetStatusMethod == null) {
+			return null;
+		}
+		try {
+			return cachedGetStatusMethod.invoke(item);
+		} catch (final Exception e) {
+			return null;
+		}
+	}
+
+	@Override
+	protected Icon getFormIcon() { return VaadinIcon.LIST_SELECT.create(); }
+
+	@Override
+	protected String getFormTitleString() { return "Select Items"; }
+
+	/** Returns the currently selected items.
+	 * @return List of selected items */
+	public List<EntityClass> getSelectedItems() { return new ArrayList<>(selectedItems); }
+
+	/** Returns whether the dialog is configured for multi-select.
+	 * @return true if multi-select mode */
+	public boolean isMultiSelect() { return multiSelect; }
+
+	/** Handle cancel button click. */
+	protected void on_buttonCancel_clicked() {
+		close();
+	}
+
+	/** Handle clear filters button click. */
+	protected void on_buttonClearFilters_clicked() {
+		textFieldIdFilter.clear();
+		textFieldNameFilter.clear();
+		textFieldDescriptionFilter.clear();
+		comboBoxStatusFilter.clear();
+		applyFilters();
+	}
+	// Helper methods
+
+	/** Handle reset button click. */
+	protected void on_buttonReset_clicked() {
+		selectedItems.clear();
+		if (multiSelect) {
+			gridItems.deselectAll();
+		} else {
+			gridItems.asSingleSelect().clear();
+		}
+		updateSelectionIndicator();
+		LOGGER.debug("Selection reset");
+	}
+
+	/** Handle select button click. */
+	protected void on_buttonSelect_clicked() {
+		if (selectedItems.isEmpty()) {
+			CNotificationService.showWarning("Please select at least one item");
+			return;
+		}
+		LOGGER.debug("Confirming selection of {} items", selectedItems.size());
+		onSelection.accept(new ArrayList<>(selectedItems));
+		close();
+	}
 
 	/** Handle entity type combobox change. */
 	protected void on_comboBoxEntityType_changed(final EntityTypeConfig<?> config) {
@@ -348,6 +529,18 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		}
 	}
 
+	/** Handle grid item click (for toggle in multi-select mode). */
+	protected void on_gridItems_clicked(final EntityClass item) {
+		if (selectedItems.contains(item)) {
+			selectedItems.remove(item);
+			gridItems.deselect(item);
+		} else {
+			selectedItems.add(item);
+			gridItems.select(item);
+		}
+		updateSelectionIndicator();
+	}
+
 	/** Handle grid multi-select value change. */
 	protected void on_gridItems_multiSelected(final Set<EntityClass> value) {
 		// Add new selections, but don't remove items that were previously selected
@@ -369,170 +562,37 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		updateSelectionIndicator();
 	}
 
-	/** Handle grid item click (for toggle in multi-select mode). */
-	protected void on_gridItems_clicked(final EntityClass item) {
-		if (selectedItems.contains(item)) {
-			selectedItems.remove(item);
-			gridItems.deselect(item);
-		} else {
-			selectedItems.add(item);
-			gridItems.select(item);
-		}
-		updateSelectionIndicator();
+	@Override
+	protected void setupButtons() {
+		buttonSelect = create_buttonSelect();
+		buttonCancel = create_buttonCancel();
+		buttonLayout.add(buttonSelect, buttonCancel);
 	}
 
-	/** Handle clear filters button click. */
-	protected void on_buttonClearFilters_clicked() {
-		textFieldIdFilter.clear();
-		textFieldNameFilter.clear();
-		textFieldDescriptionFilter.clear();
-		comboBoxStatusFilter.clear();
-		applyFilters();
+	@Override
+	protected void setupContent() {
+		// Entity type selector
+		final HorizontalLayout layoutEntityType = create_layoutEntityTypeSelector();
+		mainLayout.add(layoutEntityType);
+		// Search toolbar
+		final HorizontalLayout layoutSearchToolbar = create_layoutSearchToolbar();
+		mainLayout.add(layoutSearchToolbar);
+		// Selection indicator and reset
+		final HorizontalLayout layoutSelectionIndicator = create_layoutSelectionIndicator();
+		mainLayout.add(layoutSelectionIndicator);
+		// Grid
+		create_gridItems();
+		mainLayout.add(gridItems);
+		mainLayout.setFlexGrow(1, gridItems);
+		// Make the layout fill available space
+		mainLayout.setSizeFull();
 	}
 
-	/** Handle reset button click. */
-	protected void on_buttonReset_clicked() {
-		selectedItems.clear();
-		if (multiSelect) {
-			gridItems.deselectAll();
-		} else {
-			gridItems.asSingleSelect().clear();
-		}
-		updateSelectionIndicator();
-		LOGGER.debug("Selection reset");
-	}
-
-	/** Handle select button click. */
-	protected void on_buttonSelect_clicked() {
-		if (selectedItems.isEmpty()) {
-			CNotificationService.showWarning("Please select at least one item");
-			return;
-		}
-		LOGGER.debug("Confirming selection of {} items", selectedItems.size());
-		onSelection.accept(new ArrayList<>(selectedItems));
-		close();
-	}
-
-	/** Handle cancel button click. */
-	protected void on_buttonCancel_clicked() {
-		close();
-	}
-
-	// Helper methods
-
-	private void configureGridColumns() {
-		// Clear existing columns
-		gridItems.getColumns().forEach(gridItems::removeColumn);
-		if (currentEntityType == null) {
-			return;
-		}
-		// Add selection indicator column for multi-select
-		if (multiSelect) {
-			gridItems.addComponentColumn(item -> {
-				if (selectedItems.contains(item)) {
-					return CColorUtils.createStyledIcon("vaadin:check-square-o", "#4CAF50");
-				} else {
-					return CColorUtils.createStyledIcon("vaadin:thin-square", "#9E9E9E");
-				}
-			}).setHeader("").setWidth("40px").setFlexGrow(0);
-		}
-		// ID column
-		gridItems.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setHeader("ID").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
-				.setSortable(true).setKey("id");
-		// Name column - use cached method
-		gridItems.addColumn(this::getEntityName).setHeader("Name").setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name");
-		// Description column - use cached method
-		gridItems.addColumn(this::getEntityDescription).setHeader("Description").setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true)
-				.setKey("description");
-		// Status column with color support for CProjectItem entities
-		gridItems.addComponentColumn(item -> {
-			final CGridCell statusCell = new CGridCell();
-			statusCell.setShowIcon(true);
-			if (item instanceof CProjectItem) {
-				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-				if (projectItem.getStatus() != null) {
-					statusCell.setStatusValue(projectItem.getStatus());
-				} else {
-					statusCell.setText("No Status");
-				}
-			} else {
-				// Use cached method
-				final Object status = getEntityStatus(item);
-				if (status instanceof CEntityDB) {
-					statusCell.setStatusValue((CEntityDB<?>) status);
-				} else if (status != null) {
-					statusCell.setText(status.toString());
-				} else {
-					statusCell.setText("N/A");
-				}
-			}
-			return statusCell;
-		}).setHeader("Status").setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status");
-	}
-
-	/**
-	 * Caches reflection methods for the current entity type for better performance.
-	 */
-	private void cacheReflectionMethods(final Class<?> entityClass) {
-		try {
-			cachedGetNameMethod = entityClass.getMethod("getName");
-		} catch (final NoSuchMethodException e) {
-			cachedGetNameMethod = null;
-		}
-		try {
-			cachedGetDescriptionMethod = entityClass.getMethod("getDescription");
-		} catch (final NoSuchMethodException e) {
-			cachedGetDescriptionMethod = null;
-		}
-		try {
-			cachedGetStatusMethod = entityClass.getMethod("getStatus");
-		} catch (final NoSuchMethodException e) {
-			cachedGetStatusMethod = null;
-		}
-	}
-
-	/**
-	 * Gets name from entity using cached method.
-	 */
-	private String getEntityName(final EntityClass item) {
-		if (cachedGetNameMethod == null) {
-			return "";
-		}
-		try {
-			final Object result = cachedGetNameMethod.invoke(item);
-			return result != null ? result.toString() : "";
-		} catch (final Exception e) {
-			return "";
-		}
-	}
-
-	/**
-	 * Gets description from entity using cached method.
-	 */
-	private String getEntityDescription(final EntityClass item) {
-		if (cachedGetDescriptionMethod == null) {
-			return "";
-		}
-		try {
-			final Object result = cachedGetDescriptionMethod.invoke(item);
-			return result != null ? result.toString() : "";
-		} catch (final Exception e) {
-			return "";
-		}
-	}
-
-	/**
-	 * Gets status from entity using cached method.
-	 */
-	private Object getEntityStatus(final EntityClass item) {
-		if (cachedGetStatusMethod == null) {
-			return null;
-		}
-		try {
-			return cachedGetStatusMethod.invoke(item);
-		} catch (final Exception e) {
-			return null;
-		}
+	private void updateSelectionIndicator() {
+		final int count = selectedItems.size();
+		labelSelectedCount.setText(count + " selected");
+		buttonReset.setEnabled(count > 0);
+		buttonSelect.setEnabled(count > 0);
 	}
 
 	private void updateStatusFilterOptions() {
@@ -560,94 +620,4 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<EntityClass>> 
 		}
 		comboBoxStatusFilter.setItems(statuses);
 	}
-
-	private void applyFilters() {
-		final String idValue = textFieldIdFilter.getValue();
-		final String nameValue = textFieldNameFilter.getValue();
-		final String descValue = textFieldDescriptionFilter.getValue();
-		final String statusValue = comboBoxStatusFilter.getValue();
-		final List<EntityClass> filtered = new ArrayList<>();
-		for (final EntityClass item : allItems) {
-			boolean matches = true;
-			// ID filter
-			if ((idValue != null) && !idValue.isBlank()) {
-				final String itemId = item.getId() != null ? item.getId().toString() : "";
-				if (!itemId.toLowerCase().contains(idValue.toLowerCase())) {
-					matches = false;
-				}
-			}
-			// Name filter - use cached method
-			if (matches && (nameValue != null) && !nameValue.isBlank()) {
-				final String name = getEntityName(item);
-				if (!name.toLowerCase().contains(nameValue.toLowerCase())) {
-					matches = false;
-				}
-			}
-			// Description filter - use cached method
-			if (matches && (descValue != null) && !descValue.isBlank()) {
-				final String desc = getEntityDescription(item);
-				if (!desc.toLowerCase().contains(descValue.toLowerCase())) {
-					matches = false;
-				}
-			}
-			// Status filter
-			if (matches && (statusValue != null) && !statusValue.isBlank()) {
-				String statusName = null;
-				if (item instanceof CProjectItem) {
-					final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-					if (projectItem.getStatus() != null) {
-						statusName = projectItem.getStatus().getName();
-					}
-				} else {
-					final Object status = getEntityStatus(item);
-					if (status instanceof CEntityDB) {
-						try {
-							final java.lang.reflect.Method nameMethod = status.getClass().getMethod("getName");
-							final Object name = nameMethod.invoke(status);
-							statusName = name != null ? name.toString() : null;
-						} catch (final Exception e) {
-							statusName = null;
-						}
-					}
-				}
-				if ((statusName == null) || !statusName.equals(statusValue)) {
-					matches = false;
-				}
-			}
-			if (matches) {
-				filtered.add(item);
-			}
-		}
-		gridItems.setItems(filtered);
-		// Restore visual selection state for already selected items
-		if (multiSelect) {
-			for (final EntityClass item : filtered) {
-				if (selectedItems.contains(item)) {
-					gridItems.select(item);
-				}
-			}
-		}
-		LOGGER.debug("Applied filters - showing {} of {} items", filtered.size(), allItems.size());
-	}
-
-	private void updateSelectionIndicator() {
-		final int count = selectedItems.size();
-		labelSelectedCount.setText(count + " selected");
-		buttonReset.setEnabled(count > 0);
-		buttonSelect.setEnabled(count > 0);
-	}
-
-	/**
-	 * Returns the currently selected items.
-	 *
-	 * @return List of selected items
-	 */
-	public List<EntityClass> getSelectedItems() { return new ArrayList<>(selectedItems); }
-
-	/**
-	 * Returns whether the dialog is configured for multi-select.
-	 *
-	 * @return true if multi-select mode
-	 */
-	public boolean isMultiSelect() { return multiSelect; }
 }
