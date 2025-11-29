@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Pageable;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -22,6 +21,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.view.CAbstractPage;
+import tech.derbent.api.ui.component.CH3;
 import tech.derbent.api.ui.dialogs.CExceptionDialog;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
@@ -35,7 +35,7 @@ import tech.derbent.base.users.service.CUserService;
  * per project. Provides a comprehensive overview of the system's current state. */
 @Route ("cdashboardview")
 @PageTitle ("Home")
-@Menu ( icon = "class:tech.derbent.api.dashboard.view.CDashboardView", title = "Home")
+@Menu (icon = "class:tech.derbent.api.dashboard.view.CDashboardView", title = "Home")
 @PermitAll
 public final class CDashboardView extends CAbstractPage {
 
@@ -179,11 +179,9 @@ public final class CDashboardView extends CAbstractPage {
 		Check.notNull(activitiesByProject, "ActivitiesByProject map cannot be null");
 		final Div breakdown = new Div();
 		breakdown.addClassNames(LumoUtility.Margin.Top.XLARGE);
-		final H3 title = new H3("Project Breakdown");
-		if (title != null) {
-			title.addClassNames(LumoUtility.Margin.Bottom.MEDIUM);
-			breakdown.add(title);
-		}
+		final CH3 title = new CH3("Project Breakdown");
+		title.addClassNames(LumoUtility.Margin.Bottom.MEDIUM);
+		breakdown.add(title);
 		final VerticalLayout projectList = new VerticalLayout();
 		if (projectList != null) {
 			projectList.setSpacing(true);

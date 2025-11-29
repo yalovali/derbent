@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -132,11 +131,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected void createToolbar(String titleText) {
 		final CHorizontalLayout buttonLayout = new CHorizontalLayout();
 		buttonLayout.setSizeUndefined();
-		toolbar = new HorizontalLayout();
+		toolbar = new CHorizontalLayout();
 		toolbar.setSpacing(true);
+		// leftSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.MEDIUM);
 		// Create title
-		final H3 title = new H3(titleText);
-		title.setWidthFull();
+		final CH3 title = new CH3(titleText);
 		// Create buttons
 		addButton = new Button(VaadinIcon.PLUS.create());
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

@@ -7,6 +7,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import tech.derbent.api.ui.component.CH3;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
@@ -15,7 +16,7 @@ public abstract class CDialog extends Dialog {
 
 	private static final long serialVersionUID = 1L;
 	protected final HorizontalLayout buttonLayout = new HorizontalLayout();
-	private H3 formTitle;
+	private CH3 formTitle;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected VerticalLayout mainLayout;
 
@@ -64,7 +65,7 @@ public abstract class CDialog extends Dialog {
 			Check.notNull(icon, "Form icon cannot be null");
 			icon.setSize("24px");
 			headerLayout.add(icon);
-			formTitle = new H3(getFormTitleString());
+			formTitle = new CH3(getFormTitleString());
 			headerLayout.add(formTitle);
 			mainLayout.add(headerLayout);
 			add(mainLayout);

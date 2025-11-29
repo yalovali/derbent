@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -65,7 +64,7 @@ public class CPictureSelectorDialog extends Dialog {
 
 	private void createComponents() {
 		// Dialog title
-		H3 title = new H3("Picture Selector");
+		CH3 title = new CH3("Picture Selector");
 		title.getStyle().set("margin", "0 0 20px 0");
 		// Create image preview component
 		imagePreview = new Image();
@@ -146,7 +145,7 @@ public class CPictureSelectorDialog extends Dialog {
 		layout.setSpacing(true);
 		layout.setPadding(true);
 		layout.setAlignItems(VerticalLayout.Alignment.CENTER);
-		H3 title = new H3("Picture Selector");
+		CH3 title = new CH3("Picture Selector");
 		title.getStyle().set("margin", "0 0 20px 0");
 		layout.add(title, imagePreview);
 		if (!readOnly) {
