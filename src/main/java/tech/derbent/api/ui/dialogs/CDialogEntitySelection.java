@@ -338,14 +338,14 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		// Configure selection mode
 		if (multiSelect) {
 			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
-			gridItems.asMultiSelect().addValueChangeListener(e -> on_gridItems_multiSelected(e.getValue()));
+			gridItems.asMultiSelect().addValueChangeListener(e -> on_gridItems_multiSelectionChanged(e.getValue()));
 		} else {
 			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-			gridItems.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelected(e.getValue()));
+			gridItems.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelectionChanged(e.getValue()));
 		}
 		// Add click listener to toggle selection in multi-select mode
 		if (multiSelect) {
-			gridItems.addItemClickListener(e -> on_gridItems_clicked(e.getItem()));
+			gridItems.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
 	}
 
@@ -359,7 +359,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
 		comboBoxEntityType.setWidthFull();
 		comboBoxEntityType.setRequired(true);
-		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_changed(e.getValue()));
+		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_selectionChanged(e.getValue()));
 		layout.add(comboBoxEntityType);
 		return layout;
 	}
@@ -568,24 +568,24 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		}
 	}
 
-	/** Handle entity type combobox change. */
-	protected void on_comboBoxEntityType_changed(final EntityTypeConfig<?> config) {
-		if (config == null) {
-			return;
-		}
-		LOGGER.debug("Entity type changed to: {}", config.getDisplayName());
-		currentEntityType = config;
-		// Clear selection when entity type changes
-		selectedItems.clear();
-		// Load already selected items if provider is available
-		loadAlreadySelectedItems(config);
-		updateSelectionIndicator();
-		// Cache reflection methods for the entity type
-		cacheReflectionMethods(config.getEntityClass());
-		// Configure grid columns for the new entity type
-		configureGridColumns();
-		// Load items
+	/** Handle entity type combobox selection change. */
+	protected void on_comboBoxEntityType_selectionChanged(final EntityTypeConfig<?> config) {
 		try {
+			if (config == null) {
+				return;
+			}
+			LOGGER.debug("Entity type changed to: {}", config.getDisplayName());
+			currentEntityType = config;
+			// Clear selection when entity type changes
+			selectedItems.clear();
+			// Load already selected items if provider is available
+			loadAlreadySelectedItems(config);
+			updateSelectionIndicator();
+			// Cache reflection methods for the entity type
+			cacheReflectionMethods(config.getEntityClass());
+			// Configure grid columns for the new entity type
+			configureGridColumns();
+			// Load items
 			allItems = itemsProvider.getItems(config);
 			LOGGER.debug("Loaded {} items for entity type {}", allItems.size(), config.getDisplayName());
 			// Handle already selected items based on mode
@@ -595,7 +595,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 			// Apply filters and refresh grid
 			applyFilters();
 		} catch (final Exception e) {
-			LOGGER.error("Error loading items for entity type {}", config.getDisplayName(), e);
+			LOGGER.error("Error loading items for entity type {}", config != null ? config.getDisplayName() : "null", e);
 			CNotificationService.showException("Error loading items", e);
 			allItems = new ArrayList<>();
 			gridItems.setItems(allItems);
@@ -603,36 +603,51 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	}
 
 	/** Handle grid item click (for toggle in multi-select mode). */
-	protected void on_gridItems_clicked(final EntityClass item) {
-		if (selectedItems.contains(item)) {
-			selectedItems.remove(item);
-			gridItems.deselect(item);
-		} else {
-			selectedItems.add(item);
-			gridItems.select(item);
+	protected void on_gridItems_itemClicked(final EntityClass item) {
+		try {
+			if (selectedItems.contains(item)) {
+				selectedItems.remove(item);
+				gridItems.deselect(item);
+			} else {
+				selectedItems.add(item);
+				gridItems.select(item);
+			}
+			updateSelectionIndicator();
+		} catch (final Exception e) {
+			LOGGER.error("Error handling grid item click", e);
+			CNotificationService.showException("Error selecting item", e);
 		}
-		updateSelectionIndicator();
 	}
 
 	/** Handle grid multi-select value change. */
-	protected void on_gridItems_multiSelected(final Set<EntityClass> value) {
-		// Add new selections, but don't remove items that were previously selected
-		// This allows selections to persist across filtering
-		for (final EntityClass item : value) {
-			if (!selectedItems.contains(item)) {
-				selectedItems.add(item);
+	protected void on_gridItems_multiSelectionChanged(final Set<EntityClass> value) {
+		try {
+			// Add new selections, but don't remove items that were previously selected
+			// This allows selections to persist across filtering
+			for (final EntityClass item : value) {
+				if (!selectedItems.contains(item)) {
+					selectedItems.add(item);
+				}
 			}
+			updateSelectionIndicator();
+		} catch (final Exception e) {
+			LOGGER.error("Error handling grid multi-selection change", e);
+			CNotificationService.showException("Error selecting items", e);
 		}
-		updateSelectionIndicator();
 	}
 
 	/** Handle grid single-select value change. */
-	protected void on_gridItems_singleSelected(final EntityClass value) {
-		selectedItems.clear();
-		if (value != null) {
-			selectedItems.add(value);
+	protected void on_gridItems_singleSelectionChanged(final EntityClass value) {
+		try {
+			selectedItems.clear();
+			if (value != null) {
+				selectedItems.add(value);
+			}
+			updateSelectionIndicator();
+		} catch (final Exception e) {
+			LOGGER.error("Error handling grid single-selection change", e);
+			CNotificationService.showException("Error selecting item", e);
 		}
-		updateSelectionIndicator();
 	}
 
 	@Override
@@ -714,7 +729,9 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	}
 
 	/** Process already selected items based on the configured mode. This method either filters out already selected items from allItems
-	 * (HIDE_ALREADY_SELECTED mode) or adds them to selectedItems to show them as pre-selected (SHOW_AS_SELECTED mode). */
+	 * (HIDE_ALREADY_SELECTED mode) or adds them to selectedItems to show them as pre-selected (SHOW_AS_SELECTED mode).
+	 * <p>
+	 * In single-select mode with SHOW_AS_SELECTED, only the first matching item will be pre-selected. */
 	private void processAlreadySelectedItems() {
 		if (alreadySelectedItems.isEmpty()) {
 			return;
@@ -741,9 +758,14 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 				break;
 			case SHOW_AS_SELECTED:
 				// Pre-select the already selected items (they will be visually marked in the grid)
+				// In single-select mode, only pre-select the first matching item
 				for (final EntityClass item : allItems) {
 					if ((item.getId() != null) && alreadySelectedIds.contains(item.getId())) {
 						selectedItems.add(item);
+						// In single-select mode, only allow one item to be pre-selected
+						if (!multiSelect) {
+							break;
+						}
 					}
 				}
 				LOGGER.debug("Pre-selected {} already selected items", selectedItems.size());
