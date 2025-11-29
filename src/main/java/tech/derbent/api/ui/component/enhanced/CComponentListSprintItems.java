@@ -9,6 +9,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -34,8 +35,11 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <li>Selection management</li>
  * </ul>
  * <p>
- * Implements IContentOwner to receive automatic entity updates from the form builder's binder when a sprint is selected. */
-public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem> {
+ * Implements IContentOwner to receive automatic entity updates from the form builder's binder when a sprint is selected.
+ * <p>
+ * Implements IEntitySelectionDialogSupport to provide standardized entity selection dialog configuration. */
+public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem>
+		implements IEntitySelectionDialogSupport<CProjectItem<?>> {
 
 	// Item type constants
 	private static final String ITEM_TYPE_ACTIVITY = "CActivity";
@@ -101,7 +105,46 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		return null;
 	}
 
-	private List<CDialogEntitySelection.EntityTypeConfig<?>> getDialogEntityTypes() {
+	@Override
+	public CDialogEntitySelection.AlreadySelectedMode getAlreadySelectedMode() {
+		return CDialogEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED;
+	}
+
+	/** Returns a provider for already-selected items (items currently in the sprint). This returns items based on the current sprint's members to enable
+	 * the dialog to hide or pre-select them.
+	 * @return ItemsProvider that returns the current sprint's items filtered by entity type */
+	@Override
+	public CDialogEntitySelection.ItemsProvider<CProjectItem<?>> getAlreadySelectedProvider() {
+		final CDialogEntitySelection.ItemsProvider<CProjectItem<?>> provider = config -> {
+			try {
+				final CSprint sprint = getMasterEntity();
+				if ((sprint == null) || (sprint.getId() == null)) {
+					LOGGER.debug("No sprint available for already selected items");
+					return new ArrayList<>();
+				}
+				// Get current sprint items
+				final CSprintItemService service = (CSprintItemService) childService;
+				final List<CSprintItem> sprintItems = service.findByMasterIdWithItems(sprint.getId());
+				// Filter by entity type and extract the underlying items
+				final List<CProjectItem<?>> result = new ArrayList<>();
+				final String targetType = config.getEntityClass().getSimpleName();
+				for (final CSprintItem sprintItem : sprintItems) {
+					if ((sprintItem.getItem() != null) && targetType.equals(sprintItem.getItemType())) {
+						result.add(sprintItem.getItem());
+					}
+				}
+				LOGGER.debug("Found {} already selected items of type {}", result.size(), targetType);
+				return result;
+			} catch (final Exception e) {
+				LOGGER.error("Error loading already selected items for entity type: {}", config.getDisplayName(), e);
+				return new ArrayList<>();
+			}
+		};
+		return provider;
+	}
+
+	@Override
+	public List<CDialogEntitySelection.EntityTypeConfig<?>> getDialogEntityTypes() {
 		final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
 		entityTypes.add(new CDialogEntitySelection.EntityTypeConfig<>(ITEM_TYPE_ACTIVITY, CActivity.class, activityService));
 		entityTypes.add(new CDialogEntitySelection.EntityTypeConfig<>(ITEM_TYPE_MEETING, CMeeting.class, meetingService));
@@ -109,21 +152,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	protected Integer getNextOrder() {
-		Check.notNull(getMasterEntity(), "Current sprint cannot be null when getting next order");
-		if (getMasterEntity().getId() == null) {
-			LOGGER.debug("Sprint is new, starting order at 1");
-			return 1;
-		}
-		final CSprintItemService service = (CSprintItemService) childService;
-		final List<CSprintItem> items = service.findByMasterId(getMasterEntity().getId());
-		final int nextOrder = items.size() + 1;
-		LOGGER.debug("Next item order for sprint {}: {}", getMasterEntity().getId(), nextOrder);
-		return nextOrder;
-	}
+	public String getDialogTitle() { return "Select Items to Add to Sprint"; }
 
-	private CDialogEntitySelection.ItemsProvider<CProjectItem<?>> itemProvider() {
-		@SuppressWarnings ("unchecked")
+	@Override
+	@SuppressWarnings ("unchecked")
+	public CDialogEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {
 		final CDialogEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
 			try {
 				final CProject project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
@@ -146,57 +179,26 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	protected List<CSprintItem> loadItems(final CSprint master) {
-		Check.notNull(master, "Master sprint cannot be null when loading items");
-		LOGGER.debug("Loading sprint items for sprint: {}", master.getId() != null ? master.getId() : "null");
-		if (master.getId() == null) {
-			LOGGER.debug("Master sprint is new, returning empty list");
-			return List.of();
+	protected Integer getNextOrder() {
+		Check.notNull(getMasterEntity(), "Current sprint cannot be null when getting next order");
+		if (getMasterEntity().getId() == null) {
+			LOGGER.debug("Sprint is new, starting order at 1");
+			return 1;
 		}
 		final CSprintItemService service = (CSprintItemService) childService;
-		final List<CSprintItem> items = service.findByMasterIdWithItems(master.getId());
-		Check.notNull(items, "Loaded sprint items cannot be null");
-		LOGGER.debug("Loaded {} sprint items", items.size());
-		return items;
+		final List<CSprintItem> items = service.findByMasterId(getMasterEntity().getId());
+		final int nextOrder = items.size() + 1;
+		LOGGER.debug("Next item order for sprint {}: {}", getMasterEntity().getId(), nextOrder);
+		return nextOrder;
 	}
 
 	@Override
-	protected void on_buttonAdd_clicked() {
-		try {
-			String dialogTitle = "Select Items to Add to Sprint";
-			LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
-			// Create entity type configurations
-			@SuppressWarnings ({
-					"rawtypes", "unchecked"
-			})
-			CDialogEntitySelection<CProjectItem<?>> dialog =
-					new CDialogEntitySelection(dialogTitle, getDialogEntityTypes(), itemProvider(), onItemsSelected(), true);
-			dialog.open();
-		} catch (final Exception ex) {
-			LOGGER.error("Error opening entity selection dialog", ex);
-			CNotificationService.showException("Error opening selection dialog", ex);
-		}
-	}
-
-	@Override
-	protected void on_gridItems_doubleClicked(final CSprintItem item) {
-		// Override to prevent edit dialog from opening on double-click
-		Check.notNull(item, "Double-clicked item cannot be null");
-		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
-		setSelectedItem(item);
-		updateButtonStates(true);
-		// Don't call openEditDialog - just select the item
-	}
-
-	private Consumer<List<?>> onItemsSelected() {
-		final Consumer<List<?>> onItemsSelected = selectedItems -> {
+	@SuppressWarnings ("unchecked")
+	public Consumer<List<CProjectItem<?>>> getSelectionHandler() {
+		return selectedItems -> {
 			LOGGER.debug("Selected {} items from entity selection dialog", selectedItems.size());
 			int addedCount = 0;
-			for (final Object obj : selectedItems) {
-				if (!(obj instanceof CProjectItem)) {
-					continue;
-				}
-				final CProjectItem<?> item = (CProjectItem<?>) obj;
+			for (final CProjectItem<?> item : selectedItems) {
 				try {
 					// Determine item type
 					final String itemType = item.getClass().getSimpleName();
@@ -219,7 +221,49 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				CNotificationService.showSuccess(addedCount + " items added to sprint");
 			}
 		};
-		return onItemsSelected;
+	}
+
+	@Override
+	protected List<CSprintItem> loadItems(final CSprint master) {
+		Check.notNull(master, "Master sprint cannot be null when loading items");
+		LOGGER.debug("Loading sprint items for sprint: {}", master.getId() != null ? master.getId() : "null");
+		if (master.getId() == null) {
+			LOGGER.debug("Master sprint is new, returning empty list");
+			return List.of();
+		}
+		final CSprintItemService service = (CSprintItemService) childService;
+		final List<CSprintItem> items = service.findByMasterIdWithItems(master.getId());
+		Check.notNull(items, "Loaded sprint items cannot be null");
+		LOGGER.debug("Loaded {} sprint items", items.size());
+		return items;
+	}
+
+	@Override
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	protected void on_buttonAdd_clicked() {
+		try {
+			LOGGER.debug("Opening entity selection dialog: {}", getDialogTitle());
+			// Use interface methods for dialog configuration
+			// Raw types are required due to complex generic constraints between CDialogEntitySelection and Consumer
+			final CDialogEntitySelection<CProjectItem<?>> dialog = new CDialogEntitySelection(getDialogTitle(), getDialogEntityTypes(),
+					getItemsProvider(), (Consumer) getSelectionHandler(), isMultiSelect(), getAlreadySelectedProvider(), getAlreadySelectedMode());
+			dialog.open();
+		} catch (final Exception ex) {
+			LOGGER.error("Error opening entity selection dialog", ex);
+			CNotificationService.showException("Error opening selection dialog", ex);
+		}
+	}
+
+	@Override
+	protected void on_gridItems_doubleClicked(final CSprintItem item) {
+		// Override to prevent edit dialog from opening on double-click
+		Check.notNull(item, "Double-clicked item cannot be null");
+		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
+		setSelectedItem(item);
+		updateButtonStates(true);
+		// Don't call openEditDialog - just select the item
 	}
 
 	@Override

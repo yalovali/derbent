@@ -116,6 +116,27 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	})
 	protected CButton addButtonFromList(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected) {
+		return addButtonFromList(dialogTitle, entityTypes, itemsProvider, multiSelect, onItemsSelected, null,
+				CDialogEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+	}
+
+	/** Adds an "Add From List" button to the toolbar that opens an entity selection dialog with already-selected items support. This method creates a
+	 * button that allows users to select items from a list of available entity types using a dialog with search/filter capabilities.
+	 * <p>
+	 * The button is added to the toolbar alongside the existing add button.
+	 * @param dialogTitle             The title of the selection dialog
+	 * @param entityTypes             List of entity type configurations for the dialog
+	 * @param itemsProvider           Provider for loading items based on entity type
+	 * @param multiSelect             True for multi-select, false for single-select
+	 * @param onItemsSelected         Callback invoked when items are selected from the dialog
+	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
+	 * @param alreadySelectedMode     Mode for handling already-selected items */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	protected CButton addButtonFromList(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
+			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected,
+			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider, final CDialogEntitySelection.AlreadySelectedMode alreadySelectedMode) {
 		Check.notBlank(dialogTitle, "Dialog title cannot be blank");
 		Check.notEmpty(entityTypes, "Entity types cannot be empty");
 		Check.notNull(itemsProvider, "Items provider cannot be null");
@@ -125,19 +146,35 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		final CButton button = new CButton(VaadinIcon.LIST_SELECT.create());
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		button.setTooltipText("Add from list");
-		button.addClickListener(e -> {
-			try {
-				LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
-				// Use raw types for dialog creation due to complex generic constraints
-				final CDialogEntitySelection dialog =
-						new CDialogEntitySelection(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect);
-				dialog.open();
-			} catch (final Exception ex) {
-				LOGGER.error("Error opening entity selection dialog", ex);
-				CNotificationService.showException("Error opening selection dialog", ex);
-			}
-		});
+		button.addClickListener(e -> on_buttonFromList_clicked(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
+				alreadySelectedProvider, alreadySelectedMode));
 		return button;
+	}
+
+	/** Handle click on the "Add From List" button. Opens the entity selection dialog.
+	 * @param dialogTitle             The title of the selection dialog
+	 * @param entityTypes             List of entity type configurations for the dialog
+	 * @param itemsProvider           Provider for loading items based on entity type
+	 * @param onItemsSelected         Callback invoked when items are selected from the dialog
+	 * @param multiSelect             True for multi-select, false for single-select
+	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
+	 * @param alreadySelectedMode     Mode for handling already-selected items */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	protected void on_buttonFromList_clicked(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
+			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final Consumer<List<?>> onItemsSelected, final boolean multiSelect,
+			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider, final CDialogEntitySelection.AlreadySelectedMode alreadySelectedMode) {
+		try {
+			LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
+			// Use raw types for dialog creation due to complex generic constraints
+			final CDialogEntitySelection dialog = new CDialogEntitySelection(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
+					alreadySelectedProvider, alreadySelectedMode);
+			dialog.open();
+		} catch (final Exception ex) {
+			LOGGER.error("Error opening entity selection dialog", ex);
+			CNotificationService.showException("Error opening selection dialog", ex);
+		}
 	}
 
 	/** Clear the grid. */
