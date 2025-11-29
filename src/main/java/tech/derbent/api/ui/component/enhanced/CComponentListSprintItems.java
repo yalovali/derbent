@@ -115,7 +115,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	 * @return ItemsProvider that returns the current sprint's items filtered by entity type */
 	@Override
 	public CDialogEntitySelection.ItemsProvider<CProjectItem<?>> getAlreadySelectedProvider() {
-		@SuppressWarnings ("unchecked")
 		final CDialogEntitySelection.ItemsProvider<CProjectItem<?>> provider = config -> {
 			try {
 				final CSprint sprint = getMasterEntity();
@@ -156,8 +155,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	public String getDialogTitle() { return "Select Items to Add to Sprint"; }
 
 	@Override
+	@SuppressWarnings ("unchecked")
 	public CDialogEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {
-		@SuppressWarnings ("unchecked")
 		final CDialogEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
 			try {
 				final CProject project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
@@ -240,14 +239,14 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
 	protected void on_buttonAdd_clicked() {
 		try {
 			LOGGER.debug("Opening entity selection dialog: {}", getDialogTitle());
 			// Use interface methods for dialog configuration
-			// Use HIDE_ALREADY_SELECTED mode to filter out items that are already in the sprint
-			@SuppressWarnings ({
-					"rawtypes", "unchecked"
-			})
+			// Raw types are required due to complex generic constraints between CDialogEntitySelection and Consumer
 			final CDialogEntitySelection<CProjectItem<?>> dialog = new CDialogEntitySelection(getDialogTitle(), getDialogEntityTypes(),
 					getItemsProvider(), (Consumer) getSelectionHandler(), isMultiSelect(), getAlreadySelectedProvider(), getAlreadySelectedMode());
 			dialog.open();

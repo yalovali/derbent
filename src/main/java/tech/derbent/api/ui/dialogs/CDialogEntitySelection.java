@@ -90,9 +90,9 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 
 	private static final long serialVersionUID = 1L;
 	// Already selected items configuration
-	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	private final AlreadySelectedMode alreadySelectedMode;
 	private final ItemsProvider<EntityClass> alreadySelectedProvider;
+	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	private List<EntityClass> allItems = new ArrayList<>();
 	private CButton buttonCancel;
 	private CButton buttonReset;
