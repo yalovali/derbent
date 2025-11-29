@@ -17,6 +17,8 @@ public class CProjectIncomeType extends CTypeEntity<CProjectIncomeType> {
 
 	public static final String DEFAULT_COLOR = "#8BC34A";
 	public static final String DEFAULT_ICON = "vaadin:money-deposit";
+	public static final String ENTITY_TITLE_PLURAL = "Project Income Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Project Income Type";
 	public static final String VIEW_NAME = "Project Income Type Management";
 
 	/** Default constructor for JPA. */

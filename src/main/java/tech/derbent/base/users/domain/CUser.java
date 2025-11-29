@@ -36,6 +36,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public static final String DEFAULT_COLOR = "#00546d";
 	public static final String DEFAULT_ICON = "vaadin:user";
 	public static final int MAX_LENGTH_NAME = 255;
+	public static final String ENTITY_TITLE_PLURAL = "Users";
+	public static final String ENTITY_TITLE_SINGULAR = "User";
 	public static final String VIEW_NAME = "Users View";
 	@OneToMany (fetch = FetchType.LAZY)
 	@OrderColumn (name = "item_index")

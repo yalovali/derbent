@@ -18,6 +18,8 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:flag";
+	public static final String ENTITY_TITLE_PLURAL = "Statuses";
+	public static final String ENTITY_TITLE_SINGULAR = "Status";
 	public static final String VIEW_NAME = "Activity Statuses View";
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (

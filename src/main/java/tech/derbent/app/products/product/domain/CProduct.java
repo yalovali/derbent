@@ -23,6 +23,8 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 
 	public static final String DEFAULT_COLOR = "#00BCD4";
 	public static final String DEFAULT_ICON = "vaadin:package";
+	public static final String ENTITY_TITLE_PLURAL = "Products";
+	public static final String ENTITY_TITLE_SINGULAR = "Product";
 	public static final String VIEW_NAME = "Products View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

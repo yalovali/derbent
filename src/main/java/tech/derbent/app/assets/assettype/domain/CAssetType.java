@@ -17,6 +17,8 @@ public class CAssetType extends CTypeEntity<CAssetType> {
 
 	public static final String DEFAULT_COLOR = "#FF5722";
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
+	public static final String ENTITY_TITLE_PLURAL = "Asset Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Asset Type";
 	public static final String VIEW_NAME = "Asset Type Management";
 
 	/** Default constructor for JPA. */

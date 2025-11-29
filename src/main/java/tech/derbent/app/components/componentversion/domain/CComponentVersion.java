@@ -24,6 +24,8 @@ public class CComponentVersion extends CProjectItem<CComponentVersion> implement
 
 	public static final String DEFAULT_COLOR = "#6D4C41";
 	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Component Versions";
+	public static final String ENTITY_TITLE_SINGULAR = "Component Version";
 	public static final String VIEW_NAME = "Component Versions View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "component_id", nullable = false)

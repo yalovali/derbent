@@ -21,6 +21,8 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:check";
+	public static final String ENTITY_TITLE_PLURAL = "Order Approvals";
+	public static final String ENTITY_TITLE_SINGULAR = "Order Approval";
 	public static final String VIEW_NAME = "Order Approval View";
 	@Column (name = "approval_date", nullable = true)
 	@AMetaData (

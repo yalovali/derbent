@@ -23,6 +23,8 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 
 	public static final String DEFAULT_COLOR = "#AB47BC";
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
+	public static final String ENTITY_TITLE_PLURAL = "Deliverables";
+	public static final String ENTITY_TITLE_SINGULAR = "Deliverable";
 	public static final String VIEW_NAME = "Deliverable View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

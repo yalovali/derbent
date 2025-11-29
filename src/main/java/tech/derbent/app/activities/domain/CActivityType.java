@@ -16,6 +16,8 @@ public class CActivityType extends CTypeEntity<CActivityType> {
 
 	public static final String DEFAULT_COLOR = "#17a2b8";
 	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Activity Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Activity Type";
 	public static final String VIEW_NAME = "Activity Type Management";
 
 	/** Default constructor for JPA. */

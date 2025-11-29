@@ -23,6 +23,8 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public static final String DEFAULT_COLOR = "#FFB300";
 	public static final String DEFAULT_ICON = "vaadin:ticket";
+	public static final String ENTITY_TITLE_PLURAL = "Tickets";
+	public static final String ENTITY_TITLE_SINGULAR = "Ticket";
 	public static final String VIEW_NAME = "Ticket View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

@@ -23,6 +23,8 @@ public class CProjectIncome extends CProjectItem<CProjectIncome> implements IHas
 
 	public static final String DEFAULT_COLOR = "#9CCC65";
 	public static final String DEFAULT_ICON = "vaadin:money-deposit";
+	public static final String ENTITY_TITLE_PLURAL = "Project Incomes";
+	public static final String ENTITY_TITLE_SINGULAR = "Project Income";
 	public static final String VIEW_NAME = "Project Income View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

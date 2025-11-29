@@ -33,6 +33,8 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 
 	public static final String DEFAULT_COLOR = "#905300";
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
+	public static final String ENTITY_TITLE_PLURAL = "Projects";
+	public static final String ENTITY_TITLE_SINGULAR = "Project";
 	public static final String VIEW_NAME = "Projects View";
 	// Many projects can belong to one company
 	@AMetaData (displayName = "Company", required = true, readOnly = false, description = "The company this project belongs to", hidden = false)

@@ -20,6 +20,8 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public static final String DEFAULT_COLOR = "#6f42c1";
 	public static final String DEFAULT_ICON = "vaadin:office";
+	public static final String ENTITY_TITLE_PLURAL = "Companies";
+	public static final String ENTITY_TITLE_SINGULAR = "Company";
 	public static final String VIEW_NAME = "Company View";
 	@Column (name = "address", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.FIELD_MAX_LENGTH)

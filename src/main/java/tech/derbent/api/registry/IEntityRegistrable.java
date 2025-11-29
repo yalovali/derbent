@@ -15,7 +15,7 @@ public interface IEntityRegistrable {
 		}
 	}
 
-	default String getDefaultIconName() { // TODO Auto-generated method stub
+	default String getDefaultIconName() {
 		try {
 			return CColorUtils.getStaticStringValue(getEntityClass(), "DEFAULT_ICON");
 		} catch (Exception e) {
@@ -30,4 +30,30 @@ public interface IEntityRegistrable {
 	Class<?> getServiceClass();
 
 	default String getSimpleName() { return getEntityClass().getSimpleName(); }
+
+	/** Gets the singular title for this entity (e.g., "Activity", "User", "Project").
+	 * @return the singular entity title */
+	default String getEntityTitleSingular() {
+		try {
+			return CColorUtils.getStaticStringValue(getEntityClass(), "ENTITY_TITLE_SINGULAR");
+		} catch (Exception e) {
+			// Fallback: derive from class name by removing C prefix
+			String simpleName = getEntityClass().getSimpleName();
+			if (simpleName.startsWith("C")) {
+				simpleName = simpleName.substring(1);
+			}
+			return simpleName;
+		}
+	}
+
+	/** Gets the plural title for this entity (e.g., "Activities", "Users", "Projects").
+	 * @return the plural entity title */
+	default String getEntityTitlePlural() {
+		try {
+			return CColorUtils.getStaticStringValue(getEntityClass(), "ENTITY_TITLE_PLURAL");
+		} catch (Exception e) {
+			// Fallback: derive from singular + "s"
+			return getEntityTitleSingular() + "s";
+		}
+	}
 }

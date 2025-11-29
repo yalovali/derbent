@@ -39,8 +39,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:tasks";
+	public static final String ENTITY_TITLE_PLURAL = "Activities";
+	public static final String ENTITY_TITLE_SINGULAR = "Activity";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
-	public final static String VIEW_NAME = "Activities View";
+	public static final String VIEW_NAME = "Activities View";
 	// Additional Information
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)

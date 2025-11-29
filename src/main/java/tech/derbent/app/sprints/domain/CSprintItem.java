@@ -25,6 +25,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:list-ol";
+	public static final String ENTITY_TITLE_PLURAL = "Sprint Items";
+	public static final String ENTITY_TITLE_SINGULAR = "Sprint Item";
 	public static final String VIEW_NAME = "Sprint Items View";
 	// Transient field - loaded dynamically at runtime from itemId and itemType
 	@Transient

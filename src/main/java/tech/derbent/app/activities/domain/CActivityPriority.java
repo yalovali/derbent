@@ -19,6 +19,8 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	public static final String DEFAULT_COLOR = "#10a2f8";
 	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Activity Priorities";
+	public static final String ENTITY_TITLE_SINGULAR = "Activity Priority";
 	public static final String VIEW_NAME = "Activity Priority Management";
 	/** Indicates if this is the default priority. */
 	@Column (name = "is_default", nullable = false)

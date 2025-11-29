@@ -23,6 +23,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:sliders";
+	public static final String ENTITY_TITLE_PLURAL = "System Settings";
+	public static final String ENTITY_TITLE_SINGULAR = "System Settings";
 	public static final String VIEW_NAME = "System Settings View";
 	@Column (name = "account_lockout_duration_minutes", nullable = false)
 	@Min (value = 1, message = "Lockout duration must be at least 1 minute")

@@ -25,6 +25,8 @@ public class CTeam extends CEntityNamed<CTeam> {
 
 	public static final String DEFAULT_COLOR = "#3F51B5";
 	public static final String DEFAULT_ICON = "vaadin:group";
+	public static final String ENTITY_TITLE_PLURAL = "Teams";
+	public static final String ENTITY_TITLE_SINGULAR = "Team";
 	public static final String VIEW_NAME = "Teams View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "company_id", nullable = false)
