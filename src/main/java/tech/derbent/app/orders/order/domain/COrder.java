@@ -36,6 +36,8 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:invoice";
+	public static final String ENTITY_TITLE_PLURAL = "Orders";
+	public static final String ENTITY_TITLE_SINGULAR = "Order";
 	public static final String VIEW_NAME = "Orders View";
 	@Column (name = "actual_cost", nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.00", message = "Actual cost must be positive")

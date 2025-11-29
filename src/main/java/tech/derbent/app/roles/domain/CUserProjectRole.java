@@ -19,6 +19,8 @@ public class CUserProjectRole extends CRole<CUserProjectRole> {
 	public static final String DEFAULT_COLOR = "#10341d";
 	public static final String DEFAULT_ICON = "vaadin:book";
 	public static final int MAX_LENGTH_NAME = 255;
+	public static final String ENTITY_TITLE_PLURAL = "User Project Roles";
+	public static final String ENTITY_TITLE_SINGULAR = "User Project Role";
 	public static final String VIEW_NAME = "User Project Roles View";
 	// Boolean attributes for project role types
 	@Column (name = "is_admin", nullable = false)

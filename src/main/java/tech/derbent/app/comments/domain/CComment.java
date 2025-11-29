@@ -28,6 +28,8 @@ public class CComment extends CEvent<CComment> {
 	public static final String DEFAULT_COLOR = "#1CF43F";
 	public static final String DEFAULT_ICON = "vaadin:tasks";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
+	public static final String ENTITY_TITLE_PLURAL = "Comments";
+	public static final String ENTITY_TITLE_SINGULAR = "Comment";
 	public static final String VIEW_NAME = "Comments View";
 	// Activity this comment belongs to
 	@ManyToOne (fetch = FetchType.LAZY)

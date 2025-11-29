@@ -27,6 +27,8 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:tasks";
+	public static final String ENTITY_TITLE_PLURAL = "Workflow Status Relations";
+	public static final String ENTITY_TITLE_SINGULAR = "Workflow Status Relation";
 	public static final String VIEW_NAME = "Workflow Status Relations View";
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "from_status_id", nullable = false)

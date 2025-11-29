@@ -17,6 +17,8 @@ public class CRiskType extends CTypeEntity<CRiskType> {
 
 	public static final String DEFAULT_COLOR = "#a712b8";
 	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Risk Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Risk Type";
 	public static final String VIEW_NAME = "Risk Type Management";
 
 	/** Default constructor for JPA. */

@@ -17,6 +17,8 @@ public class CProductVersionType extends CTypeEntity<CProductVersionType> {
 
 public static final String DEFAULT_COLOR = "#0097A7";
 public static final String DEFAULT_ICON = "vaadin:tag";
+public static final String ENTITY_TITLE_PLURAL = "Product Version Types";
+public static final String ENTITY_TITLE_SINGULAR = "Product Version Type";
 public static final String VIEW_NAME = "Product Version Type Management";
 
 public CProductVersionType() {

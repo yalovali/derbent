@@ -23,6 +23,8 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 
 	public static final String DEFAULT_COLOR = "#66BB6A";
 	public static final String DEFAULT_ICON = "vaadin:dollar";
+	public static final String ENTITY_TITLE_PLURAL = "Budgets";
+	public static final String ENTITY_TITLE_SINGULAR = "Budget";
 	public static final String VIEW_NAME = "Budget View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

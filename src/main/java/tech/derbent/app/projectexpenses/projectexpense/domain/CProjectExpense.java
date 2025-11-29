@@ -23,6 +23,8 @@ public class CProjectExpense extends CProjectItem<CProjectExpense> implements IH
 
 	public static final String DEFAULT_COLOR = "#EF5350";
 	public static final String DEFAULT_ICON = "vaadin:money-withdraw";
+	public static final String ENTITY_TITLE_PLURAL = "Project Expenses";
+	public static final String ENTITY_TITLE_SINGULAR = "Project Expense";
 	public static final String VIEW_NAME = "Project Expense View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

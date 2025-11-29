@@ -17,6 +17,8 @@ public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 
 	public static final String DEFAULT_COLOR = "#2196F3";
 	public static final String DEFAULT_ICON = "vaadin:flag";
+	public static final String ENTITY_TITLE_PLURAL = "Milestone Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Milestone Type";
 	public static final String VIEW_NAME = "Milestone Type Management";
 
 	/** Default constructor for JPA. */

@@ -55,6 +55,8 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 
 	public static final String DEFAULT_COLOR = "#d57d00";
 	public static final String DEFAULT_ICON = "vaadin:code";
+	public static final String ENTITY_TITLE_PLURAL = "Grid Entities";
+	public static final String ENTITY_TITLE_SINGULAR = "Grid Entity";
 	public static final String VIEW_NAME = "Grid View";
 	@Column (nullable = false)
 	@AMetaData (

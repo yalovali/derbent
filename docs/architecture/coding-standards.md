@@ -203,9 +203,13 @@ tech.derbent.api.utils              // Utility classes
 @AttributeOverride(name = "id", column = @Column(name = "entity_id"))
 public class CEntity extends CProjectItem<CEntity> {
     
-    // 1. Constants
+    // 1. Constants (MANDATORY - alphabetically ordered)
     public static final String DEFAULT_COLOR = "#DC143C";
+    public static final String DEFAULT_ICON = "vaadin:tasks";
+    public static final String ENTITY_TITLE_PLURAL = "Entities";    // MANDATORY
+    public static final String ENTITY_TITLE_SINGULAR = "Entity";     // MANDATORY
     private static final Logger LOGGER = LoggerFactory.getLogger(CEntity.class);
+    public static final String VIEW_NAME = "Entities View";
     
     // 2. Fields - grouped by type
     // Basic fields
@@ -242,6 +246,54 @@ public class CEntity extends CProjectItem<CEntity> {
     
     // 6. equals, hashCode, toString (if overriding)
 }
+```
+
+### Mandatory Entity Constants (CRITICAL)
+
+Every entity class MUST define the following constants:
+
+| Constant | Purpose | Example |
+|----------|---------|---------|
+| `DEFAULT_COLOR` | UI display color | `"#DC143C"` |
+| `DEFAULT_ICON` | Vaadin icon identifier | `"vaadin:tasks"` |
+| `ENTITY_TITLE_SINGULAR` | Human-readable singular name | `"Activity"`, `"User"` |
+| `ENTITY_TITLE_PLURAL` | Human-readable plural name | `"Activities"`, `"Users"` |
+| `VIEW_NAME` | View/page title | `"Activities View"` |
+
+#### ✅ Correct Entity Constants
+```java
+public class CActivity extends CProjectItem<CActivity> {
+    public static final String DEFAULT_COLOR = "#DC143C";
+    public static final String DEFAULT_ICON = "vaadin:tasks";
+    public static final String ENTITY_TITLE_PLURAL = "Activities";
+    public static final String ENTITY_TITLE_SINGULAR = "Activity";
+    public static final String VIEW_NAME = "Activities View";
+    // ...
+}
+```
+
+#### ❌ Incorrect - Missing Required Constants
+```java
+public class CActivity extends CProjectItem<CActivity> {
+    public static final String DEFAULT_COLOR = "#DC143C";
+    // Missing: DEFAULT_ICON, ENTITY_TITLE_SINGULAR, ENTITY_TITLE_PLURAL, VIEW_NAME
+}
+```
+
+### Using Entity Titles via CEntityRegistry
+
+The `CEntityRegistry` class provides methods to look up entity classes by title and vice versa:
+
+```java
+// Get entity class from title
+Class<?> entityClass = CEntityRegistry.getEntityClassByTitle("Activity");       // By singular
+Class<?> entityClass = CEntityRegistry.getEntityClassByTitle("Activities");     // By plural
+Class<?> entityClass = CEntityRegistry.getEntityClassBySingularTitle("User");   // Singular only
+Class<?> entityClass = CEntityRegistry.getEntityClassByPluralTitle("Users");    // Plural only
+
+// Get title from entity class
+String singular = CEntityRegistry.getEntityTitleSingular(CActivity.class);  // "Activity"
+String plural = CEntityRegistry.getEntityTitlePlural(CActivity.class);      // "Activities"
 ```
 
 ### Service Class Structure

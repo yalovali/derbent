@@ -25,6 +25,8 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 
 	public static final String DEFAULT_COLOR = "#be6f00";
 	public static final String DEFAULT_ICON = "vaadin:comment";
+	public static final String ENTITY_TITLE_PLURAL = "Detail Sections";
+	public static final String ENTITY_TITLE_SINGULAR = "Detail Section";
 	public static final String VIEW_NAME = "Detail Section View";
 	@Column (nullable = false)
 	@AMetaData (

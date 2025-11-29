@@ -16,6 +16,8 @@ public class COrderType extends CTypeEntity<COrderType> {
 
 	public static final String DEFAULT_COLOR = "#17a2b8";
 	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String ENTITY_TITLE_PLURAL = "Order Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Order Type";
 	public static final String VIEW_NAME = "Order Type View";
 
 	/** Default constructor for JPA. */

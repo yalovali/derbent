@@ -19,6 +19,8 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 
 	public static final String DEFAULT_COLOR = "#ffc107";
 	public static final String DEFAULT_ICON = "vaadin:dollar";
+	public static final String ENTITY_TITLE_PLURAL = "Currencies";
+	public static final String ENTITY_TITLE_SINGULAR = "Currency";
 	public static final String VIEW_NAME = "Currency View";
 	@Column (name = "currency_code", nullable = false, length = 3, unique = false)
 	@Size (max = 3, min = 3, message = "Currency code must be exactly 3 characters")

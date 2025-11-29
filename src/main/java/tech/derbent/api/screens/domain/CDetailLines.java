@@ -26,6 +26,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 
 	public static final String DEFAULT_COLOR = "#a76100";
 	public static final String DEFAULT_ICON = "vaadin:connect";
+	public static final String ENTITY_TITLE_PLURAL = "Detail Lines";
+	public static final String ENTITY_TITLE_SINGULAR = "Detail Line";
 	public static final String VIEW_NAME = "Detail Lines View";
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return null; }

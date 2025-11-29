@@ -17,6 +17,8 @@ public class CProductType extends CTypeEntity<CProductType> {
 
 public static final String DEFAULT_COLOR = "#00BCD4";
 public static final String DEFAULT_ICON = "vaadin:package";
+public static final String ENTITY_TITLE_PLURAL = "Product Types";
+public static final String ENTITY_TITLE_SINGULAR = "Product Type";
 public static final String VIEW_NAME = "Product Type Management";
 
 public CProductType() {

@@ -14,6 +14,8 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:timeline";
+	public static final String ENTITY_TITLE_PLURAL = "Gantt View Entities";
+	public static final String ENTITY_TITLE_SINGULAR = "Gantt View Entity";
 	public static final String VIEW_NAME = "GanntEntity View";
 
 	public CGanntViewEntity() {

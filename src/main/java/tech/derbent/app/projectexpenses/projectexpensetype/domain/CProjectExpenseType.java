@@ -17,6 +17,8 @@ public class CProjectExpenseType extends CTypeEntity<CProjectExpenseType> {
 
 	public static final String DEFAULT_COLOR = "#F44336";
 	public static final String DEFAULT_ICON = "vaadin:money-withdraw";
+	public static final String ENTITY_TITLE_PLURAL = "Project Expense Types";
+	public static final String ENTITY_TITLE_SINGULAR = "Project Expense Type";
 	public static final String VIEW_NAME = "Project Expense Type Management";
 
 	/** Default constructor for JPA. */
