@@ -363,19 +363,96 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			String serviceBeanName = gridEntity.getDataServiceBeanName();
 			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
-			List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
-			fieldConfigs.forEach(fc -> createColumnForField(fc));
-			// Configure sorting - sort by first column (ID) initially
-			// Get the first column (ID column) and sort by it
-			if (grid.getColumns().size() > 0) {
-				Grid.Column<?> firstColumn = grid.getColumns().get(0);
-				// Make it sortable and set as sorted
-				firstColumn.setSortable(true);
+			// Check if widget mode is enabled
+			if (gridEntity.isUseWidgetMode()) {
+				createWidgetColumn(serviceBeanName);
+			} else {
+				// Traditional column-based mode
+				List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
+				fieldConfigs.forEach(fc -> createColumnForField(fc));
+				// Configure sorting - sort by first column (ID) initially
+				// Get the first column (ID column) and sort by it
+				if (grid.getColumns().size() > 0) {
+					Grid.Column<?> firstColumn = grid.getColumns().get(0);
+					// Make it sortable and set as sorted
+					firstColumn.setSortable(true);
+				}
 			}
 		} catch (Exception e) {
 			LOGGER.warn("Could not configure sorting on first column: {}", e.getMessage());
 			throw e;
 		}
+	}
+
+	/** Creates a widget column for widget mode display.
+	 *
+	 * @param serviceBeanName the service bean name to get the widget provider from */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	private void createWidgetColumn(String serviceBeanName) {
+		try {
+			Check.notBlank(serviceBeanName, "Service bean name is required for widget mode");
+			// Get the service to check if it provides a widget provider
+			CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(serviceBeanName);
+			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
+			// Try to get page service class which may implement IEntityWidgetProvider
+			final Class<?> pageServiceClassFinal;
+			Class<?> tempPageServiceClass = null;
+			try {
+				if (serviceBean instanceof tech.derbent.api.registry.IEntityRegistrable) {
+					tempPageServiceClass = ((tech.derbent.api.registry.IEntityRegistrable) serviceBean).getPageServiceClass();
+				}
+			} catch (Exception e) {
+				LOGGER.debug("Could not get page service class: {}", e.getMessage());
+			}
+			pageServiceClassFinal = tempPageServiceClass;
+			// Create a widget provider function
+			java.util.function.Function<Object, com.vaadin.flow.component.Component> widgetProvider = entity -> {
+				try {
+					// Try to use the page service's widget provider if available
+					if (pageServiceClassFinal != null) {
+						// Check if page service implements IEntityWidgetProvider
+						if (tech.derbent.api.grid.widget.IEntityWidgetProvider.class.isAssignableFrom(pageServiceClassFinal)) {
+							// For now, create a default widget since we don't have page service instance here
+							// In a full implementation, the page service instance would be passed in
+							return createDefaultWidget((CEntityDB<?>) entity);
+						}
+					}
+					// Fall back to default widget
+					return createDefaultWidget((CEntityDB<?>) entity);
+				} catch (Exception e) {
+					LOGGER.error("Error creating widget for entity: {}", e.getMessage());
+					tech.derbent.api.grid.view.CGridCell errorCell = new tech.derbent.api.grid.view.CGridCell();
+					errorCell.setText("Widget Error");
+					return errorCell;
+				}
+			};
+			// Add the widget column
+			CGrid rawGrid = grid;
+			rawGrid.addWidgetColumn(widgetProvider);
+			LOGGER.debug("Created widget column for grid entity: {}", gridEntity.getName());
+		} catch (Exception e) {
+			LOGGER.error("Error creating widget column: {}", e.getMessage());
+			// Fallback to traditional columns if widget mode fails
+			try {
+				String serviceBN = gridEntity.getDataServiceBeanName();
+				Class<?> entityClass = getEntityClassFromService(serviceBN);
+				List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
+				fieldConfigs.forEach(fc -> createColumnForField(fc));
+			} catch (Exception ex) {
+				LOGGER.error("Fallback to traditional columns also failed: {}", ex.getMessage());
+			}
+		}
+	}
+
+	/** Creates a default widget for any entity.
+	 *
+	 * @param entity the entity to create a widget for
+	 * @return the widget component */
+	private com.vaadin.flow.component.Component createDefaultWidget(CEntityDB<?> entity) {
+		// Use CEntityWidget as the default widget
+		return new tech.derbent.api.grid.widget.CEntityWidget<>(entity);
 	}
 
 	private Field findField(Class<?> entityClass, String fieldName) {
