@@ -2,15 +2,19 @@ package tech.derbent.api.entity.domain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.meetings.domain.CMeeting;
+import tech.derbent.app.meetings.view.CComponentWidgetMeeting;
 
-public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting> implements IPageServiceHasStatusAndWorkflow<CMeeting> {
+public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting>
+		implements IPageServiceHasStatusAndWorkflow<CMeeting>, IComponentWidgetEntityProvider<CMeeting> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceMeeting.class);
 	Long serialVersionUID = 1L;
@@ -40,6 +44,12 @@ public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting> imple
 			throw e;
 		}
 	}
+
+	/** Creates a widget component for displaying the given meeting entity.
+	 * @param entity the meeting to create a widget for
+	 * @return the CComponentWidgetMeeting component */
+	@Override
+	public Component getComponentWidget(final CMeeting entity) { return new CComponentWidgetMeeting(entity); }
 
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() {
