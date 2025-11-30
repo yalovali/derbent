@@ -22,9 +22,19 @@ import tech.derbent.base.session.service.ISessionService;
 
 /** CWidgetGridDemo - Demo page showcasing the widget-based grid display for entities.
  * <p>
- * This demo demonstrates the CEntityWidget system which displays entities in a rich, visual format within grids. The widget displays: - Entity name
- * and description - Status with color coding - Dates and timestamps - Assigned user - Progress indicators - Action buttons (edit, delete)
+ * This demo demonstrates the CEntityWidget system which displays entities in a rich, visual format within grids.
  * </p>
+ * <p>
+ * The widget displays:
+ * </p>
+ * <ul>
+ * <li>Entity name and description</li>
+ * <li>Status with color coding</li>
+ * <li>Dates and timestamps</li>
+ * <li>Assigned user</li>
+ * <li>Progress indicators</li>
+ * <li>Action buttons (edit, delete)</li>
+ * </ul>
  * <p>
  * The demo uses CActivity entities as an example, with the CActivityWidget providing activity-specific rendering.
  * </p>
