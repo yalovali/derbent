@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -23,7 +22,6 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
-import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -41,20 +39,19 @@ import tech.derbent.api.utils.Check;
  * The widget is designed to be extendable, allowing entity-specific implementations to add custom content and actions while maintaining consistent
  * styling and behavior.
  * </p>
- *
  * @param <T> the entity type
  * @author Derbent Framework
  * @since 1.0
- * @see IEntityWidgetProvider
+ * @see IComponentWidgetEntityProvider
  * @see CEntityWidgetEvent */
-public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
+public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CDiv {
 
 	/** Event fired when a widget action is triggered (e.g., delete button clicked). */
-	public static class CEntityWidgetEvent<T extends CEntityDB<?>> extends ComponentEvent<CEntityWidget<T>> {
+	public static class CEntityWidgetEvent<T extends CEntityDB<?>> extends ComponentEvent<CComponentWidgetEntity<T>> {
 
 		/** Widget action types. */
 		public enum ActionType {
-			DELETE, EDIT, VIEW, CUSTOM
+			CUSTOM, DELETE, EDIT, VIEW
 		}
 
 		private static final long serialVersionUID = 1L;
@@ -63,11 +60,10 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 		private final T entity;
 
 		/** Creates a widget event with the specified action type.
-		 *
 		 * @param source     the source widget
 		 * @param entity     the entity associated with the event
 		 * @param actionType the type of action triggered */
-		public CEntityWidgetEvent(final CEntityWidget<T> source, final T entity, final ActionType actionType) {
+		public CEntityWidgetEvent(final CComponentWidgetEntity<T> source, final T entity, final ActionType actionType) {
 			super(source, false);
 			this.entity = entity;
 			this.actionType = actionType;
@@ -75,11 +71,10 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 		}
 
 		/** Creates a widget event with a custom action.
-		 *
 		 * @param source       the source widget
 		 * @param entity       the entity associated with the event
 		 * @param customAction the custom action name */
-		public CEntityWidgetEvent(final CEntityWidget<T> source, final T entity, final String customAction) {
+		public CEntityWidgetEvent(final CComponentWidgetEntity<T> source, final T entity, final String customAction) {
 			super(source, false);
 			this.entity = entity;
 			actionType = ActionType.CUSTOM;
@@ -94,20 +89,19 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 	}
 
 	protected static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-	protected static final Logger LOGGER = LoggerFactory.getLogger(CEntityWidget.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntity.class);
 	private static final long serialVersionUID = 1L;
+	protected final T entity;
 	protected CHorizontalLayout layoutActions;
 	protected CDiv layoutContent;
 	protected CDiv layoutPrimary;
 	protected CDiv layoutSecondary;
 	protected CDiv layoutSelection;
-	protected final T entity;
 	protected boolean selected;
 
 	/** Creates a new entity widget for the specified entity.
-	 *
 	 * @param entity the entity to display in the widget */
-	public CEntityWidget(final T entity) {
+	public CComponentWidgetEntity(final T entity) {
 		super();
 		Check.notNull(entity, "Entity cannot be null when creating widget");
 		this.entity = entity;
@@ -115,17 +109,7 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 		initializeWidget();
 	}
 
-	/** Adds an action listener that will be notified when widget actions are triggered.
-	 *
-	 * @param listener the listener to add
-	 * @return a registration that can be used to remove the listener */
-	@SuppressWarnings ("unchecked")
-	public Registration addActionListener(final com.vaadin.flow.component.ComponentEventListener<CEntityWidgetEvent<T>> listener) {
-		return addListener((Class<CEntityWidgetEvent<T>>) (Class<?>) CEntityWidgetEvent.class, listener);
-	}
-
 	/** Adds a custom action button to the widget.
-	 *
 	 * @param icon       the icon for the button
 	 * @param tooltip    the tooltip text
 	 * @param actionName the action name to fire in events */
@@ -141,8 +125,15 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 		layoutActions.add(button);
 	}
 
+	/** Adds an action listener that will be notified when widget actions are triggered.
+	 * @param listener the listener to add
+	 * @return a registration that can be used to remove the listener */
+	@SuppressWarnings ("unchecked")
+	public Registration addActionListener(final com.vaadin.flow.component.ComponentEventListener<CEntityWidgetEvent<T>> listener) {
+		return addListener((Class<CEntityWidgetEvent<T>>) (Class<?>) CEntityWidgetEvent.class, listener);
+	}
+
 	/** Adds a date row to the secondary content.
-	 *
 	 * @param label the date label
 	 * @param date  the date value
 	 * @param icon  optional icon to show before the date */
@@ -176,7 +167,6 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 	}
 
 	/** Adds an info row with icon and text to the secondary content.
-	 *
 	 * @param icon the icon to show
 	 * @param text the text to display */
 	protected void addInfoRow(final VaadinIcon icon, final String text) {
@@ -197,7 +187,6 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 	}
 
 	/** Adds a status badge to the secondary content.
-	 *
 	 * @param statusEntity the status entity to display
 	 * @param label        optional label to show before the status */
 	protected void addStatusBadge(final CEntityDB<?> statusEntity, final String label) {
@@ -233,7 +222,6 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 	}
 
 	/** Adds a user info row to the secondary content.
-	 *
 	 * @param user  the user entity
 	 * @param label the label to show */
 	protected void addUserRow(final CEntityNamed<?> user, final String label) {
@@ -287,7 +275,6 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 	}
 
 	/** Creates a styled info row container.
-	 *
 	 * @return a configured CDiv for info rows */
 	protected CDiv createInfoRow() {
 		final CDiv row = new CDiv();
@@ -297,12 +284,10 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 	}
 
 	/** Gets the entity displayed in this widget.
-	 *
 	 * @return the entity */
 	public T getEntity() { return entity; }
 
 	/** Gets the entity description if available. Override in subclasses for custom description extraction.
-	 *
 	 * @return the entity description, or null if not available */
 	protected String getEntityDescription() {
 		try {
@@ -373,12 +358,10 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 	}
 
 	/** Checks if the widget is selected.
-	 *
 	 * @return true if selected */
 	public boolean isSelected() { return selected; }
 
 	/** Handles action button clicks.
-	 *
 	 * @param actionName the name of the action */
 	protected void on_actionButton_clicked(final String actionName) {
 		Check.notBlank(actionName, "Action name cannot be blank");
@@ -401,7 +384,6 @@ public class CEntityWidget<T extends CEntityDB<?>> extends CDiv {
 	}
 
 	/** Sets the selected state of the widget.
-	 *
 	 * @param selected true to mark as selected */
 	public void setSelected(final boolean selected) {
 		this.selected = selected;

@@ -110,8 +110,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		return CDialogEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED;
 	}
 
-	/** Returns a provider for already-selected items (items currently in the sprint). This returns items based on the current sprint's members to enable
-	 * the dialog to hide or pre-select them.
+	/** Returns a provider for already-selected items (items currently in the sprint). This returns items based on the current sprint's members to
+	 * enable the dialog to hide or pre-select them.
 	 * @return ItemsProvider that returns the current sprint's items filtered by entity type */
 	@Override
 	public CDialogEntitySelection.ItemsProvider<CProjectItem<?>> getAlreadySelectedProvider() {
@@ -193,7 +193,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	@SuppressWarnings ("unchecked")
 	public Consumer<List<CProjectItem<?>>> getSelectionHandler() {
 		return selectedItems -> {
 			LOGGER.debug("Selected {} items from entity selection dialog", selectedItems.size());

@@ -62,7 +62,9 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 
 	@Override
 	public CPageService getPageService() { // TODO Auto-generated method stub
-		return null;
+		Check.instanceOf(parentContent, IPageServiceImplementer.class,
+				"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
+		return ((IPageServiceImplementer) parentContent).getPageService();
 	}
 
 	@Override

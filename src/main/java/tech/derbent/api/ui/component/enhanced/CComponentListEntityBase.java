@@ -52,6 +52,7 @@ import tech.derbent.api.utils.Check;
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
 		extends VerticalLayout implements IContentOwner {
+
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
 
@@ -68,18 +69,18 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	protected CButton buttonAdd;
 	protected CButton buttonAddFromList;
-	protected final IOrderedEntityService<ChildEntity> childService;
 	protected CButton buttonDelete;
+	protected CButton buttonMoveDown;
+	protected CButton buttonMoveUp;
+	protected final IOrderedEntityService<ChildEntity> childService;
 	protected final Class<ChildEntity> entityClass;
 	// Components
 	protected CGrid<ChildEntity> gridItems;
+	protected CHorizontalLayout layoutToolbar;
 	protected MasterEntity masterEntity;
 	protected final Class<MasterEntity> masterEntityClass;
-	protected CButton buttonMoveDown;
-	protected CButton buttonMoveUp;
 	// Data management
 	protected ChildEntity selectedItem;
-	protected CHorizontalLayout layoutToolbar;
 
 	/** Constructor for the entity list component.
 	 * @param title             The title to display above the grid
@@ -112,7 +113,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param multiSelect     True for multi-select, false for single-select
 	 * @param onItemsSelected Callback invoked when items are selected from the dialog */
 	@SuppressWarnings ({
-			"unchecked", "rawtypes"
 	})
 	protected CButton addButtonFromList(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected) {
@@ -132,11 +132,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
 	 * @param alreadySelectedMode     Mode for handling already-selected items */
 	@SuppressWarnings ({
-			"unchecked", "rawtypes"
 	})
 	protected CButton addButtonFromList(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected,
-			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider, final CDialogEntitySelection.AlreadySelectedMode alreadySelectedMode) {
+			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider,
+			final CDialogEntitySelection.AlreadySelectedMode alreadySelectedMode) {
 		Check.notBlank(dialogTitle, "Dialog title cannot be blank");
 		Check.notEmpty(entityTypes, "Entity types cannot be empty");
 		Check.notNull(itemsProvider, "Items provider cannot be null");
@@ -149,32 +149,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		button.addClickListener(e -> on_buttonFromList_clicked(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
 				alreadySelectedProvider, alreadySelectedMode));
 		return button;
-	}
-
-	/** Handle click on the "Add From List" button. Opens the entity selection dialog.
-	 * @param dialogTitle             The title of the selection dialog
-	 * @param entityTypes             List of entity type configurations for the dialog
-	 * @param itemsProvider           Provider for loading items based on entity type
-	 * @param onItemsSelected         Callback invoked when items are selected from the dialog
-	 * @param multiSelect             True for multi-select, false for single-select
-	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
-	 * @param alreadySelectedMode     Mode for handling already-selected items */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	protected void on_buttonFromList_clicked(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
-			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final Consumer<List<?>> onItemsSelected, final boolean multiSelect,
-			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider, final CDialogEntitySelection.AlreadySelectedMode alreadySelectedMode) {
-		try {
-			LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
-			// Use raw types for dialog creation due to complex generic constraints
-			final CDialogEntitySelection dialog = new CDialogEntitySelection(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
-					alreadySelectedProvider, alreadySelectedMode);
-			dialog.open();
-		} catch (final Exception ex) {
-			LOGGER.error("Error opening entity selection dialog", ex);
-			CNotificationService.showException("Error opening selection dialog", ex);
-		}
 	}
 
 	/** Clear the grid. */
@@ -298,21 +272,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @return The selected item, or null if none selected */
 	public ChildEntity getSelectedItem() { return selectedItem; }
 
-	/** Handle double-click on a grid item. Opens the edit dialog by default.
-	 * @param item The double-clicked item */
-	protected void on_gridItems_doubleClicked(final ChildEntity item) {
-		try {
-			Check.notNull(item, "Double-clicked item cannot be null");
-			LOGGER.debug("Double-clicked item: {}", item.getId());
-			selectedItem = item;
-			updateButtonStates(true);
-			handleEdit(item);
-		} catch (final Exception ex) {
-			LOGGER.error("Error opening edit dialog", ex);
-			CNotificationService.showException("Error opening edit dialog", ex);
-		}
-	}
-
 	/** Handle edit operation for selected item.
 	 * @param item The item to edit */
 	protected void handleEdit(final ChildEntity item) {
@@ -339,19 +298,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		} catch (final Exception e) {
 			LOGGER.error("Error saving entity", e);
 			CNotificationService.showException("Error saving item", e);
-		}
-	}
-
-	/** Handle selection change in the grid.
-	 * @param item The selected item (can be null) */
-	protected void on_gridItems_selected(final ChildEntity item) {
-		try {
-			LOGGER.debug("Selection changed to: {}", item != null ? item.getId() : "null");
-			selectedItem = item;
-			updateButtonStates(item != null);
-		} catch (final Exception ex) {
-			LOGGER.error("Error processing selection change", ex);
-			CNotificationService.showException("Error processing selection", ex);
 		}
 	}
 
@@ -419,6 +365,33 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 	}
 
+	/** Handle click on the "Add From List" button. Opens the entity selection dialog.
+	 * @param dialogTitle             The title of the selection dialog
+	 * @param entityTypes             List of entity type configurations for the dialog
+	 * @param itemsProvider           Provider for loading items based on entity type
+	 * @param onItemsSelected         Callback invoked when items are selected from the dialog
+	 * @param multiSelect             True for multi-select, false for single-select
+	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
+	 * @param alreadySelectedMode     Mode for handling already-selected items */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	protected void on_buttonFromList_clicked(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
+			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final Consumer<List<?>> onItemsSelected, final boolean multiSelect,
+			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider,
+			final CDialogEntitySelection.AlreadySelectedMode alreadySelectedMode) {
+		try {
+			LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
+			// Use raw types for dialog creation due to complex generic constraints
+			final CDialogEntitySelection dialog = new CDialogEntitySelection(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
+					alreadySelectedProvider, alreadySelectedMode);
+			dialog.open();
+		} catch (final Exception ex) {
+			LOGGER.error("Error opening entity selection dialog", ex);
+			CNotificationService.showException("Error opening selection dialog", ex);
+		}
+	}
+
 	/** Handle move down button click. Moves the selected item down in the order. */
 	protected void on_buttonMoveDown_clicked() {
 		Check.notNull(selectedItem, "No item selected for move down");
@@ -442,6 +415,34 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		} catch (final Exception e) {
 			LOGGER.error("Error moving item up", e);
 			CNotificationService.showException("Error moving item up", e);
+		}
+	}
+
+	/** Handle double-click on a grid item. Opens the edit dialog by default.
+	 * @param item The double-clicked item */
+	protected void on_gridItems_doubleClicked(final ChildEntity item) {
+		try {
+			Check.notNull(item, "Double-clicked item cannot be null");
+			LOGGER.debug("Double-clicked item: {}", item.getId());
+			selectedItem = item;
+			updateButtonStates(true);
+			handleEdit(item);
+		} catch (final Exception ex) {
+			LOGGER.error("Error opening edit dialog", ex);
+			CNotificationService.showException("Error opening edit dialog", ex);
+		}
+	}
+
+	/** Handle selection change in the grid.
+	 * @param item The selected item (can be null) */
+	protected void on_gridItems_selected(final ChildEntity item) {
+		try {
+			LOGGER.debug("Selection changed to: {}", item != null ? item.getId() : "null");
+			selectedItem = item;
+			updateButtonStates(item != null);
+		} catch (final Exception ex) {
+			LOGGER.error("Error processing selection change", ex);
+			CNotificationService.showException("Error processing selection", ex);
 		}
 	}
 

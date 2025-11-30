@@ -11,13 +11,13 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.grid.widget.CEntityWidget;
+import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.activities.view.CActivityWidget;
+import tech.derbent.app.activities.view.CComponentWidgetActivity;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CWidgetGridDemo - Demo page showcasing the widget-based grid display for entities.
@@ -41,8 +41,8 @@ import tech.derbent.base.session.service.ISessionService;
  *
  * @author Derbent Framework
  * @since 1.0
- * @see CEntityWidget
- * @see CActivityWidget
+ * @see CComponentWidgetEntity
+ * @see CComponentWidgetActivity
  * @see CGrid#addWidgetColumn */
 @Route ("widget-grid-demo")
 @PageTitle ("Widget Grid Demo")
@@ -83,7 +83,7 @@ public class CWidgetGridDemo extends Main {
 		grid.setWidthFull();
 		// Add widget column using the CActivityWidget
 		grid.addWidgetColumn(activity -> {
-			final CActivityWidget widget = new CActivityWidget(activity);
+			final CComponentWidgetActivity widget = new CComponentWidgetActivity(activity);
 			// Handle widget actions
 			widget.addActionListener(event -> on_widget_actionTriggered(event));
 			return widget;
@@ -134,7 +134,7 @@ public class CWidgetGridDemo extends Main {
 	}
 
 	/** Handles widget action events (edit, delete, etc.). */
-	private void on_widget_actionTriggered(final CEntityWidget.CEntityWidgetEvent<CActivity> event) {
+	private void on_widget_actionTriggered(final CComponentWidgetEntity.CEntityWidgetEvent<CActivity> event) {
 		final CActivity activity = event.getEntity();
 		switch (event.getActionType()) {
 		case EDIT -> {

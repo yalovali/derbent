@@ -85,12 +85,6 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 			dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBeans"
 	)
 	private String dataServiceBeanName;
-	@Column (nullable = false)
-	@AMetaData (
-			displayName = "Widget Mode", required = false, readOnly = false, defaultValue = "false",
-			description = "Display entities as rich widgets instead of traditional table columns", hidden = false
-	)
-	private boolean useWidgetMode = false;
 
 	public CGridEntity() {
 		super();
@@ -119,8 +113,4 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	}
 
 	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
-
-	public boolean isUseWidgetMode() { return useWidgetMode; }
-
-	public void setUseWidgetMode(final boolean useWidgetMode) { this.useWidgetMode = useWidgetMode; }
 }

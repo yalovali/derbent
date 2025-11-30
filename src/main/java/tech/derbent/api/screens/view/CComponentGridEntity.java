@@ -346,14 +346,20 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			grid = new CGrid(entityClass);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 			createGridColumns();
-			// Load data from the service
-			// loadDataFromService(serviceBeanName, gridEntity.getProject());
 			refreshGridData();
 			this.add(grid);
 		} catch (Exception e) {
 			LOGGER.error("Error creating grid content.");
 			add(new Div("Error creating grid: " + e.getMessage()));
 		}
+	}
+
+	/** Creates a default widget for any entity.
+	 * @param entity the entity to create a widget for
+	 * @return the widget component */
+	private com.vaadin.flow.component.Component createDefaultWidget(CEntityDB<?> entity) {
+		// Use CEntityWidget as the default widget
+		return new tech.derbent.api.grid.widget.CComponentWidgetEntity<>(entity);
 	}
 
 	public void createGridColumns() throws Exception {
@@ -364,19 +370,15 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			// Check if widget mode is enabled
-			if (gridEntity.isUseWidgetMode()) {
-				createWidgetColumn(serviceBeanName);
-			} else {
-				// Traditional column-based mode
-				List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
-				fieldConfigs.forEach(fc -> createColumnForField(fc));
-				// Configure sorting - sort by first column (ID) initially
-				// Get the first column (ID column) and sort by it
-				if (grid.getColumns().size() > 0) {
-					Grid.Column<?> firstColumn = grid.getColumns().get(0);
-					// Make it sortable and set as sorted
-					firstColumn.setSortable(true);
-				}
+			// Traditional column-based mode
+			List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
+			fieldConfigs.forEach(fc -> createColumnForField(fc));
+			// Configure sorting - sort by first column (ID) initially
+			// Get the first column (ID column) and sort by it
+			if (grid.getColumns().size() > 0) {
+				Grid.Column<?> firstColumn = grid.getColumns().get(0);
+				// Make it sortable and set as sorted
+				firstColumn.setSortable(true);
 			}
 		} catch (Exception e) {
 			LOGGER.warn("Could not configure sorting on first column: {}", e.getMessage());
@@ -385,7 +387,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	/** Creates a widget column for widget mode display.
-	 *
 	 * @param serviceBeanName the service bean name to get the widget provider from */
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
@@ -413,7 +414,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					// Try to use the page service's widget provider if available
 					if (pageServiceClassFinal != null) {
 						// Check if page service implements IEntityWidgetProvider
-						if (tech.derbent.api.grid.widget.IEntityWidgetProvider.class.isAssignableFrom(pageServiceClassFinal)) {
+						if (tech.derbent.api.grid.widget.IComponentWidgetEntityProvider.class.isAssignableFrom(pageServiceClassFinal)) {
 							// For now, create a default widget since we don't have page service instance here
 							// In a full implementation, the page service instance would be passed in
 							return createDefaultWidget((CEntityDB<?>) entity);
@@ -444,15 +445,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				LOGGER.error("Fallback to traditional columns also failed: {}", ex.getMessage());
 			}
 		}
-	}
-
-	/** Creates a default widget for any entity.
-	 *
-	 * @param entity the entity to create a widget for
-	 * @return the widget component */
-	private com.vaadin.flow.component.Component createDefaultWidget(CEntityDB<?> entity) {
-		// Use CEntityWidget as the default widget
-		return new tech.derbent.api.grid.widget.CEntityWidget<>(entity);
 	}
 
 	private Field findField(Class<?> entityClass, String fieldName) {

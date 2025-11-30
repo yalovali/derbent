@@ -36,7 +36,6 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			
 			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
@@ -47,14 +46,12 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "remainingHours"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
-			
 			scr.addScreenLine(CDetailLinesService.createSection("Financials"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "hourlyRate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
 			/******************/
-			
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
@@ -64,7 +61,6 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
@@ -75,9 +71,9 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(
-				List.of("id", "name", "entityType", "assignedTo", "createdBy", "startDate", "dueDate", "completionDate", "progressPercentage",
-						"estimatedHours", "actualHours", "remainingHours", "status", "priority", "project", "createdDate", "lastModifiedDate"));
+		grid.setColumnFields(List.of("id", "name", "componentWidget", "entityType", "assignedTo", "createdBy", "startDate", "dueDate",
+				"completionDate", "progressPercentage", "estimatedHours", "actualHours", "remainingHours", "status", "priority", "project",
+				"createdDate", "lastModifiedDate"));
 		return grid;
 	}
 

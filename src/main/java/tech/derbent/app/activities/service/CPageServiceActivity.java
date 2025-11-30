@@ -5,21 +5,21 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.grid.widget.IEntityWidgetProvider;
+import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.view.CActivityWidget;
+import tech.derbent.app.activities.view.CComponentWidgetActivity;
 
 public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
-		implements IPageServiceHasStatusAndWorkflow<CActivity>, IEntityWidgetProvider<CActivity> {
+		implements IPageServiceHasStatusAndWorkflow<CActivity>, IComponentWidgetEntityProvider<CActivity> {
 
 	public Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivity.class);
-	Long serialVersionUID = 1L;
-
 	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;
+	Long serialVersionUID = 1L;
 
 	public CPageServiceActivity(final IPageServiceImplementer<CActivity> view) {
 		super(view);
@@ -32,18 +32,15 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 	}
 
 	/** Creates a widget component for displaying the given activity entity.
-	 *
 	 * @param entity the activity to create a widget for
 	 * @return the CActivityWidget component */
 	@Override
-	public Component createWidget(final CActivity entity) {
-		return new CActivityWidget(entity);
+	public CComponentWidgetEntity<CActivity> getComponentWidget(final CActivity entity) {
+		return new CComponentWidgetActivity(entity);
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() {
-		return projectItemStatusService;
-	}
+	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
 	public void on_description_blur(final Component component, final Object value) {
 		LOGGER.info("function: on_description_blur for Component type: {}",

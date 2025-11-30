@@ -20,9 +20,9 @@ import tech.derbent.api.entity.domain.CEntityDB;
  * @param <T> the entity type
  * @author Derbent Framework
  * @since 1.0
- * @see CEntityWidget */
+ * @see CComponentWidgetEntity */
 @FunctionalInterface
-public interface IEntityWidgetProvider<T extends CEntityDB<?>> {
+public interface IComponentWidgetEntityProvider<T extends CEntityDB<?>> {
 
 	/** Creates a widget component for displaying the given entity.
 	 * <p>
@@ -32,5 +32,5 @@ public interface IEntityWidgetProvider<T extends CEntityDB<?>> {
 	 *
 	 * @param entity the entity to create a widget for
 	 * @return a Component representing the entity widget, or null if widget cannot be created */
-	Component createWidget(T entity);
+	Component getComponentWidget(T entity);
 }

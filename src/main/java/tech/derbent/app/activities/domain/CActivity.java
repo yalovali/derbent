@@ -24,6 +24,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
@@ -74,6 +75,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Column (name = "completion_date", nullable = true)
 	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
 	private LocalDate completionDate;
+	@AMetaData (
+			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
+			dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
+	)
+	private CComponentWidgetEntity<CActivity> componentWidget = null;
 	@Column (nullable = true)
 	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
 	private LocalDate dueDate;
@@ -213,6 +219,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public List<CComment> getComments() { return comments != null ? comments : new ArrayList<>(); }
 
 	public LocalDate getCompletionDate() { return completionDate; }
+
+	public CComponentWidgetEntity<CActivity> getComponentWidget() {
+		LOGGER.debug("getComponentWidget() - Generating component widget for activity id={}", getId());
+		return componentWidget;
+	}
 
 	public LocalDate getDueDate() { return dueDate; }
 

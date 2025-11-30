@@ -417,8 +417,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	 * @param <T>            the widget type (must be a Component)
 	 * @param widgetProvider the function that creates widgets for entities
 	 * @return the created column
-	 * @see tech.derbent.api.grid.widget.IEntityWidgetProvider
-	 * @see tech.derbent.api.grid.widget.CEntityWidget */
+	 * @see tech.derbent.api.grid.widget.IComponentWidgetEntityProvider
+	 * @see tech.derbent.api.grid.widget.CComponentWidgetEntity */
 	public <T extends com.vaadin.flow.component.Component> Column<EntityClass> addWidgetColumn(
 			final java.util.function.Function<EntityClass, T> widgetProvider) {
 		Check.notNull(widgetProvider, "Widget provider cannot be null");
