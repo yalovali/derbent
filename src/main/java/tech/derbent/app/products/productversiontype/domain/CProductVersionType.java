@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cproductversiontype_id"))
 public class CProductVersionType extends CTypeEntity<CProductVersionType> {
 
-public static final String DEFAULT_COLOR = "#E4D9B4"; // OpenWindows Button Face - version types
+public static final String DEFAULT_COLOR = "#6B8E23"; // X11 OliveDrab - version types (darker)
 public static final String DEFAULT_ICON = "vaadin:tag";
 public static final String ENTITY_TITLE_PLURAL = "Product Version Types";
 public static final String ENTITY_TITLE_SINGULAR = "Product Version Type";

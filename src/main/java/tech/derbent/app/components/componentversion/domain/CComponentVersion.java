@@ -22,7 +22,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "componentversion_id"))
 public class CComponentVersion extends CProjectItem<CComponentVersion> implements IHasStatusAndWorkflow<CComponentVersion> {
 
-	public static final String DEFAULT_COLOR = "#F0E5C0"; // OpenWindows Menu Background - component versions
+	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - component versions (darker)
 	public static final String DEFAULT_ICON = "vaadin:tag";
 	public static final String ENTITY_TITLE_PLURAL = "Component Versions";
 	public static final String ENTITY_TITLE_SINGULAR = "Component Version";

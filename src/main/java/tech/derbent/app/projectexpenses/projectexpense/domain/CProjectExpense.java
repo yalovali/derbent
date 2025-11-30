@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "projectexpense_id"))
 public class CProjectExpense extends CProjectItem<CProjectExpense> implements IHasStatusAndWorkflow<CProjectExpense> {
 
-	public static final String DEFAULT_COLOR = "#FFDEAD"; // X11 Navajowhite - outgoing money
+	public static final String DEFAULT_COLOR = "#A0522D"; // X11 Sienna - outgoing money (darker)
 	public static final String DEFAULT_ICON = "vaadin:money-withdraw";
 	public static final String ENTITY_TITLE_PLURAL = "Project Expenses";
 	public static final String ENTITY_TITLE_SINGULAR = "Project Expense";

@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "deliverable_id"))
 public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStatusAndWorkflow<CDeliverable> {
 
-	public static final String DEFAULT_COLOR = "#FFFBEA"; // OpenWindows 3D Light - deliverable items
+	public static final String DEFAULT_COLOR = "#BC8F8F"; // X11 RosyBrown - deliverable items (darker)
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
 	public static final String ENTITY_TITLE_PLURAL = "Deliverables";
 	public static final String ENTITY_TITLE_SINGULAR = "Deliverable";

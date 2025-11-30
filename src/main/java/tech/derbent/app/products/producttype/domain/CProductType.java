@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cproducttype_id"))
 public class CProductType extends CTypeEntity<CProductType> {
 
-public static final String DEFAULT_COLOR = "#E4D9B4"; // OpenWindows Button Face - product types
+public static final String DEFAULT_COLOR = "#6B8E23"; // X11 OliveDrab - product types (darker)
 public static final String DEFAULT_ICON = "vaadin:package";
 public static final String ENTITY_TITLE_PLURAL = "Product Types";
 public static final String ENTITY_TITLE_SINGULAR = "Product Type";
