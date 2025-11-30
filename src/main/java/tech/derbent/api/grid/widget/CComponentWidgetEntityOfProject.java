@@ -214,12 +214,21 @@ public abstract class CComponentWidgetEntityOfProject<T extends CProjectItem<?>>
 		} catch (final Exception e) {
 			LOGGER.debug("Could not create user icon: {}", e.getMessage());
 		}
-		// Build display name
-		String displayName = user.getName();
-		if (user.getLastname() != null && !user.getLastname().isEmpty()) {
-			displayName = displayName + " " + user.getLastname();
+		// Build display name with null safety
+		final String firstName = user.getName();
+		final String lastName = user.getLastname();
+		String displayName;
+		if (firstName != null && !firstName.isEmpty()) {
+			displayName = firstName;
+			if (lastName != null && !lastName.isEmpty()) {
+				displayName = displayName + " " + lastName;
+			}
+		} else if (lastName != null && !lastName.isEmpty()) {
+			displayName = lastName;
+		} else {
+			displayName = "Unknown User";
 		}
-		final Span userName = new Span(displayName != null ? displayName : "Unknown User");
+		final Span userName = new Span(displayName);
 		userLayout.add(userName);
 		return userLayout;
 	}

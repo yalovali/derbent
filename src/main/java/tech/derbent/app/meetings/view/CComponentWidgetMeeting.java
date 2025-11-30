@@ -1,6 +1,7 @@
 package tech.derbent.app.meetings.view;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Span;
@@ -29,6 +30,7 @@ public class CComponentWidgetMeeting extends CComponentWidgetEntityOfProject<CMe
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetMeeting.class);
 	private static final long serialVersionUID = 1L;
+	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
 	/** Creates a new meeting widget for the specified meeting.
 	 * @param meeting the meeting to display in the widget */
@@ -138,16 +140,16 @@ public class CComponentWidgetMeeting extends CComponentWidgetEntityOfProject<CMe
 		} catch (final Exception e) {
 			LOGGER.debug("Could not create clock icon: {}", e.getMessage());
 		}
-		// Format time range
+		// Format time range using TIME_FORMATTER for consistent display
 		final StringBuilder timeRange = new StringBuilder();
 		if (startTime != null) {
-			timeRange.append(startTime.toString());
+			timeRange.append(startTime.format(TIME_FORMATTER));
 		}
 		if (startTime != null && endTime != null) {
 			timeRange.append(" - ");
 		}
 		if (endTime != null) {
-			timeRange.append(endTime.toString());
+			timeRange.append(endTime.format(TIME_FORMATTER));
 		}
 		final Span timeSpan = new Span(timeRange.toString());
 		timeLayout.add(timeSpan);

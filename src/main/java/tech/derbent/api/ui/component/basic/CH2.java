@@ -24,6 +24,5 @@ public class CH2 extends H2 {
 	private void initializeComponent() {
 		getStyle().set("display", "flex").set("justify-content", "space-evenly");
 		setWidthFull();
-		setHeightFull();
 	}
 }
