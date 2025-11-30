@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
@@ -15,9 +16,11 @@ import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.view.CComponentWidgetSprint;
 
 /** CPageServiceSprint - Page service for Sprint management UI. Handles UI events and interactions for sprint views. */
-public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> implements IPageServiceHasStatusAndWorkflow<CSprint> {
+public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
+		implements IPageServiceHasStatusAndWorkflow<CSprint>, IComponentWidgetEntityProvider<CSprint> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
 	private CActivityService activityService;
@@ -61,6 +64,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> impleme
 
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
+
+	/** Creates a widget component for displaying the given sprint entity.
+	 * @param item the sprint to create a widget for
+	 * @return the CComponentWidgetSprint component */
+	@Override
+	public Component getComponentWidget(final CSprint item) { return new CComponentWidgetSprint(item); }
 
 	public void on_description_blur(final Component component, final Object value) {
 		LOGGER.info("function: on_description_blur for Component type: {}",

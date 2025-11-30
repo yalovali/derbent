@@ -2,11 +2,11 @@ package tech.derbent.app.activities.view;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.function.ValueProvider;
-import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 
-public class CComponentWidgetActivity extends CComponentWidgetEntity<CActivity> {
+public class CComponentWidgetActivity extends CComponentWidgetEntityOfProject<CActivity> {
 
 	private static final long serialVersionUID = 1L;
 
