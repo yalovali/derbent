@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -174,8 +175,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						method.setAccessible(true);
 					}
 					Object result = method.invoke(bean, entity);
-					if (result instanceof com.vaadin.flow.component.Component) {
-						return (com.vaadin.flow.component.Component) result;
+					if (result instanceof Component) {
+						return (Component) result;
 					} else if (result == null) {
 						return createErrorCell("Null widget");
 					} else {

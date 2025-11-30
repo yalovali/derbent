@@ -1,5 +1,6 @@
 package tech.derbent.api.grid.widget;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +23,7 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
@@ -171,7 +173,6 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 	// =============== INSTANCE MEMBERS ===============
 
 	protected final T entity;
-	protected CHorizontalLayout layoutActions;
 	protected CVerticalLayout layoutLeft = new CVerticalLayout();
 	protected CHorizontalLayout layoutLineOne = new CHorizontalLayout();
 	protected CHorizontalLayout layoutLineThree = new CHorizontalLayout();
@@ -198,7 +199,7 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 		button.getStyle().set("min-width", "var(--lumo-size-s)");
 		button.getStyle().set("padding", "0");
 		button.addClickListener(e -> on_actionButton_clicked(actionName));
-		layoutActions.add(button);
+		layoutRight.add(button);
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -221,6 +222,19 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 		addActionButton(VaadinIcon.EYE, "View Details", "VIEW");
 	}
 
+	protected void createFirstLine() {
+		final String name;
+		if (entity instanceof CEntityNamed namedEntity) {
+			name = namedEntity.getName();
+		} else {
+			name = entity.toString();
+		}
+		final CSpan nameSpan = new CSpan(name);
+		nameSpan.getStyle().set("font-size", "16px");
+		nameSpan.getStyle().set("font-weight", "bold");
+		layoutLineOne.add(nameSpan);
+	}
+
 	/** Creates a styled info row container.
 	 * @return a configured CDiv for info rows */
 	protected CDiv createInfoRow() {
@@ -228,6 +242,30 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 		row.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.XSMALL);
 		row.getStyle().set("flex-shrink", "0");
 		return row;
+	}
+
+	protected void createSecondLine() {
+		final String description = getEntityDescription();
+		if (description != null && !description.isEmpty()) {
+			final CSpan descSpan = new CSpan(description);
+			descSpan.getStyle().set("font-size", "12px");
+			descSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
+			layoutLineThree.add(descSpan);
+		}
+	}
+
+	protected void createThirdLine() {
+		// put fields of responsible, status, type
+		if (entity instanceof CEntityNamed) {
+			final CEntityNamed namedEntity = (CEntityNamed) entity;
+			// Example: add entity ID
+			final CDiv row = createInfoRow();
+			final CSpan idSpan = new CSpan("ID: " + namedEntity.getId());
+			idSpan.getStyle().set("font-size", "10px");
+			idSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
+			row.add(idSpan);
+			layoutLineTwo.add(row);
+		}
 	}
 
 	/** Gets the entity displayed in this widget.
@@ -238,7 +276,7 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 	 * @return the entity description, or null if not available */
 	protected String getEntityDescription() {
 		try {
-			final java.lang.reflect.Method descMethod = entity.getClass().getMethod("getDescription");
+			final Method descMethod = entity.getClass().getMethod("getDescription");
 			final Object result = descMethod.invoke(entity);
 			return result != null ? result.toString() : null;
 		} catch (final Exception e) {
@@ -250,6 +288,9 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 	/** Initializes the widget structure and content. */
 	protected void initializeWidget() {
 		CAuxillaries.setId(this);
+		createFirstLine();
+		createSecondLine();
+		createThirdLine();
 		add(layoutLeft, layoutRight);
 		layoutLeft.add(layoutLineOne, layoutLineTwo, layoutLineThree);
 	}
