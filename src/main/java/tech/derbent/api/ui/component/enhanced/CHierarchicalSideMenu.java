@@ -172,7 +172,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final CMenuItem item = new CMenuItem(clazz, name, iconName, path, null, false, order);
 			items.add(item);
 			// Also add to flat list for search (only non-navigation items with paths)
-			if ((path != null) && !path.trim().isEmpty()) {
+			if ((path != null) && !path.isBlank()) {
 				allMenuItems.add(item);
 			}
 			return item;
@@ -338,7 +338,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		itemLayout.add(itemText);
 		// Add click listener to navigate
 		itemLayout.addClickListener(e -> {
-			if ((item.path != null) && !item.path.trim().isEmpty()) {
+			if ((item.path != null) && !item.path.isBlank()) {
 				LOGGER.debug("Search result clicked - navigating to path: {}", item.path);
 				if (item.path.startsWith("dynamic.")) {
 					String dynamicPath = item.path.substring("dynamic.".length());
@@ -368,21 +368,15 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final VerticalLayout resultsLayout = new VerticalLayout();
 		resultsLayout.addClassNames(Padding.NONE, Gap.SMALL);
 		resultsLayout.setWidthFull();
-		// Filter menu items (case-insensitive)
+		// Filter menu items (case-insensitive) using streams for better readability
 		final String lowerFilter = filterText.toLowerCase();
-		final List<CMenuItem> filteredItems = new ArrayList<>();
-		for (final CMenuItem item : allMenuItems) {
-			if (item.name.toLowerCase().contains(lowerFilter)) {
-				filteredItems.add(item);
-			}
-		}
+		final List<CMenuItem> filteredItems = allMenuItems.stream().filter(item -> item.name.toLowerCase().contains(lowerFilter))
+				.sorted((a, b) -> Double.compare(a.getOrder(), b.getOrder())).toList();
 		if (filteredItems.isEmpty()) {
 			final Span noResults = new Span("No matching items found");
 			noResults.addClassNames(Padding.MEDIUM, TextColor.SECONDARY);
 			resultsLayout.add(noResults);
 		} else {
-			// Sort by order and add to layout
-			filteredItems.sort((a, b) -> Double.compare(a.getOrder(), b.getOrder()));
 			for (final CMenuItem item : filteredItems) {
 				resultsLayout.add(createSearchResultItem(item));
 			}
