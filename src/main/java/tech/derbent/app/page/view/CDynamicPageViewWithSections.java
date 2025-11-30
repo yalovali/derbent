@@ -62,6 +62,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			Check.notNull(pageEntity.getGridEntity(), "Grid entity cannot be null");
 			// Create the grid component using the configured grid entity
 			grid = new CComponentGridEntity(pageEntity.getGridEntity(), getSessionService());
+			// Set the content owner so widget columns can access page service
+			grid.setContentOwner(this);
 			// Listen for selection changes from the grid
 			grid.addSelectionChangeListener(event -> {
 				try {
