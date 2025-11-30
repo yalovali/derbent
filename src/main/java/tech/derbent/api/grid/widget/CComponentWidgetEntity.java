@@ -13,22 +13,16 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
-import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
-public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalLayout {
+public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CHorizontalLayout {
 
 	/** Event fired when a widget action is triggered (e.g., delete button clicked). */
 	public static class CEntityWidgetEvent<T extends CEntityDB<?>> extends ComponentEvent<CComponentWidgetEntity<T>> {
@@ -106,44 +100,6 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 		};
 	}
 
-	public static <E extends CEntityDB<?>> ValueProvider<E, String> descriptionValueProvider() {
-		return entity -> {
-			if (entity == null) {
-				return "";
-			}
-			try {
-				final String cacheKey = entity.getClass().getName() + ":getDescription";
-				java.lang.reflect.Method descMethod = methodCache.get(cacheKey);
-				if (descMethod == null) {
-					descMethod = entity.getClass().getMethod("getDescription");
-					methodCache.put(cacheKey, descMethod);
-				}
-				final Object result = descMethod.invoke(entity);
-				return result != null ? result.toString() : "";
-			} catch (final Exception e) {
-				return "";
-			}
-		};
-	}
-
-	public static <E extends CEntityDB<?>> ValueProvider<E, String> hoursValueProvider(final Function<E, BigDecimal> hoursExtractor) {
-		Check.notNull(hoursExtractor, "Hours extractor cannot be null");
-		return entity -> {
-			if (entity == null) {
-				return "";
-			}
-			final BigDecimal hours = hoursExtractor.apply(entity);
-			if ((hours == null) || (hours.compareTo(BigDecimal.ZERO) == 0)) {
-				return "";
-			}
-			return hours + "h";
-		};
-	}
-
-	public static <E extends CEntityNamed<?>> ValueProvider<E, String> nameValueProvider() {
-		return entity -> entity != null ? entity.getName() : "";
-	}
-
 	@SuppressWarnings ("unchecked")
 	public static <E extends CEntityDB<?>, V> ValueProvider<E, V> propertyValueProvider(final String propertyName) {
 		Check.notBlank(propertyName, "Property name cannot be blank");
@@ -172,7 +128,7 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 	}
 	// =============== INSTANCE MEMBERS ===============
 
-	protected final T entity;
+	protected final EntityClass entity;
 	protected CVerticalLayout layoutLeft = new CVerticalLayout();
 	protected CHorizontalLayout layoutLineOne = new CHorizontalLayout();
 	protected CHorizontalLayout layoutLineThree = new CHorizontalLayout();
@@ -182,7 +138,7 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 
 	/** Creates a new entity widget for the specified entity.
 	 * @param entity the entity to display in the widget */
-	public CComponentWidgetEntity(final T entity) {
+	public CComponentWidgetEntity(final EntityClass entity) {
 		super();
 		Check.notNull(entity, "Entity cannot be null when creating widget");
 		this.entity = entity;
@@ -203,8 +159,8 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 	}
 
 	@SuppressWarnings ("unchecked")
-	public Registration addActionListener(final com.vaadin.flow.component.ComponentEventListener<CEntityWidgetEvent<T>> listener) {
-		return addListener((Class<CEntityWidgetEvent<T>>) (Class<?>) CEntityWidgetEvent.class, listener);
+	public Registration addActionListener(final com.vaadin.flow.component.ComponentEventListener<CEntityWidgetEvent<EntityClass>> listener) {
+		return addListener((Class<CEntityWidgetEvent<EntityClass>>) (Class<?>) CEntityWidgetEvent.class, listener);
 	}
 
 	/** Adds a delete action button to the widget. */
@@ -222,68 +178,15 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 		addActionButton(VaadinIcon.EYE, "View Details", "VIEW");
 	}
 
-	protected void createFirstLine() {
-		final String name;
-		if (entity instanceof CEntityNamed namedEntity) {
-			name = namedEntity.getName();
-		} else {
-			name = entity.toString();
-		}
-		final CSpan nameSpan = new CSpan(name);
-		nameSpan.getStyle().set("font-size", "16px");
-		nameSpan.getStyle().set("font-weight", "bold");
-		layoutLineOne.add(nameSpan);
-	}
+	protected void createFirstLine() {}
 
-	/** Creates a styled info row container.
-	 * @return a configured CDiv for info rows */
-	protected CDiv createInfoRow() {
-		final CDiv row = new CDiv();
-		row.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.XSMALL);
-		row.getStyle().set("flex-shrink", "0");
-		return row;
-	}
+	protected void createSecondLine() {}
 
-	protected void createSecondLine() {
-		final String description = getEntityDescription();
-		if (description != null && !description.isEmpty()) {
-			final CSpan descSpan = new CSpan(description);
-			descSpan.getStyle().set("font-size", "12px");
-			descSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
-			layoutLineThree.add(descSpan);
-		}
-	}
-
-	protected void createThirdLine() {
-		// put fields of responsible, status, type
-		if (entity instanceof CEntityNamed) {
-			final CEntityNamed namedEntity = (CEntityNamed) entity;
-			// Example: add entity ID
-			final CDiv row = createInfoRow();
-			final CSpan idSpan = new CSpan("ID: " + namedEntity.getId());
-			idSpan.getStyle().set("font-size", "10px");
-			idSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
-			row.add(idSpan);
-			layoutLineTwo.add(row);
-		}
-	}
+	protected void createThirdLine() {}
 
 	/** Gets the entity displayed in this widget.
 	 * @return the entity */
-	public T getEntity() { return entity; }
-
-	/** Gets the entity description if available. Override in subclasses for custom description extraction.
-	 * @return the entity description, or null if not available */
-	protected String getEntityDescription() {
-		try {
-			final Method descMethod = entity.getClass().getMethod("getDescription");
-			final Object result = descMethod.invoke(entity);
-			return result != null ? result.toString() : null;
-		} catch (final Exception e) {
-			// No description method available
-			return null;
-		}
-	}
+	public EntityClass getEntity() { return entity; }
 
 	/** Initializes the widget structure and content. */
 	protected void initializeWidget() {
