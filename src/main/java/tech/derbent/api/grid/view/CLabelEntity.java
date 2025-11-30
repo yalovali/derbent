@@ -18,7 +18,7 @@ import tech.derbent.base.users.domain.CUser;
  * <p>
  * This component provides a standardized way to display entities across the application with appropriate icons, colors,
  * and formatting based on entity type. It automatically detects entity capabilities (IHasColorAndIcon, CStatus,
- * CTypeEntity, CUser, CCompany, CProject) and renders accordingly.
+ * CTypeEntity, CUser) and renders accordingly.
  * </p>
  * <p>
  * <strong>Factory Methods:</strong>
@@ -27,7 +27,6 @@ import tech.derbent.base.users.domain.CUser;
  * <li>{@link #createLabel(CEntityDB)} - Creates a decorated label for an entity</li>
  * <li>{@link #createLabel(String)} - Creates a simple label for text</li>
  * <li>{@link #createPlainLabel(CEntityDB)} - Creates a plain label without decoration</li>
- * <li>{@link #createPlainLabel(String)} - Creates a plain label for text</li>
  * <li>{@link #createH2Label(CEntityDB)} - Creates an H2 header label for entity</li>
  * <li>{@link #createH2Label(String)} - Creates an H2 header label for text</li>
  * <li>{@link #createH3Label(CEntityDB)} - Creates an H3 header label for entity</li>
@@ -70,13 +69,6 @@ public class CLabelEntity extends Div {
 		final CLabelEntity label = new CLabelEntity();
 		label.setValue(entity, false, false);
 		return label;
-	}
-
-	/** Creates a plain label for text content.
-	 * @param text the text to display
-	 * @return a new CLabelEntity instance */
-	public static CLabelEntity createPlainLabel(final String text) {
-		return createLabel(text);
 	}
 
 	/** Creates an H2 header label for an entity with icon and color.
@@ -161,17 +153,18 @@ public class CLabelEntity extends Div {
 		// Special handling for CUser - show full name
 		if (entity instanceof CUser) {
 			final CUser user = (CUser) entity;
-			final StringBuilder name = new StringBuilder();
-			if (user.getName() != null) {
-				name.append(user.getName());
-			}
-			if (user.getLastname() != null && !user.getLastname().isEmpty()) {
-				if (name.length() > 0) {
-					name.append(" ");
+			final String firstName = user.getName();
+			final String lastName = user.getLastname();
+			if (firstName != null && !firstName.isEmpty()) {
+				if (lastName != null && !lastName.isEmpty()) {
+					return firstName + " " + lastName;
 				}
-				name.append(user.getLastname());
+				return firstName;
 			}
-			return name.length() > 0 ? name.toString() : "User #" + user.getId();
+			if (lastName != null && !lastName.isEmpty()) {
+				return lastName;
+			}
+			return "User #" + user.getId();
 		}
 		// Use CColorUtils for standard entity name extraction
 		return CColorUtils.getDisplayTextFromEntity(entity);
@@ -351,8 +344,8 @@ public class CLabelEntity extends Div {
 
 	/** Sets whether to show icon.
 	 * @param showIcon true to show icon */
-	public void setShowIcon(final Boolean showIcon) {
-		this.showIcon = showIcon != null ? showIcon : false;
+	public void setShowIcon(final boolean showIcon) {
+		this.showIcon = showIcon;
 	}
 
 	/** Checks if auto-contrast is enabled.
