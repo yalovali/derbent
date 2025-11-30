@@ -172,11 +172,11 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CHorizontalL
 
 	protected final T entity;
 	protected CHorizontalLayout layoutActions;
-	private CVerticalLayout layoutLeft = new CVerticalLayout();
-	private CHorizontalLayout layoutLineOne = new CHorizontalLayout();
-	private CHorizontalLayout layoutLineThree = new CHorizontalLayout();
-	private CHorizontalLayout layoutLineTwo = new CHorizontalLayout();
-	private CVerticalLayout layoutRight = new CVerticalLayout();
+	protected CVerticalLayout layoutLeft = new CVerticalLayout();
+	protected CHorizontalLayout layoutLineOne = new CHorizontalLayout();
+	protected CHorizontalLayout layoutLineThree = new CHorizontalLayout();
+	protected CHorizontalLayout layoutLineTwo = new CHorizontalLayout();
+	protected CVerticalLayout layoutRight = new CVerticalLayout();
 	protected boolean selected;
 
 	/** Creates a new entity widget for the specified entity.
