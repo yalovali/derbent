@@ -38,7 +38,6 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
@@ -124,6 +123,73 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error applying search filter.");
 			// Fallback to refresh data on error
 			refreshGridData();
+		}
+	}
+
+	/** Creates a component column for CComponentWidgetEntity fields using dataProviderBean and dataProviderMethod.
+	 * <p>
+	 * When the field type is CComponentWidgetEntity or its subclass, this method:
+	 * <ol>
+	 * <li>Reaches the current page via contentOwner (which should be IPageServiceImplementer)</li>
+	 * <li>Gets the CPageService from the page</li>
+	 * <li>Invokes the method specified by dataProviderMethod (e.g., "getComponentWidget")</li>
+	 * <li>The method receives the current grid item and returns a widget component</li>
+	 * </ol>
+	 * Example annotation: dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
+	 * </p>
+	 * @param fieldInfo   the field metadata containing dataProviderBean and dataProviderMethod
+	 * @param displayName the column display name
+	 * @param fieldName   the field name for the column key */
+	@SuppressWarnings ({})
+	private void createColumnForComponentWidgetEntity(EntityFieldInfo fieldInfo, String displayName, String fieldName) {
+		try {
+			final String beanName = fieldInfo.getDataProviderBean();
+			final String methodName = fieldInfo.getDataProviderMethod();
+			// Validate required annotations
+			if (beanName == null || beanName.isBlank()) {
+				LOGGER.warn("CComponentWidgetEntity field {} requires dataProviderBean annotation", fieldName);
+				return;
+			}
+			if (methodName == null || methodName.isBlank()) {
+				LOGGER.warn("CComponentWidgetEntity field {} requires dataProviderMethod annotation", fieldName);
+				return;
+			}
+			// Create a component column that invokes the data provider method for each row
+			grid.addComponentColumn(entity -> {
+				try {
+					// Resolve the bean based on beanName
+					Object bean = resolveWidgetProviderBean(beanName);
+					if (bean == null) {
+						LOGGER.warn("Could not resolve widget provider bean: {}", beanName);
+						return createErrorCell("Bean not found");
+					}
+					// Find and invoke the method on the bean
+					Method method = findWidgetProviderMethod(bean.getClass(), methodName, entity.getClass());
+					if (method == null) {
+						LOGGER.warn("Could not find widget provider method {} on bean {}", methodName, beanName);
+						return createErrorCell("Method not found");
+					}
+					// Try to invoke the method; use setAccessible only if method is not already accessible
+					if (!method.canAccess(bean)) {
+						method.setAccessible(true);
+					}
+					Object result = method.invoke(bean, entity);
+					if (result instanceof com.vaadin.flow.component.Component) {
+						return (com.vaadin.flow.component.Component) result;
+					} else if (result == null) {
+						return createErrorCell("Null widget");
+					} else {
+						LOGGER.warn("Widget provider method {} returned non-Component type: {}", methodName, result.getClass().getName());
+						return createErrorCell("Invalid widget type");
+					}
+				} catch (Exception e) {
+					LOGGER.error("Error invoking widget provider method {} for entity: {}", methodName, e.getMessage());
+					return createErrorCell("Widget error");
+				}
+			}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61cf")).setAutoWidth(true).setFlexGrow(1).setKey(fieldName);
+			LOGGER.debug("Created component widget column for field {} using bean {} method {}", fieldName, beanName, methodName);
+		} catch (Exception e) {
+			LOGGER.error("Error creating column for CComponentWidgetEntity field {}: {}", fieldName, e.getMessage());
 		}
 	}
 
@@ -340,72 +406,28 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
-	/** Creates a component column for CComponentWidgetEntity fields using dataProviderBean and dataProviderMethod.
-	 * <p>
-	 * When the field type is CComponentWidgetEntity or its subclass, this method:
-	 * <ol>
-	 * <li>Reaches the current page via contentOwner (which should be IPageServiceImplementer)</li>
-	 * <li>Gets the CPageService from the page</li>
-	 * <li>Invokes the method specified by dataProviderMethod (e.g., "getComponentWidget")</li>
-	 * <li>The method receives the current grid item and returns a widget component</li>
-	 * </ol>
-	 * Example annotation: dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
-	 * </p>
-	 * @param fieldInfo   the field metadata containing dataProviderBean and dataProviderMethod
-	 * @param displayName the column display name
-	 * @param fieldName   the field name for the column key */
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
-	private void createColumnForComponentWidgetEntity(EntityFieldInfo fieldInfo, String displayName, String fieldName) {
+	private void createContent() {
 		try {
-			final String beanName = fieldInfo.getDataProviderBean();
-			final String methodName = fieldInfo.getDataProviderMethod();
-			// Validate required annotations
-			if (beanName == null || beanName.isBlank()) {
-				LOGGER.warn("CComponentWidgetEntity field {} requires dataProviderBean annotation", fieldName);
+			if (gridEntity == null) {
+				add(new Div("No grid configuration provided"));
 				return;
 			}
-			if (methodName == null || methodName.isBlank()) {
-				LOGGER.warn("CComponentWidgetEntity field {} requires dataProviderMethod annotation", fieldName);
-				return;
-			}
-			// Create a component column that invokes the data provider method for each row
-			grid.addComponentColumn(entity -> {
-				try {
-					// Resolve the bean based on beanName
-					Object bean = resolveWidgetProviderBean(beanName);
-					if (bean == null) {
-						LOGGER.warn("Could not resolve widget provider bean: {}", beanName);
-						return createErrorCell("Bean not found");
-					}
-					// Find and invoke the method on the bean
-					Method method = findWidgetProviderMethod(bean.getClass(), methodName, entity.getClass());
-					if (method == null) {
-						LOGGER.warn("Could not find widget provider method {} on bean {}", methodName, beanName);
-						return createErrorCell("Method not found");
-					}
-					// Try to invoke the method; use setAccessible only if method is not already accessible
-					if (!method.canAccess(bean)) {
-						method.setAccessible(true);
-					}
-					Object result = method.invoke(bean, entity);
-					if (result instanceof com.vaadin.flow.component.Component) {
-						return (com.vaadin.flow.component.Component) result;
-					} else if (result == null) {
-						return createErrorCell("Null widget");
-					} else {
-						LOGGER.warn("Widget provider method {} returned non-Component type: {}", methodName, result.getClass().getName());
-						return createErrorCell("Invalid widget type");
-					}
-				} catch (Exception e) {
-					LOGGER.error("Error invoking widget provider method {} for entity: {}", methodName, e.getMessage());
-					return createErrorCell("Widget error");
-				}
-			}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61cf")).setAutoWidth(true).setFlexGrow(1).setKey(fieldName);
-			LOGGER.debug("Created component widget column for field {} using bean {} method {}", fieldName, beanName, methodName);
+			String serviceBeanName = gridEntity.getDataServiceBeanName();
+			Check.notNull(serviceBeanName, "Data service bean name is not set in grid entity");
+			// Get the entity class from the service bean
+			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
+			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
+			grid = new CGrid(entityClass);
+			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
+			createGridColumns();
+			refreshGridData();
+			this.add(grid);
 		} catch (Exception e) {
-			LOGGER.error("Error creating column for CComponentWidgetEntity field {}: {}", fieldName, e.getMessage());
+			LOGGER.error("Error creating grid content.");
+			add(new Div("Error creating grid: " + e.getMessage()));
 		}
 	}
 
@@ -418,30 +440,40 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return errorCell;
 	}
 
-	/** Resolves the widget provider bean based on the beanName.
-	 * @param beanName the bean name ("view" for CPageService, or a Spring bean name)
-	 * @return the resolved bean, or null if not found */
-	private Object resolveWidgetProviderBean(String beanName) {
+	public void createGridColumns() throws Exception {
 		try {
-			if ("view".equals(beanName)) {
-				// For "view" bean, get the CPageService from the IPageServiceImplementer
-				if (contentOwner instanceof IPageServiceImplementer<?> pageServiceImplementer) {
-					return pageServiceImplementer.getPageService();
-				} else {
-					LOGGER.warn("contentOwner is not IPageServiceImplementer - cannot use 'view' as dataProviderBean");
-					return null;
-				}
-			} else if ("context".equals(beanName)) {
-				// For "context" bean, return the content owner itself
-				return contentOwner;
-			} else {
-				// For other beans, get from Spring context
-				return CSpringContext.getBean(beanName);
+			// clear existing columns
+			grid.removeAllColumns();
+			String serviceBeanName = gridEntity.getDataServiceBeanName();
+			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
+			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
+			// Check if widget mode is enabled
+			// Traditional column-based mode
+			List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
+			fieldConfigs.forEach(fc -> createColumnForField(fc));
+			// Configure sorting - sort by first column (ID) initially
+			// Get the first column (ID column) and sort by it
+			if (grid.getColumns().size() > 0) {
+				Grid.Column<?> firstColumn = grid.getColumns().get(0);
+				// Make it sortable and set as sorted
+				firstColumn.setSortable(true);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error resolving widget provider bean {}: {}", beanName, e.getMessage());
-			return null;
+			LOGGER.warn("Could not configure sorting on first column: {}", e.getMessage());
+			throw e;
 		}
+	}
+
+	private Field findField(Class<?> entityClass, String fieldName) {
+		Class<?> currentClass = entityClass;
+		while (currentClass != null) {
+			try {
+				return currentClass.getDeclaredField(fieldName);
+			} catch (NoSuchFieldException e) {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+		return null;
 	}
 
 	/** Finds the widget provider method on the bean class.
@@ -481,135 +513,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void createContent() {
-		try {
-			if (gridEntity == null) {
-				add(new Div("No grid configuration provided"));
-				return;
-			}
-			String serviceBeanName = gridEntity.getDataServiceBeanName();
-			Check.notNull(serviceBeanName, "Data service bean name is not set in grid entity");
-			// Get the entity class from the service bean
-			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
-			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
-			grid = new CGrid(entityClass);
-			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
-			createGridColumns();
-			refreshGridData();
-			this.add(grid);
-		} catch (Exception e) {
-			LOGGER.error("Error creating grid content.");
-			add(new Div("Error creating grid: " + e.getMessage()));
-		}
-	}
-
-	/** Creates a default widget for any entity.
-	 * @param entity the entity to create a widget for
-	 * @return the widget component */
-	private com.vaadin.flow.component.Component createDefaultWidget(CEntityDB<?> entity) {
-		// Use CEntityWidget as the default widget
-		return new tech.derbent.api.grid.widget.CComponentWidgetEntity<>(entity);
-	}
-
-	public void createGridColumns() throws Exception {
-		try {
-			// clear existing columns
-			grid.removeAllColumns();
-			String serviceBeanName = gridEntity.getDataServiceBeanName();
-			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
-			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
-			// Check if widget mode is enabled
-			// Traditional column-based mode
-			List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
-			fieldConfigs.forEach(fc -> createColumnForField(fc));
-			// Configure sorting - sort by first column (ID) initially
-			// Get the first column (ID column) and sort by it
-			if (grid.getColumns().size() > 0) {
-				Grid.Column<?> firstColumn = grid.getColumns().get(0);
-				// Make it sortable and set as sorted
-				firstColumn.setSortable(true);
-			}
-		} catch (Exception e) {
-			LOGGER.warn("Could not configure sorting on first column: {}", e.getMessage());
-			throw e;
-		}
-	}
-
-	/** Creates a widget column for widget mode display.
-	 * @param serviceBeanName the service bean name to get the widget provider from */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void createWidgetColumn(String serviceBeanName) {
-		try {
-			Check.notBlank(serviceBeanName, "Service bean name is required for widget mode");
-			// Get the service to check if it provides a widget provider
-			CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(serviceBeanName);
-			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
-			// Try to get page service class which may implement IEntityWidgetProvider
-			final Class<?> pageServiceClassFinal;
-			Class<?> tempPageServiceClass = null;
-			try {
-				if (serviceBean instanceof tech.derbent.api.registry.IEntityRegistrable) {
-					tempPageServiceClass = ((tech.derbent.api.registry.IEntityRegistrable) serviceBean).getPageServiceClass();
-				}
-			} catch (Exception e) {
-				LOGGER.debug("Could not get page service class: {}", e.getMessage());
-			}
-			pageServiceClassFinal = tempPageServiceClass;
-			// Create a widget provider function
-			java.util.function.Function<Object, com.vaadin.flow.component.Component> widgetProvider = entity -> {
-				try {
-					// Try to use the page service's widget provider if available
-					if (pageServiceClassFinal != null) {
-						// Check if page service implements IEntityWidgetProvider
-						if (tech.derbent.api.grid.widget.IComponentWidgetEntityProvider.class.isAssignableFrom(pageServiceClassFinal)) {
-							// For now, create a default widget since we don't have page service instance here
-							// In a full implementation, the page service instance would be passed in
-							return createDefaultWidget((CEntityDB<?>) entity);
-						}
-					}
-					// Fall back to default widget
-					return createDefaultWidget((CEntityDB<?>) entity);
-				} catch (Exception e) {
-					LOGGER.error("Error creating widget for entity: {}", e.getMessage());
-					tech.derbent.api.grid.view.CGridCell errorCell = new tech.derbent.api.grid.view.CGridCell();
-					errorCell.setText("Widget Error");
-					return errorCell;
-				}
-			};
-			// Add the widget column
-			CGrid rawGrid = grid;
-			rawGrid.addWidgetColumn(widgetProvider);
-			LOGGER.debug("Created widget column for grid entity: {}", gridEntity.getName());
-		} catch (Exception e) {
-			LOGGER.error("Error creating widget column: {}", e.getMessage());
-			// Fallback to traditional columns if widget mode fails
-			try {
-				String serviceBN = gridEntity.getDataServiceBeanName();
-				Class<?> entityClass = getEntityClassFromService(serviceBN);
-				List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
-				fieldConfigs.forEach(fc -> createColumnForField(fc));
-			} catch (Exception ex) {
-				LOGGER.error("Fallback to traditional columns also failed: {}", ex.getMessage());
-			}
-		}
-	}
-
-	private Field findField(Class<?> entityClass, String fieldName) {
-		Class<?> currentClass = entityClass;
-		while (currentClass != null) {
-			try {
-				return currentClass.getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				currentClass = currentClass.getSuperclass();
-			}
-		}
-		return null;
-	}
+	@Override
+	public IContentOwner getContentOwner() { return contentOwner; }
 
 	private Class<?> getEntityClassFromService(CAbstractService<?> service) throws Exception {
 		try {
@@ -637,9 +542,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	public CGridEntity getGridEntity() { return gridEntity; }
-
-	@Override
-	public IContentOwner getContentOwner() { return contentOwner; }
 
 	/** Gets the currently selected item from the grid */
 	public CEntityDB<?> getSelectedItem() {
@@ -791,6 +693,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return fieldConfigs;
 	}
 
+	@Override
+	public void populateForm() throws Exception {
+		// Grid component doesn't have a form to populate; implementation exists for interface compliance
+	}
+
 	/** Refresh grid data based on current project */
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
@@ -831,6 +738,32 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		} catch (Exception e) {
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
+		}
+	}
+
+	/** Resolves the widget provider bean based on the beanName.
+	 * @param beanName the bean name ("view" for CPageService, or a Spring bean name)
+	 * @return the resolved bean, or null if not found */
+	private Object resolveWidgetProviderBean(String beanName) {
+		try {
+			if ("view".equals(beanName)) {
+				// For "view" bean, get the CPageService from the IPageServiceImplementer
+				if (contentOwner instanceof IPageServiceImplementer<?> pageServiceImplementer) {
+					return pageServiceImplementer.getPageService();
+				} else {
+					LOGGER.warn("contentOwner is not IPageServiceImplementer - cannot use 'view' as dataProviderBean");
+					return null;
+				}
+			} else if ("context".equals(beanName)) {
+				// For "context" bean, return the content owner itself
+				return contentOwner;
+			} else {
+				// For other beans, get from Spring context
+				return CSpringContext.getBean(beanName);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error resolving widget provider bean {}: {}", beanName, e.getMessage());
+			return null;
 		}
 	}
 
@@ -933,6 +866,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
+	@Override
+	public void setContentOwner(IContentOwner parentContent) { contentOwner = parentContent; }
+
 	public void setEnableSelectionChangeListener(boolean enableSelectionChangeListener) {
 		if (this.enableSelectionChangeListener == enableSelectionChangeListener) {
 			LOGGER.debug("Selection change listener already set to {}", enableSelectionChangeListener);
@@ -941,14 +877,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
-
-	@Override
-	public void setContentOwner(IContentOwner parentContent) { this.contentOwner = parentContent; }
-
-	@Override
-	public void populateForm() throws Exception {
-		// Grid component doesn't have a form to populate; implementation exists for interface compliance
-	}
 
 	/** Sets a search filter on the grid */
 	public void setSearchFilter(String searchValue) {
