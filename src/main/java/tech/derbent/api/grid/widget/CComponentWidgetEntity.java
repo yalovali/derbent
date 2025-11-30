@@ -1,13 +1,17 @@
 package tech.derbent.api.grid.widget;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -17,8 +21,10 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -91,6 +97,145 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CDiv {
 	protected static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntity.class);
 	private static final long serialVersionUID = 1L;
+
+	// =============== STATIC VALUE PROVIDERS ===============
+	// These static methods provide value providers for grid columns and external use
+
+	/** Creates a generic widget for any entity type using the entity registry.
+	 * @param entity the entity to create a widget for
+	 * @param <E>    the entity type
+	 * @return a widget component for the entity */
+	@SuppressWarnings ("unchecked")
+	public static <E extends CEntityDB<?>> Component createWidget(final E entity) {
+		Check.notNull(entity, "Entity cannot be null when creating widget");
+		// Try to find a registered widget provider via CEntityRegistry
+		final Class<?> entityClass = entity.getClass();
+		final Class<?> pageServiceClass = CEntityRegistry.getPageServiceClass(entityClass);
+		if (pageServiceClass != null) {
+			try {
+				// Try to get the widget from the page service
+				final Object pageService = CSpringContext.getBean(pageServiceClass);
+				if (pageService instanceof IComponentWidgetEntityProvider) {
+					final IComponentWidgetEntityProvider<E> provider = (IComponentWidgetEntityProvider<E>) pageService;
+					final Component widget = provider.getComponentWidget(entity);
+					if (widget != null) {
+						return widget;
+					}
+				}
+			} catch (final Exception e) {
+				LOGGER.debug("Could not create widget via page service for {}: {}", entityClass.getSimpleName(), e.getMessage());
+			}
+		}
+		// Fall back to generic widget
+		return new CComponentWidgetEntity<>(entity);
+	}
+
+	/** Returns a static value provider that creates widgets for entities.
+	 * Use this when you need to display widgets in grid columns.
+	 * @param <E> the entity type
+	 * @return a value provider that creates widgets */
+	public static <E extends CEntityDB<?>> ValueProvider<E, Component> widgetValueProvider() {
+		return entity -> createWidget(entity);
+	}
+
+	/** Returns a value provider that extracts the entity name.
+	 * @param <E> the entity type
+	 * @return a value provider for entity names */
+	public static <E extends CEntityNamed<?>> ValueProvider<E, String> nameValueProvider() {
+		return entity -> entity != null ? entity.getName() : "";
+	}
+
+	/** Returns a value provider that extracts description using reflection.
+	 * @param <E> the entity type
+	 * @return a value provider for entity descriptions */
+	public static <E extends CEntityDB<?>> ValueProvider<E, String> descriptionValueProvider() {
+		return entity -> {
+			if (entity == null) {
+				return "";
+			}
+			try {
+				final java.lang.reflect.Method descMethod = entity.getClass().getMethod("getDescription");
+				final Object result = descMethod.invoke(entity);
+				return result != null ? result.toString() : "";
+			} catch (final Exception e) {
+				return "";
+			}
+		};
+	}
+
+	/** Returns a value provider for a specific property using reflection.
+	 * @param propertyName the name of the property
+	 * @param <E>          the entity type
+	 * @param <V>          the value type
+	 * @return a value provider for the property */
+	@SuppressWarnings ("unchecked")
+	public static <E extends CEntityDB<?>, V> ValueProvider<E, V> propertyValueProvider(final String propertyName) {
+		Check.notBlank(propertyName, "Property name cannot be blank");
+		return entity -> {
+			if (entity == null) {
+				return null;
+			}
+			try {
+				final String getterName = "get" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+				final java.lang.reflect.Method getter = entity.getClass().getMethod(getterName);
+				return (V) getter.invoke(entity);
+			} catch (final Exception e) {
+				LOGGER.debug("Could not get property {}: {}", propertyName, e.getMessage());
+				return null;
+			}
+		};
+	}
+
+	/** Returns a value provider for dates.
+	 * @param dateExtractor function to extract the date from the entity
+	 * @param <E>           the entity type
+	 * @return a value provider that formats dates */
+	public static <E extends CEntityDB<?>> ValueProvider<E, String> dateValueProvider(final Function<E, LocalDate> dateExtractor) {
+		Check.notNull(dateExtractor, "Date extractor cannot be null");
+		return entity -> {
+			if (entity == null) {
+				return "";
+			}
+			final LocalDate date = dateExtractor.apply(entity);
+			return date != null ? date.format(DATE_FORMATTER) : "";
+		};
+	}
+
+	/** Returns a value provider for progress percentage.
+	 * @param progressExtractor function to extract progress from the entity
+	 * @param <E>               the entity type
+	 * @return a value provider that formats progress as percentage string */
+	public static <E extends CEntityDB<?>> ValueProvider<E, String> progressValueProvider(final Function<E, Integer> progressExtractor) {
+		Check.notNull(progressExtractor, "Progress extractor cannot be null");
+		return entity -> {
+			if (entity == null) {
+				return "";
+			}
+			final Integer progress = progressExtractor.apply(entity);
+			return progress != null ? progress + "%" : "";
+		};
+	}
+
+	/** Returns a value provider for hours/duration.
+	 * @param hoursExtractor function to extract hours from the entity
+	 * @param <E>            the entity type
+	 * @return a value provider that formats hours */
+	public static <E extends CEntityDB<?>> ValueProvider<E, String> hoursValueProvider(final Function<E, BigDecimal> hoursExtractor) {
+		Check.notNull(hoursExtractor, "Hours extractor cannot be null");
+		return entity -> {
+			if (entity == null) {
+				return "";
+			}
+			final BigDecimal hours = hoursExtractor.apply(entity);
+			if ((hours == null) || (hours.compareTo(BigDecimal.ZERO) == 0)) {
+				return "";
+			}
+			return hours + "h";
+		};
+	}
+
+	// =============== INSTANCE MEMBERS ===============
+
 	protected final T entity;
 	protected CHorizontalLayout layoutActions;
 	protected CDiv layoutContent;
