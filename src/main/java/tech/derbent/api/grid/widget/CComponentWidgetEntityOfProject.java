@@ -21,17 +21,22 @@ import tech.derbent.base.users.domain.CUser;
 /** CComponentWidgetEntityOfProject - Base widget component for project items.
  * <p>
  * This class provides a standardized widget layout for entities that belong to a project (extend CProjectItem). It implements a three-row layout:
+ * </p>
  * <ul>
  * <li><b>Row 1 (Top):</b> Entity name (12pt font)</li>
  * <li><b>Row 2 (Middle):</b> Short description (100 chars) and status with color/icon (10pt font)</li>
  * <li><b>Row 3 (Bottom):</b> Responsible user, due date, start date, etc. (10pt font)</li>
  * </ul>
- * </p>
  * <p>
- * Subclasses should override the template methods to provide entity-specific content: - {@link #getEntityDueDate()} - Return the entity's due date -
- * {@link #getEntityStartDate()} - Return the entity's start date - {@link #getEntityResponsible()} - Return the entity's responsible user -
- * {@link #getEntityStatus()} - Return the entity's status - {@link #getEntityDescription()} - Return the entity's description
+ * Subclasses should override the following template methods to provide entity-specific content:
  * </p>
+ * <ul>
+ * <li>{@link #getEntityDueDate()} - Return the entity's due date</li>
+ * <li>{@link #getEntityStartDate()} - Return the entity's start date</li>
+ * <li>{@link #getEntityResponsible()} - Return the entity's responsible user</li>
+ * <li>{@link #getEntityStatus()} - Return the entity's status</li>
+ * <li>{@link #getEntityDescription()} - Return the entity's description (override from parent)</li>
+ * </ul>
  *
  * @param <T> the entity type, must extend CProjectItem
  * @author Derbent Framework
