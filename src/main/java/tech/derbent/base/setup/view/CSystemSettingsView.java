@@ -32,7 +32,7 @@ import tech.derbent.base.setup.service.CSystemSettingsService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CSystemSettingsView extends CAbstractPage {
 
-	public static final String DEFAULT_COLOR = "#C3B79F"; // OpenWindows 3D Shadow - settings view
+	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - settings view (darker)
 	public static final String DEFAULT_ICON = "vaadin:sliders";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "System Settings View";

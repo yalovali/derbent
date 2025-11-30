@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cprovidertype_id"))
 public class CProviderType extends CTypeEntity<CProviderType> {
 
-	public static final String DEFAULT_COLOR = "#B5B5B5"; // CDE Background Gray - provider types
+	public static final String DEFAULT_COLOR = "#696969"; // X11 DimGray - provider types (darker)
 	public static final String DEFAULT_ICON = "vaadin:handshake";
 	public static final String ENTITY_TITLE_PLURAL = "Provider Types";
 	public static final String ENTITY_TITLE_SINGULAR = "Provider Type";

@@ -26,7 +26,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PermitAll
 public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObserver, HasUrlParameter<String>, IPageTitleProvider {
 
-	public static final String DEFAULT_COLOR = "#FAEBD7"; // X11 AntiqueWhite - dynamic pages
+	public static final String DEFAULT_COLOR = "#BDB76B"; // X11 DarkKhaki - dynamic pages (darker)
 	public static final String DEFAULT_ICON = "vaadin:file";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageRouter.class);
 	private static final long serialVersionUID = 1L;

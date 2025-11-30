@@ -18,7 +18,7 @@ import tech.derbent.api.validation.ValidationMessages;
 @AttributeOverride (name = "id", column = @Column (name = "company_id"))
 public class CCompany extends CEntityNamed<CCompany> {
 
-	public static final String DEFAULT_COLOR = "#EDE8D1"; // OpenWindows Base Background - top-level organization
+	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - top-level organization (darker)
 	public static final String DEFAULT_ICON = "vaadin:office";
 	public static final String ENTITY_TITLE_PLURAL = "Companies";
 	public static final String ENTITY_TITLE_SINGULAR = "Company";

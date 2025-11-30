@@ -24,7 +24,7 @@ import tech.derbent.api.validation.ValidationMessages;
 @AttributeOverride (name = "id", column = @Column (name = "detaillines_id"))
 public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEntity {
 
-	public static final String DEFAULT_COLOR = "#C3B79F"; // OpenWindows 3D Shadow - detail lines
+	public static final String DEFAULT_COLOR = "#7A6E58"; // OpenWindows Border Darker - detail lines (darker)
 	public static final String DEFAULT_ICON = "vaadin:connect";
 	public static final String ENTITY_TITLE_PLURAL = "Detail Lines";
 	public static final String ENTITY_TITLE_SINGULAR = "Detail Line";

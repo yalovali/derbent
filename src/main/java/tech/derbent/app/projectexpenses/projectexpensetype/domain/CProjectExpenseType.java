@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cprojectexpensetype_id"))
 public class CProjectExpenseType extends CTypeEntity<CProjectExpenseType> {
 
-	public static final String DEFAULT_COLOR = "#FFDEAD"; // X11 Navajowhite - expense types
+	public static final String DEFAULT_COLOR = "#A0522D"; // X11 Sienna - expense types (darker)
 	public static final String DEFAULT_ICON = "vaadin:money-withdraw";
 	public static final String ENTITY_TITLE_PLURAL = "Project Expense Types";
 	public static final String ENTITY_TITLE_SINGULAR = "Project Expense Type";

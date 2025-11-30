@@ -22,7 +22,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "productversion_id"))
 public class CProductVersion extends CProjectItem<CProductVersion> implements IHasStatusAndWorkflow<CProductVersion> {
 
-	public static final String DEFAULT_COLOR = "#E4D9B4"; // OpenWindows Button Face - product versions
+	public static final String DEFAULT_COLOR = "#6B8E23"; // X11 OliveDrab - product versions (darker)
 	public static final String DEFAULT_ICON = "vaadin:tag";
 	public static final String ENTITY_TITLE_PLURAL = "Product Versions";
 	public static final String ENTITY_TITLE_SINGULAR = "Product Version";

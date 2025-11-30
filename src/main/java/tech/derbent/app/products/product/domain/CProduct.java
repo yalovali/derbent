@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 @AttributeOverride (name = "id", column = @Column (name = "product_id"))
 public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWorkflow<CProduct> {
 
-	public static final String DEFAULT_COLOR = "#E4D9B4"; // OpenWindows Button Face - product entities
+	public static final String DEFAULT_COLOR = "#6B8E23"; // X11 OliveDrab - product entities (darker)
 	public static final String DEFAULT_ICON = "vaadin:package";
 	public static final String ENTITY_TITLE_PLURAL = "Products";
 	public static final String ENTITY_TITLE_SINGULAR = "Product";

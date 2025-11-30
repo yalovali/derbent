@@ -21,7 +21,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 @AttributeOverride (name = "id", column = @Column (name = "system_settings_id"))
 public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
-	public static final String DEFAULT_COLOR = "#C3B79F"; // OpenWindows 3D Shadow - system settings
+	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - system settings (darker)
 	public static final String DEFAULT_ICON = "vaadin:sliders";
 	public static final String ENTITY_TITLE_PLURAL = "System Settings";
 	public static final String ENTITY_TITLE_SINGULAR = "System Settings";
