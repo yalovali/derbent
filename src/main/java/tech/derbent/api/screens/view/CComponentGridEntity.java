@@ -385,7 +385,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						LOGGER.warn("Could not find widget provider method {} on bean {}", methodName, beanName);
 						return createErrorCell("Method not found");
 					}
-					method.setAccessible(true);
+					// Try to invoke the method; use setAccessible only if method is not already accessible
+					if (!method.canAccess(bean)) {
+						method.setAccessible(true);
+					}
 					Object result = method.invoke(bean, entity);
 					if (result instanceof com.vaadin.flow.component.Component) {
 						return (com.vaadin.flow.component.Component) result;
@@ -399,7 +402,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					LOGGER.error("Error invoking widget provider method {} for entity: {}", methodName, e.getMessage());
 					return createErrorCell("Widget error");
 				}
-			}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61Cf")).setAutoWidth(true).setFlexGrow(1).setKey(fieldName);
+			}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61cf")).setAutoWidth(true).setFlexGrow(1).setKey(fieldName);
 			LOGGER.debug("Created component widget column for field {} using bean {} method {}", fieldName, beanName, methodName);
 		} catch (Exception e) {
 			LOGGER.error("Error creating column for CComponentWidgetEntity field {}: {}", fieldName, e.getMessage());
@@ -422,8 +425,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		try {
 			if ("view".equals(beanName)) {
 				// For "view" bean, get the CPageService from the IPageServiceImplementer
-				if (contentOwner instanceof IPageServiceImplementer) {
-					IPageServiceImplementer<?> pageServiceImplementer = (IPageServiceImplementer<?>) contentOwner;
+				if (contentOwner instanceof IPageServiceImplementer<?> pageServiceImplementer) {
 					return pageServiceImplementer.getPageService();
 				} else {
 					LOGGER.warn("contentOwner is not IPageServiceImplementer - cannot use 'view' as dataProviderBean");
@@ -449,31 +451,30 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * @return the Method object, or null if not found */
 	private Method findWidgetProviderMethod(Class<?> beanClass, String methodName, Class<?> entityType) {
 		try {
-			// First try to find method with exact entity type parameter
-			try {
-				return beanClass.getMethod(methodName, entityType);
-			} catch (NoSuchMethodException e) {
-				// Try finding method with CEntityDB parameter
+			// Define parameter types to try in order of preference
+			Class<?>[] parameterTypeCandidates = {
+					entityType, // Exact entity type
+					CEntityDB.class, // Base entity type
+					Object.class // Generic object type
+			};
+			// Try each parameter type candidate
+			for (Class<?> paramType : parameterTypeCandidates) {
 				try {
-					return beanClass.getMethod(methodName, CEntityDB.class);
-				} catch (NoSuchMethodException e2) {
-					// Try finding method with Object parameter
-					try {
-						return beanClass.getMethod(methodName, Object.class);
-					} catch (NoSuchMethodException e3) {
-						// Search through all methods for a compatible one
-						for (Method method : beanClass.getMethods()) {
-							if (method.getName().equals(methodName) && method.getParameterCount() == 1) {
-								Class<?> paramType = method.getParameterTypes()[0];
-								if (paramType.isAssignableFrom(entityType)) {
-									return method;
-								}
-							}
-						}
-						return null;
+					return beanClass.getMethod(methodName, paramType);
+				} catch (NoSuchMethodException e) {
+					// Continue to next candidate
+				}
+			}
+			// Fallback: search through all methods for a compatible one
+			for (Method method : beanClass.getMethods()) {
+				if (method.getName().equals(methodName) && method.getParameterCount() == 1) {
+					Class<?> paramType = method.getParameterTypes()[0];
+					if (paramType.isAssignableFrom(entityType)) {
+						return method;
 					}
 				}
 			}
+			return null;
 		} catch (Exception e) {
 			LOGGER.error("Error finding widget provider method {}: {}", methodName, e.getMessage());
 			return null;
