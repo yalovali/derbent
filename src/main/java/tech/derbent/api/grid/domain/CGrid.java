@@ -408,6 +408,41 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		return column;
 	}
 
+	/** Adds a widget column to the grid using the provided widget provider.
+	 * <p>
+	 * This method allows entities to be displayed as rich widgets instead of traditional table columns. The widget provider function is responsible
+	 * for creating the appropriate widget component for each entity.
+	 * </p>
+	 *
+	 * @param <T>            the widget type (must be a Component)
+	 * @param widgetProvider the function that creates widgets for entities
+	 * @return the created column
+	 * @see tech.derbent.api.grid.widget.IEntityWidgetProvider
+	 * @see tech.derbent.api.grid.widget.CEntityWidget */
+	public <T extends com.vaadin.flow.component.Component> Column<EntityClass> addWidgetColumn(
+			final java.util.function.Function<EntityClass, T> widgetProvider) {
+		Check.notNull(widgetProvider, "Widget provider cannot be null");
+		final Column<EntityClass> column = addComponentColumn(entity -> {
+			try {
+				Check.notNull(entity, "Entity cannot be null when creating widget");
+				final T widget = widgetProvider.apply(entity);
+				if (widget == null) {
+					LOGGER.warn("Widget provider returned null for entity: {}", entity);
+					final CGridCell fallbackCell = new CGridCell();
+					fallbackCell.setText("Widget Error");
+					return fallbackCell;
+				}
+				return widget;
+			} catch (final Exception e) {
+				LOGGER.error("Error creating widget for entity: {}", e.getMessage());
+				final CGridCell errorCell = new CGridCell();
+				errorCell.setText("Error: " + e.getMessage());
+				return errorCell;
+			}
+		}).setAutoWidth(true).setFlexGrow(1).setSortable(false);
+		return column;
+	}
+
 	/** Ensures that the grid has a selected row when data is available. This method is called automatically when data changes and follows the coding
 	 * guideline that grids should always have a selected row. */
 	public void ensureSelectionWhenDataAvailable() {

@@ -5,16 +5,19 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.grid.widget.IEntityWidgetProvider;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.activities.view.CActivityWidget;
 
-public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity> implements IPageServiceHasStatusAndWorkflow<CActivity> {
+public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
+		implements IPageServiceHasStatusAndWorkflow<CActivity>, IEntityWidgetProvider<CActivity> {
 
 	public Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivity.class);
 	Long serialVersionUID = 1L;
-	
+
 	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;
 
@@ -23,14 +26,23 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity> imp
 		// Initialize the service from Spring context
 		try {
 			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
 	}
 
+	/** Creates a widget component for displaying the given activity entity.
+	 *
+	 * @param entity the activity to create a widget for
+	 * @return the CActivityWidget component */
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { 
-		return projectItemStatusService; 
+	public Component createWidget(final CActivity entity) {
+		return new CActivityWidget(entity);
+	}
+
+	@Override
+	public CProjectItemStatusService getProjectItemStatusService() {
+		return projectItemStatusService;
 	}
 
 	public void on_description_blur(final Component component, final Object value) {
