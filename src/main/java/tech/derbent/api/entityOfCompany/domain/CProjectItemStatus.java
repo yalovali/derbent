@@ -16,7 +16,7 @@ import tech.derbent.app.companies.domain.CCompany;
 @AttributeOverride (name = "id", column = @Column (name = "cprojectitemstatus_id"))
 public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 
-	public static final String DEFAULT_COLOR = "#A9A08B"; // OpenWindows Disabled Gray - status entities
+	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - activity statuses (matches CActivity)
 	public static final String DEFAULT_ICON = "vaadin:flag";
 	public static final String ENTITY_TITLE_PLURAL = "Statuses";
 	public static final String ENTITY_TITLE_SINGULAR = "Status";
