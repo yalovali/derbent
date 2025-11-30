@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSingleSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -20,7 +21,7 @@ import com.vaadin.flow.function.ValueProvider;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.grid.view.CGridCell;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
@@ -315,18 +316,18 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		if ((meta != null) && meta.setBackgroundFromColor()) {
 			return addComponentColumn(item -> {
 				final Object value = valueProvider.apply(item);
-				final CGridCell cell = new CGridCell();
+				final CLabelEntity labelEntity = new CLabelEntity();
 				// Enable icon display if configured in metadata
 				if (meta.useIcon()) {
-					cell.setShowIcon(true);
+					labelEntity.setShowIcon(true);
 				}
 				// Set the value which will handle color rendering if entity has color
 				if (value instanceof CEntityDB) {
-					cell.setEntityValue((CEntityDB<?>) value);
+					labelEntity.setEntityValue((CEntityDB<?>) value);
 				} else {
-					cell.setText(value != null ? value.toString() : "");
+					labelEntity.setText(value != null ? value.toString() : "");
 				}
-				return cell;
+				return labelEntity;
 			}).setHeader(header).setWidth(width).setFlexGrow(0).setSortable(true);
 		}
 		// Normal sütun
@@ -396,11 +397,11 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		Check.notBlank(header, "Header cannot be null or blank");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			final S status = valueProvider.apply(entity);
-			final CGridCell statusCell = new CGridCell();
+			final CLabelEntity labelEntity = new CLabelEntity();
 			// Configure icon display based on grid setting
-			statusCell.setShowIcon(showIconInStatusColumns);
-			statusCell.setStatusValue(status);
-			return statusCell;
+			labelEntity.setShowIcon(showIconInStatusColumns);
+			labelEntity.setStatusValue(status);
+			return labelEntity;
 		}).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
 		if (key != null) {
 			column.setKey(key);
@@ -413,14 +414,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	 * This method allows entities to be displayed as rich widgets instead of traditional table columns. The widget provider function is responsible
 	 * for creating the appropriate widget component for each entity.
 	 * </p>
-	 *
 	 * @param <T>            the widget type (must be a Component)
 	 * @param widgetProvider the function that creates widgets for entities
 	 * @return the created column
 	 * @see tech.derbent.api.grid.widget.IComponentWidgetEntityProvider
 	 * @see tech.derbent.api.grid.widget.CComponentWidgetEntity */
-	public <T extends com.vaadin.flow.component.Component> Column<EntityClass> addWidgetColumn(
-			final java.util.function.Function<EntityClass, T> widgetProvider) {
+	public <T extends Component> Column<EntityClass> addWidgetColumn(final java.util.function.Function<EntityClass, T> widgetProvider) {
 		Check.notNull(widgetProvider, "Widget provider cannot be null");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			try {
@@ -428,16 +427,16 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				final T widget = widgetProvider.apply(entity);
 				if (widget == null) {
 					LOGGER.warn("Widget provider returned null for entity: {}", entity);
-					final CGridCell fallbackCell = new CGridCell();
-					fallbackCell.setText("Widget Error");
-					return fallbackCell;
+					final CLabelEntity labelEntity = new CLabelEntity();
+					labelEntity.setText("Widget Error");
+					return labelEntity;
 				}
 				return widget;
 			} catch (final Exception e) {
 				LOGGER.error("Error creating widget for entity: {}", e.getMessage());
-				final CGridCell errorCell = new CGridCell();
-				errorCell.setText("Error: " + e.getMessage());
-				return errorCell;
+				final CLabelEntity labelEntity = new CLabelEntity();
+				labelEntity.setText("Error: " + e.getMessage());
+				return labelEntity;
 			}
 		}).setAutoWidth(true).setFlexGrow(1).setSortable(false);
 		return column;

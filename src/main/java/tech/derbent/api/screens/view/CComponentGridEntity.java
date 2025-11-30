@@ -30,7 +30,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.grid.view.CGridCell;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
@@ -346,31 +346,31 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					// Create a component column that shows the color value as background
 					grid.addComponentColumn(entity -> {
 						String colorValue = (String) valueProvider.apply(entity);
-						CGridCell colorCell = new CGridCell();
+						CLabelEntity lavelEntity = new CLabelEntity();
 						if (colorValue != null && !colorValue.trim().isEmpty()) {
 							// Display the color value as text with background color
-							colorCell.setText(colorValue);
-							colorCell.getStyle().set("background-color", colorValue);
+							lavelEntity.setText(colorValue);
+							lavelEntity.getStyle().set("background-color", colorValue);
 							// Apply contrasting text color for readability
 							try {
 								String textColor = CColorUtils.getContrastTextColor(colorValue);
-								colorCell.getStyle().set("color", textColor);
+								lavelEntity.getStyle().set("color", textColor);
 							} catch (Exception e) {
 								// Fallback to simple contrast logic
-								colorCell.getStyle().set("color", isColorLight(colorValue) ? "#000000" : "#ffffff");
+								lavelEntity.getStyle().set("color", isColorLight(colorValue) ? "#000000" : "#ffffff");
 							}
 							// Add some styling to make it look like a color swatch
-							colorCell.getStyle().set("padding", "8px 12px");
-							colorCell.getStyle().set("border-radius", "4px");
-							colorCell.getStyle().set("text-align", "center");
-							colorCell.getStyle().set("font-family", "monospace");
-							colorCell.getStyle().set("font-weight", "bold");
+							lavelEntity.getStyle().set("padding", "8px 12px");
+							lavelEntity.getStyle().set("border-radius", "4px");
+							lavelEntity.getStyle().set("text-align", "center");
+							lavelEntity.getStyle().set("font-family", "monospace");
+							lavelEntity.getStyle().set("font-weight", "bold");
 						} else {
-							colorCell.setText("No Color");
-							colorCell.getStyle().set("color", "#666");
-							colorCell.getStyle().set("font-style", "italic");
+							lavelEntity.setText("No Color");
+							lavelEntity.getStyle().set("color", "#666");
+							lavelEntity.getStyle().set("font-style", "italic");
 						}
-						return colorCell;
+						return lavelEntity;
 					}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61Cf")).setWidth("150px").setFlexGrow(0).setSortable(true)
 							.setKey(fieldName);
 				} else {
@@ -433,12 +433,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	/** Creates an error cell to display when widget creation fails. */
-	private com.vaadin.flow.component.Component createErrorCell(String message) {
-		CGridCell errorCell = new CGridCell();
-		errorCell.setText(message);
-		errorCell.getStyle().set("color", "#666");
-		errorCell.getStyle().set("font-style", "italic");
-		return errorCell;
+	private Component createErrorCell(String message) {
+		CLabelEntity labelEntity = new CLabelEntity();
+		labelEntity.setText(message);
+		labelEntity.getStyle().set("color", "#666");
+		labelEntity.getStyle().set("font-style", "italic");
+		return labelEntity;
 	}
 
 	public void createGridColumns() throws Exception {

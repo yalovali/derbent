@@ -7,23 +7,22 @@ import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.CColorUtils;
 
-public class CGridCell extends Div {
+public class CLabelEntity extends Div {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CGridCell.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CLabelEntity.class);
 	private static final long serialVersionUID = 1L;
 	private Boolean autoContrast = Boolean.TRUE;
-	// Simplified styling configuration - only essential properties
 	private Boolean showIcon = Boolean.FALSE;
 
 	/** Default constructor for CGridCell. */
-	public CGridCell() {
+	public CLabelEntity() {
 		super();
 		initializeCell();
 	}
 
 	/** Constructor for CGridCell with entity value.
 	 * @param entity the entity to display in the cell */
-	public CGridCell(final CEntityDB<?> entity) {
+	public CLabelEntity(final CEntityDB<?> entity) {
 		super();
 		setEntityValue(entity);
 		initializeCell();
@@ -31,7 +30,7 @@ public class CGridCell extends Div {
 
 	/** Constructor for CGridCell with text content.
 	 * @param text the text content for the cell */
-	public CGridCell(final String text) {
+	public CLabelEntity(final String text) {
 		super();
 		setText(text);
 		initializeCell();
@@ -91,60 +90,6 @@ public class CGridCell extends Div {
 	 * @return true if icons are displayed alongside text */
 	public boolean isShowIcon() { return showIcon; }
 
-	/** Enable or disable auto-contrast for text color in color-aware cells.
-	 * @param autoContrast true to enable auto-contrast */
-	public void setAutoContrast(final Boolean autoContrast) {
-		this.autoContrast = autoContrast != null ? autoContrast : Boolean.TRUE;
-	}
-
-	/** Set boolean value with custom styling for true/false states. This method provides consistent styling for boolean-based grid cells.
-	 * @param value      the boolean value to display
-	 * @param trueText   text to display when value is true
-	 * @param falseText  text to display when value is false (can be empty)
-	 * @param trueColor  background color for true state
-	 * @param falseColor background color for false state (can be null for no background) */
-	public void setBooleanValue(final boolean value, final String trueText, final String falseText, final String trueColor, final String falseColor) {
-		removeAll(); // Clear any existing content
-		final String displayText = value ? trueText : falseText;
-		// Only show content if there's text to display
-		if ((displayText != null) && !displayText.isBlank()) {
-			setText(displayText);
-			// Apply boolean-specific styling
-			getStyle().set("padding", "4px 8px");
-			getStyle().set("border-radius", "12px");
-			getStyle().set("font-size", "12px");
-			getStyle().set("font-weight", "bold");
-			getStyle().set("text-align", "center");
-			// Apply colors based on the boolean value
-			if (value && (trueColor != null)) {
-				getStyle().set("background-color", trueColor);
-				if (Boolean.TRUE.equals(autoContrast)) {
-					final String textColor = CColorUtils.getContrastTextColor(trueColor);
-					getStyle().set("color", textColor);
-				}
-			} else if (!value && (falseColor != null)) {
-				getStyle().set("background-color", falseColor);
-				if (Boolean.TRUE.equals(autoContrast)) {
-					final String textColor = CColorUtils.getContrastTextColor(falseColor);
-					getStyle().set("color", textColor);
-				}
-			}
-		}
-	}
-
-	/** Set boolean value with predefined Default styling. This is a convenience method for default status indicators.
-	 * @param isDefault true if this is the default item */
-	public void setDefaultValue(final boolean isDefault) {
-		if (isDefault) {
-			setBooleanValue(true, "Default", "", "#e3f2fd", null);
-			getStyle().set("color", "#1976d2");
-		} else {
-			// For non-default, show nothing
-			removeAll();
-			setText("");
-		}
-	}
-
 	/** Set entity value and display text with optional color rendering.
 	 * @param entity the entity to display */
 	public void setEntityValue(final CEntityDB<?> entity) {
@@ -156,9 +101,7 @@ public class CGridCell extends Div {
 			return;
 		}
 		try {
-			// Get display text
 			final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
-			// Check if entity has color for background rendering
 			final String color = CColorUtils.getColorFromEntity(entity);
 			if ((color != null) && !color.isBlank()) {
 				// Color-aware rendering
@@ -178,18 +121,6 @@ public class CGridCell extends Div {
 		}
 	}
 
-	/** Set boolean value with predefined Final/Active styling. This is a convenience method for common Final/Active status display.
-	 * @param isFinal true if the status is final, false if active */
-	public void setFinalActiveValue(final boolean isFinal) {
-		setBooleanValue(isFinal, "Final", "Active", "#ffebee", "#e8f5e8");
-		// Apply specific text colors for Final/Active
-		if (isFinal) {
-			getStyle().set("color", "#c62828");
-		} else {
-			getStyle().set("color", "#2e7d32");
-		}
-	}
-
 	/** Enable or disable icon display.
 	 * @param showIcon true to show icons alongside text */
 	public void setShowIcon(final Boolean showIcon) {
@@ -198,25 +129,34 @@ public class CGridCell extends Div {
 
 	/** Set status entity value with color-aware rendering and optional icon display. This method provides the same functionality as the removed
 	 * CGridCellStatus.
-	 * @param statusEntity the status entity to display */
-	public void setStatusValue(final CEntityDB<?> statusEntity) {
+	 * @param entity the status entity to display */
+	public void setStatusValue(final CEntityDB<?> entity) {
 		removeAll(); // Clear any existing content
-		if (statusEntity == null) {
+		if (entity == null) {
 			setText("No Status");
 			applyDefaultStatusStyling();
 			return;
 		}
 		try {
-			final String displayText = CColorUtils.getDisplayTextFromEntity(statusEntity);
-			final String color = CColorUtils.getColorFromEntity(statusEntity);
-			// Apply color-aware styling with status-specific enhancements
-			applyColorStyling(statusEntity, color, displayText);
+			final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
+			final String color = CColorUtils.getColorFromEntity(entity);
+			if ((color != null) && !color.isBlank()) {
+				// Color-aware rendering
+				applyColorStyling(entity, color, displayText);
+			} else {
+				// Regular text rendering
+				setText(displayText);
+				// Reset any color styling
+				getStyle().remove("background-color");
+				getStyle().remove("color");
+				getStyle().remove("font-style");
+			}
 			// Add status-specific styling
 			getStyle().set("border-radius", "4px");
 			getStyle().set("font-weight", "500");
 		} catch (final Exception e) {
 			LOGGER.error("Error applying color to status cell: {}", e.getMessage());
-			setEntityValue(statusEntity);
+			setEntityValue(entity);
 			applyDefaultStatusStyling();
 		}
 	}

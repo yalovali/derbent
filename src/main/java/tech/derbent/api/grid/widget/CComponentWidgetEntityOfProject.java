@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasColorAndIcon;
@@ -31,9 +32,9 @@ import tech.derbent.base.users.domain.CUser;
  * @param <T> the entity type extending CProjectItem */
 public abstract class CComponentWidgetEntityOfProject<T extends CProjectItem<?>> extends CComponentWidgetEntity<T> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntityOfProject.class);
 	/** Max description length to display in the widget. */
 	protected static final int MAX_DESCRIPTION_LENGTH = 100;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntityOfProject.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Creates a new project item widget for the specified entity.
@@ -42,8 +43,45 @@ public abstract class CComponentWidgetEntityOfProject<T extends CProjectItem<?>>
 		super(item);
 	}
 
-	/** Creates the first line with entity name, icon, and color styling.
-	 * If entity implements IHasColorAndIcon, the icon and color will be used. */
+	/** Creates a styled date range display component.
+	 * @param startDate the start date (can be null)
+	 * @param endDate   the end date (can be null)
+	 * @return the date range display component */
+	protected CHorizontalLayout createDateRangeDisplay(final LocalDate startDate, final LocalDate endDate) {
+		final CHorizontalLayout dateLayout = new CHorizontalLayout();
+		dateLayout.setSpacing(true);
+		dateLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+		dateLayout.getStyle().set("font-size", "10pt");
+		dateLayout.getStyle().set("color", "#666");
+		try {
+			// Add calendar icon
+			final Icon icon = CColorUtils.createStyledIcon("vaadin:calendar");
+			if (icon != null) {
+				icon.getStyle().set("width", "14px");
+				icon.getStyle().set("height", "14px");
+				icon.getStyle().set("color", "#666");
+				dateLayout.add(icon);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not create calendar icon: {}", e.getMessage());
+		}
+		// Format date range
+		final StringBuilder dateRange = new StringBuilder();
+		if (startDate != null) {
+			dateRange.append(startDate.format(DATE_FORMATTER));
+		}
+		if (startDate != null && endDate != null) {
+			dateRange.append(" - ");
+		}
+		if (endDate != null) {
+			dateRange.append(endDate.format(DATE_FORMATTER));
+		}
+		final Span dateSpan = new Span(dateRange.toString());
+		dateLayout.add(dateSpan);
+		return dateLayout;
+	}
+
+	/** Creates the first line with entity name, icon, and color styling. If entity implements IHasColorAndIcon, the icon and color will be used. */
 	@Override
 	protected void createFirstLine() {
 		final T item = getEntity();
@@ -51,13 +89,9 @@ public abstract class CComponentWidgetEntityOfProject<T extends CProjectItem<?>>
 			layoutLineOne.add(new CH3("(No Entity)"));
 			return;
 		}
-		String name = item.getName();
-		if (name == null || name.isEmpty()) {
-			name = "(No Name)";
-		}
 		final CHorizontalLayout nameLayout = new CHorizontalLayout();
 		nameLayout.setSpacing(true);
-		nameLayout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+		nameLayout.setAlignItems(Alignment.START);
 		// Add icon if entity has IHasColorAndIcon interface
 		if (item instanceof IHasColorAndIcon) {
 			try {
@@ -79,7 +113,7 @@ public abstract class CComponentWidgetEntityOfProject<T extends CProjectItem<?>>
 			}
 		}
 		// Add name span with styling
-		final CH3 nameSpan = new CH3(name);
+		final CH3 nameSpan = new CH3(entity.getName());
 		// Apply color styling to name if entity has color
 		if (item instanceof IHasColorAndIcon) {
 			try {
@@ -117,38 +151,13 @@ public abstract class CComponentWidgetEntityOfProject<T extends CProjectItem<?>>
 		layoutLineTwo.add(descriptionDiv);
 	}
 
-	/** Creates the third line with status badge, responsible user, and date range. */
-	@Override
-	protected void createThirdLine() {
-		final T item = getEntity();
-		if (item == null) {
-			return;
-		}
-		// Add status display
-		final CProjectItemStatus status = item.getStatus();
-		if (status != null) {
-			layoutLineThree.add(createStatusDisplay(status));
-		}
-		// Add responsible user display
-		final CUser responsible = item.getResponsible();
-		if (responsible != null) {
-			layoutLineThree.add(createUserDisplay(responsible));
-		}
-		// Add date range display - CProjectItem has getStartDate() and getEndDate() methods
-		final LocalDate startDate = item.getStartDate();
-		final LocalDate endDate = item.getEndDate();
-		if (startDate != null || endDate != null) {
-			layoutLineThree.add(createDateRangeDisplay(startDate, endDate));
-		}
-	}
-
 	/** Creates a styled status display component with color.
 	 * @param status the status entity to display
 	 * @return the status display component */
 	protected CHorizontalLayout createStatusDisplay(final CProjectItemStatus status) {
 		final CHorizontalLayout statusLayout = new CHorizontalLayout();
 		statusLayout.setSpacing(true);
-		statusLayout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+		statusLayout.setAlignItems(Alignment.CENTER);
 		statusLayout.getStyle().set("padding", "2px 6px");
 		statusLayout.getStyle().set("border-radius", "4px");
 		statusLayout.getStyle().set("font-size", "10pt");
@@ -189,13 +198,38 @@ public abstract class CComponentWidgetEntityOfProject<T extends CProjectItem<?>>
 		return statusLayout;
 	}
 
+	/** Creates the third line with status badge, responsible user, and date range. */
+	@Override
+	protected void createThirdLine() {
+		final T item = getEntity();
+		if (item == null) {
+			return;
+		}
+		// Add status display
+		final CProjectItemStatus status = item.getStatus();
+		if (status != null) {
+			layoutLineThree.add(createStatusDisplay(status));
+		}
+		// Add responsible user display
+		final CUser responsible = item.getResponsible();
+		if (responsible != null) {
+			layoutLineThree.add(createUserDisplay(responsible));
+		}
+		// Add date range display - CProjectItem has getStartDate() and getEndDate() methods
+		final LocalDate startDate = item.getStartDate();
+		final LocalDate endDate = item.getEndDate();
+		if (startDate != null || endDate != null) {
+			layoutLineThree.add(createDateRangeDisplay(startDate, endDate));
+		}
+	}
+
 	/** Creates a styled user display component with icon.
 	 * @param user the user entity to display
 	 * @return the user display component */
 	protected CHorizontalLayout createUserDisplay(final CUser user) {
 		final CHorizontalLayout userLayout = new CHorizontalLayout();
 		userLayout.setSpacing(true);
-		userLayout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+		userLayout.setAlignItems(Alignment.CENTER);
 		userLayout.getStyle().set("font-size", "10pt");
 		userLayout.getStyle().set("color", "#666");
 		if (user == null) {
@@ -231,43 +265,5 @@ public abstract class CComponentWidgetEntityOfProject<T extends CProjectItem<?>>
 		final Span userName = new Span(displayName);
 		userLayout.add(userName);
 		return userLayout;
-	}
-
-	/** Creates a styled date range display component.
-	 * @param startDate the start date (can be null)
-	 * @param endDate   the end date (can be null)
-	 * @return the date range display component */
-	protected CHorizontalLayout createDateRangeDisplay(final LocalDate startDate, final LocalDate endDate) {
-		final CHorizontalLayout dateLayout = new CHorizontalLayout();
-		dateLayout.setSpacing(true);
-		dateLayout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-		dateLayout.getStyle().set("font-size", "10pt");
-		dateLayout.getStyle().set("color", "#666");
-		try {
-			// Add calendar icon
-			final Icon icon = CColorUtils.createStyledIcon("vaadin:calendar");
-			if (icon != null) {
-				icon.getStyle().set("width", "14px");
-				icon.getStyle().set("height", "14px");
-				icon.getStyle().set("color", "#666");
-				dateLayout.add(icon);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not create calendar icon: {}", e.getMessage());
-		}
-		// Format date range
-		final StringBuilder dateRange = new StringBuilder();
-		if (startDate != null) {
-			dateRange.append(startDate.format(DATE_FORMATTER));
-		}
-		if (startDate != null && endDate != null) {
-			dateRange.append(" - ");
-		}
-		if (endDate != null) {
-			dateRange.append(endDate.format(DATE_FORMATTER));
-		}
-		final Span dateSpan = new Span(dateRange.toString());
-		dateLayout.add(dateSpan);
-		return dateLayout;
 	}
 }

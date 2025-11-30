@@ -20,7 +20,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.grid.view.CGridCell;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -285,27 +285,27 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 				.setKey("description");
 		// Status column with color support for CProjectItem entities
 		gridItems.addComponentColumn(item -> {
-			final CGridCell statusCell = new CGridCell();
-			statusCell.setShowIcon(true);
+			final CLabelEntity labelEntity = new CLabelEntity();
+			labelEntity.setShowIcon(true);
 			if (item instanceof CProjectItem) {
 				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
 				if (projectItem.getStatus() != null) {
-					statusCell.setStatusValue(projectItem.getStatus());
+					labelEntity.setStatusValue(projectItem.getStatus());
 				} else {
-					statusCell.setText("No Status");
+					labelEntity.setText("No Status");
 				}
 			} else {
 				// Use cached method
 				final Object status = getEntityStatus(item);
 				if (status instanceof CEntityDB) {
-					statusCell.setStatusValue((CEntityDB<?>) status);
+					labelEntity.setStatusValue((CEntityDB<?>) status);
 				} else if (status != null) {
-					statusCell.setText(status.toString());
+					labelEntity.setText(status.toString());
 				} else {
-					statusCell.setText("N/A");
+					labelEntity.setText("N/A");
 				}
 			}
-			return statusCell;
+			return labelEntity;
 		}).setHeader("Status").setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status");
 	}
 
