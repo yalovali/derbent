@@ -15,6 +15,8 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.server.menu.MenuConfiguration;
@@ -169,6 +171,10 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				final Double order) throws Exception {
 			final CMenuItem item = new CMenuItem(clazz, name, iconName, path, null, false, order);
 			items.add(item);
+			// Also add to flat list for search (only non-navigation items with paths)
+			if ((path != null) && !path.isBlank()) {
+				allMenuItems.add(item);
+			}
 			return item;
 		}
 
@@ -205,6 +211,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	// Styling constants
 	private static final String MENU_ITEM_CLASS = "hierarchical-menu-item";
 	private static final long serialVersionUID = 1L;
+	// All menu items for search (flat list)
+	private final List<CMenuItem> allMenuItems;
 	private CMenuLevel currentLevel;
 	private final Div currentLevelContainer;
 	private String currentRoute; // Track current route for highlighting
@@ -218,6 +226,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	// Services for dynamic menu integration
 	private final CPageMenuIntegrationService pageMenuService;
 	private final CPageTestAuxillaryService pageTestAuxillaryService;
+	// Search components
+	private final TextField searchField;
+	private final Div searchContainer;
 
 	/** Constructor initializes the hierarchical side menu component.
 	 * @param pageMenuService Service for dynamic page menu integration
@@ -228,6 +239,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		this.pageTestAuxillaryService = pageTestAuxillaryService;
 		navigationPath = new ArrayList<>();
 		menuLevels = new HashMap<>();
+		allMenuItems = new ArrayList<>();
 		// Initialize main container
 		menuContainer = new VerticalLayout();
 		menuContainer.addClassNames(Padding.NONE, Gap.SMALL);
@@ -236,14 +248,19 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		headerLayout = new HorizontalLayout();
 		headerLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, HEADER_CLASS);
 		headerLayout.setWidthFull();
+		// Initialize search field
+		searchField = createSearchField();
+		searchContainer = new Div(searchField);
+		searchContainer.addClassNames(Padding.Horizontal.MEDIUM, Padding.Bottom.SMALL);
+		searchContainer.setWidthFull();
 		// Initialize current level display container
 		currentLevelContainer = new Div();
 		currentLevelContainer.addClassNames(LEVEL_CONTAINER_CLASS);
 		currentLevelContainer.setWidthFull();
 		// Build menu structure from annotations
 		buildMenuHierarchy();
-		// Add components to main container
-		menuContainer.add(headerLayout, currentLevelContainer);
+		// Add components to main container (header, search, content)
+		menuContainer.add(headerLayout, searchContainer, currentLevelContainer);
 		add(menuContainer);
 		// Apply CSS styling
 		initializeStyles();
@@ -284,6 +301,115 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		CColorUtils.setIconClassSize(icon, IconSize.MEDIUM);
 		icon.getStyle().set("color", iconColor);
 		return icon;
+	}
+
+	/** Creates the search field for filtering menu items.
+	 * @return TextField configured for menu search */
+	private TextField createSearchField() {
+		final TextField textFieldSearch = new TextField();
+		textFieldSearch.setPlaceholder("Search menu...");
+		textFieldSearch.setPrefixComponent(VaadinIcon.SEARCH.create());
+		textFieldSearch.setClearButtonVisible(true);
+		textFieldSearch.setWidthFull();
+		textFieldSearch.setValueChangeMode(ValueChangeMode.EAGER);
+		textFieldSearch.addValueChangeListener(event -> on_textFieldSearch_valueChanged(event.getValue()));
+		// Style the search field
+		textFieldSearch.getStyle().set("--vaadin-input-field-border-radius", "var(--lumo-border-radius-m)");
+		return textFieldSearch;
+	}
+
+	/** Creates a search result item component for displaying filtered menu items.
+	 * @param item The menu item to display
+	 * @return Component representing the search result item */
+	private Component createSearchResultItem(final CMenuItem item) {
+		final HorizontalLayout itemLayout = new HorizontalLayout();
+		itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, Gap.MEDIUM, MENU_ITEM_CLASS);
+		itemLayout.setWidthFull();
+		// Add icon with consistent sizing and colorful styling
+		Icon icon = CColorUtils.setIconClassSize(CColorUtils.createStyledIcon(item.iconName, item.iconColor), IconSize.MEDIUM);
+		if (icon == null) {
+			icon = VaadinIcon.CIRCLE.create();
+			icon.getStyle().set("visibility", "hidden");
+		}
+		itemLayout.add(icon);
+		// Add text
+		final Span itemText = new Span(item.name);
+		itemText.addClassNames(FontSize.LARGE, FontWeight.NORMAL);
+		itemLayout.add(itemText);
+		// Add click listener to navigate
+		itemLayout.addClickListener(e -> {
+			if ((item.path != null) && !item.path.isBlank()) {
+				LOGGER.debug("Search result clicked - navigating to path: {}", item.path);
+				if (item.path.startsWith("dynamic.")) {
+					String dynamicPath = item.path.substring("dynamic.".length());
+					String dynamicViewPath = "cdynamicpagerouter/page:" + dynamicPath;
+					UI.getCurrent().navigate(dynamicViewPath);
+				} else {
+					UI.getCurrent().navigate(item.path);
+				}
+				// Clear search after navigation
+				searchField.clear();
+			}
+		});
+		// Style as clickable
+		itemLayout.getElement().getStyle().set("cursor", "pointer").set("border-radius", "var(--lumo-border-radius-m)").set("transition",
+				"all 0.2s ease");
+		// Add hover effects
+		itemLayout.getElement().addEventListener("mouseenter",
+				e -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+		itemLayout.getElement().addEventListener("mouseleave", e -> itemLayout.getElement().getStyle().remove("background-color"));
+		return itemLayout;
+	}
+
+	/** Displays search results based on the filter text.
+	 * @param filterText The text to filter menu items by */
+	private void displaySearchResults(final String filterText) {
+		currentLevelContainer.removeAll();
+		final VerticalLayout resultsLayout = new VerticalLayout();
+		resultsLayout.addClassNames(Padding.NONE, Gap.SMALL);
+		resultsLayout.setWidthFull();
+		// Filter menu items (case-insensitive) using streams for better readability
+		final String lowerFilter = filterText.toLowerCase();
+		final List<CMenuItem> filteredItems = allMenuItems.stream().filter(item -> item.name.toLowerCase().contains(lowerFilter))
+				.sorted((a, b) -> Double.compare(a.getOrder(), b.getOrder())).toList();
+		if (filteredItems.isEmpty()) {
+			final Span noResults = new Span("No matching items found");
+			noResults.addClassNames(Padding.MEDIUM, TextColor.SECONDARY);
+			resultsLayout.add(noResults);
+		} else {
+			for (final CMenuItem item : filteredItems) {
+				resultsLayout.add(createSearchResultItem(item));
+			}
+		}
+		currentLevelContainer.add(resultsLayout);
+		// Update header to show search mode
+		updateHeaderForSearch();
+	}
+
+	/** Handles search field value changes.
+	 * @param value The new search value */
+	private void on_textFieldSearch_valueChanged(final String value) {
+		if ((value == null) || value.trim().isEmpty()) {
+			// Clear search - show current level
+			showLevel(currentLevel != null ? currentLevel.getLevelKey() : "root");
+		} else {
+			// Display filtered results
+			displaySearchResults(value.trim());
+		}
+	}
+
+	/** Updates the header to show search mode. */
+	private void updateHeaderForSearch() {
+		headerLayout.removeAll();
+		final Icon searchIcon = createMenuIcon(VaadinIcon.SEARCH.create(), "var(--lumo-primary-color)");
+		searchIcon.addClassNames(Margin.Right.MEDIUM, Margin.Left.SMALL);
+		headerLayout.add(searchIcon);
+		final Span title = new Span("Search Results");
+		title.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
+		headerLayout.add(title);
+		final Div spacer = new CDiv();
+		headerLayout.add(spacer);
+		headerLayout.setFlexGrow(1, spacer);
 	}
 
 	/** Get icon color for a dynamic page.

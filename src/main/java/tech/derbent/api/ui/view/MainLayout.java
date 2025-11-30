@@ -149,8 +149,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		// Make the header clickable to navigate to dashboard
 		header.getStyle().set("cursor", "pointer");
 		header.addClickListener(e -> {
-			LOGGER.debug("Header clicked - navigating to dashboard");
-			com.vaadin.flow.component.UI.getCurrent().navigate("dashboard");
+			LOGGER.debug("Header clicked - navigating to home");
+			com.vaadin.flow.component.UI.getCurrent().navigate("home");
 		});
 		// Add hover effects
 		header.getElement().addEventListener("mouseenter", e -> header.getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
