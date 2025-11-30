@@ -98,6 +98,9 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CDiv {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntity.class);
 	private static final long serialVersionUID = 1L;
 
+	/** Cache for getter methods to improve reflection performance in grids */
+	private static final java.util.Map<String, java.lang.reflect.Method> methodCache = new java.util.concurrent.ConcurrentHashMap<>();
+
 	// =============== STATIC VALUE PROVIDERS ===============
 	// These static methods provide value providers for grid columns and external use
 
@@ -154,7 +157,12 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CDiv {
 				return "";
 			}
 			try {
-				final java.lang.reflect.Method descMethod = entity.getClass().getMethod("getDescription");
+				final String cacheKey = entity.getClass().getName() + ":getDescription";
+				java.lang.reflect.Method descMethod = methodCache.get(cacheKey);
+				if (descMethod == null) {
+					descMethod = entity.getClass().getMethod("getDescription");
+					methodCache.put(cacheKey, descMethod);
+				}
 				final Object result = descMethod.invoke(entity);
 				return result != null ? result.toString() : "";
 			} catch (final Exception e) {
@@ -163,21 +171,27 @@ public class CComponentWidgetEntity<T extends CEntityDB<?>> extends CDiv {
 		};
 	}
 
-	/** Returns a value provider for a specific property using reflection.
-	 * @param propertyName the name of the property
+	/** Returns a value provider for a specific property using reflection with method caching.
+	 * @param propertyName the name of the property (must be at least 1 character)
 	 * @param <E>          the entity type
 	 * @param <V>          the value type
 	 * @return a value provider for the property */
 	@SuppressWarnings ("unchecked")
 	public static <E extends CEntityDB<?>, V> ValueProvider<E, V> propertyValueProvider(final String propertyName) {
 		Check.notBlank(propertyName, "Property name cannot be blank");
+		final String getterName = "get" + propertyName.substring(0, 1).toUpperCase()
+				+ (propertyName.length() > 1 ? propertyName.substring(1) : "");
 		return entity -> {
 			if (entity == null) {
 				return null;
 			}
 			try {
-				final String getterName = "get" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
-				final java.lang.reflect.Method getter = entity.getClass().getMethod(getterName);
+				final String cacheKey = entity.getClass().getName() + ":" + getterName;
+				java.lang.reflect.Method getter = methodCache.get(cacheKey);
+				if (getter == null) {
+					getter = entity.getClass().getMethod(getterName);
+					methodCache.put(cacheKey, getter);
+				}
 				return (V) getter.invoke(entity);
 			} catch (final Exception e) {
 				LOGGER.debug("Could not get property {}: {}", propertyName, e.getMessage());

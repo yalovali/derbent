@@ -2,7 +2,6 @@ package tech.derbent.app.activities.view;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.function.Function;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -19,7 +18,6 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
-import tech.derbent.app.activities.domain.CActivityType;
 import tech.derbent.base.users.domain.CUser;
 
 /** CActivityWidget - Custom widget for displaying CActivity entities in a rich visual format.
@@ -37,6 +35,11 @@ import tech.derbent.base.users.domain.CUser;
 public class CComponentWidgetActivity extends CComponentWidgetEntity<CActivity> {
 
 	private static final long serialVersionUID = 1L;
+
+	// =============== PROGRESS COLOR CONSTANTS ===============
+	private static final String COLOR_PROGRESS_COMPLETE = "#28a745"; // Green
+	private static final String COLOR_PROGRESS_HALF = "#ffc107"; // Yellow
+	private static final String COLOR_PROGRESS_STARTED = "#17a2b8"; // Blue
 
 	// =============== STATIC FACTORY METHODS ===============
 
@@ -204,11 +207,11 @@ public class CComponentWidgetActivity extends CComponentWidgetEntity<CActivity> 
 		progressBar.setHeight("8px");
 		// Set color based on progress
 		if (progress >= 100) {
-			progressBar.getStyle().set("--lumo-primary-color", "#28a745"); // Green for complete
+			progressBar.getStyle().set("--lumo-primary-color", COLOR_PROGRESS_COMPLETE);
 		} else if (progress >= 50) {
-			progressBar.getStyle().set("--lumo-primary-color", "#ffc107"); // Yellow for in progress
+			progressBar.getStyle().set("--lumo-primary-color", COLOR_PROGRESS_HALF);
 		} else {
-			progressBar.getStyle().set("--lumo-primary-color", "#17a2b8"); // Blue for started
+			progressBar.getStyle().set("--lumo-primary-color", COLOR_PROGRESS_STARTED);
 		}
 		final Span percentSpan = new Span(progress + "%");
 		percentSpan.addClassNames(FontSize.XSMALL);
@@ -240,10 +243,9 @@ public class CComponentWidgetActivity extends CComponentWidgetEntity<CActivity> 
 		if (priority != null) {
 			addStatusBadge(priority, "Priority");
 		}
-		// Activity type badge
-		final CActivityType entityType = (CActivityType) activity.getEntityType();
-		if (entityType != null) {
-			addStatusBadge(entityType, "Type");
+		// Activity type badge - getEntityType returns CTypeEntity which extends CEntityDB
+		if (activity.getEntityType() != null) {
+			addStatusBadge(activity.getEntityType(), "Type");
 		}
 		// Progress with visual bar
 		addProgressRow(activity.getProgressPercentage());
@@ -280,11 +282,11 @@ public class CComponentWidgetActivity extends CComponentWidgetEntity<CActivity> 
 		progressBar.setHeight("6px");
 		// Set color based on progress
 		if (progress >= 100) {
-			progressBar.getStyle().set("--lumo-primary-color", "#28a745"); // Green
+			progressBar.getStyle().set("--lumo-primary-color", COLOR_PROGRESS_COMPLETE);
 		} else if (progress >= 50) {
-			progressBar.getStyle().set("--lumo-primary-color", "#ffc107"); // Yellow
+			progressBar.getStyle().set("--lumo-primary-color", COLOR_PROGRESS_HALF);
 		} else {
-			progressBar.getStyle().set("--lumo-primary-color", "#17a2b8"); // Blue
+			progressBar.getStyle().set("--lumo-primary-color", COLOR_PROGRESS_STARTED);
 		}
 		row.add(progressBar);
 		final Span percentSpan = new Span(progress + "%");
