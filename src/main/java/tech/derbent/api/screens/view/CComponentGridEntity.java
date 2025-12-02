@@ -212,7 +212,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			}
 			// Handle different field types using appropriate CGrid methods
 			if (CEntityDB.class.isAssignableFrom(fieldType)) {
-				// Entity reference - check if it's a status entity or has setBackgroundFromColor
+				// Entity reference - use addEntityColumn for consistent display with CLabelEntity
 				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
