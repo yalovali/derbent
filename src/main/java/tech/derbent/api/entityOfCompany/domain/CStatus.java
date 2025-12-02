@@ -9,14 +9,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.interfaces.IHasColorAndIcon;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.companies.domain.CCompany;
 
 /** CStatus - Abstract base entity for all status types in the system. Layer: Domain (MVC) This class provides common functionality for status
  * entities including name and description. All status types (like CProjectItemStatus) should inherit from this class. */
 @MappedSuperclass
-public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass> {
+public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass> implements IHasColorAndIcon {
 
+	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - project item statuses
+	public static final String DEFAULT_ICON = "vaadin:flag";
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CStatus.class);
 	@Column (nullable = false)
 	@AMetaData (
@@ -31,6 +34,13 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, maxLength = 7
 	)
 	private String color = "#4A90E2";
+	@Column (nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Icon", required = true, readOnly = false, defaultValue = "vaadin:file", description = "Icon for the page menu item",
+			hidden = false, maxLength = 100, useIcon = true
+	)
+	private String icon;
 	@Column (name = "sort_order", nullable = false)
 	@NotNull (message = ValidationMessages.SORT_ORDER_REQUIRED)
 	@Min (value = 1, message = ValidationMessages.SORT_ORDER_MIN)
@@ -74,7 +84,8 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	/** Default constructor for JPA. */
 	protected CStatus() {
 		super();
-		color = "#4A90E2";
+		setColor(DEFAULT_COLOR);
+		setIcon(DEFAULT_ICON);
 		sortOrder = 100;
 		attributeNonDeletable = false;
 	}
@@ -83,14 +94,19 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	 * @param name the name of the status */
 	protected CStatus(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name, company);
-		color = "#4A90E2";
+		setColor(DEFAULT_COLOR);
+		setIcon(DEFAULT_ICON);
 		sortOrder = 100;
 		attributeNonDeletable = false;
 	}
 
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }
 
+	@Override
 	public String getColor() { return color; }
+
+	@Override
+	public String getIcon() { return icon; }
 
 	public Integer getSortOrder() { return sortOrder; }
 
@@ -106,7 +122,10 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 
 	public void setAttributeNonDeletable(final boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
 
+	@Override
 	public void setColor(final String color) { this.color = color; }
+
+	public void setIcon(String icon) { this.icon = icon; }
 
 	public void setSortOrder(final Integer sortOrder) { this.sortOrder = sortOrder; }
 

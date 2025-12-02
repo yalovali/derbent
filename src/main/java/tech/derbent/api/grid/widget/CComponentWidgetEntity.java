@@ -1,7 +1,5 @@
 package tech.derbent.api.grid.widget;
 
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
@@ -9,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.function.ValueProvider;
@@ -159,7 +158,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	@SuppressWarnings ("unchecked")
-	public Registration addActionListener(final com.vaadin.flow.component.ComponentEventListener<CEntityWidgetEvent<EntityClass>> listener) {
+	public Registration addActionListener(final ComponentEventListener<CEntityWidgetEvent<EntityClass>> listener) {
 		return addListener((Class<CEntityWidgetEvent<EntityClass>>) (Class<?>) CEntityWidgetEvent.class, listener);
 	}
 

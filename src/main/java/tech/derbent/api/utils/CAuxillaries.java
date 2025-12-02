@@ -9,6 +9,7 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.api.registry.CEntityRegistry;
 
 public class CAuxillaries {
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(CAuxillaries.class);
 
 	public static String formatWidthPx(final int i) {
@@ -215,6 +216,22 @@ public class CAuxillaries {
 			LOGGER.error("Error invoking static method " + methodName + " of class " + className, e);
 			throw e;
 		}
+	}
+
+	public static String safeTrim(String text, int maxLength) {
+		if (text == null) {
+			return "";
+		}
+		if (maxLength < 0) {
+			return text; // or throw IllegalArgumentException
+		}
+		final int codePointCount = text.codePointCount(0, text.length());
+		if (codePointCount <= maxLength) {
+			return text; // no trimming needed
+		}
+		// Trim at a valid Unicode code point boundary
+		final int endIndex = text.offsetByCodePoints(0, maxLength);
+		return text.substring(0, endIndex) + "...";
 	}
 
 	public static void setId(final Component component) {

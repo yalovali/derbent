@@ -68,6 +68,7 @@ public final class CDialogMessageWithDetails extends CDialog {
 		detailsButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		detailsButton.setIcon(VaadinIcon.ANGLE_DOWN.create());
 		detailsButton.addClickListener(e -> toggleDetails());
+		detailsButton.setMinWidth("120px");
 		// OK button
 		final CButton okButton = CButton.createPrimary("OK", null, e -> close());
 		okButton.setAutofocus(true);

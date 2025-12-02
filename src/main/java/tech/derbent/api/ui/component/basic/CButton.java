@@ -14,6 +14,7 @@ import tech.derbent.api.utils.CColorUtils;
 /** CButton - Abstract base class for all buttons in the application. Layer: View (MVC) Provides common initialization patterns, logging, and
  * standardized button configurations. Extends Vaadin Button with application-specific enhancements. */
 public class CButton extends Button {
+
 	private static final long serialVersionUID = 1L;
 
 	public static CButton createCancelButton(final String text, final ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -118,5 +119,8 @@ public class CButton extends Button {
 	/** Common initialization for all CButton instances. This method can be overridden by subclasses to provide additional initialization. */
 	protected void initializeComponent() {
 		CAuxillaries.setId(this);
+		if (!getText().isEmpty()) {
+			setMinWidth("120px");
+		}
 	}
 }

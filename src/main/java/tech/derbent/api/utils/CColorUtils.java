@@ -25,7 +25,6 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.base.users.domain.CUser;
 
 public final class CColorUtils {
-
 	// ===========================================
 	// Solaris/CDE Color Constants for CRUD buttons
 	// ===========================================
@@ -145,11 +144,9 @@ public final class CColorUtils {
 					return color;
 				}
 			}
-		} catch (final NoSuchMethodException e) {
-			// Entity doesn't have a getColor() method, try using static icon color
-			LOGGER.debug("Entity {} does not have getColor() method, using static color", entity.getClass().getSimpleName());
 		} catch (final Exception e) {
 			LOGGER.warn("Error invoking getColor() on entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
+			throw e;
 		}
 		// Fallback to static icon color if available
 		if (entity instanceof CEntityDB) {
@@ -194,14 +191,8 @@ public final class CColorUtils {
 			return "N/A";
 		}
 		// Try to get the name property if the object has one
-		if (item instanceof CEntityDB) {
-			try {
-				final Method m = item.getClass().getMethod("getName");
-				final Object v = m.invoke(item);
-				return v == null ? "" : v.toString();
-			} catch (final ReflectiveOperationException ignore) {
-				// Fallback to toString if getName() is not available
-			}
+		if (item instanceof CEntityNamed) {
+			return ((CEntityNamed<?>) item).getName();
 		}
 		return item.toString();
 	}

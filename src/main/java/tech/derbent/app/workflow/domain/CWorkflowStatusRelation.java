@@ -30,7 +30,7 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 	public static final String ENTITY_TITLE_PLURAL = "Workflow Status Relations";
 	public static final String ENTITY_TITLE_SINGULAR = "Workflow Status Relation";
 	public static final String VIEW_NAME = "Workflow Status Relations View";
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "from_status_id", nullable = false)
 	@AMetaData (
 			displayName = "From Status", required = true, readOnly = false, description = "The status from which the transition starts",
@@ -44,7 +44,7 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 			description = "Indicates if this status is an initial/start status for new items", hidden = false
 	)
 	private Boolean initialStatus = Boolean.FALSE;
-	@ManyToMany (fetch = FetchType.LAZY)
+	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (
 			name = "cworkflowstatusrelation_roles", joinColumns = @JoinColumn (name = "cworkflowstatusrelation_id"),
 			inverseJoinColumns = @JoinColumn (name = "role_id")
@@ -55,14 +55,14 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 			useIcon = true, dataProviderBean = "CUserProjectRoleService", useGridSelection = true
 	)
 	private List<CUserProjectRole> roles = new ArrayList<>();
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "to_status_id", nullable = false)
 	@AMetaData (
 			displayName = "To Status", required = true, readOnly = false, description = "The status to which the transition goes", hidden = false,
 			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService"
 	)
 	private CProjectItemStatus toStatus;
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "workflow_id", nullable = false)
 	@AMetaData (
 			displayName = "Workflow", required = true, readOnly = false, description = "The workflow this status relation belongs to", hidden = false,

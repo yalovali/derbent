@@ -5,18 +5,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IHasColorAndIcon;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorAwareComboBox.class);
 	private static final long serialVersionUID = 1L;
 	private Boolean autoContrast = Boolean.TRUE;
@@ -121,7 +124,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				}
 				// Use the new CEntityLabel for consistent entity display
 				return new CEntityLabel((CEntityNamed<?>) item, padding, autoContrast, roundedCorners);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 				return null;
 			}
@@ -174,56 +177,43 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	 * ensures the selected value also displays with color and icon, not just the dropdown items. */
 	private void setupSelectedValueDisplay() {
 		addValueChangeListener(event -> {
-			final T selectedItem = event.getValue();
-			if (selectedItem == null) {
-				// Clear the prefix component and styling when no item is selected
-				setPrefixComponent(null);
-				getElement().getStyle().remove("--vaadin-input-field-background");
-				getElement().getStyle().remove("color");
-				return;
-			}
+			Icon icon;
 			try {
-				if (selectedItem instanceof CEntityNamed) {
+				final T selectedItem = event.getValue();
+				if (selectedItem == null) {
+					// Clear the prefix component and styling when no item is selected
+					setPrefixComponent(null);
+					getElement().getStyle().remove("--vaadin-input-field-background");
+					getElement().getStyle().remove("color");
+					return;
+				}
+				if (selectedItem instanceof IHasColorAndIcon) {
 					// Get the icon for the selected entity
-					final com.vaadin.flow.component.icon.Icon icon = CColorUtils.getIconForEntity(selectedItem);
-					if (icon != null) {
-						CColorUtils.styleIcon(icon);
-						// Apply color to the icon if entity has color
-						try {
-							final String color = CColorUtils.getColorFromEntity(selectedItem);
-							if ((color != null) && !color.isEmpty()) {
-								icon.getElement().getStyle().set("color", color);
-							}
-						} catch (final Exception colorEx) {
-							// Entity doesn't have color, ignore
-						}
-						setPrefixComponent(icon);
-					} else {
-						setPrefixComponent(null);
-					}
-					// Apply background color to the entire combobox input field if entity has color
+					icon = CColorUtils.getIconForEntity(selectedItem);
+					CColorUtils.styleIcon(icon);
+					// Apply color to the icon if entity has color
 					try {
-						final String backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
-						if ((backgroundColor != null) && !backgroundColor.isEmpty()) {
-							// Apply background color to the input field
-							getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
-							// Calculate and apply contrasting text color
-							if (autoContrast) {
-								final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
-								getElement().getStyle().set("color", textColor);
-							}
+						final String color = CColorUtils.getColorFromEntity(selectedItem);
+						if ((color != null) && !color.isEmpty()) {
+							icon.getElement().getStyle().set("color", color);
 						}
 					} catch (final Exception colorEx) {
-						// Entity doesn't have color, keep default styling
-						getElement().getStyle().remove("--vaadin-input-field-background");
-						getElement().getStyle().remove("color");
+						// Entity doesn't have color, ignore
+					}
+					setPrefixComponent(icon);
+					final String backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
+					if ((backgroundColor != null) && !backgroundColor.isEmpty()) {
+						// Apply background color to the input field
+						getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
+						// Calculate and apply contrasting text color
+						if (autoContrast) {
+							final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
+							getElement().getStyle().set("color", textColor);
+						}
 					}
 				}
 			} catch (final Exception e) {
-				LOGGER.warn("Failed to create selected value display for entity {}: {}", selectedItem.getClass().getSimpleName(), e.getMessage());
-				setPrefixComponent(null);
-				getElement().getStyle().remove("--vaadin-input-field-background");
-				getElement().getStyle().remove("color");
+				e.printStackTrace();
 			}
 		});
 	}

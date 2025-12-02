@@ -72,7 +72,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	public static <T> void setupGrid(final Grid<T> grid) {
 		Check.notNull(grid, "Grid cannot be null when setting up relational component");
 		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		GridSingleSelectionModel<T> sm = (GridSingleSelectionModel<T>) grid.getSelectionModel();
+		final GridSingleSelectionModel<T> sm = (GridSingleSelectionModel<T>) grid.getSelectionModel();
 		sm.setDeselectAllowed(false);
 		grid.getStyle().set("border-radius", "8px");
 		grid.getStyle().set("border", "1px solid #E0E0E0");
@@ -86,7 +86,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	 * @param entityClass The entity class for the grid */
 	Class<EntityClass> clazz;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	protected boolean showIconInStatusColumns = true;
 
 	public CGrid(final Class<EntityClass> entityClass) {
 		super(entityClass, false);
@@ -249,7 +248,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			final java.util.function.BiConsumer<EntityClass, byte[]> imageDataSetter, final String header, final String fieldDisplayName) {
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			// Create field info for the picture selector
-			EntityFieldInfo fieldInfo = new EntityFieldInfo();
+			final EntityFieldInfo fieldInfo = new EntityFieldInfo();
 			fieldInfo.setFieldName("imageData");
 			fieldInfo.setDisplayName(fieldDisplayName);
 			fieldInfo.setDescription("Click to edit " + fieldDisplayName.toLowerCase());
@@ -257,7 +256,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			fieldInfo.setWidth("40px");
 			fieldInfo.setReadOnly(false);
 			// Create CPictureSelector in icon mode
-			CPictureSelector selector = new CPictureSelector(fieldInfo, true);
+			final CPictureSelector selector = new CPictureSelector(fieldInfo, true);
 			// Set current value
 			final byte[] imageData = imageDataProvider.apply(entity);
 			selector.setValue(imageData);
@@ -317,13 +316,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			return addComponentColumn(item -> {
 				final Object value = valueProvider.apply(item);
 				final CLabelEntity labelEntity = new CLabelEntity();
-				// Enable icon display if configured in metadata
-				if (meta.useIcon()) {
-					labelEntity.setShowIcon(true);
-				}
-				// Set the value which will handle color rendering if entity has color
 				if (value instanceof CEntityDB) {
-					labelEntity.setEntityValue((CEntityDB<?>) value);
+					labelEntity.setValue((CEntityDB<?>) value, true);
 				} else {
 					labelEntity.setText(value != null ? value.toString() : "");
 				}
@@ -398,9 +392,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			final S status = valueProvider.apply(entity);
 			final CLabelEntity labelEntity = new CLabelEntity();
-			// Configure icon display based on grid setting
-			labelEntity.setShowIcon(showIconInStatusColumns);
-			labelEntity.setStatusValue(status);
+			labelEntity.setValue(status, true);
 			return labelEntity;
 		}).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
 		if (key != null) {
@@ -468,17 +460,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		getColumns().forEach(this::removeColumn);
 		setHeightFull();
 		CAuxillaries.setId(this);
-		// Prevent deselection when clicking on already-selected item
-		// preventDeselection(this);
-		// Ensure grid always has a selected row when data is available
 		getDataProvider().addDataProviderListener(e -> {
 			ensureSelectionWhenDataAvailable();
 		});
-		GridSingleSelectionModel<EntityClass> sm = (GridSingleSelectionModel<EntityClass>) getSelectionModel();
+		final GridSingleSelectionModel<EntityClass> sm = (GridSingleSelectionModel<EntityClass>) getSelectionModel();
 		sm.setDeselectAllowed(false);
 	}
-
-	public boolean isShowIconInStatusColumns() { return showIconInStatusColumns; }
 
 	@Override
 	public void select(final EntityClass entity) {
@@ -493,6 +480,4 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		}
 		super.select(entity);
 	}
-
-	public void setShowIconInStatusColumns(final boolean showIconInStatusColumns) { this.showIconInStatusColumns = showIconInStatusColumns; }
 }

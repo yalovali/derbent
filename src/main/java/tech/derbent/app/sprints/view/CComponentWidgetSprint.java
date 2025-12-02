@@ -23,7 +23,5 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	 * @param item the sprint to display in the widget */
 	public CComponentWidgetSprint(final CSprint item) {
 		super(item);
-		addEditAction();
-		addDeleteAction();
 	}
 }

@@ -38,7 +38,6 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 
 	public CProjectItemStatus(final String name, final CCompany company) {
 		super(CProjectItemStatus.class, name, company);
-		setColor(DEFAULT_COLOR);
 	}
 
 	@Override

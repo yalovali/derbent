@@ -89,11 +89,11 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	}
 
 	private static final long serialVersionUID = 1L;
+	private List<EntityClass> allItems = new ArrayList<>();
+	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	// Already selected items configuration
 	private final AlreadySelectedMode alreadySelectedMode;
 	private final ItemsProvider<EntityClass> alreadySelectedProvider;
-	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
-	private List<EntityClass> allItems = new ArrayList<>();
 	private CButton buttonCancel;
 	private CButton buttonReset;
 	private CButton buttonSelect;
@@ -286,11 +286,10 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		// Status column with color support for CProjectItem entities
 		gridItems.addComponentColumn(item -> {
 			final CLabelEntity labelEntity = new CLabelEntity();
-			labelEntity.setShowIcon(true);
 			if (item instanceof CProjectItem) {
 				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
 				if (projectItem.getStatus() != null) {
-					labelEntity.setStatusValue(projectItem.getStatus());
+					labelEntity.setValue(projectItem.getStatus(), true);
 				} else {
 					labelEntity.setText("No Status");
 				}
@@ -298,7 +297,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 				// Use cached method
 				final Object status = getEntityStatus(item);
 				if (status instanceof CEntityDB) {
-					labelEntity.setStatusValue((CEntityDB<?>) status);
+					labelEntity.setValue((CEntityDB<?>) status, true);
 				} else if (status != null) {
 					labelEntity.setText(status.toString());
 				} else {
@@ -435,6 +434,16 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		return layout;
 	}
 
+	/** Returns the list of already selected items.
+	 * @return List of already selected items (can be empty, never null) */
+	public List<EntityClass> getAlreadySelectedItems() {
+		return new ArrayList<>(alreadySelectedItems);
+	}
+
+	/** Returns the already selected mode configured for this dialog.
+	 * @return The AlreadySelectedMode */
+	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
+
 	@Override
 	public String getDialogTitleString() { return dialogTitle; }
 
@@ -491,6 +500,25 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	 * @return true if multi-select mode */
 	public boolean isMultiSelect() { return multiSelect; }
 
+	/** Loads already selected items from the provider if available.
+	 * @param config The current entity type configuration */
+	private void loadAlreadySelectedItems(final EntityTypeConfig<?> config) {
+		alreadySelectedItems = new ArrayList<>();
+		if (alreadySelectedProvider == null) {
+			return;
+		}
+		try {
+			final List<EntityClass> items = alreadySelectedProvider.getItems(config);
+			if (items != null) {
+				alreadySelectedItems = new ArrayList<>(items);
+				LOGGER.debug("Loaded {} already selected items for entity type {}", alreadySelectedItems.size(), config.getDisplayName());
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error loading already selected items for entity type {}", config.getDisplayName(), e);
+			alreadySelectedItems = new ArrayList<>();
+		}
+	}
+
 	/** Handle cancel button click. */
 	protected void on_buttonCancel_clicked() {
 		close();
@@ -528,46 +556,6 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		close();
 	}
 
-	/** Handle status filter combobox value change. */
-	protected void on_comboBoxStatusFilter_changed() {
-		try {
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error applying status filter", e);
-			CNotificationService.showException("Error applying filter", e);
-		}
-	}
-
-	/** Handle description filter text field value change. */
-	protected void on_textFieldDescriptionFilter_changed() {
-		try {
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error applying description filter", e);
-			CNotificationService.showException("Error applying filter", e);
-		}
-	}
-
-	/** Handle ID filter text field value change. */
-	protected void on_textFieldIdFilter_changed() {
-		try {
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error applying ID filter", e);
-			CNotificationService.showException("Error applying filter", e);
-		}
-	}
-
-	/** Handle name filter text field value change. */
-	protected void on_textFieldNameFilter_changed() {
-		try {
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error applying name filter", e);
-			CNotificationService.showException("Error applying filter", e);
-		}
-	}
-
 	/** Handle entity type combobox selection change. */
 	protected void on_comboBoxEntityType_selectionChanged(final EntityTypeConfig<?> config) {
 		try {
@@ -599,6 +587,16 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 			CNotificationService.showException("Error loading items", e);
 			allItems = new ArrayList<>();
 			gridItems.setItems(allItems);
+		}
+	}
+
+	/** Handle status filter combobox value change. */
+	protected void on_comboBoxStatusFilter_changed() {
+		try {
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error applying status filter", e);
+			CNotificationService.showException("Error applying filter", e);
 		}
 	}
 
@@ -647,6 +645,84 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		} catch (final Exception e) {
 			LOGGER.error("Error handling grid single-selection change", e);
 			CNotificationService.showException("Error selecting item", e);
+		}
+	}
+
+	/** Handle description filter text field value change. */
+	protected void on_textFieldDescriptionFilter_changed() {
+		try {
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error applying description filter", e);
+			CNotificationService.showException("Error applying filter", e);
+		}
+	}
+
+	/** Handle ID filter text field value change. */
+	protected void on_textFieldIdFilter_changed() {
+		try {
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error applying ID filter", e);
+			CNotificationService.showException("Error applying filter", e);
+		}
+	}
+
+	/** Handle name filter text field value change. */
+	protected void on_textFieldNameFilter_changed() {
+		try {
+			applyFilters();
+		} catch (final Exception e) {
+			LOGGER.error("Error applying name filter", e);
+			CNotificationService.showException("Error applying filter", e);
+		}
+	}
+
+	/** Process already selected items based on the configured mode. This method either filters out already selected items from allItems
+	 * (HIDE_ALREADY_SELECTED mode) or adds them to selectedItems to show them as pre-selected (SHOW_AS_SELECTED mode).
+	 * <p>
+	 * In single-select mode with SHOW_AS_SELECTED, only the first matching item will be pre-selected. */
+	private void processAlreadySelectedItems() {
+		if (alreadySelectedItems.isEmpty()) {
+			return;
+		}
+		// Create a set of already selected item IDs for efficient lookup
+		final Set<Object> alreadySelectedIds = new HashSet<>();
+		for (final EntityClass item : alreadySelectedItems) {
+			if (item.getId() != null) {
+				alreadySelectedIds.add(item.getId());
+			}
+		}
+		switch (alreadySelectedMode) {
+		case HIDE_ALREADY_SELECTED:
+			// Filter out already selected items from the available items list
+			final List<EntityClass> filteredItems = new ArrayList<>();
+			for (final EntityClass item : allItems) {
+				if ((item.getId() == null) || !alreadySelectedIds.contains(item.getId())) {
+					filteredItems.add(item);
+				}
+			}
+			final int removedCount = allItems.size() - filteredItems.size();
+			allItems = filteredItems;
+			LOGGER.debug("Hidden {} already selected items from available items list", removedCount);
+			break;
+		case SHOW_AS_SELECTED:
+			// Pre-select the already selected items (they will be visually marked in the grid)
+			// In single-select mode, only pre-select the first matching item
+			for (final EntityClass item : allItems) {
+				if ((item.getId() != null) && alreadySelectedIds.contains(item.getId())) {
+					selectedItems.add(item);
+					// In single-select mode, only allow one item to be pre-selected
+					if (!multiSelect) {
+						break;
+					}
+				}
+			}
+			LOGGER.debug("Pre-selected {} already selected items", selectedItems.size());
+			updateSelectionIndicator();
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -708,79 +784,4 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		}
 		comboBoxStatusFilter.setItems(statuses);
 	}
-
-	/** Loads already selected items from the provider if available.
-	 * @param config The current entity type configuration */
-	private void loadAlreadySelectedItems(final EntityTypeConfig<?> config) {
-		alreadySelectedItems = new ArrayList<>();
-		if (alreadySelectedProvider == null) {
-			return;
-		}
-		try {
-			final List<EntityClass> items = alreadySelectedProvider.getItems(config);
-			if (items != null) {
-				alreadySelectedItems = new ArrayList<>(items);
-				LOGGER.debug("Loaded {} already selected items for entity type {}", alreadySelectedItems.size(), config.getDisplayName());
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error loading already selected items for entity type {}", config.getDisplayName(), e);
-			alreadySelectedItems = new ArrayList<>();
-		}
-	}
-
-	/** Process already selected items based on the configured mode. This method either filters out already selected items from allItems
-	 * (HIDE_ALREADY_SELECTED mode) or adds them to selectedItems to show them as pre-selected (SHOW_AS_SELECTED mode).
-	 * <p>
-	 * In single-select mode with SHOW_AS_SELECTED, only the first matching item will be pre-selected. */
-	private void processAlreadySelectedItems() {
-		if (alreadySelectedItems.isEmpty()) {
-			return;
-		}
-		// Create a set of already selected item IDs for efficient lookup
-		final Set<Object> alreadySelectedIds = new HashSet<>();
-		for (final EntityClass item : alreadySelectedItems) {
-			if (item.getId() != null) {
-				alreadySelectedIds.add(item.getId());
-			}
-		}
-		switch (alreadySelectedMode) {
-			case HIDE_ALREADY_SELECTED:
-				// Filter out already selected items from the available items list
-				final List<EntityClass> filteredItems = new ArrayList<>();
-				for (final EntityClass item : allItems) {
-					if ((item.getId() == null) || !alreadySelectedIds.contains(item.getId())) {
-						filteredItems.add(item);
-					}
-				}
-				final int removedCount = allItems.size() - filteredItems.size();
-				allItems = filteredItems;
-				LOGGER.debug("Hidden {} already selected items from available items list", removedCount);
-				break;
-			case SHOW_AS_SELECTED:
-				// Pre-select the already selected items (they will be visually marked in the grid)
-				// In single-select mode, only pre-select the first matching item
-				for (final EntityClass item : allItems) {
-					if ((item.getId() != null) && alreadySelectedIds.contains(item.getId())) {
-						selectedItems.add(item);
-						// In single-select mode, only allow one item to be pre-selected
-						if (!multiSelect) {
-							break;
-						}
-					}
-				}
-				LOGGER.debug("Pre-selected {} already selected items", selectedItems.size());
-				updateSelectionIndicator();
-				break;
-			default:
-				break;
-		}
-	}
-
-	/** Returns the already selected mode configured for this dialog.
-	 * @return The AlreadySelectedMode */
-	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
-
-	/** Returns the list of already selected items.
-	 * @return List of already selected items (can be empty, never null) */
-	public List<EntityClass> getAlreadySelectedItems() { return new ArrayList<>(alreadySelectedItems); }
 }

@@ -26,7 +26,7 @@ public class CComponentWidgetActivity extends CComponentWidgetEntityOfProject<CA
 	 * @param activity the activity to display in the widget */
 	public CComponentWidgetActivity(final CActivity activity) {
 		super(activity);
-		addEditAction();
-		addDeleteAction();
+		// addEditAction();
+		// addDeleteAction();
 	}
 }

@@ -82,7 +82,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			enableSelectionChangeListener = true;
 			setSizeFull();
 			createContent();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error initializing CComponentGridEntity: {}", e.getMessage());
 			throw e;
 		}
@@ -99,19 +99,19 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	})
 	private void applySearchFilter(String searchText) {
 		try {
-			String serviceBeanName = gridEntity.getDataServiceBeanName();
+			final String serviceBeanName = gridEntity.getDataServiceBeanName();
 			Check.notBlank(serviceBeanName, "Service bean name is blank for search filtering");
 			// Get the service and entity class
-			CEntityOfProjectService<?> projectService = CSpringContext.<CEntityOfProjectService<?>>getBean(serviceBeanName);
-			CProject currentProject = sessionService != null
+			final CEntityOfProjectService<?> projectService = CSpringContext.<CEntityOfProjectService<?>>getBean(serviceBeanName);
+			final CProject currentProject = sessionService != null
 					? sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found.")) : null;
 			// Get all entities for the current project - note: using raw types due to grid constraints
-			List allEntities = projectService.listByProject(currentProject, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+			final List allEntities = projectService.listByProject(currentProject, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
 			// Filter entities based on search text
-			List filteredEntities = (List) allEntities.stream().filter(entity -> {
+			final List filteredEntities = (List) allEntities.stream().filter(entity -> {
 				try {
 					return matchesSearchText(entity, searchText);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					return false;
@@ -120,7 +120,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Update grid with filtered data
 			grid.setItems(filteredEntities);
 			LOGGER.debug("Applied search filter '{}' - {} results out of {} total", searchText, filteredEntities.size(), allEntities.size());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error applying search filter.");
 			// Fallback to refresh data on error
 			refreshGridData();
@@ -159,13 +159,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			grid.addComponentColumn(entity -> {
 				try {
 					// Resolve the bean based on beanName
-					Object bean = resolveWidgetProviderBean(beanName);
+					final Object bean = resolveWidgetProviderBean(beanName);
 					if (bean == null) {
 						LOGGER.warn("Could not resolve widget provider bean: {}", beanName);
 						return createErrorCell("Bean not found");
 					}
 					// Find and invoke the method on the bean
-					Method method = findWidgetProviderMethod(bean.getClass(), methodName, entity.getClass());
+					final Method method = findWidgetProviderMethod(bean.getClass(), methodName, entity.getClass());
 					if (method == null) {
 						LOGGER.warn("Could not find widget provider method {} on bean {}", methodName, beanName);
 						return createErrorCell("Method not found");
@@ -174,7 +174,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					if (!method.canAccess(bean)) {
 						method.setAccessible(true);
 					}
-					Object result = method.invoke(bean, entity);
+					final Object result = method.invoke(bean, entity);
 					if (result instanceof Component) {
 						return (Component) result;
 					} else if (result == null) {
@@ -183,13 +183,14 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						LOGGER.warn("Widget provider method {} returned non-Component type: {}", methodName, result.getClass().getName());
 						return createErrorCell("Invalid widget type");
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Error invoking widget provider method {} for entity: {}", methodName, e.getMessage());
+					// e.printStackTrace();
 					return createErrorCell("Widget error");
 				}
 			}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61cf")).setAutoWidth(true).setFlexGrow(1).setKey(fieldName);
 			LOGGER.debug("Created component widget column for field {} using bean {} method {}", fieldName, beanName, methodName);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating column for CComponentWidgetEntity field {}: {}", fieldName, e.getMessage());
 		}
 	}
@@ -198,11 +199,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			"unchecked", "rawtypes"
 	})
 	private void createColumnForField(FieldConfig fieldConfig) {
-		Field field = fieldConfig.getField();
-		EntityFieldInfo fieldInfo = fieldConfig.getFieldInfo();
-		String fieldName = field.getName();
-		String displayName = fieldInfo.getDisplayName();
-		Class<?> fieldType = field.getType();
+		final Field field = fieldConfig.getField();
+		final EntityFieldInfo fieldInfo = fieldConfig.getFieldInfo();
+		final String fieldName = field.getName();
+		final String displayName = fieldInfo.getDisplayName();
+		final Class<?> fieldType = field.getType();
 		try {
 			// Check if field type is CComponentWidgetEntity or its subclass - handle via dataProviderBean/Method
 			if (CComponentWidgetEntity.class.isAssignableFrom(fieldType)) {
@@ -212,11 +213,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Handle different field types using appropriate CGrid methods
 			if (CEntityDB.class.isAssignableFrom(fieldType)) {
 				// Entity reference - check if it's a status entity or has setBackgroundFromColor
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
 						return field.get(entity);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing entity field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
@@ -232,12 +233,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				}
 			} else if (Collection.class.isAssignableFrom(fieldType)) {
 				// Collection field - use addColumnEntityCollection if it contains entities
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
-						Object value = field.get(entity);
+						final Object value = field.get(entity);
 						return value instanceof Collection ? (Collection) value : Collections.emptyList();
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing collection field {}: {}", fieldName, e.getMessage());
 						return Collections.emptyList();
 					}
@@ -246,11 +247,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			} else if (fieldName.toLowerCase().contains("id")
 					&& (fieldType == Long.class || fieldType == long.class || fieldType == Integer.class || fieldType == int.class)) {
 				// ID fields - use addIdColumn for consistent ID formatting
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
 						return field.get(entity);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing ID field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
@@ -258,11 +259,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				grid.addIdColumn(valueProvider, displayName, fieldName);
 			} else if (fieldType == Integer.class || fieldType == int.class) {
 				// Integer fields - use addIntegerColumn
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
 						return (Integer) field.get(entity);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing integer field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
@@ -270,11 +271,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				grid.addIntegerColumn(valueProvider, displayName, fieldName);
 			} else if (fieldType == BigDecimal.class) {
 				// BigDecimal fields - use addDecimalColumn
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
 						return (BigDecimal) field.get(entity);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing decimal field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
@@ -282,11 +283,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				grid.addDecimalColumn(valueProvider, displayName, fieldName);
 			} else if (fieldType == LocalDate.class) {
 				// LocalDate fields - use addDateColumn
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
 						return (LocalDate) field.get(entity);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing date field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
@@ -294,11 +295,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				grid.addDateColumn(valueProvider, displayName, fieldName);
 			} else if (fieldType == LocalDateTime.class) {
 				// LocalDateTime fields - use addDateTimeColumn
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
 						return (LocalDateTime) field.get(entity);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing datetime field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
@@ -306,11 +307,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				grid.addDateTimeColumn(valueProvider, displayName, fieldName);
 			} else if (fieldType == Boolean.class || fieldType == boolean.class) {
 				// Boolean fields - use addBooleanColumn with appropriate true/false text
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
 						return (Boolean) field.get(entity);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing boolean field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
@@ -319,12 +320,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			} else if (fieldName.toLowerCase().contains("description") || fieldName.toLowerCase().contains("comment")
 					|| (fieldInfo.getMaxLength() > 100)) {
 				// Long text fields - use addLongTextColumn
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
-						Object value = field.get(entity);
+						final Object value = field.get(entity);
 						return value != null ? value.toString() : "";
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing long text field {}: {}", fieldName, e.getMessage());
 						return "";
 					}
@@ -334,28 +335,28 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				// Check if this is a color field that should be displayed with color background
 				if (fieldInfo.isColorField()) {
 					// Color field - create a custom component column to display the color with background
-					ValueProvider valueProvider = entity -> {
+					final ValueProvider valueProvider = entity -> {
 						try {
 							field.setAccessible(true);
 							return field.get(entity);
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							LOGGER.error("Error accessing color field {}: {}", fieldName, e.getMessage());
 							return null;
 						}
 					};
 					// Create a component column that shows the color value as background
 					grid.addComponentColumn(entity -> {
-						String colorValue = (String) valueProvider.apply(entity);
-						CLabelEntity lavelEntity = new CLabelEntity();
+						final String colorValue = (String) valueProvider.apply(entity);
+						final CLabelEntity lavelEntity = new CLabelEntity();
 						if (colorValue != null && !colorValue.trim().isEmpty()) {
 							// Display the color value as text with background color
 							lavelEntity.setText(colorValue);
 							lavelEntity.getStyle().set("background-color", colorValue);
 							// Apply contrasting text color for readability
 							try {
-								String textColor = CColorUtils.getContrastTextColor(colorValue);
+								final String textColor = CColorUtils.getContrastTextColor(colorValue);
 								lavelEntity.getStyle().set("color", textColor);
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								// Fallback to simple contrast logic
 								lavelEntity.getStyle().set("color", isColorLight(colorValue) ? "#000000" : "#ffffff");
 							}
@@ -375,12 +376,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 							.setKey(fieldName);
 				} else {
 					// Short text fields - use addShortTextColumn
-					ValueProvider valueProvider = entity -> {
+					final ValueProvider valueProvider = entity -> {
 						try {
 							field.setAccessible(true);
-							Object value = field.get(entity);
+							final Object value = field.get(entity);
 							return value != null ? value.toString() : "";
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							LOGGER.error("Error accessing text field {}: {}", fieldName, e.getMessage());
 							return "";
 						}
@@ -389,18 +390,18 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				}
 			} else {
 				// For any other type, use addEntityColumn which provides metadata-based styling
-				ValueProvider valueProvider = entity -> {
+				final ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
 						return field.get(entity);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error accessing field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
 				};
 				grid.addEntityColumn(valueProvider, displayName, fieldName);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("Failed to create column for field {}, falling back to addColumnByProperty: {}", fieldName, e.getMessage());
 			// Fallback to addColumnByProperty for simple property-based columns
 			grid.addColumnByProperty(fieldName, displayName);
@@ -416,17 +417,17 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				add(new Div("No grid configuration provided"));
 				return;
 			}
-			String serviceBeanName = gridEntity.getDataServiceBeanName();
+			final String serviceBeanName = gridEntity.getDataServiceBeanName();
 			Check.notNull(serviceBeanName, "Data service bean name is not set in grid entity");
 			// Get the entity class from the service bean
-			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
+			final Class<?> entityClass = getEntityClassFromService(serviceBeanName);
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			grid = new CGrid(entityClass);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 			createGridColumns();
 			refreshGridData();
 			this.add(grid);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating grid content.");
 			add(new Div("Error creating grid: " + e.getMessage()));
 		}
@@ -434,7 +435,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	/** Creates an error cell to display when widget creation fails. */
 	private Component createErrorCell(String message) {
-		CLabelEntity labelEntity = new CLabelEntity();
+		final CLabelEntity labelEntity = new CLabelEntity();
 		labelEntity.setText(message);
 		labelEntity.getStyle().set("color", "#666");
 		labelEntity.getStyle().set("font-style", "italic");
@@ -445,21 +446,21 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		try {
 			// clear existing columns
 			grid.removeAllColumns();
-			String serviceBeanName = gridEntity.getDataServiceBeanName();
-			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
+			final String serviceBeanName = gridEntity.getDataServiceBeanName();
+			final Class<?> entityClass = getEntityClassFromService(serviceBeanName);
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			// Check if widget mode is enabled
 			// Traditional column-based mode
-			List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
+			final List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
 			fieldConfigs.forEach(fc -> createColumnForField(fc));
 			// Configure sorting - sort by first column (ID) initially
 			// Get the first column (ID column) and sort by it
 			if (grid.getColumns().size() > 0) {
-				Grid.Column<?> firstColumn = grid.getColumns().get(0);
+				final Grid.Column<?> firstColumn = grid.getColumns().get(0);
 				// Make it sortable and set as sorted
 				firstColumn.setSortable(true);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("Could not configure sorting on first column: {}", e.getMessage());
 			throw e;
 		}
@@ -470,7 +471,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		while (currentClass != null) {
 			try {
 				return currentClass.getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
+			} catch (final NoSuchFieldException e) {
 				currentClass = currentClass.getSuperclass();
 			}
 		}
@@ -485,30 +486,30 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private Method findWidgetProviderMethod(Class<?> beanClass, String methodName, Class<?> entityType) {
 		try {
 			// Define parameter types to try in order of preference
-			Class<?>[] parameterTypeCandidates = {
+			final Class<?>[] parameterTypeCandidates = {
 					entityType, // Exact entity type
 					CEntityDB.class, // Base entity type
 					Object.class // Generic object type
 			};
 			// Try each parameter type candidate
-			for (Class<?> paramType : parameterTypeCandidates) {
+			for (final Class<?> paramType : parameterTypeCandidates) {
 				try {
 					return beanClass.getMethod(methodName, paramType);
-				} catch (NoSuchMethodException e) {
+				} catch (final NoSuchMethodException e) {
 					// Continue to next candidate
 				}
 			}
 			// Fallback: search through all methods for a compatible one
-			for (Method method : beanClass.getMethods()) {
+			for (final Method method : beanClass.getMethods()) {
 				if (method.getName().equals(methodName) && method.getParameterCount() == 1) {
-					Class<?> paramType = method.getParameterTypes()[0];
+					final Class<?> paramType = method.getParameterTypes()[0];
 					if (paramType.isAssignableFrom(entityType)) {
 						return method;
 					}
 				}
 			}
 			return null;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error finding widget provider method {}: {}", methodName, e.getMessage());
 			return null;
 		}
@@ -523,10 +524,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			if (serviceClass.getName().contains("$$SpringCGLIB$$")) {
 				serviceClass = serviceClass.getSuperclass();
 			}
-			Method getEntityClassMethod = serviceClass.getDeclaredMethod("getEntityClass");
+			final Method getEntityClassMethod = serviceClass.getDeclaredMethod("getEntityClass");
 			getEntityClassMethod.setAccessible(true);
 			return (Class<?>) getEntityClassMethod.invoke(service);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Could not get entity class from service: {}", e.getMessage());
 			throw e;
 		}
@@ -534,9 +535,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	private Class<?> getEntityClassFromService(String serviceBeanName) throws Exception {
 		try {
-			CAbstractService<?> abstractService = CSpringContext.<CAbstractService<?>>getBean(serviceBeanName);
+			final CAbstractService<?> abstractService = CSpringContext.<CAbstractService<?>>getBean(serviceBeanName);
 			return getEntityClassFromService(abstractService);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error getting entity class from service {}: {}", serviceBeanName, e.getMessage());
 			throw e;
 		}
@@ -570,13 +571,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				return true; // Invalid format, default to light
 			}
 			// Calculate brightness using standard formula
-			int r = Integer.parseInt(hex.substring(0, 2), 16);
-			int g = Integer.parseInt(hex.substring(2, 4), 16);
-			int b = Integer.parseInt(hex.substring(4, 6), 16);
+			final int r = Integer.parseInt(hex.substring(0, 2), 16);
+			final int g = Integer.parseInt(hex.substring(2, 4), 16);
+			final int b = Integer.parseInt(hex.substring(4, 6), 16);
 			// Calculate brightness (0-255)
-			double brightness = (r * 0.299 + g * 0.587 + b * 0.114);
+			final double brightness = (r * 0.299 + g * 0.587 + b * 0.114);
 			return brightness > 127; // Threshold for light vs dark
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return true; // Default to light on error
 		}
 	}
@@ -590,12 +591,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			return true;
 		}
 		try {
-			Class<?> entityClass = entity.getClass();
+			final Class<?> entityClass = entity.getClass();
 			// Search in common string fields using reflection
-			Field[] fields = entityClass.getDeclaredFields();
-			for (Field field : fields) {
+			final Field[] fields = entityClass.getDeclaredFields();
+			for (final Field field : fields) {
 				field.setAccessible(true);
-				Object value = field.get(entity);
+				final Object value = field.get(entity);
 				if (value != null) {
 					String stringValue = null;
 					// Handle different field types
@@ -603,7 +604,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						stringValue = (String) value;
 					} else if (value instanceof CEntityNamed) {
 						// For related entities, search in their name
-						CEntityNamed<?> namedEntity = (CEntityNamed<?>) value;
+						final CEntityNamed<?> namedEntity = (CEntityNamed<?>) value;
 						stringValue = namedEntity.getName();
 					}
 					// Check if the string value contains the search text
@@ -615,12 +616,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Also check inherited fields from superclasses
 			Class<?> superClass = entityClass.getSuperclass();
 			while (superClass != null && !superClass.equals(Object.class)) {
-				Field[] superFields = superClass.getDeclaredFields();
-				for (Field field : superFields) {
+				final Field[] superFields = superClass.getDeclaredFields();
+				for (final Field field : superFields) {
 					field.setAccessible(true);
-					Object value = field.get(entity);
+					final Object value = field.get(entity);
 					if (value instanceof String) {
-						String stringValue = (String) value;
+						final String stringValue = (String) value;
 						if (stringValue.toLowerCase().contains(searchText)) {
 							return true;
 						}
@@ -628,7 +629,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				}
 				superClass = superClass.getSuperclass();
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error checking search match for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
 			throw e;
 		}
@@ -670,22 +671,22 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		if (!enableSelectionChangeListener) {
 			return;
 		}
-		CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
+		final CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
 		fireEvent(new SelectionChangeEvent(this, selectedEntity));
 	}
 
 	private List<FieldConfig> parseSelectedFields(List<String> list, Class<?> entityClass) {
-		List<FieldConfig> fieldConfigs = new ArrayList<>();
+		final List<FieldConfig> fieldConfigs = new ArrayList<>();
 		Check.notNull(entityClass, "Entity class is null for parsing selected fields");
 		Check.notNull(list, "Selected fields string is null");
 		if (list.isEmpty()) {
 			return fieldConfigs;
 		}
 		int order = 0;
-		for (String fieldName : list) {
-			Field field = findField(entityClass, fieldName);
+		for (final String fieldName : list) {
+			final Field field = findField(entityClass, fieldName);
 			Check.notNull(field, "Field not found in entity class: " + fieldName);
-			EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
+			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
 			fieldConfigs.add(new FieldConfig(fieldInfo, order, field));
 			order++;
 		}
@@ -706,27 +707,27 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public void refreshGridData() {
 		LOGGER.debug("Refreshing grid data for grid entity: {}", gridEntity != null ? gridEntity.getName() : "null");
 		try {
-			boolean old_enableSelectionChangeListener = enableSelectionChangeListener;
+			final boolean old_enableSelectionChangeListener = enableSelectionChangeListener;
 			enableSelectionChangeListener = false;
 			// first get the selected item to restore selection later
-			CEntityDB<?> selectedItem = getSelectedItem();
+			final CEntityDB<?> selectedItem = getSelectedItem();
 			//
-			CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
+			final CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
 			Check.instanceOf(serviceBean, CAbstractService.class,
 					"Service bean does not extend CAbstractService: " + gridEntity.getDataServiceBeanName());
 			// Use pageable to get data - limit to first 1000 records for performance
-			PageRequest pageRequest = PageRequest.of(0, 1000);
+			final PageRequest pageRequest = PageRequest.of(0, 1000);
 			List data;
 			// Check if this is a project-specific service and filter by the gridEntity's project
 			if (serviceBean instanceof CEntityOfProjectService) {
-				CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
+				final CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
 				Check.notNull(project, "Project is null");
-				CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
+				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
 				data = projectService.listByProject(project, pageRequest).getContent();
 			} else if (serviceBean instanceof CEntityOfCompanyService) {
-				CCompany company = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company found."));
+				final CCompany company = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company found."));
 				Check.notNull(company, "Company is null");
-				CEntityOfCompanyService<?> projectService = (CEntityOfCompanyService<?>) serviceBean;
+				final CEntityOfCompanyService<?> projectService = (CEntityOfCompanyService<?>) serviceBean;
 				data = projectService.findByCompany(company, pageRequest).getContent();
 			} else {
 				// For non-project or company services, use regular list method
@@ -736,7 +737,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			grid.setItems(data);
 			enableSelectionChangeListener = old_enableSelectionChangeListener;
 			selectEntity(selectedItem);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
 		}
@@ -749,7 +750,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		try {
 			if ("view".equals(beanName)) {
 				// For "view" bean, get the CPageService from the IPageServiceImplementer
-				if (contentOwner instanceof IPageServiceImplementer<?> pageServiceImplementer) {
+				if (contentOwner instanceof final IPageServiceImplementer<?> pageServiceImplementer) {
 					return pageServiceImplementer.getPageService();
 				} else {
 					LOGGER.warn("contentOwner is not IPageServiceImplementer - cannot use 'view' as dataProviderBean");
@@ -762,7 +763,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				// For other beans, get from Spring context
 				return CSpringContext.getBean(beanName);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error resolving widget provider bean {}: {}", beanName, e.getMessage());
 			return null;
 		}
@@ -777,12 +778,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			return;
 		}
 		try {
-			CGrid rawGrid = grid;
+			final CGrid rawGrid = grid;
 			// Get all items and find the index of the entity
-			List items = (List) rawGrid.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+			final List items = (List) rawGrid.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
 			int index = -1;
 			for (int i = 0; i < items.size(); i++) {
-				CEntityDB<?> item = (CEntityDB<?>) items.get(i);
+				final CEntityDB<?> item = (CEntityDB<?>) items.get(i);
 				if (item.getId().equals(entity.getId())) {
 					index = i;
 					break;
@@ -793,7 +794,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				rawGrid.scrollToIndex(index);
 				LOGGER.debug("Scrolled to entity at index: {}", index);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error scrolling to entity: {}", e.getMessage());
 			throw e;
 		}
@@ -806,11 +807,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public void selectEntity(CEntityDB<?> entity) {
 		try {
 			// Use unchecked cast to work with generic grid constraints
-			CGrid rawGrid = grid;
+			final CGrid rawGrid = grid;
 			rawGrid.select(entity);
 			// Scroll to the selected entity to make it visible
 			scrollToEntity(entity);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error selecting entity in grid: {}", e.getMessage());
 			throw e;
 		}
@@ -823,12 +824,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public void selectFirstItem() {
 		Check.notNull(grid, "Grid is not initialized");
 		try {
-			CGrid rawGrid = grid;
+			final CGrid rawGrid = grid;
 			grid.getDataProvider().fetch(new Query<>()).findFirst().ifPresent(entity -> {
 				rawGrid.select(entity);
 				// LOGGER.debug("Selected first item in grid");
 			});
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error selecting first item in grid: {}", e.getMessage());
 			throw e;
 		}
@@ -840,9 +841,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	})
 	public void selectNextItem() {
 		Check.notNull(grid, "Grid is not initialized");
-		CEntityDB<?> currentSelection = getSelectedItem();
-		CGrid rawGrid = grid;
-		List items = (List) rawGrid.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+		final CEntityDB<?> currentSelection = getSelectedItem();
+		final CGrid rawGrid = grid;
+		final List items = (List) rawGrid.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
 		if (items == null) {
 			return;
 		}
@@ -850,15 +851,15 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Find the current item's index and select the next one
 			int currentIndex = -1;
 			for (int i = 0; i < items.size(); i++) {
-				CEntityDB<?> item = (CEntityDB<?>) items.get(i);
+				final CEntityDB<?> item = (CEntityDB<?>) items.get(i);
 				if (item.getId().equals(currentSelection.getId())) {
 					currentIndex = i;
 					break;
 				}
 			}
 			// Select next item, or first item if we were at the end
-			int nextIndex = (currentIndex + 1) < items.size() ? (currentIndex + 1) : 0;
-			Object nextItem = items.get(nextIndex);
+			final int nextIndex = (currentIndex + 1) < items.size() ? (currentIndex + 1) : 0;
+			final Object nextItem = items.get(nextIndex);
 			rawGrid.select(nextItem);
 			// LOGGER.debug("Selected next item at index: {}", nextIndex);
 		} else {
