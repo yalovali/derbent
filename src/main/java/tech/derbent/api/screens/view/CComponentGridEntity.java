@@ -156,7 +156,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				return;
 			}
 			// Create a component column that invokes the data provider method for each row
-			grid.addComponentColumn(entity -> {
+			final var column = grid.addComponentColumn(entity -> {
 				try {
 					// Resolve the bean based on beanName
 					final Object bean = resolveWidgetProviderBean(beanName);
@@ -185,10 +185,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					}
 				} catch (final Exception e) {
 					LOGGER.error("Error invoking widget provider method {} for entity: {}", methodName, e.getMessage());
-					// e.printStackTrace();
 					return createErrorCell("Widget error");
 				}
-			}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61cf")).setAutoWidth(true).setFlexGrow(1).setKey(fieldName);
+			});
+			CGrid.styleColumnHeader(column.setAutoWidth(true).setFlexGrow(1).setKey(fieldName), displayName, "#2a61cf");
 			LOGGER.debug("Created component widget column for field {} using bean {} method {}", fieldName, beanName, methodName);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating column for CComponentWidgetEntity field {}: {}", fieldName, e.getMessage());
@@ -345,7 +345,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						}
 					};
 					// Create a component column that shows the color value as background
-					grid.addComponentColumn(entity -> {
+					final var column = grid.addComponentColumn(entity -> {
 						final String colorValue = (String) valueProvider.apply(entity);
 						final CLabelEntity lavelEntity = new CLabelEntity();
 						if (colorValue != null && !colorValue.trim().isEmpty()) {
@@ -372,8 +372,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 							lavelEntity.getStyle().set("font-style", "italic");
 						}
 						return lavelEntity;
-					}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61Cf")).setWidth("150px").setFlexGrow(0).setSortable(true)
-							.setKey(fieldName);
+					});
+					CGrid.styleColumnHeader(column.setWidth("150px").setFlexGrow(0).setSortable(true)
+							.setKey(fieldName), displayName, "#2a61Cf");
 				} else {
 					// Short text fields - use addShortTextColumn
 					final ValueProvider valueProvider = entity -> {

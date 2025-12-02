@@ -69,6 +69,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		Check.notBlank(header, "Header text cannot be blank when styling header");
 		final String headerColor = (color != null && !color.isBlank()) ? color : CColorUtils.CRUD_READ_COLOR;
 		column.setHeader(CColorUtils.createStyledHeader(header, headerColor));
+		column.setResizable(true);
 		return column;
 	}
 
@@ -113,14 +114,14 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		final Column<EntityClass> column = addColumn(entity -> {
 			final Boolean value = valueProvider.apply(entity);
 			return (value != null) && value ? trueText : falseText;
-		}).setHeader(header).setWidth(WIDTH_BOOLEAN).setFlexGrow(0).setSortable(true);
+		}).setHeader(header).setWidth(WIDTH_BOOLEAN).setFlexGrow(0).setSortable(true).setResizable(true);
 		return column;
 	}
 
 	public Column<EntityClass> addColumn(final ValueProvider<EntityClass, String> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header).setFlexGrow(1).setSortable(true);
+		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header).setFlexGrow(1).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {
 			column.setKey(key);
@@ -131,7 +132,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	public Column<EntityClass> addColumnByProperty(final String propertyName, final String header) {
 		Check.notBlank(propertyName, "Property name cannot be null or blank");
 		Check.notBlank(header, "Header cannot be null or blank");
-		final Column<EntityClass> column = addColumn(propertyName).setHeader(header).setSortable(true);
+		final Column<EntityClass> column = addColumn(propertyName).setHeader(header).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for property: " + propertyName);
 		// Apply width based on property name patterns
 		if (propertyName.toLowerCase().contains("id")) {
@@ -193,8 +194,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				return "[Error rendering collection]";
 			}
 		};
-		final Column<EntityClass> column = addColumn(namesProvider).setHeader(header).setAutoWidth(true).setSortable(false) // usually collection
-																															// columns aren't sortable
+		final Column<EntityClass> column = addColumn(namesProvider).setHeader(header).setAutoWidth(true).setSortable(false).setResizable(true)
 				.setFlexGrow(1);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		LOGGER.debug("Successfully created collection column for header: {}", header);
@@ -204,14 +204,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	public Column<EntityClass> addColumnEntityNamed(final ValueProvider<EntityClass, ? extends CEntityDB<?>> valueProvider, final String header) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		// one place to compute the display name
 		final ValueProvider<EntityClass, String> nameProvider = entity -> {
 			final CEntityDB<?> ref = valueProvider.apply(entity);
 			return ref == null ? "" : entityName(ref);
 		};
 		final Column<EntityClass> column = addColumn(nameProvider).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true)
-				// ensure server-side sorting by the shown name
-				.setComparator(nameProvider);
+				.setResizable(true).setComparator(nameProvider);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		return column;
 	}
@@ -222,7 +220,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		Check.notBlank(header, "Header cannot be null or blank");
 		Check.notBlank(width, "Width cannot be null or blank");
 		Check.isTrue(flexGrow >= 0, "Flex grow must be non-negative");
-		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header).setWidth(width).setFlexGrow(flexGrow).setSortable(true);
+		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header).setWidth(width).setFlexGrow(flexGrow).setSortable(true)
+				.setResizable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {
 			column.setKey(key);
@@ -368,7 +367,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
 			}
 			return image;
-		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
+		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false).setResizable(true);
 		return column;
 	}
 
@@ -405,7 +404,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			final CLabelEntity labelEntity = new CLabelEntity();
 			labelEntity.setValue(status, true);
 			return labelEntity;
-		}).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
+		}).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setResizable(true);
 		if (key != null) {
 			column.setKey(key);
 		}
