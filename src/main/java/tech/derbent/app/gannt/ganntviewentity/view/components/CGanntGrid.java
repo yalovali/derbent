@@ -103,7 +103,7 @@ public class CGanntGrid extends CGrid<CGanntItem> {
 		});
 		timelineHeader = new CGanntTimelineHeader(timelineStart, timelineEnd, timelineWidthPixels, range -> updateTimelineRange(range),
 				this::setTimelineWidth);
-		styleColumnHeader(addColumn(timelineRenderer).setKey("timeline").setFlexGrow(1).setSortable(false), timelineHeader);
+		addColumn(timelineRenderer).setHeader(timelineHeader).setKey("timeline").setFlexGrow(1).setSortable(false).setResizable(true);
 	}
 
 	/** Public refresh hook. */
