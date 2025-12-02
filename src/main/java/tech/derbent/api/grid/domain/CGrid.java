@@ -26,6 +26,7 @@ import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
 import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
 
@@ -57,17 +58,27 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			return String.valueOf(ref);
 		}
 	}
-	// private static <T> void preventDeselection(final Grid<T> grid) {
-	// final AtomicReference<T> lastSelection = new AtomicReference<>();
-	// grid.asSingleSelect().addValueChangeListener(event -> {
-	// // If selection is being cleared and we had a previous selection, restore it
-	// if (event.getValue() == null && lastSelection.get() != null) {
-	// grid.asSingleSelect().setValue(lastSelection.get());
-	// } else {
-	// lastSelection.set(event.getValue());
-	// }
-	// });
-	// }
+
+	/** Applies standardized header styling to a column with bold text and color.
+	 * @param column the column to style
+	 * @param header the header text
+	 * @param color  the header color (optional, uses default if null)
+	 * @return the styled column */
+	public static <T> Column<T> styleColumnHeader(final Column<T> column, final String header, final String color) {
+		Check.notNull(column, "Column cannot be null when styling header");
+		Check.notBlank(header, "Header text cannot be blank when styling header");
+		final String headerColor = (color != null && !color.isBlank()) ? color : CColorUtils.CRUD_READ_COLOR;
+		column.setHeader(CColorUtils.createStyledHeader(header, headerColor));
+		return column;
+	}
+
+	/** Applies standardized header styling to a column with default color.
+	 * @param column the column to style
+	 * @param header the header text
+	 * @return the styled column */
+	public static <T> Column<T> styleColumnHeader(final Column<T> column, final String header) {
+		return styleColumnHeader(column, header, null);
+	}
 
 	public static <T> void setupGrid(final Grid<T> grid) {
 		Check.notNull(grid, "Grid cannot be null when setting up relational component");
@@ -403,15 +414,16 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 
 	/** Adds a widget column to the grid using the provided widget provider.
 	 * <p>
-	 * This method allows entities to be displayed as rich widgets instead of traditional table columns. The widget provider function is responsible
-	 * for creating the appropriate widget component for each entity.
+	 * Widget columns support sorting when a comparator is provided. The comparator extracts a comparable value from the entity for sorting purposes.
 	 * </p>
 	 * @param <T>            the widget type (must be a Component)
 	 * @param widgetProvider the function that creates widgets for entities
+	 * @param comparator     optional comparator for sorting (null to disable sorting)
 	 * @return the created column
 	 * @see tech.derbent.api.grid.widget.IComponentWidgetEntityProvider
 	 * @see tech.derbent.api.grid.widget.CComponentWidgetEntity */
-	public <T extends Component> Column<EntityClass> addWidgetColumn(final java.util.function.Function<EntityClass, T> widgetProvider) {
+	public <T extends Component> Column<EntityClass> addWidgetColumn(final java.util.function.Function<EntityClass, T> widgetProvider,
+			final java.util.Comparator<EntityClass> comparator) {
 		Check.notNull(widgetProvider, "Widget provider cannot be null");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			try {
@@ -430,8 +442,21 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				labelEntity.setText("Error: " + e.getMessage());
 				return labelEntity;
 			}
-		}).setAutoWidth(true).setFlexGrow(1).setSortable(false);
+		}).setAutoWidth(true).setFlexGrow(1);
+		if (comparator != null) {
+			column.setSortable(true).setComparator(comparator);
+		} else {
+			column.setSortable(false);
+		}
 		return column;
+	}
+
+	/** Adds a widget column to the grid (non-sortable by default).
+	 * @param <T>            the widget type (must be a Component)
+	 * @param widgetProvider the function that creates widgets for entities
+	 * @return the created column */
+	public <T extends Component> Column<EntityClass> addWidgetColumn(final java.util.function.Function<EntityClass, T> widgetProvider) {
+		return addWidgetColumn(widgetProvider, null);
 	}
 
 	/** Ensures that the grid has a selected row when data is available. This method is called automatically when data changes and follows the coding

@@ -5,6 +5,8 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.service.CCompanyService;
@@ -109,30 +111,28 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 			super.setupGrid(grid);
 			LOGGER.debug("Setting up grid for User-Project relationship component.");
 			if (isUserMaster()) {
-				// User-centric: User->Project
-				grid.addComponentColumn(settings -> {
+				CGrid.styleColumnHeader(grid.addComponentColumn(settings -> {
 					try {
-						return CColorUtils.getEntityWithIcon(settings.getProject());
+						return new CLabelEntity(settings.getProject());
 					} catch (Exception e) {
 						LOGGER.error("Failed to create project component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "project"));
 					}
-				}).setHeader(CColorUtils.createStyledHeader("Project", "#2E7D32")).setAutoWidth(true).setSortable(true);
+				}).setAutoWidth(true).setSortable(true), "Project", "#2E7D32");
 			} else {
-				// Project-centric: Project->User
-				grid.addComponentColumn(settings -> {
+				CGrid.styleColumnHeader(grid.addComponentColumn(settings -> {
 					try {
-						return CColorUtils.getEntityWithIcon(settings.getUser());
+						return CLabelEntity.createUserLabel(settings.getUser());
 					} catch (Exception e) {
 						LOGGER.error("Failed to create user component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
 					}
-				}).setHeader(CColorUtils.createStyledHeader("User", "#1565C0")).setAutoWidth(true).setSortable(true);
+				}).setAutoWidth(true).setSortable(true), "User", "#1565C0");
 			}
-			grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(CColorUtils.createStyledHeader("Role", "#F57F17"))
-					.setAutoWidth(true).setSortable(true);
-			grid.addColumn(settings -> getDisplayText(settings, "permission")).setHeader(CColorUtils.createStyledHeader("Permissions", "#8E24AA"))
-					.setAutoWidth(true).setSortable(true);
+			CGrid.styleColumnHeader(grid.addColumn(settings -> getDisplayText(settings, "role"))
+					.setAutoWidth(true).setSortable(true), "Role", "#F57F17");
+			CGrid.styleColumnHeader(grid.addColumn(settings -> getDisplayText(settings, "permission"))
+					.setAutoWidth(true).setSortable(true), "Permissions", "#8E24AA");
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid.");
 			throw e;

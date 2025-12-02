@@ -1,5 +1,7 @@
 package tech.derbent.api.grid.view;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
@@ -13,6 +15,7 @@ import tech.derbent.api.ui.component.basic.CH2;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.users.domain.CUser;
 
 /** CLabelEntity - Unified label component for displaying entities or text values.
  * <p>
@@ -30,6 +33,9 @@ import tech.derbent.api.utils.Check;
  * <li>{@link #createH2Label(String)} - Creates an H2 header label for text</li>
  * <li>{@link #createH3Label(CEntityDB)} - Creates an H3 header label for entity</li>
  * <li>{@link #createH3Label(String)} - Creates an H3 header label for text</li>
+ * <li>{@link #createDateLabel(LocalDate)} - Creates a date label with calendar icon</li>
+ * <li>{@link #createDateRangeLabel(LocalDate, LocalDate)} - Creates a date range label</li>
+ * <li>{@link #createUserLabel(CUser)} - Creates a user label with icon</li>
  * </ul>
  * @author Derbent Framework
  * @since 1.0 */
@@ -37,9 +43,9 @@ public class CLabelEntity extends Div {
 
 	private static final String DEFAULT_BORDER_RADIUS = "4px";
 	private static final String DEFAULT_PADDING = "4px 8px";
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLabelEntity.class);
 	private static final long serialVersionUID = 1L;
-	// ==================== STATIC FACTORY METHODS ====================
 
 	/** Applies color styling to an icon based on entity color.
 	 * @param icon   the icon to style
@@ -123,6 +129,93 @@ public class CLabelEntity extends Div {
 	public static CLabelEntity createPlainLabel(final CEntityDB<?> entity) {
 		final CLabelEntity label = new CLabelEntity();
 		label.setValue(entity, false);
+		return label;
+	}
+
+	/** Creates a date label with calendar icon.
+	 * @param date the date to display (can be null)
+	 * @return a CLabelEntity with date display */
+	public static CLabelEntity createDateLabel(final LocalDate date) {
+		final CLabelEntity label = new CLabelEntity();
+		label.getStyle().set("font-size", "10pt").set("color", "#666");
+		if (date == null) {
+			label.setText("No date");
+			return label;
+		}
+		try {
+			final Icon icon = CColorUtils.createStyledIcon("vaadin:calendar");
+			if (icon != null) {
+				icon.getStyle().set("width", "14px").set("height", "14px").set("color", "#666");
+				label.add(icon);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not create calendar icon: {}", e.getMessage());
+		}
+		final Span dateSpan = new Span(date.format(DATE_FORMATTER));
+		label.add(dateSpan);
+		return label;
+	}
+
+	/** Creates a date range label with calendar icon.
+	 * @param startDate the start date (can be null)
+	 * @param endDate   the end date (can be null)
+	 * @return a CLabelEntity with date range display */
+	public static CLabelEntity createDateRangeLabel(final LocalDate startDate, final LocalDate endDate) {
+		final CLabelEntity label = new CLabelEntity();
+		label.getStyle().set("font-size", "10pt").set("color", "#666");
+		if (startDate == null && endDate == null) {
+			label.setText("No dates");
+			return label;
+		}
+		try {
+			final Icon icon = CColorUtils.createStyledIcon("vaadin:calendar");
+			if (icon != null) {
+				icon.getStyle().set("width", "14px").set("height", "14px").set("color", "#666");
+				label.add(icon);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not create calendar icon: {}", e.getMessage());
+		}
+		final StringBuilder dateRange = new StringBuilder();
+		if (startDate != null) {
+			dateRange.append(startDate.format(DATE_FORMATTER));
+		}
+		if (startDate != null && endDate != null) {
+			dateRange.append(" - ");
+		}
+		if (endDate != null) {
+			dateRange.append(endDate.format(DATE_FORMATTER));
+		}
+		final Span dateSpan = new Span(dateRange.toString());
+		label.add(dateSpan);
+		return label;
+	}
+
+	/** Creates a user label with icon and full name.
+	 * @param user the user to display (can be null)
+	 * @return a CLabelEntity with user display */
+	public static CLabelEntity createUserLabel(final CUser user) {
+		final CLabelEntity label = new CLabelEntity();
+		if (user == null) {
+			label.setText("No user");
+			label.getStyle().set("color", "#666").set("font-style", "italic");
+			return label;
+		}
+		try {
+			final Icon icon = CColorUtils.getIconForEntity(user);
+			if (icon != null) {
+				CColorUtils.styleIcon(icon);
+				label.add(icon);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not create icon for user: {}", e.getMessage());
+		}
+		String displayName = user.getName();
+		if (user.getLastname() != null && !user.getLastname().isEmpty()) {
+			displayName += " " + user.getLastname();
+		}
+		final Span nameSpan = new Span(displayName);
+		label.add(nameSpan);
 		return label;
 	}
 

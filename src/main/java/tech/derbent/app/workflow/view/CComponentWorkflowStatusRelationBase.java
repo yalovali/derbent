@@ -6,6 +6,8 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.ui.component.enhanced.CComponentRelationPanelBase;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -119,45 +121,40 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		try {
 			super.setupGrid(grid);
 			LOGGER.debug("Setting up grid for Workflow Status Relation component.");
-			// Add workflow column if workflow is not the master entity (only show in status-centric view)
 			if (!isWorkflowMaster()) {
-				grid.addComponentColumn(relation -> {
+				CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 					try {
-						return CColorUtils.getEntityWithIcon(relation.getWorkflowEntity());
+						return new CLabelEntity(relation.getWorkflowEntity());
 					} catch (Exception e) {
 						LOGGER.error("Failed to create workflow component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflowentity"));
 					}
-				}).setHeader(CColorUtils.createStyledHeader("Workflow", "#2E7D32")).setAutoWidth(true).setSortable(true);
+				}).setAutoWidth(true).setSortable(true), "Workflow", "#2E7D32");
 			}
-			// Add From Status column with color and icon
-			grid.addComponentColumn(relation -> {
+			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
-					return CColorUtils.getEntityWithIcon(relation.getFromStatus());
+					return new CLabelEntity(relation.getFromStatus());
 				} catch (Exception e) {
 					LOGGER.error("Failed to create from status component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "fromStatus"));
 				}
-			}).setHeader(CColorUtils.createStyledHeader("From Status", "#1565C0")).setAutoWidth(true).setSortable(true);
-			// Add To Status column with color and icon
-			grid.addComponentColumn(relation -> {
+			}).setAutoWidth(true).setSortable(true), "From Status", "#1565C0");
+			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
-					return CColorUtils.getEntityWithIcon(relation.getToStatus());
+					return new CLabelEntity(relation.getToStatus());
 				} catch (Exception e) {
 					LOGGER.error("Failed to create to status component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "toStatus"));
 				}
-			}).setHeader(CColorUtils.createStyledHeader("To Status", "#F57F17")).setAutoWidth(true).setSortable(true);
-			// Add Roles column with color and icon (can be empty for "All Roles")
-			grid.addComponentColumn(relation -> {
+			}).setAutoWidth(true).setSortable(true), "To Status", "#F57F17");
+			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					if (relation.getRoles() != null && !relation.getRoles().isEmpty()) {
-						// Display roles as comma-separated list with icons
 						com.vaadin.flow.component.orderedlayout.HorizontalLayout rolesLayout =
 								new com.vaadin.flow.component.orderedlayout.HorizontalLayout();
 						rolesLayout.setSpacing(true);
 						for (int i = 0; i < relation.getRoles().size(); i++) {
-							rolesLayout.add(CColorUtils.getEntityWithIcon(relation.getRoles().get(i)));
+							rolesLayout.add(new CLabelEntity(relation.getRoles().get(i)));
 							if (i < relation.getRoles().size() - 1) {
 								rolesLayout.add(new com.vaadin.flow.component.html.Span(", "));
 							}
@@ -173,7 +170,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					LOGGER.error("Failed to create roles component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "roles"));
 				}
-			}).setHeader(CColorUtils.createStyledHeader("Roles", "#8E24AA")).setAutoWidth(true).setSortable(true);
+			}).setAutoWidth(true).setSortable(true), "Roles", "#8E24AA");
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid.");
 			throw e;

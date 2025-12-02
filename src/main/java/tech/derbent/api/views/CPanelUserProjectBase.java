@@ -9,6 +9,8 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -132,13 +134,12 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	}
 
 	protected void setupGrid() {
-		// Add columns for project name, roles, and permissions
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		grid.addComponentColumn(settings -> CColorUtils.getEntityWithIcon(settings.getUser()))
-				.setHeader(CColorUtils.createStyledHeader("User", "#1565C0")).setAutoWidth(true);
-		grid.addColumn(CUserProjectSettings::getProjectName).setHeader(CColorUtils.createStyledHeader("Project Name", "#1a65C0")).setAutoWidth(true)
-				.setSortable(true);
-		grid.addColumn(this::getPermissionAsString).setHeader(CColorUtils.createStyledHeader("Permission", "#1a65Cf")).setAutoWidth(true);
+		CGrid.styleColumnHeader(grid.addComponentColumn(settings -> CLabelEntity.createUserLabel(settings.getUser()))
+				.setAutoWidth(true), "User", "#1565C0");
+		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getProjectName).setAutoWidth(true)
+				.setSortable(true), "Project Name", "#1a65C0");
+		CGrid.styleColumnHeader(grid.addColumn(this::getPermissionAsString).setAutoWidth(true), "Permission", "#1a65Cf");
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		com.vaadin.flow.component.grid.GridSingleSelectionModel<CUserProjectSettings> sm =
 				(com.vaadin.flow.component.grid.GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();
