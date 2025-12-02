@@ -41,29 +41,34 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 	/** Add a column for entity names with consistent styling */
 	protected Column<RelationEntity> addEntityNameColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> nameProvider,
 			final String header) {
-		return addColumn(nameProvider).setHeader(header).setWidth(WIDTH_ENTITY_NAME).setFlexGrow(0).setSortable(true);
+		final var column = addColumn(nameProvider).setWidth(WIDTH_ENTITY_NAME).setFlexGrow(0).setSortable(true);
+		return tech.derbent.api.grid.domain.CGrid.styleColumnHeader(column, header);
 	}
 
 	/** Add a column for roles with consistent styling */
 	protected Column<RelationEntity> addRoleColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> roleProvider,
 			final String header) {
-		return addColumn(roleProvider).setHeader(header).setWidth(WIDTH_ROLE).setFlexGrow(0).setSortable(true);
+		final var column = addColumn(roleProvider).setWidth(WIDTH_ROLE).setFlexGrow(0).setSortable(true);
+		return tech.derbent.api.grid.domain.CGrid.styleColumnHeader(column, header);
 	}
 
 	/** Add a column for permissions with consistent styling */
 	protected Column<RelationEntity> addPermissionColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> permissionProvider,
 			final String header) {
-		return addColumn(permissionProvider).setHeader(header).setWidth(WIDTH_PERMISSION).setFlexGrow(0).setSortable(true);
+		final var column = addColumn(permissionProvider).setWidth(WIDTH_PERMISSION).setFlexGrow(0).setSortable(true);
+		return tech.derbent.api.grid.domain.CGrid.styleColumnHeader(column, header);
 	}
 
 	/** Add a column for status with consistent styling */
 	protected Column<RelationEntity> addStatusColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> statusProvider,
 			final String header) {
-		return addColumn(statusProvider).setHeader(header).setWidth(WIDTH_STATUS).setFlexGrow(0).setSortable(true);
+		final var column = addColumn(statusProvider).setWidth(WIDTH_STATUS).setFlexGrow(0).setSortable(true);
+		return tech.derbent.api.grid.domain.CGrid.styleColumnHeader(column, header);
 	}
 
 	/** Add an ID column with standard styling */
 	protected Column<RelationEntity> addIdColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, Long> idProvider, final String header) {
-		return addColumn(idProvider).setHeader(header).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true);
+		final var column = addColumn(idProvider).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true);
+		return tech.derbent.api.grid.domain.CGrid.styleColumnHeader(column, header);
 	}
 }
