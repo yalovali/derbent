@@ -276,15 +276,18 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 			}).setHeader("").setWidth("40px").setFlexGrow(0);
 		}
 		// ID column
-		gridItems.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setHeader("ID").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
-				.setSortable(true).setKey("id");
+		CGrid.styleColumnHeader(
+				gridItems.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
+						.setSortable(true).setKey("id"),
+				"ID");
 		// Name column - use cached method
-		gridItems.addColumn(this::getEntityName).setHeader("Name").setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name");
+		CGrid.styleColumnHeader(
+				gridItems.addColumn(this::getEntityName).setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name"), "Name");
 		// Description column - use cached method
-		gridItems.addColumn(this::getEntityDescription).setHeader("Description").setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true)
-				.setKey("description");
+		CGrid.styleColumnHeader(gridItems.addColumn(this::getEntityDescription).setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true)
+				.setKey("description"), "Description");
 		// Status column with color support for CProjectItem entities
-		gridItems.addComponentColumn(item -> {
+		CGrid.styleColumnHeader(gridItems.addComponentColumn(item -> {
 			final CLabelEntity labelEntity = new CLabelEntity();
 			if (item instanceof CProjectItem) {
 				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
@@ -305,7 +308,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 				}
 			}
 			return labelEntity;
-		}).setHeader("Status").setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status");
+		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), "Status");
 	}
 
 	/** Factory method for cancel button. */

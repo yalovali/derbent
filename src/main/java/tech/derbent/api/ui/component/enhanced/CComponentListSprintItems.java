@@ -69,16 +69,16 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	protected void configureGrid(final CGrid<CSprintItem> grid) {
 		Check.notNull(grid, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CSprintItem");
-		grid.addColumn(CSprintItem::getId).setHeader("Id").setWidth("80px");
-		grid.addColumn(CSprintItem::getItemOrder).setHeader("Order").setWidth("80px");
-		grid.addColumn(CSprintItem::getItemType).setHeader("Type").setWidth("120px");
-		grid.addColumn(item -> {
+		CGrid.styleColumnHeader(grid.addColumn(CSprintItem::getId).setWidth("80px"), "Id");
+		CGrid.styleColumnHeader(grid.addColumn(CSprintItem::getItemOrder).setWidth("80px"), "Order");
+		CGrid.styleColumnHeader(grid.addColumn(CSprintItem::getItemType).setWidth("120px"), "Type");
+		CGrid.styleColumnHeader(grid.addColumn(item -> {
 			if (item.getItem() != null) {
 				return item.getItem().getName();
 			}
 			return "Item " + item.getItemId();
-		}).setHeader("Name").setAutoWidth(true);
-		// Use addStatusColumn to display status with color and icon
+		}).setAutoWidth(true), "Name");
+		// Use addEntityColumn to display status with color and icon
 		grid.addEntityColumn(item -> {
 			if ((item.getItem() != null) && (item.getItem().getStatus() != null)) {
 				return item.getItem().getStatus();

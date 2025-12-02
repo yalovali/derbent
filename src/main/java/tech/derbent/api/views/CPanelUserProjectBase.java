@@ -133,7 +133,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	}
 
 	protected void setupGrid() {
-		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
+		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getId).setAutoWidth(true), "ID");
 		CGrid.styleColumnHeader(grid.addComponentColumn(settings -> CLabelEntity.createUserLabel(settings.getUser())).setAutoWidth(true), "User");
 		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getProjectName).setAutoWidth(true).setSortable(true), "Project Name");
 		CGrid.styleColumnHeader(grid.addColumn(this::getPermissionAsString).setAutoWidth(true), "Permission");

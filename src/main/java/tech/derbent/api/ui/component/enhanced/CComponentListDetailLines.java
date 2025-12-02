@@ -43,12 +43,12 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 	protected void configureGrid(final CGrid<CDetailLines> grid) {
 		Check.notNull(grid, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CDetailLines");
-		grid.addColumn(CDetailLines::getId).setHeader("Id").setWidth("50px");
-		grid.addColumn(CDetailLines::getItemOrder).setHeader("Order").setWidth("50px");
-		grid.addColumn(CDetailLines::getFieldCaption).setHeader("Caption").setAutoWidth(true);
-		grid.addColumn(CDetailLines::getEntityProperty).setHeader("Field Name").setAutoWidth(true);
-		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setHeader("Required").setWidth("80px");
-		grid.addColumn(line -> line.getActive() ? "Active" : "Inactive").setHeader("Status").setWidth("80px");
+		CGrid.styleColumnHeader(grid.addColumn(CDetailLines::getId).setWidth("50px"), "Id");
+		CGrid.styleColumnHeader(grid.addColumn(CDetailLines::getItemOrder).setWidth("50px"), "Order");
+		CGrid.styleColumnHeader(grid.addColumn(CDetailLines::getFieldCaption).setAutoWidth(true), "Caption");
+		CGrid.styleColumnHeader(grid.addColumn(CDetailLines::getEntityProperty).setAutoWidth(true), "Field Name");
+		CGrid.styleColumnHeader(grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setWidth("80px"), "Required");
+		CGrid.styleColumnHeader(grid.addColumn(line -> line.getActive() ? "Active" : "Inactive").setWidth("80px"), "Status");
 	}
 
 	@Override
