@@ -77,7 +77,7 @@ public class CGanntGrid extends CGrid<CGanntItem> {
 		addIdColumn(CGanntItem::getEntityId, "ID", "entityId").setFlexGrow(0);
 		addShortTextColumn(CGanntItem::getEntityType, "Type", "entityType").setWidth("80px").setFlexGrow(0);
 		// Title column with hierarchical indentation based on hierarchy level
-		addColumn(item -> {
+		styleColumnHeader(addColumn(item -> {
 			final StringBuilder title = new StringBuilder();
 			// Add indentation based on hierarchy level (2 spaces per level)
 			for (int i = 0; i < item.getHierarchyLevel(); i++) {
@@ -85,7 +85,7 @@ public class CGanntGrid extends CGrid<CGanntItem> {
 			}
 			title.append(item.getEntity().getName());
 			return title.toString();
-		}).setHeader("Title").setKey("title").setWidth("200px").setFlexGrow(0).setSortable(false);
+		}).setKey("title").setWidth("200px").setFlexGrow(0).setSortable(false), "Title");
 		addShortTextColumn(CGanntItem::getResponsibleName, "Responsible", "responsible").setWidth("120px").setFlexGrow(0);
 		// Timeline visual bar column - colorful, responsive, with proper scaling
 		addDateColumn(CGanntItem::getStartDate, "Start", "startDate").setWidth("100px").setFlexGrow(0);
@@ -103,7 +103,7 @@ public class CGanntGrid extends CGrid<CGanntItem> {
 		});
 		timelineHeader = new CGanntTimelineHeader(timelineStart, timelineEnd, timelineWidthPixels, range -> updateTimelineRange(range),
 				this::setTimelineWidth);
-		addColumn(timelineRenderer).setHeader(timelineHeader).setKey("timeline").setFlexGrow(1).setSortable(false);
+		addColumn(timelineRenderer).setHeader(timelineHeader).setKey("timeline").setFlexGrow(1).setSortable(false).setResizable(true);
 	}
 
 	/** Public refresh hook. */

@@ -102,25 +102,25 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		final Column<EntityClass> column = addColumn(entity -> {
 			final Boolean value = valueProvider.apply(entity);
 			return (value != null) && value ? trueText : falseText;
-		}).setHeader(header).setWidth(WIDTH_BOOLEAN).setFlexGrow(0).setSortable(true).setResizable(true);
-		return column;
+		}).setWidth(WIDTH_BOOLEAN).setFlexGrow(0).setSortable(true).setResizable(true);
+		return styleColumnHeader(column, header);
 	}
 
 	public Column<EntityClass> addColumn(final ValueProvider<EntityClass, String> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header).setFlexGrow(1).setSortable(true).setResizable(true);
+		final Column<EntityClass> column = addColumn(valueProvider).setFlexGrow(1).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {
 			column.setKey(key);
 		}
-		return column;
+		return styleColumnHeader(column, header);
 	}
 
 	public Column<EntityClass> addColumnByProperty(final String propertyName, final String header) {
 		Check.notBlank(propertyName, "Property name cannot be null or blank");
 		Check.notBlank(header, "Header cannot be null or blank");
-		final Column<EntityClass> column = addColumn(propertyName).setHeader(header).setSortable(true).setResizable(true);
+		final Column<EntityClass> column = addColumn(propertyName).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for property: " + propertyName);
 		// Apply width based on property name patterns
 		if (propertyName.toLowerCase().contains("id")) {
@@ -135,7 +135,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			// Default to short text width
 			column.setWidth(WIDTH_SHORT_TEXT).setFlexGrow(0);
 		}
-		return column;
+		return styleColumnHeader(column, header);
 	}
 
 	public Column<EntityClass> addColumnEntityCollection(final ValueProvider<EntityClass, ? extends Collection<?>> valueProvider,
@@ -183,10 +183,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			}
 		};
 		final Column<EntityClass> column =
-				addColumn(namesProvider).setHeader(header).setAutoWidth(true).setSortable(false).setResizable(true).setFlexGrow(1);
+				addColumn(namesProvider).setAutoWidth(true).setSortable(false).setResizable(true).setFlexGrow(1);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		LOGGER.debug("Successfully created collection column for header: {}", header);
-		return column;
+		return styleColumnHeader(column, header);
 	}
 
 	public Column<EntityClass> addColumnEntityNamed(final ValueProvider<EntityClass, ? extends CEntityDB<?>> valueProvider, final String header) {
@@ -196,10 +196,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			final CEntityDB<?> ref = valueProvider.apply(entity);
 			return ref == null ? "" : entityName(ref);
 		};
-		final Column<EntityClass> column = addColumn(nameProvider).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true)
+		final Column<EntityClass> column = addColumn(nameProvider).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true)
 				.setResizable(true).setComparator(nameProvider);
 		Check.notNull(column, "Column creation failed for header: " + header);
-		return column;
+		return styleColumnHeader(column, header);
 	}
 
 	public Column<EntityClass> addCustomColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String width,
@@ -209,12 +209,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		Check.notBlank(width, "Width cannot be null or blank");
 		Check.isTrue(flexGrow >= 0, "Flex grow must be non-negative");
 		final Column<EntityClass> column =
-				addColumn(valueProvider).setHeader(header).setWidth(width).setFlexGrow(flexGrow).setSortable(true).setResizable(true);
+				addColumn(valueProvider).setWidth(width).setFlexGrow(flexGrow).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {
 			column.setKey(key);
 		}
-		return column;
+		return styleColumnHeader(column, header);
 	}
 
 	public Column<EntityClass> addDateColumn(final ValueProvider<EntityClass, LocalDate> valueProvider, final String header, final String key) {
@@ -265,8 +265,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				}
 			});
 			return selector;
-		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
-		return column;
+		}).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
+		return styleColumnHeader(column, header);
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -283,7 +283,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		final AMetaData meta = field.getAnnotation(AMetaData.class);
 		Check.notNull(meta, "AMetaData annotation is missing on field: " + key + " in class: " + clazz.getSimpleName());
 		String width = getColumnWidth(field, meta);
-		return addComponentColumn(item -> {
+		final Column<EntityClass> column = addComponentColumn(item -> {
 			final Object value = valueProvider.apply(item);
 			final CLabelEntity labelEntity = new CLabelEntity();
 			if (value instanceof CEntityDB) {
@@ -292,7 +292,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				labelEntity.setText(value != null ? value.toString() : "");
 			}
 			return labelEntity;
-		}).setHeader(header).setWidth(width).setFlexGrow(0).setSortable(true);
+		}).setWidth(width).setFlexGrow(0).setSortable(true).setResizable(true);
+		return styleColumnHeader(column, header);
 	}
 
 	private String getColumnWidth(Field field, final AMetaData meta) {
@@ -355,8 +356,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
 			}
 			return image;
-		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false).setResizable(true);
-		return column;
+		}).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false).setResizable(true);
+		return styleColumnHeader(column, header);
 	}
 
 	public Column<EntityClass> addIntegerColumn(final ValueProvider<EntityClass, Integer> valueProvider, final String header, final String key) {
