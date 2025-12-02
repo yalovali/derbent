@@ -22,12 +22,12 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CEntityLabel;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
-import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
 public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHorizontalLayout
 		implements HasValue<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>>,
 		HasValueAndElement<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>> {
+
 	private static final String DEFAULT_GRID_HEIGHT = "250px";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentFieldSelection.class);
 	private static final long serialVersionUID = 1L;
@@ -134,7 +134,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				return new Span(fallbackText);
 			}
 		}).setAutoWidth(true).setFlexGrow(1);
-		CGrid.styleColumnHeader(column, header, "#1565C0");
+		CGrid.styleColumnHeader(column, header);
 	}
 
 	/** Creates and configures a grid for field selection with common styling and behavior.
@@ -157,6 +157,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		if (!oldValue.equals(newValue)) {
 			LOGGER.info("Value changed from {} to {} selected items - notifying {} listeners", oldValue.size(), newValue.size(), listeners.size());
 			final ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
+
 				private static final long serialVersionUID = 1L;
 
 				@Override

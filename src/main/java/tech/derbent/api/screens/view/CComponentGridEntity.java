@@ -188,7 +188,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					return createErrorCell("Widget error");
 				}
 			});
-			CGrid.styleColumnHeader(column.setAutoWidth(true).setFlexGrow(1).setKey(fieldName), displayName, "#2a61cf");
+			CGrid.styleColumnHeader(column.setAutoWidth(true).setFlexGrow(1).setKey(fieldName), displayName);
 			LOGGER.debug("Created component widget column for field {} using bean {} method {}", fieldName, beanName, methodName);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating column for CComponentWidgetEntity field {}: {}", fieldName, e.getMessage());
@@ -222,15 +222,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						return null;
 					}
 				};
-				// Check if this field should use color rendering
-				// Either it's a status entity OR it has setBackgroundFromColor = true
-				if (CColorUtils.isStatusEntity(fieldType) || fieldInfo.isSetBackgroundFromColor()) {
-					// Use addStatusColumn for color-enabled entity fields
-					grid.addStatusColumn(valueProvider, displayName, fieldName);
-				} else {
-					// Use addEntityColumn for regular entity references
-					grid.addEntityColumn(valueProvider, displayName, fieldName);
-				}
+				grid.addEntityColumn(valueProvider, displayName, fieldName);
 			} else if (Collection.class.isAssignableFrom(fieldType)) {
 				// Collection field - use addColumnEntityCollection if it contains entities
 				final ValueProvider valueProvider = entity -> {
@@ -248,13 +240,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					&& (fieldType == Long.class || fieldType == long.class || fieldType == Integer.class || fieldType == int.class)) {
 				// ID fields - use addIdColumn for consistent ID formatting
 				final ValueProvider valueProvider = entity -> {
-					try {
-						field.setAccessible(true);
-						return field.get(entity);
-					} catch (final Exception e) {
-						LOGGER.error("Error accessing ID field {}: {}", fieldName, e.getMessage());
-						return null;
-					}
+					return ((CEntityDB) entity).getId();
 				};
 				grid.addIdColumn(valueProvider, displayName, fieldName);
 			} else if (fieldType == Integer.class || fieldType == int.class) {
@@ -373,8 +359,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						}
 						return lavelEntity;
 					});
-					CGrid.styleColumnHeader(column.setWidth("150px").setFlexGrow(0).setSortable(true)
-							.setKey(fieldName), displayName, "#2a61Cf");
+					CGrid.styleColumnHeader(column.setWidth("150px").setFlexGrow(0).setSortable(true).setKey(fieldName), displayName);
 				} else {
 					// Short text fields - use addShortTextColumn
 					final ValueProvider valueProvider = entity -> {

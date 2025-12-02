@@ -129,7 +129,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 						LOGGER.error("Failed to create workflow component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflowentity"));
 					}
-				}).setAutoWidth(true).setSortable(true), "Workflow", "#2E7D32");
+				}).setAutoWidth(true).setSortable(true), "Workflow");
 			}
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
@@ -138,7 +138,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					LOGGER.error("Failed to create from status component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "fromStatus"));
 				}
-			}).setAutoWidth(true).setSortable(true), "From Status", "#1565C0");
+			}).setAutoWidth(true).setSortable(true), "From Status");
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					return new CLabelEntity(relation.getToStatus());
@@ -146,7 +146,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					LOGGER.error("Failed to create to status component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "toStatus"));
 				}
-			}).setAutoWidth(true).setSortable(true), "To Status", "#F57F17");
+			}).setAutoWidth(true).setSortable(true), "To Status");
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					if (relation.getRoles() != null && !relation.getRoles().isEmpty()) {
@@ -170,7 +170,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					LOGGER.error("Failed to create roles component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "roles"));
 				}
-			}).setAutoWidth(true).setSortable(true), "Roles", "#8E24AA");
+			}).setAutoWidth(true).setSortable(true), "Roles");
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid.");
 			throw e;

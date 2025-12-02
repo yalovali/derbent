@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -59,28 +61,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		}
 	}
 
-	/** Applies standardized header styling to a column with bold text and color.
-	 * @param column the column to style
-	 * @param header the header text
-	 * @param color  the header color (optional, uses default if null)
-	 * @return the styled column */
-	public static <T> Column<T> styleColumnHeader(final Column<T> column, final String header, final String color) {
-		Check.notNull(column, "Column cannot be null when styling header");
-		Check.notBlank(header, "Header text cannot be blank when styling header");
-		final String headerColor = (color != null && !color.isBlank()) ? color : CColorUtils.CRUD_READ_COLOR;
-		column.setHeader(CColorUtils.createStyledHeader(header, headerColor));
-		column.setResizable(true);
-		return column;
-	}
-
-	/** Applies standardized header styling to a column with default color.
-	 * @param column the column to style
-	 * @param header the header text
-	 * @return the styled column */
-	public static <T> Column<T> styleColumnHeader(final Column<T> column, final String header) {
-		return styleColumnHeader(column, header, null);
-	}
-
 	public static <T> void setupGrid(final Grid<T> grid) {
 		Check.notNull(grid, "Grid cannot be null when setting up relational component");
 		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
@@ -92,6 +72,14 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		CAuxillaries.setId(grid);
 		// Prevent deselection when clicking on already-selected item
 		// preventDeselection(grid);
+	}
+
+	public static <T> Column<T> styleColumnHeader(final Column<T> column, final String header) {
+		Check.notNull(column, "Column cannot be null when styling header");
+		Check.notBlank(header, "Header text cannot be blank when styling header");
+		column.setHeader(CColorUtils.createStyledHeader(header, CColorUtils.CRUD_READ_COLOR));
+		column.setResizable(true);
+		return column;
 	}
 
 	/** Constructor for CGrid with entity class.
@@ -194,8 +182,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				return "[Error rendering collection]";
 			}
 		};
-		final Column<EntityClass> column = addColumn(namesProvider).setHeader(header).setAutoWidth(true).setSortable(false).setResizable(true)
-				.setFlexGrow(1);
+		final Column<EntityClass> column =
+				addColumn(namesProvider).setHeader(header).setAutoWidth(true).setSortable(false).setResizable(true).setFlexGrow(1);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		LOGGER.debug("Successfully created collection column for header: {}", header);
 		return column;
@@ -220,8 +208,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		Check.notBlank(header, "Header cannot be null or blank");
 		Check.notBlank(width, "Width cannot be null or blank");
 		Check.isTrue(flexGrow >= 0, "Flex grow must be non-negative");
-		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header).setWidth(width).setFlexGrow(flexGrow).setSortable(true)
-				.setResizable(true);
+		final Column<EntityClass> column =
+				addColumn(valueProvider).setHeader(header).setWidth(width).setFlexGrow(flexGrow).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {
 			column.setKey(key);
@@ -294,6 +282,20 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		}
 		final AMetaData meta = field.getAnnotation(AMetaData.class);
 		Check.notNull(meta, "AMetaData annotation is missing on field: " + key + " in class: " + clazz.getSimpleName());
+		String width = getColumnWidth(field, meta);
+		return addComponentColumn(item -> {
+			final Object value = valueProvider.apply(item);
+			final CLabelEntity labelEntity = new CLabelEntity();
+			if (value instanceof CEntityDB) {
+				labelEntity.setValue((CEntityDB<?>) value, true);
+			} else {
+				labelEntity.setText(value != null ? value.toString() : "");
+			}
+			return labelEntity;
+		}).setHeader(header).setWidth(width).setFlexGrow(0).setSortable(true);
+	}
+
+	private String getColumnWidth(Field field, final AMetaData meta) {
 		String width;
 		switch (field.getType().getSimpleName()) {
 		case "Integer":
@@ -321,21 +323,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		default:
 			width = WIDTH_SHORT_TEXT;
 		}
-		// Renkli hücre gerekiyorsa component ile çiz
-		if ((meta != null) && meta.setBackgroundFromColor()) {
-			return addComponentColumn(item -> {
-				final Object value = valueProvider.apply(item);
-				final CLabelEntity labelEntity = new CLabelEntity();
-				if (value instanceof CEntityDB) {
-					labelEntity.setValue((CEntityDB<?>) value, true);
-				} else {
-					labelEntity.setText(value != null ? value.toString() : "");
-				}
-				return labelEntity;
-			}).setHeader(header).setWidth(width).setFlexGrow(0).setSortable(true);
-		}
-		// Normal sütun
-		return addCustomColumn(valueProvider, header, width, key, 0);
+		return width;
 	}
 
 	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
@@ -395,20 +383,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
 	}
 
-	public <S extends CEntityDB<S>> Column<EntityClass> addStatusColumn(final ValueProvider<EntityClass, S> valueProvider, final String header,
-			final String key) {
-		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
-		final Column<EntityClass> column = addComponentColumn(entity -> {
-			final S status = valueProvider.apply(entity);
-			final CLabelEntity labelEntity = new CLabelEntity();
-			labelEntity.setValue(status, true);
-			return labelEntity;
-		}).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setResizable(true);
-		if (key != null) {
-			column.setKey(key);
-		}
-		return column;
+	/** Adds a widget column to the grid (non-sortable by default).
+	 * @param <T>            the widget type (must be a Component)
+	 * @param widgetProvider the function that creates widgets for entities
+	 * @return the created column */
+	public <T extends Component> Column<EntityClass> addWidgetColumn(final Function<EntityClass, T> widgetProvider) {
+		return addWidgetColumn(widgetProvider, null);
 	}
 
 	/** Adds a widget column to the grid using the provided widget provider.
@@ -421,8 +401,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	 * @return the created column
 	 * @see tech.derbent.api.grid.widget.IComponentWidgetEntityProvider
 	 * @see tech.derbent.api.grid.widget.CComponentWidgetEntity */
-	public <T extends Component> Column<EntityClass> addWidgetColumn(final java.util.function.Function<EntityClass, T> widgetProvider,
-			final java.util.Comparator<EntityClass> comparator) {
+	public <T extends Component> Column<EntityClass> addWidgetColumn(final Function<EntityClass, T> widgetProvider,
+			final Comparator<EntityClass> comparator) {
 		Check.notNull(widgetProvider, "Widget provider cannot be null");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			try {
@@ -448,14 +428,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			column.setSortable(false);
 		}
 		return column;
-	}
-
-	/** Adds a widget column to the grid (non-sortable by default).
-	 * @param <T>            the widget type (must be a Component)
-	 * @param widgetProvider the function that creates widgets for entities
-	 * @return the created column */
-	public <T extends Component> Column<EntityClass> addWidgetColumn(final java.util.function.Function<EntityClass, T> widgetProvider) {
-		return addWidgetColumn(widgetProvider, null);
 	}
 
 	/** Ensures that the grid has a selected row when data is available. This method is called automatically when data changes and follows the coding

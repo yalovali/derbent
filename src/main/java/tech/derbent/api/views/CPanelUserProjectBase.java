@@ -14,7 +14,6 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
@@ -135,11 +134,9 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 
 	protected void setupGrid() {
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		CGrid.styleColumnHeader(grid.addComponentColumn(settings -> CLabelEntity.createUserLabel(settings.getUser()))
-				.setAutoWidth(true), "User", "#1565C0");
-		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getProjectName).setAutoWidth(true)
-				.setSortable(true), "Project Name", "#1a65C0");
-		CGrid.styleColumnHeader(grid.addColumn(this::getPermissionAsString).setAutoWidth(true), "Permission", "#1a65Cf");
+		CGrid.styleColumnHeader(grid.addComponentColumn(settings -> CLabelEntity.createUserLabel(settings.getUser())).setAutoWidth(true), "User");
+		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getProjectName).setAutoWidth(true).setSortable(true), "Project Name");
+		CGrid.styleColumnHeader(grid.addColumn(this::getPermissionAsString).setAutoWidth(true), "Permission");
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		com.vaadin.flow.component.grid.GridSingleSelectionModel<CUserProjectSettings> sm =
 				(com.vaadin.flow.component.grid.GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();

@@ -153,7 +153,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 				return new Span(fallbackText);
 			}
 		}).setAutoWidth(true).setFlexGrow(1);
-		CGrid.styleColumnHeader(column, header, "#1565C0");
+		CGrid.styleColumnHeader(column, header);
 		grid.addClassName("first-column-checkbox-grid");
 	}
 

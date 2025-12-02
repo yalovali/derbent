@@ -118,7 +118,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 						LOGGER.error("Failed to create project component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "project"));
 					}
-				}).setAutoWidth(true).setSortable(true), "Project", "#2E7D32");
+				}).setAutoWidth(true).setSortable(true), "Project");
 			} else {
 				CGrid.styleColumnHeader(grid.addComponentColumn(settings -> {
 					try {
@@ -127,12 +127,11 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 						LOGGER.error("Failed to create user component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
 					}
-				}).setAutoWidth(true).setSortable(true), "User", "#1565C0");
+				}).setAutoWidth(true).setSortable(true), "User");
 			}
-			CGrid.styleColumnHeader(grid.addColumn(settings -> getDisplayText(settings, "role"))
-					.setAutoWidth(true).setSortable(true), "Role", "#F57F17");
-			CGrid.styleColumnHeader(grid.addColumn(settings -> getDisplayText(settings, "permission"))
-					.setAutoWidth(true).setSortable(true), "Permissions", "#8E24AA");
+			CGrid.styleColumnHeader(grid.addColumn(settings -> getDisplayText(settings, "role")).setAutoWidth(true).setSortable(true), "Role");
+			CGrid.styleColumnHeader(grid.addColumn(settings -> getDisplayText(settings, "permission")).setAutoWidth(true).setSortable(true),
+					"Permissions");
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid.");
 			throw e;

@@ -79,7 +79,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			return "Item " + item.getItemId();
 		}).setHeader("Name").setAutoWidth(true);
 		// Use addStatusColumn to display status with color and icon
-		grid.addStatusColumn(item -> {
+		grid.addEntityColumn(item -> {
 			if ((item.getItem() != null) && (item.getItem().getStatus() != null)) {
 				return item.getItem().getStatus();
 			}
