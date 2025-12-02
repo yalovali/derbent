@@ -181,17 +181,15 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			try {
 				final T selectedItem = event.getValue();
 				if (selectedItem == null) {
-					// Clear the prefix component and styling when no item is selected
 					setPrefixComponent(null);
 					getElement().getStyle().remove("--vaadin-input-field-background");
+					getElement().getStyle().remove("background-color");
 					getElement().getStyle().remove("color");
 					return;
 				}
 				if (selectedItem instanceof IHasColorAndIcon) {
-					// Get the icon for the selected entity
 					icon = CColorUtils.getIconForEntity(selectedItem);
 					CColorUtils.styleIcon(icon);
-					// Apply color to the icon if entity has color
 					try {
 						final String color = CColorUtils.getColorFromEntity(selectedItem);
 						if ((color != null) && !color.isEmpty()) {
@@ -203,9 +201,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 					setPrefixComponent(icon);
 					final String backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
 					if ((backgroundColor != null) && !backgroundColor.isEmpty()) {
-						// Apply background color to the input field
-						getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
-						// Calculate and apply contrasting text color
+						getElement().getStyle().set("background-color", backgroundColor);
 						if (autoContrast) {
 							final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
 							getElement().getStyle().set("color", textColor);
