@@ -130,33 +130,30 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			return checkmark;
 		}).setHeader("").setWidth("30px").setFlexGrow(0).setPartNameGenerator(item -> "check-column-cell");
 		// Item display column (with color and icon for CEntityNamed)
-		grid.addComponentColumn(item -> {
+		final var column = grid.addComponentColumn(item -> {
 			try {
 				if (item == null) {
 					LOGGER.warn("Rendering null item in grid - returning N/A placeholder");
 					return new Span("N/A");
 				}
-				// Check if item is a CEntityNamed (has color and icon support)
 				if (item instanceof CEntityNamed) {
 					try {
-						// Use CEntityLabel for colored rendering with icon
 						return new CEntityLabel((CEntityNamed<?>) item);
 					} catch (Exception e) {
 						LOGGER.error("Failed to create CEntityLabel for entity: {}", item, e);
 						throw new IllegalStateException("Failed to render entity with color: " + item, e);
 					}
 				} else {
-					// Fall back to text rendering for non-entity types
 					String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
 					return new Span(text);
 				}
 			} catch (Exception e) {
-				// Log error and provide fallback rendering
 				LOGGER.error("Error rendering item in list selection: {}", item, e);
 				String fallbackText = item != null ? item.toString() : "Error";
 				return new Span(fallbackText);
 			}
-		}).setHeader(CColorUtils.createStyledHeader(header, "#1565C0")).setAutoWidth(true).setFlexGrow(1);
+		}).setAutoWidth(true).setFlexGrow(1);
+		CGrid.styleColumnHeader(column, header, "#1565C0");
 		grid.addClassName("first-column-checkbox-grid");
 	}
 

@@ -111,33 +111,30 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	 * @throws IllegalArgumentException if grid is null */
 	private void configureGridColumn(final Grid<DetailEntity> grid, final String header) {
 		Check.notNull(grid, "Grid cannot be null");
-		grid.addComponentColumn(item -> {
+		final var column = grid.addComponentColumn(item -> {
 			try {
 				if (item == null) {
 					LOGGER.warn("Rendering null item in grid - returning N/A placeholder");
 					return new Span("N/A");
 				}
-				// Check if item is a CEntityNamed (has color and icon support)
 				if (item instanceof CEntityNamed) {
 					try {
-						// Use CEntityLabel for colored rendering with icon
 						return new CEntityLabel((CEntityNamed<?>) item);
 					} catch (final Exception e) {
 						LOGGER.error("Failed to create CEntityLabel for entity: {}", item, e);
 						throw new IllegalStateException("Failed to render entity with color: " + item, e);
 					}
 				} else {
-					// Fall back to text rendering for non-entity types
 					final String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
 					return new Span(text);
 				}
 			} catch (final Exception e) {
-				// Log error and provide fallback rendering
 				LOGGER.error("Error rendering item in field selection: {}", item, e);
 				final String fallbackText = item != null ? item.toString() : "Error";
 				return new Span(fallbackText);
 			}
-		}).setHeader(CColorUtils.createStyledHeader(header, "#1565C0")).setAutoWidth(true).setFlexGrow(1);
+		}).setAutoWidth(true).setFlexGrow(1);
+		CGrid.styleColumnHeader(column, header, "#1565C0");
 	}
 
 	/** Creates and configures a grid for field selection with common styling and behavior.
