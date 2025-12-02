@@ -1,6 +1,5 @@
 package tech.derbent.app.meetings.view;
 
-import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.grid.view.CLabelEntity;
@@ -26,7 +25,6 @@ public class CComponentWidgetMeeting extends CComponentWidgetEntityOfProject<CMe
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetMeeting.class);
 	private static final long serialVersionUID = 1L;
-	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
 	/** Creates a new meeting widget for the specified meeting.
 	 * @param meeting the meeting to display in the widget */

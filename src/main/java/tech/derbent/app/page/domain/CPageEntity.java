@@ -10,7 +10,7 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IHasColorAndIcon;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.app.projects.domain.CProject;
@@ -20,7 +20,7 @@ import tech.derbent.app.projects.domain.CProject;
 		"menu_title", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "pageentity_id"))
-public class CPageEntity extends CProjectItem<CPageEntity> implements IHasColorAndIcon {
+public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#BDB76B"; // X11 DarkKhaki - navigation pages (darker)
 	public static final String DEFAULT_ICON = "vaadin:file";

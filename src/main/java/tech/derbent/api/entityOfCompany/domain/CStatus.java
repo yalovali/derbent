@@ -9,14 +9,14 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.interfaces.IHasColorAndIcon;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.companies.domain.CCompany;
 
 /** CStatus - Abstract base entity for all status types in the system. Layer: Domain (MVC) This class provides common functionality for status
  * entities including name and description. All status types (like CProjectItemStatus) should inherit from this class. */
 @MappedSuperclass
-public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass> implements IHasColorAndIcon {
+public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass> implements IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - project item statuses
 	public static final String DEFAULT_ICON = "vaadin:flag";

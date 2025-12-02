@@ -1,7 +1,6 @@
 package tech.derbent.api.grid.widget;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

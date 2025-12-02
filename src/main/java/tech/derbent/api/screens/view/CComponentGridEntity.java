@@ -333,31 +333,31 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					// Create a component column that shows the color value as background
 					final var column = grid.addComponentColumn(entity -> {
 						final String colorValue = (String) valueProvider.apply(entity);
-						final CLabelEntity lavelEntity = new CLabelEntity();
+						final CLabelEntity labelEntity = new CLabelEntity();
 						if (colorValue != null && !colorValue.trim().isEmpty()) {
 							// Display the color value as text with background color
-							lavelEntity.setText(colorValue);
-							lavelEntity.getStyle().set("background-color", colorValue);
+							labelEntity.setText(colorValue);
+							labelEntity.getStyle().set("background-color", colorValue);
 							// Apply contrasting text color for readability
 							try {
 								final String textColor = CColorUtils.getContrastTextColor(colorValue);
-								lavelEntity.getStyle().set("color", textColor);
+								labelEntity.getStyle().set("color", textColor);
 							} catch (final Exception e) {
 								// Fallback to simple contrast logic
-								lavelEntity.getStyle().set("color", isColorLight(colorValue) ? "#000000" : "#ffffff");
+								labelEntity.getStyle().set("color", isColorLight(colorValue) ? "#000000" : "#ffffff");
 							}
 							// Add some styling to make it look like a color swatch
-							lavelEntity.getStyle().set("padding", "8px 12px");
-							lavelEntity.getStyle().set("border-radius", "4px");
-							lavelEntity.getStyle().set("text-align", "center");
-							lavelEntity.getStyle().set("font-family", "monospace");
-							lavelEntity.getStyle().set("font-weight", "bold");
+							labelEntity.getStyle().set("padding", "8px 12px");
+							labelEntity.getStyle().set("border-radius", "4px");
+							labelEntity.getStyle().set("text-align", "center");
+							labelEntity.getStyle().set("font-family", "monospace");
+							labelEntity.getStyle().set("font-weight", "bold");
 						} else {
-							lavelEntity.setText("No Color");
-							lavelEntity.getStyle().set("color", "#666");
-							lavelEntity.getStyle().set("font-style", "italic");
+							labelEntity.setText("No Color");
+							labelEntity.getStyle().set("color", "#666");
+							labelEntity.getStyle().set("font-style", "italic");
 						}
-						return lavelEntity;
+						return labelEntity;
 					});
 					CGrid.styleColumnHeader(column.setWidth("150px").setFlexGrow(0).setSortable(true).setKey(fieldName), displayName);
 				} else {

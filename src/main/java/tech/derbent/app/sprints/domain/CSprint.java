@@ -18,7 +18,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IHasColorAndIcon;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -31,7 +31,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "csprint")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_id"))
-public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasColorAndIcon {
+public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - time-boxed work
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";

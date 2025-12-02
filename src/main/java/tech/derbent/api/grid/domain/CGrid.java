@@ -182,8 +182,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 				return "[Error rendering collection]";
 			}
 		};
-		final Column<EntityClass> column =
-				addColumn(namesProvider).setAutoWidth(true).setSortable(false).setResizable(true).setFlexGrow(1);
+		final Column<EntityClass> column = addColumn(namesProvider).setAutoWidth(true).setSortable(false).setResizable(true).setFlexGrow(1);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		LOGGER.debug("Successfully created collection column for header: {}", header);
 		return styleColumnHeader(column, header);
@@ -196,8 +195,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			final CEntityDB<?> ref = valueProvider.apply(entity);
 			return ref == null ? "" : entityName(ref);
 		};
-		final Column<EntityClass> column = addColumn(nameProvider).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true)
-				.setResizable(true).setComparator(nameProvider);
+		final Column<EntityClass> column =
+				addColumn(nameProvider).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setResizable(true).setComparator(nameProvider);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		return styleColumnHeader(column, header);
 	}
@@ -208,8 +207,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		Check.notBlank(header, "Header cannot be null or blank");
 		Check.notBlank(width, "Width cannot be null or blank");
 		Check.isTrue(flexGrow >= 0, "Flex grow must be non-negative");
-		final Column<EntityClass> column =
-				addColumn(valueProvider).setWidth(width).setFlexGrow(flexGrow).setSortable(true).setResizable(true);
+		final Column<EntityClass> column = addColumn(valueProvider).setWidth(width).setFlexGrow(flexGrow).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {
 			column.setKey(key);
@@ -269,17 +267,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		return styleColumnHeader(column, header);
 	}
 
-	@SuppressWarnings ("unchecked")
-	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
+	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key)
+			throws Exception {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
 		Field field;
-		try {
-			field = CEntityFieldService.getEntityField(clazz, key);
-		} catch (final NoSuchFieldException e) {
-			LOGGER.warn("Field not found: {} in class {}", key, clazz.getSimpleName(), e);
-			return addShortTextColumn((ValueProvider<EntityClass, String>) valueProvider, header, key);
-		}
+		field = CEntityFieldService.getEntityField(clazz, key);
 		final AMetaData meta = field.getAnnotation(AMetaData.class);
 		Check.notNull(meta, "AMetaData annotation is missing on field: " + key + " in class: " + clazz.getSimpleName());
 		String width = getColumnWidth(field, meta);
@@ -294,37 +287,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 			return labelEntity;
 		}).setWidth(width).setFlexGrow(0).setSortable(true).setResizable(true);
 		return styleColumnHeader(column, header);
-	}
-
-	private String getColumnWidth(Field field, final AMetaData meta) {
-		String width;
-		switch (field.getType().getSimpleName()) {
-		case "Integer":
-		case "int":
-			width = WIDTH_INTEGER;
-			break;
-		case "BigDecimal":
-			width = WIDTH_DECIMAL;
-			break;
-		case "LocalDate":
-		case "LocalDateTime":
-			width = WIDTH_DATE;
-			break;
-		case "Boolean":
-		case "boolean":
-			width = WIDTH_BOOLEAN;
-			break;
-		case "String":
-			if ((meta != null) && (meta.maxLength() > CEntityConstants.MAX_LENGTH_NAME)) {
-				width = WIDTH_LONG_TEXT;
-			} else {
-				width = WIDTH_SHORT_TEXT;
-			}
-			break;
-		default:
-			width = WIDTH_SHORT_TEXT;
-		}
-		return width;
 	}
 
 	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
@@ -446,6 +408,37 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		} catch (final Exception e) {
 			LOGGER.debug("Could not auto-select first row: {}", e.getMessage());
 		}
+	}
+
+	private String getColumnWidth(Field field, final AMetaData meta) {
+		String width;
+		switch (field.getType().getSimpleName()) {
+		case "Integer":
+		case "int":
+			width = WIDTH_INTEGER;
+			break;
+		case "BigDecimal":
+			width = WIDTH_DECIMAL;
+			break;
+		case "LocalDate":
+		case "LocalDateTime":
+			width = WIDTH_DATE;
+			break;
+		case "Boolean":
+		case "boolean":
+			width = WIDTH_BOOLEAN;
+			break;
+		case "String":
+			if ((meta != null) && (meta.maxLength() > CEntityConstants.MAX_LENGTH_NAME)) {
+				width = WIDTH_LONG_TEXT;
+			} else {
+				width = WIDTH_SHORT_TEXT;
+			}
+			break;
+		default:
+			width = WIDTH_SHORT_TEXT;
+		}
+		return width;
 	}
 
 	/** Initialize grid with common settings and styling. */

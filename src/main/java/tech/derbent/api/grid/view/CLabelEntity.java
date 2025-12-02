@@ -7,10 +7,9 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entityOfCompany.domain.CStatus;
-import tech.derbent.api.interfaces.IHasColorAndIcon;
+import tech.derbent.api.interfaces.IHasColor;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.ui.component.basic.CH2;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.utils.CColorUtils;
@@ -20,7 +19,7 @@ import tech.derbent.base.users.domain.CUser;
 /** CLabelEntity - Unified label component for displaying entities or text values.
  * <p>
  * This component provides a standardized way to display entities across the application with appropriate icons, colors, and formatting based on
- * entity type. It automatically detects entity capabilities (IHasColorAndIcon, CStatus, CTypeEntity, CUser) and renders accordingly.
+ * entity type. It automatically detects entity capabilities (IHasIcon, CStatus, CTypeEntity, CUser) and renders accordingly.
  * </p>
  * <p>
  * <strong>Factory Methods:</strong>
@@ -41,9 +40,9 @@ import tech.derbent.base.users.domain.CUser;
  * @since 1.0 */
 public class CLabelEntity extends Div {
 
+	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 	private static final String DEFAULT_BORDER_RADIUS = "4px";
 	private static final String DEFAULT_PADDING = "4px 8px";
-	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLabelEntity.class);
 	private static final long serialVersionUID = 1L;
 
@@ -54,82 +53,12 @@ public class CLabelEntity extends Div {
 		if (icon == null) {
 			return;
 		}
-		Check.instanceOf(entity, IHasColorAndIcon.class, "Entity must implement IHasColorAndIcon to apply icon color");
+		Check.instanceOf(entity, IHasIcon.class, "Entity must implement IHasIcon to apply icon color");
 		final String color = getColorForEntity(entity);
 		icon.getStyle().set("width", "24px").set("height", "24px").set("flex-shrink", "0");
 		if (color != null && !color.isBlank()) {
 			icon.getStyle().set("color", color);
 		}
-	}
-
-	/** Creates an H2 header label for an entity with icon and color.
-	 * @param entity the entity to display
-	 * @return a Div containing an H2 with entity display */
-	public static CLabelEntity createH2Label(final CEntityDB<?> entity) {
-		final CLabelEntity container = new CLabelEntity();
-		final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
-		final CH2 header = new CH2(displayText);
-		header.getStyle().set("margin", "0");
-		if (entity instanceof IHasColorAndIcon) {
-			final Icon icon = getIconForEntity(entity);
-			if (icon != null) {
-				applyIconColor(icon, entity);
-				container.add(icon);
-			}
-		}
-		container.add(header);
-		return container;
-	}
-
-	/** Creates an H2 header label for text.
-	 * @param text the text to display
-	 * @return a Div containing an H2 */
-	public static CLabelEntity createH2Label(final String text) {
-		final CLabelEntity container = new CLabelEntity();
-		final CH2 header = new CH2(text != null ? text : "");
-		header.getStyle().set("margin", "0");
-		container.add(header);
-		return container;
-	}
-
-	/** Creates an H3 header label for an entity with icon and color.
-	 * @param entity the entity to display
-	 * @return a Div containing an H3 with entity display */
-	public static Div createH3Label(final CEntityDB<?> entity) {
-		final CLabelEntity container = new CLabelEntity();
-		final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
-		final CH3 header = new CH3(displayText);
-		header.getStyle().set("margin", "0");
-		if (entity instanceof IHasColorAndIcon) {
-			final Icon icon = getIconForEntity(entity);
-			if (icon != null) {
-				applyIconColor(icon, entity);
-				container.add(icon);
-			}
-		}
-		container.add(header);
-		return container;
-	}
-
-	/** Creates an H3 header label for text.
-	 * @param text the text to display
-	 * @return a Div containing an H3 */
-	public static Div createH3Label(final String text) {
-		final CLabelEntity container = new CLabelEntity();
-		container.getStyle().set("display", "flex").set("align-items", "center");
-		final CH3 header = new CH3(text != null ? text : "");
-		header.getStyle().set("margin", "0");
-		container.add(header);
-		return container;
-	}
-
-	/** Creates a plain label for an entity without any decoration (no icon, no color).
-	 * @param entity the entity to display (can be null)
-	 * @return a new CLabelEntity instance */
-	public static CLabelEntity createPlainLabel(final CEntityDB<?> entity) {
-		final CLabelEntity label = new CLabelEntity();
-		label.setValue(entity, false);
-		return label;
 	}
 
 	/** Creates a date label with calendar icon.
@@ -191,6 +120,76 @@ public class CLabelEntity extends Div {
 		return label;
 	}
 
+	/** Creates an H2 header label for an entity with icon and color.
+	 * @param entity the entity to display
+	 * @return a Div containing an H2 with entity display */
+	public static CLabelEntity createH2Label(final CEntityDB<?> entity) {
+		final CLabelEntity container = new CLabelEntity();
+		final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
+		final CH2 header = new CH2(displayText);
+		header.getStyle().set("margin", "0");
+		if (entity instanceof IHasIcon) {
+			final Icon icon = getIconForEntity(entity);
+			if (icon != null) {
+				applyIconColor(icon, entity);
+				container.add(icon);
+			}
+		}
+		container.add(header);
+		return container;
+	}
+
+	/** Creates an H2 header label for text.
+	 * @param text the text to display
+	 * @return a Div containing an H2 */
+	public static CLabelEntity createH2Label(final String text) {
+		final CLabelEntity container = new CLabelEntity();
+		final CH2 header = new CH2(text != null ? text : "");
+		header.getStyle().set("margin", "0");
+		container.add(header);
+		return container;
+	}
+
+	/** Creates an H3 header label for an entity with icon and color.
+	 * @param entity the entity to display
+	 * @return a Div containing an H3 with entity display */
+	public static Div createH3Label(final CEntityDB<?> entity) {
+		final CLabelEntity container = new CLabelEntity();
+		final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
+		final CH3 header = new CH3(displayText);
+		header.getStyle().set("margin", "0");
+		if (entity instanceof IHasIcon) {
+			final Icon icon = getIconForEntity(entity);
+			if (icon != null) {
+				applyIconColor(icon, entity);
+				container.add(icon);
+			}
+		}
+		container.add(header);
+		return container;
+	}
+
+	/** Creates an H3 header label for text.
+	 * @param text the text to display
+	 * @return a Div containing an H3 */
+	public static Div createH3Label(final String text) {
+		final CLabelEntity container = new CLabelEntity();
+		container.getStyle().set("display", "flex").set("align-items", "center");
+		final CH3 header = new CH3(text != null ? text : "");
+		header.getStyle().set("margin", "0");
+		container.add(header);
+		return container;
+	}
+
+	/** Creates a plain label for an entity without any decoration (no icon, no color).
+	 * @param entity the entity to display (can be null)
+	 * @return a new CLabelEntity instance */
+	public static CLabelEntity createPlainLabel(final CEntityDB<?> entity) {
+		final CLabelEntity label = new CLabelEntity();
+		label.setValue(entity, false);
+		return label;
+	}
+
 	/** Creates a user label with icon and full name.
 	 * @param user the user to display (can be null)
 	 * @return a CLabelEntity with user display */
@@ -227,29 +226,12 @@ public class CLabelEntity extends Div {
 			return null;
 		}
 		try {
-			// Check IHasColorAndIcon interface first
-			if (entity instanceof IHasColorAndIcon) {
-				final String color = ((IHasColorAndIcon) entity).getColor();
-				if (color != null && !color.isBlank()) {
-					return color;
-				}
+			// Check IHasIcon interface first
+			if (entity instanceof IHasColor) {
+				return ((IHasColor) entity).getColor();
+			} else {
+				return "";
 			}
-			// Check CStatus entities
-			if (entity instanceof CStatus) {
-				final String color = ((CStatus<?>) entity).getColor();
-				if (color != null && !color.isBlank()) {
-					return color;
-				}
-			}
-			// Check CTypeEntity
-			if (entity instanceof CTypeEntity) {
-				final String color = ((CTypeEntity<?>) entity).getColor();
-				if (color != null && !color.isBlank()) {
-					return color;
-				}
-			}
-			// Fall back to CColorUtils which handles reflection-based color extraction
-			return CColorUtils.getColorFromEntity(entity);
 		} catch (final Exception e) {
 			LOGGER.debug("Could not get color for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
 			return null;
@@ -332,13 +314,16 @@ public class CLabelEntity extends Div {
 				getStyle().set("font-style", "italic");
 				return;
 			}
-			if (entity instanceof IHasColorAndIcon && showIconColor) {
+			if (entity instanceof IHasColor && showIconColor) {
 				final String color = getColorForEntity(entity);
 				getStyle().set("background-color", color);
 				getStyle().set("color", CColorUtils.getContrastTextColor(color));
 				getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
+			}
+			if (entity instanceof IHasIcon && showIconColor) {
 				final Icon icon = getIconForEntity(entity);
 				CColorUtils.styleIcon(icon);
+				final String color = getColorForEntity(entity);
 				icon.getStyle().set("color", CColorUtils.getContrastTextColor(color));
 				add(icon);
 			}

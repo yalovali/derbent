@@ -12,7 +12,7 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IHasColorAndIcon;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
@@ -187,7 +187,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 					getElement().getStyle().remove("color");
 					return;
 				}
-				if (selectedItem instanceof IHasColorAndIcon) {
+				if (selectedItem instanceof IHasIcon) {
 					icon = CColorUtils.getIconForEntity(selectedItem);
 					CColorUtils.styleIcon(icon);
 					try {

@@ -11,7 +11,7 @@ import tech.derbent.api.utils.CAuxillaries;
  * <p>
  * This widget provides a three-row layout with common content:
  * <ul>
- * <li><b>Row 1:</b> Entity name with icon and color (if entity implements IHasColorAndIcon)</li>
+ * <li><b>Row 1:</b> Entity name with icon and color (if entity implements IHasIcon)</li>
  * <li><b>Row 2:</b> Description (truncated with ellipsis)</li>
  * <li><b>Row 3:</b> Status badge, responsible user, and date range</li>
  * </ul>

@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.interfaces.IHasColor;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
@@ -17,7 +18,7 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
  * @author Derbent Team
  * @since 1.0 */
 @MappedSuperclass
-public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityClass> {
+public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityClass> implements IHasColor {
 
 	@Column (nullable = false)
 	@AMetaData (
