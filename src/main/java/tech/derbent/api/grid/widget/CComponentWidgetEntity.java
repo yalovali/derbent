@@ -57,9 +57,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		public T getEntity() { return entity; }
 	}
 
-	protected static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntity.class);
-	/** Cache for getter methods to improve reflection performance in grids */
 	private static final java.util.Map<String, java.lang.reflect.Method> methodCache = new java.util.concurrent.ConcurrentHashMap<>();
 	private static final long serialVersionUID = 1L;
 
@@ -95,7 +93,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 				return "";
 			}
 			final LocalDate date = dateExtractor.apply(entity);
-			return date != null ? date.format(DATE_FORMATTER) : "";
+			return date != null ? date.format(tech.derbent.api.grid.view.CLabelEntity.DATE_FORMATTER) : "";
 		};
 	}
 

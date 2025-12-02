@@ -197,13 +197,14 @@ public final class CColorUtils {
 		return item.toString();
 	}
 
+	/** @deprecated Use {@link tech.derbent.api.grid.view.CLabelEntity#createUserLabel(CUser)} or {@link tech.derbent.api.grid.view.CLabelEntity} constructor instead for consistent entity display. */
+	@Deprecated
 	public static HorizontalLayout getEntityWithIcon(final CEntityNamed<?> entity) {
 		Check.notNull(entity, "Entity cannot be null when creating entity with icon display");
 		final HorizontalLayout layout = new HorizontalLayout();
 		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
 		layout.setSpacing(true);
 		try {
-			// Get the entity's icon using the existing infrastructure
 			final Icon icon = getIconForEntity(entity);
 			if (icon != null) {
 				icon.setSize("24px");
@@ -211,9 +212,7 @@ public final class CColorUtils {
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("Could not create icon for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
-			// Continue without icon rather than failing completely
 		}
-		// Add entity name - for Users, include lastname if available
 		String displayName = entity.getName();
 		if (entity instanceof CUser) {
 			final CUser user = (CUser) entity;

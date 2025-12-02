@@ -43,7 +43,7 @@ public class CLabelEntity extends Div {
 
 	private static final String DEFAULT_BORDER_RADIUS = "4px";
 	private static final String DEFAULT_PADDING = "4px 8px";
-	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLabelEntity.class);
 	private static final long serialVersionUID = 1L;
 
