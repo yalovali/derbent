@@ -106,7 +106,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	/** Gets the icon for Gantt chart display.
 	 * @return the decision icon identifier */
 	@Override
-	public String getIcon() { return DEFAULT_ICON; }
+	public String getIconString() { return DEFAULT_ICON; }
 
 	public LocalDateTime getImplementationDate() { return implementationDate; }
 

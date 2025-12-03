@@ -195,7 +195,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	/** Gets the icon for Gantt chart display.
 	 * @return the order icon identifier */
 	@Override
-	public String getIcon() { return DEFAULT_ICON; }
+	public String getIconString() { return DEFAULT_ICON; }
 
 	public LocalDate getOrderDate() { return orderDate; }
 

@@ -15,6 +15,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
@@ -174,11 +175,11 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		addActionButton(VaadinIcon.EYE, "View Details", "VIEW");
 	}
 
-	protected void createFirstLine() {}
+	protected void createFirstLine() throws Exception {}
 
-	protected void createSecondLine() {}
+	protected void createSecondLine() throws Exception {}
 
-	protected void createThirdLine() {}
+	protected void createThirdLine() throws Exception {}
 
 	/** Gets the entity displayed in this widget.
 	 * @return the entity */
@@ -186,12 +187,17 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 
 	/** Initializes the widget structure and content. */
 	protected void initializeWidget() {
-		CAuxillaries.setId(this);
-		createFirstLine();
-		createSecondLine();
-		createThirdLine();
-		add(layoutLeft, layoutRight);
-		layoutLeft.add(layoutLineOne, layoutLineTwo, layoutLineThree);
+		try {
+			CAuxillaries.setId(this);
+			createFirstLine();
+			createSecondLine();
+			createThirdLine();
+			add(layoutLeft, layoutRight);
+			layoutLeft.add(layoutLineOne, layoutLineTwo, layoutLineThree);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing widget for entity {}: {}", entity, e.getMessage());
+			layoutLeft.add(new CDiv("Exception occured"));
+		}
 	}
 
 	/** Checks if the widget is selected.

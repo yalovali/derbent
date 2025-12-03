@@ -82,10 +82,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		try {
 			grid.addEntityColumn(item -> {
 				return item.getItem().getStatus();
-			}, "Status", "status");
-		} catch (Exception e) {
+			}, "Status", "status", CSprintItem.class);
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
+		CGrid.styleColumnHeader(grid.addColumn(CSprintItem::getItemType).setWidth("120px"), "Type");
 	}
 
 	@Override
@@ -248,7 +249,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			// Use interface methods for dialog configuration
 			// Raw types are required due to complex generic constraints between CDialogEntitySelection and Consumer
 			final CDialogEntitySelection<CProjectItem<?>> dialog = new CDialogEntitySelection(getDialogTitle(), getDialogEntityTypes(),
-					getItemsProvider(), (Consumer) getSelectionHandler(), isMultiSelect(), getAlreadySelectedProvider(), getAlreadySelectedMode());
+					getItemsProvider(), getSelectionHandler(), isMultiSelect(), getAlreadySelectedProvider(), getAlreadySelectedMode());
 			dialog.open();
 		} catch (final Exception ex) {
 			LOGGER.error("Error opening entity selection dialog", ex);

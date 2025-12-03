@@ -80,7 +80,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
 			dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
 	)
-	private CComponentWidgetEntity<CActivity> componentWidget = null;
+	private final CComponentWidgetEntity<CActivity> componentWidget = null;
 	@Column (nullable = true)
 	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
 	private LocalDate dueDate;
@@ -221,10 +221,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
-	public CComponentWidgetEntity<CActivity> getComponentWidget() {
-		LOGGER.debug("getComponentWidget() - Generating component widget for activity id={}", getId());
-		return componentWidget;
-	}
+	public CComponentWidgetEntity<CActivity> getComponentWidget() { return componentWidget; }
 
 	public LocalDate getDueDate() { return dueDate; }
 
@@ -247,7 +244,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Gets the icon for Gantt chart display.
 	 * @return the activity icon identifier */
 	@Override
-	public String getIcon() { return DEFAULT_ICON; }
+	public String getIconString() { return DEFAULT_ICON; }
 
 	public String getNotes() { return notes; }
 

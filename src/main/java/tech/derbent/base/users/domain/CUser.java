@@ -1,7 +1,9 @@
 package tech.derbent.base.users.domain;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import com.vaadin.flow.component.icon.Icon;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,6 +23,7 @@ import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISearchable;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.activities.domain.CActivity;
@@ -36,9 +39,9 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	public static final String DEFAULT_COLOR = "#6CAFB0"; // CDE Light Green - individual people
 	public static final String DEFAULT_ICON = "vaadin:user";
-	public static final int MAX_LENGTH_NAME = 255;
 	public static final String ENTITY_TITLE_PLURAL = "Users";
 	public static final String ENTITY_TITLE_SINGULAR = "User";
+	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
 	@OneToMany (fetch = FetchType.LAZY)
 	@OrderColumn (name = "item_index")
@@ -160,33 +163,39 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
 
 	@Override
-	public String getColor() {
-		return color != null ? color : DEFAULT_COLOR;
+	public Class<?> getClassName() { // TODO Auto-generated method stub
+		return CUser.class;
 	}
 
 	@Override
-	public String getIcon() {
+	public String getColor() { return color != null ? color : DEFAULT_COLOR; }
+
+	public CUserCompanyRole getCompanyRole() { return companyRole; }
+
+	public String getEmail() { return email; }
+
+	@Override
+	public Icon getIcon() {
+		// convert picture data to icon
+		if (profilePictureData != null && profilePictureData.length > 0) {
+			final Icon icon = new Icon();
+			final String base64Image = Base64.getEncoder().encodeToString(profilePictureData);
+			icon.getElement().setAttribute("src", "data:image/png;base64," + base64Image);
+			icon.setSize("32px");
+			return CColorUtils.styleIcon(icon);
+		} else {
+			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
+		}
+	}
+
+	@Override
+	public String getIconString() {
 		// Return icon string identifier based on profile picture availability
 		if (profilePictureData != null && profilePictureData.length > 0) {
 			return "vaadin:user-card"; // Icon indicating user with profile picture
 		}
 		return DEFAULT_ICON; // Default user icon
 	}
-
-	@Override
-	public byte[] getIconData() {
-		// Return the profile picture data if available
-		return profilePictureData;
-	}
-
-	@Override
-	public Class<?> getClassName() { // TODO Auto-generated method stub
-		return CUser.class;
-	}
-
-	public CUserCompanyRole getCompanyRole() { return companyRole; }
-
-	public String getEmail() { return email; }
 
 	public String getLastname() { return lastname; }
 
@@ -260,9 +269,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	@Override
-	public void setColor(final String color) {
-		this.color = color;
-	}
+	public void setColor(final String color) { this.color = color; }
 
 	public void setCompany(final CCompany company, final CUserCompanyRole companyRole) {
 		setCompany(company);

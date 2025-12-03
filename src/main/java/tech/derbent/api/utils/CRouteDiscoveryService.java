@@ -32,7 +32,7 @@ public class CRouteDiscoveryService {
 
 		public String getDisplayName() { return displayName; }
 
-		public Icon getIcon() { return icon; }
+		public Icon getIconString() { return icon; }
 
 		public String getIconColor() { return iconColor; }
 

@@ -198,7 +198,8 @@ public final class CColorUtils {
 		return item.toString();
 	}
 
-	/** @deprecated Use {@link tech.derbent.api.grid.view.CLabelEntity#createUserLabel(CUser)} or {@link tech.derbent.api.grid.view.CLabelEntity} constructor instead for consistent entity display. */
+	/** @deprecated Use {@link tech.derbent.api.grid.view.CLabelEntity#createUserLabel(CUser)} or {@link tech.derbent.api.grid.view.CLabelEntity}
+	 *             constructor instead for consistent entity display. */
 	@Deprecated
 	public static HorizontalLayout getEntityWithIcon(final CEntityNamed<?> entity) {
 		Check.notNull(entity, "Entity cannot be null when creating entity with icon display");
@@ -229,13 +230,11 @@ public final class CColorUtils {
 		String iconString;
 		// Check if entity implements IHasIcon and use instance method
 		if (entity instanceof IHasIcon) {
-			iconString = ((IHasIcon) entity).getIcon();
+			return styleIcon(((IHasIcon) entity).getIcon());
 		} else {
-			// Fall back to static icon lookup
 			iconString = getStaticIconFilename(entity.getClass().getName());
 		}
-		final Icon icon = new Icon(iconString);
-		return styleIcon(icon);
+		return getIconFromString(iconString);
 	}
 
 	public static Icon getIconForViewClass(final CAbstractNamedEntityPage<?> view) throws Exception {
@@ -245,6 +244,11 @@ public final class CColorUtils {
 
 	public static Icon getIconForViewClass(final Class<? extends CAbstractNamedEntityPage<?>> clazz) throws Exception {
 		final Icon icon = new Icon(getStaticIconFilename(clazz));
+		return styleIcon(icon);
+	}
+
+	public static Icon getIconFromString(final String iconString) {
+		final Icon icon = new Icon(iconString);
 		return styleIcon(icon);
 	}
 

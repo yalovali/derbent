@@ -155,7 +155,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 
 	/** Get the icon identifier for the entity.
 	 * @return The icon identifier */
-	public String getIcon() { return entity.getIcon(); }
+	public String getIconString() { return entity.getIconString(); }
 
 	/** Get the parent entity ID.
 	 * @return The parent ID or null */

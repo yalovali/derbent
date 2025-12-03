@@ -267,26 +267,39 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		return styleColumnHeader(column, header);
 	}
 
-	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key)
-			throws Exception {
-		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
-		Field field;
-		field = CEntityFieldService.getEntityField(clazz, key);
-		final AMetaData meta = field.getAnnotation(AMetaData.class);
-		Check.notNull(meta, "AMetaData annotation is missing on field: " + key + " in class: " + clazz.getSimpleName());
-		String width = getColumnWidth(field, meta);
-		final Column<EntityClass> column = addComponentColumn(item -> {
-			final Object value = valueProvider.apply(item);
-			final CLabelEntity labelEntity = new CLabelEntity();
-			if (value instanceof CEntityDB) {
-				labelEntity.setValue((CEntityDB<?>) value, true);
-			} else {
-				labelEntity.setText(value != null ? value.toString() : "");
-			}
-			return labelEntity;
-		}).setWidth(width).setFlexGrow(0).setSortable(true).setResizable(true);
-		return styleColumnHeader(column, header);
+	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key,
+			final Class<?> returnType) throws Exception {
+		try {
+			Check.notNull(valueProvider, "Value provider cannot be null");
+			Check.notBlank(header, "Header cannot be null or blank");
+			Field field;
+			// final Method applyMethod = valueProvider.getClass().getMethod("apply", Object.class);
+			// final Class<?> returnType = applyMethod.getReturnType();
+			field = CEntityFieldService.getEntityField(clazz, key);
+			// field = CEntityFieldService.getEntityField(clazz, key);
+			final AMetaData meta = field.getAnnotation(AMetaData.class);
+			Check.notNull(meta, "AMetaData annotation is missing on field: " + key + " in class: " + clazz.getSimpleName());
+			final String width = getColumnWidth(field, meta);
+			final Column<EntityClass> column = addComponentColumn(item -> {
+				final CLabelEntity labelEntity = new CLabelEntity();
+				try {
+					final Object value = valueProvider.apply(item);
+					if (value instanceof CEntityDB) {
+						labelEntity.setValue((CEntityDB<?>) value, true);
+					} else {
+						labelEntity.setText(value != null ? value.toString() : "");
+					}
+				} catch (final Exception e) {
+					LOGGER.error("Error setting entity column value: {}", e.getMessage());
+					labelEntity.setText("Error");
+				}
+				return labelEntity;
+			}).setWidth(width).setFlexGrow(0).setSortable(true).setResizable(true);
+			return styleColumnHeader(column, header);
+		} catch (final Exception e) {
+			LOGGER.error("Error adding entity column for header: {}: {}, key: {} clazz:", header, e.getMessage(), key, clazz.getSimpleName());
+			throw e;
+		}
 	}
 
 	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {

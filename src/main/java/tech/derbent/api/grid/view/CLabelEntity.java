@@ -122,14 +122,15 @@ public class CLabelEntity extends Div {
 
 	/** Creates an H2 header label for an entity with icon and color.
 	 * @param entity the entity to display
-	 * @return a Div containing an H2 with entity display */
-	public static CLabelEntity createH2Label(final CEntityDB<?> entity) {
+	 * @return a Div containing an H2 with entity display
+	 * @throws Exception */
+	public static CLabelEntity createH2Label(final CEntityDB<?> entity) throws Exception {
 		final CLabelEntity container = new CLabelEntity();
 		final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
 		final CH2 header = new CH2(displayText);
 		header.getStyle().set("margin", "0");
 		if (entity instanceof IHasIcon) {
-			final Icon icon = getIconForEntity(entity);
+			final Icon icon = CColorUtils.getIconForEntity(entity);
 			if (icon != null) {
 				applyIconColor(icon, entity);
 				container.add(icon);
@@ -152,14 +153,15 @@ public class CLabelEntity extends Div {
 
 	/** Creates an H3 header label for an entity with icon and color.
 	 * @param entity the entity to display
-	 * @return a Div containing an H3 with entity display */
-	public static Div createH3Label(final CEntityDB<?> entity) {
+	 * @return a Div containing an H3 with entity display
+	 * @throws Exception */
+	public static Div createH3Label(final CEntityDB<?> entity) throws Exception {
 		final CLabelEntity container = new CLabelEntity();
 		final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
 		final CH3 header = new CH3(displayText);
 		header.getStyle().set("margin", "0");
 		if (entity instanceof IHasIcon) {
-			final Icon icon = getIconForEntity(entity);
+			final Icon icon = CColorUtils.getIconForEntity(entity);
 			if (icon != null) {
 				applyIconColor(icon, entity);
 				container.add(icon);
@@ -183,8 +185,9 @@ public class CLabelEntity extends Div {
 
 	/** Creates a plain label for an entity without any decoration (no icon, no color).
 	 * @param entity the entity to display (can be null)
-	 * @return a new CLabelEntity instance */
-	public static CLabelEntity createPlainLabel(final CEntityDB<?> entity) {
+	 * @return a new CLabelEntity instance
+	 * @throws Exception */
+	public static CLabelEntity createPlainLabel(final CEntityDB<?> entity) throws Exception {
 		final CLabelEntity label = new CLabelEntity();
 		label.setValue(entity, false);
 		return label;
@@ -238,22 +241,6 @@ public class CLabelEntity extends Div {
 		}
 	}
 
-	/** Gets the icon for an entity based on its type.
-	 * @param entity the entity
-	 * @return the icon or null */
-	private static Icon getIconForEntity(final CEntityDB<?> entity) {
-		if (entity == null) {
-			return null;
-		}
-		try {
-			// Use CColorUtils infrastructure for icon resolution
-			return CColorUtils.getIconForEntity(entity);
-		} catch (final Exception e) {
-			LOGGER.debug("Could not get icon for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
-			return null;
-		}
-	}
-
 	/** Default constructor. */
 	public CLabelEntity() {
 		super();
@@ -261,8 +248,9 @@ public class CLabelEntity extends Div {
 	}
 
 	/** Constructor with entity value.
-	 * @param entity the entity to display */
-	public CLabelEntity(final CEntityDB<?> entity) {
+	 * @param entity the entity to display
+	 * @throws Exception */
+	public CLabelEntity(final CEntityDB<?> entity) throws Exception {
 		super();
 		initializeComponent();
 		setValue(entity, true);
@@ -300,11 +288,11 @@ public class CLabelEntity extends Div {
 		setText(text != null ? text : "");
 	}
 
-	public void setValue(final CEntityDB<?> entity, final boolean showIconColor) {
+	public void setValue(final CEntityDB<?> entity, final boolean showIconColor) throws Exception {
 		setValue(entity, CColorUtils.getDisplayTextFromEntity(entity), showIconColor);
 	}
 
-	public void setValue(final CEntityDB<?> entity, String displayText, final boolean showIconColor) {
+	public void setValue(final CEntityDB<?> entity, String displayText, final boolean showIconColor) throws Exception {
 		try {
 			removeAll();
 			resetStyles();
@@ -321,7 +309,7 @@ public class CLabelEntity extends Div {
 				getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
 			}
 			if (entity instanceof IHasIcon && showIconColor) {
-				final Icon icon = getIconForEntity(entity);
+				final Icon icon = CColorUtils.getIconForEntity(entity);
 				CColorUtils.styleIcon(icon);
 				final String color = getColorForEntity(entity);
 				icon.getStyle().set("color", CColorUtils.getContrastTextColor(color));

@@ -18,8 +18,8 @@ import tech.derbent.app.sprints.domain.CSprint;
  * </ul>
  * </p>
  * <p>
- * Extends CComponentWidgetEntityOfProject and adds sprint-specific information like item count and sprint type.
- * Uses CLabelEntity for colorful, visually appealing badges and labels.
+ * Extends CComponentWidgetEntityOfProject and adds sprint-specific information like item count and sprint type. Uses CLabelEntity for colorful,
+ * visually appealing badges and labels.
  * </p>
  * @author Derbent Framework
  * @since 1.0
@@ -35,10 +35,10 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		super(sprint);
 	}
 
-	/** Creates the second line with sprint type and item count.
-	 * This line shows colorful badges for sprint type and item count. */
+	/** Creates the second line with sprint type and item count. This line shows colorful badges for sprint type and item count.
+	 * @throws Exception */
 	@Override
-	protected void createSecondLine() {
+	protected void createSecondLine() throws Exception {
 		// Show sprint type with color if available
 		if (getEntity().getEntityType() != null) {
 			final CLabelEntity typeLabel = new CLabelEntity();
@@ -49,8 +49,9 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		// Show item count with icon and colorful badge
 		final Integer itemCount = getEntity().getItemCount();
 		final CLabelEntity itemCountLabel = new CLabelEntity();
-		itemCountLabel.getStyle().set("display", "flex").set("align-items", "center").set("gap", "4px")
-				.set("background-color", "#E3F2FD") // Light blue background
+		itemCountLabel.getStyle().set("display", "flex").set("align-items", "center").set("gap", "4px").set("background-color", "#E3F2FD") // Light
+																																			// blue
+																																			// background
 				.set("color", "#1976D2") // Blue text
 				.set("padding", "4px 8px").set("border-radius", "4px").set("font-size", "10pt").set("font-weight", "500");
 		// Add tasks icon

@@ -40,7 +40,7 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 			displayName = "Icon", required = true, readOnly = false, defaultValue = "vaadin:file", description = "Icon for the page menu item",
 			hidden = false, maxLength = 100, useIcon = true
 	)
-	private String icon;
+	private String iconString;
 	@Column (name = "sort_order", nullable = false)
 	@NotNull (message = ValidationMessages.SORT_ORDER_REQUIRED)
 	@Min (value = 1, message = ValidationMessages.SORT_ORDER_MIN)
@@ -85,7 +85,7 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	protected CStatus() {
 		super();
 		setColor(DEFAULT_COLOR);
-		setIcon(DEFAULT_ICON);
+		setIconString(DEFAULT_ICON);
 		sortOrder = 100;
 		attributeNonDeletable = false;
 	}
@@ -95,7 +95,7 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	protected CStatus(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name, company);
 		setColor(DEFAULT_COLOR);
-		setIcon(DEFAULT_ICON);
+		setIconString(DEFAULT_ICON);
 		sortOrder = 100;
 		attributeNonDeletable = false;
 	}
@@ -106,15 +106,7 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	public String getColor() { return color; }
 
 	@Override
-	public String getIcon() {
-		return icon != null ? icon : DEFAULT_ICON;
-	}
-
-	@Override
-	public byte[] getIconData() {
-		// Status entities don't have binary icon data
-		return null;
-	}
+	public String getIconString() { return iconString != null ? iconString : DEFAULT_ICON; }
 
 	public Integer getSortOrder() { return sortOrder; }
 
@@ -133,7 +125,7 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	@Override
 	public void setColor(final String color) { this.color = color; }
 
-	public void setIcon(String icon) { this.icon = icon; }
+	public void setIconString(String icon) { this.iconString = icon; }
 
 	public void setSortOrder(final Integer sortOrder) { this.sortOrder = sortOrder; }
 

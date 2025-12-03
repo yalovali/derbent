@@ -19,8 +19,8 @@ import tech.derbent.app.sprints.domain.CSprintItem;
  * </ul>
  * </p>
  * <p>
- * Displays the underlying project item (Activity, Meeting, etc.) with ordering information.
- * Uses CLabelEntity for colorful, visually appealing badges and labels.
+ * Displays the underlying project item (Activity, Meeting, etc.) with ordering information. Uses CLabelEntity for colorful, visually appealing badges
+ * and labels.
  * </p>
  * @author Derbent Framework
  * @since 1.0
@@ -36,18 +36,19 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 		super(sprintItem);
 	}
 
-	/** Creates the first line with order badge and project item name.
-	 * This line shows the item order number and the underlying project item name. */
+	/** Creates the first line with order badge and project item name. This line shows the item order number and the underlying project item name.
+	 * @throws Exception */
 	@Override
-	protected void createFirstLine() {
+	protected void createFirstLine() throws Exception {
 		// Show order number badge
 		final Integer order = getEntity().getItemOrder();
 		final CLabelEntity orderLabel = new CLabelEntity();
-		orderLabel.getStyle().set("display", "flex").set("align-items", "center").set("justify-content", "center")
-				.set("background-color", "#FFF3E0") // Light orange background
+		orderLabel.getStyle().set("display", "flex").set("align-items", "center").set("justify-content", "center").set("background-color", "#FFF3E0") // Light
+																																						// orange
+																																						// background
 				.set("color", "#E65100") // Deep orange text
-				.set("padding", "4px 8px").set("border-radius", "4px").set("font-size", "10pt").set("font-weight", "600")
-				.set("min-width", "32px").set("margin-right", "8px");
+				.set("padding", "4px 8px").set("border-radius", "4px").set("font-size", "10pt").set("font-weight", "600").set("min-width", "32px")
+				.set("margin-right", "8px");
 		orderLabel.setText("#" + (order != null ? order : 0));
 		layoutLineOne.add(orderLabel);
 		// Show project item name with icon if item is loaded
@@ -63,8 +64,8 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 		}
 	}
 
-	/** Creates the second line with project item type and description.
-	 * This line shows a colorful badge for the item type and truncated description. */
+	/** Creates the second line with project item type and description. This line shows a colorful badge for the item type and truncated
+	 * description. */
 	@Override
 	protected void createSecondLine() {
 		final CProjectItem<?> projectItem = getEntity().getItem();
@@ -86,30 +87,30 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 				typeIcon = VaadinIcon.CALENDAR.create();
 			}
 			typeLabel.getStyle().set("display", "flex").set("align-items", "center").set("gap", "4px").set("background-color", bgColor)
-					.set("color", textColor).set("padding", "4px 8px").set("border-radius", "4px").set("font-size", "10pt")
-					.set("font-weight", "500").set("margin-right", "8px");
+					.set("color", textColor).set("padding", "4px 8px").set("border-radius", "4px").set("font-size", "10pt").set("font-weight", "500")
+					.set("margin-right", "8px");
 			typeIcon.getStyle().set("width", "14px").set("height", "14px").set("color", textColor);
 			typeLabel.add(typeIcon);
 			// Display friendly name
-			String displayName = itemType.substring(1); // Remove 'C' prefix
+			final String displayName = itemType.substring(1); // Remove 'C' prefix
 			typeLabel.setText(displayName);
 			layoutLineTwo.add(typeLabel);
 		}
 		// Show description if project item is loaded
 		if (projectItem != null && projectItem.getDescription() != null && !projectItem.getDescription().isEmpty()) {
 			final CLabelEntity descLabel = new CLabelEntity();
-			final String truncatedDesc = projectItem.getDescription().length() > 80 ? projectItem.getDescription().substring(0, 77) + "..."
-					: projectItem.getDescription();
+			final String truncatedDesc =
+					projectItem.getDescription().length() > 80 ? projectItem.getDescription().substring(0, 77) + "..." : projectItem.getDescription();
 			descLabel.setText(truncatedDesc);
 			descLabel.getStyle().set("font-size", "10pt").set("color", "#666");
 			layoutLineTwo.add(descLabel);
 		}
 	}
 
-	/** Creates the third line with status, user, and dates from the project item.
-	 * This line shows information from the underlying project item. */
+	/** Creates the third line with status, user, and dates from the project item. This line shows information from the underlying project item.
+	 * @throws Exception */
 	@Override
-	protected void createThirdLine() {
+	protected void createThirdLine() throws Exception {
 		final CProjectItem<?> projectItem = getEntity().getItem();
 		if (projectItem != null) {
 			// Show status

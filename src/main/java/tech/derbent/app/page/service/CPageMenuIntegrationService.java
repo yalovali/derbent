@@ -34,7 +34,7 @@ public class CPageMenuIntegrationService {
 	private MenuEntry createMenuEntryFromPage(CPageEntity page) {
 		Check.notNull(page, "Page entity cannot be null");
 		// Get icon with fallback
-		String icon = page.getIcon();
+		String icon = page.getIconString();
 		if (icon == null || icon.trim().isEmpty()) {
 			icon = "vaadin:file-text-o";
 		}

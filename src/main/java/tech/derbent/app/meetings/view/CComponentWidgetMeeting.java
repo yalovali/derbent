@@ -32,9 +32,10 @@ public class CComponentWidgetMeeting extends CComponentWidgetEntityOfProject<CMe
 		super(meeting);
 	}
 
-	/** Creates the second line with meeting agenda and location. */
+	/** Creates the second line with meeting agenda and location.
+	 * @throws Exception */
 	@Override
-	protected void createSecondLine() {
+	protected void createSecondLine() throws Exception {
 		super.createSecondLine();
 		final String location = getEntity().getLocation();
 		layoutLineTwo.add(new CLabelEntity("Location: " + (location != null ? location : "N/A")));

@@ -16,7 +16,7 @@ public interface IGanttDisplayable {
 	LocalDate getEndDate();
 	/** Get the icon identifier for this item type. Should return a Vaadin icon identifier (e.g., "vaadin:tasks", "vaadin:calendar").
 	 * @return the icon identifier */
-	String getIcon();
+	String getIconString();
 	/** Get the parent item ID for hierarchy display.
 	 * @return the parent item ID, or null if this is a top-level item */
 	Long getParentId();

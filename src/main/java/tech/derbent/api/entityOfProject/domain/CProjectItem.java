@@ -55,7 +55,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	/** Get the icon identifier for Gantt chart display. Subclasses should override this to return their specific icon (e.g., "vaadin:tasks" for
 	 * activities). Default implementation returns a generic icon.
 	 * @return the icon identifier */
-	public String getIcon() { return "vaadin:file"; }
+	public String getIconString() { return "vaadin:file"; }
 
 	// --- Plain getters / setters ---
 	public Long getParentId() { return parentId; }

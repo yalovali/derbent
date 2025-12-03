@@ -33,19 +33,19 @@ public abstract class CComponentWidgetEntityOfProject<EntityClass extends CProje
 	}
 
 	@Override
-	protected void createFirstLine() {
+	protected void createFirstLine() throws Exception {
 		layoutLineOne.add(CLabelEntity.createH3Label(getEntity()));
 	}
 
 	@Override
-	protected void createSecondLine() {
+	protected void createSecondLine() throws Exception {
 		final CLabelEntity label = new CLabelEntity();
 		label.setValue(getEntity(), CAuxillaries.safeTrim(getEntity().getDescription(), MAX_DESCRIPTION_LENGTH), true);
 		layoutLineTwo.add(label);
 	}
 
 	@Override
-	protected void createThirdLine() {
+	protected void createThirdLine() throws Exception {
 		final EntityClass item = getEntity();
 		layoutLineThree.add(new CLabelEntity(getEntity().getStatus()));
 		layoutLineThree.add(new CLabelEntity(getEntity().getResponsible()));

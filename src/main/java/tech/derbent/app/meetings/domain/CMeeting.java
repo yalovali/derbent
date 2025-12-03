@@ -173,7 +173,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public CTypeEntity getEntityType() { return entityType; }
 
 	@Override
-	public String getIcon() { return DEFAULT_ICON; }
+	public String getIconString() { return DEFAULT_ICON; }
 
 	public String getLinkedElement() { return linkedElement; }
 

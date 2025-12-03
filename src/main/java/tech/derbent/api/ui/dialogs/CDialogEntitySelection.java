@@ -276,10 +276,8 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 			}).setHeader("").setWidth("40px").setFlexGrow(0);
 		}
 		// ID column
-		CGrid.styleColumnHeader(
-				gridItems.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
-						.setSortable(true).setKey("id"),
-				"ID");
+		CGrid.styleColumnHeader(gridItems.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setWidth(CGrid.WIDTH_ID)
+				.setFlexGrow(0).setSortable(true).setKey("id"), "ID");
 		// Name column - use cached method
 		CGrid.styleColumnHeader(
 				gridItems.addColumn(this::getEntityName).setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name"), "Name");
@@ -289,23 +287,27 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		// Status column with color support for CProjectItem entities
 		CGrid.styleColumnHeader(gridItems.addComponentColumn(item -> {
 			final CLabelEntity labelEntity = new CLabelEntity();
-			if (item instanceof CProjectItem) {
-				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-				if (projectItem.getStatus() != null) {
-					labelEntity.setValue(projectItem.getStatus(), true);
+			try {
+				if (item instanceof CProjectItem) {
+					final CProjectItem<?> projectItem = (CProjectItem<?>) item;
+					if (projectItem.getStatus() != null) {
+						labelEntity.setValue(projectItem.getStatus(), true);
+					} else {
+						labelEntity.setText("No Status");
+					}
 				} else {
-					labelEntity.setText("No Status");
+					// Use cached method
+					final Object status = getEntityStatus(item);
+					if (status instanceof CEntityDB) {
+						labelEntity.setValue((CEntityDB<?>) status, true);
+					} else if (status != null) {
+						labelEntity.setText(status.toString());
+					} else {
+						labelEntity.setText("N/A");
+					}
 				}
-			} else {
-				// Use cached method
-				final Object status = getEntityStatus(item);
-				if (status instanceof CEntityDB) {
-					labelEntity.setValue((CEntityDB<?>) status, true);
-				} else if (status != null) {
-					labelEntity.setText(status.toString());
-				} else {
-					labelEntity.setText("N/A");
-				}
+			} catch (final Exception e) {
+				labelEntity.setText("Error");
 			}
 			return labelEntity;
 		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), "Status");

@@ -68,6 +68,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private IContentOwner contentOwner;
 	protected CProject currentProject;
 	private boolean enableSelectionChangeListener;
+	private Class<?> entityClass;
 	private CGrid<?> grid;
 	private CGridEntity gridEntity;
 	private ISessionService sessionService;
@@ -222,7 +223,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						return null;
 					}
 				};
-				grid.addEntityColumn(valueProvider, displayName, fieldName);
+				grid.addEntityColumn(valueProvider, displayName, fieldName, entityClass);
 			} else if (Collection.class.isAssignableFrom(fieldType)) {
 				// Collection field - use addColumnEntityCollection if it contains entities
 				final ValueProvider valueProvider = entity -> {
@@ -375,17 +376,18 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					grid.addShortTextColumn(valueProvider, displayName, fieldName);
 				}
 			} else {
+				Check.fail("Unsupported field type for column creation: " + fieldType.getName());
 				// For any other type, use addEntityColumn which provides metadata-based styling
-				final ValueProvider valueProvider = entity -> {
-					try {
-						field.setAccessible(true);
-						return field.get(entity);
-					} catch (final Exception e) {
-						LOGGER.error("Error accessing field {}: {}", fieldName, e.getMessage());
-						return null;
-					}
-				};
-				grid.addEntityColumn(valueProvider, displayName, fieldName);
+				// final ValueProvider valueProvider = entity -> {
+				// try {
+				// field.setAccessible(true);
+				// return field.get(entity);
+				// } catch (final Exception e) {
+				// LOGGER.error("Error accessing field {}: {}", fieldName, e.getMessage());
+				// return null;
+				// }
+				// };
+				// grid.addEntityColumn(valueProvider, displayName, fieldName);
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to create column for field {}, falling back to addColumnByProperty: {}", fieldName, e.getMessage());
@@ -406,7 +408,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			final String serviceBeanName = gridEntity.getDataServiceBeanName();
 			Check.notNull(serviceBeanName, "Data service bean name is not set in grid entity");
 			// Get the entity class from the service bean
-			final Class<?> entityClass = getEntityClassFromService(serviceBeanName);
+			entityClass = getEntityClassFromService(serviceBeanName);
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			grid = new CGrid(entityClass);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);

@@ -13,7 +13,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.screens.service.IOrderedEntity;
 
 /** CSprintItem - Join entity for Sprint-ProjectItem relationships. Represents an item (Activity, Meeting, etc.) included in a sprint with ordering.
@@ -28,6 +30,11 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	public static final String ENTITY_TITLE_PLURAL = "Sprint Items";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint Item";
 	public static final String VIEW_NAME = "Sprint Items View";
+	@AMetaData (
+			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
+			dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
+	)
+	private final CComponentWidgetEntity<CSprintItem> componentWidget = null;
 	// Transient field - loaded dynamically at runtime from itemId and itemType
 	@Transient
 	private CProjectItem<?> item;
@@ -57,12 +64,18 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	private String itemType;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "sprint_id", nullable = false)
-	@NotNull (message = "Sprint reference is required")
+	@NotNull (message = "Sprint reference is requ`ired")
 	@AMetaData (
 			displayName = "Sprint", required = true, readOnly = false, description = "The sprint this item belongs to", hidden = false,
 			dataProviderBean = "CSprintService"
 	)
 	private CSprint sprint;
+	@Transient
+	@AMetaData (
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the item", hidden = false,
+			setBackgroundFromColor = true, useIcon = true
+	)
+	protected CProjectItemStatus status;
 
 	/** Default constructor for JPA. */
 	public CSprintItem() {
@@ -112,6 +125,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 		this.itemOrder = itemOrder;
 	}
 
+	public CComponentWidgetEntity<CSprintItem> getComponentWidget() { return componentWidget; }
+
 	/** Get the project item. This is a transient field that must be loaded at runtime. Use CSprintItemService.loadItem() to populate this field.
 	 * @return the project item, or null if not loaded */
 	public CProjectItem<?> getItem() { return item; }
@@ -124,6 +139,13 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	public String getItemType() { return itemType; }
 
 	public CSprint getSprint() { return sprint; }
+
+	public CProjectItemStatus getStatus() {
+		if (item == null) {
+			return null;
+		}
+		return item.getStatus();
+	}
 
 	/** Set the project item. This also updates itemId and itemType.
 	 * @param item the project item */
