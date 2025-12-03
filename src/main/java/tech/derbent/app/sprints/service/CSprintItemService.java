@@ -90,7 +90,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 
 	@Override
 	public Class<?> getPageServiceClass() {
-		return null; // Uses default page service
+		return CPageServiceSprintItem.class;
 	}
 
 	@Override
