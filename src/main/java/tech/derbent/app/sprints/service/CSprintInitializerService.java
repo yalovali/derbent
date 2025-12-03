@@ -33,6 +33,31 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 	private static final String pageTitle = "Sprint Management";
 	private static final boolean showInQuickToolbar = true;
 
+	public static CGridEntity create_SprintEditingGridEntity(final CProject project) {
+		final CGridEntity grid = createBaseGridEntity(project, clazz);
+		grid.setColumnFields(List.of("sprintItems"));
+		return grid;
+	}
+
+	public static CDetailSection create_SprintEditingView(final CProject project) throws Exception {
+		try {
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			scr.addScreenLine(CDetailLinesService.createSection("Sprint Items"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sprintItems"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "itemCount"));
+			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "endDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			return scr;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sprint view.");
+			throw e;
+		}
+	}
+
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
@@ -78,6 +103,13 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+		// initialize another sprint view screen
+		final CDetailSection detailSection_2 = create_SprintEditingView(project);
+		detailSection_2.setName(detailSection.getName() + "_Editing");
+		final CGridEntity grid_2 = create_SprintEditingGridEntity(project);
+		grid_2.setName(grid.getName() + "_Editing");
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection_2, grid_2, menuTitle + "_2",
+				pageTitle + "_2", pageDescription + "_2", showInQuickToolbar, menuOrder);
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
