@@ -143,7 +143,15 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	public CGridEntity getGridEntity() { return gridEntity; }
 
 	@Override
-	public String getIcon() { return icon; }
+	public String getIcon() {
+		return icon != null ? icon : DEFAULT_ICON;
+	}
+
+	@Override
+	public byte[] getIconData() {
+		// Page entities don't have binary icon data
+		return null;
+	}
 
 	public String getMenuOrder() { return menuOrder; }
 

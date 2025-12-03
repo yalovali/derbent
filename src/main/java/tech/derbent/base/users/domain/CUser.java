@@ -19,6 +19,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
@@ -31,7 +32,7 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 		"login", "company_id"
 })) // Using quoted identifier to ensure exact case matching in
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
-public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator {
+public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator, IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#6CAFB0"; // CDE Light Green - individual people
 	public static final String DEFAULT_ICON = "vaadin:user";
@@ -52,6 +53,12 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			description = "Whether to display user interface sections as tabs", hidden = false
 	)
 	private Boolean attributeDisplaySectionsAsTabs;
+	@Column (name = "color", nullable = true, length = 7)
+	@AMetaData (
+			displayName = "Color", required = false, readOnly = false, defaultValue = DEFAULT_COLOR,
+			description = "User's color for display purposes", hidden = true
+	)
+	private String color;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_role_id", nullable = true)
 	@AMetaData (
@@ -153,6 +160,26 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
 
 	@Override
+	public String getColor() {
+		return color != null ? color : DEFAULT_COLOR;
+	}
+
+	@Override
+	public String getIcon() {
+		// Return icon string identifier based on profile picture availability
+		if (profilePictureData != null && profilePictureData.length > 0) {
+			return "vaadin:user-card"; // Icon indicating user with profile picture
+		}
+		return DEFAULT_ICON; // Default user icon
+	}
+
+	@Override
+	public byte[] getIconData() {
+		// Return the profile picture data if available
+		return profilePictureData;
+	}
+
+	@Override
 	public Class<?> getClassName() { // TODO Auto-generated method stub
 		return CUser.class;
 	}
@@ -230,6 +257,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	public void setAttributeDisplaySectionsAsTabs(final Boolean attributeDisplaySectionsAsTabs) {
 		this.attributeDisplaySectionsAsTabs = attributeDisplaySectionsAsTabs;
+	}
+
+	@Override
+	public void setColor(final String color) {
+		this.color = color;
 	}
 
 	public void setCompany(final CCompany company, final CUserCompanyRole companyRole) {

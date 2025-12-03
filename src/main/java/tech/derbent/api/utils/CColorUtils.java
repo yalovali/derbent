@@ -21,6 +21,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.entityOfCompany.domain.CStatus;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.base.users.domain.CUser;
 
@@ -224,7 +225,16 @@ public final class CColorUtils {
 	}
 
 	public static Icon getIconForEntity(final CEntityDB<?> entity) throws Exception {
-		final Icon icon = new Icon(getStaticIconFilename(entity.getClass().getName()));
+		Check.notNull(entity, "Entity cannot be null");
+		String iconString;
+		// Check if entity implements IHasIcon and use instance method
+		if (entity instanceof IHasIcon) {
+			iconString = ((IHasIcon) entity).getIcon();
+		} else {
+			// Fall back to static icon lookup
+			iconString = getStaticIconFilename(entity.getClass().getName());
+		}
+		final Icon icon = new Icon(iconString);
 		return styleIcon(icon);
 	}
 
