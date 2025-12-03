@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
+import tech.derbent.api.interfaces.ISprintItemPageService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
@@ -14,7 +15,7 @@ import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.view.CComponentWidgetMeeting;
 
 public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting>
-		implements IPageServiceHasStatusAndWorkflow<CMeeting>, IComponentWidgetEntityProvider<CMeeting> {
+		implements IPageServiceHasStatusAndWorkflow<CMeeting>, IComponentWidgetEntityProvider<CMeeting>, ISprintItemPageService<CMeeting> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceMeeting.class);
 	Long serialVersionUID = 1L;
@@ -50,6 +51,12 @@ public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting>
 	 * @return the CComponentWidgetMeeting component */
 	@Override
 	public Component getComponentWidget(final CMeeting entity) { return new CComponentWidgetMeeting(entity); }
+
+	/** Creates a widget component for displaying the meeting as a sprint item.
+	 * @param entity the meeting to create a sprint item widget for
+	 * @return the CComponentWidgetMeeting component */
+	@Override
+	public Component getSprintItemWidget(final CMeeting entity) { return new CComponentWidgetMeeting(entity); }
 
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() {
