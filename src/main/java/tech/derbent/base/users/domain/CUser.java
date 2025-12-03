@@ -166,9 +166,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	@Override
 	public String getIcon() {
-		// Return user icon - if profile picture exists, still return the user icon
-		// The profile picture is rendered separately via StreamResource in Avatar components
-		return DEFAULT_ICON;
+		// Return different icon based on whether user has profile picture
+		if (profilePictureData != null && profilePictureData.length > 0) {
+			return "vaadin:user-card"; // Icon indicating user with profile picture
+		}
+		return DEFAULT_ICON; // Default user icon for users without profile picture
 	}
 
 	@Override
