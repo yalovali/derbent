@@ -166,11 +166,17 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	@Override
 	public String getIcon() {
-		// Return different icon based on whether user has profile picture
+		// Return icon string identifier based on profile picture availability
 		if (profilePictureData != null && profilePictureData.length > 0) {
 			return "vaadin:user-card"; // Icon indicating user with profile picture
 		}
-		return DEFAULT_ICON; // Default user icon for users without profile picture
+		return DEFAULT_ICON; // Default user icon
+	}
+
+	@Override
+	public byte[] getIconData() {
+		// Return the profile picture data if available
+		return profilePictureData;
 	}
 
 	@Override

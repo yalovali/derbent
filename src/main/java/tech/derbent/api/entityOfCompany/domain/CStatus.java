@@ -106,7 +106,15 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	public String getColor() { return color; }
 
 	@Override
-	public String getIcon() { return icon; }
+	public String getIcon() {
+		return icon != null ? icon : DEFAULT_ICON;
+	}
+
+	@Override
+	public byte[] getIconData() {
+		// Status entities don't have binary icon data
+		return null;
+	}
 
 	public Integer getSortOrder() { return sortOrder; }
 

@@ -186,7 +186,15 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	/** Gets the icon for Gantt chart display.
 	 * @return the sprint icon identifier */
 	@Override
-	public String getIcon() { return DEFAULT_ICON; }
+	public String getIcon() {
+		return DEFAULT_ICON;
+	}
+
+	@Override
+	public byte[] getIconData() {
+		// Sprint entities don't have binary icon data
+		return null;
+	}
 
 	/** Get the total number of items in this sprint. This is a calculated field for UI display.
 	 * @return total count of sprint items */
