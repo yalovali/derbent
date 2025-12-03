@@ -7,6 +7,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
+import tech.derbent.api.interfaces.ISprintItemPageService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
@@ -14,7 +15,7 @@ import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.view.CComponentWidgetActivity;
 
 public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
-		implements IPageServiceHasStatusAndWorkflow<CActivity>, IComponentWidgetEntityProvider<CActivity> {
+		implements IPageServiceHasStatusAndWorkflow<CActivity>, IComponentWidgetEntityProvider<CActivity>, ISprintItemPageService<CActivity> {
 
 	public Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivity.class);
 	// Declare the field required by the interface
@@ -36,6 +37,14 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 	 * @return the CActivityWidget component */
 	@Override
 	public CComponentWidgetEntity<CActivity> getComponentWidget(final CActivity entity) {
+		return new CComponentWidgetActivity(entity);
+	}
+
+	/** Creates a widget component for displaying the activity as a sprint item.
+	 * @param entity the activity to create a sprint item widget for
+	 * @return the CActivityWidget component */
+	@Override
+	public Component getSprintItemWidget(final CActivity entity) {
 		return new CComponentWidgetActivity(entity);
 	}
 
