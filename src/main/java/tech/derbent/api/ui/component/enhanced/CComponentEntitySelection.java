@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -116,7 +115,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private ComboBox<String> comboBoxStatusFilter;
 	private EntityTypeConfig<?> currentEntityType;
 	private final List<EntityTypeConfig<?>> entityTypes;
-	private Grid<EntityClass> gridItems;
+	private CGrid<EntityClass> gridItems;
 	private final ItemsProvider<EntityClass> itemsProvider;
 	private Span labelSelectedCount;
 	private final boolean multiSelect;
@@ -282,31 +281,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			return;
 		}
 
-		// Add selection indicator column for multi-select
-		if (multiSelect) {
-			gridItems.addComponentColumn(item -> {
-				if (selectedItems.contains(item)) {
-					return CColorUtils.createStyledIcon("vaadin:check-square-o", "#4CAF50");
-				} else {
-					return CColorUtils.createStyledIcon("vaadin:thin-square", "#9E9E9E");
-				}
-			}).setHeader("").setWidth("40px").setFlexGrow(0);
-		}
-
 		// ID column
-		CGrid.styleColumnHeader(
-				gridItems.addColumn(item -> item.getId() != null ? item.getId().toString() : "").setWidth(CGrid.WIDTH_ID).setFlexGrow(0)
-						.setSortable(true).setKey("id"),
-				"ID");
+		gridItems.addIdColumn(item -> item.getId(), "ID", "id");
 
 		// Name column - use cached method
-		CGrid.styleColumnHeader(
-				gridItems.addColumn(this::getEntityName).setWidth(CGrid.WIDTH_SHORT_TEXT).setFlexGrow(1).setSortable(true).setKey("name"), "Name");
+		gridItems.addShortTextColumn(this::getEntityName, "Name", "name");
 
 		// Description column - use cached method
-		CGrid.styleColumnHeader(
-				gridItems.addColumn(this::getEntityDescription).setWidth(CGrid.WIDTH_LONG_TEXT).setFlexGrow(1).setSortable(true).setKey("description"),
-				"Description");
+		gridItems.addLongTextColumn(this::getEntityDescription, "Description", "description");
 
 		// Status column with color support for CProjectItem entities
 		CGrid.styleColumnHeader(gridItems.addComponentColumn(item -> {
@@ -340,16 +322,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Factory method for grid. */
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected void create_gridItems() {
-		// Create Grid using Object type with auto-columns disabled, then cast.
+		// Create CGrid using Object type with auto-columns disabled, then cast.
 		// Type safety is maintained by controlling all items in the grid through itemsProvider.
-		final com.vaadin.flow.component.grid.Grid rawGrid = new com.vaadin.flow.component.grid.Grid<>(Object.class, false);
+		final CGrid rawGrid = new CGrid<>(Object.class);
 		gridItems = rawGrid;
 		gridItems.setSizeFull();
 		gridItems.setMinHeight("300px");
-
-		// Apply CGrid-like styling
-		gridItems.addThemeVariants(com.vaadin.flow.component.grid.GridVariant.LUMO_NO_BORDER,
-				com.vaadin.flow.component.grid.GridVariant.LUMO_ROW_STRIPES, com.vaadin.flow.component.grid.GridVariant.LUMO_COMPACT);
 
 		// Configure selection mode
 		if (multiSelect) {
