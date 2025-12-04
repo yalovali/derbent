@@ -185,8 +185,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	@Override
 	public Icon getIcon() {
-		// SIMPLIFIED APPROACH: Create a custom icon element that wraps an image
-		// This ensures proper rendering of profile pictures and generated avatars
+		// COMPREHENSIVE APPROACH: Create a properly styled icon element that wraps an image
+		// This ensures reliable rendering of profile pictures and generated avatars across all contexts
 		
 		// Use thumbnail if available for efficient rendering
 		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
@@ -251,7 +251,9 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		// Append the image to the icon element
 		icon.getElement().appendChild(img);
 		
-		return icon;
+		// Apply additional styling from CColorUtils for consistency with other icons
+		// Note: This adds margin-right and flex-shrink properties
+		return CColorUtils.styleIcon(icon);
 	}
 
 	@Override
