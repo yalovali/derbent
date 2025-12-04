@@ -185,6 +185,83 @@ public final class CImageUtils {
 		LOGGER.debug("Image validation successful for file: {}", fileName);
 	}
 
+	/** Generates an avatar image with initials on a colored background. Creates a PNG image with the specified size, containing centered initials text
+	 * on a background color derived from the initials string (for consistency).
+	 * @param initials The initials text to display (typically 1-2 characters, e.g., "JD" for John Doe)
+	 * @param size     Size in pixels for both width and height (square avatar)
+	 * @return PNG image data as byte array containing the avatar with initials
+	 * @throws IOException if image generation fails */
+	public static byte[] generateAvatarWithInitials(final String initials, final int size) throws IOException {
+		Check.notBlank(initials, "Initials cannot be null or blank");
+		Check.checkPositive(size, "Size must be positive");
+		try {
+			// Create a new image with transparent background
+			final BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+			final Graphics2D g2d = image.createGraphics();
+			// Enable anti-aliasing for smooth text
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			// Generate a consistent background color based on the initials
+			final java.awt.Color backgroundColor = generateColorFromText(initials);
+			g2d.setColor(backgroundColor);
+			g2d.fillRect(0, 0, size, size);
+			// Draw the initials text in white
+			g2d.setColor(java.awt.Color.WHITE);
+			// Calculate font size based on avatar size (roughly 40% of size for 2 chars)
+			final int fontSize = Math.max(8, (int) (size * 0.4));
+			final java.awt.Font font = new java.awt.Font("SansSerif", java.awt.Font.BOLD, fontSize);
+			g2d.setFont(font);
+			// Calculate text position to center it
+			final java.awt.FontMetrics fm = g2d.getFontMetrics();
+			final int textWidth = fm.stringWidth(initials);
+			final int textHeight = fm.getAscent();
+			final int x = (size - textWidth) / 2;
+			final int y = (size + textHeight) / 2 - fm.getDescent();
+			g2d.drawString(initials, x, y);
+			g2d.dispose();
+			// Convert to PNG byte array
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ImageIO.write(image, "png", baos);
+			final byte[] avatarData = baos.toByteArray();
+			LOGGER.debug("Generated avatar with initials '{}' (size: {}x{}, {} bytes)", initials, size, size, avatarData.length);
+			return avatarData;
+		} catch (final IOException e) {
+			LOGGER.error("Failed to generate avatar with initials: {}", initials, e);
+			throw e;
+		}
+	}
+
+	/** Generates a consistent color based on input text. Uses a simple hash-based algorithm to ensure the same text always produces the same color.
+	 * Colors are selected from a predefined palette of visually pleasing colors suitable for avatars.
+	 * @param text Input text to generate color from
+	 * @return Color object representing the generated color */
+	private static java.awt.Color generateColorFromText(final String text) {
+		// Predefined color palette for avatars (Material Design inspired)
+		final java.awt.Color[] colorPalette = {
+				new java.awt.Color(0xE91E63), // Pink
+				new java.awt.Color(0x9C27B0), // Purple
+				new java.awt.Color(0x673AB7), // Deep Purple
+				new java.awt.Color(0x3F51B5), // Indigo
+				new java.awt.Color(0x2196F3), // Blue
+				new java.awt.Color(0x00BCD4), // Cyan
+				new java.awt.Color(0x009688), // Teal
+				new java.awt.Color(0x4CAF50), // Green
+				new java.awt.Color(0xFF9800), // Orange
+				new java.awt.Color(0xFF5722), // Deep Orange
+				new java.awt.Color(0x795548), // Brown
+				new java.awt.Color(0x607D8B) // Blue Grey
+		};
+		// Generate hash from text
+		int hash = 0;
+		for (int i = 0; i < text.length(); i++) {
+			hash = text.charAt(i) + ((hash << 5) - hash);
+		}
+		// Use hash to select color from palette
+		final int index = Math.abs(hash) % colorPalette.length;
+		return colorPalette[index];
+	}
+
 	private CImageUtils() {
 		// Utility class - prevent instantiation
 	}
