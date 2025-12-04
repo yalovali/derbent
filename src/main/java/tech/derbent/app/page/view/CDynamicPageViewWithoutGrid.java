@@ -96,7 +96,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 			createPageHeader();
 			createDetailsSection();
 			createPageFooter();
-			rebuildEntityDetails(entityClass);
+			rebuildEntityDetailsById(null);
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing dynamic page view for page '{}': {}", pageEntity != null ? pageEntity.getPageTitle() : "null",
 					e.getMessage());

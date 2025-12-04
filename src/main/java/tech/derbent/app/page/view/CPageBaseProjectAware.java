@@ -46,6 +46,30 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		LOGGER.debug("Entering Sample Page");
 	}
 
+	protected <T extends CEntityDB<?>> void buildScreen(final Long detailId, final Class<T> entityClass, final CFlexLayout detailsLayout) {
+		try {
+			LOGGER.debug("Building screen '{}' for entity type: {}", detailId, entityClass.getSimpleName());
+			detailsLayout.removeAll();
+			if (detailId == null) {
+				return;
+			}
+			final CDetailSection screen = screenService.findByIdWithScreenLines(detailId);
+			Check.notNull(screen, "Screen not found: " + detailId);
+			// Only create binder if not already set for this entity type or if no current binder exists
+			if (currentBinder == null || !currentBinder.getBeanType().equals(entityClass)) {
+				@SuppressWarnings ("unchecked")
+				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
+				currentBinder = localBinder;
+			}
+			detailsBuilder.buildDetails(this, screen, currentBinder, detailsLayout);
+		} catch (final Exception e) {
+			final String errorMsg = "Error building details layout for screen: " + detailId;
+			LOGGER.error("Error building details layout for screen '{}': {}", detailId, e.getMessage());
+			detailsLayout.add(new CDiv(errorMsg));
+			currentBinder = null; // Clear binder on error
+		}
+	}
+
 	protected void buildScreen(final String baseViewName) {
 		buildScreen(baseViewName, CEntityDB.class, getBaseDetailsLayout());
 	}

@@ -1,6 +1,5 @@
 package tech.derbent.app.page.view;
 
-import java.lang.reflect.Field;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -22,6 +21,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 
 	private static final long serialVersionUID = 1L;
 	protected Class<?> currentEntityType = null;
+	private Long currentEntityViewID;
 	protected String currentEntityViewName = null;
 	protected Class<?> entityClass;
 	protected CAbstractService<?> entityService;
@@ -59,6 +59,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		}
 		currentBinder = null;
 		currentEntityViewName = null;
+		currentEntityViewID = null;
 		currentEntityType = null;
 	}
 
@@ -87,10 +88,10 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	}
 
 	@Override
-	public Class<?> getEntityClass() { return entityClass; }
+	public CAbstractService<?> getChildService() { return entityService; }
 
 	@Override
-	public CAbstractService<?> getChildService() { return entityService; }
+	public Class<?> getEntityClass() { return entityClass; }
 
 	/** Get the page entity this view represents. */
 	public CPageEntity getPageEntity() { return pageEntity; }
@@ -144,20 +145,15 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		}
 	}
 
-	@SuppressWarnings ({
-			"unchecked"
-	})
-	protected void rebuildEntityDetails(final Class<?> clazz) throws Exception {
+	@SuppressWarnings ("unchecked")
+	protected void rebuildEntityDetailsById(Long detailId) throws Exception {
 		try {
-			final Field viewNameField = clazz.getField("VIEW_NAME");
-			final String entityViewName = (String) viewNameField.get(null);
-			LOGGER.debug("Rebuilding entity details for view: {}", entityViewName);
 			clearEntityDetails();
-			currentEntityViewName = entityViewName;
-			buildScreen(entityViewName, (Class) entityClass, baseDetailsLayout);
+			currentEntityViewID = detailId;
+			buildScreen(currentEntityViewID, (Class) entityClass, baseDetailsLayout);
 			pageService.bind();
 		} catch (final Exception e) {
-			LOGGER.error("Error rebuilding entity details for view '{}': {}", clazz.getField("VIEW_NAME"), e.getMessage());
+			LOGGER.error("Error rebuilding entity details for view '{}': {}", detailId, e.getMessage());
 			throw e;
 		}
 	}

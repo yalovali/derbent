@@ -41,7 +41,7 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 			// Rebuild details layout for the new entity if it doesn't exist yet
 			if ((currentEntityViewName == null) || (currentEntityType == null)) {
 				LOGGER.debug("Rebuilding details for newly created entity");
-				rebuildEntityDetails(entity.getClass());
+				rebuildEntityDetailsById(null);
 			}
 			// Set the current entity and populate form
 			setCurrentEntity(entity);
@@ -70,7 +70,8 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 				setCurrentEntity(selectedEntity);
 				// Rebuild details if VIEW_NAME changed or not yet built
 				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
-					rebuildEntityDetails(selectedEntity.getClass());
+					// rebuildEntityDetails(selectedEntity.getClass());
+					rebuildEntityDetailsById(pageEntity.getDetailSection().getId());
 				}
 				// Always attempt to populate form, even if rebuild failed
 				populateForm();

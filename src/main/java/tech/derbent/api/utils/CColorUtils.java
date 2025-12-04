@@ -1,10 +1,16 @@
 package tech.derbent.api.utils;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
@@ -72,6 +78,7 @@ public final class CColorUtils {
 	private static final String DEFAULT_ICON_SIZE = "16px";
 	/** Default text color for dark backgrounds */
 	public static final String DEFAULT_LIGHT_TEXT = "white";
+	public static int ICON_SIZE_NORMAL = 32;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorUtils.class);
 	public static String Symbol_BoxChecked = "☒";
 	public static String Symbol_BoxUnchecked = "☐";
@@ -447,6 +454,19 @@ public final class CColorUtils {
 			LOGGER.error("Error checking if entity type {} is a status entity: {}", entityType.getSimpleName(), e.getMessage());
 			return false;
 		}
+	}
+
+	public static byte[] resizeImage(byte[] originalData, int width, int height) throws Exception {
+		final ByteArrayInputStream bais = new ByteArrayInputStream(originalData);
+		final BufferedImage original = ImageIO.read(bais);
+		final Image scaled = original.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+		final BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		final Graphics2D g2d = resized.createGraphics();
+		g2d.drawImage(scaled, 0, 0, null);
+		g2d.dispose();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(resized, "png", baos);
+		return baos.toByteArray();
 	}
 
 	public static Icon setIconClassSize(final Icon icon, final String iconSizeClass) {
