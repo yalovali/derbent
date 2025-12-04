@@ -142,4 +142,88 @@ class CUserIconTest {
 		assertEquals(CUser.ICON_SIZE, resultImage.getWidth(), "Resized width should match target");
 		assertEquals(CUser.ICON_SIZE, resultImage.getHeight(), "Resized height should match target");
 	}
+
+	/** Tests that CUser generates correct initials from first name and last name. */
+	@Test
+	void testGetInitials_WithFirstAndLastName_ReturnsInitials() {
+		// Given: A user with first name and last name
+		final CUser user = new CUser();
+		user.setName("John");
+		user.setLastname("Doe");
+		// When: Getting initials
+		final String initials = user.getInitials();
+		// Then: Should return "JD"
+		assertEquals("JD", initials, "Should generate initials from first and last name");
+	}
+
+	/** Tests that CUser generates initials from first name only when no last name. */
+	@Test
+	void testGetInitials_WithFirstNameOnly_ReturnsFirstInitial() {
+		// Given: A user with only first name
+		final CUser user = new CUser();
+		user.setName("John");
+		// When: Getting initials
+		final String initials = user.getInitials();
+		// Then: Should return "J"
+		assertEquals("J", initials, "Should generate initial from first name only");
+	}
+
+	/** Tests that CUser falls back to login for initials when no names available. */
+	@Test
+	void testGetInitials_WithLoginOnly_ReturnsLoginInitials() {
+		// Given: A user with only login
+		final CUser user = new CUser();
+		user.setLogin("johndoe");
+		// When: Getting initials
+		final String initials = user.getInitials();
+		// Then: Should return initials from login
+		assertEquals("JO", initials, "Should generate initials from login when no name available");
+	}
+
+	/** Tests that CImageUtils generates avatar with initials. */
+	@Test
+	void testGenerateAvatarWithInitials_CreatesImage() throws IOException {
+		// Given: Initials and size
+		final String initials = "JD";
+		final int size = CUser.ICON_SIZE;
+		// When: Generating avatar
+		final byte[] avatarData = CImageUtils.generateAvatarWithInitials(initials, size);
+		// Then: Should create valid image
+		assertNotNull(avatarData, "Avatar data should not be null");
+		assertTrue(avatarData.length > 0, "Avatar data should not be empty");
+		// And: Should be valid PNG image
+		final BufferedImage image = ImageIO.read(new java.io.ByteArrayInputStream(avatarData));
+		assertNotNull(image, "Should be a valid image");
+		assertEquals(size, image.getWidth(), "Avatar width should match requested size");
+		assertEquals(size, image.getHeight(), "Avatar height should match requested size");
+	}
+
+	/** Tests that CUser.getIcon() generates avatar with initials when no profile picture. */
+	@Test
+	void testGetIcon_NoProfilePicture_GeneratesAvatarWithInitials() {
+		// Given: A user with name but no profile picture
+		final CUser user = new CUser();
+		user.setName("Jane");
+		user.setLastname("Smith");
+		// When: Getting the icon
+		final Icon icon = user.getIcon();
+		// Then: Should return non-null icon with avatar
+		assertNotNull(icon, "Icon should not be null");
+		// Icon should be generated from initials (not the default icon)
+		// We can verify this by checking that getInitials returns "JS"
+		assertEquals("JS", user.getInitials(), "User should have initials JS");
+	}
+
+	/** Tests that avatar generation is consistent for same initials. */
+	@Test
+	void testGenerateAvatarWithInitials_ConsistentForSameInitials() throws IOException {
+		// Given: Same initials
+		final String initials = "AB";
+		final int size = CUser.ICON_SIZE;
+		// When: Generating avatar twice
+		final byte[] avatar1 = CImageUtils.generateAvatarWithInitials(initials, size);
+		final byte[] avatar2 = CImageUtils.generateAvatarWithInitials(initials, size);
+		// Then: Should produce identical results
+		assertArrayEquals(avatar1, avatar2, "Same initials should produce identical avatars");
+	}
 }

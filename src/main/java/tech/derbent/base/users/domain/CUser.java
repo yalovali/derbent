@@ -201,7 +201,24 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			icon.getElement().appendChild(img);
 			return CColorUtils.styleIcon(icon);
 		} else {
-			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
+			// Generate avatar with initials when no profile picture is available
+			try {
+				final String initials = getInitials();
+				final byte[] avatarImage = CImageUtils.generateAvatarWithInitials(initials, ICON_SIZE);
+				final Icon icon = new Icon();
+				final String base64Image = Base64.getEncoder().encodeToString(avatarImage);
+				final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
+				img.setAttribute("src", "data:image/png;base64," + base64Image);
+				img.getStyle().set("width", ICON_SIZE + "px");
+				img.getStyle().set("height", ICON_SIZE + "px");
+				img.getStyle().set("object-fit", "cover");
+				img.getStyle().set("border-radius", "2px");
+				icon.getElement().appendChild(img);
+				return CColorUtils.styleIcon(icon);
+			} catch (final Exception e) {
+				LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
+				return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
+			}
 		}
 	}
 
@@ -234,6 +251,38 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	public String getUsername() {
 		return getLogin(); // Convenience method to get username for authentication
+	}
+
+	/** Gets the user's initials for avatar generation. Generates initials from the user's first name and last name. Falls back to login if no name is
+	 * available.
+	 * @return Initials string (typically 1-2 characters, e.g., "JD" for John Doe) */
+	public String getInitials() {
+		String initials = "";
+		// Get initials from first name
+		if ((getName() != null) && !getName().trim().isEmpty()) {
+			final String[] nameParts = getName().trim().split("\\s+");
+			for (final String part : nameParts) {
+				if (!part.isEmpty()) {
+					initials += part.substring(0, 1).toUpperCase();
+					if (initials.length() >= 2) {
+						break; // Limit to 2 initials
+					}
+				}
+			}
+		}
+		// Add last name initial if we have less than 2 initials
+		if ((lastname != null) && !lastname.trim().isEmpty() && (initials.length() < 2)) {
+			initials += lastname.substring(0, 1).toUpperCase();
+		}
+		// Fall back to username if no name is available
+		if (initials.isEmpty() && (login != null) && !login.trim().isEmpty()) {
+			initials = login.substring(0, Math.min(2, login.length())).toUpperCase();
+		}
+		// Final fallback
+		if (initials.isEmpty()) {
+			initials = "U";
+		}
+		return initials;
 	}
 
 	@Override
