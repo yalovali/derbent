@@ -234,19 +234,31 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 
 	/** Handle select button click. */
 	protected void on_buttonSelect_clicked() {
-		final Set<EntityClass> selected = componentEntitySelection.getSelectedItems();
-		if (selected.isEmpty()) {
-			CNotificationService.showWarning("Please select at least one item");
-			return;
+		try {
+			Check.notNull(componentEntitySelection, "Component entity selection cannot be null");
+			final Set<EntityClass> selected = componentEntitySelection.getSelectedItems();
+			Check.notNull(selected, "Selected items set cannot be null");
+			
+			if (selected.isEmpty()) {
+				CNotificationService.showWarning("Please select at least one item");
+				return;
+			}
+			
+			LOGGER.debug("Confirming selection of {} items", selected.size());
+			onSelection.accept(new ArrayList<>(selected));
+			close();
+		} catch (final Exception e) {
+			LOGGER.error("Error confirming selection", e);
+			CNotificationService.showException("Error confirming selection", e);
 		}
-		LOGGER.debug("Confirming selection of {} items", selected.size());
-		onSelection.accept(new ArrayList<>(selected));
-		close();
 	}
 
 	/** Handle selection change from component. */
 	protected void on_componentEntitySelection_selectionChanged(final Set<EntityClass> selectedItems) {
-		buttonSelect.setEnabled(!selectedItems.isEmpty());
+		Check.notNull(selectedItems, "Selected items set cannot be null");
+		final boolean hasSelection = !selectedItems.isEmpty();
+		buttonSelect.setEnabled(hasSelection);
+		LOGGER.debug("Selection changed - {} items selected, button enabled: {}", selectedItems.size(), hasSelection);
 	}
 
 	@Override
