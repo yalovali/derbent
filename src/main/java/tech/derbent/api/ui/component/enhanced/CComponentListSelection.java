@@ -55,8 +55,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	private List<DetailEntity> currentValue = new ArrayList<>();
 	CDataProviderResolver dataProviderResolver;
 	EntityFieldInfo fieldInfo;
-	private Grid<DetailEntity> grid;
-	private ItemLabelGenerator<DetailEntity> itemLabelGenerator = Object::toString;
+	private CGrid<DetailEntity> grid;
 	private final List<ValueChangeListener<? super ValueChangeEvent<List<DetailEntity>>>> listeners = new ArrayList<>();
 	private boolean readOnly = false;
 	private final List<DetailEntity> selectedItems = new ArrayList<>();
@@ -64,7 +63,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 
 	/** Creates a new list selection component with default title. */
 	public CComponentListSelection() {
-		this(null, null, null, "Items");
+		this(null, null, null, "Items", Object.class);
 	}
 
 	/** Creates a new list selection component with custom title.
@@ -72,14 +71,16 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	 * @param contentOwner         the content owner
 	 * @param fieldInfo            the field information
 	 * @param title                Title for the items grid (must not be null or blank)
+	 * @param class1
 	 * @throws IllegalArgumentException if title is null or blank */
-	public CComponentListSelection(CDataProviderResolver dataProviderResolver, IContentOwner contentOwner, EntityFieldInfo fieldInfo, String title) {
+	public CComponentListSelection(CDataProviderResolver dataProviderResolver, IContentOwner contentOwner, EntityFieldInfo fieldInfo, String title,
+			Class<?> class1) {
 		super(false, false, false);
 		Check.notBlank(title, "Title cannot be null or blank");
 		this.contentOwner = contentOwner;
 		this.fieldInfo = fieldInfo;
 		this.dataProviderResolver = dataProviderResolver;
-		initializeUI(title);
+		initializeUI(title, class1);
 	}
 
 	/** Adds a value change listener.
@@ -124,34 +125,17 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 				checkmark = CColorUtils.createStyledIcon("vaadin:thin-square", "#1CFFa0");
 				// checkmark = new Span(CColorUtils.Symbol_BoxUnchecked);
 			}
-			// checkmark.getStyle().set("color", "#4CAF50").set("font-weight", "bold").set("font-size", "24px").set("text-align", "right")
-			// .set("width", width).set("display", "block").setMargin("0 auto").setPadding("0");
 			checkmark.getStyle().set("width", width).set("display", "block").setMargin("0 auto").setPadding("0");
 			return checkmark;
 		}).setHeader("").setWidth("30px").setFlexGrow(0).setPartNameGenerator(item -> "check-column-cell");
 		// Item display column (with color and icon for CEntityNamed)
 		final var column = grid.addComponentColumn(item -> {
 			try {
-				if (item == null) {
-					LOGGER.warn("Rendering null item in grid - returning N/A placeholder");
-					return new Span("N/A");
-				}
-				if (item instanceof CEntityNamed) {
-					try {
-						return new CEntityLabel((CEntityNamed<?>) item);
-					} catch (Exception e) {
-						LOGGER.error("Failed to create CEntityLabel for entity: {}", item, e);
-						throw new IllegalStateException("Failed to render entity with color: " + item, e);
-					}
-				} else {
-					String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
-					return new Span(text);
-				}
+				return new CEntityLabel((CEntityNamed<?>) item);
 			} catch (Exception e) {
-				LOGGER.error("Error rendering item in list selection: {}", item, e);
-				String fallbackText = item != null ? item.toString() : "Error";
-				return new Span(fallbackText);
+				e.printStackTrace();
 			}
+			return new Span("N/A");
 		}).setAutoWidth(true).setFlexGrow(1);
 		CGrid.styleColumnHeader(column, header);
 		grid.addClassName("first-column-checkbox-grid");
@@ -159,9 +143,10 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 
 	/** Creates and configures a grid for list selection with common styling and behavior.
 	 * @param header The header text for the grid column
+	 * @param class1
 	 * @return Configured Grid instance */
-	private Grid<DetailEntity> createAndSetupGrid(String header) {
-		Grid<DetailEntity> grid = new Grid<>();
+	private CGrid<DetailEntity> createAndSetupGrid(String header, Class<?> class1) {
+		CGrid<DetailEntity> grid = new CGrid<DetailEntity>(class1);
 		CGrid.setupGrid(grid);
 		grid.setHeight(DEFAULT_GRID_HEIGHT);
 		configureGridColumns(grid, header);
@@ -208,12 +193,12 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	@Override
 	public List<DetailEntity> getValue() { return new ArrayList<>(selectedItems); }
 
-	private void initializeUI(String title) {
+	private void initializeUI(String title, Class<?> class1) {
 		LOGGER.debug("Initializing list selection UI with title: '{}'", title);
 		Check.notBlank(title, "Title cannot be null or blank");
 		setSpacing(true);
 		setWidthFull();
-		grid = createAndSetupGrid(title);
+		grid = createAndSetupGrid(title, class1);
 		this.add(grid);
 		setupEventHandlers();
 	}
@@ -243,8 +228,6 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 
 	public void setItemLabelGenerator(ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
 		try {
-			this.itemLabelGenerator = itemLabelGenerator != null ? itemLabelGenerator : Object::toString;
-			// Refresh grid to use new label generator
 			grid.getColumns().forEach(grid::removeColumn);
 			configureGridColumns(grid, "Items");
 			refreshGrid();
@@ -274,8 +257,8 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			sourceItems.addAll(items);
 			sourceItems.sort((a, b) -> {
 				try {
-					String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : a.toString();
-					String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : b.toString();
+					String labelA = a.toString();
+					String labelB = b.toString();
 					return labelA.compareToIgnoreCase(labelB);
 				} catch (Exception e) {
 					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);

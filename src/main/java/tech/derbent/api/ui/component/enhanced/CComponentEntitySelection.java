@@ -25,11 +25,10 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
-/**
- * CComponentEntitySelection - Reusable component for selecting entities from a grid with search/filter capabilities.
+/** CComponentEntitySelection - Reusable component for selecting entities from a grid with search/filter capabilities.
  * <p>
  * This component can be embedded in dialogs, pages, or panels for entity selection functionality.
  * <p>
@@ -44,9 +43,7 @@ import tech.derbent.api.utils.Check;
  * <li>Selected items persist across grid filtering</li>
  * <li>Support for already-selected items with two modes: hide or show as pre-selected</li>
  * </ul>
- * 
- * @param <EntityClass> The entity type being selected
- */
+ * @param <EntityClass> The entity type being selected */
 public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout> {
 
 	/** Mode for handling already selected items */
@@ -73,17 +70,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			this.service = service;
 		}
 
-		public String getDisplayName() {
-			return displayName;
-		}
+		public String getDisplayName() { return displayName; }
 
-		public Class<E> getEntityClass() {
-			return entityClass;
-		}
+		public Class<E> getEntityClass() { return entityClass; }
 
-		public CAbstractService<E> getService() {
-			return service;
-		}
+		public CAbstractService<E> getService() { return service; }
 
 		@Override
 		public String toString() {
@@ -100,7 +91,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
 	private static final long serialVersionUID = 1L;
-
 	private List<EntityClass> allItems = new ArrayList<>();
 	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	private final AlreadySelectedMode alreadySelectedMode;
@@ -120,29 +110,23 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private final Consumer<Set<EntityClass>> onSelectionChanged;
 	private final Set<EntityClass> selectedItems = new HashSet<>();
 
-	/**
-	 * Creates an entity selection component.
-	 * 
-	 * @param entityTypes          Available entity types for selection
-	 * @param itemsProvider        Provider for loading items based on entity type
-	 * @param onSelectionChanged   Callback when selection changes
-	 * @param multiSelect          True for multi-select, false for single-select
-	 */
+	/** Creates an entity selection component.
+	 * @param entityTypes        Available entity types for selection
+	 * @param itemsProvider      Provider for loading items based on entity type
+	 * @param onSelectionChanged Callback when selection changes
+	 * @param multiSelect        True for multi-select, false for single-select */
 	public CComponentEntitySelection(final List<EntityTypeConfig<?>> entityTypes, final ItemsProvider<EntityClass> itemsProvider,
 			final Consumer<Set<EntityClass>> onSelectionChanged, final boolean multiSelect) {
 		this(entityTypes, itemsProvider, onSelectionChanged, multiSelect, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
 	}
 
-	/**
-	 * Creates an entity selection component with support for already-selected items.
-	 * 
+	/** Creates an entity selection component with support for already-selected items.
 	 * @param entityTypes             Available entity types for selection
 	 * @param itemsProvider           Provider for loading items based on entity type
 	 * @param onSelectionChanged      Callback when selection changes
 	 * @param multiSelect             True for multi-select, false for single-select
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
-	 * @param alreadySelectedMode     Mode for handling already-selected items
-	 */
+	 * @param alreadySelectedMode     Mode for handling already-selected items */
 	public CComponentEntitySelection(final List<EntityTypeConfig<?>> entityTypes, final ItemsProvider<EntityClass> itemsProvider,
 			final Consumer<Set<EntityClass>> onSelectionChanged, final boolean multiSelect, final ItemsProvider<EntityClass> alreadySelectedProvider,
 			final AlreadySelectedMode alreadySelectedMode) {
@@ -151,14 +135,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		Check.notNull(itemsProvider, "Items provider cannot be null");
 		Check.notNull(onSelectionChanged, "Selection callback cannot be null");
 		Check.notNull(alreadySelectedMode, "Already selected mode cannot be null");
-
 		this.entityTypes = entityTypes;
 		this.itemsProvider = itemsProvider;
 		this.onSelectionChanged = onSelectionChanged;
 		this.multiSelect = multiSelect;
 		this.alreadySelectedProvider = alreadySelectedProvider;
 		this.alreadySelectedMode = alreadySelectedMode;
-
 		try {
 			setupComponent();
 			// Select first entity type if available
@@ -176,17 +158,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
 			final CComponentGridSearchToolbar.FilterCriteria criteria = gridSearchToolbar.getCurrentFilters();
 			Check.notNull(criteria, "Filter criteria cannot be null");
-			
 			final String idValue = criteria.getIdFilter();
 			final String nameValue = criteria.getNameFilter();
 			final String descValue = criteria.getDescriptionFilter();
 			final String statusValue = criteria.getStatusFilter();
 			final List<EntityClass> filtered = new ArrayList<>();
-
 			for (final EntityClass item : allItems) {
 				Check.notNull(item, "Item in allItems cannot be null");
 				boolean matches = true;
-
 				// ID filter
 				if ((idValue != null) && !idValue.isBlank()) {
 					final String itemId = item.getId() != null ? item.getId().toString() : "";
@@ -194,7 +173,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 						matches = false;
 					}
 				}
-
 				// Name filter - use cached method
 				if (matches && (nameValue != null) && !nameValue.isBlank()) {
 					final String name = getEntityName(item);
@@ -202,7 +180,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 						matches = false;
 					}
 				}
-
 				// Description filter - use cached method
 				if (matches && (descValue != null) && !descValue.isBlank()) {
 					final String desc = getEntityDescription(item);
@@ -210,7 +187,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 						matches = false;
 					}
 				}
-
 				// Status filter
 				if (matches && (statusValue != null) && !statusValue.isBlank()) {
 					String statusName = null;
@@ -235,14 +211,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 						matches = false;
 					}
 				}
-
 				if (matches) {
 					filtered.add(item);
 				}
 			}
-
 			gridItems.setItems(filtered);
-
 			// Restore visual selection state for already selected items
 			if (multiSelect) {
 				for (final EntityClass item : filtered) {
@@ -251,7 +224,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 					}
 				}
 			}
-
 			LOGGER.debug("Applied filters - showing {} of {} items", filtered.size(), allItems.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error applying filters", e);
@@ -278,62 +250,37 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	@SuppressWarnings ("rawtypes")
 	private void configureGridColumns() {
 		// Clear existing columns
 		gridItems.getColumns().forEach(gridItems::removeColumn);
-
 		if (currentEntityType == null) {
 			return;
 		}
-
-		// ID column
 		gridItems.addIdColumn(item -> item.getId(), "ID", "id");
-
-		// Name column - use cached method
 		gridItems.addShortTextColumn(this::getEntityName, "Name", "name");
-
-		// Description column - use cached method
 		gridItems.addLongTextColumn(this::getEntityDescription, "Description", "description");
-
-		// Status column with color support for CProjectItem entities
 		CGrid.styleColumnHeader(gridItems.addComponentColumn(item -> {
-			final CLabelEntity labelEntity = new CLabelEntity();
 			try {
-				if (item instanceof CProjectItem) {
-					final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-					if (projectItem.getStatus() != null) {
-						labelEntity.setValue(projectItem.getStatus(), true);
-					} else {
-						labelEntity.setText("No Status");
-					}
-				} else {
-					// Use cached method
-					final Object status = getEntityStatus(item);
-					if (status instanceof CEntityDB) {
-						labelEntity.setValue((CEntityDB<?>) status, true);
-					} else if (status != null) {
-						labelEntity.setText(status.toString());
-					} else {
-						labelEntity.setText("N/A");
-					}
-				}
+				return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
 			} catch (final Exception e) {
-				labelEntity.setText("Error");
+				e.printStackTrace();
 			}
-			return labelEntity;
+			return new CLabelEntity("Error");
 		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), "Status");
 	}
 
 	/** Factory method for grid. */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	protected void create_gridItems() {
 		// Create CGrid using Object type with auto-columns disabled, then cast.
 		// Type safety is maintained by controlling all items in the grid through itemsProvider.
 		final CGrid rawGrid = new CGrid<>(Object.class);
 		gridItems = rawGrid;
-		gridItems.setSizeFull();  // Grid should expand
-		gridItems.setHeightFull();  // Ensure full height expansion
-
+		gridItems.setSizeFull(); // Grid should expand
+		gridItems.setHeightFull(); // Ensure full height expansion
 		// Configure selection mode
 		if (multiSelect) {
 			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
@@ -342,11 +289,18 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 			gridItems.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelectionChanged(e.getValue()));
 		}
-
 		// Add click listener to toggle selection in multi-select mode
 		if (multiSelect) {
 			gridItems.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
+	}
+
+	/** Factory method for search toolbar layout using CComponentGridSearchToolbar. */
+	protected CComponentGridSearchToolbar create_gridSearchToolbar() {
+		final CComponentGridSearchToolbar toolbar = new CComponentGridSearchToolbar();
+		// Add filter change listener to trigger grid filtering
+		toolbar.addFilterChangeListener(criteria -> applyFilters());
+		return toolbar;
 	}
 
 	/** Factory method for entity type selector layout. */
@@ -354,26 +308,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		final CHorizontalLayout layout = new CHorizontalLayout();
 		layout.setWidthFull();
 		layout.setAlignItems(FlexComponent.Alignment.CENTER);
-
 		comboBoxEntityType = new ComboBox<>("Entity Type");
 		comboBoxEntityType.setItems(entityTypes);
 		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
 		comboBoxEntityType.setWidthFull();
 		comboBoxEntityType.setRequired(true);
 		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_selectionChanged(e.getValue()));
-
 		layout.add(comboBoxEntityType);
 		return layout;
-	}
-
-	/** Factory method for search toolbar layout using CComponentGridSearchToolbar. */
-	protected CComponentGridSearchToolbar create_gridSearchToolbar() {
-		final CComponentGridSearchToolbar toolbar = new CComponentGridSearchToolbar();
-		
-		// Add filter change listener to trigger grid filtering
-		toolbar.addFilterChangeListener(criteria -> applyFilters());
-		
-		return toolbar;
 	}
 
 	/** Factory method for selection indicator layout. */
@@ -382,43 +324,31 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		layout.setWidthFull();
 		layout.setAlignItems(FlexComponent.Alignment.CENTER);
 		layout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-
 		// Selected count indicator
 		final Icon selectedIcon = VaadinIcon.CHECK_SQUARE.create();
 		selectedIcon.setSize("16px");
 		selectedIcon.setColor("#1976D2");
-
 		labelSelectedCount = new Span("0 selected");
 		labelSelectedCount.getStyle().set("font-weight", "500").set("color", "#1976D2").set("margin-right", "10px");
-
 		// Reset button
 		buttonReset = new CButton("Reset", VaadinIcon.REFRESH.create());
 		buttonReset.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
 		buttonReset.setTooltipText("Clear all selected items");
 		buttonReset.addClickListener(e -> on_buttonReset_clicked());
 		buttonReset.setEnabled(false);
-
 		layout.add(selectedIcon, labelSelectedCount, buttonReset);
 		return layout;
 	}
 
-	/**
-	 * Returns the list of already selected items.
-	 * 
-	 * @return List of already selected items (can be empty, never null)
-	 */
+	/** Returns the list of already selected items.
+	 * @return List of already selected items (can be empty, never null) */
 	public List<EntityClass> getAlreadySelectedItems() {
 		return new ArrayList<>(alreadySelectedItems);
 	}
 
-	/**
-	 * Returns the already selected mode configured for this component.
-	 * 
-	 * @return The AlreadySelectedMode
-	 */
-	public AlreadySelectedMode getAlreadySelectedMode() {
-		return alreadySelectedMode;
-	}
+	/** Returns the already selected mode configured for this component.
+	 * @return The AlreadySelectedMode */
+	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
 
 	/** Gets description from entity using cached method. */
 	private String getEntityDescription(final EntityClass item) {
@@ -458,23 +388,13 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/**
-	 * Returns the currently selected items.
-	 * 
-	 * @return Set of selected items
-	 */
-	public Set<EntityClass> getSelectedItems() {
-		return new HashSet<>(selectedItems);
-	}
+	/** Returns the currently selected items.
+	 * @return Set of selected items */
+	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
 
-	/**
-	 * Returns whether the component is configured for multi-select.
-	 * 
-	 * @return true if multi-select mode
-	 */
-	public boolean isMultiSelect() {
-		return multiSelect;
-	}
+	/** Returns whether the component is configured for multi-select.
+	 * @return true if multi-select mode */
+	public boolean isMultiSelect() { return multiSelect; }
 
 	/** Loads already selected items from the provider if available. */
 	private void loadAlreadySelectedItems(final EntityTypeConfig<?> config) {
@@ -482,7 +402,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (alreadySelectedProvider == null) {
 			return;
 		}
-
 		try {
 			final List<EntityClass> items = alreadySelectedProvider.getItems(config);
 			if (items != null) {
@@ -511,34 +430,22 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	protected void on_comboBoxEntityType_selectionChanged(final EntityTypeConfig<?> config) {
 		try {
 			Check.notNull(config, "Entity type config cannot be null");
-
 			LOGGER.debug("Entity type changed to: {}", config.getDisplayName());
 			currentEntityType = config;
-
-			// DO NOT clear selectedItems - keep selections across entity type changes
-			// This allows selecting items from multiple entity types (e.g., 2 activities + 1 meeting = 3 total)
-
-			// Load already selected items if provider is available
 			loadAlreadySelectedItems(config);
 			updateSelectionIndicator();
-
 			// Cache reflection methods for the entity type
 			cacheReflectionMethods(config.getEntityClass());
-
 			// Configure grid columns for the new entity type
 			configureGridColumns();
-
 			// Load items
 			allItems = itemsProvider.getItems(config);
 			Check.notNull(allItems, "Items provider returned null for entity type: " + config.getDisplayName());
 			LOGGER.debug("Loaded {} items for entity type {}", allItems.size(), config.getDisplayName());
-
 			// Handle already selected items based on mode
 			processAlreadySelectedItems();
-
 			// Update status filter options
 			updateStatusFilterOptions();
-
 			// Apply filters and refresh grid
 			applyFilters();
 		} catch (final Exception e) {
@@ -597,17 +504,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/**
-	 * Process already selected items based on the configured mode. This method either filters out already selected items from allItems
+	/** Process already selected items based on the configured mode. This method either filters out already selected items from allItems
 	 * (HIDE_ALREADY_SELECTED mode) or adds them to selectedItems to show them as pre-selected (SHOW_AS_SELECTED mode).
 	 * <p>
-	 * In single-select mode with SHOW_AS_SELECTED, only the first matching item will be pre-selected.
-	 */
+	 * In single-select mode with SHOW_AS_SELECTED, only the first matching item will be pre-selected. */
 	private void processAlreadySelectedItems() {
 		if (alreadySelectedItems.isEmpty()) {
 			return;
 		}
-
 		// Create a set of already selected item IDs for efficient lookup
 		final Set<Object> alreadySelectedIds = new HashSet<>();
 		for (final EntityClass item : alreadySelectedItems) {
@@ -615,7 +519,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				alreadySelectedIds.add(item.getId());
 			}
 		}
-
 		switch (alreadySelectedMode) {
 		case HIDE_ALREADY_SELECTED:
 			// Filter out already selected items from the available items list
@@ -629,7 +532,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			allItems = filteredItems;
 			LOGGER.debug("Hidden {} already selected items from available items list", removedCount);
 			break;
-
 		case SHOW_AS_SELECTED:
 			// Pre-select the already selected items (they will be visually marked in the grid)
 			// In single-select mode, only pre-select the first matching item
@@ -645,24 +547,18 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			LOGGER.debug("Pre-selected {} already selected items", selectedItems.size());
 			updateSelectionIndicator();
 			break;
-
 		default:
 			break;
 		}
 	}
 
-	/**
-	 * Resets the component selection state.
-	 */
+	/** Resets the component selection state. */
 	public void reset() {
 		on_buttonReset_clicked();
 	}
 
-	/**
-	 * Sets the entity type for the component.
-	 * 
-	 * @param config The entity type configuration to set
-	 */
+	/** Sets the entity type for the component.
+	 * @param config The entity type configuration to set */
 	public void setEntityType(final EntityTypeConfig<?> config) {
 		if (config != null && entityTypes.contains(config)) {
 			comboBoxEntityType.setValue(config);
@@ -672,35 +568,29 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	protected void setupComponent() {
 		final CVerticalLayout mainLayout = getContent();
 		mainLayout.setSizeFull();
-		mainLayout.setSpacing(false);  // Reduce spacing between components
+		mainLayout.setSpacing(false); // Reduce spacing between components
 		mainLayout.setPadding(false);
-
 		// Entity type selector
 		final HorizontalLayout layoutEntityType = create_layoutEntityTypeSelector();
 		mainLayout.add(layoutEntityType);
-
 		// Search toolbar using CComponentGridSearchToolbar
 		gridSearchToolbar = create_gridSearchToolbar();
 		mainLayout.add(gridSearchToolbar);
-
 		// Selection indicator and reset
 		final HorizontalLayout layoutSelectionIndicator = create_layoutSelectionIndicator();
 		mainLayout.add(layoutSelectionIndicator);
-
 		// Grid
 		create_gridItems();
 		mainLayout.add(gridItems);
-		mainLayout.setFlexGrow(1, gridItems);  // Make grid expand
+		mainLayout.setFlexGrow(1, gridItems); // Make grid expand
 	}
 
 	private void updateSelectionIndicator() {
 		final int count = selectedItems.size();
 		labelSelectedCount.setText(count + " selected");
-		
 		// Update button states based on selection
 		final boolean hasSelection = count > 0;
 		buttonReset.setEnabled(hasSelection);
-
 		// Notify parent container of selection change
 		if (onSelectionChanged != null) {
 			onSelectionChanged.accept(new HashSet<>(selectedItems));
@@ -709,7 +599,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	private void updateStatusFilterOptions() {
 		Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
-		
 		final Set<String> statuses = new HashSet<>();
 		for (final EntityClass item : allItems) {
 			if (item instanceof CProjectItem) {

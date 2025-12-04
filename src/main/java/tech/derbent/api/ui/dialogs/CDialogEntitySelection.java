@@ -14,8 +14,8 @@ import tech.derbent.api.utils.Check;
 
 /** CDialogEntitySelection - Dialog for selecting entities from a grid with search/filter capabilities.
  * <p>
- * Extends CDialog to follow the standard dialog pattern in the application.
- * This dialog wraps the CComponentEntitySelection component to provide a modal entity selection experience.
+ * Extends CDialog to follow the standard dialog pattern in the application. This dialog wraps the CComponentEntitySelection component to provide a
+ * modal entity selection experience.
  * <p>
  * Features:
  * <ul>
@@ -33,19 +33,20 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
+
 		/** Hide already selected items from the available items list */
 		HIDE_ALREADY_SELECTED,
 		/** Show already selected items in the grid, pre-selected (visually marked) */
 		SHOW_AS_SELECTED;
 
-		/** Convert to component enum */
-		public CComponentEntitySelection.AlreadySelectedMode toComponentMode() {
-			return CComponentEntitySelection.AlreadySelectedMode.valueOf(this.name());
-		}
-
 		/** Create from component enum */
 		public static AlreadySelectedMode fromComponentMode(final CComponentEntitySelection.AlreadySelectedMode mode) {
 			return AlreadySelectedMode.valueOf(mode.name());
+		}
+
+		/** Convert to component enum */
+		public CComponentEntitySelection.AlreadySelectedMode toComponentMode() {
+			return CComponentEntitySelection.AlreadySelectedMode.valueOf(name());
 		}
 	}
 
@@ -54,30 +55,25 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 
 		private final CComponentEntitySelection.EntityTypeConfig<E> componentConfig;
 
-		public EntityTypeConfig(final String displayName, final Class<E> entityClass, final tech.derbent.api.entity.service.CAbstractService<E> service) {
-			this.componentConfig = new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
+		public EntityTypeConfig(final String displayName, final Class<E> entityClass,
+				final tech.derbent.api.entity.service.CAbstractService<E> service) {
+			componentConfig = new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
 		}
 
-		public String getDisplayName() {
-			return componentConfig.getDisplayName();
-		}
+		public String getDisplayName() { return componentConfig.getDisplayName(); }
 
-		public Class<E> getEntityClass() {
-			return componentConfig.getEntityClass();
-		}
+		public Class<E> getEntityClass() { return componentConfig.getEntityClass(); }
 
-		public tech.derbent.api.entity.service.CAbstractService<E> getService() {
-			return componentConfig.getService();
+		public tech.derbent.api.entity.service.CAbstractService<E> getService() { return componentConfig.getService(); }
+
+		/** Get the underlying component configuration */
+		CComponentEntitySelection.EntityTypeConfig<E> toComponentConfig() {
+			return componentConfig;
 		}
 
 		@Override
 		public String toString() {
 			return componentConfig.toString();
-		}
-
-		/** Get the underlying component configuration */
-		CComponentEntitySelection.EntityTypeConfig<E> toComponentConfig() {
-			return componentConfig;
 		}
 	}
 
@@ -88,20 +84,21 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		List<T> getItems(EntityTypeConfig<?> config);
 
 		/** Convert to component provider */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings ("unchecked")
 		default CComponentEntitySelection.ItemsProvider<T> toComponentProvider() {
 			return componentConfig -> {
 				// Wrap component config back into dialog config for the callback
 				// This is a bit awkward but maintains backward compatibility
-				final EntityTypeConfig dialogConfig = new EntityTypeConfig(componentConfig.getDisplayName(), componentConfig.getEntityClass(),
-						componentConfig.getService());
+				final EntityTypeConfig dialogConfig =
+						new EntityTypeConfig(componentConfig.getDisplayName(), componentConfig.getEntityClass(), componentConfig.getService());
 				return this.getItems(dialogConfig);
 			};
 		}
 	}
 
 	private static final long serialVersionUID = 1L;
-
+	private final AlreadySelectedMode alreadySelectedMode;
+	private final ItemsProvider<EntityClass> alreadySelectedProvider;
 	private CButton buttonCancel;
 	private CButton buttonSelect;
 	private CComponentEntitySelection<EntityClass> componentEntitySelection;
@@ -112,8 +109,6 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	// Configuration
 	private final boolean multiSelect;
 	private final Consumer<List<EntityClass>> onSelection;
-	private final ItemsProvider<EntityClass> alreadySelectedProvider;
-	private final AlreadySelectedMode alreadySelectedMode;
 
 	/** Creates an entity selection dialog.
 	 * @param title         Dialog title
@@ -143,15 +138,13 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		Check.notNull(itemsProvider, "Items provider cannot be null");
 		Check.notNull(onSelection, "Selection callback cannot be null");
 		Check.notNull(alreadySelectedMode, "Already selected mode cannot be null");
-
-		this.dialogTitle = title;
+		dialogTitle = title;
 		this.entityTypes = entityTypes;
 		this.itemsProvider = itemsProvider;
 		this.onSelection = onSelection;
 		this.multiSelect = multiSelect;
 		this.alreadySelectedProvider = alreadySelectedProvider;
 		this.alreadySelectedMode = alreadySelectedMode;
-
 		try {
 			setupDialog();
 			// Override default width from CDialog
@@ -176,56 +169,34 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		return button;
 	}
 
-	/**
-	 * Returns the list of already selected items.
-	 * 
-	 * @return List of already selected items (can be empty, never null)
-	 */
+	/** Returns the list of already selected items.
+	 * @return List of already selected items (can be empty, never null) */
 	public List<EntityClass> getAlreadySelectedItems() {
 		return componentEntitySelection != null ? componentEntitySelection.getAlreadySelectedItems() : new ArrayList<>();
 	}
 
-	/**
-	 * Returns the already selected mode configured for this dialog.
-	 * 
-	 * @return The AlreadySelectedMode
-	 */
-	public AlreadySelectedMode getAlreadySelectedMode() {
-		return alreadySelectedMode;
-	}
+	/** Returns the already selected mode configured for this dialog.
+	 * @return The AlreadySelectedMode */
+	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
 
 	@Override
-	public String getDialogTitleString() {
-		return dialogTitle;
-	}
+	public String getDialogTitleString() { return dialogTitle; }
 
 	@Override
-	protected Icon getFormIcon() {
-		return VaadinIcon.LIST_SELECT.create();
-	}
+	protected Icon getFormIcon() { return VaadinIcon.LIST_SELECT.create(); }
 
 	@Override
-	protected String getFormTitleString() {
-		return "Select Items";
-	}
+	protected String getFormTitleString() { return "Select Items"; }
 
-	/**
-	 * Returns the currently selected items.
-	 * 
-	 * @return List of selected items
-	 */
+	/** Returns the currently selected items.
+	 * @return List of selected items */
 	public List<EntityClass> getSelectedItems() {
 		return componentEntitySelection != null ? new ArrayList<>(componentEntitySelection.getSelectedItems()) : new ArrayList<>();
 	}
 
-	/**
-	 * Returns whether the dialog is configured for multi-select.
-	 * 
-	 * @return true if multi-select mode
-	 */
-	public boolean isMultiSelect() {
-		return multiSelect;
-	}
+	/** Returns whether the dialog is configured for multi-select.
+	 * @return true if multi-select mode */
+	public boolean isMultiSelect() { return multiSelect; }
 
 	/** Handle cancel button click. */
 	protected void on_buttonCancel_clicked() {
@@ -238,12 +209,10 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 			Check.notNull(componentEntitySelection, "Component entity selection cannot be null");
 			final Set<EntityClass> selected = componentEntitySelection.getSelectedItems();
 			Check.notNull(selected, "Selected items set cannot be null");
-			
 			if (selected.isEmpty()) {
 				CNotificationService.showWarning("Please select at least one item");
 				return;
 			}
-			
 			LOGGER.debug("Confirming selection of {} items", selected.size());
 			onSelection.accept(new ArrayList<>(selected));
 			close();
@@ -275,24 +244,18 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		for (final EntityTypeConfig<?> config : entityTypes) {
 			componentEntityTypes.add(config.toComponentConfig());
 		}
-
 		// Convert item providers to component providers
 		final CComponentEntitySelection.ItemsProvider<EntityClass> componentItemsProvider = itemsProvider.toComponentProvider();
-		final CComponentEntitySelection.ItemsProvider<EntityClass> componentAlreadySelectedProvider = alreadySelectedProvider != null
-				? alreadySelectedProvider.toComponentProvider()
-				: null;
-
+		final CComponentEntitySelection.ItemsProvider<EntityClass> componentAlreadySelectedProvider =
+				alreadySelectedProvider != null ? alreadySelectedProvider.toComponentProvider() : null;
 		// Convert already selected mode
 		final CComponentEntitySelection.AlreadySelectedMode componentMode = alreadySelectedMode.toComponentMode();
-
 		// Create the entity selection component with all configuration
 		componentEntitySelection = new CComponentEntitySelection<EntityClass>(componentEntityTypes, componentItemsProvider,
 				this::on_componentEntitySelection_selectionChanged, multiSelect, componentAlreadySelectedProvider, componentMode);
-
 		// Add component to main layout
 		mainLayout.add(componentEntitySelection);
 		mainLayout.setFlexGrow(1, componentEntitySelection);
-
 		// Make the layout fill available space
 		mainLayout.setSizeFull();
 	}

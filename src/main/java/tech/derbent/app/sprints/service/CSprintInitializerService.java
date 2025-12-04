@@ -44,10 +44,9 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-			scr.addScreenLine(CDetailLinesService.createSection("Sprint Items"));
+			// scr.addScreenLine(CDetailLinesService.createSection("Sprint Items"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sprintItems"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "itemCount"));
-			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "endDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));

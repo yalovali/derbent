@@ -15,7 +15,7 @@ public class CComponentListSelectionTest {
 	@Test
 	public void testBinderIntegration_SimulateEntitySwitch() {
 		// This test simulates how the binder behaves when switching between entities
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		// Setup: Set source items (this would typically be done once by FormBuilder)
 		List<String> allItems = Arrays.asList("Role 1", "Role 2", "Role 3", "Role 4", "Role 5");
 		component.setSourceItems(allItems);
@@ -45,7 +45,7 @@ public class CComponentListSelectionTest {
 	@Test
 	public void testBinderIntegration_ValueChangeListener() {
 		// Test that value change listeners are notified when binder triggers setValue
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		List<String> allItems = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setSourceItems(allItems);
 		// Track value changes
@@ -78,7 +78,7 @@ public class CComponentListSelectionTest {
 
 	@Test
 	public void testClear() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setSourceItems(items);
 		component.setValue(Arrays.asList("Item 1", "Item 2"));
@@ -90,7 +90,7 @@ public class CComponentListSelectionTest {
 
 	@Test
 	public void testComponentInitialization() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		assertNotNull(component);
 		assertTrue(component.isEmpty());
 		assertNotNull(component.getValue());
@@ -99,7 +99,7 @@ public class CComponentListSelectionTest {
 
 	@Test
 	public void testListSeparation() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		List<String> allItems = Arrays.asList("Item 1", "Item 2", "Item 3", "Item 4", "Item 5");
 		component.setSourceItems(allItems);
 		// Select some items
@@ -116,7 +116,7 @@ public class CComponentListSelectionTest {
 
 	@Test
 	public void testReadOnlyMode() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		assertFalse(component.isReadOnly());
 		component.setReadOnly(true);
 		assertTrue(component.isReadOnly());
@@ -126,7 +126,7 @@ public class CComponentListSelectionTest {
 
 	@Test
 	public void testSetSourceItems() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setSourceItems(items);
 		// Initially no items should be selected
@@ -135,7 +135,7 @@ public class CComponentListSelectionTest {
 
 	@Test
 	public void testSetValue() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3", "Item 4");
 		component.setSourceItems(items);
 		// Select items
@@ -153,7 +153,7 @@ public class CComponentListSelectionTest {
 
 	@Test
 	public void testValueChangeWithNullHandling() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items");
+		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		List<String> items = Arrays.asList("Item 1", "Item 2");
 		component.setSourceItems(items);
 		// Set null value should be handled gracefully

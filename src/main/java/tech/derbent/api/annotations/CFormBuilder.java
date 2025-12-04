@@ -538,8 +538,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for GridListSelector creation");
 		LOGGER.debug("Creating CComponentListSelection for field: {}", fieldInfo.getFieldName());
-		final CComponentListSelection<EntityClass, DetailClass> gridListSelector =
-				new CComponentListSelection<EntityClass, DetailClass>(dataProviderResolver, contentOwner, fieldInfo, fieldInfo.getDisplayName());
+		final CComponentListSelection<EntityClass, DetailClass> gridListSelector = new CComponentListSelection<EntityClass, DetailClass>(
+				dataProviderResolver, contentOwner, fieldInfo, fieldInfo.getDisplayName(), fieldInfo.getFieldTypeClass());
 		// Set item label generator based on entity type
 		gridListSelector.setItemLabelGenerator(item -> {
 			if (item instanceof CEntityNamed<?>) {
