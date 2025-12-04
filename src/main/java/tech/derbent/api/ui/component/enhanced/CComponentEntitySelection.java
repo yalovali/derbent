@@ -16,8 +16,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -112,18 +110,15 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private Method cachedGetNameMethod;
 	private Method cachedGetStatusMethod;
 	private ComboBox<EntityTypeConfig<?>> comboBoxEntityType;
-	private ComboBox<String> comboBoxStatusFilter;
 	private EntityTypeConfig<?> currentEntityType;
 	private final List<EntityTypeConfig<?>> entityTypes;
 	private CGrid<EntityClass> gridItems;
+	private CGridSearchToolbar gridSearchToolbar;
 	private final ItemsProvider<EntityClass> itemsProvider;
 	private Span labelSelectedCount;
 	private final boolean multiSelect;
 	private final Consumer<Set<EntityClass>> onSelectionChanged;
 	private final Set<EntityClass> selectedItems = new HashSet<>();
-	private TextField textFieldDescriptionFilter;
-	private TextField textFieldIdFilter;
-	private TextField textFieldNameFilter;
 
 	/**
 	 * Creates an entity selection component.
@@ -178,10 +173,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	private void applyFilters() {
 		try {
-			final String idValue = textFieldIdFilter.getValue();
-			final String nameValue = textFieldNameFilter.getValue();
-			final String descValue = textFieldDescriptionFilter.getValue();
-			final String statusValue = comboBoxStatusFilter.getValue();
+			Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
+			final CGridSearchToolbar.FilterCriteria criteria = gridSearchToolbar.getCurrentFilters();
+			Check.notNull(criteria, "Filter criteria cannot be null");
+			
+			final String idValue = criteria.getIdFilter();
+			final String nameValue = criteria.getNameFilter();
+			final String descValue = criteria.getDescriptionFilter();
+			final String statusValue = criteria.getStatusFilter();
 			final List<EntityClass> filtered = new ArrayList<>();
 
 			for (final EntityClass item : allItems) {
@@ -367,59 +366,13 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		return layout;
 	}
 
-	/** Factory method for search toolbar layout. */
-	protected HorizontalLayout create_layoutSearchToolbar() {
-		final CHorizontalLayout toolbar = new CHorizontalLayout();
-		toolbar.setWidthFull();
-		toolbar.setSpacing(true);
-		toolbar.setPadding(false);
-		toolbar.setAlignItems(FlexComponent.Alignment.END);
-
-		// ID filter
-		textFieldIdFilter = new TextField("ID");
-		textFieldIdFilter.setPlaceholder("Filter by ID...");
-		textFieldIdFilter.setPrefixComponent(VaadinIcon.KEY.create());
-		textFieldIdFilter.setClearButtonVisible(true);
-		textFieldIdFilter.setValueChangeMode(ValueChangeMode.LAZY);
-		textFieldIdFilter.setValueChangeTimeout(300);
-		textFieldIdFilter.setWidth("100px");
-		textFieldIdFilter.addValueChangeListener(e -> on_textFieldIdFilter_changed());
-
-		// Name filter - expand to available width
-		textFieldNameFilter = new TextField("Name");
-		textFieldNameFilter.setPlaceholder("Filter by name...");
-		textFieldNameFilter.setPrefixComponent(VaadinIcon.SEARCH.create());
-		textFieldNameFilter.setClearButtonVisible(true);
-		textFieldNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
-		textFieldNameFilter.setValueChangeTimeout(300);
-		textFieldNameFilter.addValueChangeListener(e -> on_textFieldNameFilter_changed());
-
-		// Description filter - expand to available width
-		textFieldDescriptionFilter = new TextField("Description");
-		textFieldDescriptionFilter.setPlaceholder("Filter by description...");
-		textFieldDescriptionFilter.setPrefixComponent(VaadinIcon.FILE_TEXT.create());
-		textFieldDescriptionFilter.setClearButtonVisible(true);
-		textFieldDescriptionFilter.setValueChangeMode(ValueChangeMode.LAZY);
-		textFieldDescriptionFilter.setValueChangeTimeout(300);
-		textFieldDescriptionFilter.addValueChangeListener(e -> on_textFieldDescriptionFilter_changed());
-
-		// Status filter
-		comboBoxStatusFilter = new ComboBox<>("Status");
-		comboBoxStatusFilter.setPlaceholder("All statuses");
-		comboBoxStatusFilter.setClearButtonVisible(true);
-		comboBoxStatusFilter.setWidth("150px");
-		comboBoxStatusFilter.addValueChangeListener(e -> on_comboBoxStatusFilter_changed());
-
-		// Clear filters button
-		final CButton buttonClearFilters = new CButton(VaadinIcon.CLOSE_CIRCLE.create());
-		buttonClearFilters.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		buttonClearFilters.setTooltipText("Clear all filters");
-		buttonClearFilters.addClickListener(e -> on_buttonClearFilters_clicked());
-
-		toolbar.add(textFieldIdFilter, textFieldNameFilter, textFieldDescriptionFilter, comboBoxStatusFilter, buttonClearFilters);
-		// Make name and description filters expand
-		toolbar.setFlexGrow(1, textFieldNameFilter);
-		toolbar.setFlexGrow(1, textFieldDescriptionFilter);
+	/** Factory method for search toolbar layout using CGridSearchToolbar. */
+	protected CGridSearchToolbar create_gridSearchToolbar() {
+		final CGridSearchToolbar toolbar = new CGridSearchToolbar();
+		
+		// Add filter change listener to trigger grid filtering
+		toolbar.addFilterChangeListener(criteria -> applyFilters());
+		
 		return toolbar;
 	}
 
@@ -542,15 +495,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Handle clear filters button click. */
-	protected void on_buttonClearFilters_clicked() {
-		textFieldIdFilter.clear();
-		textFieldNameFilter.clear();
-		textFieldDescriptionFilter.clear();
-		comboBoxStatusFilter.clear();
-		applyFilters();
-	}
-
 	/** Handle reset button click. */
 	protected void on_buttonReset_clicked() {
 		selectedItems.clear();
@@ -605,16 +549,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Handle status filter combobox value change. */
-	protected void on_comboBoxStatusFilter_changed() {
-		try {
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error applying status filter", e);
-			CNotificationService.showException("Error applying filter", e);
-		}
-	}
-
 	/** Handle grid item click (for toggle in multi-select mode). */
 	protected void on_gridItems_itemClicked(final EntityClass item) {
 		try {
@@ -660,36 +594,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		} catch (final Exception e) {
 			LOGGER.error("Error handling grid single-selection change", e);
 			CNotificationService.showException("Error selecting item", e);
-		}
-	}
-
-	/** Handle description filter text field value change. */
-	protected void on_textFieldDescriptionFilter_changed() {
-		try {
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error applying description filter", e);
-			CNotificationService.showException("Error applying filter", e);
-		}
-	}
-
-	/** Handle ID filter text field value change. */
-	protected void on_textFieldIdFilter_changed() {
-		try {
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error applying ID filter", e);
-			CNotificationService.showException("Error applying filter", e);
-		}
-	}
-
-	/** Handle name filter text field value change. */
-	protected void on_textFieldNameFilter_changed() {
-		try {
-			applyFilters();
-		} catch (final Exception e) {
-			LOGGER.error("Error applying name filter", e);
-			CNotificationService.showException("Error applying filter", e);
 		}
 	}
 
@@ -775,9 +679,9 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		final HorizontalLayout layoutEntityType = create_layoutEntityTypeSelector();
 		mainLayout.add(layoutEntityType);
 
-		// Search toolbar
-		final HorizontalLayout layoutSearchToolbar = create_layoutSearchToolbar();
-		mainLayout.add(layoutSearchToolbar);
+		// Search toolbar using CGridSearchToolbar
+		gridSearchToolbar = create_gridSearchToolbar();
+		mainLayout.add(gridSearchToolbar);
 
 		// Selection indicator and reset
 		final HorizontalLayout layoutSelectionIndicator = create_layoutSelectionIndicator();
@@ -804,6 +708,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	private void updateStatusFilterOptions() {
+		Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
+		
 		final Set<String> statuses = new HashSet<>();
 		for (final EntityClass item : allItems) {
 			if (item instanceof CProjectItem) {
@@ -826,6 +732,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				}
 			}
 		}
-		comboBoxStatusFilter.setItems(statuses);
+		gridSearchToolbar.setStatusOptions(statuses);
 	}
 }
