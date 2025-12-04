@@ -113,7 +113,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private EntityTypeConfig<?> currentEntityType;
 	private final List<EntityTypeConfig<?>> entityTypes;
 	private CGrid<EntityClass> gridItems;
-	private CGridSearchToolbar gridSearchToolbar;
+	private CComponentGridSearchToolbar gridSearchToolbar;
 	private final ItemsProvider<EntityClass> itemsProvider;
 	private Span labelSelectedCount;
 	private final boolean multiSelect;
@@ -174,7 +174,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private void applyFilters() {
 		try {
 			Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
-			final CGridSearchToolbar.FilterCriteria criteria = gridSearchToolbar.getCurrentFilters();
+			final CComponentGridSearchToolbar.FilterCriteria criteria = gridSearchToolbar.getCurrentFilters();
 			Check.notNull(criteria, "Filter criteria cannot be null");
 			
 			final String idValue = criteria.getIdFilter();
@@ -366,9 +366,9 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		return layout;
 	}
 
-	/** Factory method for search toolbar layout using CGridSearchToolbar. */
-	protected CGridSearchToolbar create_gridSearchToolbar() {
-		final CGridSearchToolbar toolbar = new CGridSearchToolbar();
+	/** Factory method for search toolbar layout using CComponentGridSearchToolbar. */
+	protected CComponentGridSearchToolbar create_gridSearchToolbar() {
+		final CComponentGridSearchToolbar toolbar = new CComponentGridSearchToolbar();
 		
 		// Add filter change listener to trigger grid filtering
 		toolbar.addFilterChangeListener(criteria -> applyFilters());
@@ -679,7 +679,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		final HorizontalLayout layoutEntityType = create_layoutEntityTypeSelector();
 		mainLayout.add(layoutEntityType);
 
-		// Search toolbar using CGridSearchToolbar
+		// Search toolbar using CComponentGridSearchToolbar
 		gridSearchToolbar = create_gridSearchToolbar();
 		mainLayout.add(gridSearchToolbar);
 
