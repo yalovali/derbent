@@ -25,7 +25,7 @@ public final class CImageUtils {
 	public static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 	/** Supported image formats */
 	public static final String[] SUPPORTED_FORMATS = {
-			"jpg", "jpeg", "png", "gif"
+			"jpg", "jpeg", "png", "gif", "svg"
 	};
 
 	/** Creates a data URL from image bytes for display in HTML components. Validates input data and generates base64-encoded data URL with proper
@@ -84,6 +84,18 @@ public final class CImageUtils {
 		return "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNmNWY1ZjUiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM1IiByPSIxNSIgZmlsbD0iIzk5OTk5OSIvPjxwYXRoIGQ9Im0yNSA3NWMwLTE0IDExLTI1IDI1LTI1czI1IDExIDI1IDI1IiBmaWxsPSIjOTk5OTk5Ii8+PC9zdmc+";
 	}
 
+	/** Checks if the given image data is in SVG format by examining the file signature.
+	 * @param imageData Image data to check
+	 * @return true if the data appears to be SVG format, false otherwise */
+	private static boolean isSvgImage(final byte[] imageData) {
+		if ((imageData == null) || (imageData.length < 4)) {
+			return false;
+		}
+		// Check for SVG signature (starts with "<svg" or "<?xml")
+		final String start = new String(imageData, 0, Math.min(100, imageData.length)).toLowerCase();
+		return start.contains("<svg") || (start.contains("<?xml") && start.contains("svg"));
+	}
+
 	private static String getFileExtension(final String fileName) {
 		Check.notBlank(fileName, "File name cannot be null or blank");
 		final int lastDotIndex = fileName.lastIndexOf('.');
@@ -94,11 +106,12 @@ public final class CImageUtils {
 	}
 
 	/** Resizes an image to the specified dimensions with high quality scaling. Uses bilinear interpolation and high-quality rendering hints for
-	 * optimal results. Validates input parameters and handles various image formats, outputting JPEG format.
+	 * optimal results. Validates input parameters and handles various image formats, outputting JPEG format. SVG images are returned as-is since
+	 * they are vector-based and scale without loss of quality.
 	 * @param imageData    Original image data as byte array
 	 * @param targetWidth  Target width in pixels (must be positive)
 	 * @param targetHeight Target height in pixels (must be positive)
-	 * @return Resized image data as byte array in JPEG format
+	 * @return Resized image data as byte array in JPEG format (or original SVG data for SVG images)
 	 * @throws IOException
 	 * @throws IllegalArgumentException  if imageData is null/empty or dimensions are not positive
 	 * @throws CImageProcessingException if image reading, processing, or writing fails */
@@ -108,6 +121,11 @@ public final class CImageUtils {
 		Check.notEmpty(imageData, "Image data cannot be empty");
 		Check.checkPositive(targetWidth, "Target width must be positive");
 		Check.checkPositive(targetHeight, "Target height must be positive");
+		// Check if image is SVG - SVGs are vector-based and don't need resizing
+		if (isSvgImage(imageData)) {
+			LOGGER.info("Image is SVG format - returning original data (vector format scales without resizing)");
+			return imageData;
+		}
 		try {
 			// Read original image
 			final ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
@@ -172,17 +190,28 @@ public final class CImageUtils {
 					String.format("Unsupported image format: %s. Supported formats: %s", fileExtension, String.join(", ", SUPPORTED_FORMATS)));
 		}
 		// Try to read the image to validate it's a valid image file
-		try {
-			final ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
-			final BufferedImage image = ImageIO.read(inputStream);
-			if (image == null) {
-				throw new CImageProcessingException("Invalid image data - cannot read image");
+		// SVG images are validated differently as they are text-based
+		if (isSvgImage(imageData)) {
+			// For SVG, just check if it contains valid SVG tags
+			final String svgContent = new String(imageData).toLowerCase();
+			if (!svgContent.contains("<svg") || !svgContent.contains("</svg>")) {
+				throw new CImageProcessingException("Invalid SVG data - missing required SVG tags");
 			}
-		} catch (final IOException e) {
-			LOGGER.error("Failed to read image data for validation");
-			throw e;
+			LOGGER.debug("SVG image validation successful for file: {}", fileName);
+		} else {
+			// For raster images, use ImageIO
+			try {
+				final ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+				final BufferedImage image = ImageIO.read(inputStream);
+				if (image == null) {
+					throw new CImageProcessingException("Invalid image data - cannot read image");
+				}
+			} catch (final IOException e) {
+				LOGGER.error("Failed to read image data for validation");
+				throw e;
+			}
+			LOGGER.debug("Image validation successful for file: {}", fileName);
 		}
-		LOGGER.debug("Image validation successful for file: {}", fileName);
 	}
 
 	/** Generates an avatar image with initials on a colored background. Creates a PNG image with the specified size, containing centered initials text
