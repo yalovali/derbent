@@ -181,7 +181,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			final Icon icon = new Icon();
 			final String base64Image = Base64.getEncoder().encodeToString(profilePictureData);
 			icon.getElement().setAttribute("src", "data:image/png;base64," + base64Image);
-			icon.setSize("32px");
 			return CColorUtils.styleIcon(icon);
 		} else {
 			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
