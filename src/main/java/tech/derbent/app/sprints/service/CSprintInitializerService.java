@@ -25,6 +25,7 @@ import tech.derbent.base.users.service.CUserService;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
+
 	static final Class<?> clazz = CSprint.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".3";
@@ -35,7 +36,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 
 	public static CGridEntity create_SprintEditingGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("sprintItems"));
+		grid.setColumnFields(List.of("componentWidget"));
 		return grid;
 	}
 

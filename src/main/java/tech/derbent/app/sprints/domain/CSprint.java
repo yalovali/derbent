@@ -18,6 +18,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
@@ -38,7 +39,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public static final String ENTITY_TITLE_PLURAL = "Sprints";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint";
 	public static final String VIEW_NAME = "Sprints View";
-	// Sprint Color for UI display
 	@Column (nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (
@@ -46,6 +46,12 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			description = "Color code for sprint visualization (hex format)", hidden = false, colorField = true
 	)
 	private String color = DEFAULT_COLOR;
+	@Transient
+	@AMetaData (
+			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
+			dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
+	)
+	private final CComponentWidgetEntity<CSprint> componentWidget = null;
 	// Sprint Basic Information
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -171,6 +177,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	@Override
 	public String getColor() { return color; }
+
+	public CComponentWidgetEntity<CSprint> getComponentWidget() { return componentWidget; }
 
 	@Override
 	public String getDescription() { return description; }
