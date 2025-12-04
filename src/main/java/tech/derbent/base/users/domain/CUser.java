@@ -180,7 +180,16 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		if (profilePictureData != null && profilePictureData.length > 0) {
 			final Icon icon = new Icon();
 			final String base64Image = Base64.getEncoder().encodeToString(profilePictureData);
-			icon.getElement().setAttribute("src", "data:image/png;base64," + base64Image);
+			// For bitmap images, we need to use an img element with proper CSS
+			// to ensure it respects the size constraints (16px x 16px)
+			icon.getElement().removeAllChildren();
+			final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
+			img.setAttribute("src", "data:image/png;base64," + base64Image);
+			img.getStyle().set("width", "16px");
+			img.getStyle().set("height", "16px");
+			img.getStyle().set("object-fit", "cover");
+			img.getStyle().set("border-radius", "2px");
+			icon.getElement().appendChild(img);
 			return CColorUtils.styleIcon(icon);
 		} else {
 			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
