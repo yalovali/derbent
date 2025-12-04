@@ -182,7 +182,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			final String base64Image = Base64.getEncoder().encodeToString(profilePictureData);
 			// For bitmap images, we need to use an img element with proper CSS
 			// to ensure it respects the size constraints (16px x 16px)
-			icon.getElement().removeAllChildren();
 			final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
 			img.setAttribute("src", "data:image/png;base64," + base64Image);
 			img.getStyle().set("width", "16px");
