@@ -1,8 +1,11 @@
 package tech.derbent.base.users.domain;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
@@ -24,6 +27,7 @@ import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.activities.domain.CActivity;
@@ -37,12 +41,15 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator, IHasIcon {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CUser.class);
 	public static final String DEFAULT_COLOR = "#6CAFB0"; // CDE Light Green - individual people
 	public static final String DEFAULT_ICON = "vaadin:user";
 	public static final String ENTITY_TITLE_PLURAL = "Users";
 	public static final String ENTITY_TITLE_SINGULAR = "User";
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
+	/** Icon size for user icons in pixels */
+	public static final int ICON_SIZE = 16;
 	@OneToMany (fetch = FetchType.LAZY)
 	@OrderColumn (name = "item_index")
 	@AMetaData (
@@ -113,6 +120,9 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	)
 	@Column (name = "profile_picture_data", nullable = true, length = 10000, columnDefinition = "bytea")
 	private byte[] profilePictureData;
+	/** Thumbnail version of profile picture for efficient icon rendering (16x16 pixels). Generated automatically when profile picture is set. */
+	@Column (name = "profile_picture_thumbnail", nullable = true, length = 5000, columnDefinition = "bytea")
+	private byte[] profilePictureThumbnail;
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Project Settings", required = false, readOnly = true, description = "User's project memberships and roles", hidden = false,
@@ -176,16 +186,16 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	@Override
 	public Icon getIcon() {
-		// convert picture data to icon
-		if (profilePictureData != null && profilePictureData.length > 0) {
+		// Use thumbnail if available for efficient rendering
+		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
 			final Icon icon = new Icon();
-			final String base64Image = Base64.getEncoder().encodeToString(profilePictureData);
+			final String base64Image = Base64.getEncoder().encodeToString(profilePictureThumbnail);
 			// For bitmap images, we need to use an img element with proper CSS
 			// to ensure it respects the size constraints (16px x 16px)
 			final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
 			img.setAttribute("src", "data:image/png;base64," + base64Image);
-			img.getStyle().set("width", "16px");
-			img.getStyle().set("height", "16px");
+			img.getStyle().set("width", ICON_SIZE + "px");
+			img.getStyle().set("height", ICON_SIZE + "px");
 			img.getStyle().set("object-fit", "cover");
 			img.getStyle().set("border-radius", "2px");
 			icon.getElement().appendChild(img);
@@ -198,7 +208,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@Override
 	public String getIconString() {
 		// Return icon string identifier based on profile picture availability
-		if (profilePictureData != null && profilePictureData.length > 0) {
+		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
 			return "vaadin:user-card"; // Icon indicating user with profile picture
 		}
 		return DEFAULT_ICON; // Default user icon
@@ -301,7 +311,28 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	public void setPhone(final String phone) { this.phone = phone; }
 
-	public void setProfilePictureData(final byte[] profilePictureData) { this.profilePictureData = profilePictureData; }
+	public void setProfilePictureData(final byte[] profilePictureData) {
+		this.profilePictureData = profilePictureData;
+		// Automatically generate thumbnail when setting profile picture
+		if (profilePictureData != null && profilePictureData.length > 0) {
+			try {
+				this.profilePictureThumbnail = CImageUtils.resizeImage(profilePictureData, ICON_SIZE, ICON_SIZE);
+				LOGGER.debug("Generated thumbnail for user profile picture: {} bytes -> {} bytes", profilePictureData.length,
+						this.profilePictureThumbnail.length);
+			} catch (final Exception e) {
+				LOGGER.error("Failed to generate thumbnail for user profile picture", e);
+				// If thumbnail generation fails, clear it so we fall back to default icon
+				this.profilePictureThumbnail = null;
+			}
+		} else {
+			// Clear thumbnail when profile picture is cleared
+			this.profilePictureThumbnail = null;
+		}
+	}
+
+	public byte[] getProfilePictureThumbnail() { return profilePictureThumbnail; }
+
+	public void setProfilePictureThumbnail(final byte[] profilePictureThumbnail) { this.profilePictureThumbnail = profilePictureThumbnail; }
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
 		this.projectSettings = projectSettings != null ? projectSettings : new ArrayList<>();
