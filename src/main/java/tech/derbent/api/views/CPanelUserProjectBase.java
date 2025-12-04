@@ -155,7 +155,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	protected boolean validateGridSelection(final String actionName) {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 		if (selected == null) {
-			final String message = String.format("Please select an item to %s.", actionName);
+			final String message = String.format("Please  select an item to %s.", actionName);
 			CNotificationService.showWarning(message);
 			return false;
 		}
