@@ -3,7 +3,6 @@ package tech.derbent.api.entity.domain;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -101,6 +100,26 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 
 	public boolean isNew() { return id == null; }
 
+	/** Checks if this entity matches the given search value in the specified fields. This base implementation searches in 'id' and 'active' fields.
+	 * Subclasses should override to add their specific fields while calling super.matchesFilter().
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "id" field. Supported field names: "id", "active"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check ID field if requested
+		if (fieldNames.remove("id") && getId().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("active") && getActive().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		return false;
+	}
+
 	/** Generic method to save entity state using reflection. This method can be overridden by subclasses for custom save behavior.
 	 * @return this entity instance for method chaining */
 	@SuppressWarnings ("unchecked")
@@ -151,42 +170,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	@Override
 	public String toString() {
 		return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
-	}
-
-	/** Checks if this entity matches the given search value in the specified fields. This base implementation searches in 'id' and 'active'
-	 * fields. Subclasses should override to add their specific fields while calling super.matchesFilter().
-	 * @param searchValue the value to search for (case-insensitive)
-	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "id" field. Supported field names: "id",
-	 *                    "active"
-	 * @return true if the entity matches the search criteria in any of the specified fields */
-	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
-			return true; // No filter means match all
-		}
-		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		// If no field names specified, only search in "id" by default at this level
-		final Collection<String> fieldsToSearch = ((fieldNames == null) || fieldNames.isEmpty()) ? List.of("id") : fieldNames;
-		// Check ID field if requested
-		if (fieldsToSearch.contains("id")) {
-			final Long entityId = getId();
-			if (entityId != null) {
-				final String idStr = entityId.toString();
-				if (idStr.toLowerCase().contains(lowerSearchValue)) {
-					return true;
-				}
-			}
-		}
-		// Check active field if requested
-		if (fieldsToSearch.contains("active")) {
-			final Boolean activeValue = getActive();
-			if (activeValue != null) {
-				final String activeStr = activeValue.toString();
-				if (activeStr.toLowerCase().contains(lowerSearchValue)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	/** Helper method to update audit fields using reflection. Looks for common audit fields like 'lastModifiedDate', 'updatedAt'. */

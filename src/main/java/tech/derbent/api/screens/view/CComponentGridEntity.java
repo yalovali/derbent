@@ -25,7 +25,6 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -572,9 +571,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
 
-	/** Checks if an entity matches the search text. This method now uses the entity's matchesFilter() method which provides hierarchical
-	 * filtering. If the entity is a CEntityDB (which all domain entities extend), it uses the built-in filtering. Otherwise, falls back to
-	 * simple string comparison.
+	/** Checks if an entity matches the search text. This method now uses the entity's matchesFilter() method which provides hierarchical filtering.
+	 * If the entity is a CEntityDB (which all domain entities extend), it uses the built-in filtering. Otherwise, falls back to simple string
+	 * comparison.
 	 * @param entity     the entity to check
 	 * @param searchText the text to search for
 	 * @return true if the entity matches the search text

@@ -1,5 +1,6 @@
 package tech.derbent.app.companies.domain;
 
+import org.jspecify.annotations.Nullable;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -189,6 +190,33 @@ public class CCompany extends CEntityNamed<CCompany> {
 	}
 
 	public Boolean isEnableNotifications() { return enableNotifications; }
+
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		if (fieldNames.remove("address") && getAddress().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("email") && getEmail().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("phone") && getPhone().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("taxNumber") && getTaxNumber().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("website") && getWebsite().contains(lowerSearchValue)) {
+			return true;
+		}
+		return false;
+	}
 
 	public void setAddress(final String address) { this.address = address; }
 

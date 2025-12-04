@@ -87,6 +87,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	Class<EntityClass> clazz;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
+	@SuppressWarnings ("unchecked")
 	public CGrid(final Class<?> class1) {
 		super((Class<EntityClass>) class1, false);
 		setClazz(class1);
@@ -484,5 +485,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		super.select(entity);
 	}
 
+	@SuppressWarnings ("unchecked")
 	public void setClazz(Class<?> class1) { clazz = (Class<EntityClass>) class1; }
 }

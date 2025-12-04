@@ -89,6 +89,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 			return componentConfig -> {
 				// Wrap component config back into dialog config for the callback
 				// This is a bit awkward but maintains backward compatibility
+				@SuppressWarnings ("rawtypes")
 				final EntityTypeConfig dialogConfig =
 						new EntityTypeConfig(componentConfig.getDisplayName(), componentConfig.getEntityClass(), componentConfig.getService());
 				return this.getItems(dialogConfig);

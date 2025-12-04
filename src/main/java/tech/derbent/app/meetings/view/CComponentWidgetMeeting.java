@@ -1,7 +1,5 @@
 package tech.derbent.app.meetings.view;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -23,7 +21,6 @@ import tech.derbent.app.meetings.domain.CMeeting;
  * @see CComponentWidgetEntityOfProject */
 public class CComponentWidgetMeeting extends CComponentWidgetEntityOfProject<CMeeting> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetMeeting.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Creates a new meeting widget for the specified meeting.

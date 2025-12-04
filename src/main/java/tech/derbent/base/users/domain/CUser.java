@@ -1,6 +1,5 @@
 package tech.derbent.base.users.domain;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -41,15 +40,15 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator, IHasIcon {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CUser.class);
 	public static final String DEFAULT_COLOR = "#6CAFB0"; // CDE Light Green - individual people
 	public static final String DEFAULT_ICON = "vaadin:user";
 	public static final String ENTITY_TITLE_PLURAL = "Users";
 	public static final String ENTITY_TITLE_SINGULAR = "User";
-	public static final int MAX_LENGTH_NAME = 255;
-	public static final String VIEW_NAME = "Users View";
 	/** Icon size for user icons in pixels */
 	public static final int ICON_SIZE = 16;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CUser.class);
+	public static final int MAX_LENGTH_NAME = 255;
+	public static final String VIEW_NAME = "Users View";
 	@OneToMany (fetch = FetchType.LAZY)
 	@OrderColumn (name = "item_index")
 	@AMetaData (
@@ -231,28 +230,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		return DEFAULT_ICON; // Default user icon
 	}
 
-	public String getLastname() { return lastname; }
-
-	public String getLogin() { return login; }
-
-	@Override
-	public String getName() { return super.getName(); }
-
-	public String getPassword() {
-		return password; // Return the encoded password
-	}
-
-	public String getPhone() { return phone; }
-
-	public byte[] getProfilePictureData() { return profilePictureData; }
-
-	// Getter and setter with safe initialization to prevent lazy loading issues
-	public List<CUserProjectSettings> getProjectSettings() { return projectSettings; }
-
-	public String getUsername() {
-		return getLogin(); // Convenience method to get username for authentication
-	}
-
 	/** Gets the user's initials for avatar generation. Generates initials from the user's first name and last name. Falls back to login if no name is
 	 * available.
 	 * @return Initials string (typically 1-2 characters, e.g., "JD" for John Doe) */
@@ -283,6 +260,30 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			initials = "U";
 		}
 		return initials;
+	}
+
+	public String getLastname() { return lastname; }
+
+	public String getLogin() { return login; }
+
+	@Override
+	public String getName() { return super.getName(); }
+
+	public String getPassword() {
+		return password; // Return the encoded password
+	}
+
+	public String getPhone() { return phone; }
+
+	public byte[] getProfilePictureData() { return profilePictureData; }
+
+	public byte[] getProfilePictureThumbnail() { return profilePictureThumbnail; }
+
+	// Getter and setter with safe initialization to prevent lazy loading issues
+	public List<CUserProjectSettings> getProjectSettings() { return projectSettings; }
+
+	public String getUsername() {
+		return getLogin(); // Convenience method to get username for authentication
 	}
 
 	@Override
@@ -365,21 +366,19 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		// Automatically generate thumbnail when setting profile picture
 		if (profilePictureData != null && profilePictureData.length > 0) {
 			try {
-				this.profilePictureThumbnail = CImageUtils.resizeImage(profilePictureData, ICON_SIZE, ICON_SIZE);
+				profilePictureThumbnail = CImageUtils.resizeImage(profilePictureData, ICON_SIZE, ICON_SIZE);
 				LOGGER.debug("Generated thumbnail for user profile picture: {} bytes -> {} bytes", profilePictureData.length,
-						this.profilePictureThumbnail.length);
+						profilePictureThumbnail.length);
 			} catch (final Exception e) {
 				LOGGER.error("Failed to generate thumbnail for user profile picture", e);
 				// If thumbnail generation fails, clear it so we fall back to default icon
-				this.profilePictureThumbnail = null;
+				profilePictureThumbnail = null;
 			}
 		} else {
 			// Clear thumbnail when profile picture is cleared
-			this.profilePictureThumbnail = null;
+			profilePictureThumbnail = null;
 		}
 	}
-
-	public byte[] getProfilePictureThumbnail() { return profilePictureThumbnail; }
 
 	public void setProfilePictureThumbnail(final byte[] profilePictureThumbnail) { this.profilePictureThumbnail = profilePictureThumbnail; }
 

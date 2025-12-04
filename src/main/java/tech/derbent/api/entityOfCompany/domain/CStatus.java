@@ -1,5 +1,6 @@
 package tech.derbent.api.entityOfCompany.domain;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.Column;
@@ -120,12 +121,23 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 
 	public Boolean getStatusTypePause() { return statusTypePause; }
 
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		return false;
+	}
+
 	public void setAttributeNonDeletable(final boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
 
 	@Override
 	public void setColor(final String color) { this.color = color; }
 
-	public void setIconString(String icon) { this.iconString = icon; }
+	public void setIconString(String icon) { iconString = icon; }
 
 	public void setSortOrder(final Integer sortOrder) { this.sortOrder = sortOrder; }
 

@@ -1,7 +1,5 @@
 package tech.derbent.app.sprints.view;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.grid.view.CLabelEntity;
@@ -26,7 +24,6 @@ import tech.derbent.app.sprints.domain.CSprint;
  * @see CComponentWidgetEntityOfProject */
 public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetSprint.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Creates a new sprint widget for the specified sprint.

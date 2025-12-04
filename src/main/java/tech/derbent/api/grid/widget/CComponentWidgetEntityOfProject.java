@@ -1,8 +1,6 @@
 package tech.derbent.api.grid.widget;
 
 import java.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.utils.CAuxillaries;
@@ -24,7 +22,6 @@ import tech.derbent.api.utils.CAuxillaries;
  * @param <EntityClass> the entity type extending CProjectItem */
 public abstract class CComponentWidgetEntityOfProject<EntityClass extends CProjectItem<?>> extends CComponentWidgetEntity<EntityClass> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntityOfProject.class);
 	protected static final int MAX_DESCRIPTION_LENGTH = 100;
 	private static final long serialVersionUID = 1L;
 
