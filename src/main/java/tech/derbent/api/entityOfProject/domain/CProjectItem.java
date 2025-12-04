@@ -1,6 +1,7 @@
 package tech.derbent.api.entityOfProject.domain;
 
 import java.time.LocalDate;
+import org.jspecify.annotations.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -100,6 +101,40 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	public void setStatus(final CProjectItemStatus status) {
 		this.status = status;
 		updateLastModified();
+	}
+
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityOfProject to also search
+	 * in status field. For the status field, only the status name is searched.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: "id",
+	 *                    "active", "name", "description", "project", "assignedTo", "createdBy", "status"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// If no field names specified, default to "name" only (inherited from parent)
+		final java.util.Collection<String> fieldsToSearch = ((fieldNames == null) || fieldNames.isEmpty()) ? java.util.List.of("name")
+				: fieldNames;
+		// Check status field if requested - search only status name
+		if (fieldsToSearch.contains("status")) {
+			final CProjectItemStatus entityStatus = getStatus();
+			if (entityStatus != null) {
+				final String statusName = entityStatus.getName();
+				if ((statusName != null) && statusName.toLowerCase().contains(lowerSearchValue)) {
+					return true;
+				}
+			}
+		}
+		// Delegate to parent class for inherited fields
+		final java.util.Set<String> parentFields = new java.util.HashSet<>(fieldsToSearch);
+		parentFields.retainAll(java.util.List.of("id", "active", "name", "description", "project", "assignedTo", "createdBy"));
+		if (!parentFields.isEmpty()) {
+			return super.matchesFilter(searchValue, parentFields);
+		}
+		return false;
 	}
 	// ========================================================================
 	// Gantt Chart Display Methods - Override in subclasses that need Gantt display

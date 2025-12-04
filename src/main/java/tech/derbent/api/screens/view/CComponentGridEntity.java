@@ -572,56 +572,32 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
 
-	/** Checks if an entity matches the search text using reflection
-	 * @throws Exception */
+	/** Checks if an entity matches the search text. This method now uses the entity's matchesFilter() method which provides hierarchical
+	 * filtering. If the entity is a CEntityDB (which all domain entities extend), it uses the built-in filtering. Otherwise, falls back to
+	 * simple string comparison.
+	 * @param entity     the entity to check
+	 * @param searchText the text to search for
+	 * @return true if the entity matches the search text
+	 * @throws Exception if there's an error during matching */
 	private boolean matchesSearchText(Object entity, String searchText) throws Exception {
-		if (entity == null || searchText == null || searchText.isEmpty()) {
+		if ((entity == null) || (searchText == null) || searchText.isEmpty()) {
 			return true;
 		}
 		try {
-			final Class<?> entityClass = entity.getClass();
-			// Search in common string fields using reflection
-			final Field[] fields = entityClass.getDeclaredFields();
-			for (final Field field : fields) {
-				field.setAccessible(true);
-				final Object value = field.get(entity);
-				if (value != null) {
-					String stringValue = null;
-					// Handle different field types
-					if (value instanceof String) {
-						stringValue = (String) value;
-					} else if (value instanceof CEntityNamed) {
-						// For related entities, search in their name
-						final CEntityNamed<?> namedEntity = (CEntityNamed<?>) value;
-						stringValue = namedEntity.getName();
-					}
-					// Check if the string value contains the search text
-					if (stringValue != null && stringValue.toLowerCase().contains(searchText)) {
-						return true;
-					}
-				}
+			// Use the new matchesFilter method if the entity is a CEntityDB
+			if (entity instanceof CEntityDB) {
+				final CEntityDB<?> entityDB = (CEntityDB<?>) entity;
+				// Search in all common fields: id, name, description
+				// This will automatically delegate through the hierarchy
+				return entityDB.matchesFilter(searchText, List.of("id", "name", "description"));
 			}
-			// Also check inherited fields from superclasses
-			Class<?> superClass = entityClass.getSuperclass();
-			while (superClass != null && !superClass.equals(Object.class)) {
-				final Field[] superFields = superClass.getDeclaredFields();
-				for (final Field field : superFields) {
-					field.setAccessible(true);
-					final Object value = field.get(entity);
-					if (value instanceof String) {
-						final String stringValue = (String) value;
-						if (stringValue.toLowerCase().contains(searchText)) {
-							return true;
-						}
-					}
-				}
-				superClass = superClass.getSuperclass();
-			}
+			// Fallback for non-CEntityDB entities (shouldn't happen in normal usage)
+			LOGGER.warn("Entity {} is not a CEntityDB instance, using fallback search", entity.getClass().getSimpleName());
+			return entity.toString().toLowerCase().contains(searchText.toLowerCase());
 		} catch (final Exception e) {
 			LOGGER.error("Error checking search match for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
 			throw e;
 		}
-		return false;
 	}
 
 	@Override

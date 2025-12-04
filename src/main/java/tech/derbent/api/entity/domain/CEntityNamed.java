@@ -2,6 +2,7 @@ package tech.derbent.api.entity.domain;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.Column;
@@ -118,6 +119,47 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends the base class to search in
+	 * 'name' and 'description' fields in addition to inherited fields from CEntityDB. If no field names are specified, searches only in "name"
+	 * field.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: "id",
+	 *                    "active", "name", "description"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// If no field names specified, default to "name" only at this level
+		final java.util.Collection<String> fieldsToSearch = ((fieldNames == null) || fieldNames.isEmpty()) ? java.util.List.of("name")
+				: fieldNames;
+		// Check fields specific to CEntityNamed
+		// Check name field if requested
+		if (fieldsToSearch.contains("name")) {
+			final String entityName = getName();
+			if ((entityName != null) && entityName.toLowerCase().contains(lowerSearchValue)) {
+				return true;
+			}
+		}
+		// Check description field if requested
+		if (fieldsToSearch.contains("description")) {
+			final String entityDescription = getDescription();
+			if ((entityDescription != null) && entityDescription.toLowerCase().contains(lowerSearchValue)) {
+				return true;
+			}
+		}
+		// Delegate to parent class for inherited fields (id, active)
+		// Only pass parent-level fields to avoid duplicate checks
+		final java.util.Set<String> parentFields = new java.util.HashSet<>(fieldsToSearch);
+		parentFields.retainAll(java.util.List.of("id", "active"));
+		if (!parentFields.isEmpty()) {
+			return super.matchesFilter(searchValue, parentFields);
+		}
+		return false;
 	}
 
 	/** Update the last modified date to now. */

@@ -166,48 +166,27 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			for (final EntityClass item : allItems) {
 				Check.notNull(item, "Item in allItems cannot be null");
 				boolean matches = true;
-				// ID filter
-				if ((idValue != null) && !idValue.isBlank()) {
-					final String itemId = item.getId() != null ? item.getId().toString() : "";
-					if (!itemId.toLowerCase().contains(idValue.toLowerCase())) {
+				// ID filter - search in "id" field
+				if (matches && (idValue != null) && !idValue.isBlank()) {
+					if (!item.matchesFilter(idValue, List.of("id"))) {
 						matches = false;
 					}
 				}
-				// Name filter - use cached method
+				// Name filter - search in "name" field
 				if (matches && (nameValue != null) && !nameValue.isBlank()) {
-					final String name = getEntityName(item);
-					if (!name.toLowerCase().contains(nameValue.toLowerCase())) {
+					if (!item.matchesFilter(nameValue, List.of("name"))) {
 						matches = false;
 					}
 				}
-				// Description filter - use cached method
+				// Description filter - search in "description" field
 				if (matches && (descValue != null) && !descValue.isBlank()) {
-					final String desc = getEntityDescription(item);
-					if (!desc.toLowerCase().contains(descValue.toLowerCase())) {
+					if (!item.matchesFilter(descValue, List.of("description"))) {
 						matches = false;
 					}
 				}
-				// Status filter
+				// Status filter - search in "status" field
 				if (matches && (statusValue != null) && !statusValue.isBlank()) {
-					String statusName = null;
-					if (item instanceof CProjectItem) {
-						final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-						if (projectItem.getStatus() != null) {
-							statusName = projectItem.getStatus().getName();
-						}
-					} else {
-						final Object status = getEntityStatus(item);
-						if (status instanceof CEntityDB) {
-							try {
-								final java.lang.reflect.Method nameMethod = status.getClass().getMethod("getName");
-								final Object name = nameMethod.invoke(status);
-								statusName = name != null ? name.toString() : null;
-							} catch (final Exception e) {
-								statusName = null;
-							}
-						}
-					}
-					if ((statusName == null) || !statusName.equals(statusValue)) {
+					if (!item.matchesFilter(statusValue, List.of("status"))) {
 						matches = false;
 					}
 				}
@@ -231,7 +210,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Caches reflection methods for the current entity type for better performance. */
+	/** Caches reflection methods for the current entity type for better performance. This method is no longer needed since entities now have
+	 * matchesFilter() but is kept for backward compatibility with grid column configuration.
+	 * @deprecated Use entity.matchesFilter() instead */
+	@Deprecated
 	private void cacheReflectionMethods(final Class<?> entityClass) {
 		try {
 			cachedGetNameMethod = entityClass.getMethod("getName");
