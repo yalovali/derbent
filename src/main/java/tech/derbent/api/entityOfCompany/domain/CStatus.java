@@ -129,6 +129,33 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 		if (super.matchesFilter(searchValue, fieldNames)) {
 			return true;
 		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check boolean fields for status types
+		if (fieldNames.remove("attributeNonDeletable") && String.valueOf(getAttributeNonDeletable()).toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypeCancelled") && getStatusTypeCancelled().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypeClosed") && getStatusTypeClosed().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypeCompleted") && getStatusTypeCompleted().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypeInprogress") && getStatusTypeInprogress().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypePause") && getStatusTypePause().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		// Check string fields
+		if (fieldNames.remove("color") && (getColor() != null) && getColor().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("iconString") && (getIconString() != null) && getIconString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
 		return false;
 	}
 

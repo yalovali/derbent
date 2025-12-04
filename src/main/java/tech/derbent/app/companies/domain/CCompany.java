@@ -200,19 +200,24 @@ public class CCompany extends CEntityNamed<CCompany> {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("address") && getAddress().contains(lowerSearchValue)) {
+		if (fieldNames.remove("address") && (getAddress() != null) && getAddress().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("email") && getEmail().contains(lowerSearchValue)) {
+		if (fieldNames.remove("email") && (getEmail() != null) && getEmail().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("phone") && getPhone().contains(lowerSearchValue)) {
+		if (fieldNames.remove("phone") && (getPhone() != null) && getPhone().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("taxNumber") && getTaxNumber().contains(lowerSearchValue)) {
+		if (fieldNames.remove("taxNumber") && (getTaxNumber() != null) && getTaxNumber().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("website") && getWebsite().contains(lowerSearchValue)) {
+		if (fieldNames.remove("website") && (getWebsite() != null) && getWebsite().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		// Check boolean field
+		if (fieldNames.remove("enableNotifications") && (getEnableNotifications() != null)
+				&& getEnableNotifications().toString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;

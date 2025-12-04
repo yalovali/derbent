@@ -80,13 +80,13 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("project") && getProject().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (fieldNames.remove("project") && (getProject() != null) && getProject().matchesFilter(lowerSearchValue, List.of("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("assignedTo") && getAssignedTo().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (fieldNames.remove("assignedTo") && (getAssignedTo() != null) && getAssignedTo().matchesFilter(lowerSearchValue, List.of("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("createdBy") && getCreatedBy().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (fieldNames.remove("createdBy") && (getCreatedBy() != null) && getCreatedBy().matchesFilter(lowerSearchValue, List.of("name"))) {
 			return true;
 		}
 		return false;

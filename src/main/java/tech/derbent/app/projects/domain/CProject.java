@@ -109,6 +109,29 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		return false;
 	}
 
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityNamed to also search in
+	 * company field.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
+	 *                    fields plus "company"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check entity field
+		if (fieldNames.remove("company") && (getCompany() != null)
+				&& getCompany().matchesFilter(lowerSearchValue, java.util.List.of("name"))) {
+			return true;
+		}
+		return false;
+	}
+
 	/** Remove a user setting from this project and maintain bidirectional relationship.
 	 * @param userSettings the user settings to remove */
 	public void removeUserSettings(final CUserProjectSettings userSettings) {

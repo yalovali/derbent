@@ -91,7 +91,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("status") && getStatus().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (fieldNames.remove("status") && (getStatus() != null) && getStatus().matchesFilter(lowerSearchValue, List.of("name"))) {
 			return true;
 		}
 		return false;
