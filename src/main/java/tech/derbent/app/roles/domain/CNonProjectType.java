@@ -87,6 +87,37 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 		return super.hashCode();
 	}
 
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityNamed to also search in
+	 * company and boolean/string fields.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
+	 *                    fields plus "company", "attributeNonDeletable", "color"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check entity field
+		if (fieldNames.remove("company") && (getCompany() != null)
+				&& getCompany().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+			return true;
+		}
+		// Check boolean field
+		if (fieldNames.remove("attributeNonDeletable") && String.valueOf(getAttributeNonDeletable()).toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		// Check string field
+		if (fieldNames.remove("color") && (getColor() != null) && getColor().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		return false;
+	}
+
 	/** Sets whether this type entity is non-deletable.
 	 * @param attributeNonDeletable true if this entity cannot be deleted */
 	public void setAttributeNonDeletable(final boolean attributeNonDeletable) {

@@ -236,6 +236,37 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		}
 	}
 
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in
+	 * meeting-specific entity fields.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
+	 *                    fields plus "entityType", "relatedActivity", "responsible"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check entity fields
+		if (fieldNames.remove("entityType") && (getEntityType() != null)
+				&& getEntityType().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+			return true;
+		}
+		if (fieldNames.remove("relatedActivity") && (getRelatedActivity() != null)
+				&& getRelatedActivity().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+			return true;
+		}
+		if (fieldNames.remove("responsible") && (getResponsible() != null)
+				&& getResponsible().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+			return true;
+		}
+		return false;
+	}
+
 	public void setAgenda(final String agenda) { this.agenda = agenda; }
 
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }

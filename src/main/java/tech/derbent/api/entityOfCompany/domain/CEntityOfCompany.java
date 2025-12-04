@@ -43,15 +43,23 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	 *                    "active", "name", "description", "company"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, final @Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, java.util.@Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
-		if (super.matchesFilter(searchValue, fieldNames)) {
+		// Ensure fieldNames is mutable for the entire traversal chain
+		java.util.Collection<String> mutableFieldNames = fieldNames;
+		if (fieldNames == null) {
+			mutableFieldNames = new java.util.ArrayList<>();
+		} else if (!(fieldNames instanceof java.util.ArrayList)) {
+			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
+		}
+		if (super.matchesFilter(searchValue, mutableFieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("company") && (getCompany() != null) && getCompany().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (mutableFieldNames.remove("company") && (getCompany() != null)
+				&& getCompany().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

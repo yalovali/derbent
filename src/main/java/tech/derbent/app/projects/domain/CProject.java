@@ -126,7 +126,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity field
 		if (fieldNames.remove("company") && (getCompany() != null)
-				&& getCompany().matchesFilter(lowerSearchValue, java.util.List.of("name"))) {
+				&& getCompany().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

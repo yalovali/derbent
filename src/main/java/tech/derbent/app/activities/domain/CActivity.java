@@ -347,11 +347,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity fields
 		if (fieldNames.remove("entityType") && (getEntityType() != null)
-				&& getEntityType().matchesFilter(lowerSearchValue, java.util.List.of("name"))) {
+				&& getEntityType().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
 			return true;
 		}
 		if (fieldNames.remove("priority") && (getPriority() != null)
-				&& getPriority().matchesFilter(lowerSearchValue, java.util.List.of("name"))) {
+				&& getPriority().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

@@ -353,7 +353,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 		// Check entity fields
 		if (fieldNames.remove("companyRole") && (getCompanyRole() != null)
-				&& getCompanyRole().matchesFilter(lowerSearchValue, java.util.List.of("name"))) {
+				&& getCompanyRole().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
 			return true;
 		}
 		// Check boolean field
