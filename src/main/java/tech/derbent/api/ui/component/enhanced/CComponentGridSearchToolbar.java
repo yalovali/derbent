@@ -17,7 +17,7 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
 /**
- * CGridSearchToolbar - A reusable search toolbar component for entity grids.
+ * CComponentGridSearchToolbar - A reusable search toolbar component for entity grids.
  * <p>
  * Provides filter fields for common entity properties:
  * <ul>
@@ -35,9 +35,9 @@ import tech.derbent.api.utils.Check;
  * <li>Callback-based filter notification</li>
  * </ul>
  */
-public class CGridSearchToolbar extends CHorizontalLayout {
+public class CComponentGridSearchToolbar extends CHorizontalLayout {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CGridSearchToolbar.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridSearchToolbar.class);
 	private static final long serialVersionUID = 1L;
 	private static final int DEFAULT_DEBOUNCE_DELAY_MS = 300;
 
@@ -150,7 +150,7 @@ public class CGridSearchToolbar extends CHorizontalLayout {
 	/**
 	 * Creates a search toolbar with default configuration (all filters visible).
 	 */
-	public CGridSearchToolbar() {
+	public CComponentGridSearchToolbar() {
 		this(new ToolbarConfig().showAll());
 	}
 
@@ -159,7 +159,7 @@ public class CGridSearchToolbar extends CHorizontalLayout {
 	 *
 	 * @param config Configuration for visible fields
 	 */
-	public CGridSearchToolbar(final ToolbarConfig config) {
+	public CComponentGridSearchToolbar(final ToolbarConfig config) {
 		super();
 		Check.notNull(config, "Toolbar config cannot be null");
 		this.config = config;
@@ -293,7 +293,7 @@ public class CGridSearchToolbar extends CHorizontalLayout {
 		// Apply styling
 		addClassName("grid-search-toolbar");
 		CAuxillaries.setId(this);
-		LOGGER.debug("CGridSearchToolbar initialized with config - ID: {}, Name: {}, Desc: {}, Status: {}", config.isShowIdFilter(),
+		LOGGER.debug("CComponentGridSearchToolbar initialized with config - ID: {}, Name: {}, Desc: {}, Status: {}", config.isShowIdFilter(),
 				config.isShowNameFilter(), config.isShowDescriptionFilter(), config.isShowStatusFilter());
 	}
 
