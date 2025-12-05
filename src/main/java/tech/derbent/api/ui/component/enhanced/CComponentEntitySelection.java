@@ -627,4 +627,20 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 		gridSearchToolbar.setStatusOptions(statuses);
 	}
+
+	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally. */
+	public void refresh() {
+		try {
+			if (currentEntityType != null) {
+				on_comboBoxEntityType_selectionChanged(currentEntityType);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing component", e);
+			CNotificationService.showException("Error refreshing component", e);
+		}
+	}
+
+	/** Gets the grid component for external configuration (e.g., drag and drop).
+	 * @return the CGrid instance */
+	public CGrid<EntityClass> getGrid() { return gridItems; }
 }
