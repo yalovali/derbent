@@ -49,6 +49,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private final CActivityService activityService;
 	// Services for loading items
 	private final CMeetingService meetingService;
+	// Listener for item changes
+	private Consumer<CSprintItem> onItemChangeListener;
+	// Flag to control whether grid is shown in widget (managed by parent)
+	private boolean isInWidgetMode = false;
 
 	/** Constructor for CComponentListSprintItems.
 	 * @param sprintItemService The service for CSprintItem operations
@@ -63,6 +67,14 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		this.activityService = activityService;
 		this.meetingService = meetingService;
 		LOGGER.debug("CComponentListSprintItems created");
+	}
+
+	/** Configure this component for use in widget mode. In widget mode, the grid uses dynamic height to expand to content.
+	 * @param maxHeight The maximum height for the grid (e.g., "400px", "50vh") */
+	public void configureForWidgetMode(final String maxHeight) {
+		this.isInWidgetMode = true;
+		setDynamicHeight(maxHeight);
+		LOGGER.debug("CComponentListSprintItems configured for widget mode with max height: {}", maxHeight);
 	}
 
 	@Override
@@ -213,6 +225,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 					// Save
 					childService.save(sprintItem);
 					addedCount++;
+					// Notify listener if set
+					if (onItemChangeListener != null) {
+						onItemChangeListener.accept(sprintItem);
+					}
 				} catch (final Exception e) {
 					LOGGER.error("Error adding item {} to sprint", item.getId(), e);
 				}
@@ -267,11 +283,39 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		// Don't call openEditDialog - just select the item
 	}
 
+	/** Handle delete button click. Deletes the selected item after confirmation and notifies listeners. */
+	@Override
+	protected void on_buttonDelete_clicked() {
+		Check.notNull(getSelectedItem(), "No item selected for deletion");
+		Check.notNull(getSelectedItem().getId(), "Cannot delete unsaved item");
+		try {
+			LOGGER.debug("Deleting sprint item: {}", getSelectedItem().getId());
+			final CSprintItem itemToDelete = getSelectedItem();
+			childService.delete(itemToDelete);
+			refreshGrid();
+			getGridItems().asSingleSelect().clear();
+			CNotificationService.showDeleteSuccess();
+			// Notify listener if set
+			if (onItemChangeListener != null) {
+				onItemChangeListener.accept(itemToDelete);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error deleting sprint item", e);
+			CNotificationService.showException("Error deleting item", e);
+		}
+	}
+
 	@Override
 	protected void openEditDialog(final CSprintItem entity, final Consumer<CSprintItem> saveCallback, final boolean isNew) {
 		Check.notNull(entity, "Entity cannot be null when opening edit dialog");
 		LOGGER.warn("Edit operation not supported for sprint items - ID: {}", entity.getId());
 		CNotificationService
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
+	}
+
+	/** Sets a listener to be notified when sprint items are added or removed.
+	 * @param listener the listener to be called when an item changes */
+	public void setOnItemChangeListener(final Consumer<CSprintItem> listener) {
+		this.onItemChangeListener = listener;
 	}
 }

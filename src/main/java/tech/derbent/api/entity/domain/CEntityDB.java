@@ -3,6 +3,7 @@ package tech.derbent.api.entity.domain;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -105,7 +106,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @param searchValue the value to search for (case-insensitive)
 	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "id" field. Supported field names: "id", "active"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
-	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}

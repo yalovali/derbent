@@ -1,7 +1,7 @@
 package tech.derbent.api.entityOfProject.domain;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.jspecify.annotations.Nullable;
@@ -72,7 +72,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	}
 
 	@Override
-	public boolean matchesFilter(final String searchValue, final @Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
@@ -80,13 +80,13 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("project") && getProject().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (fieldNames.remove("project") && (getProject() != null) && getProject().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("assignedTo") && getAssignedTo().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (fieldNames.remove("assignedTo") && (getAssignedTo() != null) && getAssignedTo().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("createdBy") && getCreatedBy().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (fieldNames.remove("createdBy") && (getCreatedBy() != null) && getCreatedBy().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

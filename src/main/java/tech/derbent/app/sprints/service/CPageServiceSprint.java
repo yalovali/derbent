@@ -24,10 +24,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
 	private CActivityService activityService;
-	// private CComponentFieldSelection<CSprint, CActivity> componentFieldSelection;
 	private CComponentListEntityBase<CSprint, CSprintItem> componentItemsSelection;
 	private CMeetingService meetingService;
-	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;
 	private CSprintItemService sprintItemService;
 
@@ -39,7 +37,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			activityService = CSpringContext.getBean(CActivityService.class);
 			meetingService = CSpringContext.getBean(CMeetingService.class);
 			sprintItemService = CSpringContext.getBean(CSprintItemService.class);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
 	}
@@ -52,7 +50,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		try {
 			createFormFields();
 			return componentItemsSelection;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to create project user settings component.");
 			// Fallback to simple div with error message
 			final Div errorDiv = new Div();
@@ -62,14 +60,16 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
-
 	/** Creates a widget component for displaying the given sprint entity.
 	 * @param item the sprint to create a widget for
 	 * @return the CComponentWidgetSprint component */
 	@Override
-	public Component getComponentWidget(final CSprint item) { return new CComponentWidgetSprint(item); }
+	public Component getComponentWidget(final CSprint item) {
+		return new CComponentWidgetSprint(item);
+	}
+
+	@Override
+	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
 	public void on_description_blur(final Component component, final Object value) {
 		LOGGER.info("function: on_description_blur for Component type: {}",
@@ -93,9 +93,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	@Override
 	public void populateForm() {
-		// IContentOwner implementation in CComponentListSprintItems handles this automatically.
-		// CFormBuilder.populateForm() iterates through all components implementing IContentOwner
-		// and calls setCurrentEntity() and populateForm() on them, so no manual call is needed here.
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
 	}
 }

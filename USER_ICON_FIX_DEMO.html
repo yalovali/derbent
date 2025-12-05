@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Icon Visibility Fix - Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .demo-container {
+            display: flex;
+            gap: 40px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .demo-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 300px;
+        }
+        .demo-box h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .icon-example {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: rgb(108, 175, 176);
+            border-radius: 4px;
+            color: black;
+            margin: 10px 0;
+        }
+        vaadin-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        vaadin-icon img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .broken { background-color: #ffebee; color: #c62828; }
+        .fixed { background-color: #e8f5e9; color: #2e7d32; }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Icon Visibility Fix - Demonstration</h1>
+    
+    <h2>Problem Statement</h2>
+    <p>User icon images (profile pictures and generated avatars) were present in the HTML DOM but not visible. The Vaadin Icon's shadow DOM SVG was rendering on top of the custom image.</p>
+
+    <div class="demo-container">
+        <div class="demo-box">
+            <h3>❌ Before Fix (Icon Not Visible)</h3>
+            <span class="status broken">BROKEN</span>
+            <p>Without <code>icon-class</code> attribute, the shadow DOM SVG overlays the image:</p>
+            
+            <div class="icon-example">
+                <vaadin-icon style="flex-shrink: 0; overflow: hidden; color: black; display: inline-flex; width: 16px; justify-content: center; align-items: center; height: 16px; margin-right: 6px;">
+                    <!-- Shadow DOM SVG is rendered on top, hiding the image -->
+                    <svg style="display: block; width: 100%; height: 100%;">
+                        <rect width="16" height="16" fill="#cccccc"/>
+                    </svg>
+                    <img src="data:image/svg+xml,%3Csvg width='16' height='16' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='8' fill='%234A90E2'/%3E%3Ctext x='8' y='11' font-family='Arial' font-size='10' font-weight='bold' fill='white' text-anchor='middle'%3ESA%3C/text%3E%3C/svg%3E" alt="User icon">
+                </vaadin-icon>
+                <span>Admin (Icon Hidden)</span>
+            </div>
+
+            <pre>&lt;vaadin-icon&gt;
+  &lt;!-- Shadow DOM SVG blocks the image --&gt;
+  &lt;svg&gt;...&lt;/svg&gt;
+  &lt;img src="..."&gt;  &lt;!-- NOT VISIBLE --&gt;
+&lt;/vaadin-icon&gt;</pre>
+        </div>
+
+        <div class="demo-box">
+            <h3>✅ After Fix (Icon Visible)</h3>
+            <span class="status fixed">FIXED</span>
+            <p>With <code>icon-class="user-icon-image"</code>, the SVG is hidden:</p>
+            
+            <div class="icon-example">
+                <vaadin-icon icon-class="user-icon-image" style="flex-shrink: 0; overflow: hidden; color: black; display: inline-flex; width: 16px; justify-content: center; align-items: center; height: 16px; margin-right: 6px;">
+                    <img src="data:image/svg+xml,%3Csvg width='16' height='16' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='8' fill='%234A90E2'/%3E%3Ctext x='8' y='11' font-family='Arial' font-size='10' font-weight='bold' fill='white' text-anchor='middle'%3ESA%3C/text%3E%3C/svg%3E" alt="User icon">
+                </vaadin-icon>
+                <span>Admin (Icon Visible)</span>
+            </div>
+
+            <pre>&lt;vaadin-icon icon-class="user-icon-image"&gt;
+  &lt;!-- Shadow DOM SVG hidden by CSS --&gt;
+  &lt;svg style="display: none;"&gt;...&lt;/svg&gt;
+  &lt;img src="..."&gt;  &lt;!-- NOW VISIBLE! --&gt;
+&lt;/vaadin-icon&gt;</pre>
+        </div>
+    </div>
+
+    <h2>Technical Details</h2>
+    <div class="demo-box">
+        <h3>How It Works</h3>
+        <p>Vaadin Icon has a built-in CSS rule in its shadow DOM:</p>
+        <pre>:host(:is([icon-class], [font-icon-content])) svg {
+    display: none;
+}</pre>
+        <p>When we set the <code>icon-class</code> attribute, this rule activates and hides the default SVG, allowing our custom image to be visible.</p>
+        
+        <h3>Code Implementation</h3>
+        <pre>private Icon createIconFromImageData(final byte[] imageData) {
+    final Icon icon = new Icon();
+    
+    // CRITICAL: Set icon-class to hide shadow DOM SVG
+    icon.getElement().setAttribute("icon-class", "user-icon-image");
+    
+    // Create and append custom image
+    final Element img = new Element("img");
+    img.setAttribute("src", dataUrl);
+    icon.getElement().appendChild(img);
+    
+    return icon;
+}</pre>
+    </div>
+
+    <h2>Test Coverage</h2>
+    <div class="demo-box">
+        <p>✅ All 15 unit tests pass</p>
+        <p>✅ Test verifies icon-class attribute is set for profile pictures</p>
+        <p>✅ Test verifies icon-class attribute is set for generated avatars</p>
+        <p>✅ Test validates icon remains visible with different user types</p>
+    </div>
+
+    <h2>Impact</h2>
+    <div class="demo-box">
+        <p>This fix affects all user icons throughout the application:</p>
+        <ul>
+            <li>User listings in grids</li>
+            <li>User display in CLabelEntity components</li>
+            <li>User selection dropdowns</li>
+            <li>Activity/task assignee displays</li>
+            <li>Any other location where user entities are rendered with icons</li>
+        </ul>
+    </div>
+</body>
+</html>

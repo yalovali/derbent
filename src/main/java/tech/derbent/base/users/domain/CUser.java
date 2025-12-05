@@ -1,6 +1,7 @@
 package tech.derbent.base.users.domain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import org.slf4j.Logger;
@@ -162,6 +163,63 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 	}
 
+	/** Creates an icon from image data using proper SVG wrapping with data URLs.
+	 * This method embeds images in SVG using data URLs, which is properly supported
+	 * by Vaadin's Icon component when used correctly.
+	 * 
+	 * @param imageData Binary image data (PNG/JPEG)
+	 * @return Icon component with properly rendered image
+	 * @throws IllegalArgumentException if image data is null or empty */
+	private Icon createIconFromImageData(final byte[] imageData) {
+		Check.notNull(imageData, "Image data cannot be null");
+		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
+		
+		// Encode image data as base64 data URL
+		final String base64Image = Base64.getEncoder().encodeToString(imageData);
+		final String mimeType = detectMimeType(imageData);
+		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
+		
+		// Create an SVG that contains the image
+		final String svgContent = String.format(
+			"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\">" +
+			"<image href=\"%s\" width=\"%d\" height=\"%d\" " +
+			"style=\"border-radius: 2px;\"/></svg>",
+			ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE, 
+			dataUrl, ICON_SIZE, ICON_SIZE
+		);
+		
+		// Convert SVG content to data URL
+		final String svgDataUrl = "data:image/svg+xml;charset=utf-8," + 
+			java.net.URLEncoder.encode(svgContent, java.nio.charset.StandardCharsets.UTF_8);
+		
+		// Create Icon with SVG data URL
+		// Use the icon attribute to set the SVG content
+		final Icon icon = new Icon();
+		icon.getElement().setAttribute("icon", svgDataUrl);
+		icon.setSize(ICON_SIZE + "px");
+		
+		// Apply standard icon styling through CColorUtils
+		return CColorUtils.styleIcon(icon);
+	}
+
+	/** Detects MIME type from image data signature.
+	 * @param imageData Binary image data
+	 * @return MIME type string (e.g., "image/png", "image/jpeg") */
+	private String detectMimeType(final byte[] imageData) {
+		if (imageData.length < 4) {
+			return "image/png"; // Default fallback
+		}
+		// Check for PNG signature (89 50 4E 47)
+		if ((imageData[0] & 0xFF) == 0x89 && (imageData[1] & 0xFF) == 0x50 && (imageData[2] & 0xFF) == 0x4E && (imageData[3] & 0xFF) == 0x47) {
+			return "image/png";
+		}
+		// Check for JPEG signature (FF D8)
+		if ((imageData[0] & 0xFF) == 0xFF && (imageData[1] & 0xFF) == 0xD8) {
+			return "image/jpeg";
+		}
+		return "image/png"; // Default fallback
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 		return super.equals(o);
@@ -187,37 +245,28 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public Icon getIcon() {
 		// Use thumbnail if available for efficient rendering
 		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
+			return createIconFromImageData(profilePictureThumbnail);
+		}
+		
+		// Generate SVG avatar with initials when no profile picture is available
+		// This is more efficient and produces better quality than PNG avatars
+		try {
+			final String initials = getInitials();
+			final String svgContent = CImageUtils.generateAvatarSvg(initials, ICON_SIZE);
+			
+			// Convert SVG string to data URL
+			final String svgDataUrl = "data:image/svg+xml;charset=utf-8," + 
+				java.net.URLEncoder.encode(svgContent, java.nio.charset.StandardCharsets.UTF_8);
+			
+			// Create Icon with SVG data URL
 			final Icon icon = new Icon();
-			final String base64Image = Base64.getEncoder().encodeToString(profilePictureThumbnail);
-			// For bitmap images, we need to use an img element with proper CSS
-			// to ensure it respects the size constraints (16px x 16px)
-			final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
-			img.setAttribute("src", "data:image/png;base64," + base64Image);
-			img.getStyle().set("width", ICON_SIZE + "px");
-			img.getStyle().set("height", ICON_SIZE + "px");
-			img.getStyle().set("object-fit", "cover");
-			img.getStyle().set("border-radius", "2px");
-			icon.getElement().appendChild(img);
+			icon.getElement().setAttribute("icon", svgDataUrl);
+			icon.setSize(ICON_SIZE + "px");
+			
 			return CColorUtils.styleIcon(icon);
-		} else {
-			// Generate avatar with initials when no profile picture is available
-			try {
-				final String initials = getInitials();
-				final byte[] avatarImage = CImageUtils.generateAvatarWithInitials(initials, ICON_SIZE);
-				final Icon icon = new Icon();
-				final String base64Image = Base64.getEncoder().encodeToString(avatarImage);
-				final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
-				img.setAttribute("src", "data:image/png;base64," + base64Image);
-				img.getStyle().set("width", ICON_SIZE + "px");
-				img.getStyle().set("height", ICON_SIZE + "px");
-				img.getStyle().set("object-fit", "cover");
-				img.getStyle().set("border-radius", "2px");
-				icon.getElement().appendChild(img);
-				return CColorUtils.styleIcon(icon);
-			} catch (final Exception e) {
-				LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
-				return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
-			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
+			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
 		}
 	}
 
@@ -314,6 +363,51 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 		// Search in ID as string
 		if (getId() != null && getId().toString().contains(lowerSearchText)) {
+			return true;
+		}
+		return false;
+	}
+
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityOfCompany to also search in
+	 * user-specific fields like login, email, lastname, phone, and entity references.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: "id",
+	 *                    "active", "name", "description", "company", "login", "email", "lastname", "phone", "companyRole",
+	 *                    "attributeDisplaySectionsAsTabs"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check string fields
+		if (fieldNames.remove("login") && (getLogin() != null) && getLogin().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("email") && (getEmail() != null) && getEmail().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("lastname") && (getLastname() != null) && getLastname().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("phone") && (getPhone() != null) && getPhone().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("color") && (getColor() != null) && getColor().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		// Check entity fields
+		if (fieldNames.remove("companyRole") && (getCompanyRole() != null)
+				&& getCompanyRole().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+			return true;
+		}
+		// Check boolean field
+		if (fieldNames.remove("attributeDisplaySectionsAsTabs") && (getAttributeDisplaySectionsAsTabs() != null)
+				&& getAttributeDisplaySectionsAsTabs().toString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;

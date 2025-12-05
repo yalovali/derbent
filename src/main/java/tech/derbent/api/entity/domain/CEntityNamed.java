@@ -1,6 +1,7 @@
 package tech.derbent.api.entity.domain;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -107,9 +108,18 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	 *                    "active", "name", "description"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
+		}
+		// Ensure fieldNames is mutable for the entire traversal chain
+		java.util.Collection<String> mutableFieldNames = fieldNames;
+		if ((fieldNames == null) || fieldNames.isEmpty()) {
+			// Default to searching in "name" field when no fields specified
+			mutableFieldNames = new java.util.ArrayList<>();
+			mutableFieldNames.add("name");
+		} else if (!(fieldNames instanceof java.util.ArrayList)) {
+			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
 			return true;

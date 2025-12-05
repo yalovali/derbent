@@ -189,6 +189,15 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	protected void initializeWidget() {
 		try {
 			CAuxillaries.setId(this);
+			// Ensure the horizontal layout (this) uses full width so children can expand
+			this.setWidthFull();
+			// Make the left vertical layout take available space
+			layoutLeft.setWidthFull();
+			// Ensure left expands and right does not take flex space
+			this.expand(layoutLeft);
+			// Right layout should not expand and must have no width set
+			layoutRight.setSizeUndefined();
+			this.setFlexGrow(0, layoutRight);
 			createFirstLine();
 			createSecondLine();
 			createThirdLine();

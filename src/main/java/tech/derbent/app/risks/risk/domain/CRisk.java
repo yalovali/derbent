@@ -1,5 +1,6 @@
 package tech.derbent.app.risks.risk.domain;
 
+import java.util.Arrays;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,21 +33,21 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
-			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk", hidden = false, 
+			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk", hidden = false,
 			maxLength = 1000
 	)
 	private String cause;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk", hidden = false, 
+			displayName = "Risk Type", required = false, readOnly = false, description = "Type category of the risk", hidden = false,
 			dataProviderBean = "CRiskTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CRiskType entityType;
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
-			displayName = "Impact", required = false, readOnly = false, description = "Potential impact if risk occurs", hidden = false, 
+			displayName = "Impact", required = false, readOnly = false, description = "Potential impact if risk occurs", hidden = false,
 			maxLength = 1000
 	)
 	private String impact;
@@ -54,42 +55,42 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Mitigation", required = false, readOnly = false, description = "Strategy to mitigate or reduce the risk", hidden = false,
-			 maxLength = 2000
+			maxLength = 2000
 	)
 	private String mitigation;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Action Plan", required = false, readOnly = false, description = "Detailed action plan to address the risk", hidden = false,
-			 maxLength = 2000
+			maxLength = 2000
 	)
 	private String plan;
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
 			displayName = "Result", required = false, readOnly = false, description = "Outcome or result of risk management", hidden = false,
-			 maxLength = 1000
+			maxLength = 1000
 	)
 	private String result;
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_criticality", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Criticality", required = false, readOnly = false, defaultValue = "MODERATE",
-			description = "Overall importance/criticality of the risk", hidden = false,  useRadioButtons = false
+			description = "Overall importance/criticality of the risk", hidden = false, useRadioButtons = false
 	)
 	private ERiskCriticality riskCriticality;
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_likelihood", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Likelihood", required = false, readOnly = false, defaultValue = "POSSIBLE", description = "Probability of risk occurring",
-			hidden = false,  useRadioButtons = false
+			hidden = false, useRadioButtons = false
 	)
 	private ERiskLikelihood riskLikelihood;
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk",
-			hidden = false,  useRadioButtons = false
+			hidden = false, useRadioButtons = false
 	)
 	private ERiskSeverity riskSeverity;
 
@@ -141,6 +142,28 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		if (riskCriticality == null) {
 			riskCriticality = ERiskCriticality.MODERATE;
 		}
+	}
+
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in
+	 * risk-specific entity fields.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
+	 *                    fields plus "entityType"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check entity field
+		if (fieldNames.remove("entityType") && (getEntityType() != null) && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+			return true;
+		}
+		return false;
 	}
 
 	public void setCause(final String cause) {

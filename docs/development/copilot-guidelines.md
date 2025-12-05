@@ -541,6 +541,62 @@ These files demonstrate Copilot-friendly patterns:
 ☐ Proper error handling with notifications
 ```
 
+## Screenshot Documentation Requirements
+
+### MANDATORY: Screenshots for All Tasks
+
+**For ANY task that involves code changes, you MUST provide screenshot evidence as proof of the changes.**
+
+This requirement applies to:
+- UI changes (components, layouts, styling)
+- Functional changes (business logic, workflows)
+- Bug fixes (showing before/after or the fix working)
+- New features (demonstrating the feature in action)
+- Refactoring (showing the affected functionality still works)
+
+### How to Provide Screenshots
+
+1. **Use Test Pages**: Navigate to the Test Support Page at `/cpagetestauxillary` to access all test pages
+2. **Capture Screenshots**: Use Playwright browser automation or manual screenshots
+3. **Include in PR**: Embed screenshots directly in the PR description using markdown
+4. **Label Clearly**: Add descriptive captions (e.g., "Before Fix", "After Fix", "Feature in Action")
+
+### Screenshot Checklist
+
+```
+☐ Screenshot shows the relevant UI component or feature
+☐ Screenshot demonstrates the change is working correctly
+☐ Screenshot is embedded in PR description with markdown
+☐ Caption clearly explains what the screenshot shows
+☐ Test page URL is documented if applicable
+```
+
+### Example Screenshot Documentation
+
+```markdown
+## Visual Proof
+
+### Before Fix
+![Before](path/to/before.png)
+*ComboBox background bleeding beyond borders*
+
+### After Fix  
+![After](path/to/after.png)
+*Background color properly contained within input borders*
+
+### Test Page
+The fix can be verified at: `/cpagetestauxillary` → "User Icon Test" page
+```
+
+### When Screenshots Are Not Required
+
+Screenshots are **NOT** required for:
+- Pure documentation changes (no code)
+- Configuration-only changes (pom.xml, properties files)
+- Backend-only changes with no UI impact (if explicitly documented as backend-only)
+
+**Note**: If you claim a change has no UI impact, you must explicitly state this and explain why screenshots are not applicable.
+
 ## Summary
 
 GitHub Copilot works exceptionally well with Derbent because of:

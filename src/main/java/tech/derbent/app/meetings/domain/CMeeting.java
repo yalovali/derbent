@@ -2,6 +2,7 @@ package tech.derbent.app.meetings.domain;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.AssociationOverride;
@@ -168,9 +169,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	@Override
 	@SuppressWarnings ({
-			"rawtypes", "unchecked"
 	})
-	public CTypeEntity getEntityType() { return entityType; }
+	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
@@ -218,6 +218,36 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	 * @return true if the user is a participant, false otherwise */
 	public boolean isParticipant(final CUser user) {
 		return (user != null) && participants.contains(user);
+	}
+
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in
+	 * meeting-specific entity fields.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
+	 *                    fields plus "entityType", "relatedActivity", "responsible"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check entity fields
+		if (fieldNames.remove("entityType") && (getEntityType() != null) && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+			return true;
+		}
+		if (fieldNames.remove("relatedActivity") && (getRelatedActivity() != null)
+				&& getRelatedActivity().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+			return true;
+		}
+		if (fieldNames.remove("responsible") && (getResponsible() != null)
+				&& getResponsible().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+			return true;
+		}
+		return false;
 	}
 
 	/** Convenience method to remove an attendee from the meeting.

@@ -296,6 +296,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		allMenuEntries.addAll(pageMenuService.getDynamicMenuEntries());
 		// Process all menu entries (both static and dynamic)
 		pageTestAuxillaryService.clearRoutes(); // Clear previous routes to avoid duplicates
+		pageTestAuxillaryService.addStaticTestRoutes(); // Re-add static test routes after clear
 		for (final MenuEntry menuEntry : allMenuEntries) {
 			processMenuEntry(menuEntry);
 		}

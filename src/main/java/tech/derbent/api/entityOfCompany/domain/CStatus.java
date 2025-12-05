@@ -1,5 +1,6 @@
 package tech.derbent.api.entityOfCompany.domain;
 
+import java.util.Collection;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,11 +123,38 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	public Boolean getStatusTypePause() { return statusTypePause; }
 
 	@Override
-	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, final @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check boolean fields for status types
+		if (fieldNames.remove("attributeNonDeletable") && String.valueOf(getAttributeNonDeletable()).toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypeCancelled") && getStatusTypeCancelled().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypeClosed") && getStatusTypeClosed().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypeCompleted") && getStatusTypeCompleted().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypeInprogress") && getStatusTypeInprogress().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("statusTypePause") && getStatusTypePause().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		// Check string fields
+		if (fieldNames.remove("color") && (getColor() != null) && getColor().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("iconString") && (getIconString() != null) && getIconString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;

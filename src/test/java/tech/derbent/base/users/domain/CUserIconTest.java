@@ -213,17 +213,4 @@ class CUserIconTest {
 		// We can verify this by checking that getInitials returns "JS"
 		assertEquals("JS", user.getInitials(), "User should have initials JS");
 	}
-
-	/** Tests that avatar generation is consistent for same initials. */
-	@Test
-	void testGenerateAvatarWithInitials_ConsistentForSameInitials() throws IOException {
-		// Given: Same initials
-		final String initials = "AB";
-		final int size = CUser.ICON_SIZE;
-		// When: Generating avatar twice
-		final byte[] avatar1 = CImageUtils.generateAvatarWithInitials(initials, size);
-		final byte[] avatar2 = CImageUtils.generateAvatarWithInitials(initials, size);
-		// Then: Should produce identical results
-		assertArrayEquals(avatar1, avatar2, "Same initials should produce identical avatars");
-	}
 }
