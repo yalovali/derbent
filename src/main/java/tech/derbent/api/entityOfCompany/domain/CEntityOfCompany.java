@@ -1,5 +1,8 @@
 package tech.derbent.api.entityOfCompany.domain;
 
+import java.util.Collection;
+import java.util.List;
+import org.jspecify.annotations.Nullable;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -32,6 +35,35 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	}
 
 	public CCompany getCompany() { return company; }
+
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityNamed to also search in
+	 * company field. For the company field, only the company name is searched.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: "id",
+	 *                    "active", "name", "description", "company"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, java.util.@Nullable Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		// Ensure fieldNames is mutable for the entire traversal chain
+		java.util.Collection<String> mutableFieldNames = fieldNames;
+		if (fieldNames == null) {
+			mutableFieldNames = new java.util.ArrayList<>();
+		} else if (!(fieldNames instanceof java.util.ArrayList)) {
+			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
+		}
+		if (super.matchesFilter(searchValue, mutableFieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		if (mutableFieldNames.remove("company") && (getCompany() != null)
+				&& getCompany().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+			return true;
+		}
+		return false;
+	}
 
 	public void setCompany(final CCompany company) { this.company = company; }
 }

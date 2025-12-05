@@ -83,15 +83,23 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	 *                    "active", "name", "description", "project", "assignedTo", "createdBy", "status"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, java.util.@Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
-		if (super.matchesFilter(searchValue, fieldNames)) {
+		// Ensure fieldNames is mutable for the entire traversal chain
+		java.util.Collection<String> mutableFieldNames = fieldNames;
+		if (fieldNames == null) {
+			mutableFieldNames = new java.util.ArrayList<>();
+		} else if (!(fieldNames instanceof java.util.ArrayList)) {
+			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
+		}
+		if (super.matchesFilter(searchValue, mutableFieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("status") && getStatus().matchesFilter(lowerSearchValue, List.of("name"))) {
+		if (mutableFieldNames.remove("status") && (getStatus() != null)
+				&& getStatus().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

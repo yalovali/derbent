@@ -354,6 +354,51 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		return false;
 	}
 
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityOfCompany to also search in
+	 * user-specific fields like login, email, lastname, phone, and entity references.
+	 * @param searchValue the value to search for (case-insensitive)
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: "id",
+	 *                    "active", "name", "description", "company", "login", "email", "lastname", "phone", "companyRole",
+	 *                    "attributeDisplaySectionsAsTabs"
+	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@Override
+	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
+		if ((searchValue == null) || searchValue.isBlank()) {
+			return true; // No filter means match all
+		}
+		if (super.matchesFilter(searchValue, fieldNames)) {
+			return true;
+		}
+		final String lowerSearchValue = searchValue.toLowerCase().trim();
+		// Check string fields
+		if (fieldNames.remove("login") && (getLogin() != null) && getLogin().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("email") && (getEmail() != null) && getEmail().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("lastname") && (getLastname() != null) && getLastname().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("phone") && (getPhone() != null) && getPhone().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		if (fieldNames.remove("color") && (getColor() != null) && getColor().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		// Check entity fields
+		if (fieldNames.remove("companyRole") && (getCompanyRole() != null)
+				&& getCompanyRole().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+			return true;
+		}
+		// Check boolean field
+		if (fieldNames.remove("attributeDisplaySectionsAsTabs") && (getAttributeDisplaySectionsAsTabs() != null)
+				&& getAttributeDisplaySectionsAsTabs().toString().toLowerCase().contains(lowerSearchValue)) {
+			return true;
+		}
+		return false;
+	}
+
 	/** Remove a project setting from this user and maintain bidirectional relationship.
 	 * @param projectSettings the project settings to remove */
 	public void removeProjectSettings(final CUserProjectSettings projectSettings) {

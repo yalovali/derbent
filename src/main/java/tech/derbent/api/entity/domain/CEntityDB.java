@@ -105,16 +105,23 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @param searchValue the value to search for (case-insensitive)
 	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "id" field. Supported field names: "id", "active"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
-	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, java.util.@Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
+		// Ensure fieldNames is mutable - this will be used by all subclasses in the chain
+		java.util.Collection<String> mutableFieldNames = fieldNames;
+		if (fieldNames == null) {
+			mutableFieldNames = new java.util.ArrayList<>();
+		} else if (!(fieldNames instanceof java.util.ArrayList)) {
+			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
+		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check ID field if requested
-		if (fieldNames.remove("id") && getId().toString().toLowerCase().contains(lowerSearchValue)) {
+		if (mutableFieldNames.remove("id") && getId().toString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("active") && getActive().toString().toLowerCase().contains(lowerSearchValue)) {
+		if (mutableFieldNames.remove("active") && getActive().toString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;
