@@ -405,6 +405,18 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return Set of selected items */
 	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
 
+	/** Returns the number of currently selected items.
+	 * @return count of selected items */
+	public int getSelectedCount() { return selectedItems.size(); }
+
+	/** Returns all loaded items (before filtering).
+	 * @return List of all items */
+	public List<EntityClass> getAllItems() { return new ArrayList<>(allItems); }
+
+	/** Returns the number of all loaded items.
+	 * @return count of all items */
+	public int getItemCount() { return allItems.size(); }
+
 	/** Returns whether the component is configured for multi-select.
 	 * @return true if multi-select mode */
 	public boolean isMultiSelect() { return multiSelect; }
