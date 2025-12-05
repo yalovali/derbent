@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -166,34 +167,27 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	private Icon createIconFromImageData(final byte[] imageData) {
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
-		// Create an Icon with a clean DOM structure
-		final Icon icon = new Icon();
-		// CRITICAL: Set icon-class attribute to hide the shadow DOM's default SVG
-		// This allows our custom image to be visible instead of being hidden behind the SVG
-		icon.getElement().setAttribute("icon-class", "user-icon-image");
+		
 		// Encode image data as base64 data URL
 		final String base64Image = Base64.getEncoder().encodeToString(imageData);
 		final String dataUrl = "data:image/png;base64," + base64Image;
-		// Create img element with proper attributes
-		final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
-		img.setAttribute("src", dataUrl);
-		img.setAttribute("alt", "User icon");
-		img.setAttribute("loading", "eager"); // Ensure immediate loading
-		// Apply critical inline styles for proper rendering
-		// These styles ensure the image displays correctly across all browsers
-		img.getStyle().set("width", ICON_SIZE + "px").set("height", ICON_SIZE + "px").set("display", "block") // Remove inline spacing
-				.set("object-fit", "cover") // Ensure image fills the space
-				.set("border-radius", "2px") // Slightly rounded corners
-				.set("vertical-align", "middle"); // Align with text
-		// Clear any default Icon styles that might interfere
-		icon.getElement().getStyle().set("width", ICON_SIZE + "px").set("height", ICON_SIZE + "px").set("display", "inline-flex") // Use flex for
-																																	// proper
-																																	// alignment
-				.set("align-items", "center").set("justify-content", "center").set("overflow", "hidden"); // Clip any overflow
-		// Append the image to the icon element
-		icon.getElement().appendChild(img);
-		// Apply additional styling from CColorUtils for consistency with other icons
-		// Note: This adds margin-right and flex-shrink properties
+		
+		// Create an SVG that embeds the image
+		// This is much cleaner than complex DOM manipulation
+		final String svgContent = String.format(
+			"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">" +
+			"<image href=\"%s\" width=\"%d\" height=\"%d\" style=\"border-radius: 2px;\"/>" +
+			"</svg>",
+			ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE,
+			dataUrl, ICON_SIZE, ICON_SIZE
+		);
+		
+		// Use Icon with inline SVG - simpler and cleaner than the previous DOM manipulation
+		final Icon icon = new Icon();
+		icon.getElement().setProperty("innerHTML", svgContent);
+		icon.setSize(ICON_SIZE + "px");
+		
+		// Apply standard icon styling for consistency
 		return CColorUtils.styleIcon(icon);
 	}
 
