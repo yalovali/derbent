@@ -47,12 +47,12 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
+	// Flag to control whether grid is shown in widget (managed by parent)
+	private boolean isInWidgetMode = false;
 	// Services for loading items
 	private final CMeetingService meetingService;
 	// Listener for item changes
 	private Consumer<CSprintItem> onItemChangeListener;
-	// Flag to control whether grid is shown in widget (managed by parent)
-	private boolean isInWidgetMode = false;
 
 	/** Constructor for CComponentListSprintItems.
 	 * @param sprintItemService The service for CSprintItem operations
@@ -72,9 +72,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	/** Configure this component for use in widget mode. In widget mode, the grid uses dynamic height to expand to content.
 	 * @param maxHeight The maximum height for the grid (e.g., "400px", "50vh") */
 	public void configureForWidgetMode(final String maxHeight) {
-		this.isInWidgetMode = true;
+		isInWidgetMode = true;
 		setDynamicHeight(maxHeight);
-		LOGGER.debug("CComponentListSprintItems configured for widget mode with max height: {}", maxHeight);
 	}
 
 	@Override
@@ -273,16 +272,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		}
 	}
 
-	@Override
-	protected void on_gridItems_doubleClicked(final CSprintItem item) {
-		// Override to prevent edit dialog from opening on double-click
-		Check.notNull(item, "Double-clicked item cannot be null");
-		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
-		setSelectedItem(item);
-		updateButtonStates(true);
-		// Don't call openEditDialog - just select the item
-	}
-
 	/** Handle delete button click. Deletes the selected item after confirmation and notifies listeners. */
 	@Override
 	protected void on_buttonDelete_clicked() {
@@ -306,6 +295,16 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
+	protected void on_gridItems_doubleClicked(final CSprintItem item) {
+		// Override to prevent edit dialog from opening on double-click
+		Check.notNull(item, "Double-clicked item cannot be null");
+		LOGGER.debug("Double-clicked sprint item: {} (edit not supported)", item.getId());
+		setSelectedItem(item);
+		updateButtonStates(true);
+		// Don't call openEditDialog - just select the item
+	}
+
+	@Override
 	protected void openEditDialog(final CSprintItem entity, final Consumer<CSprintItem> saveCallback, final boolean isNew) {
 		Check.notNull(entity, "Entity cannot be null when opening edit dialog");
 		LOGGER.warn("Edit operation not supported for sprint items - ID: {}", entity.getId());
@@ -316,6 +315,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	/** Sets a listener to be notified when sprint items are added or removed.
 	 * @param listener the listener to be called when an item changes */
 	public void setOnItemChangeListener(final Consumer<CSprintItem> listener) {
-		this.onItemChangeListener = listener;
+		onItemChangeListener = listener;
 	}
 }

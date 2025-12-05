@@ -56,6 +56,17 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		super(sprint);
 	}
 
+	protected void createFirstLine() throws Exception {
+		super.createFirstLine();
+		// Show sprint type with color if available
+		if (getEntity().getEntityType() != null) {
+			final CLabelEntity typeLabel = new CLabelEntity();
+			typeLabel.setValue(getEntity().getEntityType(), true);
+			typeLabel.getStyle().set("margin-right", "8px");
+			layoutLineOne.add(typeLabel);
+		}
+	}
+
 	/** Creates the item count label with icon and styling.
 	 * @return the configured label */
 	private CLabelEntity createItemCountLabel() {
@@ -84,13 +95,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		final CHorizontalLayout layoutMidLineOne = new CHorizontalLayout();
 		createSprintItemsComponent();
 		layoutMid.add(layoutMidLineOne, containerSprintItems);
-		// Show sprint type with color if available
-		if (getEntity().getEntityType() != null) {
-			final CLabelEntity typeLabel = new CLabelEntity();
-			typeLabel.setValue(getEntity().getEntityType(), true);
-			typeLabel.getStyle().set("margin-right", "8px");
-			layoutMidLineOne.add(typeLabel);
-		}
 		// Show item count with icon and colorful badge - make it clickable
 		itemCountLabel = createItemCountLabel();
 		// Make the label clickable

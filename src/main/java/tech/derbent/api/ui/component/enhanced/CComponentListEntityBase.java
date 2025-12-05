@@ -74,16 +74,12 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected CButton buttonMoveUp;
 	protected final IOrderedEntityService<ChildEntity> childService;
 	protected final Class<ChildEntity> entityClass;
-	// Components
-	protected CGrid<ChildEntity> gridItems;
+	protected CGrid<ChildEntity> grid;
 	protected CHorizontalLayout layoutToolbar;
 	protected MasterEntity masterEntity;
 	protected final Class<MasterEntity> masterEntityClass;
-	// Data management
 	protected ChildEntity selectedItem;
-	// Grid sizing configuration
 	protected boolean useDynamicHeight = false;
-	protected String maxHeight = null;
 
 	/** Constructor for the entity list component.
 	 * @param title             The title to display above the grid
@@ -115,8 +111,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param itemsProvider   Provider for loading items based on entity type
 	 * @param multiSelect     True for multi-select, false for single-select
 	 * @param onItemsSelected Callback invoked when items are selected from the dialog */
-	@SuppressWarnings ({
-	})
+	@SuppressWarnings ({})
 	protected CButton addButtonFromList(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected) {
 		return addButtonFromList(dialogTitle, entityTypes, itemsProvider, multiSelect, onItemsSelected, null,
@@ -134,8 +129,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param onItemsSelected         Callback invoked when items are selected from the dialog
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
 	 * @param alreadySelectedMode     Mode for handling already-selected items */
-	@SuppressWarnings ({
-	})
+	@SuppressWarnings ({})
 	protected CButton addButtonFromList(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected,
 			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider,
@@ -158,7 +152,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@SuppressWarnings ("unchecked")
 	public void clearGrid() {
 		LOGGER.debug("Clearing grid");
-		gridItems.setItems();
+		grid.setItems();
 		selectedItem = null;
 		updateButtonStates(false);
 	}
@@ -198,27 +192,15 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	/** Create and configure the grid component. */
 	protected void createGrid() {
-		gridItems = new CGrid<>(entityClass);
-		gridItems.setSelectionMode(CGrid.SelectionMode.SINGLE);
+		grid = new CGrid<>(entityClass);
+		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);
 		// Configure height based on useDynamicHeight setting
-		if (useDynamicHeight) {
-			// Dynamic height: size to content with optional max height, no min height
-			// Use CSS to make grid size based on content
-			gridItems.getStyle().set("height", "auto");
-			if (maxHeight != null) {
-				gridItems.setMaxHeight(maxHeight);
-			}
-		} else {
-			// Default behavior: full height with minimum
-			gridItems.setHeightFull();
-			gridItems.setMinHeight("250px");
-		}
-		// Configure grid columns - subclass responsibility
-		configureGrid(gridItems);
-		// Add selection listener
-		gridItems.asSingleSelect().addValueChangeListener(e -> on_gridItems_selected(e.getValue()));
+		grid.setHeightFull();
+		grid.setMinHeight("120px");
+		configureGrid(grid);
+		grid.asSingleSelect().addValueChangeListener(e -> on_gridItems_selected(e.getValue()));
 		// Add double-click listener
-		gridItems.addItemDoubleClickListener(e -> on_gridItems_doubleClicked(e.getItem()));
+		grid.addItemDoubleClickListener(e -> on_gridItems_doubleClicked(e.getItem()));
 		LOGGER.debug("Grid created and configured for {}", entityClass.getSimpleName());
 	}
 
@@ -274,13 +256,13 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	/** Get the grid component.
 	 * @return The grid */
-	public CGrid<ChildEntity> getGridItems() { return gridItems; }
-
-	protected MasterEntity getMasterEntity() { return masterEntity; }
+	public CGrid<ChildEntity> getGridItems() { return grid; }
 
 	/** Get the toolbar layout component.
 	 * @return The toolbar layout */
 	public CHorizontalLayout getLayoutToolbar() { return layoutToolbar; }
+
+	protected MasterEntity getMasterEntity() { return masterEntity; }
 
 	/** Get the next order number for a new item. Subclasses must implement this to provide appropriate ordering.
 	 * @return The next order number */
@@ -311,7 +293,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			LOGGER.debug("Saving entity: {}", entity.getId() != null ? entity.getId() : "new");
 			childService.save(entity);
 			refreshGrid();
-			gridItems.asSingleSelect().clear();
+			grid.asSingleSelect().clear();
 			CNotificationService.showSaveSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error saving entity", e);
@@ -327,7 +309,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		setWidthFull();
 		createGrid();
 		createToolbar(titleText);
-		add(layoutToolbar, gridItems);
+		add(layoutToolbar, grid);
 		LOGGER.debug("UI components initialized for {}", entityClass.getSimpleName());
 	}
 
@@ -375,7 +357,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			LOGGER.debug("Deleting item: {}", selectedItem.getId());
 			childService.delete(selectedItem);
 			refreshGrid();
-			gridItems.asSingleSelect().clear();
+			grid.asSingleSelect().clear();
 			CNotificationService.showDeleteSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error deleting item", e);
@@ -485,12 +467,12 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public void refreshGrid() {
 		final MasterEntity master = getMasterEntity();
 		Check.notNull(master, "Master entity cannot be null when refreshing grid");
-		final ChildEntity currentValue = gridItems.asSingleSelect().getValue();
+		final ChildEntity currentValue = grid.asSingleSelect().getValue();
 		final List<ChildEntity> items = loadItems(master);
 		Check.notNull(items, "Loaded items cannot be null");
 		LOGGER.debug("Refreshing grid with {} items", items.size());
-		gridItems.setItems(items);
-		gridItems.asSingleSelect().setValue(currentValue);
+		grid.setItems(items);
+		grid.asSingleSelect().setValue(currentValue);
 	}
 
 	/** Sets the current master entity for this component. Called by CFormBuilder when the binder's entity changes.
@@ -500,11 +482,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public void setCurrentEntity(final CEntityDB<?> entity) {
 		if (entity == null) {
 			LOGGER.debug("setCurrentEntity called with null - clearing grid");
-			this.masterEntity = null;
+			masterEntity = null;
 			clearGrid();
 		} else if (masterEntityClass.isInstance(entity)) {
 			LOGGER.debug("setCurrentEntity called with {} - setting master entity", entity.getClass().getSimpleName());
-			this.masterEntity = (MasterEntity) entity;
+			masterEntity = (MasterEntity) entity;
 			refreshGrid();
 		} else {
 			LOGGER.warn("setCurrentEntity called with unexpected entity type: {} (expected {}) - ignoring", entity.getClass().getSimpleName(),
@@ -512,10 +494,22 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 	}
 
+	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.
+	 * This must be called before the component is initialized.
+	 * @param maxHeight Optional maximum height (e.g., "400px", "50vh"), or null for no maximum */
+	protected void setDynamicHeight(final String maxHeight) {
+		useDynamicHeight = true;
+		setSizeUndefined();
+		setWidthFull();
+		this.setMinHeight("60px");
+		this.setMaxHeight(maxHeight);
+		grid.setDynamicHeight();
+	}
+
 	/** Set the master entity directly.
 	 * @param master The master entity to set */
 	protected void setMasterEntity(final MasterEntity master) {
-		this.masterEntity = master;
+		masterEntity = master;
 		if (master == null) {
 			clearGrid();
 		} else if (master.getId() != null) {
@@ -526,7 +520,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Set the currently selected item.
 	 * @param item The item to select */
 	public void setSelectedItem(final ChildEntity item) {
-		gridItems.asSingleSelect().setValue(item);
+		grid.asSingleSelect().setValue(item);
 	}
 
 	/** Update the enabled state of action buttons based on selection.
@@ -535,13 +529,5 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		buttonDelete.setEnabled(hasSelection);
 		buttonMoveUp.setEnabled(hasSelection);
 		buttonMoveDown.setEnabled(hasSelection);
-	}
-
-	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.
-	 * This must be called before the component is initialized.
-	 * @param maxHeight Optional maximum height (e.g., "400px", "50vh"), or null for no maximum */
-	protected void setDynamicHeight(final String maxHeight) {
-		this.useDynamicHeight = true;
-		this.maxHeight = maxHeight;
 	}
 }

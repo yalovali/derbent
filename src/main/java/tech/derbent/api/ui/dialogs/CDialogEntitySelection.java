@@ -225,10 +225,9 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 
 	/** Handle selection change from component. */
 	protected void on_componentEntitySelection_selectionChanged(final Set<EntityClass> selectedItems) {
-		Check.notNull(selectedItems, "Selected items set cannot be null");
-		final boolean hasSelection = !selectedItems.isEmpty();
-		buttonSelect.setEnabled(hasSelection);
-		LOGGER.debug("Selection changed - {} items selected, button enabled: {}", selectedItems.size(), hasSelection);
+		if (buttonSelect != null) {
+			buttonSelect.setEnabled(!selectedItems.isEmpty());
+		}
 	}
 
 	@Override

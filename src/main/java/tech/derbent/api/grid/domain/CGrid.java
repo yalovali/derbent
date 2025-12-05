@@ -90,6 +90,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 	@SuppressWarnings ("unchecked")
 	public CGrid(final Class<?> class1) {
 		super((Class<EntityClass>) class1, false);
+		setEmptyStateText("No entites ...");
 		setClazz(class1);
 		initializeGrid();
 	}
@@ -487,4 +488,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 
 	@SuppressWarnings ("unchecked")
 	public void setClazz(Class<?> class1) { clazz = (Class<EntityClass>) class1; }
+
+	public void setDynamicHeight() {
+		setSizeUndefined();
+		getStyle().set("height", "auto");
+		setMinHeight("60px");
+		setWidthFull();
+		setAllRowsVisible(true);
+	}
 }
