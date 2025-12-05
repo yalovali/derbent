@@ -1,10 +1,10 @@
 package tech.derbent.base.users.view;
 
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,10 +16,10 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 
-/** Enhanced test page to demonstrate SVG icon functionality with multiple display methods. 
- * Shows how user icons are displayed using the new SVG data URL approach. */
+/** Test page to demonstrate user avatar functionality using Vaadin's Avatar component. 
+ * Shows how user avatars are displayed with initials and colors. */
 @Route ("user-icon-test")
-@PageTitle ("User Icon Test - SVG Icons")
+@PageTitle ("User Icon Test - Avatars")
 @AnonymousAllowed
 public class CUserIconTestPage extends Div {
 
@@ -32,14 +32,14 @@ public class CUserIconTestPage extends Div {
 		mainLayout.setWidthFull();
 		
 		// Title
-		final H2 title = new H2("SVG Icon Test Page");
+		final H2 title = new H2("User Avatar Test Page");
 		title.getStyle().set("color", "#2196F3");
 		mainLayout.add(title);
 		
 		// Description
 		final Div description = new Div();
-		description.setText("This page demonstrates the SVG icon solution using direct SVG embedding in the DOM. " +
-			"Icons are generated as pure SVG for users without profile pictures, showing colored circles with initials.");
+		description.setText("This page demonstrates user avatar display using Vaadin's Avatar component. " +
+			"Avatars show user initials with consistent colors. Profile pictures are displayed when available.");
 		description.getStyle()
 			.set("background-color", "#E3F2FD")
 			.set("padding", "15px")
@@ -54,21 +54,21 @@ public class CUserIconTestPage extends Div {
 			if (users.isEmpty()) {
 				mainLayout.add(new Div("No users found in database."));
 			} else {
-				// Section 1: Individual Icon Display
-				mainLayout.add(createSection("1. Individual Icon Display", 
-					"Each user icon is displayed using the getIcon() method with SVG data URLs"));
+				// Section 1: Individual Avatar Display
+				mainLayout.add(createSection("1. Individual Avatar Display", 
+					"Each user avatar displayed using the getAvatar() method"));
 				
-				final VerticalLayout iconSection = new VerticalLayout();
-				iconSection.setSpacing(true);
-				iconSection.setPadding(false);
+				final VerticalLayout avatarSection = new VerticalLayout();
+				avatarSection.setSpacing(true);
+				avatarSection.setPadding(false);
 				
 				// Display up to 5 users
 				final int displayCount = Math.min(5, users.size());
 				for (int i = 0; i < displayCount; i++) {
 					final CUser user = users.get(i);
-					iconSection.add(createIconDisplay(user));
+					avatarSection.add(createAvatarDisplay(user));
 				}
-				mainLayout.add(iconSection);
+				mainLayout.add(avatarSection);
 				
 				// Section 2: CLabelEntity Display
 				mainLayout.add(createSection("2. CLabelEntity Display", 
@@ -89,37 +89,37 @@ public class CUserIconTestPage extends Div {
 				}
 				mainLayout.add(labelSection);
 				
-				// Section 3: Multiple Icons in Row
-				mainLayout.add(createSection("3. Multiple Icons in Row", 
-					"Demonstrates icon rendering in horizontal layout"));
+				// Section 3: Multiple Avatars in Row
+				mainLayout.add(createSection("3. Multiple Avatars in Row", 
+					"Demonstrates avatar rendering in horizontal layout"));
 				
-				final HorizontalLayout iconRow = new HorizontalLayout();
-				iconRow.setSpacing(true);
+				final HorizontalLayout avatarRow = new HorizontalLayout();
+				avatarRow.setSpacing(true);
+				avatarRow.setAlignItems(FlexComponent.Alignment.CENTER);
 				
 				for (int i = 0; i < displayCount; i++) {
 					final CUser user = users.get(i);
-					final Icon icon = user.getIcon();
-					icon.getStyle()
+					final Avatar avatar = user.getAvatar();
+					avatar.getStyle()
 						.set("border", "2px solid #ddd")
-						.set("border-radius", "4px")
-						.set("padding", "4px");
-					iconRow.add(icon);
+						.set("border-radius", "50%");
+					avatarRow.add(avatar);
 				}
-				mainLayout.add(iconRow);
+				mainLayout.add(avatarRow);
 				
 				// Section 4: Technical Details
 				mainLayout.add(createSection("4. Technical Details", 
-					"Information about the SVG icon implementation"));
+					"Information about the Avatar component implementation"));
 				
 				final Div technicalInfo = new Div();
 				technicalInfo.getElement().setProperty("innerHTML",
 					"<ul style='line-height: 1.8; color: #555;'>" +
-					"<li><strong>Implementation:</strong> Uses Vaadin Icon component with SVG content embedded via innerHTML</li>" +
-					"<li><strong>SVG Generation:</strong> Pure SVG content with colored circle and text initials</li>" +
-					"<li><strong>Rendering Method:</strong> Direct SVG embedding in DOM (innerHTML property)</li>" +
-					"<li><strong>Colors:</strong> Consistent colors generated from user name hash</li>" +
-					"<li><strong>Size:</strong> 16x16 pixels, scalable without quality loss</li>" +
-					"<li><strong>Profile Pictures:</strong> Wrapped in SVG container when available</li>" +
+					"<li><strong>Implementation:</strong> Uses Vaadin Avatar component with built-in color and initial support</li>" +
+					"<li><strong>Initials:</strong> Automatically extracted from first name and last name</li>" +
+					"<li><strong>Colors:</strong> Consistent colors generated from user name hash (7 color variants)</li>" +
+					"<li><strong>Size:</strong> Standard Vaadin Avatar size, responsive</li>" +
+					"<li><strong>Profile Pictures:</strong> Displayed as circular images when available</li>" +
+					"<li><strong>Component:</strong> Native Vaadin Avatar - no custom SVG hacks needed</li>" +
 					"</ul>");
 				mainLayout.add(technicalInfo);
 			}
@@ -156,7 +156,7 @@ public class CUserIconTestPage extends Div {
 		return section;
 	}
 	
-	private HorizontalLayout createIconDisplay(final CUser user) {
+	private HorizontalLayout createAvatarDisplay(final CUser user) {
 		final HorizontalLayout layout = new HorizontalLayout();
 		layout.setSpacing(true);
 		layout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -166,12 +166,8 @@ public class CUserIconTestPage extends Div {
 			.set("border-radius", "4px")
 			.set("border", "1px solid #e0e0e0");
 		
-		// Get the icon
-		final Icon icon = user.getIcon();
-		icon.getStyle()
-			.set("border", "2px solid #ddd")
-			.set("border-radius", "4px")
-			.set("padding", "2px");
+		// Get the avatar
+		final Avatar avatar = user.getAvatar();
 		
 		// User info
 		final VerticalLayout info = new VerticalLayout();
@@ -184,13 +180,13 @@ public class CUserIconTestPage extends Div {
 		final Span detailsSpan = new Span("Login: " + user.getLogin() + " | Initials: " + user.getInitials());
 		detailsSpan.getStyle().set("font-size", "0.9em").set("color", "#666");
 		
-		final Span iconInfoSpan = new Span(user.getProfilePictureThumbnail() != null ? 
-			"Has profile picture (wrapped in SVG)" : "Generated SVG avatar");
-		iconInfoSpan.getStyle().set("font-size", "0.85em").set("color", "#2196F3").set("font-style", "italic");
+		final Span avatarInfoSpan = new Span(user.getProfilePictureThumbnail() != null ? 
+			"Has profile picture" : "Showing initials with color");
+		avatarInfoSpan.getStyle().set("font-size", "0.85em").set("color", "#2196F3").set("font-style", "italic");
 		
-		info.add(nameSpan, detailsSpan, iconInfoSpan);
+		info.add(nameSpan, detailsSpan, avatarInfoSpan);
 		
-		layout.add(icon, info);
+		layout.add(avatar, info);
 		return layout;
 	}
 }

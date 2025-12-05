@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.icon.Icon;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
@@ -292,6 +293,42 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		
 		icon.setSize(ICON_SIZE + "px");
 		return CColorUtils.styleIcon(icon);
+	}
+	
+	/** Creates an Avatar component for this user with proper initials and color.
+	 * This is the PROPER way to display user avatars in Vaadin.
+	 * Avatar component has built-in support for initials, colors, and profile pictures.
+	 * 
+	 * @return Avatar component configured for this user */
+	public Avatar getAvatar() {
+		final Avatar avatar = new Avatar();
+		
+		// Set user's name for the avatar (use toString() for display name)
+		final String displayName = toString();
+		avatar.setName(displayName);
+		
+		// Set initials
+		final String initials = getInitials();
+		avatar.setAbbreviation(initials);
+		
+		// Set color based on name hash for consistency
+		final int colorIndex = Math.abs(displayName.hashCode() % 7); // Vaadin supports 7 color variants
+		avatar.setColorIndex(colorIndex);
+		
+		// Set profile picture if available
+		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
+			try {
+				final String base64Image = Base64.getEncoder().encodeToString(profilePictureThumbnail);
+				final String mimeType = detectMimeType(profilePictureThumbnail);
+				final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
+				avatar.setImage(dataUrl);
+			} catch (final Exception e) {
+				LOGGER.error("Failed to set avatar image", e);
+				// Avatar will fall back to showing initials
+			}
+		}
+		
+		return avatar;
 	}
 
 	@Override
