@@ -37,8 +37,9 @@ public class CPageTestAuxillaryService {
 		addStaticTestRoutes();
 	}
 
-	/** Add static test pages that are available but not in the main menu. These pages are specifically created for testing purposes. */
-	private void addStaticTestRoutes() {
+	/** Add static test pages that are available but not in the main menu. These pages are specifically created for testing purposes. 
+	 * This method is public so it can be called after clearing routes to re-add static test pages. */
+	public void addStaticTestRoutes() {
 		// Add User Icon Test page
 		addRoute("User Icon Test", "vaadin:user", "#6B5FA7", "user-icon-test");
 		LOGGER.debug("Added static test routes");
