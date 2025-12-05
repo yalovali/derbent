@@ -163,55 +163,38 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 	}
 
-	/** Creates an SVG-based icon from image data by directly creating SVG DOM elements. This bypasses Vaadin Icon's limited icon attribute
-	 * support and creates a proper SVG structure with embedded image.
-	 * @param imageData Binary image data (PNG/JPEG)
-	 * @return Icon component with embedded SVG image */
 	private Icon createIconFromImageData(final byte[] imageData) {
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
+		// Create an Icon with a clean DOM structure
+		final Icon icon = new Icon();
+		// CRITICAL: Set icon-class attribute to hide the shadow DOM's default SVG
+		// This allows our custom image to be visible instead of being hidden behind the SVG
+		icon.getElement().setAttribute("icon-class", "user-icon-image");
 		// Encode image data as base64 data URL
 		final String base64Image = Base64.getEncoder().encodeToString(imageData);
-		final String mimeType = detectMimeType(imageData);
-		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
-		// Create Icon component
-		final Icon icon = new Icon();
-		// Create SVG element directly in the DOM
-		final com.vaadin.flow.dom.Element svg = new com.vaadin.flow.dom.Element("svg");
-		svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-		svg.setAttribute("width", String.valueOf(ICON_SIZE));
-		svg.setAttribute("height", String.valueOf(ICON_SIZE));
-		svg.setAttribute("viewBox", String.format("0 0 %d %d", ICON_SIZE, ICON_SIZE));
-		// Create image element inside SVG
-		final com.vaadin.flow.dom.Element image = new com.vaadin.flow.dom.Element("image");
-		image.setAttribute("href", dataUrl);
-		image.setAttribute("width", String.valueOf(ICON_SIZE));
-		image.setAttribute("height", String.valueOf(ICON_SIZE));
-		// Append image to SVG
-		svg.appendChild(image);
-		// Replace Icon's content with our custom SVG
-		icon.getElement().removeAllChildren();
-		icon.getElement().appendChild(svg);
-		// Apply standard icon styling
+		final String dataUrl = "data:image/png;base64," + base64Image;
+		// Create img element with proper attributes
+		final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
+		img.setAttribute("src", dataUrl);
+		img.setAttribute("alt", "User icon");
+		img.setAttribute("loading", "eager"); // Ensure immediate loading
+		// Apply critical inline styles for proper rendering
+		// These styles ensure the image displays correctly across all browsers
+		img.getStyle().set("width", ICON_SIZE + "px").set("height", ICON_SIZE + "px").set("display", "block") // Remove inline spacing
+				.set("object-fit", "cover") // Ensure image fills the space
+				.set("border-radius", "2px") // Slightly rounded corners
+				.set("vertical-align", "middle"); // Align with text
+		// Clear any default Icon styles that might interfere
+		icon.getElement().getStyle().set("width", ICON_SIZE + "px").set("height", ICON_SIZE + "px").set("display", "inline-flex") // Use flex for
+																																	// proper
+																																	// alignment
+				.set("align-items", "center").set("justify-content", "center").set("overflow", "hidden"); // Clip any overflow
+		// Append the image to the icon element
+		icon.getElement().appendChild(img);
+		// Apply additional styling from CColorUtils for consistency with other icons
+		// Note: This adds margin-right and flex-shrink properties
 		return CColorUtils.styleIcon(icon);
-	}
-
-	/** Detects MIME type from image data signature.
-	 * @param imageData Binary image data
-	 * @return MIME type string (e.g., "image/png", "image/jpeg") */
-	private String detectMimeType(final byte[] imageData) {
-		if (imageData.length < 4) {
-			return "image/png"; // Default fallback
-		}
-		// Check for PNG signature (89 50 4E 47)
-		if ((imageData[0] & 0xFF) == 0x89 && (imageData[1] & 0xFF) == 0x50 && (imageData[2] & 0xFF) == 0x4E && (imageData[3] & 0xFF) == 0x47) {
-			return "image/png";
-		}
-		// Check for JPEG signature (FF D8)
-		if ((imageData[0] & 0xFF) == 0xFF && (imageData[1] & 0xFF) == 0xD8) {
-			return "image/jpeg";
-		}
-		return "image/png"; // Default fallback
 	}
 
 	@Override
@@ -237,6 +220,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	@Override
 	public Icon getIcon() {
+		// COMPREHENSIVE APPROACH: Create a properly styled icon element that wraps an image
+		// This ensures reliable rendering of profile pictures and generated avatars across all contexts
 		// Use thumbnail if available for efficient rendering
 		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
 			return createIconFromImageData(profilePictureThumbnail);

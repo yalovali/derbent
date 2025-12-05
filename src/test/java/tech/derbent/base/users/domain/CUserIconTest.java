@@ -213,4 +213,54 @@ class CUserIconTest {
 		// We can verify this by checking that getInitials returns "JS"
 		assertEquals("JS", user.getInitials(), "User should have initials JS");
 	}
+
+	/** Tests that avatar generation is consistent for same initials. */
+	@Test
+	void testGenerateAvatarWithInitials_ConsistentForSameInitials() throws IOException {
+		// Given: Same initials
+		final String initials = "AB";
+		final int size = CUser.ICON_SIZE;
+		// When: Generating avatar twice
+		final byte[] avatar1 = CImageUtils.generateAvatarWithInitials(initials, size);
+		final byte[] avatar2 = CImageUtils.generateAvatarWithInitials(initials, size);
+		// Then: Should produce identical results
+		assertArrayEquals(avatar1, avatar2, "Same initials should produce identical avatars");
+	}
+
+	/** Tests that icon-class attribute is set to hide shadow DOM SVG.
+	 * This is critical for making the custom user icon image visible in the browser.
+	 * The icon-class attribute triggers Vaadin's built-in CSS rule:
+	 *   :host(:is([icon-class], [font-icon-content])) svg { display: none; }
+	 * Without this attribute, the shadow DOM's SVG overlays the custom image. */
+	@Test
+	void testGetIcon_HasIconClassAttribute() throws IOException {
+		// Given: A user with profile picture
+		final CUser user = new CUser();
+		user.setProfilePictureData(createTestImage(100, 100));
+		// When: Getting the icon
+		final Icon icon = user.getIcon();
+		// Then: Icon element should have icon-class attribute
+		assertNotNull(icon, "Icon should not be null");
+		assertTrue(icon.getElement().hasAttribute("icon-class"),
+				"Icon element must have icon-class attribute to hide shadow DOM SVG");
+		assertEquals("user-icon-image", icon.getElement().getAttribute("icon-class"),
+				"Icon-class attribute should be set to 'user-icon-image'");
+	}
+
+	/** Tests that icon-class attribute is set even for generated avatar icons. */
+	@Test
+	void testGetIcon_GeneratedAvatar_HasIconClassAttribute() {
+		// Given: A user without profile picture (will generate avatar)
+		final CUser user = new CUser();
+		user.setName("Test");
+		user.setLastname("User");
+		// When: Getting the icon
+		final Icon icon = user.getIcon();
+		// Then: Icon element should have icon-class attribute
+		assertNotNull(icon, "Icon should not be null");
+		assertTrue(icon.getElement().hasAttribute("icon-class"),
+				"Icon element must have icon-class attribute to hide shadow DOM SVG");
+		assertEquals("user-icon-image", icon.getElement().getAttribute("icon-class"),
+				"Icon-class attribute should be set to 'user-icon-image'");
+	}
 }
