@@ -33,6 +33,15 @@ public class CPageTestAuxillaryService {
 
 	public CPageTestAuxillaryService() {
 		LOGGER.debug("CPageTestAuxillaryService initialized");
+		// Add static test pages that don't appear in the main menu
+		addStaticTestRoutes();
+	}
+
+	/** Add static test pages that are available but not in the main menu. These pages are specifically created for testing purposes. */
+	private void addStaticTestRoutes() {
+		// Add User Icon Test page
+		addRoute("User Icon Test", "vaadin:user", "#6B5FA7", "user-icon-test");
+		LOGGER.debug("Added static test routes");
 	}
 
 	/** Add a route entry to the service. This method is idempotent — it will not add duplicate entries (same title + route) if called multiple times.
