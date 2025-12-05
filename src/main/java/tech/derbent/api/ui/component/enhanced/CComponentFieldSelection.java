@@ -109,8 +109,15 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	 * @param grid   The Grid to configure (must not be null)
 	 * @param header The column header text
 	 * @throws IllegalArgumentException if grid is null */
-	private void configureGridColumn(final Grid<DetailEntity> grid, final String header) {
+	/** Configures grid column following standard pattern with color-aware rendering. If the item is a CEntityNamed, it will be rendered with its
+	 * color and icon using CEntityLabel. Otherwise, it falls back to text rendering using the configured item label generator.
+	 * @param grid   The Grid to configure (must not be null)
+	 * @param header The header text for the grid column
+	 * @throws IllegalArgumentException if grid is null */
+	protected void configureGrid(final Grid<DetailEntity> grid, final String header) {
 		Check.notNull(grid, "Grid cannot be null");
+		Check.notBlank(header, "Header cannot be null or blank");
+		LOGGER.debug("Configuring grid with header: {}", header);
 		final var column = grid.addComponentColumn(item -> {
 			try {
 				if (item == null) {
@@ -137,14 +144,14 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		CGrid.styleColumnHeader(column, header);
 	}
 
-	/** Creates and configures a grid for field selection with common styling and behavior.
+	/** Creates and configures a grid for field selection following standard pattern with common styling and behavior.
 	 * @param header The header text for the grid column
 	 * @return Configured Grid instance */
 	private Grid<DetailEntity> createAndSetupGrid(final String header) {
 		final Grid<DetailEntity> grid = new Grid<>();
 		CGrid.setupGrid(grid);
 		grid.setHeight(DEFAULT_GRID_HEIGHT);
-		configureGridColumn(grid, header);
+		configureGrid(grid, header);
 		return grid;
 	}
 
@@ -327,12 +334,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			// Note: We need to reconfigure the columns
 			availableGrid.getColumns().forEach(availableGrid::removeColumn);
 			selectedGrid.getColumns().forEach(selectedGrid::removeColumn);
-			configureGridColumn(availableGrid, "Available Items");
-			configureGridColumn(selectedGrid, "Selected Items");
+			configureGrid(availableGrid, "Available Items");
+			configureGrid(selectedGrid, "Selected Items");
 			// Refresh data
 			populateForm();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set item label generator:" + e.getMessage());
+			LOGGER.error("Failed to set item label generator: {}", e.getMessage());
 			throw e;
 		}
 	}
