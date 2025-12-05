@@ -24,9 +24,12 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import tech.derbent.api.config.CDataInitializer;
+import tech.derbent.api.config.CDatabaseConfigService;
+import tech.derbent.api.config.CDatabaseConfigService.DatabaseType;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
@@ -47,6 +50,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	// private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_UPDATE_COLOR));
 	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
 	private final CCompanyService companyService;
+	private final CDatabaseConfigService databaseConfigService;
+	private final ComboBox<DatabaseType> databaseTypeSelector = new ComboBox<>();
+	private final Paragraph databaseInfoText = new Paragraph();
 	private final Div errorMessage = new Div();
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
@@ -58,9 +64,10 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired
 	public CCustomLoginView(CSystemSettingsService systemSettingsService, CRouteDiscoveryService routeDiscoveryService,
-			ISessionService sessionService, CCompanyService companyService) {
+			ISessionService sessionService, CCompanyService companyService, CDatabaseConfigService databaseConfigService) {
 		this.sessionService = sessionService;
 		this.companyService = companyService;
+		this.databaseConfigService = databaseConfigService;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();
@@ -149,6 +156,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		headerlayout.add(icon, title);
 		// Setup form fields horizontally
 		final HorizontalLayout companyLayout = createHorizontalField("Company:", companyField);
+		final HorizontalLayout databaseLayout = createHorizontalField("Database:", databaseTypeSelector);
 		final HorizontalLayout usernameLayout = createHorizontalField("Username:", usernameField);
 		final HorizontalLayout passwordLayout = createHorizontalField("Password:", passwordField);
 		// Setup form fields
@@ -163,6 +171,20 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			handleLogin();
 		}).setFilter("event.key === 'Enter'");
 		// Load enabled companies from service
+		// Database type selector setup
+		databaseTypeSelector.setWidthFull();
+		databaseTypeSelector.setItems(DatabaseType.POSTGRESQL, DatabaseType.H2);
+		databaseTypeSelector.setItemLabelGenerator(DatabaseType::getDisplayName);
+		databaseTypeSelector.setId("custom-database-selector");
+		// Set current database type
+		final DatabaseType currentDbType = databaseConfigService.detectDatabaseType();
+		databaseTypeSelector.setValue(currentDbType);
+		// Add change listener to show instructions
+		databaseTypeSelector.addValueChangeListener(event -> {
+			if (event.getValue() != null && event.getValue() != currentDbType) {
+				on_databaseTypeSelector_changed(event.getValue());
+			}
+		});
 		// Username field setup
 		usernameField.setWidthFull();
 		usernameField.setRequired(true);
@@ -200,6 +222,10 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		final Paragraph passwordHint = new Paragraph("Default: admin/test123");
 		passwordHint.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
 		passwordHint.setWidthFull();
+		// Database info text setup
+		databaseInfoText.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.XSMALL);
+		databaseInfoText.setWidthFull();
+		updateDatabaseInfo();
 		// Back to original login link
 		final HorizontalLayout buttonsLayout = new CHorizontalLayout();
 		buttonsLayout.setAlignItems(Alignment.CENTER);
@@ -209,7 +235,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		loginButtonLayout.setAlignItems(Alignment.END);
 		loginButtonLayout.add(new CDiv(), loginButton);
 		// Add components to form card
-		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, errorMessage, loginButtonLayout, buttonsLayout);
+		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, databaseLayout, databaseInfoText, errorMessage, loginButtonLayout, buttonsLayout);
 		container.add(formCard);
 		add(container);
 		populateForm();
@@ -217,6 +243,31 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private void showError(final String message) {
 		errorMessage.setText(message);
+	}
+
+	/** Updates the database info text with current database and profile information */
+	private void updateDatabaseInfo() {
+		final DatabaseType currentType = databaseConfigService.detectDatabaseType();
+		final String profiles = databaseConfigService.getActiveProfiles();
+		databaseInfoText.setText(String.format("Current: %s | Profile: %s", currentType.getShortName(), profiles));
+	}
+
+	/** Handle database type selector change */
+	private void on_databaseTypeSelector_changed(final DatabaseType selectedType) {
+		final DatabaseType currentType = databaseConfigService.detectDatabaseType();
+		
+		if (selectedType == currentType) {
+			return;
+		}
+
+		// Show instructions dialog
+		final String instructions = databaseConfigService.getSwitchInstructions(selectedType);
+		final String dialogContent = "To switch to " + selectedType.getDisplayName() + ", you need to restart the application.\n\n" + instructions;
+		
+		CNotificationService.showInfoDialog(dialogContent);
+		
+		// Reset selector to current value
+		databaseTypeSelector.setValue(currentType);
 	}
 
 	/** Handle reset database button click. */
