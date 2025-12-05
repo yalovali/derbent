@@ -10,6 +10,8 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.app.activities.service.CActivityService;
@@ -42,7 +44,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetSprint.class);
 	private static final long serialVersionUID = 1L;
-
 	private CButton buttonToggleItems;
 	private CComponentListSprintItems componentSprintItems;
 	private CDiv containerSprintItems;
@@ -53,26 +54,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	 * @param sprint the sprint to display in the widget */
 	public CComponentWidgetSprint(final CSprint sprint) {
 		super(sprint);
-	}
-
-	/** Creates the second line with sprint type and item count. This line shows colorful badges for sprint type and item count. The item count is
-	 * clickable to show/hide the sprint items component.
-	 * @throws Exception */
-	@Override
-	protected void createSecondLine() throws Exception {
-		// Show sprint type with color if available
-		if (getEntity().getEntityType() != null) {
-			final CLabelEntity typeLabel = new CLabelEntity();
-			typeLabel.setValue(getEntity().getEntityType(), true);
-			typeLabel.getStyle().set("margin-right", "8px");
-			layoutLineTwo.add(typeLabel);
-		}
-		// Show item count with icon and colorful badge - make it clickable
-		itemCountLabel = createItemCountLabel();
-		// Make the label clickable
-		itemCountLabel.getStyle().set("cursor", "pointer");
-		itemCountLabel.addClickListener(e -> on_itemCountLabel_clicked());
-		layoutLineTwo.add(itemCountLabel);
 	}
 
 	/** Creates the item count label with icon and styling.
@@ -92,6 +73,31 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		final String countText = (itemCount != null ? itemCount : 0) + " item" + ((itemCount != null && itemCount != 1) ? "s" : "");
 		label.setText(countText);
 		return label;
+	}
+
+	/** Creates the second line with sprint type and item count. This line shows colorful badges for sprint type and item count. The item count is
+	 * clickable to show/hide the sprint items component.
+	 * @throws Exception */
+	@Override
+	protected void createSecondLine() throws Exception {
+		final CVerticalLayout layoutMid = new CVerticalLayout();
+		final CHorizontalLayout layoutMidLineOne = new CHorizontalLayout();
+		createSprintItemsComponent();
+		layoutMid.add(layoutMidLineOne, containerSprintItems);
+		// Show sprint type with color if available
+		if (getEntity().getEntityType() != null) {
+			final CLabelEntity typeLabel = new CLabelEntity();
+			typeLabel.setValue(getEntity().getEntityType(), true);
+			typeLabel.getStyle().set("margin-right", "8px");
+			layoutMidLineOne.add(typeLabel);
+		}
+		// Show item count with icon and colorful badge - make it clickable
+		itemCountLabel = createItemCountLabel();
+		// Make the label clickable
+		itemCountLabel.getStyle().set("cursor", "pointer");
+		itemCountLabel.addClickListener(e -> on_itemCountLabel_clicked());
+		layoutMidLineOne.add(itemCountLabel);
+		layoutLineTwo.add(layoutMid);
 	}
 
 	/** Creates the sprint items component with the list of sprint items. This component is shown/hidden when the item count is clicked.
@@ -126,20 +132,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create sprint items component for sprint {}", getEntity().getId(), e);
 			CNotificationService.showException("Failed to load sprint items", e);
-		}
-	}
-
-	@Override
-	protected void initializeWidget() {
-		super.initializeWidget();
-		// Add container for sprint items after the regular layout
-		try {
-			createSprintItemsComponent();
-			if (containerSprintItems != null) {
-				add(containerSprintItems);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize sprint items component", e);
 		}
 	}
 
