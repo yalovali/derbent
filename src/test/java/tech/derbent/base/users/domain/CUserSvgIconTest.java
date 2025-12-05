@@ -27,13 +27,17 @@ class CUserSvgIconTest {
 		// Verify icon is not null
 		assertNotNull(icon, "Icon should not be null");
 		
-		// Verify the innerHTML contains SVG content (new implementation)
-		final String innerHTML = icon.getElement().getProperty("innerHTML");
-		assertNotNull(innerHTML, "Icon innerHTML should not be null");
-		assertTrue(innerHTML.startsWith("<svg"), 
-			"Icon innerHTML should be SVG content");
-		assertTrue(innerHTML.contains("svg"), 
-			"Icon innerHTML should contain SVG tags");
+		// Verify the SVG content is in a child element (new implementation uses appendChild)
+		// The icon element has a child div that contains the SVG
+		final int childCount = icon.getElement().getChildCount();
+		assertTrue(childCount > 0, "Icon should have child elements");
+		
+		final String childInnerHTML = icon.getElement().getChild(0).getProperty("innerHTML");
+		assertNotNull(childInnerHTML, "Child element innerHTML should contain SVG");
+		assertTrue(childInnerHTML.startsWith("<svg"), 
+			"Child innerHTML should be SVG content");
+		assertTrue(childInnerHTML.contains("svg"), 
+			"Child innerHTML should contain SVG tags");
 	}
 	
 	@Test
@@ -54,13 +58,16 @@ class CUserSvgIconTest {
 		// Verify icon is not null
 		assertNotNull(icon, "Icon should not be null");
 		
-		// Verify the innerHTML contains SVG with embedded image (new implementation)
-		final String innerHTML = icon.getElement().getProperty("innerHTML");
-		assertNotNull(innerHTML, "Icon innerHTML should not be null");
-		assertTrue(innerHTML.startsWith("<svg"), 
-			"Icon innerHTML should be SVG content");
-		assertTrue(innerHTML.contains("image"), 
-			"Icon innerHTML should contain an image element");
+		// Verify the SVG content is in a child element (new implementation uses appendChild)
+		final int childCount = icon.getElement().getChildCount();
+		assertTrue(childCount > 0, "Icon should have child elements");
+		
+		final String childInnerHTML = icon.getElement().getChild(0).getProperty("innerHTML");
+		assertNotNull(childInnerHTML, "Child element innerHTML should contain SVG");
+		assertTrue(childInnerHTML.startsWith("<svg"), 
+			"Child innerHTML should be SVG content");
+		assertTrue(childInnerHTML.contains("image"), 
+			"Child innerHTML should contain an image element");
 	}
 	
 	@Test

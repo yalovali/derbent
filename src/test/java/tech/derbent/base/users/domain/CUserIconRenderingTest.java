@@ -26,19 +26,22 @@ class CUserIconRenderingTest {
 		// Verify icon is not null
 		assertNotNull(icon, "Icon should not be null");
 		
-		// Verify the innerHTML contains SVG content (new implementation)
-		final String innerHTML = icon.getElement().getProperty("innerHTML");
-		assertNotNull(innerHTML, "Icon innerHTML should not be null");
-		assertTrue(innerHTML.startsWith("<svg"), 
-			"Icon innerHTML should start with <svg tag");
-		assertTrue(innerHTML.contains("</svg>"), 
-			"Icon innerHTML should end with </svg> tag");
-		assertTrue(innerHTML.contains("circle"), 
-			"Icon innerHTML should contain a circle element for avatar background");
-		assertTrue(innerHTML.contains("text"), 
-			"Icon innerHTML should contain a text element for initials");
-		assertTrue(innerHTML.contains("JD"), 
-			"Icon innerHTML should contain the user's initials 'JD'");
+		// Verify the SVG content is in a child element (new implementation uses appendChild)
+		final int childCount = icon.getElement().getChildCount();
+		assertTrue(childCount > 0, "Icon should have child elements with SVG content");
+		
+		final String childInnerHTML = icon.getElement().getChild(0).getProperty("innerHTML");
+		assertNotNull(childInnerHTML, "Child element should contain SVG innerHTML");
+		assertTrue(childInnerHTML.startsWith("<svg"), 
+			"Child innerHTML should start with <svg tag");
+		assertTrue(childInnerHTML.contains("</svg>"), 
+			"Child innerHTML should end with </svg> tag");
+		assertTrue(childInnerHTML.contains("circle"), 
+			"Child innerHTML should contain a circle element for avatar background");
+		assertTrue(childInnerHTML.contains("text"), 
+			"Child innerHTML should contain a text element for initials");
+		assertTrue(childInnerHTML.contains("JD"), 
+			"Child innerHTML should contain the user's initials 'JD'");
 		
 		// Verify the old 'icon' attribute is NOT used (it doesn't work for custom SVG)
 		final String iconAttr = icon.getElement().getAttribute("icon");
@@ -65,17 +68,20 @@ class CUserIconRenderingTest {
 		// Verify icon is not null
 		assertNotNull(icon, "Icon should not be null");
 		
-		// Verify the innerHTML contains SVG with embedded image (new implementation)
-		final String innerHTML = icon.getElement().getProperty("innerHTML");
-		assertNotNull(innerHTML, "Icon innerHTML should not be null");
-		assertTrue(innerHTML.startsWith("<svg"), 
-			"Icon innerHTML should start with <svg tag");
-		assertTrue(innerHTML.contains("</svg>"), 
-			"Icon innerHTML should end with </svg> tag");
-		assertTrue(innerHTML.contains("image"), 
-			"Icon innerHTML should contain an image element for profile picture");
-		assertTrue(innerHTML.contains("href=\"data:"), 
-			"Icon innerHTML should contain a data URL for the embedded image");
+		// Verify the SVG content is in a child element (new implementation uses appendChild)
+		final int childCount = icon.getElement().getChildCount();
+		assertTrue(childCount > 0, "Icon should have child elements");
+		
+		final String childInnerHTML = icon.getElement().getChild(0).getProperty("innerHTML");
+		assertNotNull(childInnerHTML, "Child element innerHTML should contain SVG");
+		assertTrue(childInnerHTML.startsWith("<svg"), 
+			"Child innerHTML should start with <svg tag");
+		assertTrue(childInnerHTML.contains("</svg>"), 
+			"Child innerHTML should end with </svg> tag");
+		assertTrue(childInnerHTML.contains("image"), 
+			"Child innerHTML should contain an image element for profile picture");
+		assertTrue(childInnerHTML.contains("href=\"data:"), 
+			"Child innerHTML should contain a data URL for the embedded image");
 		
 		// Verify the old 'icon' attribute is NOT used
 		final String iconAttr = icon.getElement().getAttribute("icon");
@@ -100,9 +106,12 @@ class CUserIconRenderingTest {
 		final Icon icon1 = user1.getIcon();
 		final Icon icon2 = user2.getIcon();
 		
-		// Get innerHTML
-		final String innerHTML1 = icon1.getElement().getProperty("innerHTML");
-		final String innerHTML2 = icon2.getElement().getProperty("innerHTML");
+		// Get child innerHTML (SVG is in child elements now)
+		assertTrue(icon1.getElement().getChildCount() > 0, "Icon1 should have child elements");
+		assertTrue(icon2.getElement().getChildCount() > 0, "Icon2 should have child elements");
+		
+		final String innerHTML1 = icon1.getElement().getChild(0).getProperty("innerHTML");
+		final String innerHTML2 = icon2.getElement().getChild(0).getProperty("innerHTML");
 		
 		// Verify both contain SVG
 		assertNotNull(innerHTML1);

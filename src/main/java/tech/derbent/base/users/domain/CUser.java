@@ -187,15 +187,10 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			dataUrl, ICON_SIZE, ICON_SIZE
 		);
 		
-		// Create Icon and embed SVG content directly in the DOM
-		// NOTE: Vaadin's Icon component doesn't support custom SVG via 'icon' attribute
-		// We need to use innerHTML to directly embed the SVG content
-		final Icon icon = new Icon();
-		icon.getElement().setProperty("innerHTML", svgContent);
-		icon.setSize(ICON_SIZE + "px");
-		
-		// Apply standard icon styling through CColorUtils
-		return CColorUtils.styleIcon(icon);
+		// Create a custom SVG icon using a span element wrapper
+		// NOTE: Vaadin's Icon component uses <vaadin-icon> web component with shadow DOM
+		// which doesn't render custom innerHTML. We use a span-based Icon instead.
+		return createSvgIcon(svgContent);
 	}
 
 	/** Detects MIME type from image data signature.
@@ -249,19 +244,38 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		try {
 			final String initials = getInitials();
 			final String svgContent = CImageUtils.generateAvatarSvg(initials, ICON_SIZE);
-			
-			// Create Icon as a wrapper and embed SVG directly in the DOM
-			// NOTE: Vaadin's Icon component doesn't support custom SVG via 'icon' attribute
-			// We need to use innerHTML to directly embed the SVG content
-			final Icon icon = new Icon();
-			icon.getElement().setProperty("innerHTML", svgContent);
-			icon.setSize(ICON_SIZE + "px");
-			
-			return CColorUtils.styleIcon(icon);
+			return createSvgIcon(svgContent);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
 			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
 		}
+	}
+	
+	/** Creates a custom Icon component that can render SVG content.
+	 * Appends SVG as a child element to work around shadow DOM limitations.
+	 * 
+	 * @param svgContent The SVG markup to render
+	 * @return Icon component that will properly render the SVG */
+	private Icon createSvgIcon(final String svgContent) {
+		// Create a regular Icon instance (will use vaadin-icon element)
+		final Icon icon = new Icon();
+		
+		// Create a div wrapper to hold the SVG since vaadin-icon shadow DOM won't render innerHTML
+		final com.vaadin.flow.dom.Element svgWrapper = new com.vaadin.flow.dom.Element("div");
+		svgWrapper.setProperty("innerHTML", svgContent);
+		svgWrapper.getStyle()
+			.set("display", "inline-flex")
+			.set("align-items", "center")
+			.set("justify-content", "center")
+			.set("width", ICON_SIZE + "px")
+			.set("height", ICON_SIZE + "px")
+			.set("line-height", "0");
+		
+		// Append the SVG wrapper as a child (this will work even with shadow DOM)
+		icon.getElement().appendChild(svgWrapper);
+		icon.setSize(ICON_SIZE + "px");
+		
+		return CColorUtils.styleIcon(icon);
 	}
 
 	@Override
