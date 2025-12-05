@@ -254,13 +254,17 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	/** Configure grid columns following standard CGrid pattern.
+	 * @param grid The grid to configure (must not be null) */
 	@SuppressWarnings ("rawtypes")
-	private void configureGridColumns() {
+	protected void configureGrid(final CGrid<EntityClass> grid) {
+		Check.notNull(grid, "Grid cannot be null");
 		// Clear existing columns
 		grid.getColumns().forEach(grid::removeColumn);
 		if (currentEntityType == null) {
 			return;
 		}
+		LOGGER.debug("Configuring grid columns for entity type: {}", currentEntityType.getDisplayName());
 		grid.addIdColumn(item -> item.getId(), "ID", "id");
 		grid.addShortTextColumn(this::getEntityName, "Name", "name");
 		grid.addLongTextColumn(this::getEntityDescription, "Description", "description");
@@ -274,17 +278,20 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), "Status");
 	}
 
-	/** Factory method for grid. */
+	/** Factory method for grid following standard pattern. */
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
 	protected void create_gridItems() {
+		Check.isTrue(grid == null, "Grid should only be created once");
 		// Create CGrid using Object type with auto-columns disabled, then cast.
 		// Type safety is maintained by controlling all items in the grid through itemsProvider.
 		final CGrid rawGrid = new CGrid<>(Object.class);
 		grid = rawGrid;
+		// Configure size
 		grid.setSizeFull(); // Grid should expand
 		grid.setHeightFull(); // Ensure full height expansion
+		grid.setMinHeight("120px");
 		// Configure selection mode
 		if (multiSelect) {
 			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
@@ -297,6 +304,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (multiSelect) {
 			grid.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
+		// Note: configureGrid() is called later when entity type is selected
+		LOGGER.debug("Grid created for entity selection component");
 	}
 
 	/** Factory method for search toolbar layout using CComponentGridSearchToolbar. */
@@ -445,7 +454,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			// Cache reflection methods for the entity type
 			cacheReflectionMethods(config.getEntityClass());
 			// Configure grid columns for the new entity type
-			configureGridColumns();
+			configureGrid(grid);
 			// Load items
 			allItems = itemsProvider.getItems(config);
 			Check.notNull(allItems, "Items provider returned null for entity type: " + config.getDisplayName());
