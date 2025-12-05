@@ -38,7 +38,7 @@ public class CUserIconTestPage extends Div {
 		
 		// Description
 		final Div description = new Div();
-		description.setText("This page demonstrates the SVG icon solution using Vaadin's icon attribute with data URLs. " +
+		description.setText("This page demonstrates the SVG icon solution using direct SVG embedding in the DOM. " +
 			"Icons are generated as pure SVG for users without profile pictures, showing colored circles with initials.");
 		description.getStyle()
 			.set("background-color", "#E3F2FD")
@@ -114,9 +114,9 @@ public class CUserIconTestPage extends Div {
 				final Div technicalInfo = new Div();
 				technicalInfo.getElement().setProperty("innerHTML",
 					"<ul style='line-height: 1.8; color: #555;'>" +
-					"<li><strong>Implementation:</strong> Uses Vaadin Icon component with 'icon' attribute set to SVG data URL</li>" +
+					"<li><strong>Implementation:</strong> Uses Vaadin Icon component with SVG content embedded via innerHTML</li>" +
 					"<li><strong>SVG Generation:</strong> Pure SVG content with colored circle and text initials</li>" +
-					"<li><strong>Data URL Format:</strong> data:image/svg+xml;charset=utf-8,{URL_ENCODED_SVG}</li>" +
+					"<li><strong>Rendering Method:</strong> Direct SVG embedding in DOM (innerHTML property)</li>" +
 					"<li><strong>Colors:</strong> Consistent colors generated from user name hash</li>" +
 					"<li><strong>Size:</strong> 16x16 pixels, scalable without quality loss</li>" +
 					"<li><strong>Profile Pictures:</strong> Wrapped in SVG container when available</li>" +

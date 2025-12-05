@@ -163,9 +163,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 	}
 
-	/** Creates an icon from image data using proper SVG wrapping with data URLs.
-	 * This method embeds images in SVG using data URLs, which is properly supported
-	 * by Vaadin's Icon component when used correctly.
+	/** Creates an icon from image data using proper SVG wrapping.
+	 * This method embeds images in SVG which is then directly rendered in the DOM.
 	 * 
 	 * @param imageData Binary image data (PNG/JPEG)
 	 * @return Icon component with properly rendered image
@@ -188,14 +187,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			dataUrl, ICON_SIZE, ICON_SIZE
 		);
 		
-		// Convert SVG content to data URL
-		final String svgDataUrl = "data:image/svg+xml;charset=utf-8," + 
-			java.net.URLEncoder.encode(svgContent, java.nio.charset.StandardCharsets.UTF_8);
-		
-		// Create Icon with SVG data URL
-		// Use the icon attribute to set the SVG content
+		// Create Icon and embed SVG content directly in the DOM
+		// NOTE: Vaadin's Icon component doesn't support custom SVG via 'icon' attribute
+		// We need to use innerHTML to directly embed the SVG content
 		final Icon icon = new Icon();
-		icon.getElement().setAttribute("icon", svgDataUrl);
+		icon.getElement().setProperty("innerHTML", svgContent);
 		icon.setSize(ICON_SIZE + "px");
 		
 		// Apply standard icon styling through CColorUtils
@@ -254,13 +250,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			final String initials = getInitials();
 			final String svgContent = CImageUtils.generateAvatarSvg(initials, ICON_SIZE);
 			
-			// Convert SVG string to data URL
-			final String svgDataUrl = "data:image/svg+xml;charset=utf-8," + 
-				java.net.URLEncoder.encode(svgContent, java.nio.charset.StandardCharsets.UTF_8);
-			
-			// Create Icon with SVG data URL
+			// Create Icon as a wrapper and embed SVG directly in the DOM
+			// NOTE: Vaadin's Icon component doesn't support custom SVG via 'icon' attribute
+			// We need to use innerHTML to directly embed the SVG content
 			final Icon icon = new Icon();
-			icon.getElement().setAttribute("icon", svgDataUrl);
+			icon.getElement().setProperty("innerHTML", svgContent);
 			icon.setSize(ICON_SIZE + "px");
 			
 			return CColorUtils.styleIcon(icon);

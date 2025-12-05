@@ -27,13 +27,13 @@ class CUserSvgIconTest {
 		// Verify icon is not null
 		assertNotNull(icon, "Icon should not be null");
 		
-		// Verify the icon attribute contains SVG data URL
-		final String iconAttr = icon.getElement().getAttribute("icon");
-		assertNotNull(iconAttr, "Icon attribute should not be null");
-		assertTrue(iconAttr.startsWith("data:image/svg+xml"), 
-			"Icon attribute should be an SVG data URL");
-		assertTrue(iconAttr.contains("svg"), 
-			"Icon attribute should contain SVG content");
+		// Verify the innerHTML contains SVG content (new implementation)
+		final String innerHTML = icon.getElement().getProperty("innerHTML");
+		assertNotNull(innerHTML, "Icon innerHTML should not be null");
+		assertTrue(innerHTML.startsWith("<svg"), 
+			"Icon innerHTML should be SVG content");
+		assertTrue(innerHTML.contains("svg"), 
+			"Icon innerHTML should contain SVG tags");
 	}
 	
 	@Test
@@ -54,13 +54,13 @@ class CUserSvgIconTest {
 		// Verify icon is not null
 		assertNotNull(icon, "Icon should not be null");
 		
-		// Verify the icon attribute contains SVG with embedded image
-		final String iconAttr = icon.getElement().getAttribute("icon");
-		assertNotNull(iconAttr, "Icon attribute should not be null");
-		assertTrue(iconAttr.startsWith("data:image/svg+xml"), 
-			"Icon attribute should be an SVG data URL");
-		assertTrue(iconAttr.contains("image"), 
-			"Icon attribute should contain an image element");
+		// Verify the innerHTML contains SVG with embedded image (new implementation)
+		final String innerHTML = icon.getElement().getProperty("innerHTML");
+		assertNotNull(innerHTML, "Icon innerHTML should not be null");
+		assertTrue(innerHTML.startsWith("<svg"), 
+			"Icon innerHTML should be SVG content");
+		assertTrue(innerHTML.contains("image"), 
+			"Icon innerHTML should contain an image element");
 	}
 	
 	@Test
