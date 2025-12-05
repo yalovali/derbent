@@ -81,6 +81,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected final Class<MasterEntity> masterEntityClass;
 	// Data management
 	protected ChildEntity selectedItem;
+	// Grid sizing configuration
+	protected boolean useDynamicHeight = false;
+	protected String maxHeight = null;
 
 	/** Constructor for the entity list component.
 	 * @param title             The title to display above the grid
@@ -197,8 +200,19 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected void createGrid() {
 		gridItems = new CGrid<>(entityClass);
 		gridItems.setSelectionMode(CGrid.SelectionMode.SINGLE);
-		gridItems.setHeightFull();
-		gridItems.setMinHeight("250px");
+		// Configure height based on useDynamicHeight setting
+		if (useDynamicHeight) {
+			// Dynamic height: size to content with optional max height, no min height
+			// Use CSS to make grid size based on content
+			gridItems.getStyle().set("height", "auto");
+			if (maxHeight != null) {
+				gridItems.setMaxHeight(maxHeight);
+			}
+		} else {
+			// Default behavior: full height with minimum
+			gridItems.setHeightFull();
+			gridItems.setMinHeight("250px");
+		}
 		// Configure grid columns - subclass responsibility
 		configureGrid(gridItems);
 		// Add selection listener
@@ -264,6 +278,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	protected MasterEntity getMasterEntity() { return masterEntity; }
 
+	/** Get the toolbar layout component.
+	 * @return The toolbar layout */
+	public CHorizontalLayout getLayoutToolbar() { return layoutToolbar; }
+
 	/** Get the next order number for a new item. Subclasses must implement this to provide appropriate ordering.
 	 * @return The next order number */
 	protected abstract Integer getNextOrder();
@@ -304,7 +322,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Initialize all UI components.
 	 * @param titleText The title text to display */
 	protected void initializeComponents(final String titleText) {
-		setSpacing(true);
+		setSpacing(false); // Reduced spacing between components
 		setPadding(false);
 		setWidthFull();
 		createGrid();
@@ -517,5 +535,13 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		buttonDelete.setEnabled(hasSelection);
 		buttonMoveUp.setEnabled(hasSelection);
 		buttonMoveDown.setEnabled(hasSelection);
+	}
+
+	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.
+	 * This must be called before the component is initialized.
+	 * @param maxHeight Optional maximum height (e.g., "400px", "50vh"), or null for no maximum */
+	protected void setDynamicHeight(final String maxHeight) {
+		this.useDynamicHeight = true;
+		this.maxHeight = maxHeight;
 	}
 }

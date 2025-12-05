@@ -51,6 +51,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private final CMeetingService meetingService;
 	// Listener for item changes
 	private Consumer<CSprintItem> onItemChangeListener;
+	// Flag to control whether grid is shown in widget (managed by parent)
+	private boolean isInWidgetMode = false;
 
 	/** Constructor for CComponentListSprintItems.
 	 * @param sprintItemService The service for CSprintItem operations
@@ -65,6 +67,14 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		this.activityService = activityService;
 		this.meetingService = meetingService;
 		LOGGER.debug("CComponentListSprintItems created");
+	}
+
+	/** Configure this component for use in widget mode. In widget mode, the grid uses dynamic height to expand to content.
+	 * @param maxHeight The maximum height for the grid (e.g., "400px", "50vh") */
+	public void configureForWidgetMode(final String maxHeight) {
+		this.isInWidgetMode = true;
+		setDynamicHeight(maxHeight);
+		LOGGER.debug("CComponentListSprintItems configured for widget mode with max height: {}", maxHeight);
 	}
 
 	@Override

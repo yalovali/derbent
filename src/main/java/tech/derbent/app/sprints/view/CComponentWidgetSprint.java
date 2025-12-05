@@ -114,20 +114,24 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
 			// Create the component
 			componentSprintItems = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
+			// Configure for widget mode with dynamic height (max 400px)
+			componentSprintItems.configureForWidgetMode("400px");
 			// Set the current entity (sprint)
 			componentSprintItems.setCurrentEntity(getEntity());
 			// Register listener for item changes
 			componentSprintItems.setOnItemChangeListener(item -> refreshItemCount());
-			// Create container for sprint items with collapse button
+			// Create container for sprint items
 			containerSprintItems = new CDiv();
 			containerSprintItems.getStyle().set("margin-top", "8px").set("padding", "8px").set("background-color", "#F5F5F5")
 					.set("border-radius", "4px").set("border", "1px solid #E0E0E0");
-			// Add collapse button
+			// Create and add toggle button to the toolbar of sprint items component
 			buttonToggleItems = new CButton(VaadinIcon.ANGLE_UP.create());
 			buttonToggleItems.setTooltipText("Hide sprint items");
-			buttonToggleItems.getStyle().set("margin-bottom", "4px");
 			buttonToggleItems.addClickListener(e -> on_buttonToggleItems_clicked());
-			containerSprintItems.add(buttonToggleItems, componentSprintItems);
+			// Add toggle button to the toolbar (next to other CRUD buttons)
+			componentSprintItems.getLayoutToolbar().addComponentAsFirst(buttonToggleItems);
+			// Add only the component to the container (button is now in its toolbar)
+			containerSprintItems.add(componentSprintItems);
 			containerSprintItems.setVisible(false); // Initially hidden
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create sprint items component for sprint {}", getEntity().getId(), e);
