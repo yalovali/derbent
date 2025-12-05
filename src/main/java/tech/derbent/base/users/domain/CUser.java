@@ -163,8 +163,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 	}
 
-	/** Creates an SVG-based icon from image data. This method generates a proper SVG string with an embedded image element, which Vaadin's Icon
-	 * component can render natively without DOM manipulation.
+	/** Creates an SVG-based icon from image data by directly creating SVG DOM elements. This bypasses Vaadin Icon's limited icon attribute
+	 * support and creates a proper SVG structure with embedded image.
 	 * @param imageData Binary image data (PNG/JPEG)
 	 * @return Icon component with embedded SVG image */
 	private Icon createIconFromImageData(final byte[] imageData) {
@@ -174,16 +174,24 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		final String base64Image = Base64.getEncoder().encodeToString(imageData);
 		final String mimeType = detectMimeType(imageData);
 		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
-		// Create SVG with embedded image - this is the proper way to embed raster images in SVG
-		// The SVG namespace and proper structure ensure compatibility with Vaadin Icon component
-		final String svgIcon = String.format(
-				"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">" + "<image href=\"%s\" width=\"%d\" height=\"%d\"/>" + "</svg>",
-				ICON_SIZE, ICON_SIZE, dataUrl, ICON_SIZE, ICON_SIZE);
-		// Convert SVG string to data URL
-		final String svgDataUrl = "data:image/svg+xml;base64," + Base64.getEncoder().encodeToString(svgIcon.getBytes());
-		// Create icon using the SVG data URL
+		// Create Icon component
 		final Icon icon = new Icon();
-		icon.getElement().setAttribute("icon", svgDataUrl);
+		// Create SVG element directly in the DOM
+		final com.vaadin.flow.dom.Element svg = new com.vaadin.flow.dom.Element("svg");
+		svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+		svg.setAttribute("width", String.valueOf(ICON_SIZE));
+		svg.setAttribute("height", String.valueOf(ICON_SIZE));
+		svg.setAttribute("viewBox", String.format("0 0 %d %d", ICON_SIZE, ICON_SIZE));
+		// Create image element inside SVG
+		final com.vaadin.flow.dom.Element image = new com.vaadin.flow.dom.Element("image");
+		image.setAttribute("href", dataUrl);
+		image.setAttribute("width", String.valueOf(ICON_SIZE));
+		image.setAttribute("height", String.valueOf(ICON_SIZE));
+		// Append image to SVG
+		svg.appendChild(image);
+		// Replace Icon's content with our custom SVG
+		icon.getElement().removeAllChildren();
+		icon.getElement().appendChild(svg);
 		// Apply standard icon styling
 		return CColorUtils.styleIcon(icon);
 	}
