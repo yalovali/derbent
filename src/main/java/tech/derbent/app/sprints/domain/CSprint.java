@@ -39,6 +39,12 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public static final String ENTITY_TITLE_PLURAL = "Sprints";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint";
 	public static final String VIEW_NAME = "Sprints View";
+	@Transient
+	@AMetaData (
+			displayName = "Backlog Items", required = false, readOnly = false, description = "Items (activities, meetings, etc.", hidden = false,
+			createComponentMethod = "createSpritBacklogComponent", dataProviderBean = "view", captionVisible = false
+	)
+	private List<CSprintItem> backlogItems = new ArrayList<>();
 	@Column (nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (
@@ -113,7 +119,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @param endDate   the sprint end date */
 	public CSprint(final String name, final CProject project, final LocalDate startDate, final LocalDate endDate) {
 		super(CSprint.class, name, project);
-		this.setStartDate(startDate);
+		setStartDate(startDate);
 		this.endDate = endDate;
 		initializeDefaults();
 	}
@@ -389,7 +395,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
-		this.entityType = (CSprintType) typeEntity;
+		entityType = (CSprintType) typeEntity;
 		updateLastModified();
 	}
 

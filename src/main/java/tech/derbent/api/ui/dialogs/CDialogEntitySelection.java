@@ -9,6 +9,9 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.AlreadySelectedMode;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.EntityTypeConfig;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.ItemsProvider;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
@@ -30,72 +33,6 @@ import tech.derbent.api.utils.Check;
  * </ul>
  * @param <EntityClass> The entity type being selected */
 public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CDialog {
-
-	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
-	public static enum AlreadySelectedMode {
-
-		/** Hide already selected items from the available items list */
-		HIDE_ALREADY_SELECTED,
-		/** Show already selected items in the grid, pre-selected (visually marked) */
-		SHOW_AS_SELECTED;
-
-		/** Create from component enum */
-		public static AlreadySelectedMode fromComponentMode(final CComponentEntitySelection.AlreadySelectedMode mode) {
-			return AlreadySelectedMode.valueOf(mode.name());
-		}
-
-		/** Convert to component enum */
-		public CComponentEntitySelection.AlreadySelectedMode toComponentMode() {
-			return CComponentEntitySelection.AlreadySelectedMode.valueOf(name());
-		}
-	}
-
-	/** Entity type configuration - re-exported from CComponentEntitySelection for backward compatibility */
-	public static class EntityTypeConfig<E extends CEntityDB<E>> {
-
-		private final CComponentEntitySelection.EntityTypeConfig<E> componentConfig;
-
-		public EntityTypeConfig(final String displayName, final Class<E> entityClass,
-				final tech.derbent.api.entity.service.CAbstractService<E> service) {
-			componentConfig = new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
-		}
-
-		public String getDisplayName() { return componentConfig.getDisplayName(); }
-
-		public Class<E> getEntityClass() { return componentConfig.getEntityClass(); }
-
-		public tech.derbent.api.entity.service.CAbstractService<E> getService() { return componentConfig.getService(); }
-
-		/** Get the underlying component configuration */
-		CComponentEntitySelection.EntityTypeConfig<E> toComponentConfig() {
-			return componentConfig;
-		}
-
-		@Override
-		public String toString() {
-			return componentConfig.toString();
-		}
-	}
-
-	/** Callback for getting items based on entity type - re-exported from CComponentEntitySelection for backward compatibility */
-	@FunctionalInterface
-	public interface ItemsProvider<T> {
-
-		List<T> getItems(EntityTypeConfig<?> config);
-
-		/** Convert to component provider */
-		@SuppressWarnings ("unchecked")
-		default CComponentEntitySelection.ItemsProvider<T> toComponentProvider() {
-			return componentConfig -> {
-				// Wrap component config back into dialog config for the callback
-				// This is a bit awkward but maintains backward compatibility
-				@SuppressWarnings ("rawtypes")
-				final EntityTypeConfig dialogConfig =
-						new EntityTypeConfig(componentConfig.getDisplayName(), componentConfig.getEntityClass(), componentConfig.getService());
-				return this.getItems(dialogConfig);
-			};
-		}
-	}
 
 	private static final long serialVersionUID = 1L;
 	private final AlreadySelectedMode alreadySelectedMode;
@@ -242,7 +179,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		// Convert dialog entity types to component entity types
 		final List<CComponentEntitySelection.EntityTypeConfig<?>> componentEntityTypes = new ArrayList<>();
 		for (final EntityTypeConfig<?> config : entityTypes) {
-			componentEntityTypes.add(config.toComponentConfig());
+			componentEntityTypes.add(config);
 		}
 		// Convert item providers to component providers
 		final CComponentEntitySelection.ItemsProvider<EntityClass> componentItemsProvider = itemsProvider.toComponentProvider();

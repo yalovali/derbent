@@ -46,12 +46,23 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
  * @param <EntityClass> The entity type being selected */
 public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout> {
 
-	/** Mode for handling already selected items */
-	public enum AlreadySelectedMode {
+	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
+	public static enum AlreadySelectedMode {
+
 		/** Hide already selected items from the available items list */
 		HIDE_ALREADY_SELECTED,
 		/** Show already selected items in the grid, pre-selected (visually marked) */
-		SHOW_AS_SELECTED
+		SHOW_AS_SELECTED;
+
+		/** Create from component enum */
+		public static AlreadySelectedMode fromComponentMode(final CComponentEntitySelection.AlreadySelectedMode mode) {
+			return AlreadySelectedMode.valueOf(mode.name());
+		}
+
+		/** Convert to component enum */
+		public CComponentEntitySelection.AlreadySelectedMode toComponentMode() {
+			return CComponentEntitySelection.AlreadySelectedMode.valueOf(name());
+		}
 	}
 
 	/** Entity type configuration */
@@ -82,11 +93,22 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Callback for getting items based on entity type */
+	/** Callback for getting items based on entity type - re-exported from CComponentEntitySelection for backward compatibility */
 	@FunctionalInterface
 	public interface ItemsProvider<T> {
 
 		List<T> getItems(EntityTypeConfig<?> config);
+
+		/** Convert to component provider */
+		@SuppressWarnings ("unchecked")
+		default CComponentEntitySelection.ItemsProvider<T> toComponentProvider() {
+			return componentConfig -> {
+				@SuppressWarnings ("rawtypes")
+				final EntityTypeConfig dialogConfig =
+						new EntityTypeConfig(componentConfig.getDisplayName(), componentConfig.getEntityClass(), componentConfig.getService());
+				return this.getItems(dialogConfig);
+			};
+		}
 	}
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);

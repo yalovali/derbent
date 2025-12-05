@@ -10,6 +10,7 @@ import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
 import tech.derbent.api.ui.component.enhanced.CComponentListEntityBase;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
 import tech.derbent.app.activities.service.CActivityService;
@@ -24,6 +25,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
 	private CActivityService activityService;
+	private CComponentEntitySelection<CSprintItem> componentBacklogItems;
 	private CComponentListEntityBase<CSprint, CSprintItem> componentItemsSelection;
 	private CMeetingService meetingService;
 	private CProjectItemStatusService projectItemStatusService;
@@ -42,13 +44,23 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	private void createFormFields() throws Exception {
-		componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
-	}
-
 	public Component createSpritActivitiesComponent() {
 		try {
-			createFormFields();
+			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
+			return componentItemsSelection;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create project user settings component.");
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading project user settings component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
+	}
+
+	public Component createSpritBacklogComponent() {
+		try {
+			componentBacklogItems = new CComponentEntitySelection();
 			return componentItemsSelection;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create project user settings component.");

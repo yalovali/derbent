@@ -119,16 +119,16 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	public CDialogEntitySelection.AlreadySelectedMode getAlreadySelectedMode() {
-		return CDialogEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED;
+	public CComponentEntitySelection.AlreadySelectedMode getAlreadySelectedMode() {
+		return CComponentEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED;
 	}
 
 	/** Returns a provider for already-selected items (items currently in the sprint). This returns items based on the current sprint's members to
 	 * enable the dialog to hide or pre-select them.
 	 * @return ItemsProvider that returns the current sprint's items filtered by entity type */
 	@Override
-	public CDialogEntitySelection.ItemsProvider<CProjectItem<?>> getAlreadySelectedProvider() {
-		final CDialogEntitySelection.ItemsProvider<CProjectItem<?>> provider = config -> {
+	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getAlreadySelectedProvider() {
+		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> provider = config -> {
 			try {
 				final CSprint sprint = getMasterEntity();
 				if ((sprint == null) || (sprint.getId() == null)) {
@@ -157,10 +157,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	public List<CDialogEntitySelection.EntityTypeConfig<?>> getDialogEntityTypes() {
-		final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
-		entityTypes.add(new CDialogEntitySelection.EntityTypeConfig<>(ITEM_TYPE_ACTIVITY, CActivity.class, activityService));
-		entityTypes.add(new CDialogEntitySelection.EntityTypeConfig<>(ITEM_TYPE_MEETING, CMeeting.class, meetingService));
+	public List<CComponentEntitySelection.EntityTypeConfig<?>> getDialogEntityTypes() {
+		final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
+		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>(ITEM_TYPE_ACTIVITY, CActivity.class, activityService));
+		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>(ITEM_TYPE_MEETING, CMeeting.class, meetingService));
 		return entityTypes;
 	}
 
@@ -169,8 +169,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	@Override
 	@SuppressWarnings ("unchecked")
-	public CDialogEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {
-		final CDialogEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
+	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {
+		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
 			try {
 				final CProject project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
 				if (project == null) {

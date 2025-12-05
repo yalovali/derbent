@@ -62,9 +62,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param service     The service for the entity type
 	 * @param <T>         The entity type
 	 * @return EntityTypeConfig instance */
-	protected static <T extends CEntityDB<T>> CDialogEntitySelection.EntityTypeConfig<T> createEntityTypeConfig(final String displayName,
+	protected static <T extends CEntityDB<T>> CComponentEntitySelection.EntityTypeConfig<T> createEntityTypeConfig(final String displayName,
 			final Class<T> entityClass, final CAbstractService<T> service) {
-		return new CDialogEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
+		return new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
 	}
 
 	protected CButton buttonAdd;
@@ -112,10 +112,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param multiSelect     True for multi-select, false for single-select
 	 * @param onItemsSelected Callback invoked when items are selected from the dialog */
 	@SuppressWarnings ({})
-	protected CButton addButtonFromList(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
-			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected) {
+	protected CButton addButtonFromList(final String dialogTitle, final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes,
+			final CComponentEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected) {
 		return addButtonFromList(dialogTitle, entityTypes, itemsProvider, multiSelect, onItemsSelected, null,
-				CDialogEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+				CComponentEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED);
 	}
 
 	/** Adds an "Add From List" button to the toolbar that opens an entity selection dialog with already-selected items support. This method creates a
@@ -130,10 +130,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
 	 * @param alreadySelectedMode     Mode for handling already-selected items */
 	@SuppressWarnings ({})
-	protected CButton addButtonFromList(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
-			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected,
-			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider,
-			final CDialogEntitySelection.AlreadySelectedMode alreadySelectedMode) {
+	protected CButton addButtonFromList(final String dialogTitle, final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes,
+			final CComponentEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected,
+			final CComponentEntitySelection.ItemsProvider<?> alreadySelectedProvider,
+			final CComponentEntitySelection.AlreadySelectedMode alreadySelectedMode) {
 		Check.notBlank(dialogTitle, "Dialog title cannot be blank");
 		Check.notEmpty(entityTypes, "Entity types cannot be empty");
 		Check.notNull(itemsProvider, "Items provider cannot be null");
@@ -376,10 +376,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
-	protected void on_buttonFromList_clicked(final String dialogTitle, final List<CDialogEntitySelection.EntityTypeConfig<?>> entityTypes,
-			final CDialogEntitySelection.ItemsProvider<?> itemsProvider, final Consumer<List<?>> onItemsSelected, final boolean multiSelect,
-			final CDialogEntitySelection.ItemsProvider<?> alreadySelectedProvider,
-			final CDialogEntitySelection.AlreadySelectedMode alreadySelectedMode) {
+	protected void on_buttonFromList_clicked(final String dialogTitle, final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes,
+			final CComponentEntitySelection.ItemsProvider<?> itemsProvider, final Consumer<List<?>> onItemsSelected, final boolean multiSelect,
+			final CComponentEntitySelection.ItemsProvider<?> alreadySelectedProvider,
+			final CComponentEntitySelection.AlreadySelectedMode alreadySelectedMode) {
 		try {
 			LOGGER.debug("Opening entity selection dialog: {}", dialogTitle);
 			// Use raw types for dialog creation due to complex generic constraints
