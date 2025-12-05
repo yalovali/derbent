@@ -1,19 +1,35 @@
 package tech.derbent.app.sprints.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
+import tech.derbent.api.interfaces.IEntityUpdateListener;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
+import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
+import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.service.CSprintItemService;
 
 /** CComponentWidgetSprint - Widget component for displaying Sprint entities in grids.
  * <p>
  * This widget displays sprint information in a three-row layout:
  * <ul>
  * <li><b>Row 1:</b> Sprint name with calendar icon and sprint color</li>
- * <li><b>Row 2:</b> Sprint type badge, item count with colorful display</li>
+ * <li><b>Row 2:</b> Sprint type badge, item count with colorful display (clickable to expand/collapse)</li>
  * <li><b>Row 3:</b> Status badge, responsible user, and date range with calendar icons</li>
  * </ul>
+ * </p>
+ * <p>
+ * When the item count is clicked, a collapsible section opens showing the sprint items in a grid using CComponentListSprintItems. The component
+ * automatically refreshes the item count when items are added or removed.
  * </p>
  * <p>
  * Extends CComponentWidgetEntityOfProject and adds sprint-specific information like item count and sprint type. Uses CLabelEntity for colorful,
@@ -22,9 +38,16 @@ import tech.derbent.app.sprints.domain.CSprint;
  * @author Derbent Framework
  * @since 1.0
  * @see CComponentWidgetEntityOfProject */
-public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint> {
+public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint> implements IEntityUpdateListener<CSprintItem> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetSprint.class);
 	private static final long serialVersionUID = 1L;
+
+	private CButton buttonToggleItems;
+	private CComponentListSprintItems componentSprintItems;
+	private CDiv containerSprintItems;
+	private CLabelEntity itemCountLabel;
+	private boolean sprintItemsVisible = false;
 
 	/** Creates a new sprint widget for the specified sprint.
 	 * @param sprint the sprint to display in the widget */
@@ -32,7 +55,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		super(sprint);
 	}
 
-	/** Creates the second line with sprint type and item count. This line shows colorful badges for sprint type and item count.
+	/** Creates the second line with sprint type and item count. This line shows colorful badges for sprint type and item count. The item count is
+	 * clickable to show/hide the sprint items component.
 	 * @throws Exception */
 	@Override
 	protected void createSecondLine() throws Exception {
@@ -43,21 +67,164 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			typeLabel.getStyle().set("margin-right", "8px");
 			layoutLineTwo.add(typeLabel);
 		}
-		// Show item count with icon and colorful badge
+		// Show item count with icon and colorful badge - make it clickable
+		itemCountLabel = createItemCountLabel();
+		// Make the label clickable
+		itemCountLabel.getStyle().set("cursor", "pointer");
+		itemCountLabel.addClickListener(e -> on_itemCountLabel_clicked());
+		layoutLineTwo.add(itemCountLabel);
+	}
+
+	/** Creates the item count label with icon and styling.
+	 * @return the configured label */
+	private CLabelEntity createItemCountLabel() {
 		final Integer itemCount = getEntity().getItemCount();
-		final CLabelEntity itemCountLabel = new CLabelEntity();
-		itemCountLabel.getStyle().set("display", "flex").set("align-items", "center").set("gap", "4px").set("background-color", "#E3F2FD") // Light
-																																			// blue
-																																			// background
+		final CLabelEntity label = new CLabelEntity();
+		label.getStyle().set("display", "flex").set("align-items", "center").set("gap", "4px").set("background-color", "#E3F2FD") // Light blue
+				// background
 				.set("color", "#1976D2") // Blue text
 				.set("padding", "4px 8px").set("border-radius", "4px").set("font-size", "10pt").set("font-weight", "500");
 		// Add tasks icon
 		final Icon icon = VaadinIcon.TASKS.create();
 		icon.getStyle().set("width", "14px").set("height", "14px").set("color", "#1976D2");
-		itemCountLabel.add(icon);
+		label.add(icon);
 		// Add count text
 		final String countText = (itemCount != null ? itemCount : 0) + " item" + ((itemCount != null && itemCount != 1) ? "s" : "");
-		itemCountLabel.setText(countText);
-		layoutLineTwo.add(itemCountLabel);
+		label.setText(countText);
+		return label;
+	}
+
+	/** Creates the sprint items component with the list of sprint items. This component is shown/hidden when the item count is clicked.
+	 * @throws Exception if component creation fails */
+	private void createSprintItemsComponent() throws Exception {
+		if (componentSprintItems != null) {
+			return; // Already created
+		}
+		LOGGER.debug("Creating sprint items component for sprint {}", getEntity().getId());
+		try {
+			// Get services from Spring context
+			final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
+			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
+			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
+			// Create the component
+			componentSprintItems = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
+			// Set the current entity (sprint)
+			componentSprintItems.setCurrentEntity(getEntity());
+			// Register listener for item changes
+			componentSprintItems.setOnItemChangeListener(item -> refreshItemCount());
+			// Create container for sprint items with collapse button
+			containerSprintItems = new CDiv();
+			containerSprintItems.getStyle().set("margin-top", "8px").set("padding", "8px").set("background-color", "#F5F5F5")
+					.set("border-radius", "4px").set("border", "1px solid #E0E0E0");
+			// Add collapse button
+			buttonToggleItems = new CButton(VaadinIcon.ANGLE_UP.create());
+			buttonToggleItems.setTooltipText("Hide sprint items");
+			buttonToggleItems.getStyle().set("margin-bottom", "4px");
+			buttonToggleItems.addClickListener(e -> on_buttonToggleItems_clicked());
+			containerSprintItems.add(buttonToggleItems, componentSprintItems);
+			containerSprintItems.setVisible(false); // Initially hidden
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create sprint items component for sprint {}", getEntity().getId(), e);
+			CNotificationService.showException("Failed to load sprint items", e);
+		}
+	}
+
+	@Override
+	protected void initializeWidget() {
+		super.initializeWidget();
+		// Add container for sprint items after the regular layout
+		try {
+			createSprintItemsComponent();
+			if (containerSprintItems != null) {
+				add(containerSprintItems);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to initialize sprint items component", e);
+		}
+	}
+
+	/** Handle click on the item count label. Toggles visibility of the sprint items component. */
+	protected void on_buttonToggleItems_clicked() {
+		try {
+			sprintItemsVisible = !sprintItemsVisible;
+			containerSprintItems.setVisible(sprintItemsVisible);
+			// Update button icon and tooltip
+			if (sprintItemsVisible) {
+				buttonToggleItems.setIcon(VaadinIcon.ANGLE_UP.create());
+				buttonToggleItems.setTooltipText("Hide sprint items");
+			} else {
+				buttonToggleItems.setIcon(VaadinIcon.ANGLE_DOWN.create());
+				buttonToggleItems.setTooltipText("Show sprint items");
+			}
+			LOGGER.debug("Sprint items visibility toggled to: {}", sprintItemsVisible);
+		} catch (final Exception e) {
+			LOGGER.error("Error toggling sprint items visibility", e);
+			CNotificationService.showException("Error toggling sprint items", e);
+		}
+	}
+
+	/** Handle click on the item count label. Toggles visibility of the sprint items component. */
+	protected void on_itemCountLabel_clicked() {
+		try {
+			sprintItemsVisible = !sprintItemsVisible;
+			if (containerSprintItems != null) {
+				containerSprintItems.setVisible(sprintItemsVisible);
+				// Update button icon if visible
+				if (buttonToggleItems != null && sprintItemsVisible) {
+					buttonToggleItems.setIcon(VaadinIcon.ANGLE_UP.create());
+					buttonToggleItems.setTooltipText("Hide sprint items");
+				} else if (buttonToggleItems != null) {
+					buttonToggleItems.setIcon(VaadinIcon.ANGLE_DOWN.create());
+					buttonToggleItems.setTooltipText("Show sprint items");
+				}
+			}
+			LOGGER.debug("Sprint items visibility toggled to: {}", sprintItemsVisible);
+		} catch (final Exception e) {
+			LOGGER.error("Error toggling sprint items visibility", e);
+			CNotificationService.showException("Error toggling sprint items", e);
+		}
+	}
+
+	@Override
+	public void onEntityCreated(final CSprintItem newEntity) throws Exception {
+		LOGGER.debug("Sprint item created: {}", newEntity.getId());
+		refreshItemCount();
+	}
+
+	@Override
+	public void onEntityDeleted(final CSprintItem entity) throws Exception {
+		LOGGER.debug("Sprint item deleted: {}", entity.getId());
+		refreshItemCount();
+	}
+
+	@Override
+	public void onEntityRefreshed(final CSprintItem reloaded) throws Exception {
+		LOGGER.debug("Sprint item refreshed: {}", reloaded.getId());
+		refreshItemCount();
+	}
+
+	@Override
+	public void onEntitySaved(final CSprintItem savedEntity) throws Exception {
+		LOGGER.debug("Sprint item saved: {}", savedEntity.getId());
+		refreshItemCount();
+	}
+
+	/** Refresh the item count display by recreating the label with updated count. */
+	private void refreshItemCount() {
+		try {
+			if (itemCountLabel != null && layoutLineTwo != null) {
+				// Remove old label
+				layoutLineTwo.remove(itemCountLabel);
+				// Create new label with updated count
+				itemCountLabel = createItemCountLabel();
+				itemCountLabel.getStyle().set("cursor", "pointer");
+				itemCountLabel.addClickListener(e -> on_itemCountLabel_clicked());
+				// Add back to layout
+				layoutLineTwo.add(itemCountLabel);
+				LOGGER.debug("Item count refreshed for sprint {}", getEntity().getId());
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing item count", e);
+		}
 	}
 }
