@@ -43,8 +43,10 @@ import tech.derbent.app.page.view.CDynamicPageRouter;
  * levels of menu hierarchy - Sliding animations between levels - Back button navigation - Parses menu entries from route annotations in format:
  * parentItem2.childItem1.childofchileitem1 - Responsive design with proper styling - Current page highlighting */
 public final class CHierarchicalSideMenu extends Div implements AfterNavigationObserver {
+
 	/** Inner class representing a single menu item. */
 	private final class CMenuItem {
+
 		private final String iconColor;
 		private final String iconName;
 		private final boolean isNavigation;
@@ -153,6 +155,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 	/** Inner class representing a single level in the menu hierarchy. */
 	private final class CMenuLevel {
+
 		private final String displayName;
 		private final List<CMenuItem> items;
 		private final String levelKey;
@@ -226,9 +229,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	// Services for dynamic menu integration
 	private final CPageMenuIntegrationService pageMenuService;
 	private final CPageTestAuxillaryService pageTestAuxillaryService;
+	private final Div searchContainer;
 	// Search components
 	private final TextField searchField;
-	private final Div searchContainer;
 
 	/** Constructor initializes the hierarchical side menu component.
 	 * @param pageMenuService Service for dynamic page menu integration
@@ -250,6 +253,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		headerLayout.setWidthFull();
 		// Initialize search field
 		searchField = createSearchField();
+		searchField.setWidth("90%");
 		searchContainer = new Div(searchField);
 		searchContainer.addClassNames(Padding.Horizontal.MEDIUM, Padding.Bottom.SMALL);
 		searchContainer.setWidthFull();
@@ -386,32 +390,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		updateHeaderForSearch();
 	}
 
-	/** Handles search field value changes.
-	 * @param value The new search value */
-	private void on_textFieldSearch_valueChanged(final String value) {
-		if ((value == null) || value.trim().isEmpty()) {
-			// Clear search - show current level
-			showLevel(currentLevel != null ? currentLevel.getLevelKey() : "root");
-		} else {
-			// Display filtered results
-			displaySearchResults(value.trim());
-		}
-	}
-
-	/** Updates the header to show search mode. */
-	private void updateHeaderForSearch() {
-		headerLayout.removeAll();
-		final Icon searchIcon = createMenuIcon(VaadinIcon.SEARCH.create(), "var(--lumo-primary-color)");
-		searchIcon.addClassNames(Margin.Right.MEDIUM, Margin.Left.SMALL);
-		headerLayout.add(searchIcon);
-		final Span title = new Span("Search Results");
-		title.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-		headerLayout.add(title);
-		final Div spacer = new CDiv();
-		headerLayout.add(spacer);
-		headerLayout.setFlexGrow(1, spacer);
-	}
-
 	/** Get icon color for a dynamic page.
 	 * @param path The dynamic page path (format: "dynamic.{pageId}")
 	 * @return The color code from CPageEntity, or default color if not found */
@@ -463,6 +441,18 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @return true if this is a dynamic page path */
 	private boolean isDynamicPagePath(final String path) {
 		return (path != null) && path.startsWith("dynamic.");
+	}
+
+	/** Handles search field value changes.
+	 * @param value The new search value */
+	private void on_textFieldSearch_valueChanged(final String value) {
+		if ((value == null) || value.trim().isEmpty()) {
+			// Clear search - show current level
+			showLevel(currentLevel != null ? currentLevel.getLevelKey() : "root");
+		} else {
+			// Display filtered results
+			displaySearchResults(value.trim());
+		}
 	}
 
 	/** Parse hierarchical order from entry order. The order value encodes the hierarchy: - For order 4.1: integer part 4 is parent order, fractional
@@ -607,6 +597,20 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		levelTitle.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 		headerLayout.add(levelTitle);
 		// Add spacer to push content to the left
+		final Div spacer = new CDiv();
+		headerLayout.add(spacer);
+		headerLayout.setFlexGrow(1, spacer);
+	}
+
+	/** Updates the header to show search mode. */
+	private void updateHeaderForSearch() {
+		headerLayout.removeAll();
+		final Icon searchIcon = createMenuIcon(VaadinIcon.SEARCH.create(), "var(--lumo-primary-color)");
+		searchIcon.addClassNames(Margin.Right.MEDIUM, Margin.Left.SMALL);
+		headerLayout.add(searchIcon);
+		final Span title = new Span("Search Results");
+		title.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
+		headerLayout.add(title);
 		final Div spacer = new CDiv();
 		headerLayout.add(spacer);
 		headerLayout.setFlexGrow(1, spacer);

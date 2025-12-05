@@ -3,6 +3,7 @@ package tech.derbent.api.views;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.grid.GridSingleSelectionModel;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -138,8 +139,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getProjectName).setAutoWidth(true).setSortable(true), "Project Name");
 		CGrid.styleColumnHeader(grid.addColumn(this::getPermissionAsString).setAutoWidth(true), "Permission");
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-		com.vaadin.flow.component.grid.GridSingleSelectionModel<CUserProjectSettings> sm =
-				(com.vaadin.flow.component.grid.GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();
+		GridSingleSelectionModel<CUserProjectSettings> sm = (GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();
 		sm.setDeselectAllowed(false);
 		addToContent(grid);
 	}

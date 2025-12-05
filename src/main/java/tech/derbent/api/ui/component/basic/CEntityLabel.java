@@ -4,6 +4,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.interfaces.IHasColor;
 import tech.derbent.api.utils.CColorUtils;
 
 /** CEntityLabel - Base label component for displaying entities with both icons and colors.
@@ -69,6 +70,17 @@ public class CEntityLabel extends HorizontalLayout {
 	 * @throws Exception */
 	private void applyColorStyling() throws Exception {
 		// Get entity color or fallback to default
+		// Apply layout styling
+		getStyle().set("padding", padding);
+		getStyle().set("display", "inline-flex");
+		getStyle().set("align-items", "center");
+		getStyle().set("white-space", "nowrap");
+		if (roundedCorners) {
+			getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
+		}
+		if (!(entity instanceof IHasColor)) {
+			return;
+		}
 		final String backgroundColor = CColorUtils.getColorFromEntity(entity);
 		// Apply background color
 		getStyle().set("background-color", backgroundColor);
@@ -82,14 +94,6 @@ public class CEntityLabel extends HorizontalLayout {
 					component.getElement().getStyle().set("color", textColor);
 				}
 			});
-		}
-		// Apply layout styling
-		getStyle().set("padding", padding);
-		getStyle().set("display", "inline-flex");
-		getStyle().set("align-items", "center");
-		getStyle().set("white-space", "nowrap");
-		if (roundedCorners) {
-			getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
 		}
 	}
 
