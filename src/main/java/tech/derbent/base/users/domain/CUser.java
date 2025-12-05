@@ -164,7 +164,9 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	/** Creates a custom icon component from image data (PNG format). Uses a clean implementation that creates a vaadin-icon element with an embedded
-	 * image. This approach ensures the icon displays correctly in all contexts (grids, labels, menus).
+	 * image. This approach ensures the icon displays correctly in all contexts (grids, labels, menus). CRITICAL FIX: Sets the "icon-class" attribute
+	 * to hide the shadow DOM's SVG element, allowing the custom image to be visible. This leverages Vaadin's built-in CSS rule:
+	 * :host(:is([icon-class], [font-icon-content])) svg { display: none; }
 	 * @param imageData PNG image data (should be 16x16 pixels for optimal display)
 	 * @return Icon component containing the image */
 	private Icon createIconFromImageData(final byte[] imageData) {
@@ -172,6 +174,9 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
 		// Create an Icon with a clean DOM structure
 		final Icon icon = new Icon();
+		// CRITICAL: Set icon-class attribute to hide the shadow DOM's default SVG
+		// This allows our custom image to be visible instead of being hidden behind the SVG
+		icon.getElement().setAttribute("icon-class", "user-icon-image");
 		// Encode image data as base64 data URL
 		final String base64Image = Base64.getEncoder().encodeToString(imageData);
 		final String dataUrl = "data:image/png;base64," + base64Image;
