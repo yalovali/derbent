@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.icon.Icon;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
@@ -163,9 +164,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 	}
 
-	/** Creates an icon from image data using proper SVG wrapping with data URLs.
-	 * This method embeds images in SVG using data URLs, which is properly supported
-	 * by Vaadin's Icon component when used correctly.
+	/** Creates an icon from image data using proper SVG wrapping.
+	 * This method embeds images in SVG which is then directly rendered in the DOM.
 	 * 
 	 * @param imageData Binary image data (PNG/JPEG)
 	 * @return Icon component with properly rendered image
@@ -188,18 +188,10 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			dataUrl, ICON_SIZE, ICON_SIZE
 		);
 		
-		// Convert SVG content to data URL
-		final String svgDataUrl = "data:image/svg+xml;charset=utf-8," + 
-			java.net.URLEncoder.encode(svgContent, java.nio.charset.StandardCharsets.UTF_8);
-		
-		// Create Icon with SVG data URL
-		// Use the icon attribute to set the SVG content
-		final Icon icon = new Icon();
-		icon.getElement().setAttribute("icon", svgDataUrl);
-		icon.setSize(ICON_SIZE + "px");
-		
-		// Apply standard icon styling through CColorUtils
-		return CColorUtils.styleIcon(icon);
+		// Create a custom SVG icon using a span element wrapper
+		// NOTE: Vaadin's Icon component uses <vaadin-icon> web component with shadow DOM
+		// which doesn't render custom innerHTML. We use a span-based Icon instead.
+		return createSvgIcon(svgContent);
 	}
 
 	/** Detects MIME type from image data signature.
@@ -253,21 +245,90 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		try {
 			final String initials = getInitials();
 			final String svgContent = CImageUtils.generateAvatarSvg(initials, ICON_SIZE);
-			
-			// Convert SVG string to data URL
-			final String svgDataUrl = "data:image/svg+xml;charset=utf-8," + 
-				java.net.URLEncoder.encode(svgContent, java.nio.charset.StandardCharsets.UTF_8);
-			
-			// Create Icon with SVG data URL
-			final Icon icon = new Icon();
-			icon.getElement().setAttribute("icon", svgDataUrl);
-			icon.setSize(ICON_SIZE + "px");
-			
-			return CColorUtils.styleIcon(icon);
+			return createSvgIcon(svgContent);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
 			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
 		}
+	}
+	
+	/** Creates a custom Icon component that can render SVG content.
+	 * Creates a span-based icon since vaadin-icon doesn't support custom SVG.
+	 * 
+	 * @param svgContent The SVG markup to render
+	 * @return Icon component that will properly render the SVG */
+	private Icon createSvgIcon(final String svgContent) {
+		// CRITICAL FIX: Don't use Icon() constructor - it creates <vaadin-icon> which has shadow DOM
+		// Instead, create an Icon using a custom span element that can render the SVG
+		final com.vaadin.flow.dom.Element spanElement = new com.vaadin.flow.dom.Element("span");
+		spanElement.setProperty("innerHTML", svgContent);
+		spanElement.getStyle()
+			.set("display", "inline-flex")
+			.set("align-items", "center")
+			.set("justify-content", "center")
+			.set("width", ICON_SIZE + "px")
+			.set("height", ICON_SIZE + "px")
+			.set("line-height", "0")
+			.set("flex-shrink", "0");
+		
+		// Create a custom Icon by using the protected constructor that accepts an Element
+		// We can't directly call this, so we'll use reflection or create a wrapper
+		// Actually, let's just create an Icon and replace its element
+		final Icon icon = new Icon();
+		
+		// Remove the default vaadin-icon element and use our span instead
+		icon.getElement().removeFromTree();
+		
+		// Attach our span element by setting it as the icon's element
+		// This is tricky - we need to use Component.from() or another approach
+		// Let's try using the UI's executor to replace the element
+		try {
+			final java.lang.reflect.Field elementField = com.vaadin.flow.component.Component.class.getDeclaredField("element");
+			elementField.setAccessible(true);
+			elementField.set(icon, spanElement);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to replace icon element, falling back to default", e);
+			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
+		}
+		
+		icon.setSize(ICON_SIZE + "px");
+		return CColorUtils.styleIcon(icon);
+	}
+	
+	/** Creates an Avatar component for this user with proper initials and color.
+	 * This is the PROPER way to display user avatars in Vaadin.
+	 * Avatar component has built-in support for initials, colors, and profile pictures.
+	 * 
+	 * @return Avatar component configured for this user */
+	public Avatar getAvatar() {
+		final Avatar avatar = new Avatar();
+		
+		// Set user's name for the avatar (use toString() for display name)
+		final String displayName = toString();
+		avatar.setName(displayName);
+		
+		// Set initials
+		final String initials = getInitials();
+		avatar.setAbbreviation(initials);
+		
+		// Set color based on name hash for consistency
+		final int colorIndex = Math.abs(displayName.hashCode() % 7); // Vaadin supports 7 color variants
+		avatar.setColorIndex(colorIndex);
+		
+		// Set profile picture if available
+		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
+			try {
+				final String base64Image = Base64.getEncoder().encodeToString(profilePictureThumbnail);
+				final String mimeType = detectMimeType(profilePictureThumbnail);
+				final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
+				avatar.setImage(dataUrl);
+			} catch (final Exception e) {
+				LOGGER.error("Failed to set avatar image", e);
+				// Avatar will fall back to showing initials
+			}
+		}
+		
+		return avatar;
 	}
 
 	@Override

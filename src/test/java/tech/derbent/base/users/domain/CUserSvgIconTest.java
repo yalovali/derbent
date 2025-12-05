@@ -27,13 +27,13 @@ class CUserSvgIconTest {
 		// Verify icon is not null
 		assertNotNull(icon, "Icon should not be null");
 		
-		// Verify the icon attribute contains SVG data URL
-		final String iconAttr = icon.getElement().getAttribute("icon");
-		assertNotNull(iconAttr, "Icon attribute should not be null");
-		assertTrue(iconAttr.startsWith("data:image/svg+xml"), 
-			"Icon attribute should be an SVG data URL");
-		assertTrue(iconAttr.contains("svg"), 
-			"Icon attribute should contain SVG content");
+		// With the new element replacement approach, SVG is directly in the element's innerHTML
+		final String innerHTML = icon.getElement().getProperty("innerHTML");
+		assertNotNull(innerHTML, "Element innerHTML should contain SVG");
+		assertTrue(innerHTML.startsWith("<svg"), 
+			"Element innerHTML should be SVG content");
+		assertTrue(innerHTML.contains("svg"), 
+			"Element innerHTML should contain SVG tags");
 	}
 	
 	@Test
@@ -54,13 +54,13 @@ class CUserSvgIconTest {
 		// Verify icon is not null
 		assertNotNull(icon, "Icon should not be null");
 		
-		// Verify the icon attribute contains SVG with embedded image
-		final String iconAttr = icon.getElement().getAttribute("icon");
-		assertNotNull(iconAttr, "Icon attribute should not be null");
-		assertTrue(iconAttr.startsWith("data:image/svg+xml"), 
-			"Icon attribute should be an SVG data URL");
-		assertTrue(iconAttr.contains("image"), 
-			"Icon attribute should contain an image element");
+		// With the new element replacement approach, SVG is directly in the element's innerHTML
+		final String innerHTML = icon.getElement().getProperty("innerHTML");
+		assertNotNull(innerHTML, "Element innerHTML should contain SVG");
+		assertTrue(innerHTML.startsWith("<svg"), 
+			"Element innerHTML should be SVG content");
+		assertTrue(innerHTML.contains("image"), 
+			"Element innerHTML should contain an image element");
 	}
 	
 	@Test
