@@ -1,6 +1,8 @@
 package tech.derbent.app.projects.domain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -80,7 +82,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		if (getCompanyId() == null) {
 			return null;
 		}
-		CCompany company =
+		final CCompany company =
 				service.getById(getCompanyId()).orElseThrow(() -> new IllegalStateException("Company with ID " + getCompanyId() + " not found"));
 		return company;
 	}
@@ -116,7 +118,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	 *                    fields plus "company"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, final Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
@@ -125,8 +127,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity field
-		if (fieldNames.remove("company") && (getCompany() != null)
-				&& getCompany().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("company") && (getCompany() != null) && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

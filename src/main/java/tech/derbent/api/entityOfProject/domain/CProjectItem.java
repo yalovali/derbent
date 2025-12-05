@@ -1,7 +1,8 @@
 package tech.derbent.api.entityOfProject.domain;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collection;
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
@@ -83,23 +84,15 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	 *                    "active", "name", "description", "project", "assignedTo", "createdBy", "status"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
-		// Ensure fieldNames is mutable for the entire traversal chain
-		java.util.Collection<String> mutableFieldNames = fieldNames;
-		if (fieldNames == null) {
-			mutableFieldNames = new java.util.ArrayList<>();
-		} else if (!(fieldNames instanceof java.util.ArrayList)) {
-			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
-		}
-		if (super.matchesFilter(searchValue, mutableFieldNames)) {
+		if (super.matchesFilter(searchValue, fieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (mutableFieldNames.remove("status") && (getStatus() != null)
-				&& getStatus().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("status") && (getStatus() != null) && getStatus().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

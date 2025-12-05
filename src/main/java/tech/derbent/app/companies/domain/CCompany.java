@@ -1,5 +1,6 @@
 package tech.derbent.app.companies.domain;
 
+import java.util.Collection;
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -192,7 +193,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 	public Boolean isEnableNotifications() { return enableNotifications; }
 
 	@Override
-	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, final @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}

@@ -1,7 +1,7 @@
 package tech.derbent.api.entityOfCompany.domain;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -17,7 +17,7 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_id", nullable = true)
 	@AMetaData (
-			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false, 
+			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false,
 			setBackgroundFromColor = true, useIcon = true
 	)
 	private CCompany company;
@@ -43,23 +43,16 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	 *                    "active", "name", "description", "company"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
-		// Ensure fieldNames is mutable for the entire traversal chain
-		java.util.Collection<String> mutableFieldNames = fieldNames;
-		if (fieldNames == null) {
-			mutableFieldNames = new java.util.ArrayList<>();
-		} else if (!(fieldNames instanceof java.util.ArrayList)) {
-			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
-		}
-		if (super.matchesFilter(searchValue, mutableFieldNames)) {
+		// Ensure fieldNames is mutable for
+		if (super.matchesFilter(searchValue, fieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (mutableFieldNames.remove("company") && (getCompany() != null)
-				&& getCompany().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("company") && (getCompany() != null) && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

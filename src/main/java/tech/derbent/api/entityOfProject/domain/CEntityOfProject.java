@@ -1,7 +1,7 @@
 package tech.derbent.api.entityOfProject.domain;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.jspecify.annotations.Nullable;
@@ -72,31 +72,21 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	}
 
 	@Override
-	public boolean matchesFilter(final String searchValue, java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
-		// Ensure fieldNames is mutable for the entire traversal chain
-		java.util.Collection<String> mutableFieldNames = fieldNames;
-		if (fieldNames == null) {
-			mutableFieldNames = new java.util.ArrayList<>();
-		} else if (!(fieldNames instanceof java.util.ArrayList)) {
-			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
-		}
-		if (super.matchesFilter(searchValue, mutableFieldNames)) {
+		if (super.matchesFilter(searchValue, fieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (mutableFieldNames.remove("project") && (getProject() != null)
-				&& getProject().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("project") && (getProject() != null) && getProject().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (mutableFieldNames.remove("assignedTo") && (getAssignedTo() != null)
-				&& getAssignedTo().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("assignedTo") && (getAssignedTo() != null) && getAssignedTo().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (mutableFieldNames.remove("createdBy") && (getCreatedBy() != null)
-				&& getCreatedBy().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("createdBy") && (getCreatedBy() != null) && getCreatedBy().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

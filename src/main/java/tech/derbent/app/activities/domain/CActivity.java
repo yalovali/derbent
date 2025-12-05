@@ -3,6 +3,7 @@ package tech.derbent.app.activities.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -346,12 +347,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity fields
-		if (fieldNames.remove("entityType") && (getEntityType() != null)
-				&& getEntityType().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("entityType") && (getEntityType() != null) && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("priority") && (getPriority() != null)
-				&& getPriority().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("priority") && (getPriority() != null) && getPriority().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;

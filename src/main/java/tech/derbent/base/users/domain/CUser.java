@@ -1,6 +1,7 @@
 package tech.derbent.base.users.domain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import org.slf4j.Logger;
@@ -162,6 +163,41 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 	}
 
+	/** Creates a custom icon component from image data (PNG format). Uses a clean implementation that creates a vaadin-icon element with an embedded
+	 * image. This approach ensures the icon displays correctly in all contexts (grids, labels, menus).
+	 * @param imageData PNG image data (should be 16x16 pixels for optimal display)
+	 * @return Icon component containing the image */
+	private Icon createIconFromImageData(final byte[] imageData) {
+		Check.notNull(imageData, "Image data cannot be null");
+		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
+		// Create an Icon with a clean DOM structure
+		final Icon icon = new Icon();
+		// Encode image data as base64 data URL
+		final String base64Image = Base64.getEncoder().encodeToString(imageData);
+		final String dataUrl = "data:image/png;base64," + base64Image;
+		// Create img element with proper attributes
+		final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
+		img.setAttribute("src", dataUrl);
+		img.setAttribute("alt", "User icon");
+		img.setAttribute("loading", "eager"); // Ensure immediate loading
+		// Apply critical inline styles for proper rendering
+		// These styles ensure the image displays correctly across all browsers
+		img.getStyle().set("width", ICON_SIZE + "px").set("height", ICON_SIZE + "px").set("display", "block") // Remove inline spacing
+				.set("object-fit", "cover") // Ensure image fills the space
+				.set("border-radius", "2px") // Slightly rounded corners
+				.set("vertical-align", "middle"); // Align with text
+		// Clear any default Icon styles that might interfere
+		icon.getElement().getStyle().set("width", ICON_SIZE + "px").set("height", ICON_SIZE + "px").set("display", "inline-flex") // Use flex for
+																																	// proper
+																																	// alignment
+				.set("align-items", "center").set("justify-content", "center").set("overflow", "hidden"); // Clip any overflow
+		// Append the image to the icon element
+		icon.getElement().appendChild(img);
+		// Apply additional styling from CColorUtils for consistency with other icons
+		// Note: This adds margin-right and flex-shrink properties
+		return CColorUtils.styleIcon(icon);
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 		return super.equals(o);
@@ -187,12 +223,10 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public Icon getIcon() {
 		// COMPREHENSIVE APPROACH: Create a properly styled icon element that wraps an image
 		// This ensures reliable rendering of profile pictures and generated avatars across all contexts
-		
 		// Use thumbnail if available for efficient rendering
 		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
 			return createIconFromImageData(profilePictureThumbnail);
 		}
-		
 		// Generate avatar with initials when no profile picture is available
 		try {
 			final String initials = getInitials();
@@ -202,58 +236,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
 			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
 		}
-	}
-	
-	/**
-	 * Creates a custom icon component from image data (PNG format).
-	 * Uses a clean implementation that creates a vaadin-icon element with an embedded image.
-	 * This approach ensures the icon displays correctly in all contexts (grids, labels, menus).
-	 * 
-	 * @param imageData PNG image data (should be 16x16 pixels for optimal display)
-	 * @return Icon component containing the image
-	 */
-	private Icon createIconFromImageData(final byte[] imageData) {
-		Check.notNull(imageData, "Image data cannot be null");
-		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
-		
-		// Create an Icon with a clean DOM structure
-		final Icon icon = new Icon();
-		
-		// Encode image data as base64 data URL
-		final String base64Image = Base64.getEncoder().encodeToString(imageData);
-		final String dataUrl = "data:image/png;base64," + base64Image;
-		
-		// Create img element with proper attributes
-		final com.vaadin.flow.dom.Element img = new com.vaadin.flow.dom.Element("img");
-		img.setAttribute("src", dataUrl);
-		img.setAttribute("alt", "User icon");
-		img.setAttribute("loading", "eager"); // Ensure immediate loading
-		
-		// Apply critical inline styles for proper rendering
-		// These styles ensure the image displays correctly across all browsers
-		img.getStyle()
-			.set("width", ICON_SIZE + "px")
-			.set("height", ICON_SIZE + "px")
-			.set("display", "block")  // Remove inline spacing
-			.set("object-fit", "cover")  // Ensure image fills the space
-			.set("border-radius", "2px")  // Slightly rounded corners
-			.set("vertical-align", "middle");  // Align with text
-		
-		// Clear any default Icon styles that might interfere
-		icon.getElement().getStyle()
-			.set("width", ICON_SIZE + "px")
-			.set("height", ICON_SIZE + "px")
-			.set("display", "inline-flex")  // Use flex for proper alignment
-			.set("align-items", "center")
-			.set("justify-content", "center")
-			.set("overflow", "hidden");  // Clip any overflow
-		
-		// Append the image to the icon element
-		icon.getElement().appendChild(img);
-		
-		// Apply additional styling from CColorUtils for consistency with other icons
-		// Note: This adds margin-right and flex-shrink properties
-		return CColorUtils.styleIcon(icon);
 	}
 
 	@Override
@@ -388,7 +370,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 		// Check entity fields
 		if (fieldNames.remove("companyRole") && (getCompanyRole() != null)
-				&& getCompanyRole().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+				&& getCompanyRole().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		// Check boolean field

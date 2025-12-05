@@ -1,5 +1,6 @@
 package tech.derbent.app.roles.domain;
 
+import java.util.Arrays;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -103,8 +104,7 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity field
-		if (fieldNames.remove("company") && (getCompany() != null)
-				&& getCompany().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("company") && (getCompany() != null) && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		// Check boolean field

@@ -1,5 +1,6 @@
 package tech.derbent.api.domains;
 
+import java.util.Arrays;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -78,6 +79,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 
 	/** Gets the color code for this type.
 	 * @return the hex color code */
+	@Override
 	public String getColor() { return color; }
 
 	/** Gets the sort order for this type.
@@ -110,8 +112,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity field
-		if (fieldNames.remove("workflow") && (getWorkflow() != null)
-				&& getWorkflow().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("workflow") && (getWorkflow() != null) && getWorkflow().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		// Check boolean field
@@ -133,6 +134,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 
 	/** Sets the color code for this type.
 	 * @param color the hex color code to set */
+	@Override
 	public void setColor(final String color) { this.color = color; }
 
 	/** Sets the sort order for this type.

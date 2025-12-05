@@ -1,5 +1,6 @@
 package tech.derbent.api.entityOfCompany.domain;
 
+import java.util.Collection;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +123,7 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	public Boolean getStatusTypePause() { return statusTypePause; }
 
 	@Override
-	public boolean matchesFilter(final String searchValue, final java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, final @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}

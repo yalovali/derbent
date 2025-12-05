@@ -2,6 +2,7 @@ package tech.derbent.app.meetings.domain;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.AssociationOverride;
@@ -168,9 +169,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	@Override
 	@SuppressWarnings ({
-			"rawtypes", "unchecked"
 	})
-	public CTypeEntity getEntityType() { return entityType; }
+	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
@@ -220,22 +220,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		return (user != null) && participants.contains(user);
 	}
 
-	/** Convenience method to remove an attendee from the meeting.
-	 * @param user the user to remove as an attendee */
-	public void removeAttendee(final CUser user) {
-		if (user != null) {
-			attendees.remove(user);
-		}
-	}
-
-	/** Convenience method to remove a participant from the meeting.
-	 * @param user the user to remove as a participant */
-	public void removeParticipant(final CUser user) {
-		if (user != null) {
-			participants.remove(user);
-		}
-	}
-
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in
 	 * meeting-specific entity fields.
 	 * @param searchValue the value to search for (case-insensitive)
@@ -252,19 +236,34 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity fields
-		if (fieldNames.remove("entityType") && (getEntityType() != null)
-				&& getEntityType().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+		if (fieldNames.remove("entityType") && (getEntityType() != null) && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		if (fieldNames.remove("relatedActivity") && (getRelatedActivity() != null)
-				&& getRelatedActivity().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+				&& getRelatedActivity().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		if (fieldNames.remove("responsible") && (getResponsible() != null)
-				&& getResponsible().matchesFilter(lowerSearchValue, java.util.Arrays.asList("name"))) {
+				&& getResponsible().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
+	}
+
+	/** Convenience method to remove an attendee from the meeting.
+	 * @param user the user to remove as an attendee */
+	public void removeAttendee(final CUser user) {
+		if (user != null) {
+			attendees.remove(user);
+		}
+	}
+
+	/** Convenience method to remove a participant from the meeting.
+	 * @param user the user to remove as a participant */
+	public void removeParticipant(final CUser user) {
+		if (user != null) {
+			participants.remove(user);
+		}
 	}
 
 	public void setAgenda(final String agenda) { this.agenda = agenda; }

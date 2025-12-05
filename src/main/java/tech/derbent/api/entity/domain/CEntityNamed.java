@@ -1,6 +1,7 @@
 package tech.derbent.api.entity.domain;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -107,7 +108,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	 *                    "active", "name", "description"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, java.util.@Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
 		if ((searchValue == null) || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
@@ -120,15 +121,15 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		} else if (!(fieldNames instanceof java.util.ArrayList)) {
 			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
 		}
-		if (super.matchesFilter(searchValue, mutableFieldNames)) {
+		if (super.matchesFilter(searchValue, fieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check ID field if requested
-		if (mutableFieldNames.remove("name") && getName().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("name") && getName().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (mutableFieldNames.remove("description") && getDescription().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("description") && getDescription().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;
