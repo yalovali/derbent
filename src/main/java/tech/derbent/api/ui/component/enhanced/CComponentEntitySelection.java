@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -23,7 +21,6 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
-import tech.derbent.api.interfaces.IGridDragDropSupport;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -45,11 +42,9 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
  * <li>Reset button for clearing selection</li>
  * <li>Selected items persist across grid filtering</li>
  * <li>Support for already-selected items with two modes: hide or show as pre-selected</li>
- * <li>Drag and drop support for moving items to other components</li>
  * </ul>
  * @param <EntityClass> The entity type being selected */
-public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
-		implements IGridDragDropSupport<EntityClass> {
+public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout> {
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
@@ -136,10 +131,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private final boolean multiSelect;
 	private final Consumer<Set<EntityClass>> onSelectionChanged;
 	private final Set<EntityClass> selectedItems = new HashSet<>();
-	// Drag and drop support
-	private boolean dragEnabled = false;
-	private Consumer<EntityClass> dropHandler = null;
-	private EntityClass draggedItem = null;
 
 	/** Creates an entity selection component.
 	 * @param entityTypes        Available entity types for selection
@@ -405,18 +396,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return Set of selected items */
 	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
 
-	/** Returns the number of currently selected items.
-	 * @return count of selected items */
-	public int getSelectedCount() { return selectedItems.size(); }
-
-	/** Returns all loaded items (before filtering).
-	 * @return List of all items */
-	public List<EntityClass> getAllItems() { return new ArrayList<>(allItems); }
-
-	/** Returns the number of all loaded items.
-	 * @return count of all items */
-	public int getItemCount() { return allItems.size(); }
-
 	/** Returns whether the component is configured for multi-select.
 	 * @return true if multi-select mode */
 	public boolean isMultiSelect() { return multiSelect; }
@@ -649,87 +628,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		gridSearchToolbar.setStatusOptions(statuses);
 	}
 
-	// IGridDragDropSupport implementation
-
-	/** Checks if drag is currently enabled on the grid.
-	 * @return true if drag is enabled, false otherwise */
-	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	/** Enables or disables dragging of grid rows with full visual feedback.
-	 * @param enabled true to enable dragging, false to disable */
-	@Override
-	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		if (gridItems != null) {
-			gridItems.setRowsDraggable(enabled);
-			if (enabled) {
-				setupDragListeners();
-			}
-		}
-		LOGGER.debug("Drag enabled set to: {}", enabled);
-	}
-
-	/** Gets the current drop handler.
-	 * @return the drop handler, or null if not set */
-	@Override
-	public Consumer<EntityClass> getDropHandler() { return dropHandler; }
-
-	/** Sets the handler to be called when an item is dragged from this component.
-	 * @param handler the consumer to handle dragged items */
-	@Override
-	public void setDropHandler(final Consumer<EntityClass> handler) {
-		dropHandler = handler;
-		LOGGER.debug("Drop handler set: {}", handler != null);
-	}
-
-	/** Sets up drag listeners for visual feedback and drag start/end events. */
-	private void setupDragListeners() {
-		Check.notNull(gridItems, "Grid items must be initialized before setting up drag listeners");
-		// Handle drag start - store the dragged item and add visual feedback
-		gridItems.addDragStartListener(this::on_gridItems_dragStart);
-		// Handle drag end - clear visual feedback
-		gridItems.addDragEndListener(this::on_gridItems_dragEnd);
-		LOGGER.debug("Drag listeners configured for grid");
-	}
-
-	/** Handle drag start event - stores dragged item and adds visual feedback.
-	 * @param event the drag start event */
-	protected void on_gridItems_dragStart(final GridDragStartEvent<EntityClass> event) {
-		try {
-			final List<EntityClass> draggedItems = event.getDraggedItems();
-			if ((draggedItems != null) && !draggedItems.isEmpty()) {
-				draggedItem = draggedItems.get(0);
-				// Add visual feedback - semi-transparent style
-				gridItems.getStyle().set("opacity", "0.6");
-				LOGGER.debug("Drag started for item: {}", draggedItem.getId());
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error handling drag start", e);
-		}
-	}
-
-	/** Handle drag end event - clears visual feedback and notifies drop handler.
-	 * @param event the drag end event */
-	protected void on_gridItems_dragEnd(final GridDragEndEvent<EntityClass> event) {
-		try {
-			// Remove visual feedback
-			gridItems.getStyle().remove("opacity");
-			// If drop handler is set and drag was successful, notify handler
-			// Note: In Vaadin 24, drag end doesn't indicate drop success directly
-			// The drop handler is called when an actual drop occurs
-			if ((dropHandler != null) && (draggedItem != null)) {
-				LOGGER.debug("Drag ended for item: {}, notifying drop handler", draggedItem.getId());
-				dropHandler.accept(draggedItem);
-			} else {
-				LOGGER.debug("Drag ended without handler or item");
-			}
-			draggedItem = null;
-		} catch (final Exception e) {
-			LOGGER.error("Error handling drag end", e);
-		}
-	}
-
 	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally. */
 	public void refresh() {
 		try {
@@ -742,15 +640,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Gets the currently selected entity type.
-	 * @return the current entity type config, or null if none selected */
-	public EntityTypeConfig<?> getCurrentEntityType() { return currentEntityType; }
-
-	/** Notifies the component of the current item in a parent context. This method can be used to track which item is currently being viewed or
-	 * edited in a parent component.
-	 * @param item the current item */
-	public void setCurrentItem(final EntityClass item) {
-		LOGGER.debug("Current item set: {}", item != null ? item.getId() : "null");
-		// This method is available for future enhancements to highlight or track the current item
-	}
+	/** Gets the grid component for external configuration (e.g., drag and drop).
+	 * @return the CGrid instance */
+	public CGrid<EntityClass> getGrid() { return gridItems; }
 }
