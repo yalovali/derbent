@@ -261,6 +261,43 @@ public final class CImageUtils {
 		}
 	}
 
+	/** Generates an SVG avatar with initials as a string.
+	 * This creates a lightweight SVG representation that can be used directly
+	 * with Vaadin's SvgIcon component.
+	 * 
+	 * @param initials The initials to display (e.g., "JD")
+	 * @param size The size of the avatar in pixels
+	 * @return SVG string representation of the avatar
+	 * @throws IllegalArgumentException if initials is blank or size is not positive */
+	public static String generateAvatarSvg(final String initials, final int size) {
+		Check.notBlank(initials, "Initials cannot be null or blank");
+		Check.checkPositive(size, "Size must be positive");
+		
+		// Generate a consistent background color based on the initials
+		final java.awt.Color backgroundColor = generateColorFromText(initials);
+		final String colorHex = String.format("#%02X%02X%02X", 
+			backgroundColor.getRed(), 
+			backgroundColor.getGreen(), 
+			backgroundColor.getBlue());
+		
+		// Calculate font size based on avatar size (roughly 40% of size for 2 chars)
+		final int fontSize = Math.max(8, (int) (size * 0.4));
+		
+		// Create SVG with circle and text
+		final StringBuilder svg = new StringBuilder();
+		svg.append(String.format("<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">", size, size));
+		svg.append(String.format("<circle cx=\"%d\" cy=\"%d\" r=\"%d\" fill=\"%s\"/>", 
+			size / 2, size / 2, size / 2, colorHex));
+		svg.append(String.format("<text x=\"%d\" y=\"%d\" font-family=\"Arial, sans-serif\" font-size=\"%d\" " +
+			"font-weight=\"bold\" fill=\"white\" text-anchor=\"middle\" dominant-baseline=\"middle\">",
+			size / 2, size / 2, fontSize));
+		svg.append(initials);
+		svg.append("</text></svg>");
+		
+		LOGGER.debug("Generated SVG avatar with initials '{}' (size: {}x{})", initials, size, size);
+		return svg.toString();
+	}
+
 	/** Generates a consistent color based on input text. Uses a simple hash-based algorithm to ensure the same text always produces the same color.
 	 * Colors are selected from a predefined palette of visually pleasing colors suitable for avatars.
 	 * @param text Input text to generate color from

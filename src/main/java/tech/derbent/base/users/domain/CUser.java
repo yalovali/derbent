@@ -163,36 +163,42 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 	}
 
-	/** Creates an SVG-based icon from image data by directly creating SVG DOM elements. This bypasses Vaadin Icon's limited icon attribute
-	 * support and creates a proper SVG structure with embedded image.
+	/** Creates an icon from image data using proper SVG wrapping with data URLs.
+	 * This method embeds images in SVG using data URLs, which is properly supported
+	 * by Vaadin's Icon component when used correctly.
+	 * 
 	 * @param imageData Binary image data (PNG/JPEG)
-	 * @return Icon component with embedded SVG image */
+	 * @return Icon component with properly rendered image
+	 * @throws IllegalArgumentException if image data is null or empty */
 	private Icon createIconFromImageData(final byte[] imageData) {
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
+		
 		// Encode image data as base64 data URL
 		final String base64Image = Base64.getEncoder().encodeToString(imageData);
 		final String mimeType = detectMimeType(imageData);
 		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
-		// Create Icon component
+		
+		// Create an SVG that contains the image
+		final String svgContent = String.format(
+			"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\">" +
+			"<image href=\"%s\" width=\"%d\" height=\"%d\" " +
+			"style=\"border-radius: 2px;\"/></svg>",
+			ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE, 
+			dataUrl, ICON_SIZE, ICON_SIZE
+		);
+		
+		// Convert SVG content to data URL
+		final String svgDataUrl = "data:image/svg+xml;charset=utf-8," + 
+			java.net.URLEncoder.encode(svgContent, java.nio.charset.StandardCharsets.UTF_8);
+		
+		// Create Icon with SVG data URL
+		// Use the icon attribute to set the SVG content
 		final Icon icon = new Icon();
-		// Create SVG element directly in the DOM
-		final com.vaadin.flow.dom.Element svg = new com.vaadin.flow.dom.Element("svg");
-		svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-		svg.setAttribute("width", String.valueOf(ICON_SIZE));
-		svg.setAttribute("height", String.valueOf(ICON_SIZE));
-		svg.setAttribute("viewBox", String.format("0 0 %d %d", ICON_SIZE, ICON_SIZE));
-		// Create image element inside SVG
-		final com.vaadin.flow.dom.Element image = new com.vaadin.flow.dom.Element("image");
-		image.setAttribute("href", dataUrl);
-		image.setAttribute("width", String.valueOf(ICON_SIZE));
-		image.setAttribute("height", String.valueOf(ICON_SIZE));
-		// Append image to SVG
-		svg.appendChild(image);
-		// Replace Icon's content with our custom SVG
-		icon.getElement().removeAllChildren();
-		icon.getElement().appendChild(svg);
-		// Apply standard icon styling
+		icon.getElement().setAttribute("icon", svgDataUrl);
+		icon.setSize(ICON_SIZE + "px");
+		
+		// Apply standard icon styling through CColorUtils
 		return CColorUtils.styleIcon(icon);
 	}
 
@@ -241,11 +247,23 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
 			return createIconFromImageData(profilePictureThumbnail);
 		}
-		// Generate avatar with initials when no profile picture is available
+		
+		// Generate SVG avatar with initials when no profile picture is available
+		// This is more efficient and produces better quality than PNG avatars
 		try {
 			final String initials = getInitials();
-			final byte[] avatarImage = CImageUtils.generateAvatarWithInitials(initials, ICON_SIZE);
-			return createIconFromImageData(avatarImage);
+			final String svgContent = CImageUtils.generateAvatarSvg(initials, ICON_SIZE);
+			
+			// Convert SVG string to data URL
+			final String svgDataUrl = "data:image/svg+xml;charset=utf-8," + 
+				java.net.URLEncoder.encode(svgContent, java.nio.charset.StandardCharsets.UTF_8);
+			
+			// Create Icon with SVG data URL
+			final Icon icon = new Icon();
+			icon.getElement().setAttribute("icon", svgDataUrl);
+			icon.setSize(ICON_SIZE + "px");
+			
+			return CColorUtils.styleIcon(icon);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
 			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
