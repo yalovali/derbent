@@ -1,6 +1,7 @@
 package tech.derbent.base.login.view;
 
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,6 @@ import tech.derbent.api.config.CDatabaseConfigService.DatabaseType;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
-import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
@@ -181,7 +181,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		databaseTypeSelector.setValue(currentDbType);
 		// Add change listener to show instructions
 		databaseTypeSelector.addValueChangeListener(event -> {
-			if (event.getValue() != null && event.getValue() != currentDbType) {
+			if (event.getValue() != null && !Objects.equals(event.getValue(), currentDbType)) {
 				on_databaseTypeSelector_changed(event.getValue());
 			}
 		});
@@ -256,7 +256,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private void on_databaseTypeSelector_changed(final DatabaseType selectedType) {
 		final DatabaseType currentType = databaseConfigService.detectDatabaseType();
 		
-		if (selectedType == currentType) {
+		if (Objects.equals(selectedType, currentType)) {
 			return;
 		}
 

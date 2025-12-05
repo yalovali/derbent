@@ -1,12 +1,12 @@
 package tech.derbent.api.config;
 
+import java.util.Objects;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.utils.Check;
 
 /**
  * Service to detect and report the active database configuration.
@@ -22,6 +22,9 @@ public class CDatabaseConfigService {
 
 	@Autowired
 	private DataSource dataSource;
+
+	// Cache the detected database type to avoid repeated connection requests
+	private DatabaseType cachedDatabaseType = null;
 
 	/**
 	 * Enumeration of supported database types
@@ -50,28 +53,38 @@ public class CDatabaseConfigService {
 
 	/**
 	 * Detects the current database type based on the datasource URL
+	 * Result is cached after first detection to avoid repeated connection requests.
 	 * 
 	 * @return the detected database type
 	 */
 	public DatabaseType detectDatabaseType() {
+		// Return cached value if already detected
+		if (cachedDatabaseType != null) {
+			return cachedDatabaseType;
+		}
+
 		try {
 			final String url = dataSource.getConnection().getMetaData().getURL();
 			LOGGER.debug("Database URL: {}", url);
 
 			if (url == null || url.trim().isEmpty()) {
-				return DatabaseType.UNKNOWN;
+				cachedDatabaseType = DatabaseType.UNKNOWN;
+				return cachedDatabaseType;
 			}
 
 			if (url.toLowerCase().contains("postgresql")) {
-				return DatabaseType.POSTGRESQL;
+				cachedDatabaseType = DatabaseType.POSTGRESQL;
 			} else if (url.toLowerCase().contains("h2")) {
-				return DatabaseType.H2;
+				cachedDatabaseType = DatabaseType.H2;
+			} else {
+				cachedDatabaseType = DatabaseType.UNKNOWN;
 			}
 
-			return DatabaseType.UNKNOWN;
+			return cachedDatabaseType;
 		} catch (final Exception e) {
 			LOGGER.error("Error detecting database type", e);
-			return DatabaseType.UNKNOWN;
+			cachedDatabaseType = DatabaseType.UNKNOWN;
+			return cachedDatabaseType;
 		}
 	}
 
