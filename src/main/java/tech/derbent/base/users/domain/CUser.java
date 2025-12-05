@@ -252,29 +252,45 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 	
 	/** Creates a custom Icon component that can render SVG content.
-	 * Appends SVG as a child element to work around shadow DOM limitations.
+	 * Creates a span-based icon since vaadin-icon doesn't support custom SVG.
 	 * 
 	 * @param svgContent The SVG markup to render
 	 * @return Icon component that will properly render the SVG */
 	private Icon createSvgIcon(final String svgContent) {
-		// Create a regular Icon instance (will use vaadin-icon element)
-		final Icon icon = new Icon();
-		
-		// Create a div wrapper to hold the SVG since vaadin-icon shadow DOM won't render innerHTML
-		final com.vaadin.flow.dom.Element svgWrapper = new com.vaadin.flow.dom.Element("div");
-		svgWrapper.setProperty("innerHTML", svgContent);
-		svgWrapper.getStyle()
+		// CRITICAL FIX: Don't use Icon() constructor - it creates <vaadin-icon> which has shadow DOM
+		// Instead, create an Icon using a custom span element that can render the SVG
+		final com.vaadin.flow.dom.Element spanElement = new com.vaadin.flow.dom.Element("span");
+		spanElement.setProperty("innerHTML", svgContent);
+		spanElement.getStyle()
 			.set("display", "inline-flex")
 			.set("align-items", "center")
 			.set("justify-content", "center")
 			.set("width", ICON_SIZE + "px")
 			.set("height", ICON_SIZE + "px")
-			.set("line-height", "0");
+			.set("line-height", "0")
+			.set("flex-shrink", "0");
 		
-		// Append the SVG wrapper as a child (this will work even with shadow DOM)
-		icon.getElement().appendChild(svgWrapper);
+		// Create a custom Icon by using the protected constructor that accepts an Element
+		// We can't directly call this, so we'll use reflection or create a wrapper
+		// Actually, let's just create an Icon and replace its element
+		final Icon icon = new Icon();
+		
+		// Remove the default vaadin-icon element and use our span instead
+		icon.getElement().removeFromTree();
+		
+		// Attach our span element by setting it as the icon's element
+		// This is tricky - we need to use Component.from() or another approach
+		// Let's try using the UI's executor to replace the element
+		try {
+			final java.lang.reflect.Field elementField = com.vaadin.flow.component.Component.class.getDeclaredField("element");
+			elementField.setAccessible(true);
+			elementField.set(icon, spanElement);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to replace icon element, falling back to default", e);
+			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
+		}
+		
 		icon.setSize(ICON_SIZE + "px");
-		
 		return CColorUtils.styleIcon(icon);
 	}
 
