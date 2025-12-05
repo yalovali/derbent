@@ -6,9 +6,12 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.interfaces.IDropTarget;
 import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
@@ -24,7 +27,7 @@ import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
 
 /** CComponentListSprintItems - Component for managing CSprintItems in a CSprint. Provides full CRUD functionality for sprint items with ordering and
- * type selection.
+ * type selection. Supports drag and drop from backlog to sprint items.
  * <p>
  * Features inherited from CComponentListEntityBase:
  * <ul>
@@ -33,13 +36,16 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <li>Edit/Delete operations</li>
  * <li>Move up/down for reordering</li>
  * <li>Selection management</li>
+ * <li>Drop target for receiving items from backlog via drag and drop</li>
  * </ul>
  * <p>
  * Implements IContentOwner to receive automatic entity updates from the form builder's binder when a sprint is selected.
  * <p>
- * Implements IEntitySelectionDialogSupport to provide standardized entity selection dialog configuration. */
+ * Implements IEntitySelectionDialogSupport to provide standardized entity selection dialog configuration.
+ * <p>
+ * Implements IDropTarget to receive dropped items from backlog component. */
 public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem>
-		implements IEntitySelectionDialogSupport<CProjectItem<?>> {
+		implements IEntitySelectionDialogSupport<CProjectItem<?>>, IDropTarget<CProjectItem<?>> {
 
 	// Item type constants
 	private static final String ITEM_TYPE_ACTIVITY = "CActivity";
@@ -53,6 +59,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private final CMeetingService meetingService;
 	// Listener for item changes
 	private Consumer<CSprintItem> onItemChangeListener;
+	// Drop target support
+	private Consumer<CProjectItem<?>> dropHandler = null;
 
 	/** Constructor for CComponentListSprintItems.
 	 * @param sprintItemService The service for CSprintItem operations
@@ -316,5 +324,79 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	 * @param listener the listener to be called when an item changes */
 	public void setOnItemChangeListener(final Consumer<CSprintItem> listener) {
 		onItemChangeListener = listener;
+	}
+
+	// IDropTarget implementation
+
+	/** Gets the current drop handler.
+	 * @return the drop handler, or null if not set */
+	@Override
+	public Consumer<CProjectItem<?>> getDropHandler() { return dropHandler; }
+
+	/** Checks if dropping is currently enabled for this component.
+	 * @return true if drops are enabled (handler is set), false otherwise */
+	@Override
+	public boolean isDropEnabled() { return dropHandler != null; }
+
+	/** Sets the handler to be called when an item is dropped into this component. Also configures the grid to accept drops.
+	 * @param handler the consumer to handle dropped items */
+	@Override
+	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
+		dropHandler = handler;
+		if (getGridItems() != null) {
+			if (handler != null) {
+				// Enable drop mode on the grid
+				getGridItems().setDropMode(GridDropMode.BETWEEN);
+				// Add drop listener to handle the drop operation
+				getGridItems().addDropListener(event -> {
+					try {
+						// Get the drop location
+						final GridDropLocation dropLocation = event.getDropLocation();
+						LOGGER.debug("Item dropped on sprint items grid at location: {}", dropLocation);
+						// Note: The actual dropped item is tracked in the drag source component
+						// and passed via the drop handler callback from the source component
+					} catch (final Exception e) {
+						LOGGER.error("Error handling drop on sprint items grid", e);
+						CNotificationService.showException("Error handling drop", e);
+					}
+				});
+				LOGGER.debug("Drop handler set and grid configured for drops");
+			} else {
+				// Disable drop mode
+				getGridItems().setDropMode(null);
+				LOGGER.debug("Drop handler removed");
+			}
+		}
+	}
+
+	/** Handles adding a dropped item to the sprint. This is called by the drop handler.
+	 * @param item the project item to add to the sprint */
+	public void addDroppedItem(final CProjectItem<?> item) {
+		try {
+			Check.notNull(item, "Dropped item cannot be null");
+			LOGGER.debug("Adding dropped item to sprint: {} ({})", item.getId(), item.getClass().getSimpleName());
+			// Determine item type
+			final String itemType = item.getClass().getSimpleName();
+			// Create sprint item
+			final CSprintItem sprintItem = new CSprintItem();
+			sprintItem.setSprint(getMasterEntity());
+			sprintItem.setItemId(item.getId());
+			sprintItem.setItemType(itemType);
+			sprintItem.setItemOrder(getNextOrder());
+			sprintItem.setItem(item);
+			// Save
+			childService.save(sprintItem);
+			// Refresh grid
+			refreshGrid();
+			// Show success notification
+			CNotificationService.showSuccess("Item added to sprint");
+			// Notify listener if set
+			if (onItemChangeListener != null) {
+				onItemChangeListener.accept(sprintItem);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error adding dropped item to sprint", e);
+			CNotificationService.showException("Error adding item to sprint", e);
+		}
 	}
 }
