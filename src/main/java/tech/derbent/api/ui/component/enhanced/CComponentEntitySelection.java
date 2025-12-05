@@ -124,7 +124,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private ComboBox<EntityTypeConfig<?>> comboBoxEntityType;
 	private EntityTypeConfig<?> currentEntityType;
 	private final List<EntityTypeConfig<?>> entityTypes;
-	private CGrid<EntityClass> gridItems;
+	private CGrid<EntityClass> grid;
 	private CComponentGridSearchToolbar gridSearchToolbar;
 	private final ItemsProvider<EntityClass> itemsProvider;
 	private Span labelSelectedCount;
@@ -216,12 +216,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 					filtered.add(item);
 				}
 			}
-			gridItems.setItems(filtered);
+			grid.setItems(filtered);
 			// Restore visual selection state for already selected items
 			if (multiSelect) {
 				for (final EntityClass item : filtered) {
 					if (selectedItems.contains(item)) {
-						gridItems.select(item);
+						grid.select(item);
 					}
 				}
 			}
@@ -257,14 +257,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@SuppressWarnings ("rawtypes")
 	private void configureGridColumns() {
 		// Clear existing columns
-		gridItems.getColumns().forEach(gridItems::removeColumn);
+		grid.getColumns().forEach(grid::removeColumn);
 		if (currentEntityType == null) {
 			return;
 		}
-		gridItems.addIdColumn(item -> item.getId(), "ID", "id");
-		gridItems.addShortTextColumn(this::getEntityName, "Name", "name");
-		gridItems.addLongTextColumn(this::getEntityDescription, "Description", "description");
-		CGrid.styleColumnHeader(gridItems.addComponentColumn(item -> {
+		grid.addIdColumn(item -> item.getId(), "ID", "id");
+		grid.addShortTextColumn(this::getEntityName, "Name", "name");
+		grid.addLongTextColumn(this::getEntityDescription, "Description", "description");
+		CGrid.styleColumnHeader(grid.addComponentColumn(item -> {
 			try {
 				return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
 			} catch (final Exception e) {
@@ -282,20 +282,20 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		// Create CGrid using Object type with auto-columns disabled, then cast.
 		// Type safety is maintained by controlling all items in the grid through itemsProvider.
 		final CGrid rawGrid = new CGrid<>(Object.class);
-		gridItems = rawGrid;
-		gridItems.setSizeFull(); // Grid should expand
-		gridItems.setHeightFull(); // Ensure full height expansion
+		grid = rawGrid;
+		grid.setSizeFull(); // Grid should expand
+		grid.setHeightFull(); // Ensure full height expansion
 		// Configure selection mode
 		if (multiSelect) {
-			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
-			gridItems.asMultiSelect().addValueChangeListener(e -> on_gridItems_multiSelectionChanged(e.getValue()));
+			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
+			grid.asMultiSelect().addValueChangeListener(e -> on_gridItems_multiSelectionChanged(e.getValue()));
 		} else {
-			gridItems.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-			gridItems.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelectionChanged(e.getValue()));
+			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
+			grid.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelectionChanged(e.getValue()));
 		}
 		// Add click listener to toggle selection in multi-select mode
 		if (multiSelect) {
-			gridItems.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
+			grid.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
 	}
 
@@ -392,6 +392,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	/** Gets the grid component for external configuration (e.g., drag and drop).
+	 * @return the CGrid instance */
+	public CGrid<EntityClass> getGrid() { return grid; }
+
 	/** Returns the currently selected items.
 	 * @return Set of selected items */
 	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
@@ -422,9 +426,9 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	protected void on_buttonReset_clicked() {
 		selectedItems.clear();
 		if (multiSelect) {
-			gridItems.deselectAll();
+			grid.deselectAll();
 		} else {
-			gridItems.asSingleSelect().clear();
+			grid.asSingleSelect().clear();
 		}
 		updateSelectionIndicator();
 		LOGGER.debug("Selection reset");
@@ -456,7 +460,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			LOGGER.error("Error loading items for entity type {}", config != null ? config.getDisplayName() : "null", e);
 			CNotificationService.showException("Error loading items", e);
 			allItems = new ArrayList<>();
-			gridItems.setItems(allItems);
+			grid.setItems(allItems);
 		}
 	}
 
@@ -465,10 +469,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		try {
 			if (selectedItems.contains(item)) {
 				selectedItems.remove(item);
-				gridItems.deselect(item);
+				grid.deselect(item);
 			} else {
 				selectedItems.add(item);
-				gridItems.select(item);
+				grid.select(item);
 			}
 			updateSelectionIndicator();
 		} catch (final Exception e) {
@@ -556,9 +560,29 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally. */
+	public void refresh() {
+		try {
+			if (currentEntityType != null) {
+				on_comboBoxEntityType_selectionChanged(currentEntityType);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing component", e);
+			CNotificationService.showException("Error refreshing component", e);
+		}
+	}
+
 	/** Resets the component selection state. */
 	public void reset() {
 		on_buttonReset_clicked();
+	}
+
+	public void setDynamicHeight(final String maxHeight) {
+		getContent().setSizeUndefined();
+		getContent().setWidthFull();
+		getContent().setMinHeight("60px");
+		getContent().setMaxHeight(maxHeight);
+		grid.setDynamicHeight();
 	}
 
 	/** Sets the entity type for the component.
@@ -585,8 +609,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		mainLayout.add(layoutSelectionIndicator);
 		// Grid
 		create_gridItems();
-		mainLayout.add(gridItems);
-		mainLayout.setFlexGrow(1, gridItems); // Make grid expand
+		mainLayout.add(grid);
+		mainLayout.setFlexGrow(1, grid); // Make grid expand
 	}
 
 	private void updateSelectionIndicator() {
@@ -627,20 +651,4 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 		gridSearchToolbar.setStatusOptions(statuses);
 	}
-
-	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally. */
-	public void refresh() {
-		try {
-			if (currentEntityType != null) {
-				on_comboBoxEntityType_selectionChanged(currentEntityType);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing component", e);
-			CNotificationService.showException("Error refreshing component", e);
-		}
-	}
-
-	/** Gets the grid component for external configuration (e.g., drag and drop).
-	 * @return the CGrid instance */
-	public CGrid<EntityClass> getGrid() { return gridItems; }
 }

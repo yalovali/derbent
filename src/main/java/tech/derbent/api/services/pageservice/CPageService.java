@@ -265,8 +265,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			final var componentName = parts[1];
 			final var action = parts[2];
 			final var component = components.get(componentName);
-			Check.notNull(component, "Component for field {" + componentName + "} not found in FormBuilder. of page service {"
-					+ page.getClass().getSimpleName() + "} for method {" + methodName + "}");
+			if (component == null) {
+				// skip if the component is not found
+				// code remains, fields are dynamic
+				LOGGER.warn("Component '{}' not found in FormBuilder for binding method '{}'", componentName, methodName);
+				continue;
+			}
 			bindComponent(method, component, methodName, componentName, action);
 		}
 	}

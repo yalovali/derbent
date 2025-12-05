@@ -497,7 +497,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.
 	 * This must be called before the component is initialized.
 	 * @param maxHeight Optional maximum height (e.g., "400px", "50vh"), or null for no maximum */
-	protected void setDynamicHeight(final String maxHeight) {
+	public void setDynamicHeight(final String maxHeight) {
 		useDynamicHeight = true;
 		setSizeUndefined();
 		setWidthFull();

@@ -2,6 +2,7 @@ package tech.derbent.app.sprints.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
@@ -15,9 +16,10 @@ import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
-import tech.derbent.api.ui.component.enhanced.CComponentListEntityBase;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
+import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
@@ -48,52 +50,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	public Component createSpritActivitiesComponent() {
-		try {
-			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
-			// Set up drop handler to receive items from backlog
-			componentItemsSelection.setDropHandler(item -> componentItemsSelection.addDroppedItem(item));
-			// Wire up drag and drop between backlog and sprint items if backlog exists
-			setupDragAndDrop();
-			return componentItemsSelection;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to create sprint activities component.", e);
-			// Fallback to simple div with error message
-			final Div errorDiv = new Div();
-			errorDiv.setText("Error loading sprint activities component: " + e.getMessage());
-			errorDiv.addClassName("error-message");
-			return errorDiv;
-		}
-	}
-
-	public Component createSpritBacklogComponent() {
-		try {
-			// Initialize backlog items selection component - shows items NOT in the sprint
-			if (componentBacklogItems == null) {
-				componentBacklogItems = createBacklogItemsComponent();
-			}
-			// Wire up drag and drop between backlog and sprint items
-			setupDragAndDrop();
-			return componentBacklogItems;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to create sprint backlog component.", e);
-			// Fallback to simple div with error message
-			final Div errorDiv = new Div();
-			errorDiv.setText("Error loading sprint backlog component: " + e.getMessage());
-			errorDiv.addClassName("error-message");
-			return errorDiv;
-		}
-	}
-
 	/** Creates and configures the backlog items component for displaying items not in the sprint.
 	 * @return configured CComponentEntitySelection component */
+	@SuppressWarnings ("unchecked")
 	private CComponentEntitySelection<CProjectItem<?>> createBacklogItemsComponent() {
 		// Create entity type configurations for activities and meetings
 		final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
-		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>("CActivity", tech.derbent.app.activities.domain.CActivity.class,
-				activityService));
-		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>("CMeeting", tech.derbent.app.meetings.domain.CMeeting.class,
-				meetingService));
+		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>("CActivity", CActivity.class, activityService));
+		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>("CMeeting", CMeeting.class, meetingService));
 		// Items provider - loads all project items
 		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
 			try {
@@ -137,12 +101,51 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 		};
 		// Selection change handler - just logs for now, drag & drop will handle actual addition
-		final java.util.function.Consumer<java.util.Set<CProjectItem<?>>> onSelectionChanged = selectedItems -> {
+		final Consumer<java.util.Set<CProjectItem<?>>> onSelectionChanged = selectedItems -> {
 			LOGGER.debug("Backlog selection changed: {} items selected", selectedItems.size());
 		};
 		// Create component with HIDE_ALREADY_SELECTED mode so sprint items are not shown in backlog
-		return new CComponentEntitySelection<>(entityTypes, itemsProvider, onSelectionChanged, true, alreadySelectedProvider,
-				CComponentEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+		CComponentEntitySelection<?> componentEntitySelection = new CComponentEntitySelection<>(entityTypes, itemsProvider, onSelectionChanged, true,
+				alreadySelectedProvider, CComponentEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+		componentEntitySelection.setDynamicHeight("600px");
+		return (CComponentEntitySelection<CProjectItem<?>>) componentEntitySelection;
+	}
+
+	public Component createSpritActivitiesComponent() {
+		try {
+			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
+			// Set up drop handler to receive items from backlog
+			componentItemsSelection.setDropHandler(item -> componentItemsSelection.addDroppedItem(item));
+			// Wire up drag and drop between backlog and sprint items if backlog exists
+			setupDragAndDrop();
+			return componentItemsSelection;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create sprint activities component.", e);
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading sprint activities component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
+	}
+
+	public Component createSpritBacklogComponent() {
+		try {
+			// Initialize backlog items selection component - shows items NOT in the sprint
+			if (componentBacklogItems == null) {
+				componentBacklogItems = createBacklogItemsComponent();
+			}
+			// Wire up drag and drop between backlog and sprint items
+			setupDragAndDrop();
+			return componentBacklogItems;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create sprint backlog component.", e);
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading sprint backlog component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
 	}
 
 	/** Creates a widget component for displaying the given sprint entity.
@@ -196,8 +199,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 					final List<CProjectItem<?>> draggedItems = event.getDraggedItems();
 					if ((draggedItems != null) && !draggedItems.isEmpty()) {
 						draggedItemHolder[0] = draggedItems.get(0);
-						LOGGER.debug("Drag started for item: {} ({})", draggedItemHolder[0].getId(),
-								draggedItemHolder[0].getClass().getSimpleName());
+						LOGGER.debug("Drag started for item: {} ({})", draggedItemHolder[0].getId(), draggedItemHolder[0].getClass().getSimpleName());
 					}
 				});
 				// Add drag end listener to handle when drag completes
@@ -216,8 +218,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				LOGGER.debug("Drag and drop configured between backlog and sprint items");
 			}
 		} else {
-			LOGGER.debug("Cannot setup drag and drop - components not yet initialized (backlog: {}, items: {})",
-					componentBacklogItems != null, componentItemsSelection != null);
+			LOGGER.debug("Cannot setup drag and drop - components not yet initialized (backlog: {}, items: {})", componentBacklogItems != null,
+					componentItemsSelection != null);
 		}
 	}
 }

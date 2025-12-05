@@ -53,14 +53,12 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	// Flag to control whether grid is shown in widget (managed by parent)
-	private boolean isInWidgetMode = false;
+	// Drop target support
+	private Consumer<CProjectItem<?>> dropHandler = null;
 	// Services for loading items
 	private final CMeetingService meetingService;
 	// Listener for item changes
 	private Consumer<CSprintItem> onItemChangeListener;
-	// Drop target support
-	private Consumer<CProjectItem<?>> dropHandler = null;
 
 	/** Constructor for CComponentListSprintItems.
 	 * @param sprintItemService The service for CSprintItem operations
@@ -77,11 +75,35 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		LOGGER.debug("CComponentListSprintItems created");
 	}
 
-	/** Configure this component for use in widget mode. In widget mode, the grid uses dynamic height to expand to content.
-	 * @param maxHeight The maximum height for the grid (e.g., "400px", "50vh") */
-	public void configureForWidgetMode(final String maxHeight) {
-		isInWidgetMode = true;
-		setDynamicHeight(maxHeight);
+	/** Handles adding a dropped item to the sprint. This is called by the drop handler.
+	 * @param item the project item to add to the sprint */
+	public void addDroppedItem(final CProjectItem<?> item) {
+		try {
+			Check.notNull(item, "Dropped item cannot be null");
+			LOGGER.debug("Adding dropped item to sprint: {} ({})", item.getId(), item.getClass().getSimpleName());
+			// Determine item type
+			final String itemType = item.getClass().getSimpleName();
+			// Create sprint item
+			final CSprintItem sprintItem = new CSprintItem();
+			sprintItem.setSprint(getMasterEntity());
+			sprintItem.setItemId(item.getId());
+			sprintItem.setItemType(itemType);
+			sprintItem.setItemOrder(getNextOrder());
+			sprintItem.setItem(item);
+			// Save
+			childService.save(sprintItem);
+			// Refresh grid
+			refreshGrid();
+			// Show success notification
+			CNotificationService.showSuccess("Item added to sprint");
+			// Notify listener if set
+			if (onItemChangeListener != null) {
+				onItemChangeListener.accept(sprintItem);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error adding dropped item to sprint", e);
+			CNotificationService.showException("Error adding item to sprint", e);
+		}
 	}
 
 	@Override
@@ -175,6 +197,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public String getDialogTitle() { return "Select Items to Add to Sprint"; }
 
+	/** Gets the current drop handler.
+	 * @return the drop handler, or null if not set */
+	@Override
+	public Consumer<CProjectItem<?>> getDropHandler() { return dropHandler; }
+
 	@Override
 	@SuppressWarnings ("unchecked")
 	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {
@@ -247,6 +274,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		};
 	}
 
+	/** Checks if dropping is currently enabled for this component.
+	 * @return true if drops are enabled (handler is set), false otherwise */
+	@Override
+	public boolean isDropEnabled() { return dropHandler != null; }
+
 	@Override
 	protected List<CSprintItem> loadItems(final CSprint master) {
 		Check.notNull(master, "Master sprint cannot be null when loading items");
@@ -301,6 +333,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			CNotificationService.showException("Error deleting item", e);
 		}
 	}
+	// IDropTarget implementation
 
 	@Override
 	protected void on_gridItems_doubleClicked(final CSprintItem item) {
@@ -319,24 +352,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		CNotificationService
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
 	}
-
-	/** Sets a listener to be notified when sprint items are added or removed.
-	 * @param listener the listener to be called when an item changes */
-	public void setOnItemChangeListener(final Consumer<CSprintItem> listener) {
-		onItemChangeListener = listener;
-	}
-
-	// IDropTarget implementation
-
-	/** Gets the current drop handler.
-	 * @return the drop handler, or null if not set */
-	@Override
-	public Consumer<CProjectItem<?>> getDropHandler() { return dropHandler; }
-
-	/** Checks if dropping is currently enabled for this component.
-	 * @return true if drops are enabled (handler is set), false otherwise */
-	@Override
-	public boolean isDropEnabled() { return dropHandler != null; }
 
 	/** Sets the handler to be called when an item is dropped into this component. Also configures the grid to accept drops.
 	 * @param handler the consumer to handle dropped items */
@@ -369,34 +384,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		}
 	}
 
-	/** Handles adding a dropped item to the sprint. This is called by the drop handler.
-	 * @param item the project item to add to the sprint */
-	public void addDroppedItem(final CProjectItem<?> item) {
-		try {
-			Check.notNull(item, "Dropped item cannot be null");
-			LOGGER.debug("Adding dropped item to sprint: {} ({})", item.getId(), item.getClass().getSimpleName());
-			// Determine item type
-			final String itemType = item.getClass().getSimpleName();
-			// Create sprint item
-			final CSprintItem sprintItem = new CSprintItem();
-			sprintItem.setSprint(getMasterEntity());
-			sprintItem.setItemId(item.getId());
-			sprintItem.setItemType(itemType);
-			sprintItem.setItemOrder(getNextOrder());
-			sprintItem.setItem(item);
-			// Save
-			childService.save(sprintItem);
-			// Refresh grid
-			refreshGrid();
-			// Show success notification
-			CNotificationService.showSuccess("Item added to sprint");
-			// Notify listener if set
-			if (onItemChangeListener != null) {
-				onItemChangeListener.accept(sprintItem);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error adding dropped item to sprint", e);
-			CNotificationService.showException("Error adding item to sprint", e);
-		}
+	/** Sets a listener to be notified when sprint items are added or removed.
+	 * @param listener the listener to be called when an item changes */
+	public void setOnItemChangeListener(final Consumer<CSprintItem> listener) {
+		onItemChangeListener = listener;
 	}
 }

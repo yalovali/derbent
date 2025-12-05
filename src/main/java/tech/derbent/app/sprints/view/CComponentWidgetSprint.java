@@ -119,7 +119,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			// Create the component
 			componentSprintItems = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
 			// Configure for widget mode with dynamic height (max 400px)
-			componentSprintItems.configureForWidgetMode("400px");
+			componentSprintItems.setDynamicHeight("400px");
 			// Set the current entity (sprint)
 			componentSprintItems.setCurrentEntity(getEntity());
 			// Register listener for item changes

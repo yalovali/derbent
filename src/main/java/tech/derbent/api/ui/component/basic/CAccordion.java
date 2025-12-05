@@ -20,10 +20,8 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 	 * @param title the title of the accordion panel */
 	public CAccordion(final String title) {
 		super();
-		// LOGGER.debug("Creating CAccordion with title: {}", title);
 		accordionTitle = title;
 		addClassName("c-accordion");
-		// getStyle().("min-width", "300px"); setWidthFull(); setMin
 		add(title, baseLayout);
 		baseLayout.setWidthFull();
 		baseLayout.setPadding(false);

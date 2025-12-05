@@ -70,8 +70,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		grid.getStyle().set("border", "1px solid #E0E0E0");
 		grid.setWidthFull();
 		CAuxillaries.setId(grid);
-		// Prevent deselection when clicking on already-selected item
-		// preventDeselection(grid);
 	}
 
 	public static <T> Column<T> styleColumnHeader(final Column<T> column, final String header) {
