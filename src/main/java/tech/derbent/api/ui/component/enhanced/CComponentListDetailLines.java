@@ -40,15 +40,16 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 	}
 
 	@Override
-	protected void configureGrid(final CGrid<CDetailLines> grid) {
+	public void configureGrid(final CGrid<CDetailLines> grid) {
 		Check.notNull(grid, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CDetailLines");
-		CGrid.styleColumnHeader(grid.addColumn(CDetailLines::getId).setWidth("50px"), "Id");
-		CGrid.styleColumnHeader(grid.addColumn(CDetailLines::getItemOrder).setWidth("50px"), "Order");
-		CGrid.styleColumnHeader(grid.addColumn(CDetailLines::getFieldCaption).setAutoWidth(true), "Caption");
-		CGrid.styleColumnHeader(grid.addColumn(CDetailLines::getEntityProperty).setAutoWidth(true), "Field Name");
-		CGrid.styleColumnHeader(grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setWidth("80px"), "Required");
-		CGrid.styleColumnHeader(grid.addColumn(line -> line.getActive() ? "Active" : "Inactive").setWidth("80px"), "Status");
+		// Use CGrid helper methods for consistent column creation
+		grid.addIdColumn(CDetailLines::getId, "ID", "id");
+		grid.addIntegerColumn(CDetailLines::getItemOrder, "Order", "order");
+		grid.addShortTextColumn(CDetailLines::getFieldCaption, "Caption", "caption");
+		grid.addShortTextColumn(CDetailLines::getEntityProperty, "Field Name", "fieldName");
+		grid.addBooleanColumn(CDetailLines::getIsRequired, "Required", "Yes", "No");
+		grid.addBooleanColumn(CDetailLines::getActive, "Status", "Active", "Inactive");
 	}
 
 	@Override

@@ -107,27 +107,27 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	protected void configureGrid(final CGrid<CSprintItem> grid) {
+	public void configureGrid(final CGrid<CSprintItem> grid) {
 		Check.notNull(grid, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CSprintItem");
-		CGrid.styleColumnHeader(grid.addColumn(CSprintItem::getId).setWidth("80px"), "Id");
-		CGrid.styleColumnHeader(grid.addColumn(CSprintItem::getItemOrder).setWidth("80px"), "Order");
-		CGrid.styleColumnHeader(grid.addColumn(CSprintItem::getItemType).setWidth("120px"), "Type");
-		CGrid.styleColumnHeader(grid.addColumn(item -> {
+		// Use CGrid helper methods for consistent column creation
+		grid.addIdColumn(CSprintItem::getId, "ID", "id");
+		grid.addIntegerColumn(CSprintItem::getItemOrder, "Order", "order");
+		grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
+		grid.addShortTextColumn(item -> {
 			if (item.getItem() != null) {
 				return item.getItem().getName();
 			}
 			return "Item " + item.getItemId();
-		}).setAutoWidth(true), "Name");
+		}, "Name", "name");
 		// Use addEntityColumn to display status with color and icon
 		try {
 			grid.addEntityColumn(item -> {
 				return item.getItem().getStatus();
 			}, "Status", "status", CSprintItem.class);
 		} catch (final Exception e) {
-			e.printStackTrace();
+			LOGGER.error("Error adding status column: {}", e.getMessage(), e);
 		}
-		CGrid.styleColumnHeader(grid.addColumn(CSprintItem::getItemType).setWidth("120px"), "Type");
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -51,7 +52,7 @@ import tech.derbent.api.utils.Check;
  * @param <MasterEntity> The master/parent entity type
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
-		extends VerticalLayout implements IContentOwner {
+		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -148,7 +149,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return button;
 	}
 
-	/** Clear the grid. */
+	/** Clear the grid. Implements IGridComponent.clearGrid() */
+	@Override
 	@SuppressWarnings ("unchecked")
 	public void clearGrid() {
 		LOGGER.debug("Clearing grid");
@@ -158,8 +160,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 
 	/** Configure the grid columns and appearance. Subclasses must implement this to define their specific columns.
+	 * Implements IGridComponent.configureGrid()
 	 * @param grid The grid to configure */
-	protected abstract void configureGrid(CGrid<ChildEntity> grid);
+	@Override
+	public abstract void configureGrid(CGrid<ChildEntity> grid);
 
 	protected CButton create_buttonAdd() {
 		final CButton button = new CButton(VaadinIcon.PLUS.create());
@@ -254,8 +258,15 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return (getMasterEntity() != null) && (getMasterEntity().getId() != null) ? getMasterEntity().getId().toString() : null;
 	}
 
-	/** Get the grid component.
+	/** Get the grid component. Implements IGridComponent.getGrid()
 	 * @return The grid */
+	@Override
+	public CGrid<ChildEntity> getGrid() { return grid; }
+
+	/** Get the grid component. Alias for getGrid() for backward compatibility.
+	 * @return The grid
+	 * @deprecated Use {@link #getGrid()} instead for consistency with IGridComponent interface */
+	@Deprecated
 	public CGrid<ChildEntity> getGridItems() { return grid; }
 
 	/** Get the toolbar layout component.

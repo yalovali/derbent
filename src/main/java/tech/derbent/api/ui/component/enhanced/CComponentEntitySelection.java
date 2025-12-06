@@ -21,6 +21,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
+import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -44,7 +45,8 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
  * <li>Support for already-selected items with two modes: hide or show as pre-selected</li>
  * </ul>
  * @param <EntityClass> The entity type being selected */
-public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout> {
+public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
+		implements IGridComponent<EntityClass> {
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
@@ -254,13 +256,18 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	/** Configure grid columns following standard CGrid pattern. Implements IGridComponent.configureGrid()
+	 * @param grid The grid to configure (must not be null) */
+	@Override
 	@SuppressWarnings ("rawtypes")
-	private void configureGridColumns() {
+	public void configureGrid(final CGrid<EntityClass> grid) {
+		Check.notNull(grid, "Grid cannot be null");
 		// Clear existing columns
 		grid.getColumns().forEach(grid::removeColumn);
 		if (currentEntityType == null) {
 			return;
 		}
+		LOGGER.debug("Configuring grid columns for entity type: {}", currentEntityType.getDisplayName());
 		grid.addIdColumn(item -> item.getId(), "ID", "id");
 		grid.addShortTextColumn(this::getEntityName, "Name", "name");
 		grid.addLongTextColumn(this::getEntityDescription, "Description", "description");
@@ -274,17 +281,20 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), "Status");
 	}
 
-	/** Factory method for grid. */
+	/** Factory method for grid following standard pattern. */
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
 	protected void create_gridItems() {
+		Check.isTrue(grid == null, "Grid should only be created once");
 		// Create CGrid using Object type with auto-columns disabled, then cast.
 		// Type safety is maintained by controlling all items in the grid through itemsProvider.
 		final CGrid rawGrid = new CGrid<>(Object.class);
 		grid = rawGrid;
+		// Configure size
 		grid.setSizeFull(); // Grid should expand
 		grid.setHeightFull(); // Ensure full height expansion
+		grid.setMinHeight("120px");
 		// Configure selection mode
 		if (multiSelect) {
 			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
@@ -297,6 +307,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (multiSelect) {
 			grid.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
+		// Note: configureGrid() is called later when entity type is selected
+		LOGGER.debug("Grid created for entity selection component");
 	}
 
 	/** Factory method for search toolbar layout using CComponentGridSearchToolbar. */
@@ -445,7 +457,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			// Cache reflection methods for the entity type
 			cacheReflectionMethods(config.getEntityClass());
 			// Configure grid columns for the new entity type
-			configureGridColumns();
+			configureGrid(grid);
 			// Load items
 			allItems = itemsProvider.getItems(config);
 			Check.notNull(allItems, "Items provider returned null for entity type: " + config.getDisplayName());
@@ -560,8 +572,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally. */
-	public void refresh() {
+	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally.
+	 * Implements IGridComponent.refreshGrid() */
+	@Override
+	public void refreshGrid() {
 		try {
 			if (currentEntityType != null) {
 				on_comboBoxEntityType_selectionChanged(currentEntityType);
@@ -569,6 +583,28 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing component", e);
 			CNotificationService.showException("Error refreshing component", e);
+		}
+	}
+
+	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally.
+	 * @deprecated Use {@link #refreshGrid()} instead for consistency with IGridComponent interface */
+	@Deprecated
+	public void refresh() {
+		refreshGrid();
+	}
+
+	/** Clears all items from the grid. Implements IGridComponent.clearGrid() */
+	@Override
+	public void clearGrid() {
+		try {
+			LOGGER.debug("Clearing grid");
+			allItems = new ArrayList<>();
+			selectedItems.clear();
+			grid.setItems(allItems);
+			updateSelectionIndicator();
+		} catch (final Exception e) {
+			LOGGER.error("Error clearing grid", e);
+			CNotificationService.showException("Error clearing grid", e);
 		}
 	}
 
