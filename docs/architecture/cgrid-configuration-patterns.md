@@ -4,18 +4,39 @@
 
 This document defines the standardized patterns for configuring CGrid instances across the Derbent application. Consistent grid configuration ensures maintainability, readability, and uniform user experience.
 
+## IGridComponent Interface
+
+All grid-based components should implement the `IGridComponent<T>` interface to ensure consistent behavior:
+
+```java
+public interface IGridComponent<T> {
+    CGrid<T> getGrid();
+    void refreshGrid();
+    void clearGrid();
+    void configureGrid(CGrid<T> grid);
+}
+```
+
+**Benefits:**
+- Standardized API across all grid components
+- Easier to maintain and extend
+- Type-safe grid operations
+- Consistent method naming
+
 ## Standard Pattern
 
 ### 1. Grid Configuration Method
 
-All components that use CGrid must implement a `configureGrid()` method with the following signature:
+All components that use CGrid must implement the `configureGrid()` method from the `IGridComponent` interface:
 
 ```java
 /**
  * Configures grid columns and appearance.
+ * Implements IGridComponent.configureGrid()
  * @param grid The grid to configure (must not be null)
  */
-protected void configureGrid(final CGrid<EntityType> grid) {
+@Override
+public void configureGrid(final CGrid<EntityType> grid) {
     Check.notNull(grid, "Grid cannot be null");
     LOGGER.debug("Configuring grid columns for {}", entityClass.getSimpleName());
     
@@ -25,6 +46,8 @@ protected void configureGrid(final CGrid<EntityType> grid) {
 
 **Key Points:**
 - Method name must be `configureGrid`
+- Must be `public` (interface requirement)
+- Must have `@Override` annotation
 - Must validate the grid parameter with `Check.notNull()`
 - Should log debug information about configuration
 - Use `final` modifier for parameters
@@ -149,110 +172,112 @@ protected void createGrid() {
 
 ## Examples
 
-### Example 1: Simple Entity List
+### Example 1: Simple Entity List (CComponentListSprintItems)
 
 ```java
-@Override
-protected void configureGrid(final CGrid<CSprintItem> grid) {
-    Check.notNull(grid, "Grid cannot be null");
-    LOGGER.debug("Configuring grid columns for CSprintItem");
+public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem>
+        implements IEntitySelectionDialogSupport<CProjectItem<?>>, IDropTarget<CProjectItem<?>> {
     
-    // Use CGrid helper methods for consistent column creation
-    grid.addIdColumn(CSprintItem::getId, "ID", "id");
-    grid.addIntegerColumn(CSprintItem::getItemOrder, "Order", "order");
-    grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
-    grid.addShortTextColumn(item -> {
-        if (item.getItem() != null) {
-            return item.getItem().getName();
+    @Override
+    public void configureGrid(final CGrid<CSprintItem> grid) {
+        Check.notNull(grid, "Grid cannot be null");
+        LOGGER.debug("Configuring grid columns for CSprintItem");
+        
+        // Use CGrid helper methods for consistent column creation
+        grid.addIdColumn(CSprintItem::getId, "ID", "id");
+        grid.addIntegerColumn(CSprintItem::getItemOrder, "Order", "order");
+        grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
+        grid.addShortTextColumn(item -> {
+            if (item.getItem() != null) {
+                return item.getItem().getName();
+            }
+            return "Item " + item.getItemId();
+        }, "Name", "name");
+        
+        // Use addEntityColumn for status with color and icon
+        try {
+            grid.addEntityColumn(
+                item -> item.getItem().getStatus(),
+                "Status",
+                "status",
+                CSprintItem.class
+            );
+        } catch (final Exception e) {
+            LOGGER.error("Error adding status column: {}", e.getMessage(), e);
         }
-        return "Item " + item.getItemId();
-    }, "Name", "name");
-    
-    // Use addEntityColumn for status with color and icon
-    try {
-        grid.addEntityColumn(
-            item -> item.getItem().getStatus(),
-            "Status",
-            "status",
-            CSprintItem.class
-        );
-    } catch (final Exception e) {
-        LOGGER.error("Error adding status column: {}", e.getMessage(), e);
     }
 }
 ```
 
-### Example 2: Entity Selection Grid
+### Example 2: Entity Selection Grid (CComponentEntitySelection)
 
 ```java
-protected void configureGrid(final CGrid<EntityClass> grid) {
-    Check.notNull(grid, "Grid cannot be null");
+public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
+        implements IGridComponent<EntityClass> {
     
-    // Clear existing columns
-    grid.getColumns().forEach(grid::removeColumn);
-    
-    if (currentEntityType == null) {
-        return;
-    }
-    
-    LOGGER.debug("Configuring grid columns for entity type: {}", 
-                 currentEntityType.getDisplayName());
-    
-    grid.addIdColumn(item -> item.getId(), "ID", "id");
-    grid.addShortTextColumn(this::getEntityName, "Name", "name");
-    grid.addLongTextColumn(this::getEntityDescription, "Description", "description");
-    
-    CGrid.styleColumnHeader(grid.addComponentColumn(item -> {
-        try {
-            return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
-        } catch (final Exception e) {
+    @Override
+    public void configureGrid(final CGrid<EntityClass> grid) {
+        Check.notNull(grid, "Grid cannot be null");
+        
+        // Clear existing columns
+        grid.getColumns().forEach(grid::removeColumn);
+        
+        if (currentEntityType == null) {
+            return;
+        }
+        
+        LOGGER.debug("Configuring grid columns for entity type: {}", 
+                     currentEntityType.getDisplayName());
+        
+        grid.addIdColumn(item -> item.getId(), "ID", "id");
+        grid.addShortTextColumn(this::getEntityName, "Name", "name");
+        grid.addLongTextColumn(this::getEntityDescription, "Description", "description");
+        
+        CGrid.styleColumnHeader(grid.addComponentColumn(item -> {
+            try {
+                return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
+            } catch (final Exception e) {
             LOGGER.error("Error rendering status: {}", e.getMessage());
             return new CLabelEntity("Error");
         }
-    }).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), 
-    "Status");
+        }).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), 
+        "Status");
+    }
 }
 ```
 
-### Example 3: Selection Grid with Checkmarks
+### Example 3: Using Standard Methods from IGridComponent
 
 ```java
-protected void configureGrid(final Grid<DetailEntity> grid, final String header) {
-    Check.notNull(grid, "Grid cannot be null");
-    Check.notBlank(header, "Header cannot be null or blank");
-    LOGGER.debug("Configuring grid columns with header: {}", header);
-    
-    // Selection indicator column (checkmark for selected items)
-    grid.addComponentColumn(item -> {
-        Component checkmark;
-        if (selectedItems.contains(item)) {
-            checkmark = CColorUtils.createStyledIcon("vaadin:check-square-o", "#7CAF50");
-        } else {
-            checkmark = CColorUtils.createStyledIcon("vaadin:thin-square", "#1CFFa0");
-        }
-        checkmark.getStyle()
-            .set("width", "20px")
-            .set("display", "block")
-            .setMargin("0 auto")
-            .setPadding("0");
-        return checkmark;
-    }).setHeader("").setWidth("30px").setFlexGrow(0);
-    
-    // Item display column
-    final var column = grid.addComponentColumn(item -> {
-        try {
-            return new CEntityLabel((CEntityNamed<?>) item);
-        } catch (final Exception e) {
-            LOGGER.error("Error creating entity label: {}", e.getMessage());
-            return new Span("N/A");
-        }
-    }).setAutoWidth(true).setFlexGrow(1);
-    
-    CGrid.styleColumnHeader(column, header);
-}
+// Accessing the grid
+CGrid<EntityType> grid = component.getGrid();
+
+// Refreshing data
+component.refreshGrid();
+
+// Clearing the grid
+component.clearGrid();
+
+// All components implementing IGridComponent have consistent behavior
 ```
 
 ## Common Mistakes to Avoid
+
+### ❌ DON'T: Use protected instead of public for configureGrid
+
+```java
+// INCORRECT - Violates IGridComponent interface
+@Override
+protected void configureGrid(CGrid<Entity> grid) { ... }
+```
+
+### ✅ DO: Use public as required by interface
+
+```java
+// CORRECT
+@Override
+public void configureGrid(final CGrid<Entity> grid) { ... }
+```
 
 ### ❌ DON'T: Use raw addColumn with manual styling
 
@@ -325,15 +350,17 @@ protected void configureGrid(final CGrid<Entity> grid) {
 
 ## Component Hierarchy
 
-Components following this pattern:
+Components implementing IGridComponent interface:
 
-- **CComponentListEntityBase** - Abstract base for entity list components
+- **CComponentListEntityBase** - Abstract base for entity list components (implements IGridComponent)
   - CComponentListSprintItems
   - CComponentListDetailLines
-  - CComponentListSelection
   
-- **CComponentEntitySelection** - Entity selection component
+- **CComponentEntitySelection** - Entity selection component (implements IGridComponent)
+
+Other grid-based components (may be updated to implement IGridComponent in the future):
 - **CComponentFieldSelection** - Field selection component
+- **CComponentListSelection** - List selection component
 
 ## Related Documentation
 
@@ -342,6 +369,14 @@ Components following this pattern:
 - [Entity Selection Component Design](entity-selection-component-design.md) - Entity selection patterns
 
 ## Version History
+
+- **2025-12-06**: Added IGridComponent interface
+  - Created IGridComponent interface for standard grid operations
+  - Updated CComponentListEntityBase to implement IGridComponent
+  - Updated CComponentEntitySelection to implement IGridComponent
+  - Changed configureGrid() visibility to public (interface requirement)
+  - Added getGrid(), refreshGrid(), clearGrid() standard methods
+  - Deprecated old method names (getGridItems, refresh) for consistency
 
 - **2025-12-05**: Initial standardization
   - Renamed configureGridColumns() to configureGrid()

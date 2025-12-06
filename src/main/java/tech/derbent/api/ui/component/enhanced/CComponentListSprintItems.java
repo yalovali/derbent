@@ -107,7 +107,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	protected void configureGrid(final CGrid<CSprintItem> grid) {
+	public void configureGrid(final CGrid<CSprintItem> grid) {
 		Check.notNull(grid, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CSprintItem");
 		// Use CGrid helper methods for consistent column creation

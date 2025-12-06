@@ -40,7 +40,7 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 	}
 
 	@Override
-	protected void configureGrid(final CGrid<CDetailLines> grid) {
+	public void configureGrid(final CGrid<CDetailLines> grid) {
 		Check.notNull(grid, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CDetailLines");
 		// Use CGrid helper methods for consistent column creation
