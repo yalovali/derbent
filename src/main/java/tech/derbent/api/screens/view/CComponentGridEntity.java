@@ -588,7 +588,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				final CEntityDB<?> entityDB = (CEntityDB<?>) entity;
 				// Search in all common fields: id, name, description
 				// This will automatically delegate through the hierarchy
-				return entityDB.matchesFilter(searchText, List.of("id", "name", "description"));
+				// Use mutable list for matchesFilter (it calls remove() internally)
+				return entityDB.matchesFilter(searchText, new ArrayList<>(List.of("id", "name", "description")));
 			}
 			// Fallback for non-CEntityDB entities (shouldn't happen in normal usage)
 			LOGGER.warn("Entity {} is not a CEntityDB instance, using fallback search", entity.getClass().getSimpleName());

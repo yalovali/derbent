@@ -190,27 +190,27 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			for (final EntityClass item : allItems) {
 				Check.notNull(item, "Item in allItems cannot be null");
 				boolean matches = true;
-				// ID filter - search in "id" field
+				// ID filter - search in "id" field (use mutable list for matchesFilter)
 				if (matches && (idValue != null) && !idValue.isBlank()) {
-					if (!item.matchesFilter(idValue, List.of("id"))) {
+					if (!item.matchesFilter(idValue, new ArrayList<>(List.of("id")))) {
 						matches = false;
 					}
 				}
-				// Name filter - search in "name" field
+				// Name filter - search in "name" field (use mutable list for matchesFilter)
 				if (matches && (nameValue != null) && !nameValue.isBlank()) {
-					if (!item.matchesFilter(nameValue, List.of("name"))) {
+					if (!item.matchesFilter(nameValue, new ArrayList<>(List.of("name")))) {
 						matches = false;
 					}
 				}
-				// Description filter - search in "description" field
+				// Description filter - search in "description" field (use mutable list for matchesFilter)
 				if (matches && (descValue != null) && !descValue.isBlank()) {
-					if (!item.matchesFilter(descValue, List.of("description"))) {
+					if (!item.matchesFilter(descValue, new ArrayList<>(List.of("description")))) {
 						matches = false;
 					}
 				}
-				// Status filter - search in "status" field
+				// Status filter - search in "status" field (use mutable list for matchesFilter)
 				if (matches && (statusValue != null) && !statusValue.isBlank()) {
-					if (!item.matchesFilter(statusValue, List.of("status"))) {
+					if (!item.matchesFilter(statusValue, new ArrayList<>(List.of("status")))) {
 						matches = false;
 					}
 				}
@@ -270,7 +270,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		LOGGER.debug("Configuring grid columns for entity type: {}", currentEntityType.getDisplayName());
 		grid.addIdColumn(item -> item.getId(), "ID", "id");
 		grid.addShortTextColumn(this::getEntityName, "Name", "name");
-		grid.addLongTextColumn(this::getEntityDescription, "Description", "description");
+		// Use expanding column for description to fill remaining width
+		grid.addExpandingLongTextColumn(this::getEntityDescription, "Description", "description");
 		CGrid.styleColumnHeader(grid.addComponentColumn(item -> {
 			try {
 				return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
