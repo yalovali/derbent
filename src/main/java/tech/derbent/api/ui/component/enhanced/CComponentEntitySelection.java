@@ -423,7 +423,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public CGrid<EntityClass> getGrid() { return grid; }
 
 	/** Returns the currently selected items.
-	 * @return Set of selected items */
+	 * <p>
+	 * Note: This method is functionally equivalent to {@link #getValue()} from the HasValue interface.
+	 * Both methods return the same set of selected items. Use getValue() when working with Vaadin binders,
+	 * or getSelectedItems() for direct access in application code.
+	 * @return Set of selected items (never null) */
 	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
 
 	/** Returns whether the component is configured for multi-select.
@@ -649,9 +653,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Resets the component selection state. */
+	/** Resets the component selection state.
+	 * <p>
+	 * Note: This method is functionally equivalent to {@link #clear()} from the HasValue interface.
+	 * Prefer using clear() for consistency with standard Vaadin components.
+	 * @deprecated Use {@link #clear()} instead */
+	@Deprecated
 	public void reset() {
-		on_buttonReset_clicked();
+		clear();
 	}
 
 	/** Sets the drag owner to be notified when drag operations start.
