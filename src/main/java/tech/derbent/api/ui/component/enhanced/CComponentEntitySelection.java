@@ -45,8 +45,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
  * <li>Support for already-selected items with two modes: hide or show as pre-selected</li>
  * </ul>
  * @param <EntityClass> The entity type being selected */
-public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
-		implements IGridComponent<EntityClass> {
+public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout> implements IGridComponent<EntityClass> {
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
@@ -256,6 +255,21 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	/** Clears all items from the grid. Implements IGridComponent.clearGrid() */
+	@Override
+	public void clearGrid() {
+		try {
+			LOGGER.debug("Clearing grid");
+			allItems = new ArrayList<>();
+			selectedItems.clear();
+			grid.setItems(allItems);
+			updateSelectionIndicator();
+		} catch (final Exception e) {
+			LOGGER.error("Error clearing grid", e);
+			CNotificationService.showException("Error clearing grid", e);
+		}
+	}
+
 	/** Configure grid columns following standard CGrid pattern. Implements IGridComponent.configureGrid()
 	 * @param grid The grid to configure (must not be null) */
 	@Override
@@ -280,6 +294,17 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 			return new CLabelEntity("Error");
 		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), "Status");
+	}
+
+	/** Factory method for entity type selector layout.
+	 * @param layout */
+	protected void create_combobox_typeSelector() {
+		comboBoxEntityType = new ComboBox<>("Entity Type");
+		comboBoxEntityType.setItems(entityTypes);
+		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
+		comboBoxEntityType.setWidth("150px");
+		comboBoxEntityType.setRequired(true);
+		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_selectionChanged(e.getValue()));
 	}
 
 	/** Factory method for grid following standard pattern. */
@@ -318,21 +343,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		// Add filter change listener to trigger grid filtering
 		toolbar.addFilterChangeListener(criteria -> applyFilters());
 		return toolbar;
-	}
-
-	/** Factory method for entity type selector layout. */
-	protected HorizontalLayout create_layoutEntityTypeSelector() {
-		final CHorizontalLayout layout = new CHorizontalLayout();
-		layout.setWidthFull();
-		layout.setAlignItems(FlexComponent.Alignment.CENTER);
-		comboBoxEntityType = new ComboBox<>("Entity Type");
-		comboBoxEntityType.setItems(entityTypes);
-		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
-		comboBoxEntityType.setWidthFull();
-		comboBoxEntityType.setRequired(true);
-		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_selectionChanged(e.getValue()));
-		layout.add(comboBoxEntityType);
-		return layout;
 	}
 
 	/** Factory method for selection indicator layout. */
@@ -574,7 +584,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally.
-	 * Implements IGridComponent.refreshGrid() */
+	 * @deprecated Use {@link #refreshGrid()} instead for consistency with IGridComponent interface */
+	@Deprecated
+	public void refresh() {
+		refreshGrid();
+	}
+
+	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally. Implements
+	 * IGridComponent.refreshGrid() */
 	@Override
 	public void refreshGrid() {
 		try {
@@ -584,28 +601,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing component", e);
 			CNotificationService.showException("Error refreshing component", e);
-		}
-	}
-
-	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally.
-	 * @deprecated Use {@link #refreshGrid()} instead for consistency with IGridComponent interface */
-	@Deprecated
-	public void refresh() {
-		refreshGrid();
-	}
-
-	/** Clears all items from the grid. Implements IGridComponent.clearGrid() */
-	@Override
-	public void clearGrid() {
-		try {
-			LOGGER.debug("Clearing grid");
-			allItems = new ArrayList<>();
-			selectedItems.clear();
-			grid.setItems(allItems);
-			updateSelectionIndicator();
-		} catch (final Exception e) {
-			LOGGER.error("Error clearing grid", e);
-			CNotificationService.showException("Error clearing grid", e);
 		}
 	}
 
@@ -636,10 +631,9 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		mainLayout.setSpacing(false); // Reduce spacing between components
 		mainLayout.setPadding(false);
 		// Entity type selector
-		final HorizontalLayout layoutEntityType = create_layoutEntityTypeSelector();
-		mainLayout.add(layoutEntityType);
-		// Search toolbar using CComponentGridSearchToolbar
+		create_combobox_typeSelector();
 		gridSearchToolbar = create_gridSearchToolbar();
+		gridSearchToolbar.addComponentAsFirst(comboBoxEntityType);
 		mainLayout.add(gridSearchToolbar);
 		// Selection indicator and reset
 		final HorizontalLayout layoutSelectionIndicator = create_layoutSelectionIndicator();
