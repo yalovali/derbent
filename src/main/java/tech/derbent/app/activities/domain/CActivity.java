@@ -156,16 +156,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			hidden = false, maxLength = 2000
 	)
 	private String results;
-	@Column (nullable = true)
-	@AMetaData (displayName = "Sprint Order", required = false, readOnly = false, description = "The order of item in a sprint view", hidden = false)
-	private Long sprintOrder;
-	@Column (nullable = true)
-	@AMetaData (
-			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
-			hidden = false
-	)
-	private LocalDate startDate;
-	// Sprint ordering - used by sprint-aware components for drag-and-drop ordering
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -173,6 +163,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
 	)
 	private Integer sprintOrder;
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
+			hidden = false
+	)
+	private LocalDate startDate;
 
 	/** Default constructor for JPA. */
 	public CActivity() {
@@ -273,6 +269,9 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public CUser getResponsible() { return getAssignedTo(); }
 
 	public String getResults() { return results; }
+
+	@Override
+	public Integer getSprintOrder() { return sprintOrder; }
 
 	@Override
 	public LocalDate getStartDate() { return startDate; }
@@ -478,9 +477,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	@Override
-	public Integer getSprintOrder() { return sprintOrder; }
-
-	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
 	public void setStartDate(final LocalDate startDate) {
@@ -499,13 +495,5 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			}
 		}
 		updateLastModified();
-	}
-
-	public Long getSprintOrder() {
-		return sprintOrder;
-	}
-
-	public void setSprintOrder(Long sprintOrder) {
-		this.sprintOrder = sprintOrder;
 	}
 }

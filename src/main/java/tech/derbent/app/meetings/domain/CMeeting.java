@@ -112,9 +112,13 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			description = "Person responsible for organizing and leading the meeting", hidden = false, dataProviderBean = "CUserService"
 	)
 	private CUser responsible;
-	@Column (nullable = true)
-	@AMetaData (displayName = "Sprint Order", required = false, readOnly = false, description = "The order of item in a sprint view", hidden = false)
-	private Long sprintOrder;
+	@Column (name = "sprint_order", nullable = true)
+	@jakarta.validation.constraints.Min (value = 1, message = "Sprint order must be positive")
+	@AMetaData (
+			displayName = "Sprint Order", required = false, readOnly = false,
+			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
+	)
+	private Integer sprintOrder;
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
@@ -124,14 +128,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Column (name = "startTime", nullable = true)
 	@AMetaData (displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false)
 	private LocalTime startTime;
-	// Sprint ordering - used by sprint-aware components for drag-and-drop ordering
-	@Column (name = "sprint_order", nullable = true)
-	@jakarta.validation.constraints.Min (value = 1, message = "Sprint order must be positive")
-	@AMetaData (
-			displayName = "Sprint Order", required = false, readOnly = false,
-			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
-	)
-	private Integer sprintOrder;
 
 	/** Default constructor for JPA. */
 	public CMeeting() {
@@ -205,7 +201,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Override
 	public CUser getResponsible() { return responsible; }
 
-	public Long getSprintOrder() { return sprintOrder; }
+	@Override
+	public Integer getSprintOrder() { return sprintOrder; }
 
 	@Override
 	public LocalDate getStartDate() { return startDate; }
@@ -306,9 +303,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
-
-	@Override
-	public Integer getSprintOrder() { return sprintOrder; }
 
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }

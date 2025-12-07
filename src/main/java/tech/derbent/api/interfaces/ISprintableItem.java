@@ -39,15 +39,9 @@ public interface ISprintableItem {
 	/** Gets the display name for this sprintable item.
 	 * @return the item name */
 	String getName();
-
-	/** Gets the description for this sprintable item.
-	 * @return the item description, can be null */
-	String getDescription();
-
 	/** Gets the sprint order for this item. Sprint-aware components use this field to determine display order within sprints and backlogs.
 	 * @return the sprint order, or null if not set */
 	Integer getSprintOrder();
-
 	/** Sets the sprint order for this item. This field is used by sprint-aware components for drag-and-drop ordering.
 	 * @param sprintOrder the new sprint order */
 	void setSprintOrder(Integer sprintOrder);
