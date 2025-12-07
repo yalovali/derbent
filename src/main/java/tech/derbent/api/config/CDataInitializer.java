@@ -328,7 +328,7 @@ public class CDataInitializer {
 
 	/** Create sample comments for a decision.
 	 * @param decision the decision to create comments for */
-	private void createSampleCommentsForDecision(final tech.derbent.app.decisions.domain.CDecision decision) {
+	private void createSampleCommentsForDecision(final CDecision decision) {
 		try {
 			// Comments require an activity - create a simple activity related to this decision
 			final CActivityType activityType = activityTypeService.getRandom(decision.getProject());
@@ -365,7 +365,7 @@ public class CDataInitializer {
 	/** Create sample comments for a meeting.
 	 * @param meeting the meeting to create comments for
 	 * @param minimal */
-	private void createSampleCommentsForMeeting(final tech.derbent.app.meetings.domain.CMeeting meeting, final boolean minimal) {
+	private void createSampleCommentsForMeeting(final CMeeting meeting, final boolean minimal) {
 		try {
 			// Comments require an activity - create a simple activity related to this meeting
 			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject());
@@ -385,7 +385,7 @@ public class CDataInitializer {
 			// Create 2 comments for this activity
 			final CCommentPriority priority1 = commentPriorityService.getRandom(meeting.getProject());
 			final CUser commenter1 = userService.getRandom();
-			final CComment comment1 = new tech.derbent.app.comments.domain.CComment("Meeting was productive. Action items are clearly defined.",
+			final CComment comment1 = new CComment("Meeting was productive. Action items are clearly defined.",
 					activity, commenter1, priority1);
 			commentService.save(comment1);
 			if (minimal) {
@@ -393,7 +393,7 @@ public class CDataInitializer {
 			}
 			final CUser commenter2 = userService.getRandom();
 			final CCommentPriority priority2 = commentPriorityService.getRandom(meeting.getProject());
-			final CComment comment2 = new tech.derbent.app.comments.domain.CComment(
+			final CComment comment2 = new CComment(
 					"I'll take ownership of the first two action items. Expected completion in 2 weeks.", activity, commenter2, priority2);
 			commentService.save(comment2);
 			LOGGER.debug("Created sample activity and comments for meeting ID: {}", meeting.getId());

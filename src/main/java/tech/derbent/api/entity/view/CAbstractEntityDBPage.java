@@ -354,7 +354,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@Override
-	public tech.derbent.app.workflow.service.CWorkflowStatusRelationService getWorkflowStatusRelationService() {
+	public CWorkflowStatusRelationService getWorkflowStatusRelationService() {
 		return workflowStatusRelationService;
 	}
 

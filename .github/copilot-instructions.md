@@ -1086,6 +1086,30 @@ public class CActivityService {
 
 **Rule**: Full package paths should only appear in import statements at the top of the file.
 
+#### Cast Expressions MUST Use Short Names (CRITICAL)
+**NEVER use full package paths in cast expressions. ALWAYS use short class names with proper imports:**
+
+```java
+// ✅ CORRECT - Short class name with import
+import tech.derbent.app.meetings.domain.CMeeting;
+
+meetingService.save((CMeeting) item);
+activityService.save((CActivity) item);
+
+// ❌ INCORRECT - Full package path in cast
+meetingService.save((tech.derbent.app.meetings.domain.CMeeting) item);
+activityService.save((tech.derbent.app.activities.domain.CActivity) item);
+```
+
+**This applies to:**
+- Type casts: `(CMeeting) item`
+- Variable declarations: `CMeeting meeting = ...`
+- Method parameters: `public void save(CMeeting meeting)`
+- Return types: `public CMeeting getMeeting()`
+- Generic type parameters: `List<CMeeting> meetings`
+
+**Rule**: Add the import statement at the top of the file and use the short class name everywhere in the code.
+
 #### Spotless Configuration Standards (if configured)
 The project uses Eclipse formatter configuration in `eclipse-formatter.xml`. 
 

@@ -2,6 +2,7 @@ package tech.derbent.api.ui.dialogs;
 
 import java.util.function.Consumer;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.app.projects.service.CProjectService;
 import tech.derbent.base.users.domain.CUserProjectSettings;
@@ -25,8 +26,8 @@ public abstract class CDialogUserProjectRelation<MasterEntity extends CEntityDB<
 			CUserProjectSettingsService userProjectSettingsService, CUserProjectSettings settings, MasterEntity masterEntity,
 			Consumer<CUserProjectSettings> onSave) throws Exception {
 		super(parentContent, settings != null ? settings : new CUserProjectSettings(), masterEntity,
-				(tech.derbent.api.entity.service.CAbstractService<MasterEntity>) masterService,
-				(tech.derbent.api.entity.service.CAbstractService<DetailEntity>) detailService, userProjectSettingsService, onSave, settings == null);
+				(CAbstractService<MasterEntity>) masterService,
+				(CAbstractService<DetailEntity>) detailService, userProjectSettingsService, onSave, settings == null);
 		// Store services for easy access
 		userService = masterService instanceof CUserService ? (CUserService) masterService : (CUserService) detailService;
 		projectService = masterService instanceof CProjectService ? (CProjectService) masterService : (CProjectService) detailService;
