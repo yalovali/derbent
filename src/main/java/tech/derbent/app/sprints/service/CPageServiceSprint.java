@@ -112,6 +112,10 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
+	public void on_backlogItems_change(final Component component, final Object value) {
+		LOGGER.info("function: on_backlog_clicked for Component type");
+	}
+
 	public void on_description_blur(final Component component, final Object value) {
 		LOGGER.info("function: on_description_blur for Component type: {}",
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
@@ -127,7 +131,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
 
-	public void on_sprintItems_clicked(final Component component, final Object value) {
+	public void on_sprintItems_change(final Component component, final Object value) {
 		LOGGER.info("function: on_backlog_clicked for Component type");
 	}
 
