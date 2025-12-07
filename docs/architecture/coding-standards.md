@@ -403,12 +403,131 @@ Check.notNull(entity, "Entity cannot be null");
 Check.notBlank(name, "Name cannot be blank");
 Check.notEmpty(list, "List cannot be empty");
 Check.isTrue(value > 0, "Value must be positive");
+Check.instanceof(obj, CEntityNamed.class, "Object must be an instance of CEntityNamed");
 
 // ❌ INCORRECT - Manual checks
 if (entity == null) {
     throw new IllegalArgumentException("Entity cannot be null");
 }
 ```
+
+#### Avoid Reflection and Caching Patterns
+**IMPORTANT**: Do not use reflection method caching patterns as they make code difficult to read and maintain.
+
+```java
+// ❌ INCORRECT - Reflection with method caching
+private Method cachedGetNameMethod;
+
+private void cacheMethod(Class<?> clazz) {
+    try {
+        cachedGetNameMethod = clazz.getMethod("getName");
+    } catch (NoSuchMethodException e) {
+        cachedGetNameMethod = null;
+    }
+}
+
+private String getName(Object entity) {
+    if (cachedGetNameMethod == null) return "";
+    try {
+        return (String) cachedGetNameMethod.invoke(entity);
+    } catch (Exception e) {
+        return "";
+    }
+}
+
+// ❌ INCORRECT - Hiding developer errors with safe returns
+private String getName(Object entity) {
+    Check.notNull(entity, "Entity cannot be null");
+    if (entity instanceof CEntityNamed) {
+        return ((CEntityNamed<?>) entity).getName();
+    }
+    return "";  // WRONG: Silently returns empty string for wrong type
+}
+
+// ✅ CORRECT - Fail fast on developer errors using Check.instanceOf
+private String getName(Object entity) {
+    Check.notNull(entity, "Entity cannot be null");
+    Check.instanceOf(entity, CEntityNamed.class, "Item must be of type CEntityNamed to access name");
+    return ((CEntityNamed<?>) entity).getName();
+}
+
+// ✅ CORRECT - Use type-safe interfaces with Check.instanceOf
+private Object getStatus(Object entity) {
+    Check.notNull(entity, "Entity cannot be null");
+    Check.instanceOf(entity, IHasStatusAndWorkflow.class, "Item must implement IHasStatusAndWorkflow to access status");
+    return ((IHasStatusAndWorkflow) entity).getStatus();
+}
+```
+
+**Critical Rule: Developer Errors vs Runtime Errors**
+
+**Developer Errors** (MUST throw exceptions):
+- Calling `getName()` on an object that doesn't have a name property
+- Calling `getStatus()` on an object that doesn't implement the status interface
+- Wrong type being passed to a method that expects a specific type
+- **Action**: Use `Check.instanceOf()` to fail fast and catch bugs during development
+
+**Runtime Errors** (CAN handle gracefully):
+- User input validation
+- Network failures
+- File not found
+- Database connection issues
+- **Action**: Use try-catch and return sensible defaults or error messages
+
+```java
+// ❌ WRONG - Hiding developer error
+private String getEntityName(EntityClass item) {
+    if (item instanceof CEntityNamed) {
+        return ((CEntityNamed<?>) item).getName();
+    }
+    return "";  // WRONG: Developer should never call this with wrong type
+}
+
+// ✅ CORRECT - Exposing developer error immediately
+private String getEntityName(EntityClass item) {
+    Check.notNull(item, "Item cannot be null");
+    Check.instanceOf(item, CEntityNamed.class, "Item must be of type CEntityNamed");
+    return ((CEntityNamed<?>) item).getName();
+}
+
+// ✅ CORRECT - Valid runtime check when iterating mixed collections
+private void processItems(List<?> items) {
+    for (Object item : items) {
+        if (item instanceof CEntityNamed) {
+            // Process named entities
+            String name = ((CEntityNamed<?>) item).getName();
+        } else if (item instanceof CProject) {
+            // Process projects differently
+        }
+        // This is OK - we expect mixed types at runtime
+    }
+}
+```
+
+**Why fail fast on developer errors?**
+- Catches bugs immediately during development
+- Makes code intentions explicit
+- Prevents silent failures that are hard to debug
+- Forces correct type usage
+- Improves code quality through compile-time thinking
+
+**When to use Check.instanceOf**:
+```java
+// ALWAYS use when you expect a specific type
+Check.instanceOf(entity, CEntityNamed.class, "Entity must extend CEntityNamed");
+final CEntityNamed<?> named = (CEntityNamed<?>) entity;
+return named.getName();
+
+// DON'T use when legitimately handling mixed types at runtime
+for (Object item : mixedCollection) {
+    if (item instanceof TypeA) {
+        // Handle TypeA
+    } else if (item instanceof TypeB) {
+        // Handle TypeB
+    }
+}
+```
+
 
 #### Bean Validation Annotations
 ```java
