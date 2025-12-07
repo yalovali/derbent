@@ -311,14 +311,15 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param draggedIndex original position
 	 * @param newPosition target position */
 	private void updateOrdersForDownwardMove(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
-		for (int i = 0; i < items.size(); i++) {
+		// Iterate only over the affected range for performance
+		for (int i = draggedIndex; i <= newPosition && i < items.size(); i++) {
 			final CProjectItem<?> item = items.get(i);
 			if (!(item instanceof ISprintableItem)) continue;
 
 			if (i == draggedIndex) {
 				((ISprintableItem) item).setSprintOrder(newPosition + 1);
 				saveItem(item);
-			} else if (i > draggedIndex && i <= newPosition) {
+			} else {
 				((ISprintableItem) item).setSprintOrder(i);
 				saveItem(item);
 			}
@@ -330,14 +331,15 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param draggedIndex original position
 	 * @param newPosition target position */
 	private void updateOrdersForUpwardMove(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
-		for (int i = 0; i < items.size(); i++) {
+		// Iterate only over the affected range for performance
+		for (int i = newPosition; i <= draggedIndex && i < items.size(); i++) {
 			final CProjectItem<?> item = items.get(i);
 			if (!(item instanceof ISprintableItem)) continue;
 
 			if (i == draggedIndex) {
 				((ISprintableItem) item).setSprintOrder(newPosition + 1);
 				saveItem(item);
-			} else if (i >= newPosition && i < draggedIndex) {
+			} else {
 				((ISprintableItem) item).setSprintOrder(i + 2);
 				saveItem(item);
 			}
@@ -351,6 +353,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			activityService.save((CActivity) item);
 		} else if (item instanceof CMeeting) {
 			meetingService.save((CMeeting) item);
+		} else {
+			LOGGER.warn("Unknown sprintable item type: {} (id={}). Item not saved.", item.getClass().getSimpleName(), item.getId());
 		}
 	}
 
