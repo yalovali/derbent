@@ -1,7 +1,9 @@
 package tech.derbent.api.ui.component.enhanced;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,6 +180,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			if (!items.isEmpty()) {
 				draggedItem = items.get(0);
 				LOGGER.debug("Started dragging backlog item for reordering: {}", draggedItem.getId());
+				// Notify drag owner if set
+				notifyDragOwner(new HashSet<>(items));
 			}
 		});
 		// Handle drag end - notify external handler if set
@@ -259,6 +263,10 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			LOGGER.debug("Reordered backlog items: moved from position {} to {}", draggedIndex, newPosition);
 			refreshGrid();
 			CNotificationService.showSuccess("Backlog priority updated");
+			// Notify drop owner about internal drop
+			final Set<CProjectItem<?>> droppedItems = new HashSet<>();
+			droppedItems.add((CProjectItem<?>) draggedItem);
+			notifyDropOwner(droppedItems, this);
 		} catch (final Exception e) {
 			LOGGER.error("Error reordering backlog items", e);
 			CNotificationService.showException("Error reordering backlog items", e);

@@ -8,7 +8,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import tech.derbent.api.utils.CAuxillaries;
 
 /** CDiv - Enhanced base class for div containers in the application. Layer: View (MVC) Provides common initialization patterns, utility methods for
- * styling, sizing, and content management. Extends Vaadin Div with application-specific enhancements. */
+ * styling, sizing, and content management. Extends Vaadin Div with application-specific enhancements.
+ * <p>
+ * Note: This class already implements ClickNotifier through Vaadin's Div base class. */
 public class CDiv extends Div {
 
 	private static final long serialVersionUID = 1L;

@@ -1,7 +1,9 @@
 package tech.derbent.api.ui.component.enhanced;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +14,11 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IDragOwner;
+import tech.derbent.api.interfaces.IDropOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
+import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -85,6 +90,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	private final List<Consumer<ChildEntity>> refreshListeners = new ArrayList<>();
 	protected ChildEntity selectedItem;
 	protected boolean useDynamicHeight = false;
+	
+	// Owner interfaces for notifying parent components
+	private ISelectionOwner<ChildEntity> selectionOwner;
+	private IDragOwner<ChildEntity> dragOwner;
+	private IDropOwner<ChildEntity> dropOwner;
 
 	/** Constructor for the entity list component.
 	 * @param title             The title to display above the grid
@@ -488,6 +498,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			LOGGER.debug("Selection changed to: {}", item != null ? item.getId() : "null");
 			selectedItem = item;
 			updateButtonStates(item != null);
+			// Notify selection owner if set
+			notifySelectionOwner();
 		} catch (final Exception ex) {
 			LOGGER.error("Error processing selection change", ex);
 			CNotificationService.showException("Error processing selection", ex);
@@ -623,5 +635,54 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		buttonDelete.setEnabled(hasSelection);
 		buttonMoveUp.setEnabled(hasSelection);
 		buttonMoveDown.setEnabled(hasSelection);
+	}
+	
+	// Owner interface setters and notification methods
+	
+	/** Sets the selection owner to be notified of selection changes.
+	 * @param owner the selection owner (can be null) */
+	public void setSelectionOwner(final ISelectionOwner<ChildEntity> owner) {
+		this.selectionOwner = owner;
+	}
+	
+	/** Sets the drag owner to be notified when drag operations start.
+	 * @param owner the drag owner (can be null) */
+	public void setDragOwner(final IDragOwner<ChildEntity> owner) {
+		this.dragOwner = owner;
+	}
+	
+	/** Sets the drop owner to be notified when drop operations complete.
+	 * @param owner the drop owner (can be null) */
+	public void setDropOwner(final IDropOwner<ChildEntity> owner) {
+		this.dropOwner = owner;
+	}
+	
+	/** Notifies the selection owner about selection changes.
+	 * Should be called whenever selection changes in the component. */
+	protected void notifySelectionOwner() {
+		if (selectionOwner != null) {
+			final Set<ChildEntity> selected = new HashSet<>();
+			if (selectedItem != null) {
+				selected.add(selectedItem);
+			}
+			selectionOwner.onSelectionChanged(selected);
+		}
+	}
+	
+	/** Notifies the drag owner about drag start events.
+	 * @param draggedItems the set of items being dragged */
+	protected void notifyDragOwner(final Set<ChildEntity> draggedItems) {
+		if (dragOwner != null) {
+			dragOwner.onDragStart(draggedItems);
+		}
+	}
+	
+	/** Notifies the drop owner about drop complete events.
+	 * @param droppedItems the set of items that were dropped
+	 * @param targetComponent the component where items were dropped */
+	protected void notifyDropOwner(final Set<ChildEntity> droppedItems, final Object targetComponent) {
+		if (dropOwner != null) {
+			dropOwner.onDropComplete(droppedItems, targetComponent);
+		}
 	}
 }

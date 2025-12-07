@@ -6,7 +6,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 
 /** CHorizontalLayout - Enhanced base class for horizontal layouts in the application. Layer: View (MVC) Provides common initialization patterns,
- * utility methods for spacing, padding, and sizing operations. Extends Vaadin HorizontalLayout with application-specific enhancements. */
+ * utility methods for spacing, padding, and sizing operations. Extends Vaadin HorizontalLayout with application-specific enhancements.
+ * <p>
+ * Note: This class already implements ClickNotifier through Vaadin's HorizontalLayout base class. */
 public class CHorizontalLayout extends HorizontalLayout {
 
 	private static final long serialVersionUID = 1L;
