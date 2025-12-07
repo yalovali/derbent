@@ -13,6 +13,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IDropTarget;
 import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
+import tech.derbent.api.interfaces.IGridDragDropSupport;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -55,6 +56,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private final CActivityService activityService;
 	// Drop target support
 	private Consumer<CProjectItem<?>> dropHandler = null;
+	// Drag source support for reverse drag to backlog (manual implementation)
+	private boolean dragEnabledToBacklog = false;
 	// Services for loading items
 	private final CMeetingService meetingService;
 	// Listener for item changes
@@ -353,7 +356,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
 	}
 
-	/** Sets the handler to be called when an item is dropped into this component. Also configures the grid to accept drops.
+	/** Sets the handler to be called when an item is dropped into this component from backlog. Also configures the grid to accept drops.
 	 * @param handler the consumer to handle dropped items */
 	@Override
 	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
@@ -389,6 +392,43 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	public void setOnItemChangeListener(final Consumer<CSprintItem> listener) {
 		onItemChangeListener = listener;
 	}
+
+	/** Removes a sprint item from the sprint and deletes it from the database.
+	 * @param sprintItem the sprint item to remove */
+	public void removeSprintItem(final CSprintItem sprintItem) {
+		try {
+			Check.notNull(sprintItem, "Sprint item cannot be null");
+			LOGGER.debug("Removing sprint item: {} (itemId: {})", sprintItem.getId(), sprintItem.getItemId());
+			// Delete the sprint item
+			childService.delete(sprintItem);
+			// Refresh the grid
+			refreshGrid();
+			CNotificationService.showSuccess("Item removed from sprint");
+			// Notify listener if set
+			if (onItemChangeListener != null) {
+				onItemChangeListener.accept(sprintItem);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error removing sprint item", e);
+			CNotificationService.showException("Error removing item from sprint", e);
+		}
+	}
+
+	// Drag support for reverse drag to backlog (manual, not via interface to avoid method erasure conflicts)
+	/** Enables or disables dragging sprint items back to backlog.
+	 * @param enabled true to enable dragging to backlog */
+	public void setDragToBacklogEnabled(final boolean enabled) {
+		this.dragEnabledToBacklog = enabled;
+		final var grid = getGridItems();
+		if (grid != null) {
+			grid.setRowsDraggable(enabled);
+			LOGGER.debug("Drag to backlog from sprint items {}", enabled ? "enabled" : "disabled");
+		}
+	}
+
+	/** Checks if dragging to backlog is enabled.
+	 * @return true if drag to backlog is enabled */
+	public boolean isDragToBacklogEnabled() { return dragEnabledToBacklog; }
 
 	/** Enables drag-and-drop reordering within the sprint items grid. This allows users to reorder sprint items by dragging and dropping them within
 	 * the grid. The itemOrder field is automatically updated to reflect the new order. */

@@ -141,10 +141,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	/** Sets up drag and drop between backlog and sprint items components using the IGridDragDropSupport pattern. This enables proper separation between:
 	 * - Internal reordering within backlog (handled by backlog component)
-	 * - Dragging from backlog to sprint items (handled via interface) */
+	 * - Dragging from backlog to sprint items (handled via interface)
+	 * - Reverse drag from sprint items back to backlog (removes from sprint) */
 	private void setupDragAndDrop() {
 		// Only set up if both components exist
 		if ((componentBacklogItems != null) && (componentItemsSelection != null)) {
+			// === FORWARD DRAG: Backlog → Sprint Items ===
 			// Enable dragging FROM backlog (implements IGridDragDropSupport)
 			componentBacklogItems.setDragEnabled(true);
 			// Track items dragged from backlog
@@ -167,7 +169,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			final var sprintItemsGrid = componentItemsSelection.getGridItems();
 			if (sprintItemsGrid != null) {
 				sprintItemsGrid.setDropMode(GridDropMode.BETWEEN);
-				// Listen for drops ON sprint items grid
+				// Listen for drops ON sprint items grid FROM backlog
 				sprintItemsGrid.addDropListener(event -> {
 					if (draggedFromBacklog[0] != null) {
 						final CProjectItem<?> itemToAdd = draggedFromBacklog[0];
@@ -181,7 +183,48 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 					}
 				});
 			}
-			LOGGER.debug("Drag and drop configured: backlog (source) -> sprint items (target)");
+			// === REVERSE DRAG: Sprint Items → Backlog ===
+			// Enable dragging FROM sprint items back to backlog
+			componentItemsSelection.setDragToBacklogEnabled(true);
+			// Track items dragged from sprint
+			final CSprintItem[] draggedFromSprint = new CSprintItem[1];
+			// Listen for drag start from sprint items
+			if (sprintItemsGrid != null) {
+				sprintItemsGrid.addDragStartListener(event -> {
+					if (!event.getDraggedItems().isEmpty()) {
+						draggedFromSprint[0] = event.getDraggedItems().get(0);
+						LOGGER.debug("Sprint item drag started: {} (itemId: {})", draggedFromSprint[0].getId(), draggedFromSprint[0].getItemId());
+					}
+				});
+				// Clear on drag end
+				sprintItemsGrid.addDragEndListener(event -> {
+					draggedFromSprint[0] = null;
+				});
+			}
+			// Configure backlog to ACCEPT drops from sprint items (implements IDropTarget)
+			if (backlogGrid != null) {
+				// Set up incoming drop handler
+				componentBacklogItems.setIncomingDropHandler(item -> {
+					LOGGER.debug("Backlog ready to receive items from sprint");
+				});
+				// Listen for drops ON backlog grid FROM sprint items
+				backlogGrid.addDropListener(event -> {
+					if (draggedFromSprint[0] != null) {
+						final CSprintItem sprintItem = draggedFromSprint[0];
+						final CProjectItem<?> item = sprintItem.getItem();
+						LOGGER.debug("Sprint item dropped back into backlog: {} (itemId: {})", sprintItem.getId(), item != null ? item.getId() : "null");
+						if (item != null) {
+							// Remove from sprint
+							componentItemsSelection.removeSprintItem(sprintItem);
+							// Receive back in backlog at dropped position
+							componentBacklogItems.receiveItemFromSprint(item, event.getDropLocation());
+						}
+						// Clear tracker
+						draggedFromSprint[0] = null;
+					}
+				});
+			}
+			LOGGER.debug("Bidirectional drag and drop configured: backlog ↔ sprint items");
 		} else {
 			LOGGER.debug("Cannot setup drag and drop - components not yet initialized");
 		}
