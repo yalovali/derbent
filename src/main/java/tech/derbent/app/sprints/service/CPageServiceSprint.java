@@ -1,20 +1,25 @@
 package tech.derbent.app.sprints.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
+import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
@@ -42,34 +47,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
-		}
-	}
-
-	/** Reorders backlog items after inserting a new item at a specific sprint order position. All items with sprintOrder >= newOrder need to be
-	 * shifted up by 1.
-	 * @param newOrder     the sprint order value of the newly inserted item
-	 * @param excludeItemId the ID of the item being inserted (to exclude it from reordering) */
-	private void reorderBacklogItemsAfterInsert(final int newOrder, final Long excludeItemId) {
-		try {
-			final List<CProjectItem<?>> allBacklogItems = componentBacklogItems.getAllItems();
-			// Shift items with sprintOrder >= newOrder
-			for (final CProjectItem<?> item : allBacklogItems) {
-				if (item instanceof tech.derbent.api.interfaces.ISprintableItem && !item.getId().equals(excludeItemId)) {
-					final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) item;
-					final Integer itemOrder = sprintableItem.getSprintOrder();
-					if (itemOrder != null && itemOrder >= newOrder) {
-						sprintableItem.setSprintOrder(itemOrder + 1);
-						// Save the updated item
-						if (item instanceof tech.derbent.app.activities.domain.CActivity) {
-							activityService.save((tech.derbent.app.activities.domain.CActivity) item);
-						} else if (item instanceof tech.derbent.app.meetings.domain.CMeeting) {
-							meetingService.save((tech.derbent.app.meetings.domain.CMeeting) item);
-						}
-					}
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error reordering backlog items after insert", e);
 		}
 	}
 
@@ -160,6 +137,34 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
 	}
 
+	/** Reorders backlog items after inserting a new item at a specific sprint order position. All items with sprintOrder >= newOrder need to be
+	 * shifted up by 1.
+	 * @param newOrder      the sprint order value of the newly inserted item
+	 * @param excludeItemId the ID of the item being inserted (to exclude it from reordering) */
+	private void reorderBacklogItemsAfterInsert(final int newOrder, final Long excludeItemId) {
+		try {
+			final List<CProjectItem<?>> allBacklogItems = componentBacklogItems.getAllItems();
+			// Shift items with sprintOrder >= newOrder
+			for (final CProjectItem<?> item : allBacklogItems) {
+				if (item instanceof ISprintableItem && !item.getId().equals(excludeItemId)) {
+					final ISprintableItem sprintableItem = (ISprintableItem) item;
+					final Integer itemOrder = sprintableItem.getSprintOrder();
+					if (itemOrder != null && itemOrder >= newOrder) {
+						sprintableItem.setSprintOrder(itemOrder + 1);
+						// Save the updated item
+						if (item instanceof CActivity) {
+							activityService.save((CActivity) item);
+						} else if (item instanceof CMeeting) {
+							meetingService.save((tech.derbent.app.meetings.domain.CMeeting) item);
+						}
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error reordering backlog items after insert", e);
+		}
+	}
+
 	/** Sets up drag and drop between backlog and sprint items components using the general refresh listener pattern. This enables proper separation
 	 * between: - Internal reordering within backlog (handled by backlog component) - Dragging from backlog to sprint items (handled via interface) -
 	 * Reverse drag from sprint items back to backlog (removes from sprint) */
@@ -245,9 +250,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 							// Set sprint order based on drop position
 							if (targetBacklogItem != null && dropLocation != null && item instanceof tech.derbent.api.interfaces.ISprintableItem) {
 								final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) item;
-								final tech.derbent.api.interfaces.ISprintableItem targetSprintableItem = targetBacklogItem instanceof tech.derbent.api.interfaces.ISprintableItem
-										? (tech.derbent.api.interfaces.ISprintableItem) targetBacklogItem
-										: null;
+								final tech.derbent.api.interfaces.ISprintableItem targetSprintableItem =
+										targetBacklogItem instanceof tech.derbent.api.interfaces.ISprintableItem
+												? (tech.derbent.api.interfaces.ISprintableItem) targetBacklogItem : null;
 								if (targetSprintableItem != null) {
 									// Calculate new sprint order based on drop location
 									final Integer targetOrder = targetSprintableItem.getSprintOrder();
