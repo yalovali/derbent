@@ -101,6 +101,11 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 
 	public boolean isNew() { return id == null; }
 
+	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
+	 * returns "id" to ensure consistent ordering by ID in descending order.
+	 * @return the field name to order by (e.g., "id", "name", "createDate") */
+	public String getDefaultOrderBy() { return "id"; }
+
 	/** Checks if this entity matches the given search value in the specified fields. This base implementation searches in 'id' and 'active' fields.
 	 * Subclasses should override to add their specific fields while calling super.matchesFilter().
 	 * @param searchValue the value to search for (case-insensitive)

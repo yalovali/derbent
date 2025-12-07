@@ -124,6 +124,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Column (name = "startTime", nullable = true)
 	@AMetaData (displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false)
 	private LocalTime startTime;
+	// Sprint ordering - used by sprint-aware components for drag-and-drop ordering
+	@Column (name = "sprint_order", nullable = true)
+	@jakarta.validation.constraints.Min (value = 1, message = "Sprint order must be positive")
+	@AMetaData (
+			displayName = "Sprint Order", required = false, readOnly = false,
+			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
+	)
+	private Integer sprintOrder;
 
 	/** Default constructor for JPA. */
 	public CMeeting() {
@@ -299,7 +307,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
 
-	public void setSprintOrder(Long sprintOrder) { this.sprintOrder = sprintOrder; }
+	@Override
+	public Integer getSprintOrder() { return sprintOrder; }
+
+	@Override
+	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
 	public void setStartDate(final LocalDate startDate) { this.startDate = startDate; }
 

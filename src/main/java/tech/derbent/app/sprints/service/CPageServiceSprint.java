@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -15,6 +16,7 @@ import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
 import tech.derbent.app.activities.domain.CActivity;
@@ -31,7 +33,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
 	private CActivityService activityService;
-	private CComponentEntitySelection<CProjectItem<?>> componentBacklogItems;
+	private CComponentBacklog componentBacklogItems;
 	private CComponentListSprintItems componentItemsSelection;
 	private CMeetingService meetingService;
 	private CProjectItemStatusService projectItemStatusService;
@@ -51,69 +53,22 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Creates and configures the backlog items component for displaying items not in the sprint.
-	 * @return configured CComponentEntitySelection component */
-	@SuppressWarnings ("unchecked")
-	private CComponentEntitySelection<CProjectItem<?>> createBacklogItemsComponent() {
-		// Create entity type configurations for activities and meetings
-		final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
-		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>("CActivity", CActivity.class, activityService));
-		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>("CMeeting", CMeeting.class, meetingService));
-		// Items provider - loads all project items
-		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
-			try {
-				final CSprint sprint = (CSprint) getView().getCurrentEntity();
-				if (sprint == null || sprint.getProject() == null) {
-					LOGGER.warn("No sprint or project available for loading backlog items");
-					return new ArrayList<>();
-				}
-				if (config.getEntityClass() == tech.derbent.app.activities.domain.CActivity.class) {
-					return (List<CProjectItem<?>>) (List<?>) activityService.listByProject(sprint.getProject());
-				} else if (config.getEntityClass() == tech.derbent.app.meetings.domain.CMeeting.class) {
-					return (List<CProjectItem<?>>) (List<?>) meetingService.listByProject(sprint.getProject());
-				}
-				return new ArrayList<>();
-			} catch (final Exception e) {
-				LOGGER.error("Error loading backlog items for entity type: {}", config.getDisplayName(), e);
-				return new ArrayList<>();
-			}
-		};
-		// Already selected provider - returns items currently in the sprint to hide them
-		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> alreadySelectedProvider = config -> {
-			try {
-				final CSprint sprint = (CSprint) getView().getCurrentEntity();
-				if (sprint == null || sprint.getId() == null) {
-					return new ArrayList<>();
-				}
-				// Get current sprint items
-				final List<CSprintItem> sprintItems = sprintItemService.findByMasterIdWithItems(sprint.getId());
-				// Filter by entity type and extract the underlying items
-				final List<CProjectItem<?>> result = new ArrayList<>();
-				final String targetType = config.getEntityClass().getSimpleName();
-				for (final CSprintItem sprintItem : sprintItems) {
-					if (sprintItem.getItem() != null && targetType.equals(sprintItem.getItemType())) {
-						result.add(sprintItem.getItem());
-					}
-				}
-				return result;
-			} catch (final Exception e) {
-				LOGGER.error("Error loading already selected items for backlog: {}", config.getDisplayName(), e);
-				return new ArrayList<>();
-			}
-		};
-		// Selection change handler - just logs for now, drag & drop will handle actual addition
-		final Consumer<java.util.Set<CProjectItem<?>>> onSelectionChanged = selectedItems -> {
-			LOGGER.debug("Backlog selection changed: {} items selected", selectedItems.size());
-		};
-		// Create component with HIDE_ALREADY_SELECTED mode so sprint items are not shown in backlog
-		CComponentEntitySelection<?> componentEntitySelection = new CComponentEntitySelection<>(entityTypes, itemsProvider, onSelectionChanged, true,
-				alreadySelectedProvider, CComponentEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED);
-		componentEntitySelection.setDynamicHeight("600px");
-		return (CComponentEntitySelection<CProjectItem<?>>) componentEntitySelection;
+	 * @return configured CComponentBacklog component */
+	private CComponentBacklog createBacklogItemsComponent() {
+		final CSprint currentSprint = (CSprint) getView().getCurrentEntity();
+		if (currentSprint == null) {
+			LOGGER.warn("No current sprint available for backlog component");
+			// Return empty backlog - will be populated when sprint is selected
+			return new CComponentBacklog(new CSprint());
+		}
+		return new CComponentBacklog(currentSprint);
 	}
 
 	public Component createSpritActivitiesComponent() {
 		try {
 			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
+			// Enable drag-and-drop reordering within sprint items
+			componentItemsSelection.enableDragAndDropReordering();
 			// Set up drop handler to receive items from backlog
 			componentItemsSelection.setDropHandler(item -> componentItemsSelection.addDroppedItem(item));
 			// Wire up drag and drop between backlog and sprint items if backlog exists
@@ -184,42 +139,94 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
 	}
 
-	/** Sets up drag and drop between backlog and sprint items components. Enables dragging from backlog and dropping into sprint items. */
+	/** Sets up drag and drop between backlog and sprint items components using the IGridDragDropSupport pattern. This enables proper separation between:
+	 * - Internal reordering within backlog (handled by backlog component)
+	 * - Dragging from backlog to sprint items (handled via interface)
+	 * - Reverse drag from sprint items back to backlog (removes from sprint) */
 	private void setupDragAndDrop() {
 		// Only set up if both components exist
 		if ((componentBacklogItems != null) && (componentItemsSelection != null)) {
-			// Get the grid from backlog component and enable dragging directly
-			final CGrid<CProjectItem<?>> backlogGrid = componentBacklogItems.getGrid();
+			// === FORWARD DRAG: Backlog → Sprint Items ===
+			// Enable dragging FROM backlog (implements IGridDragDropSupport)
+			componentBacklogItems.setDragEnabled(true);
+			// Track items dragged from backlog
+			final CProjectItem<?>[] draggedFromBacklog = new CProjectItem<?>[1];
+			// Listen for drag start from backlog
+			final var backlogGrid = componentBacklogItems.getGrid();
 			if (backlogGrid != null) {
-				backlogGrid.setRowsDraggable(true);
-				// Track the currently dragged item
-				final CProjectItem<?>[] draggedItemHolder = new CProjectItem<?>[1];
-				// Add drag start listener to track the dragged item
 				backlogGrid.addDragStartListener(event -> {
-					final List<CProjectItem<?>> draggedItems = event.getDraggedItems();
-					if ((draggedItems != null) && !draggedItems.isEmpty()) {
-						draggedItemHolder[0] = draggedItems.get(0);
-						LOGGER.debug("Drag started for item: {} ({})", draggedItemHolder[0].getId(), draggedItemHolder[0].getClass().getSimpleName());
+					if (!event.getDraggedItems().isEmpty()) {
+						draggedFromBacklog[0] = event.getDraggedItems().get(0);
+						LOGGER.debug("Item drag started from backlog: {}", draggedFromBacklog[0].getId());
 					}
 				});
-				// Add drag end listener to handle when drag completes
+				// Clear on drag end
 				backlogGrid.addDragEndListener(event -> {
-					if (draggedItemHolder[0] != null) {
-						LOGGER.debug("Item dragged from backlog: {} ({})", draggedItemHolder[0].getId(),
-								draggedItemHolder[0].getClass().getSimpleName());
-						// Add the item to sprint items
-						componentItemsSelection.addDroppedItem(draggedItemHolder[0]);
-						// Refresh the backlog to hide the newly added item
+					draggedFromBacklog[0] = null;
+				});
+			}
+			// Configure sprint items to ACCEPT drops from backlog (implements IDropTarget)
+			final var sprintItemsGrid = componentItemsSelection.getGridItems();
+			if (sprintItemsGrid != null) {
+				sprintItemsGrid.setDropMode(GridDropMode.BETWEEN);
+				// Listen for drops ON sprint items grid FROM backlog
+				sprintItemsGrid.addDropListener(event -> {
+					if (draggedFromBacklog[0] != null) {
+						final CProjectItem<?> itemToAdd = draggedFromBacklog[0];
+						LOGGER.debug("Item dropped into sprint from backlog: {}", itemToAdd.getId());
+						// Add to sprint items
+						componentItemsSelection.addDroppedItem(itemToAdd);
+						// Refresh backlog to hide the item
 						componentBacklogItems.refresh();
-						// Clear the holder
-						draggedItemHolder[0] = null;
+						// Clear tracker
+						draggedFromBacklog[0] = null;
 					}
 				});
-				LOGGER.debug("Drag and drop configured between backlog and sprint items");
 			}
+			// === REVERSE DRAG: Sprint Items → Backlog ===
+			// Enable dragging FROM sprint items back to backlog
+			componentItemsSelection.setDragToBacklogEnabled(true);
+			// Track items dragged from sprint
+			final CSprintItem[] draggedFromSprint = new CSprintItem[1];
+			// Listen for drag start from sprint items
+			if (sprintItemsGrid != null) {
+				sprintItemsGrid.addDragStartListener(event -> {
+					if (!event.getDraggedItems().isEmpty()) {
+						draggedFromSprint[0] = event.getDraggedItems().get(0);
+						LOGGER.debug("Sprint item drag started: {} (itemId: {})", draggedFromSprint[0].getId(), draggedFromSprint[0].getItemId());
+					}
+				});
+				// Clear on drag end
+				sprintItemsGrid.addDragEndListener(event -> {
+					draggedFromSprint[0] = null;
+				});
+			}
+			// Configure backlog to ACCEPT drops from sprint items (implements IDropTarget)
+			if (backlogGrid != null) {
+				// Set up incoming drop handler
+				componentBacklogItems.setIncomingDropHandler(item -> {
+					LOGGER.debug("Backlog ready to receive items from sprint");
+				});
+				// Listen for drops ON backlog grid FROM sprint items
+				backlogGrid.addDropListener(event -> {
+					if (draggedFromSprint[0] != null) {
+						final CSprintItem sprintItem = draggedFromSprint[0];
+						final CProjectItem<?> item = sprintItem.getItem();
+						LOGGER.debug("Sprint item dropped back into backlog: {} (itemId: {})", sprintItem.getId(), item != null ? item.getId() : "null");
+						if (item != null) {
+							// Remove from sprint
+							componentItemsSelection.removeSprintItem(sprintItem);
+							// Receive back in backlog at dropped position
+							componentBacklogItems.receiveItemFromSprint(item, event.getDropLocation());
+						}
+						// Clear tracker
+						draggedFromSprint[0] = null;
+					}
+				});
+			}
+			LOGGER.debug("Bidirectional drag and drop configured: backlog ↔ sprint items");
 		} else {
-			LOGGER.debug("Cannot setup drag and drop - components not yet initialized (backlog: {}, items: {})", componentBacklogItems != null,
-					componentItemsSelection != null);
+			LOGGER.debug("Cannot setup drag and drop - components not yet initialized");
 		}
 	}
 }

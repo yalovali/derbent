@@ -165,6 +165,14 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			hidden = false
 	)
 	private LocalDate startDate;
+	// Sprint ordering - used by sprint-aware components for drag-and-drop ordering
+	@Column (name = "sprint_order", nullable = true)
+	@Min (value = 1, message = "Sprint order must be positive")
+	@AMetaData (
+			displayName = "Sprint Order", required = false, readOnly = false,
+			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
+	)
+	private Integer sprintOrder;
 
 	/** Default constructor for JPA. */
 	public CActivity() {
@@ -468,6 +476,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		this.results = results;
 		updateLastModified();
 	}
+
+	@Override
+	public Integer getSprintOrder() { return sprintOrder; }
+
+	@Override
+	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
 	public void setStartDate(final LocalDate startDate) {
 		this.startDate = startDate;
