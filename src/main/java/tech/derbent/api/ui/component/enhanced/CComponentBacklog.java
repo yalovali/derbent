@@ -149,7 +149,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	/** Constructor for backlog component.
 	 * @param sprint The sprint for which to display the backlog (items NOT in this sprint) */
 	public CComponentBacklog(final CSprint sprint) {
-		super(createEntityTypes(), createItemsProvider(sprint), createSelectionHandler(), true, createAlreadySelectedProvider(sprint),
+		super(createEntityTypes(), createItemsProvider(sprint), createSelectionHandler(), false, createAlreadySelectedProvider(sprint),
 				AlreadySelectedMode.HIDE_ALREADY_SELECTED);
 		Check.notNull(sprint, "Sprint cannot be null");
 		// Get services from Spring context
