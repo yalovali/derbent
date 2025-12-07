@@ -206,6 +206,24 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @return total count of sprint items */
 	public Integer getItemCount() { return sprintItems != null ? sprintItems.size() : 0; }
 
+	/** Get the total story points for all items in this sprint. This is a calculated field for UI display.
+	 * @return total story points, or 0 if no items have story points */
+	public Long getTotalStoryPoints() {
+		if (sprintItems == null || sprintItems.isEmpty()) {
+			return 0L;
+		}
+		long total = 0L;
+		for (final CSprintItem sprintItem : sprintItems) {
+			if (sprintItem.getItem() != null && sprintItem.getItem() instanceof tech.derbent.api.interfaces.ISprintableItem) {
+				final Long itemStoryPoint = ((tech.derbent.api.interfaces.ISprintableItem) sprintItem.getItem()).getStoryPoint();
+				if (itemStoryPoint != null) {
+					total += itemStoryPoint;
+				}
+			}
+		}
+		return total;
+	}
+
 	/** Get all sprint items (activities and meetings combined) as a list. This is a convenience method for backward compatibility.
 	 * @return combined list of all sprint items */
 	public List<CProjectItem<?>> getItems() {

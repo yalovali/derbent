@@ -71,6 +71,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	 * @return the configured label */
 	private CLabelEntity createItemCountLabel() {
 		final Integer itemCount = getEntity().getItemCount();
+		final Long totalStoryPoints = getEntity().getTotalStoryPoints();
 		final CLabelEntity label = new CLabelEntity();
 		label.getStyle().set("display", "flex").set("align-items", "center").set("gap", "4px").set("background-color", "#E3F2FD") // Light blue
 				// background
@@ -80,9 +81,10 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		final Icon icon = VaadinIcon.TASKS.create();
 		icon.getStyle().set("width", "14px").set("height", "14px").set("color", "#1976D2");
 		label.add(icon);
-		// Add count text
+		// Add count text with story points
 		final String countText = (itemCount != null ? itemCount : 0) + " item" + ((itemCount != null && itemCount != 1) ? "s" : "");
-		label.setText(countText);
+		final String storyPointsText = totalStoryPoints != null && totalStoryPoints > 0 ? " (" + totalStoryPoints + " SP)" : "";
+		label.setText(countText + storyPointsText);
 		return label;
 	}
 

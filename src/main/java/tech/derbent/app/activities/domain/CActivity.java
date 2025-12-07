@@ -169,6 +169,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			hidden = false
 	)
 	private LocalDate startDate;
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Story Points", required = false, readOnly = false, defaultValue = "0",
+			description = "Estimated effort or complexity in story points", hidden = false
+	)
+	private Long storyPoint;
 
 	/** Default constructor for JPA. */
 	public CActivity() {
@@ -481,6 +487,15 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public void setStartDate(final LocalDate startDate) {
 		this.startDate = startDate;
+		updateLastModified();
+	}
+
+	@Override
+	public Long getStoryPoint() { return storyPoint; }
+
+	@Override
+	public void setStoryPoint(final Long storyPoint) {
+		this.storyPoint = storyPoint;
 		updateLastModified();
 	}
 

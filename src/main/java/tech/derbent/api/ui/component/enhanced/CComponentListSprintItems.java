@@ -154,6 +154,14 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		grid.addExpandingLongTextColumn(item -> {
 			return item.getItem().getDescriptionShort();
 		}, "description", "Description");
+		// Add story points column
+		grid.addIntegerColumn(item -> {
+			if (item.getItem() instanceof tech.derbent.api.interfaces.ISprintableItem) {
+				final Long storyPoint = ((tech.derbent.api.interfaces.ISprintableItem) item.getItem()).getStoryPoint();
+				return storyPoint != null ? storyPoint.intValue() : null;
+			}
+			return null;
+		}, "Story Points", "storyPoint");
 		try {
 			grid.addEntityColumn(item -> {
 				return item.getItem().getStatus();

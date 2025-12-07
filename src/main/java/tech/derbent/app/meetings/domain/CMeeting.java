@@ -128,6 +128,12 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Column (name = "startTime", nullable = true)
 	@AMetaData (displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false)
 	private LocalTime startTime;
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Story Points", required = false, readOnly = false, defaultValue = "0",
+			description = "Estimated effort or complexity in story points", hidden = false
+	)
+	private Long storyPoint;
 
 	/** Default constructor for JPA. */
 	public CMeeting() {
@@ -310,4 +316,10 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setStartDate(final LocalDate startDate) { this.startDate = startDate; }
 
 	public void setStartTime(final LocalTime startTime) { this.startTime = startTime; }
+
+	@Override
+	public Long getStoryPoint() { return storyPoint; }
+
+	@Override
+	public void setStoryPoint(final Long storyPoint) { this.storyPoint = storyPoint; }
 }
