@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -835,6 +836,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
 			}
 			if (component != null && mapComponents != null) {
+				LOGGER.debug("Adding component for field '{}' to component map of type:{}", fieldInfo.getFieldName(),
+						component.getClass().getSimpleName());
 				mapComponents.put(fieldInfo.getFieldName(), component);
 			}
 			return component;
@@ -850,7 +853,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		container.getElement().getChildren().forEach(element -> {
 			// Get the component from the element
 			if (element.getComponent().isPresent()) {
-				final com.vaadin.flow.component.Component component = element.getComponent().get();
+				final Component component = element.getComponent().get();
 				if (component instanceof ComboBox) {
 					final ComboBox<Object> comboBox = (ComboBox<Object>) component;
 					try {
@@ -866,9 +869,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					} catch (final Exception e) {
 						LOGGER.error("Error resetting ComboBox to first item: {}", e.getMessage());
 					}
-				} else if (component instanceof com.vaadin.flow.component.HasComponents) {
+				} else if (component instanceof HasComponents) {
 					// Recursively check child components
-					resetComboBoxesRecursively((com.vaadin.flow.component.HasComponents) component);
+					resetComboBoxesRecursively((HasComponents) component);
 				}
 			}
 		});
