@@ -136,14 +136,6 @@ class CComponentListEntityBaseHasValueTest {
 	void testChildClassesInheritHasValue() {
 		// When: checking if child classes inherit HasValue
 		// Then: CComponentListSprintItems should implement HasValue
-		boolean sprintItemsImplementsHasValue = false;
-		for (Class<?> iface : CComponentListSprintItems.class.getInterfaces()) {
-			if (iface.equals(HasValue.class)) {
-				sprintItemsImplementsHasValue = true;
-				break;
-			}
-		}
-		// Note: May be inherited from parent, check via isAssignableFrom
 		assertTrue(HasValue.class.isAssignableFrom(CComponentListSprintItems.class),
 				"CComponentListSprintItems should implement/inherit HasValue interface");
 		

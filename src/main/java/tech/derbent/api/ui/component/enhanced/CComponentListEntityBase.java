@@ -98,7 +98,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	private final List<ValueChangeListener<? super ValueChangeEvent<ChildEntity>>> valueChangeListeners = new ArrayList<>();
 	private ChildEntity previousValue = null;
 	private boolean readOnly = false;
-	private boolean isFromClient = false;
 	
 	// Owner interfaces for notifying parent components
 	private ISelectionOwner<ChildEntity> selectionOwner;
