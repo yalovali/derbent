@@ -354,50 +354,27 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return The AlreadySelectedMode */
 	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
 
-	/** Gets description from entity. Uses getName() method if entity extends CEntityNamed, otherwise returns empty string. */
+	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {
 		Check.notNull(item, "Item cannot be null");
-		try {
-			if (item instanceof CEntityNamed) {
-				final CEntityNamed<?> namedEntity = (CEntityNamed<?>) item;
-				final String description = namedEntity.getDescription();
-				return description != null ? description : "";
-			}
-			return "";
-		} catch (final Exception e) {
-			LOGGER.warn("Error getting description from entity: {}", e.getMessage());
-			return "";
-		}
+		Check.instanceOf(item, CEntityNamed.class, "Item must be of type CEntityNamed to access description");
+		final String description = ((CEntityNamed<?>) item).getDescription();
+		return description != null ? description : "";
 	}
 
-	/** Gets name from entity. Uses getName() method if entity extends CEntityNamed, otherwise returns empty string. */
+	/** Gets name from entity. Entity must extend CEntityNamed. */
 	private String getEntityName(final EntityClass item) {
 		Check.notNull(item, "Item cannot be null");
-		try {
-			if (item instanceof CEntityNamed) {
-				final CEntityNamed<?> namedEntity = (CEntityNamed<?>) item;
-				final String name = namedEntity.getName();
-				return name != null ? name : "";
-			}
-			return "";
-		} catch (final Exception e) {
-			LOGGER.warn("Error getting name from entity: {}", e.getMessage());
-			return "";
-		}
+		Check.instanceOf(item, CEntityNamed.class, "Item must be of type CEntityNamed to access name");
+		final String name = ((CEntityNamed<?>) item).getName();
+		return name != null ? name : "";
 	}
 
-	/** Gets status from entity. Uses getStatus() method if entity implements IHasStatusAndWorkflow, otherwise returns null. */
+	/** Gets status from entity. Entity must implement IHasStatusAndWorkflow. */
 	private Object getEntityStatus(final EntityClass item) {
 		Check.notNull(item, "Item cannot be null");
-		try {
-			if (item instanceof IHasStatusAndWorkflow) {
-				return ((IHasStatusAndWorkflow) item).getStatus();
-			}
-			return null;
-		} catch (final Exception e) {
-			LOGGER.warn("Error getting status from entity: {}", e.getMessage());
-			return null;
-		}
+		Check.instanceOf(item, IHasStatusAndWorkflow.class, "Item must implement IHasStatusAndWorkflow to access status");
+		return ((IHasStatusAndWorkflow) item).getStatus();
 	}
 
 	/** Gets the grid component for external configuration (e.g., drag and drop).
