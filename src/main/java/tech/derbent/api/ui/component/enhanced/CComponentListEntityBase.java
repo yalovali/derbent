@@ -212,6 +212,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected void createGrid() {
 		grid = new CGrid<>(entityClass);
 		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);
+		// Configure size - grid should expand to fill container width
+		grid.setWidthFull(); // Enable grid to expand horizontally with container
 		// Configure height - if dynamic height enabled, use content-based sizing
 		if (useDynamicHeight) {
 			grid.setDynamicHeight();
