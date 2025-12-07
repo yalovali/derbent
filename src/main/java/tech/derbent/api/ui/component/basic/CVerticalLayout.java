@@ -5,7 +5,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 
 /** CVerticalLayout - Enhanced base class for vertical layouts in the application. Layer: View (MVC) Provides common initialization patterns, utility
- * methods for spacing, padding, and sizing operations. Extends Vaadin VerticalLayout with application-specific enhancements. */
+ * methods for spacing, padding, and sizing operations. Extends Vaadin VerticalLayout with application-specific enhancements.
+ * <p>
+ * Note: This class already implements ClickNotifier through Vaadin's VerticalLayout base class. */
 public class CVerticalLayout extends VerticalLayout {
 
 	private static final long serialVersionUID = 1L;

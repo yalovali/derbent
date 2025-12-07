@@ -21,8 +21,11 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
+import tech.derbent.api.interfaces.IDragOwner;
+import tech.derbent.api.interfaces.IDropOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
+import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -134,6 +137,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	// Refresh listeners for the update-and-notify pattern
 	private final List<Consumer<EntityClass>> refreshListeners = new ArrayList<>();
 	private final Set<EntityClass> selectedItems = new HashSet<>();
+	
+	// Owner interfaces for notifying parent components
+	private ISelectionOwner<EntityClass> selectionOwner;
+	private IDragOwner<EntityClass> dragOwner;
+	private IDropOwner<EntityClass> dropOwner;
 
 	/** Creates an entity selection component.
 	 * @param entityTypes        Available entity types for selection
@@ -653,6 +661,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (onSelectionChanged != null) {
 			onSelectionChanged.accept(new HashSet<>(selectedItems));
 		}
+		// Notify selection owner if set
+		notifySelectionOwner();
 	}
 
 	private void updateStatusFilterOptions() {
@@ -675,5 +685,50 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 		}
 		gridSearchToolbar.setStatusOptions(statuses);
+	}
+	
+	// Owner interface setters and notification methods
+	
+	/** Sets the selection owner to be notified of selection changes.
+	 * @param owner the selection owner (can be null) */
+	public void setSelectionOwner(final ISelectionOwner<EntityClass> owner) {
+		this.selectionOwner = owner;
+	}
+	
+	/** Sets the drag owner to be notified when drag operations start.
+	 * @param owner the drag owner (can be null) */
+	public void setDragOwner(final IDragOwner<EntityClass> owner) {
+		this.dragOwner = owner;
+	}
+	
+	/** Sets the drop owner to be notified when drop operations complete.
+	 * @param owner the drop owner (can be null) */
+	public void setDropOwner(final IDropOwner<EntityClass> owner) {
+		this.dropOwner = owner;
+	}
+	
+	/** Notifies the selection owner about selection changes.
+	 * Should be called whenever selection changes in the component. */
+	protected void notifySelectionOwner() {
+		if (selectionOwner != null) {
+			selectionOwner.onSelectionChanged(new HashSet<>(selectedItems));
+		}
+	}
+	
+	/** Notifies the drag owner about drag start events.
+	 * @param draggedItems the set of items being dragged */
+	protected void notifyDragOwner(final Set<EntityClass> draggedItems) {
+		if (dragOwner != null) {
+			dragOwner.onDragStart(draggedItems);
+		}
+	}
+	
+	/** Notifies the drop owner about drop complete events.
+	 * @param droppedItems the set of items that were dropped
+	 * @param targetComponent the component where items were dropped */
+	protected void notifyDropOwner(final Set<EntityClass> droppedItems, final Object targetComponent) {
+		if (dropOwner != null) {
+			dropOwner.onDropComplete(droppedItems, targetComponent);
+		}
 	}
 }
