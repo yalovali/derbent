@@ -169,16 +169,14 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notNull(project, "Project cannot be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = (searchText == null) ? "" : searchText.trim();
-		// Pull all for project (ensure repo method DOES NOT fetch to-many relations!)
-		final List<EntityClass> all = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project, Pageable.unpaged()).getContent();
+		// Repository query includes ORDER BY clause, no need for manual sorting
+		final List<EntityClass> all = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
 		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
-		// --- apply sort from Pageable (name/id supported here; override to extend)
-		final List<EntityClass> sorted = applySort(filtered, safePage.getSort());
-		// --- slice
-		final int start = (int) Math.min(safePage.getOffset(), sorted.size());
-		final int end = Math.min(start + safePage.getPageSize(), sorted.size());
-		final List<EntityClass> content = sorted.subList(start, end);
+		// Data is already sorted by repository query
+		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+		final List<EntityClass> content = filtered.subList(start, end);
 		return new PageImpl<>(content, safePage, filtered.size());
 	}
 

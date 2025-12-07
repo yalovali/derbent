@@ -3,11 +3,8 @@ package tech.derbent.api.entity.service;
 import java.lang.reflect.Field;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,50 +47,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		this.repository = repository;
 		this.sessionService = sessionService;
 		Check.notNull(repository, "repository cannot be null");
-	}
-
-	protected List<EntityClass> applySort(final List<EntityClass> input, final Sort sort) {
-		if ((sort == null) || sort.isUnsorted() || (input == null) || input.isEmpty()) {
-			return input;
-		}
-		final Map<String, Function<EntityClass, ?>> keyFns = getSortKeyExtractors();
-		Comparator<EntityClass> chain = null;
-		for (final Sort.Order o : sort) {
-			final var keyFn = keyFns.get(o.getProperty());
-			if (keyFn == null) {
-				continue; // tanımadığımız kolonları atla
-			}
-			// El yapımı comparator: nulls last + Comparable check
-			Comparator<EntityClass> c = (a, b) -> {
-				final Object va = keyFn.apply(a);
-				final Object vb = keyFn.apply(b);
-				if (va == vb) {
-					return 0;
-				}
-				if (va == null) {
-					return 1; // nulls last
-				}
-				if (vb == null) {
-					return -1;
-				}
-				if (va instanceof final Comparable<?> ca && vb instanceof final Comparable<?> cb) {
-					@SuppressWarnings ("unchecked")
-					final int cmp = ((Comparable<Object>) ca).compareTo(cb);
-					return cmp;
-				}
-				return 0; // karşılaştırılamıyorsa eşit say
-			};
-			if (o.isDescending()) {
-				c = c.reversed();
-			}
-			chain = (chain == null) ? c : chain.thenComparing(c);
-		}
-		if (chain == null) {
-			return input;
-		}
-		final ArrayList<EntityClass> copy = new ArrayList<>(input);
-		copy.sort(chain);
-		return copy;
 	}
 
 	public String checkDeleteAllowed(final EntityClass entity) {
@@ -180,7 +133,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@PreAuthorize ("permitAll()")
 	public List<EntityClass> findAll() {
-		// Apply default ordering
+		// Repository's findAll(Sort) automatically applies sorting at database level
 		final Sort defaultSort = getDefaultSort();
 		return repository.findAll(defaultSort);
 	}
@@ -248,11 +201,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	public IAbstractRepository<EntityClass> getRepository() { return repository; }
 
-	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
-	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() {
-		return Map.of();
-	}
-
 	/** Initialize all lazy fields of an entity within a transaction context. This method should be used when you need to access lazy-loaded fields
 	 * outside of the original Hibernate session. Call this from a @Transactional method in your service.
 	 * @param entity the entity to initialize
@@ -311,13 +259,15 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		LOGGER.debug("Search text: {}", searchText);
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = (searchText == null) ? "" : searchText.trim();
-		final List<EntityClass> all = repository.findAll(Pageable.unpaged()).getContent();
+		// For search queries, fetch all data with default sorting from database
+		final Sort defaultSort = getDefaultSort();
+		final List<EntityClass> all = repository.findAll(defaultSort);
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
 		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
-		final List<EntityClass> sorted = applySort(filtered, safePage.getSort());
-		final int start = (int) Math.min(safePage.getOffset(), sorted.size());
-		final int end = Math.min(start + safePage.getPageSize(), sorted.size());
-		final List<EntityClass> content = sorted.subList(start, end);
+		// Data is already sorted by the database query, no need for additional sorting
+		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+		final List<EntityClass> content = filtered.subList(start, end);
 		return new PageImpl<>(content, safePage, filtered.size());
 	}
 

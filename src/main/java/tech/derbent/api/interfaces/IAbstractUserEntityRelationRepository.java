@@ -18,7 +18,7 @@ public interface IAbstractUserEntityRelationRepository<EntityClass extends CEnti
 	/** Find all relationship entities for a specific user ID
 	 * @param userId the ID of the user
 	 * @return list of relationship entities for the user */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user WHERE r.user.id = :userId")
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user WHERE r.user.id = :userId ORDER BY r.id DESC")
 	List<EntityClass> findByUserId(@Param ("userId") Long userId);
 	/** Count relationship entities for a specific user ID
 	 * @param userId the ID of the user

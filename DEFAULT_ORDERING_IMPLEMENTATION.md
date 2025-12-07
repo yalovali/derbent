@@ -1,7 +1,14 @@
-# Default Ordering Implementation Summary
+# Simplified Ordering Implementation Summary
 
 ## Overview
-This implementation adds default ordering to all entity queries in the Derbent application. Every entity now has a defined default order, and all queries automatically apply this ordering. This ensures consistent, predictable results across the application.
+This implementation provides a simplified, database-centric approach to ordering in the Derbent application. All sorting is handled by repository queries with explicit ORDER BY clauses, eliminating complex in-memory sorting logic and improving performance.
+
+## Key Principles
+
+1. **Database-Level Sorting**: All sorting is performed in repository queries using ORDER BY clauses
+2. **Simple & Explicit**: Every query that returns multiple results includes an explicit ORDER BY
+3. **Default Ordering**: Entities define their default order field via `getDefaultOrderBy()`
+4. **No In-Memory Sorting**: Removed complex in-memory sorting infrastructure for better performance
 
 ## What Was Implemented
 
@@ -14,12 +21,22 @@ This implementation adds default ordering to all entity queries in the Derbent a
 
 #### Service Level
 - **`CAbstractService.getDefaultSort()`**: Creates Sort object based on entity's default order field
-- **`CAbstractService.findAll()`**: Now applies default ordering (DESC by default)
-- **`CAbstractService.ensureDefaultOrdering()`**: Merges user-provided Sort with default ordering
-- **`CAbstractService.list()` methods**: All list methods now ensure default ordering
+- **`CAbstractService.findAll()`**: Uses `repository.findAll(Sort)` for database-level ordering
+- **`CAbstractService.list()` methods**: Simplified to delegate to repository queries
+
+**Removed Complex Sorting Infrastructure**:
+- ❌ Removed `applySort()` method - no more in-memory sorting
+- ❌ Removed `getSortKeyExtractors()` method - not needed with query-based sorting
+- ✅ All sorting now happens in database queries
 
 #### Repository Level
-All repository queries now include explicit ORDER BY clauses:
+All repository queries include explicit ORDER BY clauses:
+- **IEntityOfProjectRepository**: `ORDER BY e.name ASC`
+- **IEntityOfCompanyRepository**: `ORDER BY e.name ASC`
+- **IUserRelationshipRepository**: `ORDER BY r.id DESC`
+- **IAbstractUserEntityRelationRepository**: `ORDER BY r.id DESC`
+- **IUserCompanyRoleRepository**: `ORDER BY ucr.name ASC`
+- **IDetailSectionRepository**: `ORDER BY s.name ASC`
 - **IActivityRepository**: `ORDER BY a.id DESC`
 - **IMeetingRepository**: `ORDER BY m.id DESC`
 - **IProjectRepository**: `ORDER BY p.name`
@@ -36,7 +53,7 @@ Added `sprintOrder` field for sprint-aware ordering:
 - **`CMeeting`**: Added `sprintOrder` Integer field with database column `sprint_order`
 
 #### Sprint-Aware Queries
-New repository methods for sprint-aware ordering:
+Repository methods for sprint-aware ordering:
 - **`IActivityRepository.listByProjectOrderedBySprintOrder()`**: Orders by `sprintOrder ASC NULLS LAST, id DESC`
 - **`IMeetingRepository.listByProjectOrderedBySprintOrder()`**: Orders by `sprintOrder ASC NULLS LAST, id DESC`
 
@@ -46,22 +63,22 @@ Corresponding service methods:
 
 ### 3. Sprint Item Ordering
 
-Sprint items already use `itemOrder` field for ordering (existing functionality):
+Sprint items use `itemOrder` field for ordering:
 - **`ISprintItemRepository`**: All queries use `ORDER BY e.itemOrder ASC`
 
 ## How To Use
 
 ### For Regular Entities
 
-Entities automatically use their default ordering:
+Entities automatically use their default ordering from repository queries:
 
 ```java
-// Service automatically applies default ordering
+// Service uses repository.findAll(Sort) which applies ORDER BY in database
 List<CActivity> activities = activityService.findAll();
-// Result: Activities ordered by ID descending
+// SQL: SELECT ... FROM cactivity ORDER BY id DESC
 
 List<CProject> projects = projectService.findAll();
-// Result: Projects ordered by name ascending (CEntityNamed default)
+// SQL: SELECT ... FROM cproject ORDER BY name ASC (CEntityNamed default)
 ```
 
 ### For Custom Default Ordering
@@ -79,6 +96,15 @@ public class CMyEntity extends CEntityDB<CMyEntity> {
 }
 ```
 
+### Adding ORDER BY to New Repository Methods
+
+When adding new repository query methods, **always** include an ORDER BY clause:
+
+```java
+@Query("SELECT e FROM #{#entityName} e WHERE e.status = :status ORDER BY e.name ASC")
+List<MyEntity> findByStatus(@Param("status") String status);
+```
+
 ### For Sprint-Aware Components
 
 Use the sprint-order aware methods:
@@ -90,18 +116,6 @@ List<CActivity> orderedActivities = activityService.listByProjectOrderedBySprint
 // For meetings in a sprint view
 List<CMeeting> orderedMeetings = meetingService.listByProjectOrderedBySprintOrder(project);
 ```
-
-### For User-Provided Sorting
-
-User sorting is combined with default sorting:
-
-```java
-// User wants to sort by priority
-Sort userSort = Sort.by("priority").ascending();
-Pageable pageable = PageRequest.of(0, 20, userSort);
-
-// Service combines: first priority ASC, then default (id DESC)
-Page<CActivity> page = activityService.list(pageable);
 ```
 
 ## Database Changes
@@ -136,18 +150,18 @@ To complete the sprint ordering functionality:
 ### Example 1: Activity List Ordered by Default
 
 ```java
-// Before: Activities could appear in any order
+// Activities are consistently ordered by ID descending via repository query
 List<CActivity> activities = activityService.findAll();
-
-// After: Activities are consistently ordered by ID descending
-// Activity 100, Activity 99, Activity 98, ...
+// SQL: SELECT ... FROM cactivity ORDER BY id DESC
+// Result: Activity 100, Activity 99, Activity 98, ...
 ```
 
 ### Example 2: Project List Ordered by Name
 
 ```java
-// Projects extend CEntityNamed, so they order by name
+// Projects extend CEntityNamed, so they order by name via repository query
 List<CProject> projects = projectService.findAll();
+// SQL: SELECT ... FROM cproject ORDER BY name ASC
 // Result: "Alpha Project", "Beta Project", "Gamma Project"
 ```
 
@@ -156,6 +170,7 @@ List<CProject> projects = projectService.findAll();
 ```java
 // Load activities ordered by sprint order for backlog display
 List<CActivity> backlogItems = activityService.listByProjectOrderedBySprintOrder(project);
+// SQL: SELECT ... FROM cactivity WHERE project_id = ? ORDER BY sprint_order ASC NULLS LAST, id DESC
 
 // Items with sprintOrder appear first (in order), then items without sprintOrder
 // Activity 5 (sprintOrder=1)
@@ -173,21 +188,34 @@ List<CActivity> backlogItems = activityService.listByProjectOrderedBySprintOrder
 
 ## Implementation Philosophy
 
-The implementation follows the requirements to use "straight simple approach" with JPA features:
+The implementation follows a simplified, database-centric approach:
 
-- ✅ Uses standard JPA `ORDER BY` clauses in JPQL queries
-- ✅ Leverages Spring Data `Sort` objects for programmatic ordering
-- ✅ Provides simple string-based default order field specification
-- ✅ Allows easy override for custom ordering per entity
-- ✅ No complex reflection or dynamic query building
+- ✅ **Database-Level Sorting**: All sorting happens in SQL ORDER BY clauses
+- ✅ **Explicit Ordering**: Every multi-result query has an explicit ORDER BY
+- ✅ **Simple & Maintainable**: No complex in-memory sorting logic
+- ✅ **Better Performance**: Sorting at database level is more efficient
+- ✅ **Standard JPA**: Uses standard JPA `ORDER BY` clauses in JPQL queries
+- ✅ **Spring Data Integration**: Leverages Spring Data `Sort` objects when needed
+- ❌ **No In-Memory Sorting**: Removed `applySort()` and `getSortKeyExtractors()` methods
+- ❌ **No Complex Comparators**: Sorting logic belongs in queries, not services
 - ✅ Clear, maintainable code with explicit ordering
 
 ## Key Files Modified
 
-### Core Infrastructure
-- `src/main/java/tech/derbent/api/entity/domain/CEntityDB.java`
-- `src/main/java/tech/derbent/api/entity/domain/CEntityNamed.java`
-- `src/main/java/tech/derbent/api/entity/service/CAbstractService.java`
+### Core Infrastructure (Simplified)
+- `src/main/java/tech/derbent/api/entity/domain/CEntityDB.java` - Default order field
+- `src/main/java/tech/derbent/api/entity/domain/CEntityNamed.java` - Named entity ordering
+- `src/main/java/tech/derbent/api/entity/service/CAbstractService.java` - **Removed `applySort()` and `getSortKeyExtractors()`**
+- `src/main/java/tech/derbent/api/entity/service/CEntityNamedService.java` - **Removed `getSortKeyExtractors()`**
+- `src/main/java/tech/derbent/api/entityOfProject/service/CEntityOfProjectService.java` - **Updated to use repository queries**
+
+### Repository Queries (Added ORDER BY)
+- `src/main/java/tech/derbent/api/entityOfProject/service/IEntityOfProjectRepository.java`
+- `src/main/java/tech/derbent/api/entityOfCompany/service/IEntityOfCompanyRepository.java`
+- `src/main/java/tech/derbent/api/interfaces/IUserRelationshipRepository.java`
+- `src/main/java/tech/derbent/api/interfaces/IAbstractUserEntityRelationRepository.java`
+- `src/main/java/tech/derbent/app/roles/service/IUserCompanyRoleRepository.java`
+- `src/main/java/tech/derbent/api/screens/service/IDetailSectionRepository.java`
 
 ### Sprint Order Field
 - `src/main/java/tech/derbent/api/interfaces/ISprintableItem.java`

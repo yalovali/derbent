@@ -11,9 +11,9 @@ import tech.derbent.api.entity.domain.CEntityDB;
 @NoRepositoryBean
 public interface IUserRelationshipRepository<EntityClass extends CEntityDB<EntityClass>> extends IAbstractUserEntityRelationRepository<EntityClass> {
 
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user WHERE r.user.id = :userId")
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user WHERE r.user.id = :userId ORDER BY r.id DESC")
 	List<EntityClass> findByUserIdWithUser(@Param ("userId") Long userId);
-	@Query ("SELECT r FROM #{#entityName} r WHERE r.user.id = :userId AND r.active = true")
+	@Query ("SELECT r FROM #{#entityName} r WHERE r.user.id = :userId AND r.active = true ORDER BY r.id DESC")
 	List<EntityClass> findActiveByUserId(@Param ("userId") Long userId);
 	@Modifying
 	@Transactional
