@@ -190,6 +190,8 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		// Create the entity selection component with all configuration
 		componentEntitySelection = new CComponentEntitySelection<EntityClass>(componentEntityTypes, componentItemsProvider,
 				this::on_componentEntitySelection_selectionChanged, multiSelect, componentAlreadySelectedProvider, componentMode);
+        // Also register as a HasSelection listener so creators can observe selection set changes
+        componentEntitySelection.addValueChangeListener(event -> on_componentEntitySelection_selectionChanged(event.getValue()));
 		// Add component to main layout
 		mainLayout.add(componentEntitySelection);
 		mainLayout.setFlexGrow(1, componentEntitySelection);
