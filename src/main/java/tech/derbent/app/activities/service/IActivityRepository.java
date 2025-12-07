@@ -42,6 +42,21 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			ORDER BY a.id DESC
 			""")
 	Page<CActivity> listByProject(@Param ("project") CProject project, Pageable pageable);
+	/** Find all activities by project ordered by sprint order for sprint-aware components. Null sprintOrder values will appear last.
+	 * @param project the project
+	 * @return list of activities ordered by sprintOrder ASC, id DESC */
+	@Query ("""
+			SELECT a FROM #{#entityName} a
+			LEFT JOIN FETCH a.project
+			LEFT JOIN FETCH a.assignedTo
+			LEFT JOIN FETCH a.createdBy
+			LEFT JOIN FETCH a.entityType et
+			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH a.status
+			WHERE a.project = :project
+			ORDER BY a.sprintOrder ASC NULLS LAST, a.id DESC
+			""")
+	List<CActivity> listByProjectOrderedBySprintOrder(@Param ("project") CProject project);
 	// find all activities of projects where the user's company owns the project
 	@Query ("""
 			SELECT a FROM #{#entityName} a
