@@ -30,7 +30,7 @@ Derbent is a Java Spring Boot + Vaadin collaborative project management applicat
 ### Standard Workflow After Completing Tasks
 When completing a task, **automatically execute this workflow:**
 
-1. **Code Formatting**: Run `mvn spotless:apply`
+1. **Code Formatting**: Apply Eclipse formatter (via IDE) or configure Spotless Maven plugin
 2. **Compilation Check**: Run `mvn clean compile` (if code changes)
 3. **Test Validation**: Run appropriate tests (if code changes affect functionality)
 4. **Git Commit**: Commit changes with a descriptive message following conventional commits format
@@ -65,20 +65,20 @@ When completing a task, **automatically execute this workflow:**
 ### Environment Setup (CRITICAL)
 ```bash
 # ALWAYS source the Java environment setup first
-source ./setup-java-env.sh
+source ./bin/setup-java-env.sh
 
 # This ensures Java 21 is used (REQUIRED by pom.xml)
 # The script automatically configures JAVA_HOME and PATH
 
 # Quick verification of environment (recommended on first use)
-./verify-environment.sh
+./bin/verify-environment.sh
 # This checks Java 21, Maven, SO libraries, and compilation
 ```
 
 ### Bootstrap, Build, and Test the Repository
 ```bash
 # Prerequisites: Java 21 and Maven 3.9+ are required
-source ./setup-java-env.sh  # Sets up Java 21
+source ./bin/setup-java-env.sh  # Sets up Java 21
 java -version    # Should show Java 21
 mvn -version     # Should show Maven 3.9+
 
@@ -90,20 +90,21 @@ mvn clean compile
 mvn test-compile
 # TIMEOUT: Set 5+ minutes. Expected time: 10-15 seconds
 
-# Apply code formatting (required before commits)
-mvn spotless:apply
-# TIMEOUT: Set 2+ minutes. Expected time: 5 seconds
+# Apply code formatting (if Spotless is configured)
+# Note: Spotless plugin needs to be added to pom.xml first
+# mvn spotless:apply
 
-# Check code formatting
-mvn spotless:check
-# TIMEOUT: Set 2+ minutes. Expected time: 2-3 seconds
+# Check code formatting (if Spotless is configured)
+# mvn spotless:check
 ```
 
 ### Run the Application
 ```bash
-# ALWAYS source Java environment and apply formatting first
-source ./setup-java-env.sh
-mvn spotless:apply
+# ALWAYS source Java environment first
+source ./bin/setup-java-env.sh
+
+# Note: Code formatting can be done via IDE using eclipse-formatter.xml
+# Or by configuring Spotless Maven plugin in pom.xml
 
 # Start the application (NEVER CANCEL: takes 15+ seconds)
 # NOTE: The default configuration uses PostgreSQL. For development without PostgreSQL:
@@ -122,7 +123,7 @@ mvn spring-boot:run -Ph2-local-development
 ```bash
 # IMPORTANT: Before running any tests, ensure SO libraries are installed
 # Run once after cloning the repository:
-./install-so-libraries.sh
+./bin/install-so-libraries.sh
 
 # Run Playwright UI automation tests with screenshots (NEVER CANCEL: takes 37+ seconds)
 ./run-playwright-tests.sh menu
@@ -171,16 +172,15 @@ PLAYWRIGHT_VIEWPORT_WIDTH=390 PLAYWRIGHT_VIEWPORT_HEIGHT=844 ./run-playwright-te
 #### 1. Build and Format Validation
 ```bash
 # CRITICAL: Always run these in sequence before committing
-source ./setup-java-env.sh             # Setup Java 21 (REQUIRED)
-mvn spotless:apply                     # Fix formatting issues
-mvn spotless:check                     # Verify formatting is correct
+source ./bin/setup-java-env.sh             # Setup Java 21 (REQUIRED)
+# Note: Apply code formatting via IDE (Eclipse formatter: eclipse-formatter.xml)
 mvn clean compile                      # Full build (NEVER CANCEL: 12-15 seconds)
 ```
 
 #### 2. Application Startup Validation  
 ```bash
 # Start application and verify it loads (use H2 profile for development)
-source ./setup-java-env.sh
+source ./bin/setup-java-env.sh
 mvn spring-boot:run -Dspring.profiles.active=h2 &
 APP_PID=$!
 
@@ -198,7 +198,7 @@ kill $APP_PID
 #### 3. UI Automation Validation
 ```bash
 # IMPORTANT: Ensure SO libraries are installed first
-./install-so-libraries.sh  # Run once after cloning
+./bin/install-so-libraries.sh  # Run once after cloning
 
 # ALWAYS test UI changes with Playwright screenshots
 ./run-playwright-tests.sh menu
@@ -318,8 +318,6 @@ Required Entity Screens to Test:
 - **clean**: 2-5 seconds
 - **compile**: 12-15 seconds (incremental builds after first compile)
 - **test-compile**: 10-15 seconds
-- **spotless:apply**: ~5 seconds
-- **spotless:check**: ~2-3 seconds
 - **spring-boot:run**: 12-15 seconds to start
 
 ### CRITICAL Timeout Settings:
@@ -353,11 +351,35 @@ docs/                   # Essential documentation
 ```
 
 ### Coding Standards (CRITICAL - Follow Strictly)
-- **ALL domain classes MUST be prefixed with "C"** (e.g., CActivity, CUser, CProject)
+
+#### C-Prefix Convention (MANDATORY)
+**ALL custom classes MUST be prefixed with "C"** to distinguish from framework classes:
+
+```java
+// ✅ CORRECT
+public class CActivity extends CProjectItem<CActivity> { }
+public class CActivityService extends CEntityOfProjectService<CActivity> { }
+public class CActivityView extends CAbstractPage { }
+public class CButton extends Button { }
+
+// ❌ INCORRECT
+public class Activity { }  // Missing C-prefix
+public class ActivityService { }  // Missing C-prefix
+```
+
+**Benefits**: Instant recognition of custom vs. framework classes, enhanced IDE navigation, AI-assisted development optimization
+
+**Exceptions**: 
+- Interface names start with `I`: `IActivityRepository`, `ISessionService`
+- Test classes: `CActivityTest`, `CActivityServiceTest`
+- Package names: lowercase without prefix
+
+#### Core Development Patterns
 - **Follow MVC pattern**: Model (domain), View (UI), Controller (service)
 - **Always use CAbstractService** as base for service classes
 - **Entity classes extend CEntityDB<T>** for database entities
 - **Views extend appropriate CAbstract*Page** base classes
+- **Use @AMetaData** for metadata-driven development (see Entity Constants section below)
 
 ### UI Component Naming Standards (MANDATORY - No Exceptions)
 
@@ -573,7 +595,358 @@ notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
 - **Dialogs extending CDBEditDialog**: Service available if injected in parent
 
 **Rule: Every notification/message to users MUST go through CNotificationService or CNotifications**
+
+### Entity Constants (MANDATORY)
+Every entity class MUST define these constants for proper system integration:
+
+```java
+public class CActivity extends CProjectItem<CActivity> {
+    public static final String DEFAULT_COLOR = "#DC143C";
+    public static final String DEFAULT_ICON = "vaadin:tasks";
+    public static final String ENTITY_TITLE_PLURAL = "Activities";      // MANDATORY
+    public static final String ENTITY_TITLE_SINGULAR = "Activity";       // MANDATORY
+    private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
+    public static final String VIEW_NAME = "Activities View";
+}
+```
+
+**Using Entity Titles via CEntityRegistry**:
+```java
+// Get entity class from title
+Class<?> entityClass = CEntityRegistry.getEntityClassByTitle("Activity");
+Class<?> entityClass = CEntityRegistry.getEntityClassByTitle("Activities");
+
+// Get title from entity class
+String singular = CEntityRegistry.getEntityTitleSingular(CActivity.class);  // "Activity"
+String plural = CEntityRegistry.getEntityTitlePlural(CActivity.class);      // "Activities"
+```
+
+### Metadata-Driven Development
+Use `@AMetaData` annotations for automatic UI generation:
+
+```java
+@Column(nullable = false, length = 255)
+@Size(max = 255)
+@NotBlank(message = "Name is required")
+@AMetaData(
+    displayName = "Activity Name",    // UI label
+    required = true,                   // Required field indicator
+    readOnly = false,                  // Editable in forms
+    description = "Activity name",     // Tooltip/help text
+    hidden = false,                    // Visible in UI
+    maxLength = 255,                   // Max input length
+    dataProviderBean = "CUserService"  // For ComboBox data source
+)
+private String name;
+```
+
+### Validation and Error Handling (CRITICAL)
+
+#### Use Check Utility for Fail-Fast Validation
+```java
+// ✅ CORRECT - Use Check utility
+Check.notNull(entity, "Entity cannot be null");
+Check.notBlank(name, "Name cannot be blank");
+Check.notEmpty(list, "List cannot be empty");
+Check.isTrue(value > 0, "Value must be positive");
+Check.instanceOf(obj, CEntityNamed.class, "Object must be an instance of CEntityNamed");
+
+// ❌ INCORRECT - Manual checks
+if (entity == null) {
+    throw new IllegalArgumentException("Entity cannot be null");
+}
+```
+
+#### Developer Errors vs Runtime Errors
+**Developer Errors (MUST throw exceptions)**:
+- Calling `getName()` on object that doesn't have name property
+- Calling `getStatus()` on object that doesn't implement status interface
+- Wrong type being passed to method expecting specific type
+- **Action**: Use `Check.instanceOf()` to fail fast
+
+**Runtime Errors (CAN handle gracefully)**:
+- User input validation
+- Network failures
+- File not found
+- Database connection issues
+
+```java
+// ✅ CORRECT - Exposing developer error immediately
+private String getEntityName(EntityClass item) {
+    Check.notNull(item, "Item cannot be null");
+    Check.instanceOf(item, CEntityNamed.class, "Item must be of type CEntityNamed");
+    return ((CEntityNamed<?>) item).getName();
+}
+
+// ❌ WRONG - Hiding developer error
+private String getEntityName(EntityClass item) {
+    if (item instanceof CEntityNamed) {
+        return ((CEntityNamed<?>) item).getName();
+    }
+    return "";  // WRONG: Developer should never call this with wrong type
+}
+```
+
+### Form Binding
 - **Use CEnhancedBinder** for form binding instead of vanilla Vaadin Binder
+
+### Database Configuration
+- **Development**: Use H2 profile: `mvn spring-boot:run -Dspring.profiles.active=h2`
+- **Production**: PostgreSQL (requires manual setup and database server)
+- **Schema**: Hibernate auto-creates tables with sample data
+- **Sample Data**: Automatically loaded on startup via CSampleDataInitializer
+
+### Multi-User & Concurrency Patterns (CRITICAL for Web Applications)
+
+#### Stateless Service Pattern (MANDATORY)
+All services MUST be stateless to support multiple concurrent users. Services are Spring singletons shared across ALL users.
+
+```java
+// ✅ CORRECT: Stateless Service
+@Service
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    // ✅ GOOD: Only dependencies, no user-specific state
+    private final IActivityRepository repository;
+    private final Clock clock;
+    private final ISessionService sessionService;
+    
+    public CActivityService(IActivityRepository repository, Clock clock, ISessionService sessionService) {
+        super(repository, clock, sessionService);
+        this.repository = repository;
+        this.sessionService = sessionService;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<CActivity> getUserActivities() {
+        // ✅ GOOD: Get user from session each time
+        CUser currentUser = sessionService.getActiveUser()
+            .orElseThrow(() -> new IllegalStateException("No active user"));
+        return repository.findByUserId(currentUser.getId());
+    }
+}
+
+// ❌ WRONG: Service with User-Specific State
+@Service
+public class CBadActivityService {
+    // ❌ WRONG: User state stored in service (shared across ALL users!)
+    private CUser currentUser;
+    private List<CActivity> cachedActivities;
+    
+    public void setCurrentUser(CUser user) {
+        // ❌ WRONG: This will be overwritten by other users' requests
+        this.currentUser = user;
+    }
+    
+    public List<CActivity> getActivities() {
+        // ❌ WRONG: Returns wrong data when multiple users access simultaneously
+        return cachedActivities;
+    }
+}
+```
+
+**Service Field Rules**:
+| Field Type | Allowed? | Example | Notes |
+|------------|----------|---------|-------|
+| Repository dependency | ✅ Yes | `private final IUserRepository repository` | Injected via constructor |
+| Clock dependency | ✅ Yes | `private final Clock clock` | Injected via constructor |
+| Session service | ✅ Yes | `private final ISessionService sessionService` | Injected via constructor |
+| Logger | ✅ Yes | `private static final Logger LOGGER` | Thread-safe, immutable |
+| Constants | ✅ Yes | `private static final String MENU_TITLE` | Immutable |
+| User context | ❌ No | `private CUser currentUser` | **WRONG! Shared across users** |
+| User data cache | ❌ No | `private List<CEntity> userCache` | **WRONG! Shared across users** |
+| Mutable static collections | ❌ No | `private static Map<Long, CUser> cache` | **WRONG! Not thread-safe** |
+
+#### Session State Management
+```java
+// ✅ DO: Use VaadinSession for User-Specific State
+@Service
+public class CPreferenceService {
+    private static final String PREFERENCE_KEY = "userPreference";
+    
+    public void savePreference(String preference) {
+        // ✅ GOOD: Each user has their own VaadinSession
+        VaadinSession.getCurrent().setAttribute(PREFERENCE_KEY, preference);
+    }
+    
+    public String getPreference() {
+        // ✅ GOOD: Retrieved from user's own session
+        return (String) VaadinSession.getCurrent().getAttribute(PREFERENCE_KEY);
+    }
+}
+
+// ✅ DO: Retrieve Context from Session Per-Request
+@Service
+public class CActivityService extends CAbstractService<CActivity> {
+    
+    @Transactional(readOnly = true)
+    public List<CActivity> findAll() {
+        // ✅ GOOD: Get company from session each time method is called
+        CCompany currentCompany = getCurrentCompany();
+        return repository.findByCompany_Id(currentCompany.getId());
+    }
+    
+    private CCompany getCurrentCompany() {
+        Check.notNull(sessionService, "Session service required");
+        CCompany company = sessionService.getCurrentCompany();
+        Check.notNull(company, "No active company");
+        return company;
+    }
+}
+```
+
+**Multi-User Safety Checklist**:
+1. **No instance fields storing user data** ✓
+2. **No instance fields storing collections of user data** ✓
+3. **No static mutable collections** ✓
+4. **All user context retrieved from sessionService** ✓
+5. **No caching of user-specific data in service** ✓
+
+### Repository Query Patterns (MANDATORY)
+
+#### Repository Query Ordering - All Queries MUST Include ORDER BY
+All repository query methods returning List or Page MUST include explicit ORDER BY clause:
+
+```java
+// ✅ CORRECT - Explicit ORDER BY
+@Query("SELECT e FROM #{#entityName} e WHERE e.project = :project ORDER BY e.name ASC")
+List<CActivity> findByProject(@Param("project") CProject project);
+
+@Query("SELECT e FROM #{#entityName} e WHERE e.company = :company ORDER BY e.id DESC")
+List<CEntity> findByCompany(@Param("company") CCompany company);
+
+// ❌ INCORRECT - Missing ORDER BY
+@Query("SELECT e FROM #{#entityName} e WHERE e.project = :project")
+List<CActivity> findByProject(@Param("project") CProject project);
+```
+
+**Ordering Rules**:
+- **Named entities** (extending CEntityNamed): Use `ORDER BY e.name ASC`
+- **Regular entities** (extending CEntityDB): Use `ORDER BY e.id DESC`
+- **Sprintable items**: Use `ORDER BY e.sprintOrder ASC NULLS LAST, e.id DESC`
+
+#### Child Entity Repository Standards (Master-Detail Pattern)
+
+Use consistent method naming for child entity repositories:
+
+```java
+public interface ISprintItemRepository extends IAbstractRepository<CSprintItem> {
+
+    /** Find all children by master entity. */
+    @Query("SELECT e FROM #{#entityName} e WHERE e.sprint = :master ORDER BY e.itemOrder ASC")
+    List<CSprintItem> findByMaster(@Param("master") CSprint master);
+
+    /** Find all children by master ID. */
+    @Query("SELECT e FROM #{#entityName} e WHERE e.sprint.id = :masterId ORDER BY e.itemOrder ASC")
+    List<CSprintItem> findByMasterId(@Param("masterId") Long masterId);
+
+    /** Count children by master. */
+    @Query("SELECT COUNT(e) FROM #{#entityName} e WHERE e.sprint = :master")
+    Long countByMaster(@Param("master") CSprint master);
+
+    /** Get next item order for new items. */
+    @Query("SELECT COALESCE(MAX(e.itemOrder), 0) + 1 FROM #{#entityName} e WHERE e.sprint = :master")
+    Integer getNextItemOrder(@Param("master") CSprint master);
+}
+```
+
+**Standard Method Names**:
+| Method Pattern | Purpose | Example |
+|----------------|---------|---------|
+| `findByMaster(M master)` | Find all children by master entity | `findByMaster(CDetailSection master)` |
+| `findByMasterId(Long id)` | Find all children by master ID | `findByMasterId(Long sprintId)` |
+| `countByMaster(M master)` | Count children by master entity | `countByMaster(CDetailSection master)` |
+| `getNextItemOrder(M master)` | Get next order number | `getNextItemOrder(CDetailSection master)` |
+
+**JPQL Standards**:
+- Always use `e` as entity alias: `SELECT e FROM #{#entityName} e`
+- Use generic parameter names like `master` instead of entity-specific names
+- Always include explicit `e.` prefix for JOINed fields
+
+### Grid and Component Patterns
+
+#### Grid Refresh Pattern
+Use `IGridRefreshListener<T>` for Update-Then-Notify pattern:
+
+```java
+// Pattern: Action → Update self → refreshGrid() → notifyRefreshListeners() → Listeners refresh
+public class CComponentListEntityBase<T extends CEntityDB<T>> 
+        implements IGridRefreshListener<T> {
+    
+    private final List<IGridRefreshListener<T>> refreshListeners = new ArrayList<>();
+    
+    public void addRefreshListener(IGridRefreshListener<T> listener) {
+        refreshListeners.add(listener);
+    }
+    
+    protected void notifyRefreshListeners(T entity) {
+        for (IGridRefreshListener<T> listener : refreshListeners) {
+            listener.onGridRefresh(entity);
+        }
+    }
+    
+    @Override
+    public void onGridRefresh(T entity) {
+        refreshGrid();  // Refresh this component's grid
+    }
+}
+```
+
+#### Grid Reordering
+Always use service `moveItemUp()`/`moveItemDown()` methods for reordering:
+
+```java
+// ✅ CORRECT - Use service methods
+protected void on_buttonMoveUp_clicked() {
+    try {
+        T selectedItem = grid.asSingleSelect().getValue();
+        Check.notNull(selectedItem, "No item selected");
+        service.moveItemUp(selectedItem);
+        refreshGrid();
+    } catch (Exception ex) {
+        LOGGER.error("Error moving item up", ex);
+        CNotificationService.showException("Error moving item up", ex);
+    }
+}
+
+// ❌ WRONG - Manual order field updates
+protected void on_buttonMoveUp_clicked() {
+    T item = grid.asSingleSelect().getValue();
+    item.setOrder(item.getOrder() - 1);  // WRONG: Don't manually update order
+    service.save(item);
+}
+```
+
+### Sample Data Initialization Pattern (MANDATORY)
+
+All InitializerService classes MUST implement the `initializeSample()` pattern:
+
+```java
+public class CEntityTypeInitializerService extends CInitializerServiceBase {
+    
+    private static final Class<?> clazz = CEntityType.class;
+    
+    // Sample data initialization method (REQUIRED)
+    public static void initializeSample(final CProject project, 
+            final boolean minimal) throws Exception {
+        final String[][] nameAndDescriptions = {
+            { "Type 1", "Description for type 1" },
+            { "Type 2", "Description for type 2" },
+            { "Type 3", "Description for type 3" }
+        };
+        initializeProjectEntity(nameAndDescriptions,
+            (CEntityOfProjectService<?>) CSpringContext.getBean(
+                CEntityRegistry.getServiceClassForEntity(clazz)), 
+            project, minimal, null);
+    }
+}
+```
+
+**Implementation Rules**:
+1. Method MUST be named `initializeSample`
+2. Parameters: `(final CProject project, final boolean minimal)`
+3. Data Format: Use `String[][]` for name and description pairs
+4. Base Method: Call `initializeProjectEntity()` from `CInitializerServiceBase`
+5. Respect the `minimal` parameter to create reduced datasets
 
 ### Database Configuration
 - **Development**: Use H2 profile: `mvn spring-boot:run -Dspring.profiles.active=h2`
@@ -649,11 +1022,12 @@ mvn spring-boot:run -Dspring.profiles.active=h2 | grep -E "(ERROR|WARN|DEBUG)"
 ### Code Quality Checks
 **AI Assistant should automatically run these before committing:**
 ```bash
-# 1. Fix formatting (ALWAYS run first)
-mvn spotless:apply
+# 1. Setup Java environment (ALWAYS run first)
+source ./bin/setup-java-env.sh
 
-# 2. Verify formatting is correct
-mvn spotless:check
+# 2. Apply code formatting via IDE
+# Use eclipse-formatter.xml in your IDE (IntelliJ IDEA, Eclipse, VS Code)
+# Or configure Spotless Maven plugin for automated formatting
 
 # 3. Full build verification (NEVER CANCEL: 12-15 seconds)
 mvn clean compile
@@ -674,11 +1048,94 @@ git commit -m "feat: descriptive message"
 
 **Workflow Summary:**
 1. Make code changes
-2. Run `mvn spotless:apply` automatically
+2. Apply code formatting via IDE (eclipse-formatter.xml)
 3. Run `mvn clean compile` to verify build
 4. Run appropriate tests (Playwright for UI changes)
 5. Commit with conventional commit message
 6. Provide summary of changes
+
+### Code Formatting Standards
+
+#### Import Organization (MANDATORY)
+**ALWAYS use import statements instead of full class names:**
+
+```java
+// ✅ CORRECT
+import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.projects.domain.CProject;
+
+public class CActivityService {
+    public CActivity createActivity(String name, CProject project) {
+        CActivity activity = new CActivity(name, project);
+        return save(activity);
+    }
+}
+
+// ❌ INCORRECT
+public class CActivityService {
+    public tech.derbent.app.activities.domain.CActivity createActivity(
+            String name, tech.derbent.app.projects.domain.CProject project) {
+        tech.derbent.app.activities.domain.CActivity activity = 
+            new tech.derbent.app.activities.domain.CActivity(name, project);
+        return save(activity);
+    }
+}
+```
+
+**Benefits**: Improved readability, easier maintenance, better IDE support, reduced line length
+
+**Rule**: Full package paths should only appear in import statements at the top of the file.
+
+#### Spotless Configuration Standards (if configured)
+The project uses Eclipse formatter configuration in `eclipse-formatter.xml`. 
+
+To enable automated formatting with Spotless Maven plugin, add to pom.xml:
+```xml
+<plugin>
+    <groupId>com.diffplug.spotless</groupId>
+    <artifactId>spotless-maven-plugin</artifactId>
+    <version>2.43.0</version>
+    <configuration>
+        <java>
+            <eclipse>
+                <file>eclipse-formatter.xml</file>
+            </eclipse>
+        </java>
+    </configuration>
+</plugin>
+```
+
+Once configured, use:
+```bash
+mvn spotless:apply  # Apply formatting
+mvn spotless:check  # Check formatting
+```
+
+Until Spotless is configured, use your IDE's formatter with eclipse-formatter.xml.
+
+**Code Formatting Standards (from eclipse-formatter.xml)**:
+- **Indentation**: 4 spaces (no tabs)
+- **Line length**: 140 characters (soft limit)
+- **Braces**: Always use braces, even for single-line blocks
+- **Import organization**: Remove unused imports, organize alphabetically
+- **Final keyword**: Use `final` for method parameters and local variables
+
+```java
+// ✅ CORRECT
+public void processActivity(final CActivity activity) {
+    final String name = activity.getName();
+    if (name != null) {
+        doSomething(name);
+    }
+}
+
+// ❌ INCORRECT - No final, no braces
+public void processActivity(CActivity activity) {
+    String name = activity.getName();
+    if (name != null)
+        doSomething(name);
+}
+```
 
 ## Technology Stack Reference
 
