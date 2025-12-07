@@ -27,7 +27,7 @@ import tech.derbent.api.interfaces.IDragOwner;
 import tech.derbent.api.interfaces.IDropOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
-import tech.derbent.api.interfaces.IHasSelection;
+
 import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -39,6 +39,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 /** CComponentEntitySelection - Reusable component for selecting entities from a grid with search/filter capabilities.
  * <p>
  * This component can be embedded in dialogs, pages, or panels for entity selection functionality.
+ * Implements HasValue interface for full Vaadin binder integration.
  * <p>
  * Features:
  * <ul>
@@ -51,10 +52,12 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
  * <li>Selected items persist across grid filtering</li>
  * <li>Support for already-selected items with two modes: hide or show as pre-selected</li>
  * <li>Refresh listener support via IGridRefreshListener interface for component notifications</li>
+ * <li>HasValue interface for binder integration and value change events</li>
  * </ul>
  * @param <EntityClass> The entity type being selected */
 public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
-		implements IGridComponent<EntityClass>, IGridRefreshListener<EntityClass>, IHasSelection<EntityClass> {
+		implements IGridComponent<EntityClass>, IGridRefreshListener<EntityClass>, 
+		HasValue<HasValue.ValueChangeEvent<Set<EntityClass>>, Set<EntityClass>> {
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
@@ -144,7 +147,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	// Refresh listeners for the update-and-notify pattern
 	private final List<Consumer<EntityClass>> refreshListeners = new ArrayList<>();
 	private final Set<EntityClass> selectedItems = new HashSet<>();
-	// Selection listeners registered by creators (IHasSelection)
+	// Selection listeners registered by creators (HasValue interface)
 	private final List<HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<Set<EntityClass>>>> selectionListeners = new ArrayList<>();
 	// Owner interfaces for notifying parent components
 	private ISelectionOwner<EntityClass> selectionOwner;
@@ -202,7 +205,9 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		LOGGER.debug("Added refresh listener to CComponentEntitySelection");
 	}
 
-	/** Registers a selection change listener so creators can be notified when the selection set changes. */
+	/** Registers a selection change listener. Implements HasValue.addValueChangeListener().
+	 * @param listener Listener to be notified when selection changes
+	 * @return Registration that can be used to remove the listener */
 	@Override
 	public Registration addValueChangeListener(final HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<Set<EntityClass>>> listener) {
 		Check.notNull(listener, "ValueChangeListener cannot be null");
@@ -418,7 +423,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public CGrid<EntityClass> getGrid() { return grid; }
 
 	/** Returns the currently selected items.
-	 * @return Set of selected items */
+	 * <p>
+	 * Note: This method is functionally equivalent to {@link #getValue()} from the HasValue interface.
+	 * Both methods return the same set of selected items. Use getValue() when working with Vaadin binders,
+	 * or getSelectedItems() for direct access in application code.
+	 * @return Set of selected items (never null) */
 	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
 
 	/** Returns whether the component is configured for multi-select.
@@ -644,9 +653,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Resets the component selection state. */
+	/** Resets the component selection state.
+	 * <p>
+	 * Note: This method is functionally equivalent to {@link #clear()} from the HasValue interface.
+	 * Prefer using clear() for consistency with standard Vaadin components.
+	 * @deprecated Use {@link #clear()} instead */
+	@Deprecated
 	public void reset() {
-		on_buttonReset_clicked();
+		clear();
 	}
 
 	/** Sets the drag owner to be notified when drag operations start.
@@ -716,7 +730,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 		// Notify selection owner if set
 		notifySelectionOwner();
-		// Notify registered selection listeners (IHasSelection)
+		// Notify registered selection listeners (HasValue interface)
 		try {
 			final Set<EntityClass> oldValue = new HashSet<>(currentSelectionSnapshot);
 			final Set<EntityClass> newValue = new HashSet<>(selectedItems);
@@ -727,7 +741,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					public HasValue<?, Set<EntityClass>> getHasValue() { return null; }
+					public HasValue<?, Set<EntityClass>> getHasValue() { return CComponentEntitySelection.this; }
 
 					@Override
 					public Set<EntityClass> getOldValue() { return oldValue; }
@@ -771,5 +785,88 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 		}
 		gridSearchToolbar.setStatusOptions(statuses);
+	}
+
+	// HasValue interface implementation
+
+	/** Gets the current value of this component (the selected items).
+	 * @return Set of currently selected items (never null) */
+	@Override
+	public Set<EntityClass> getValue() {
+		return new HashSet<>(selectedItems);
+	}
+
+	/** Sets the value of this component (the selected items). This will update the selection and fire value change events.
+	 * @param value Set of items to select (must not be null) */
+	@Override
+	public void setValue(final Set<EntityClass> value) {
+		Check.notNull(value, "Value cannot be null");
+		LOGGER.debug("Setting value with {} items", value.size());
+		selectedItems.clear();
+		selectedItems.addAll(value);
+		// Update grid selection
+		if (multiSelect) {
+			grid.deselectAll();
+			for (final EntityClass item : selectedItems) {
+				grid.select(item);
+			}
+		} else if (!selectedItems.isEmpty()) {
+			grid.asSingleSelect().setValue(selectedItems.iterator().next());
+		} else {
+			grid.asSingleSelect().clear();
+		}
+		updateSelectionIndicator();
+	}
+
+	/** Clears the selection. Equivalent to calling setValue with an empty set. */
+	@Override
+	public void clear() {
+		LOGGER.debug("Clearing all selected items");
+		selectedItems.clear();
+		if (multiSelect) {
+			grid.deselectAll();
+		} else {
+			grid.asSingleSelect().clear();
+		}
+		updateSelectionIndicator();
+	}
+
+	/** Checks if the selection is empty.
+	 * @return true if no items are selected, false otherwise */
+	@Override
+	public boolean isEmpty() {
+		return selectedItems.isEmpty();
+	}
+
+	/** Sets the read-only state of this component. When read-only, users cannot change the selection.
+	 * @param readOnly true to make read-only, false to make editable */
+	@Override
+	public void setReadOnly(final boolean readOnly) {
+		// Note: CComponentEntitySelection doesn't currently support read-only mode
+		// This could be implemented by disabling the grid and controls
+		LOGGER.debug("setReadOnly({}) called - not currently implemented", readOnly);
+	}
+
+	/** Checks if the component is read-only.
+	 * @return false (read-only mode not currently implemented) */
+	@Override
+	public boolean isReadOnly() {
+		return false;
+	}
+
+	/** Sets whether the required indicator should be visible.
+	 * @param requiredIndicatorVisible true to show required indicator, false to hide */
+	@Override
+	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
+		// Note: CComponentEntitySelection doesn't currently support required indicator
+		// This could be implemented by adding a visual indicator to the component
+		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
+	}
+
+	/** Checks if the required indicator is visible.
+	 * @return false (required indicator not currently implemented) */
+	@Override
+	public boolean isRequiredIndicatorVisible() {
+		return false;
 	}
 }
