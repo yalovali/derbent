@@ -219,13 +219,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	/** Gets all items currently displayed in the grid.
-	 * @return list of all items in grid */
+	 * @return mutable list of all items in grid */
 	public List<CProjectItem<?>> getAllItems() {
 		final var grid = getGrid();
 		if (grid == null) {
-			return List.of();
+			return new ArrayList<>();
 		}
-		return grid.getListDataView().getItems().toList();
+		return new ArrayList<>(grid.getListDataView().getItems().toList());
 	}
 
 	@Override
