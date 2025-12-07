@@ -13,6 +13,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
@@ -92,7 +93,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 				return "";
 			}
 			final LocalDate date = dateExtractor.apply(entity);
-			return date != null ? date.format(tech.derbent.api.grid.view.CLabelEntity.DATE_FORMATTER) : "";
+			return date != null ? date.format(CLabelEntity.DATE_FORMATTER) : "";
 		};
 	}
 
