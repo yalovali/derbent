@@ -72,8 +72,9 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	/** Create a new page service instance for this page.
 	 * <p>
 	 * This method is called once during construction to create and cache the page service instance.
-	 * @return the newly created page service instance */
-	private CPageService<?> createPageService() {
+	 * @return the newly created page service instance
+	 * @throws Exception */
+	private CPageService<?> createPageService() throws Exception {
 		try {
 			Check.notNull(pageEntity, "Page entity cannot be null");
 			final Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
@@ -83,7 +84,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			return page;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create CPageService instance: {}", e.getMessage());
-			return null;
+			throw e;
 		}
 	}
 

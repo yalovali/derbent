@@ -156,8 +156,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		activityService = CSpringContext.getBean(CActivityService.class);
 		meetingService = CSpringContext.getBean(CMeetingService.class);
 		CSpringContext.getBean(CSprintItemService.class);
-		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
 		configureInternalDragAndDrop();
+		setDynamicHeight("600px");
+		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
 	}
 
 	/** Configures internal drag-and-drop for reordering items within the backlog. This is separate from external drag to sprint items. */
