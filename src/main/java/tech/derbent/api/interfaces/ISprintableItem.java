@@ -45,4 +45,10 @@ public interface ISprintableItem {
 	/** Sets the sprint order for this item. This field is used by sprint-aware components for drag-and-drop ordering.
 	 * @param sprintOrder the new sprint order */
 	void setSprintOrder(Integer sprintOrder);
+	/** Gets the story points for this item. Story points represent the estimated effort or complexity of the item.
+	 * @return the story points, or null if not set */
+	Long getStoryPoint();
+	/** Sets the story points for this item. Story points represent the estimated effort or complexity of the item.
+	 * @param storyPoint the story points value */
+	void setStoryPoint(Long storyPoint);
 }
