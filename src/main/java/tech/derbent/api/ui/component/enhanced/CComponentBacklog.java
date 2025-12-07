@@ -49,7 +49,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * </ul>
  * <p>
  * <strong>Usage:</strong>
- * 
+ *
  * <pre>
  * CComponentBacklog backlog = new CComponentBacklog(currentSprint);
  * backlog.setDragEnabled(true); // Enable dragging to sprint
@@ -63,28 +63,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
-	private final CActivityService activityService;
-	private final CMeetingService meetingService;
-	private final CSprintItemService sprintItemService;
-	private boolean dragEnabled = false;
-	private CProjectItem<?> draggedItem = null;
-	private Consumer<CProjectItem<?>> externalDropHandler = null;
-	private CSprint sprint;
-
-	/** Constructor for backlog component.
-	 * @param sprint The sprint for which to display the backlog (items NOT in this sprint) */
-	public CComponentBacklog(final CSprint sprint) {
-		super(createEntityTypes(), createItemsProvider(sprint), createSelectionHandler(), true, createAlreadySelectedProvider(sprint),
-				AlreadySelectedMode.HIDE_ALREADY_SELECTED);
-		Check.notNull(sprint, "Sprint cannot be null");
-		this.sprint = sprint;
-		// Get services from Spring context
-		this.activityService = CSpringContext.getBean(CActivityService.class);
-		this.meetingService = CSpringContext.getBean(CMeetingService.class);
-		this.sprintItemService = CSpringContext.getBean(CSprintItemService.class);
-		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
-		configureInternalDragAndDrop();
-	}
 
 	/** Creates the already-selected provider that filters out items already in the sprint.
 	 * @param sprint the sprint to check for existing items
@@ -160,6 +138,26 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		return selectedItems -> {
 			LOGGER.debug("Backlog selection changed: {} items selected", selectedItems.size());
 		};
+	}
+
+	private final CActivityService activityService;
+	private boolean dragEnabled = false;
+	private CProjectItem<?> draggedItem = null;
+	private Consumer<CProjectItem<?>> externalDropHandler = null;
+	private final CMeetingService meetingService;
+
+	/** Constructor for backlog component.
+	 * @param sprint The sprint for which to display the backlog (items NOT in this sprint) */
+	public CComponentBacklog(final CSprint sprint) {
+		super(createEntityTypes(), createItemsProvider(sprint), createSelectionHandler(), true, createAlreadySelectedProvider(sprint),
+				AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+		Check.notNull(sprint, "Sprint cannot be null");
+		// Get services from Spring context
+		activityService = CSpringContext.getBean(CActivityService.class);
+		meetingService = CSpringContext.getBean(CMeetingService.class);
+		CSpringContext.getBean(CSprintItemService.class);
+		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
+		configureInternalDragAndDrop();
 	}
 
 	/** Configures internal drag-and-drop for reordering items within the backlog. This is separate from external drag to sprint items. */
@@ -295,7 +293,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 		LOGGER.debug("Reordered backlog items: moved from position {} to {} (updated priority)", draggedIndex, newPosition);
 		// Refresh the grid
-		refresh();
+		refreshGrid();
 		CNotificationService.showSuccess("Backlog priority updated");
 	}
 
@@ -303,8 +301,14 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	public boolean isDragEnabled() { return dragEnabled; }
 
 	@Override
+	public boolean isDropEnabled() {
+		// Backlog can always receive drops from sprint items
+		return true;
+	}
+
+	@Override
 	public void setDragEnabled(final boolean enabled) {
-		this.dragEnabled = enabled;
+		dragEnabled = enabled;
 		final var grid = getGrid();
 		if (grid != null) {
 			grid.setRowsDraggable(enabled);
@@ -315,13 +319,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	// IGridDragDropSupport - For dragging TO sprint
 	@Override
 	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
-		this.externalDropHandler = handler;
+		externalDropHandler = handler;
 		LOGGER.debug("External drop handler {} for backlog", handler != null ? "set" : "cleared");
-	}
-
-	@Override
-	public boolean isDropEnabled() {
-		// Backlog can always receive drops from sprint items
-		return true;
 	}
 }

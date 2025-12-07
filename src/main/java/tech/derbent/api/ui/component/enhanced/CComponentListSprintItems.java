@@ -13,7 +13,6 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IDropTarget;
 import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
-import tech.derbent.api.interfaces.IGridDragDropSupport;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -54,10 +53,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	// Drop target support
-	private Consumer<CProjectItem<?>> dropHandler = null;
 	// Drag source support for reverse drag to backlog (manual implementation)
 	private boolean dragEnabledToBacklog = false;
+	// Drop target support
+	private Consumer<CProjectItem<?>> dropHandler = null;
 	// Services for loading items
 	private final CMeetingService meetingService;
 
@@ -147,6 +146,52 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	protected CSprintItem createNewEntity() {
 		Check.fail("Not used in this context - the component handles entity creation via the selection dialog");
 		return null;
+	}
+
+	/** Enables drag-and-drop reordering within the sprint items grid. This allows users to reorder sprint items by dragging and dropping them within
+	 * the grid. The itemOrder field is automatically updated to reflect the new order. */
+	public void enableDragAndDropReordering() {
+		final CGrid<CSprintItem> grid = getGrid();
+		if (grid == null) {
+			LOGGER.warn("Grid not available for drag-and-drop configuration");
+			return;
+		}
+		// Enable row dragging for internal reordering
+		grid.setRowsDraggable(true);
+		// Track the dragged item
+		final CSprintItem[] draggedItem = new CSprintItem[1];
+		// Add drag start listener
+		grid.addDragStartListener(event -> {
+			draggedItem[0] = event.getDraggedItems().isEmpty() ? null : event.getDraggedItems().get(0);
+			if (draggedItem[0] != null) {
+				LOGGER.debug("Started dragging sprint item: {} (order: {})", draggedItem[0].getId(), draggedItem[0].getItemOrder());
+			}
+		});
+		// Add drag end listener
+		grid.addDragEndListener(event -> {
+			LOGGER.debug("Drag ended");
+			draggedItem[0] = null;
+		});
+		// Add drop listener for internal reordering
+		grid.addDropListener(event -> {
+			final CSprintItem targetItem = event.getDropTargetItem().orElse(null);
+			final GridDropLocation dropLocation = event.getDropLocation();
+			if (draggedItem[0] == null || targetItem == null) {
+				LOGGER.debug("Drag or target item is null, ignoring drop");
+				return;
+			}
+			if (draggedItem[0].getId().equals(targetItem.getId())) {
+				LOGGER.debug("Item dropped on itself, ignoring");
+				return;
+			}
+			try {
+				handleInternalReordering(draggedItem[0], targetItem, dropLocation);
+			} catch (final Exception e) {
+				LOGGER.error("Error handling internal reordering", e);
+				CNotificationService.showException("Error reordering sprint items", e);
+			}
+		});
+		LOGGER.debug("Drag-and-drop reordering enabled for sprint items grid");
 	}
 
 	@Override
@@ -274,6 +319,65 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		};
 	}
 
+	/** Handles reordering of sprint items when dropped within the same grid. Uses the standard service move methods for consistency with up/down
+	 * buttons.
+	 * @param draggedItem  the sprint item being dragged
+	 * @param targetItem   the sprint item it's being dropped on/near
+	 * @param dropLocation where relative to target (ABOVE, BELOW, ON_TOP) */
+	private void handleInternalReordering(final CSprintItem draggedItem, final CSprintItem targetItem, final GridDropLocation dropLocation) {
+		LOGGER.debug("Handling internal reorder: dragged={} (order={}), target={} (order={}), location={}", draggedItem.getId(),
+				draggedItem.getItemOrder(), targetItem.getId(), targetItem.getItemOrder(), dropLocation);
+		// Get current items from grid
+		final List<CSprintItem> currentItems = getGrid().getListDataView().getItems().toList();
+		if (currentItems.isEmpty()) {
+			LOGGER.warn("No items in grid for reordering");
+			return;
+		}
+		// Find indices
+		int draggedIndex = -1;
+		int targetIndex = -1;
+		for (int i = 0; i < currentItems.size(); i++) {
+			if (currentItems.get(i).getId().equals(draggedItem.getId())) {
+				draggedIndex = i;
+			}
+			if (currentItems.get(i).getId().equals(targetItem.getId())) {
+				targetIndex = i;
+			}
+		}
+		if (draggedIndex == -1 || targetIndex == -1) {
+			LOGGER.warn("Could not find dragged or target item in list");
+			return;
+		}
+		// Calculate new position
+		int newPosition = targetIndex;
+		if (dropLocation == GridDropLocation.BELOW) {
+			newPosition = targetIndex + 1;
+		}
+		// Adjust if dragging from above
+		if (draggedIndex < newPosition) {
+			newPosition--;
+		}
+		if (draggedIndex == newPosition) {
+			LOGGER.debug("Item dropped at same position, no reordering needed");
+			return;
+		}
+		// Use the generalized service-based reordering from base class
+		// This ensures consistency with up/down buttons
+		final int moves = reorderItemByMoving(draggedItem, draggedIndex, newPosition, currentItems);
+		if (moves > 0) {
+			LOGGER.debug("Reordered sprint item using {} service move operations", moves);
+			// Update self and refresh grid
+			refreshGrid();
+			CNotificationService.showSuccess("Sprint items reordered");
+			// Notify listeners (Update-Then-Notify pattern)
+			notifyRefreshListeners(draggedItem);
+		}
+	}
+
+	/** Checks if dragging to backlog is enabled.
+	 * @return true if drag to backlog is enabled */
+	public boolean isDragToBacklogEnabled() { return dragEnabledToBacklog; }
+
 	/** Checks if dropping is currently enabled for this component.
 	 * @return true if drops are enabled (handler is set), false otherwise */
 	@Override
@@ -352,37 +456,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
 	}
 
-	/** Sets the handler to be called when an item is dropped into this component from backlog. Also configures the grid to accept drops.
-	 * @param handler the consumer to handle dropped items */
-	@Override
-	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
-		dropHandler = handler;
-		if (getGridItems() != null) {
-			if (handler != null) {
-				// Enable drop mode on the grid
-				getGridItems().setDropMode(GridDropMode.BETWEEN);
-				// Add drop listener to handle the drop operation
-				getGridItems().addDropListener(event -> {
-					try {
-						// Get the drop location
-						final GridDropLocation dropLocation = event.getDropLocation();
-						LOGGER.debug("Item dropped on sprint items grid at location: {}", dropLocation);
-						// Note: The actual dropped item is tracked in the drag source component
-						// and passed via the drop handler callback from the source component
-					} catch (final Exception e) {
-						LOGGER.error("Error handling drop on sprint items grid", e);
-						CNotificationService.showException("Error handling drop", e);
-					}
-				});
-				LOGGER.debug("Drop handler set and grid configured for drops");
-			} else {
-				// Disable drop mode
-				getGridItems().setDropMode(null);
-				LOGGER.debug("Drop handler removed");
-			}
-		}
-	}
-
 	/** Removes a sprint item from the sprint and deletes it from the database.
 	 * @param sprintItem the sprint item to remove */
 	public void removeSprintItem(final CSprintItem sprintItem) {
@@ -406,116 +479,42 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	/** Enables or disables dragging sprint items back to backlog.
 	 * @param enabled true to enable dragging to backlog */
 	public void setDragToBacklogEnabled(final boolean enabled) {
-		this.dragEnabledToBacklog = enabled;
-		final var grid = getGridItems();
+		dragEnabledToBacklog = enabled;
+		final var grid = getGrid();
 		if (grid != null) {
 			grid.setRowsDraggable(enabled);
 			LOGGER.debug("Drag to backlog from sprint items {}", enabled ? "enabled" : "disabled");
 		}
 	}
 
-	/** Checks if dragging to backlog is enabled.
-	 * @return true if drag to backlog is enabled */
-	public boolean isDragToBacklogEnabled() { return dragEnabledToBacklog; }
-
-	/** Enables drag-and-drop reordering within the sprint items grid. This allows users to reorder sprint items by dragging and dropping them within
-	 * the grid. The itemOrder field is automatically updated to reflect the new order. */
-	public void enableDragAndDropReordering() {
-		final CGrid<CSprintItem> grid = getGridItems();
-		if (grid == null) {
-			LOGGER.warn("Grid not available for drag-and-drop configuration");
-			return;
-		}
-		// Enable row dragging for internal reordering
-		grid.setRowsDraggable(true);
-		// Track the dragged item
-		final CSprintItem[] draggedItem = new CSprintItem[1];
-		// Add drag start listener
-		grid.addDragStartListener(event -> {
-			draggedItem[0] = event.getDraggedItems().isEmpty() ? null : event.getDraggedItems().get(0);
-			if (draggedItem[0] != null) {
-				LOGGER.debug("Started dragging sprint item: {} (order: {})", draggedItem[0].getId(), draggedItem[0].getItemOrder());
+	/** Sets the handler to be called when an item is dropped into this component from backlog. Also configures the grid to accept drops.
+	 * @param handler the consumer to handle dropped items */
+	@Override
+	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
+		dropHandler = handler;
+		if (getGrid() != null) {
+			if (handler != null) {
+				// Enable drop mode on the grid
+				getGrid().setDropMode(GridDropMode.BETWEEN);
+				// Add drop listener to handle the drop operation
+				getGrid().addDropListener(event -> {
+					try {
+						// Get the drop location
+						final GridDropLocation dropLocation = event.getDropLocation();
+						LOGGER.debug("Item dropped on sprint items grid at location: {}", dropLocation);
+						// Note: The actual dropped item is tracked in the drag source component
+						// and passed via the drop handler callback from the source component
+					} catch (final Exception e) {
+						LOGGER.error("Error handling drop on sprint items grid", e);
+						CNotificationService.showException("Error handling drop", e);
+					}
+				});
+				LOGGER.debug("Drop handler set and grid configured for drops");
+			} else {
+				// Disable drop mode
+				getGrid().setDropMode(null);
+				LOGGER.debug("Drop handler removed");
 			}
-		});
-		// Add drag end listener
-		grid.addDragEndListener(event -> {
-			LOGGER.debug("Drag ended");
-			draggedItem[0] = null;
-		});
-		// Add drop listener for internal reordering
-		grid.addDropListener(event -> {
-			final CSprintItem targetItem = event.getDropTargetItem().orElse(null);
-			final GridDropLocation dropLocation = event.getDropLocation();
-			if (draggedItem[0] == null || targetItem == null) {
-				LOGGER.debug("Drag or target item is null, ignoring drop");
-				return;
-			}
-			if (draggedItem[0].getId().equals(targetItem.getId())) {
-				LOGGER.debug("Item dropped on itself, ignoring");
-				return;
-			}
-			try {
-				handleInternalReordering(draggedItem[0], targetItem, dropLocation);
-			} catch (final Exception e) {
-				LOGGER.error("Error handling internal reordering", e);
-				CNotificationService.showException("Error reordering sprint items", e);
-			}
-		});
-		LOGGER.debug("Drag-and-drop reordering enabled for sprint items grid");
-	}
-
-	/** Handles reordering of sprint items when dropped within the same grid. Uses the standard service move methods for consistency with up/down
-	 * buttons.
-	 * @param draggedItem  the sprint item being dragged
-	 * @param targetItem   the sprint item it's being dropped on/near
-	 * @param dropLocation where relative to target (ABOVE, BELOW, ON_TOP) */
-	private void handleInternalReordering(final CSprintItem draggedItem, final CSprintItem targetItem, final GridDropLocation dropLocation) {
-		LOGGER.debug("Handling internal reorder: dragged={} (order={}), target={} (order={}), location={}", draggedItem.getId(),
-				draggedItem.getItemOrder(), targetItem.getId(), targetItem.getItemOrder(), dropLocation);
-		// Get current items from grid
-		final List<CSprintItem> currentItems = getGrid().getListDataView().getItems().toList();
-		if (currentItems.isEmpty()) {
-			LOGGER.warn("No items in grid for reordering");
-			return;
-		}
-		// Find indices
-		int draggedIndex = -1;
-		int targetIndex = -1;
-		for (int i = 0; i < currentItems.size(); i++) {
-			if (currentItems.get(i).getId().equals(draggedItem.getId())) {
-				draggedIndex = i;
-			}
-			if (currentItems.get(i).getId().equals(targetItem.getId())) {
-				targetIndex = i;
-			}
-		}
-		if (draggedIndex == -1 || targetIndex == -1) {
-			LOGGER.warn("Could not find dragged or target item in list");
-			return;
-		}
-		// Calculate new position
-		int newPosition = targetIndex;
-		if (dropLocation == GridDropLocation.BELOW) {
-			newPosition = targetIndex + 1;
-		}
-		// Adjust if dragging from above
-		if (draggedIndex < newPosition) {
-			newPosition--;
-		}
-		if (draggedIndex == newPosition) {
-			LOGGER.debug("Item dropped at same position, no reordering needed");
-			return;
-		}
-		// Use the generalized service-based reordering from base class
-		// This ensures consistency with up/down buttons
-		final int moves = reorderItemByMoving(draggedItem, draggedIndex, newPosition, currentItems);
-		if (moves > 0) {
-			LOGGER.debug("Reordered sprint item using {} service move operations", moves);
-			// Update self and refresh grid
-			refreshGrid();
-			CNotificationService.showSuccess("Sprint items reordered");
-			// Notify listeners (Update-Then-Notify pattern)
-			notifyRefreshListeners(draggedItem);
 		}
 	}
 }

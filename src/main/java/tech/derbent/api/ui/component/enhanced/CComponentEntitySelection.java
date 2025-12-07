@@ -117,8 +117,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
 	private static final long serialVersionUID = 1L;
-	// Refresh listeners for the update-and-notify pattern
-	private final List<Consumer<EntityClass>> refreshListeners = new ArrayList<>();
 	private List<EntityClass> allItems = new ArrayList<>();
 	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	private final AlreadySelectedMode alreadySelectedMode;
@@ -133,6 +131,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private Span labelSelectedCount;
 	private final boolean multiSelect;
 	private final Consumer<Set<EntityClass>> onSelectionChanged;
+	// Refresh listeners for the update-and-notify pattern
+	private final List<Consumer<EntityClass>> refreshListeners = new ArrayList<>();
 	private final Set<EntityClass> selectedItems = new HashSet<>();
 
 	/** Creates an entity selection component.
@@ -176,6 +176,16 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			LOGGER.error("Error setting up entity selection component", e);
 			CNotificationService.showException("Error creating component", e);
 		}
+	}
+
+	// IGridRefreshListener implementation
+	/** Adds a listener to be notified when this component's grid data changes. Implements IGridRefreshListener.addRefreshListener()
+	 * @param listener Consumer called when data changes (receives the changed item if available, or null) */
+	@Override
+	public void addRefreshListener(final Consumer<EntityClass> listener) {
+		Check.notNull(listener, "Refresh listener cannot be null");
+		refreshListeners.add(listener);
+		LOGGER.debug("Added refresh listener to CComponentEntitySelection");
 	}
 
 	private void applyFilters() {
@@ -234,8 +244,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			throw new IllegalStateException("Failed to apply filters", e);
 		}
 	}
-
-
 
 	/** Clears all items from the grid. Implements IGridComponent.clearGrid() */
 	@Override
@@ -376,6 +384,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Gets status from entity. Entity must implement IHasStatusAndWorkflow. */
+	@SuppressWarnings ("rawtypes")
 	private Object getEntityStatus(final EntityClass item) {
 		Check.notNull(item, "Item cannot be null");
 		Check.instanceOf(item, IHasStatusAndWorkflow.class, "Item must implement IHasStatusAndWorkflow to access status");
@@ -409,6 +418,23 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		} catch (final Exception e) {
 			LOGGER.error("Error loading already selected items for entity type {}", config.getDisplayName(), e);
 			alreadySelectedItems = new ArrayList<>();
+		}
+	}
+
+	/** Notifies all registered listeners that this component's data has changed. This is called AFTER the component has updated its own data and
+	 * refreshed its grid. Implements IGridRefreshListener.notifyRefreshListeners()
+	 * @param changedItem The item that changed, or null if multiple items changed or change is general */
+	@Override
+	public void notifyRefreshListeners(final EntityClass changedItem) {
+		if (!refreshListeners.isEmpty()) {
+			LOGGER.debug("Notifying {} refresh listeners about data change in CComponentEntitySelection", refreshListeners.size());
+			for (final Consumer<EntityClass> listener : refreshListeners) {
+				try {
+					listener.accept(changedItem);
+				} catch (final Exception e) {
+					LOGGER.error("Error notifying refresh listener", e);
+				}
+			}
 		}
 	}
 
@@ -548,13 +574,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally.
-	 * @deprecated Use {@link #refreshGrid()} instead for consistency with IGridComponent interface */
-	@Deprecated
-	public void refresh() {
-		refreshGrid();
-	}
-
 	/** Refreshes the grid to reflect updated data. Should be called after items are added/removed externally. Implements
 	 * IGridComponent.refreshGrid() */
 	@Override
@@ -569,16 +588,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	// IGridRefreshListener implementation
-	/** Adds a listener to be notified when this component's grid data changes. Implements IGridRefreshListener.addRefreshListener()
-	 * @param listener Consumer called when data changes (receives the changed item if available, or null) */
-	@Override
-	public void addRefreshListener(final Consumer<EntityClass> listener) {
-		Check.notNull(listener, "Refresh listener cannot be null");
-		refreshListeners.add(listener);
-		LOGGER.debug("Added refresh listener to CComponentEntitySelection");
-	}
-
 	/** Removes a previously added refresh listener. Implements IGridRefreshListener.removeRefreshListener()
 	 * @param listener The listener to remove */
 	@Override
@@ -586,23 +595,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (listener != null) {
 			refreshListeners.remove(listener);
 			LOGGER.debug("Removed refresh listener from CComponentEntitySelection");
-		}
-	}
-
-	/** Notifies all registered listeners that this component's data has changed. This is called AFTER the component has updated its own data and
-	 * refreshed its grid. Implements IGridRefreshListener.notifyRefreshListeners()
-	 * @param changedItem The item that changed, or null if multiple items changed or change is general */
-	@Override
-	public void notifyRefreshListeners(final EntityClass changedItem) {
-		if (!refreshListeners.isEmpty()) {
-			LOGGER.debug("Notifying {} refresh listeners about data change in CComponentEntitySelection", refreshListeners.size());
-			for (final Consumer<EntityClass> listener : refreshListeners) {
-				try {
-					listener.accept(changedItem);
-				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
-				}
-			}
 		}
 	}
 

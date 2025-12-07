@@ -1,8 +1,5 @@
 package tech.derbent.app.sprints.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
@@ -11,17 +8,13 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
-import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
-import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
@@ -140,10 +133,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Sets up drag and drop between backlog and sprint items components using the general refresh listener pattern. This enables proper separation
-	 * between:
-	 * - Internal reordering within backlog (handled by backlog component)
-	 * - Dragging from backlog to sprint items (handled via interface)
-	 * - Reverse drag from sprint items back to backlog (removes from sprint) */
+	 * between: - Internal reordering within backlog (handled by backlog component) - Dragging from backlog to sprint items (handled via interface) -
+	 * Reverse drag from sprint items back to backlog (removes from sprint) */
 	private void setupDragAndDrop() {
 		// Only set up if both components exist
 		if ((componentBacklogItems != null) && (componentItemsSelection != null)) {
@@ -214,7 +205,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 					if (draggedFromSprint[0] != null) {
 						final CSprintItem sprintItem = draggedFromSprint[0];
 						final CProjectItem<?> item = sprintItem.getItem();
-						LOGGER.debug("Sprint item dropped back into backlog: {} (itemId: {})", sprintItem.getId(), item != null ? item.getId() : "null");
+						LOGGER.debug("Sprint item dropped back into backlog: {} (itemId: {})", sprintItem.getId(),
+								item != null ? item.getId() : "null");
 						if (item != null) {
 							// Remove from sprint (which will update itself and notify listeners)
 							componentItemsSelection.removeSprintItem(sprintItem);

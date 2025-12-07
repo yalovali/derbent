@@ -11,29 +11,31 @@ import tech.derbent.api.entity.domain.CEntityNamed;
  * these for ordering. */
 class CEntityDBDefaultOrderingTest {
 
+	/** Test entity that overrides default ordering to use a custom field. */
+	private static class TestCustomOrderEntity extends CEntityDB<TestCustomOrderEntity> {
+
+		public TestCustomOrderEntity() {
+			super();
+		}
+
+		@Override
+		public String getDefaultOrderBy() { return "createDate"; }
+	}
+
 	/** Test entity extending CEntityDB for testing purposes. */
 	private static class TestEntity extends CEntityDB<TestEntity> {
 
-		public TestEntity() { super(); }
+		public TestEntity() {
+			super();
+		}
 	}
 
 	/** Test named entity extending CEntityNamed for testing purposes. */
 	private static class TestNamedEntity extends CEntityNamed<TestNamedEntity> {
 
-		public TestNamedEntity() { super(); }
-
 		public TestNamedEntity(final String name) {
 			super(TestNamedEntity.class, name);
 		}
-	}
-
-	/** Test entity that overrides default ordering to use a custom field. */
-	private static class TestCustomOrderEntity extends CEntityDB<TestCustomOrderEntity> {
-
-		public TestCustomOrderEntity() { super(); }
-
-		@Override
-		public String getDefaultOrderBy() { return "createDate"; }
 	}
 
 	@Test

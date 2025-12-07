@@ -185,23 +185,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return repository.findAll(defaultSort);
 	}
 
-	/** Gets the default Sort object based on entity's default order field. Subclasses can override to customize ordering.
-	 * @return Sort object for default ordering (descending by default) */
-	protected Sort getDefaultSort() {
-		try {
-			// Get a sample entity to determine default order field
-			final EntityClass sampleEntity = newEntity();
-			final String orderField = sampleEntity.getDefaultOrderBy();
-			if (orderField != null && !orderField.isEmpty()) {
-				return Sort.by(Sort.Direction.DESC, orderField);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not determine default ordering: {}", e.getMessage());
-		}
-		// Fallback to ID descending
-		return Sort.by(Sort.Direction.DESC, "id");
-	}
-
 	/** Formats a Java field name into a human-readable display name. Converts camelCase to Title Case with spaces.
 	 * @param fieldName the field name to format
 	 * @return formatted display name */
@@ -229,6 +212,23 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 		final Optional<EntityClass> entity = repository.findById(id);
 		return entity;
+	}
+
+	/** Gets the default Sort object based on entity's default order field. Subclasses can override to customize ordering.
+	 * @return Sort object for default ordering (descending by default) */
+	protected Sort getDefaultSort() {
+		try {
+			// Get a sample entity to determine default order field
+			final EntityClass sampleEntity = newEntity();
+			final String orderField = sampleEntity.getDefaultOrderBy();
+			if (orderField != null && !orderField.isEmpty()) {
+				return Sort.by(Sort.Direction.DESC, orderField);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not determine default ordering: {}", e.getMessage());
+		}
+		// Fallback to ID descending
+		return Sort.by(Sort.Direction.DESC, "id");
 	}
 
 	protected abstract Class<EntityClass> getEntityClass();
@@ -293,7 +293,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {
 		LOGGER.debug("Listing entities without filter specification");
-		final Pageable safePage = ensureDefaultOrdering(CPageableUtils.validateAndFix(pageable));
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final Page<EntityClass> entities = repository.findAll(safePage);
 		return entities;
 	}
@@ -301,28 +301,9 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable, final Specification<EntityClass> filter) {
 		LOGGER.debug("Filter specification: {}", filter);
-		final Pageable safePage = ensureDefaultOrdering(CPageableUtils.validateAndFix(pageable));
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final Page<EntityClass> page = repository.findAll(filter, safePage);
 		return page;
-	}
-
-	/** Ensures that the Pageable has at least default ordering. If the pageable has no sorting, applies default sort. If it has sorting, appends
-	 * default sort as secondary ordering.
-	 * @param pageable the original pageable
-	 * @return pageable with default ordering ensured */
-	protected Pageable ensureDefaultOrdering(final Pageable pageable) {
-		if (pageable == null) {
-			return Pageable.unpaged(getDefaultSort());
-		}
-		final Sort existingSort = pageable.getSort();
-		if (existingSort == null || existingSort.isUnsorted()) {
-			// No sorting provided, use default
-			return org.springframework.data.domain.PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), getDefaultSort());
-		}
-		// User provided sorting, keep it as primary and add default as secondary (to ensure consistent ordering)
-		final Sort defaultSort = getDefaultSort();
-		final Sort combinedSort = existingSort.and(defaultSort);
-		return org.springframework.data.domain.PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), combinedSort);
 	}
 
 	@Transactional (readOnly = true)
