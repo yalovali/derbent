@@ -45,6 +45,34 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
+	/** Reorders backlog items after inserting a new item at a specific sprint order position. All items with sprintOrder >= newOrder need to be
+	 * shifted up by 1.
+	 * @param newOrder     the sprint order value of the newly inserted item
+	 * @param excludeItemId the ID of the item being inserted (to exclude it from reordering) */
+	private void reorderBacklogItemsAfterInsert(final int newOrder, final Long excludeItemId) {
+		try {
+			final List<CProjectItem<?>> allBacklogItems = componentBacklogItems.getAllItems();
+			// Shift items with sprintOrder >= newOrder
+			for (final CProjectItem<?> item : allBacklogItems) {
+				if (item instanceof tech.derbent.api.interfaces.ISprintableItem && !item.getId().equals(excludeItemId)) {
+					final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) item;
+					final Integer itemOrder = sprintableItem.getSprintOrder();
+					if (itemOrder != null && itemOrder >= newOrder) {
+						sprintableItem.setSprintOrder(itemOrder + 1);
+						// Save the updated item
+						if (item instanceof tech.derbent.app.activities.domain.CActivity) {
+							activityService.save((tech.derbent.app.activities.domain.CActivity) item);
+						} else if (item instanceof tech.derbent.app.meetings.domain.CMeeting) {
+							meetingService.save((tech.derbent.app.meetings.domain.CMeeting) item);
+						}
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error reordering backlog items after insert", e);
+		}
+	}
+
 	/** Creates and configures the backlog items component for displaying items not in the sprint.
 	 * @return configured CComponentBacklog component */
 	private CComponentBacklog createBacklogItemsComponent() {
@@ -171,9 +199,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				sprintItemsGrid.addDropListener(event -> {
 					if (draggedFromBacklog[0] != null) {
 						final CProjectItem<?> itemToAdd = draggedFromBacklog[0];
-						LOGGER.debug("Item dropped into sprint from backlog: {}", itemToAdd.getId());
-						// Add to sprint items (which will update itself and notify listeners)
-						componentItemsSelection.addDroppedItem(itemToAdd);
+						final CSprintItem targetItem = event.getDropTargetItem().orElse(null);
+						final GridDropLocation dropLocation = event.getDropLocation();
+						LOGGER.debug("Item dropped into sprint from backlog: {} at location: {} relative to target: {}", itemToAdd.getId(),
+								dropLocation, targetItem != null ? targetItem.getId() : "null");
+						// Add to sprint items at the specified position (which will update itself and notify listeners)
+						componentItemsSelection.addDroppedItem(itemToAdd, targetItem, dropLocation);
 						// Note: componentBacklogItems will refresh via the listener above
 						// Clear tracker
 						draggedFromBacklog[0] = null;
@@ -205,12 +236,42 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 					if (draggedFromSprint[0] != null) {
 						final CSprintItem sprintItem = draggedFromSprint[0];
 						final CProjectItem<?> item = sprintItem.getItem();
-						LOGGER.debug("Sprint item dropped back into backlog: {} (itemId: {})", sprintItem.getId(),
-								item != null ? item.getId() : "null");
+						final CProjectItem<?> targetBacklogItem = event.getDropTargetItem().orElse(null);
+						final GridDropLocation dropLocation = event.getDropLocation();
+						LOGGER.debug("Sprint item dropped back into backlog: {} (itemId: {}) at location: {} relative to target: {}",
+								sprintItem.getId(), item != null ? item.getId() : "null", dropLocation,
+								targetBacklogItem != null ? targetBacklogItem.getId() : "null");
 						if (item != null) {
+							// Set sprint order based on drop position
+							if (targetBacklogItem != null && dropLocation != null && item instanceof tech.derbent.api.interfaces.ISprintableItem) {
+								final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) item;
+								final tech.derbent.api.interfaces.ISprintableItem targetSprintableItem = targetBacklogItem instanceof tech.derbent.api.interfaces.ISprintableItem
+										? (tech.derbent.api.interfaces.ISprintableItem) targetBacklogItem
+										: null;
+								if (targetSprintableItem != null) {
+									// Calculate new sprint order based on drop location
+									final Integer targetOrder = targetSprintableItem.getSprintOrder();
+									if (targetOrder != null) {
+										if (dropLocation == GridDropLocation.BELOW) {
+											sprintableItem.setSprintOrder(targetOrder + 1);
+										} else {
+											sprintableItem.setSprintOrder(targetOrder);
+										}
+										// Save the updated sprint order
+										if (item instanceof tech.derbent.app.activities.domain.CActivity) {
+											activityService.save((tech.derbent.app.activities.domain.CActivity) item);
+										} else if (item instanceof tech.derbent.app.meetings.domain.CMeeting) {
+											meetingService.save((tech.derbent.app.meetings.domain.CMeeting) item);
+										}
+										// Reorder other backlog items
+										reorderBacklogItemsAfterInsert(sprintableItem.getSprintOrder(), item.getId());
+									}
+								}
+							}
 							// Remove from sprint (which will update itself and notify listeners)
 							componentItemsSelection.removeSprintItem(sprintItem);
-							// Note: componentBacklogItems will refresh via the listener above
+							// Force refresh backlog to show the item in the correct position
+							componentBacklogItems.refreshGrid();
 						}
 						// Clear tracker
 						draggedFromSprint[0] = null;
