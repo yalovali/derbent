@@ -2,12 +2,14 @@ package tech.derbent.api.ui.component.enhanced;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IGridDragDropSupport;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -20,39 +22,51 @@ import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
 
-/** CComponentBacklog - Specialized component for backlog item selection with drag-and-drop reordering support.
+/** CComponentBacklog - Specialized backlog component for sprint planning with drag-and-drop support.
  * <p>
- * This component extends CComponentEntitySelection to provide a complete backlog management solution for sprint planning. It comes pre-configured with
- * support for Activities and Meetings, with easy extensibility for future entity types.
- * <p>
- * Features:
+ * This component provides a complete backlog management solution following agile sprint planning patterns. It displays project items (Activities,
+ * Meetings) that are not yet in the current sprint, allowing users to:
  * <ul>
- * <li>Pre-configured entity types (CActivity, CMeeting) - easily extensible</li>
- * <li>Automatic filtering of items already in sprint</li>
- * <li>Drag-and-drop reordering within the backlog (updates sprintOrder field)</li>
- * <li>Multi-select support for batch operations</li>
- * <li>Automatic service integration via Spring context</li>
+ * <li>View and filter backlog items by type</li>
+ * <li>Reorder items by priority (drag-and-drop updates sprintOrder)</li>
+ * <li>Drag items into sprint for planning (via IGridDragDropSupport interface)</li>
+ * <li>Multi-select for batch operations</li>
  * </ul>
  * <p>
- * Usage:
+ * <strong>Agile Sprint Planning Workflow:</strong>
+ * <ol>
+ * <li>Backlog items are ordered by sprintOrder (priority)</li>
+ * <li>User reorders items within backlog to adjust priority</li>
+ * <li>User drags high-priority items into sprint</li>
+ * <li>Sprint items are ordered by itemOrder (execution sequence)</li>
+ * </ol>
+ * <p>
+ * <strong>Drag-and-Drop Behavior:</strong>
+ * <ul>
+ * <li>Internal drag-drop: Reorders items within backlog (updates sprintOrder)</li>
+ * <li>External drag: Enables dragging to sprint items component</li>
+ * </ul>
+ * <p>
+ * <strong>Usage:</strong>
+ * 
  * <pre>
  * CComponentBacklog backlog = new CComponentBacklog(currentSprint);
+ * backlog.setDragEnabled(true); // Enable dragging to sprint
  * backlog.setDynamicHeight("600px");
  * </pre>
  * <p>
- * The component automatically:
- * - Loads activities and meetings from the current project
- * - Hides items already in the sprint
- * - Enables drag-and-drop for reordering
- * - Updates sprintOrder when items are reordered */
-public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> {
+ * The component automatically configures itself with Activities and Meetings entity types. Future entity types can be easily added by extending the
+ * createEntityTypes() method. */
+public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IGridDragDropSupport<CProjectItem<?>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
 	private final CMeetingService meetingService;
 	private final CSprintItemService sprintItemService;
+	private boolean dragEnabled = false;
 	private CProjectItem<?> draggedItem = null;
+	private Consumer<CProjectItem<?>> externalDropHandler = null;
 	private CSprint sprint;
 
 	/** Constructor for backlog component.
@@ -67,7 +81,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		this.meetingService = CSpringContext.getBean(CMeetingService.class);
 		this.sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
-		configureDragAndDrop();
+		configureInternalDragAndDrop();
 	}
 
 	/** Creates the already-selected provider that filters out items already in the sprint.
@@ -146,50 +160,62 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		};
 	}
 
-	/** Configures drag-and-drop functionality for the grid. This enables internal reordering of sprintable items. */
-	private void configureDragAndDrop() {
+	/** Configures internal drag-and-drop for reordering items within the backlog. This is separate from external drag to sprint items. */
+	private void configureInternalDragAndDrop() {
 		final var grid = getGrid();
 		if (grid == null) {
 			LOGGER.warn("Grid not available for drag-and-drop configuration");
 			return;
 		}
-		// Enable row dragging
+		// Enable row dragging for reordering within backlog
 		grid.setRowsDraggable(true);
-		// Enable drop mode
+		// Enable drop mode for receiving drops within same grid
 		grid.setDropMode(GridDropMode.BETWEEN);
-		// Add drag start listener
+		// Track dragged item for internal reordering
 		grid.addDragStartListener(event -> {
-			draggedItem = event.getDraggedItems().isEmpty() ? null : event.getDraggedItems().get(0);
-			if (draggedItem != null) {
-				LOGGER.debug("Started dragging item: {}", draggedItem.getId());
+			final List<CProjectItem<?>> items = event.getDraggedItems();
+			if (!items.isEmpty()) {
+				draggedItem = items.get(0);
+				LOGGER.debug("Started dragging backlog item for reordering: {}", draggedItem.getId());
 			}
 		});
-		// Add drag end listener
+		// Handle drag end - notify external handler if set
 		grid.addDragEndListener(event -> {
-			LOGGER.debug("Drag ended");
-			draggedItem = null;
+			if (dragEnabled && externalDropHandler != null && draggedItem != null) {
+				// Item was dragged outside the backlog grid
+				LOGGER.debug("Item dragged from backlog: {}", draggedItem.getId());
+				// External handler will be called by target component's drop listener
+			}
+			LOGGER.debug("Drag ended from backlog");
 		});
-		// Add drop listener
+		// Handle internal drops (reordering within backlog)
 		grid.addDropListener(event -> {
 			final CProjectItem<?> targetItem = event.getDropTargetItem().orElse(null);
 			final GridDropLocation dropLocation = event.getDropLocation();
 			if (draggedItem == null || targetItem == null) {
-				LOGGER.debug("Drag or target item is null, ignoring drop");
+				return;
+			}
+			// Check if this is an internal drop (same grid reordering)
+			if (draggedItem.getId().equals(targetItem.getId())) {
+				LOGGER.debug("Item dropped on itself, ignoring");
+				draggedItem = null;
 				return;
 			}
 			// Check if items are sprintable
 			if (!(draggedItem instanceof ISprintableItem) || !(targetItem instanceof ISprintableItem)) {
 				LOGGER.debug("Items are not sprintable, ignoring drop");
+				draggedItem = null;
 				return;
 			}
 			try {
-				handleReordering((ISprintableItem) draggedItem, (ISprintableItem) targetItem, dropLocation);
+				handleInternalReordering((ISprintableItem) draggedItem, (ISprintableItem) targetItem, dropLocation);
 			} catch (final Exception e) {
-				LOGGER.error("Error handling drop for reordering", e);
-				CNotificationService.showException("Error reordering items", e);
+				LOGGER.error("Error handling internal reordering", e);
+				CNotificationService.showException("Error reordering backlog items", e);
 			}
+			draggedItem = null;
 		});
-		LOGGER.debug("Drag-and-drop configured for backlog grid");
+		LOGGER.debug("Internal drag-and-drop configured for backlog reordering");
 	}
 
 	/** Gets all items currently displayed in the grid.
@@ -202,12 +228,15 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		return grid.getListDataView().getItems().toList();
 	}
 
-	/** Handles reordering of items when dropped.
+	@Override
+	public Consumer<CProjectItem<?>> getDropHandler() { return externalDropHandler; }
+
+	/** Handles internal reordering of items within the backlog when dropped.
 	 * @param draggedItem  the item being dragged
 	 * @param targetItem   the item it's being dropped on/near
 	 * @param dropLocation where relative to target (ABOVE, BELOW, ON_TOP) */
-	private void handleReordering(final ISprintableItem draggedItem, final ISprintableItem targetItem, final GridDropLocation dropLocation) {
-		LOGGER.debug("Handling reorder: dragged={}, target={}, location={}", draggedItem.getId(), targetItem.getId(), dropLocation);
+	private void handleInternalReordering(final ISprintableItem draggedItem, final ISprintableItem targetItem, final GridDropLocation dropLocation) {
+		LOGGER.debug("Handling backlog reorder: dragged={}, target={}, location={}", draggedItem.getId(), targetItem.getId(), dropLocation);
 		// Get current items list
 		final List<CProjectItem<?>> currentItems = getAllItems();
 		if (currentItems.isEmpty()) {
@@ -226,7 +255,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			}
 		}
 		if (draggedIndex == -1 || targetIndex == -1) {
-			LOGGER.warn("Could not find dragged or target item in list");
+			LOGGER.warn("Could not find dragged or target item in backlog");
 			return;
 		}
 		// Calculate new position
@@ -245,12 +274,12 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		// Reorder the list
 		final CProjectItem<?> item = currentItems.remove(draggedIndex);
 		currentItems.add(newPosition, item);
-		// Update sprint orders and save
+		// Update sprint orders (priority) and save
 		for (int i = 0; i < currentItems.size(); i++) {
 			final CProjectItem<?> currentItem = currentItems.get(i);
 			if (currentItem instanceof ISprintableItem) {
 				((ISprintableItem) currentItem).setSprintOrder(i + 1); // Start from 1
-				// Save the updated sprintOrder
+				// Save the updated sprintOrder (priority)
 				try {
 					if (currentItem instanceof CActivity) {
 						activityService.save((CActivity) currentItem);
@@ -262,9 +291,28 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				}
 			}
 		}
-		LOGGER.debug("Reordered items: moved from position {} to {}", draggedIndex, newPosition);
+		LOGGER.debug("Reordered backlog items: moved from position {} to {} (updated priority)", draggedIndex, newPosition);
 		// Refresh the grid
 		refresh();
-		CNotificationService.showSuccess("Backlog items reordered");
+		CNotificationService.showSuccess("Backlog priority updated");
+	}
+
+	@Override
+	public boolean isDragEnabled() { return dragEnabled; }
+
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		this.dragEnabled = enabled;
+		final var grid = getGrid();
+		if (grid != null) {
+			grid.setRowsDraggable(enabled);
+			LOGGER.debug("External drag from backlog {}", enabled ? "enabled" : "disabled");
+		}
+	}
+
+	@Override
+	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
+		this.externalDropHandler = handler;
+		LOGGER.debug("External drop handler {} for backlog", handler != null ? "set" : "cleared");
 	}
 }

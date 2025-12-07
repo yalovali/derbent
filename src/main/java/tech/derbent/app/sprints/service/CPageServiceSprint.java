@@ -139,50 +139,51 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
 	}
 
-	/** Sets up drag and drop between backlog and sprint items components. Enables dragging from backlog and dropping into sprint items. */
+	/** Sets up drag and drop between backlog and sprint items components using the IGridDragDropSupport pattern. This enables proper separation between:
+	 * - Internal reordering within backlog (handled by backlog component)
+	 * - Dragging from backlog to sprint items (handled via interface) */
 	private void setupDragAndDrop() {
 		// Only set up if both components exist
 		if ((componentBacklogItems != null) && (componentItemsSelection != null)) {
-			// Get the grid from backlog component
-			final CGrid<CProjectItem<?>> backlogGrid = componentBacklogItems.getGrid();
-			final CGrid<CSprintItem> sprintItemsGrid = componentItemsSelection.getGridItems();
-			if (backlogGrid != null && sprintItemsGrid != null) {
-				// Track the currently dragged item from backlog
-				final CProjectItem<?>[] draggedItemHolder = new CProjectItem<?>[1];
-				// Add drag start listener to backlog to track the dragged item
+			// Enable dragging FROM backlog (implements IGridDragDropSupport)
+			componentBacklogItems.setDragEnabled(true);
+			// Track items dragged from backlog
+			final CProjectItem<?>[] draggedFromBacklog = new CProjectItem<?>[1];
+			// Listen for drag start from backlog
+			final var backlogGrid = componentBacklogItems.getGrid();
+			if (backlogGrid != null) {
 				backlogGrid.addDragStartListener(event -> {
-					final List<CProjectItem<?>> draggedItems = event.getDraggedItems();
-					if ((draggedItems != null) && !draggedItems.isEmpty()) {
-						draggedItemHolder[0] = draggedItems.get(0);
-						LOGGER.debug("Drag started from backlog for item: {} ({})", draggedItemHolder[0].getId(),
-								draggedItemHolder[0].getClass().getSimpleName());
+					if (!event.getDraggedItems().isEmpty()) {
+						draggedFromBacklog[0] = event.getDraggedItems().get(0);
+						LOGGER.debug("Item drag started from backlog: {}", draggedFromBacklog[0].getId());
 					}
 				});
-				// Add drag end listener to clear the dragged item
+				// Clear on drag end
 				backlogGrid.addDragEndListener(event -> {
-					LOGGER.debug("Drag ended from backlog");
-					draggedItemHolder[0] = null;
+					draggedFromBacklog[0] = null;
 				});
-				// Configure sprint items grid to accept drops from backlog
+			}
+			// Configure sprint items to ACCEPT drops from backlog (implements IDropTarget)
+			final var sprintItemsGrid = componentItemsSelection.getGridItems();
+			if (sprintItemsGrid != null) {
 				sprintItemsGrid.setDropMode(GridDropMode.BETWEEN);
-				// Add drop listener to sprint items grid to handle drops from backlog
+				// Listen for drops ON sprint items grid
 				sprintItemsGrid.addDropListener(event -> {
-					if (draggedItemHolder[0] != null) {
-						final CProjectItem<?> itemToAdd = draggedItemHolder[0];
-						LOGGER.debug("Item dropped into sprint items from backlog: {} ({})", itemToAdd.getId(), itemToAdd.getClass().getSimpleName());
-						// Add the item to sprint items
+					if (draggedFromBacklog[0] != null) {
+						final CProjectItem<?> itemToAdd = draggedFromBacklog[0];
+						LOGGER.debug("Item dropped into sprint from backlog: {}", itemToAdd.getId());
+						// Add to sprint items
 						componentItemsSelection.addDroppedItem(itemToAdd);
-						// Refresh the backlog to hide the newly added item
+						// Refresh backlog to hide the item
 						componentBacklogItems.refresh();
-						// Clear the holder
-						draggedItemHolder[0] = null;
+						// Clear tracker
+						draggedFromBacklog[0] = null;
 					}
 				});
-				LOGGER.debug("Drag and drop configured between backlog and sprint items");
 			}
+			LOGGER.debug("Drag and drop configured: backlog (source) -> sprint items (target)");
 		} else {
-			LOGGER.debug("Cannot setup drag and drop - components not yet initialized (backlog: {}, items: {})", componentBacklogItems != null,
-					componentItemsSelection != null);
+			LOGGER.debug("Cannot setup drag and drop - components not yet initialized");
 		}
 	}
 }
