@@ -30,15 +30,14 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
  * @see ISprintItemPageService */
 public interface ISprintableItem {
 
-	/** Gets the unique identifier for this sprintable item.
-	 * @return the item ID */
-	Long getId();
-
-	/** Gets the display name for this sprintable item.
-	 * @return the item name */
-	String getName();
-
 	/** Gets the description for this sprintable item.
 	 * @return the item description, can be null */
 	String getDescription();
+	/** Gets the unique identifier for this sprintable item.
+	 * @return the item ID */
+	Long getId();
+	/** Gets the display name for this sprintable item.
+	 * @return the item name */
+	String getName();
+	Long getSprintOrder();
 }

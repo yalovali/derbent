@@ -113,6 +113,9 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	)
 	private CUser responsible;
 	@Column (nullable = true)
+	@AMetaData (displayName = "Sprint Order", required = false, readOnly = false, description = "The order of item in a sprint view", hidden = false)
+	private Long sprintOrder;
+	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
 			hidden = false
@@ -168,8 +171,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public LocalTime getEndTime() { return endTime; }
 
 	@Override
-	@SuppressWarnings ({
-	})
+	@SuppressWarnings ({})
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	@Override
@@ -194,6 +196,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	@Override
 	public CUser getResponsible() { return responsible; }
+
+	public Long getSprintOrder() { return sprintOrder; }
 
 	@Override
 	public LocalDate getStartDate() { return startDate; }
@@ -294,6 +298,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
+
+	public void setSprintOrder(Long sprintOrder) { this.sprintOrder = sprintOrder; }
 
 	public void setStartDate(final LocalDate startDate) { this.startDate = startDate; }
 

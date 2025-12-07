@@ -157,6 +157,9 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	)
 	private String results;
 	@Column (nullable = true)
+	@AMetaData (displayName = "Sprint Order", required = false, readOnly = false, description = "The order of item in a sprint view", hidden = false)
+	private Long sprintOrder;
+	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
 			hidden = false
@@ -482,5 +485,13 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			}
 		}
 		updateLastModified();
+	}
+
+	public Long getSprintOrder() {
+		return sprintOrder;
+	}
+
+	public void setSprintOrder(Long sprintOrder) {
+		this.sprintOrder = sprintOrder;
 	}
 }
