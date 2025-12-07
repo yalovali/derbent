@@ -20,10 +20,10 @@ public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject
 	boolean existsByNameProject(@Param ("name") String name, @Param ("project") CProject project);
 	@Query ("SELECT s FROM #{#entityName} s WHERE LOWER(s.name) = LOWER(:name) AND s.project = :project")
 	Optional<EntityClass> findByNameAndProject(@Param ("name") String name, @Param ("project") CProject project);
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project ORDER BY e.name ASC")
 	List<EntityClass> listByProject(@Param ("project") CProject project);
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project ORDER BY e.name ASC")
 	Page<EntityClass> listByProject(@Param ("project") CProject project, Pageable pageable);
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.project.id = :pid")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.project.id = :pid ORDER BY e.name ASC")
 	List<EntityClass> listByProjectId(@Param ("pid") Long pid);
 }

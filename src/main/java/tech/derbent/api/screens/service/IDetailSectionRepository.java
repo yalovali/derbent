@@ -12,7 +12,7 @@ import tech.derbent.api.screens.domain.CDetailSection;
 
 public interface IDetailSectionRepository extends IEntityOfProjectRepository<CDetailSection> {
 
-	@Query ("SELECT s FROM CDetailSection s " + "WHERE s.project = :project AND s.active = true")
+	@Query ("SELECT s FROM CDetailSection s " + "WHERE s.project = :project AND s.active = true ORDER BY s.name ASC")
 	List<CDetailSection> findActiveByProject(@Param ("project") CProject project);
 	@Query (
 		"SELECT s FROM CDetailSection s " + "LEFT JOIN FETCH s.project " + "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
@@ -31,7 +31,7 @@ public interface IDetailSectionRepository extends IEntityOfProjectRepository<CDe
 	@Override
 	@Query (
 		"SELECT s FROM CDetailSection s " + "LEFT JOIN FETCH s.project " + "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
-				+ "WHERE s.project = :project"
+				+ "WHERE s.project = :project ORDER BY s.name ASC"
 	)
 	Page<CDetailSection> listByProject(@Param ("project") CProject project, Pageable pageable);;
 }

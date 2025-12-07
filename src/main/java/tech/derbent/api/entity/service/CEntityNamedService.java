@@ -2,9 +2,7 @@ package tech.derbent.api.entity.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.utils.Check;
@@ -47,10 +45,6 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 			return "New " + getEntityClass().getSimpleName();
 		}
 	}
-
-	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
-	@Override
-	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() { return Map.of("name", e -> e.getName(), "id", e -> e.getId()); }
 
 	public String getUniqueNameFromList(String prefix, List<EntityClass> existingEntities) {
 		//
