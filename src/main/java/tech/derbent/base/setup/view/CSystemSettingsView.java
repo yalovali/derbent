@@ -268,8 +268,8 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	private void on_actionResetDatabaseMinimal() {
 		try {
-			CNotificationService.showConfirmationDialog(
-					"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", () -> {
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> {
 						try {
 							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(true);

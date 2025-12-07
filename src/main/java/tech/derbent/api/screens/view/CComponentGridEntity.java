@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -291,6 +292,18 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					}
 				};
 				grid.addDateTimeColumn(valueProvider, displayName, fieldName);
+			} else if (fieldType == LocalTime.class) {
+				// LocalDateTime fields - use addDateTimeColumn
+				final ValueProvider valueProvider = entity -> {
+					try {
+						field.setAccessible(true);
+						return (LocalTime) field.get(entity);
+					} catch (final Exception e) {
+						LOGGER.error("Error accessing datetime field {}: {}", fieldName, e.getMessage());
+						return null;
+					}
+				};
+				grid.addTimeColumn(valueProvider, displayName, fieldName);
 			} else if (fieldType == Boolean.class || fieldType == boolean.class) {
 				// Boolean fields - use addBooleanColumn with appropriate true/false text
 				final ValueProvider valueProvider = entity -> {

@@ -302,6 +302,40 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		}
 	}
 
+	/** Adds a long text column that expands to fill available space (flexGrow = 1).
+	 * @param valueProvider Value provider for the column
+	 * @param header        Column header text
+	 * @param key           Column key for identification
+	 * @return The created column */
+	public Column<EntityClass> addExpandingLongTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header,
+			final String key) {
+		Check.notNull(valueProvider, "Value provider cannot be null");
+		Check.notBlank(header, "Header cannot be null or blank");
+		final Column<EntityClass> column = addColumn(valueProvider).setFlexGrow(1).setSortable(true).setResizable(true);
+		Check.notNull(column, "Column creation failed for header: " + header);
+		if (key != null) {
+			column.setKey(key);
+		}
+		return styleColumnHeader(column, header);
+	}
+
+	/** Adds a short text column that expands to fill available space (flexGrow = 1).
+	 * @param valueProvider Value provider for the column
+	 * @param header        Column header text
+	 * @param key           Column key for identification
+	 * @return The created column */
+	public Column<EntityClass> addExpandingShortTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header,
+			final String key) {
+		Check.notNull(valueProvider, "Value provider cannot be null");
+		Check.notBlank(header, "Header cannot be null or blank");
+		final Column<EntityClass> column = addColumn(valueProvider).setFlexGrow(1).setSortable(true).setResizable(true);
+		Check.notNull(column, "Column creation failed for header: " + header);
+		if (key != null) {
+			column.setKey(key);
+		}
+		return styleColumnHeader(column, header);
+	}
+
 	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
@@ -347,23 +381,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		return addCustomColumn(valueProvider, header, WIDTH_LONG_TEXT, key, 0);
 	}
 
-	/** Adds a long text column that expands to fill available space (flexGrow = 1).
-	 * @param valueProvider Value provider for the column
-	 * @param header        Column header text
-	 * @param key           Column key for identification
-	 * @return The created column */
-	public Column<EntityClass> addExpandingLongTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header,
-			final String key) {
-		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
-		final Column<EntityClass> column = addColumn(valueProvider).setFlexGrow(1).setSortable(true).setResizable(true);
-		Check.notNull(column, "Column creation failed for header: " + header);
-		if (key != null) {
-			column.setKey(key);
-		}
-		return styleColumnHeader(column, header);
-	}
-
 	public Column<EntityClass> addReferenceColumn(final ValueProvider<EntityClass, String> valueProvider, final String header) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
@@ -376,21 +393,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> {
 		return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
 	}
 
-	/** Adds a short text column that expands to fill available space (flexGrow = 1).
-	 * @param valueProvider Value provider for the column
-	 * @param header        Column header text
-	 * @param key           Column key for identification
-	 * @return The created column */
-	public Column<EntityClass> addExpandingShortTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header,
-			final String key) {
+	public Column<EntityClass> addTimeColumn(final ValueProvider<EntityClass, LocalDateTime> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		final Column<EntityClass> column = addColumn(valueProvider).setFlexGrow(1).setSortable(true).setResizable(true);
-		Check.notNull(column, "Column creation failed for header: " + header);
-		if (key != null) {
-			column.setKey(key);
-		}
-		return styleColumnHeader(column, header);
+		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
 	}
 
 	/** Adds a widget column to the grid (non-sortable by default).

@@ -56,8 +56,6 @@ public final class CDataProviderResolver {
 				.collect(Collectors.toList());
 	}
 
-
-
 	public Component resolveDataComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
 			final Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
@@ -131,7 +129,13 @@ public final class CDataProviderResolver {
 		final String paramBeanName = bName;
 		Check.notBlank(paramBeanName, "Parameter bean name cannot be empty");
 		// paramBeanName is ok now
-		if ("context".equals(paramBeanName)) {
+		if ("this".equalsIgnoreCase(paramMethod)) {
+			return contentOwner.getCurrentEntity();
+		}
+		if ("this".equals(paramBeanName)) {
+			// just the content owner
+			paramBean = contentOwner.getCurrentEntity();
+		} else if ("context".equals(paramBeanName)) {
 			// just the content owner
 			paramBean = contentOwner;
 		} else if ("session".equals(paramBeanName)) {
