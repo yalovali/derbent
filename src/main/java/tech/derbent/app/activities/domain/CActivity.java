@@ -164,10 +164,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	private LocalDate startDate;
 	// Sprint ordering - used by sprint-aware components for drag-and-drop ordering
 	@Column (name = "sprint_order", nullable = true)
-	@Min (value = 0, message = "Sprint order must be non-negative")
+	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
-			displayName = "Sprint Order", required = false, readOnly = false, defaultValue = "0",
-			description = "Display order within sprint and backlog views", hidden = true
+			displayName = "Sprint Order", required = false, readOnly = false,
+			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
 	)
 	private Integer sprintOrder;
 

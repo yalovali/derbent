@@ -123,9 +123,10 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	private LocalTime startTime;
 	// Sprint ordering - used by sprint-aware components for drag-and-drop ordering
 	@Column (name = "sprint_order", nullable = true)
+	@jakarta.validation.constraints.Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
-			displayName = "Sprint Order", required = false, readOnly = false, defaultValue = "0",
-			description = "Display order within sprint and backlog views", hidden = true
+			displayName = "Sprint Order", required = false, readOnly = false,
+			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
 	)
 	private Integer sprintOrder;
 
