@@ -139,13 +139,20 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
 	}
 
-	/** Sets up drag and drop between backlog and sprint items components using the IGridDragDropSupport pattern. This enables proper separation between:
+	/** Sets up drag and drop between backlog and sprint items components using the general refresh listener pattern. This enables proper separation
+	 * between:
 	 * - Internal reordering within backlog (handled by backlog component)
 	 * - Dragging from backlog to sprint items (handled via interface)
 	 * - Reverse drag from sprint items back to backlog (removes from sprint) */
 	private void setupDragAndDrop() {
 		// Only set up if both components exist
 		if ((componentBacklogItems != null) && (componentItemsSelection != null)) {
+			// === Sprint Items → Backlog Listener (Update-Then-Notify pattern) ===
+			// When sprint items change, backlog should refresh itself
+			componentItemsSelection.addRefreshListener(changedItem -> {
+				LOGGER.debug("Sprint items changed, refreshing backlog");
+				componentBacklogItems.refreshGrid();
+			});
 			// === FORWARD DRAG: Backlog → Sprint Items ===
 			// Enable dragging FROM backlog (implements IGridDragDropSupport)
 			componentBacklogItems.setDragEnabled(true);
@@ -166,7 +173,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				});
 			}
 			// Configure sprint items to ACCEPT drops from backlog (implements IDropTarget)
-			final var sprintItemsGrid = componentItemsSelection.getGridItems();
+			final var sprintItemsGrid = componentItemsSelection.getGrid();
 			if (sprintItemsGrid != null) {
 				sprintItemsGrid.setDropMode(GridDropMode.BETWEEN);
 				// Listen for drops ON sprint items grid FROM backlog
@@ -174,10 +181,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 					if (draggedFromBacklog[0] != null) {
 						final CProjectItem<?> itemToAdd = draggedFromBacklog[0];
 						LOGGER.debug("Item dropped into sprint from backlog: {}", itemToAdd.getId());
-						// Add to sprint items
+						// Add to sprint items (which will update itself and notify listeners)
 						componentItemsSelection.addDroppedItem(itemToAdd);
-						// Refresh backlog to hide the item
-						componentBacklogItems.refresh();
+						// Note: componentBacklogItems will refresh via the listener above
 						// Clear tracker
 						draggedFromBacklog[0] = null;
 					}
@@ -203,10 +209,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			// Configure backlog to ACCEPT drops from sprint items (implements IDropTarget)
 			if (backlogGrid != null) {
-				// Set up incoming drop handler
-				componentBacklogItems.setIncomingDropHandler(item -> {
-					LOGGER.debug("Backlog ready to receive items from sprint");
-				});
 				// Listen for drops ON backlog grid FROM sprint items
 				backlogGrid.addDropListener(event -> {
 					if (draggedFromSprint[0] != null) {
@@ -214,17 +216,16 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 						final CProjectItem<?> item = sprintItem.getItem();
 						LOGGER.debug("Sprint item dropped back into backlog: {} (itemId: {})", sprintItem.getId(), item != null ? item.getId() : "null");
 						if (item != null) {
-							// Remove from sprint
+							// Remove from sprint (which will update itself and notify listeners)
 							componentItemsSelection.removeSprintItem(sprintItem);
-							// Receive back in backlog at dropped position
-							componentBacklogItems.receiveItemFromSprint(item, event.getDropLocation());
+							// Note: componentBacklogItems will refresh via the listener above
 						}
 						// Clear tracker
 						draggedFromSprint[0] = null;
 					}
 				});
 			}
-			LOGGER.debug("Bidirectional drag and drop configured: backlog ↔ sprint items");
+			LOGGER.debug("Bidirectional drag and drop configured with refresh listeners");
 		} else {
 			LOGGER.debug("Cannot setup drag and drop - components not yet initialized");
 		}

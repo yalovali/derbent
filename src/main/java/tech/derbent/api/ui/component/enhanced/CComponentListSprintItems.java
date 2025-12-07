@@ -60,8 +60,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private boolean dragEnabledToBacklog = false;
 	// Services for loading items
 	private final CMeetingService meetingService;
-	// Listener for item changes
-	private Consumer<CSprintItem> onItemChangeListener;
 
 	/** Constructor for CComponentListSprintItems.
 	 * @param sprintItemService The service for CSprintItem operations
@@ -75,7 +73,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		Check.notNull(meetingService, "MeetingService cannot be null");
 		this.activityService = activityService;
 		this.meetingService = meetingService;
-		LOGGER.debug("CComponentListSprintItems created");
+		// Enable dynamic height so grid resizes with content
+		setDynamicHeight("600px");
+		LOGGER.debug("CComponentListSprintItems created with dynamic height enabled");
 	}
 
 	/** Handles adding a dropped item to the sprint. This is called by the drop handler.
@@ -95,14 +95,12 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			sprintItem.setItem(item);
 			// Save
 			childService.save(sprintItem);
-			// Refresh grid
+			// Update self: refresh grid
 			refreshGrid();
 			// Show success notification
 			CNotificationService.showSuccess("Item added to sprint");
-			// Notify listener if set
-			if (onItemChangeListener != null) {
-				onItemChangeListener.accept(sprintItem);
-			}
+			// Notify listeners (Update-Then-Notify pattern)
+			notifyRefreshListeners(sprintItem);
 		} catch (final Exception e) {
 			LOGGER.error("Error adding dropped item to sprint", e);
 			CNotificationService.showException("Error adding item to sprint", e);
@@ -262,17 +260,16 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 					// Save
 					childService.save(sprintItem);
 					addedCount++;
-					// Notify listener if set
-					if (onItemChangeListener != null) {
-						onItemChangeListener.accept(sprintItem);
-					}
 				} catch (final Exception e) {
 					LOGGER.error("Error adding item {} to sprint", item.getId(), e);
 				}
 			}
 			if (addedCount > 0) {
+				// Update self: refresh grid
 				refreshGrid();
 				CNotificationService.showSuccess(addedCount + " items added to sprint");
+				// Notify listeners once for batch add (Update-Then-Notify pattern)
+				notifyRefreshListeners(null);
 			}
 		};
 	}
@@ -324,13 +321,12 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			LOGGER.debug("Deleting sprint item: {}", getSelectedItem().getId());
 			final CSprintItem itemToDelete = getSelectedItem();
 			childService.delete(itemToDelete);
+			// Update self: refresh grid
 			refreshGrid();
-			getGridItems().asSingleSelect().clear();
+			getGrid().asSingleSelect().clear();
 			CNotificationService.showDeleteSuccess();
-			// Notify listener if set
-			if (onItemChangeListener != null) {
-				onItemChangeListener.accept(itemToDelete);
-			}
+			// Notify listeners (Update-Then-Notify pattern)
+			notifyRefreshListeners(itemToDelete);
 		} catch (final Exception e) {
 			LOGGER.error("Error deleting sprint item", e);
 			CNotificationService.showException("Error deleting item", e);
@@ -387,12 +383,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		}
 	}
 
-	/** Sets a listener to be notified when sprint items are added or removed.
-	 * @param listener the listener to be called when an item changes */
-	public void setOnItemChangeListener(final Consumer<CSprintItem> listener) {
-		onItemChangeListener = listener;
-	}
-
 	/** Removes a sprint item from the sprint and deletes it from the database.
 	 * @param sprintItem the sprint item to remove */
 	public void removeSprintItem(final CSprintItem sprintItem) {
@@ -401,13 +391,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			LOGGER.debug("Removing sprint item: {} (itemId: {})", sprintItem.getId(), sprintItem.getItemId());
 			// Delete the sprint item
 			childService.delete(sprintItem);
-			// Refresh the grid
+			// Update self: refresh grid
 			refreshGrid();
 			CNotificationService.showSuccess("Item removed from sprint");
-			// Notify listener if set
-			if (onItemChangeListener != null) {
-				onItemChangeListener.accept(sprintItem);
-			}
+			// Notify listeners (Update-Then-Notify pattern)
+			notifyRefreshListeners(sprintItem);
 		} catch (final Exception e) {
 			LOGGER.error("Error removing sprint item", e);
 			CNotificationService.showException("Error removing item from sprint", e);
@@ -476,7 +464,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		LOGGER.debug("Drag-and-drop reordering enabled for sprint items grid");
 	}
 
-	/** Handles reordering of sprint items when dropped within the same grid.
+	/** Handles reordering of sprint items when dropped within the same grid. Uses the standard service move methods for consistency with up/down
+	 * buttons.
 	 * @param draggedItem  the sprint item being dragged
 	 * @param targetItem   the sprint item it's being dropped on/near
 	 * @param dropLocation where relative to target (ABOVE, BELOW, ON_TOP) */
@@ -484,7 +473,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		LOGGER.debug("Handling internal reorder: dragged={} (order={}), target={} (order={}), location={}", draggedItem.getId(),
 				draggedItem.getItemOrder(), targetItem.getId(), targetItem.getItemOrder(), dropLocation);
 		// Get current items from grid
-		final List<CSprintItem> currentItems = getGridItems().getListDataView().getItems().toList();
+		final List<CSprintItem> currentItems = getGrid().getListDataView().getItems().toList();
 		if (currentItems.isEmpty()) {
 			LOGGER.warn("No items in grid for reordering");
 			return;
@@ -517,27 +506,16 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			LOGGER.debug("Item dropped at same position, no reordering needed");
 			return;
 		}
-		// Create a mutable copy and reorder
-		final List<CSprintItem> reorderedItems = new java.util.ArrayList<>(currentItems);
-		final CSprintItem item = reorderedItems.remove(draggedIndex);
-		reorderedItems.add(newPosition, item);
-		// Update itemOrder for all items
-		for (int i = 0; i < reorderedItems.size(); i++) {
-			final CSprintItem currentItem = reorderedItems.get(i);
-			currentItem.setItemOrder(i + 1); // Start from 1
-			try {
-				childService.save(currentItem);
-			} catch (final Exception e) {
-				LOGGER.error("Error saving reordered item: {}", currentItem.getId(), e);
-			}
-		}
-		LOGGER.debug("Reordered sprint items: moved from position {} to {}", draggedIndex, newPosition);
-		// Refresh the grid
-		refreshGrid();
-		CNotificationService.showSuccess("Sprint items reordered");
-		// Notify listener if set
-		if (onItemChangeListener != null) {
-			onItemChangeListener.accept(item);
+		// Use the generalized service-based reordering from base class
+		// This ensures consistency with up/down buttons
+		final int moves = reorderItemByMoving(draggedItem, draggedIndex, newPosition, currentItems);
+		if (moves > 0) {
+			LOGGER.debug("Reordered sprint item using {} service move operations", moves);
+			// Update self and refresh grid
+			refreshGrid();
+			CNotificationService.showSuccess("Sprint items reordered");
+			// Notify listeners (Update-Then-Notify pattern)
+			notifyRefreshListeners(draggedItem);
 		}
 	}
 }

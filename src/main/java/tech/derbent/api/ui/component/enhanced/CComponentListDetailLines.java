@@ -19,9 +19,11 @@ import tech.derbent.api.utils.Check;
  * <ul>
  *   <li>Grid display with ID, Order, Caption, Field Name, Required, Status columns</li>
  *   <li>Add/Edit/Delete operations with validation</li>
- *   <li>Move up/down for reordering</li>
+ *   <li>Move up/down for reordering (uses service moveItemUp/moveItemDown methods)</li>
  *   <li>Dialog-based editing</li>
  *   <li>Selection management</li>
+ *   <li>Dynamic grid height (resizes with content up to 600px)</li>
+ *   <li>Refresh listener support via IGridRefreshListener interface</li>
  * </ul>
  */
 public class CComponentListDetailLines extends CComponentListEntityBase<CDetailSection, CDetailLines> {
@@ -36,7 +38,9 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 	public CComponentListDetailLines(final CDetailLinesService detailLinesService) {
 		super("Screen Field Definitions", CDetailSection.class, CDetailLines.class, detailLinesService);
 		Check.notNull(detailLinesService, "DetailLinesService cannot be null");
-		LOGGER.debug("CComponentListDetailLines created");
+		// Enable dynamic height so grid resizes with content
+		setDynamicHeight("600px");
+		LOGGER.debug("CComponentListDetailLines created with dynamic height enabled");
 	}
 
 	@Override
