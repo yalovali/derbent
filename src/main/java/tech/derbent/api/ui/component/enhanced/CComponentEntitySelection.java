@@ -22,6 +22,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IGridComponent;
+import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -43,9 +44,11 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
  * <li>Reset button for clearing selection</li>
  * <li>Selected items persist across grid filtering</li>
  * <li>Support for already-selected items with two modes: hide or show as pre-selected</li>
+ * <li>Refresh listener support via IGridRefreshListener interface for component notifications</li>
  * </ul>
  * @param <EntityClass> The entity type being selected */
-public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout> implements IGridComponent<EntityClass> {
+public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
+		implements IGridComponent<EntityClass>, IGridRefreshListener<EntityClass> {
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
@@ -114,6 +117,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
 	private static final long serialVersionUID = 1L;
+	// Refresh listeners for the update-and-notify pattern
+	private final List<Consumer<EntityClass>> refreshListeners = new ArrayList<>();
 	private List<EntityClass> allItems = new ArrayList<>();
 	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	private final AlreadySelectedMode alreadySelectedMode;
@@ -561,6 +566,43 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing component", e);
 			CNotificationService.showException("Error refreshing component", e);
+		}
+	}
+
+	// IGridRefreshListener implementation
+	/** Adds a listener to be notified when this component's grid data changes. Implements IGridRefreshListener.addRefreshListener()
+	 * @param listener Consumer called when data changes (receives the changed item if available, or null) */
+	@Override
+	public void addRefreshListener(final Consumer<EntityClass> listener) {
+		Check.notNull(listener, "Refresh listener cannot be null");
+		refreshListeners.add(listener);
+		LOGGER.debug("Added refresh listener to CComponentEntitySelection");
+	}
+
+	/** Removes a previously added refresh listener. Implements IGridRefreshListener.removeRefreshListener()
+	 * @param listener The listener to remove */
+	@Override
+	public void removeRefreshListener(final Consumer<EntityClass> listener) {
+		if (listener != null) {
+			refreshListeners.remove(listener);
+			LOGGER.debug("Removed refresh listener from CComponentEntitySelection");
+		}
+	}
+
+	/** Notifies all registered listeners that this component's data has changed. This is called AFTER the component has updated its own data and
+	 * refreshed its grid. Implements IGridRefreshListener.notifyRefreshListeners()
+	 * @param changedItem The item that changed, or null if multiple items changed or change is general */
+	@Override
+	public void notifyRefreshListeners(final EntityClass changedItem) {
+		if (!refreshListeners.isEmpty()) {
+			LOGGER.debug("Notifying {} refresh listeners about data change in CComponentEntitySelection", refreshListeners.size());
+			for (final Consumer<EntityClass> listener : refreshListeners) {
+				try {
+					listener.accept(changedItem);
+				} catch (final Exception e) {
+					LOGGER.error("Error notifying refresh listener", e);
+				}
+			}
 		}
 	}
 
