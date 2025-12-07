@@ -140,39 +140,20 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		}
 	}
 
-	/** Shifts existing items to make room for a new item at the specified position. All items with order >= newOrder will be incremented by 1.
-	 * @param newOrder the order value where the new item will be inserted */
-	private void shiftItemsForInsert(final int newOrder) {
-		// Load all current items from the database for the current sprint
-		final List<CSprintItem> allItems = loadItems(getMasterEntity());
-		// Sort by order in descending order to avoid conflicts during update
-		allItems.sort((a, b) -> Integer.compare(b.getItemOrder(), a.getItemOrder()));
-		// Shift items with order >= newOrder
-		for (final CSprintItem item : allItems) {
-			if (item.getItemOrder() >= newOrder) {
-				item.setItemOrder(item.getItemOrder() + 1);
-				childService.save(item);
-				LOGGER.debug("Shifted sprint item {} from order {} to {}", item.getId(), item.getItemOrder() - 1, item.getItemOrder());
-			}
-		}
-	}
-
 	@Override
 	public void configureGrid(final CGrid<CSprintItem> grid) {
 		Check.notNull(grid, "Grid cannot be null");
-		LOGGER.debug("Configuring grid columns for CSprintItem");
-		// Use CGrid helper methods for consistent column creation
+		// LOGGER.debug("Configuring grid columns for CSprintItem");
 		grid.addIdColumn(CSprintItem::getId, "ID", "id");
-		grid.addIntegerColumn(CSprintItem::getItemOrder, "Order", "order");
+		// grid.addIntegerColumn(CSprintItem::getItemOrder, "Order", "order");
 		grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
 		// Use expanding column for Name to fill remaining width
-		grid.addExpandingShortTextColumn(item -> {
-			if (item.getItem() != null) {
-				return item.getItem().getName();
-			}
-			return "Item " + item.getItemId();
+		grid.addShortTextColumn(item -> {
+			return item.getItem().getName();
 		}, "Name", "name");
-		// Use addEntityColumn to display status with color and icon
+		grid.addExpandingLongTextColumn(item -> {
+			return item.getItem().getDescriptionShort();
+		}, "description", "Description");
 		try {
 			grid.addEntityColumn(item -> {
 				return item.getItem().getStatus();
@@ -566,6 +547,23 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				// Disable drop mode
 				getGrid().setDropMode(null);
 				LOGGER.debug("Drop handler removed");
+			}
+		}
+	}
+
+	/** Shifts existing items to make room for a new item at the specified position. All items with order >= newOrder will be incremented by 1.
+	 * @param newOrder the order value where the new item will be inserted */
+	private void shiftItemsForInsert(final int newOrder) {
+		// Load all current items from the database for the current sprint
+		final List<CSprintItem> allItems = loadItems(getMasterEntity());
+		// Sort by order in descending order to avoid conflicts during update
+		allItems.sort((a, b) -> Integer.compare(b.getItemOrder(), a.getItemOrder()));
+		// Shift items with order >= newOrder
+		for (final CSprintItem item : allItems) {
+			if (item.getItemOrder() >= newOrder) {
+				item.setItemOrder(item.getItemOrder() + 1);
+				childService.save(item);
+				LOGGER.debug("Shifted sprint item {} from order {} to {}", item.getId(), item.getItemOrder() - 1, item.getItemOrder());
 			}
 		}
 	}

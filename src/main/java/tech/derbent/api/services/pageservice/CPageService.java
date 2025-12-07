@@ -1,6 +1,8 @@
 package tech.derbent.api.services.pageservice;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
@@ -27,6 +29,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
+	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
 	protected CDetailsBuilder detailsBuilder = null;
 	protected CFormBuilder<?> formBuilder = null;
@@ -243,7 +246,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 		}
 		// add more actions as needed
-		default -> Check.fail("Action {" + action + "} not recognized for binding.");
+		default -> Check.warn("Action {" + action + "} not recognized for binding.");
 		}
 	}
 
@@ -251,27 +254,26 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
 		Check.notNull(formBuilder, "FormBuilder must not be null to bind methods.");
 		final var components = formBuilder.getComponentMap();
+		// print the component names for debugging
+		LOGGER.debug("Binding methods for components: {}", components.keySet());
+		// filter methods with name matching regex:("on_[a-zA-Z0-9]+_[a" + "-zA-Z0-9]+")
+		// final var methods = Arrays.stream(page.getClass().getDeclaredMethods()).filter(m ->
+		// m.getName().matches("on_[a-zA-Z0-9]+_[a-zA-Z0-9]+")).toList();
 		final var methods = page.getClass().getDeclaredMethods();
 		for (final var method : methods) {
-			final var methodName = method.getName();
-			// use regex to match method names in format on_[componentName]_[action]
-			if (!methodName.matches("on_[a-zA-Z0-9]+_[a" + "-zA-Z0-9]+")) {
+			final var matcher = HANDLER_PATTERN.matcher(method.getName());
+			if (!matcher.matches()) {
 				continue;
 			}
-			final var parts = methodName.split("_");
-			if (parts.length != 3) {
-				continue;
-			}
-			final var componentName = parts[1];
-			final var action = parts[2];
+			LOGGER.debug("Found handler method: {}", method.getName());
+			final var componentName = matcher.group(1);
+			final var action = matcher.group(2);
 			final var component = components.get(componentName);
 			if (component == null) {
-				// skip if the component is not found
-				// code remains, fields are dynamic
-				LOGGER.warn("Component '{}' not found in FormBuilder for binding method '{}'", componentName, methodName);
+				LOGGER.warn("Component '{}' not found in FormBuilder for binding method '{}'", componentName, method.getName());
 				continue;
 			}
-			bindComponent(method, component, methodName, componentName, action);
+			bindComponent(method, component, method.getName(), componentName, action);
 		}
 	}
 

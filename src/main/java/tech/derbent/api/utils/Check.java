@@ -261,11 +261,13 @@ public class Check {
 		LOGGER.error("{} @ {}", finalMessage, callerLocation());
 	}
 
-	public static void matches(final String string, final String regex) {
-		matches(string, regex, null);
+	/** Log a failure at caller location with the final message. */
+	private static void logWarn(final String finalMessage) {
+		LOGGER.warn("{} @ {}", finalMessage, callerLocation());
 	}
 
-	/** Validates that a string matches a regular expression pattern. Performs null/blank validation on both parameters before pattern matching.
+	/** Validates public static void matches(final String string, final String regex) { matches(string, regex, null); } /** Validates that a string
+	 * matches a regular expression pattern. Performs null/blank validation on both parameters before pattern matching.
 	 * @param string  the string to validate against the pattern
 	 * @param regex   the regular expression pattern to match
 	 * @param message custom error message, or null for default
@@ -477,5 +479,9 @@ public class Check {
 			logFail(m);
 			throw new IllegalArgumentException(m);
 		}
+	}
+
+	public static void warn(final String message) {
+		logWarn(message);
 	}
 }
