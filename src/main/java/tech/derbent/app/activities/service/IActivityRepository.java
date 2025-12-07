@@ -39,6 +39,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
 			WHERE a.project = :project
+			ORDER BY a.id DESC
 			""")
 	Page<CActivity> listByProject(@Param ("project") CProject project, Pageable pageable);
 	// find all activities of projects where the user's company owns the project
@@ -46,6 +47,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			SELECT a FROM #{#entityName} a
 			LEFT JOIN FETCH a.project p
 			WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
+			ORDER BY a.id DESC
 			""")
 	List<CActivity> listByUser(@Param ("user") CUser user);
 }

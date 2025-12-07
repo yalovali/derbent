@@ -37,6 +37,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
 			   WHERE m.project = :project
+			   ORDER BY m.id DESC
 			""")
 	Page<CMeeting> listByProject(@Param ("project") CProject project, Pageable pageable);
 }

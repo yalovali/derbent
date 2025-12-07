@@ -101,6 +101,11 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		lastModifiedDate = LocalDateTime.now();
 	}
 
+	/** Returns the default ordering field for queries. Named entities are ordered by name by default.
+	 * @return "name" as the default ordering field */
+	@Override
+	public String getDefaultOrderBy() { return "name"; }
+
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends the base class to search in 'name'
 	 * and 'description' fields in addition to inherited fields from CEntityDB. If no field names are specified, searches only in "name" field.
 	 * @param searchValue the value to search for (case-insensitive)
