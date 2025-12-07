@@ -1,6 +1,5 @@
 package tech.derbent.api.ui.component.enhanced;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
@@ -119,9 +119,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private final AlreadySelectedMode alreadySelectedMode;
 	private final ItemsProvider<EntityClass> alreadySelectedProvider;
 	private CButton buttonReset;
-	private Method cachedGetDescriptionMethod;
-	private Method cachedGetNameMethod;
-	private Method cachedGetStatusMethod;
 	private ComboBox<EntityTypeConfig<?>> comboBoxEntityType;
 	private EntityTypeConfig<?> currentEntityType;
 	private final List<EntityTypeConfig<?>> entityTypes;
@@ -233,27 +230,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Caches reflection methods for the current entity type for better performance. This method is no longer needed since entities now have
-	 * matchesFilter() but is kept for backward compatibility with grid column configuration.
-	 * @deprecated Use entity.matchesFilter() instead */
-	@Deprecated
-	private void cacheReflectionMethods(final Class<?> entityClass) {
-		try {
-			cachedGetNameMethod = entityClass.getMethod("getName");
-		} catch (final NoSuchMethodException e) {
-			cachedGetNameMethod = null;
-		}
-		try {
-			cachedGetDescriptionMethod = entityClass.getMethod("getDescription");
-		} catch (final NoSuchMethodException e) {
-			cachedGetDescriptionMethod = null;
-		}
-		try {
-			cachedGetStatusMethod = entityClass.getMethod("getStatus");
-		} catch (final NoSuchMethodException e) {
-			cachedGetStatusMethod = null;
-		}
-	}
+
 
 	/** Clears all items from the grid. Implements IGridComponent.clearGrid() */
 	@Override
@@ -377,40 +354,48 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return The AlreadySelectedMode */
 	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
 
-	/** Gets description from entity using cached method. */
+	/** Gets description from entity. Uses getName() method if entity extends CEntityNamed, otherwise returns empty string. */
 	private String getEntityDescription(final EntityClass item) {
-		if (cachedGetDescriptionMethod == null) {
-			return "";
-		}
+		Check.notNull(item, "Item cannot be null");
 		try {
-			final Object result = cachedGetDescriptionMethod.invoke(item);
-			return result != null ? result.toString() : "";
+			if (item instanceof CEntityNamed) {
+				final CEntityNamed<?> namedEntity = (CEntityNamed<?>) item;
+				final String description = namedEntity.getDescription();
+				return description != null ? description : "";
+			}
+			return "";
 		} catch (final Exception e) {
+			LOGGER.warn("Error getting description from entity: {}", e.getMessage());
 			return "";
 		}
 	}
 
-	/** Gets name from entity using cached method. */
+	/** Gets name from entity. Uses getName() method if entity extends CEntityNamed, otherwise returns empty string. */
 	private String getEntityName(final EntityClass item) {
-		if (cachedGetNameMethod == null) {
-			return "";
-		}
+		Check.notNull(item, "Item cannot be null");
 		try {
-			final Object result = cachedGetNameMethod.invoke(item);
-			return result != null ? result.toString() : "";
+			if (item instanceof CEntityNamed) {
+				final CEntityNamed<?> namedEntity = (CEntityNamed<?>) item;
+				final String name = namedEntity.getName();
+				return name != null ? name : "";
+			}
+			return "";
 		} catch (final Exception e) {
+			LOGGER.warn("Error getting name from entity: {}", e.getMessage());
 			return "";
 		}
 	}
 
-	/** Gets status from entity using cached method. */
+	/** Gets status from entity. Uses getStatus() method if entity implements IHasStatusAndWorkflow, otherwise returns null. */
 	private Object getEntityStatus(final EntityClass item) {
-		if (cachedGetStatusMethod == null) {
-			return null;
-		}
+		Check.notNull(item, "Item cannot be null");
 		try {
-			return cachedGetStatusMethod.invoke(item);
+			if (item instanceof IHasStatusAndWorkflow) {
+				return ((IHasStatusAndWorkflow) item).getStatus();
+			}
+			return null;
 		} catch (final Exception e) {
+			LOGGER.warn("Error getting status from entity: {}", e.getMessage());
 			return null;
 		}
 	}
@@ -465,8 +450,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			currentEntityType = config;
 			loadAlreadySelectedItems(config);
 			updateSelectionIndicator();
-			// Cache reflection methods for the entity type
-			cacheReflectionMethods(config.getEntityClass());
 			// Configure grid columns for the new entity type
 			configureGrid(grid);
 			// Load items
@@ -667,15 +650,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				}
 			} else {
 				final Object status = getEntityStatus(item);
-				if (status instanceof CEntityDB) {
-					try {
-						final java.lang.reflect.Method nameMethod = status.getClass().getMethod("getName");
-						final Object name = nameMethod.invoke(status);
-						if (name != null) {
-							statuses.add(name.toString());
-						}
-					} catch (final Exception e) {
-						// Ignore - status may not have getName
+				if (status instanceof CEntityNamed) {
+					final String name = ((CEntityNamed<?>) status).getName();
+					if (name != null) {
+						statuses.add(name);
 					}
 				}
 			}
