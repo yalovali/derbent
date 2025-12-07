@@ -219,13 +219,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	/** Gets all items currently displayed in the grid.
-	 * @return mutable list of all items in grid */
+	 * @return list of all items in grid */
 	public List<CProjectItem<?>> getAllItems() {
 		final var grid = getGrid();
 		if (grid == null) {
-			return new ArrayList<>();
+			return List.of();
 		}
-		return new ArrayList<>(grid.getListDataView().getItems().toList());
+		return grid.getListDataView().getItems().toList();
 	}
 
 	@Override
@@ -237,64 +237,121 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param dropLocation where relative to target (ABOVE, BELOW, ON_TOP) */
 	private void handleInternalReordering(final ISprintableItem draggedItem, final ISprintableItem targetItem, final GridDropLocation dropLocation) {
 		LOGGER.debug("Handling backlog reorder: dragged={}, target={}, location={}", draggedItem.getId(), targetItem.getId(), dropLocation);
-		// Get current items list
 		final List<CProjectItem<?>> currentItems = getAllItems();
 		if (currentItems.isEmpty()) {
 			LOGGER.warn("No items in grid for reordering");
 			return;
 		}
-		// Find indices
-		int draggedIndex = -1;
-		int targetIndex = -1;
-		for (int i = 0; i < currentItems.size(); i++) {
-			if (currentItems.get(i).getId().equals(draggedItem.getId())) {
-				draggedIndex = i;
-			}
-			if (currentItems.get(i).getId().equals(targetItem.getId())) {
-				targetIndex = i;
-			}
-		}
+		final int draggedIndex = findItemIndex(currentItems, draggedItem.getId());
+		final int targetIndex = findItemIndex(currentItems, targetItem.getId());
 		if (draggedIndex == -1 || targetIndex == -1) {
 			LOGGER.warn("Could not find dragged or target item in backlog");
 			return;
 		}
-		// Calculate new position
-		int newPosition = targetIndex;
-		if (dropLocation == GridDropLocation.BELOW) {
-			newPosition = targetIndex + 1;
-		}
-		// Adjust if dragging from above
-		if (draggedIndex < newPosition) {
-			newPosition--;
-		}
+		final int newPosition = calculateNewPosition(draggedIndex, targetIndex, dropLocation);
 		if (draggedIndex == newPosition) {
 			LOGGER.debug("Item dropped at same position, no reordering needed");
 			return;
 		}
-		// Reorder the list
-		final CProjectItem<?> item = currentItems.remove(draggedIndex);
-		currentItems.add(newPosition, item);
-		// Update sprint orders (priority) and save
-		for (int i = 0; i < currentItems.size(); i++) {
-			final CProjectItem<?> currentItem = currentItems.get(i);
-			if (currentItem instanceof ISprintableItem) {
-				((ISprintableItem) currentItem).setSprintOrder(i + 1); // Start from 1
-				// Save the updated sprintOrder (priority)
-				try {
-					if (currentItem instanceof CActivity) {
-						activityService.save((CActivity) currentItem);
-					} else if (currentItem instanceof CMeeting) {
-						meetingService.save((CMeeting) currentItem);
-					}
-				} catch (final Exception e) {
-					LOGGER.error("Error saving updated sprintOrder for item {}", currentItem.getId(), e);
-				}
+		try {
+			updateSprintOrdersAndSave(currentItems, draggedIndex, newPosition);
+			LOGGER.debug("Reordered backlog items: moved from position {} to {}", draggedIndex, newPosition);
+			refreshGrid();
+			CNotificationService.showSuccess("Backlog priority updated");
+		} catch (final Exception e) {
+			LOGGER.error("Error reordering backlog items", e);
+			CNotificationService.showException("Error reordering backlog items", e);
+		}
+	}
+
+	/** Finds the index of an item in the list by its ID.
+	 * @param items the list of items
+	 * @param itemId the ID to search for
+	 * @return the index, or -1 if not found */
+	private int findItemIndex(final List<CProjectItem<?>> items, final Long itemId) {
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(itemId)) {
+				return i;
 			}
 		}
-		LOGGER.debug("Reordered backlog items: moved from position {} to {} (updated priority)", draggedIndex, newPosition);
-		// Refresh the grid
-		refreshGrid();
-		CNotificationService.showSuccess("Backlog priority updated");
+		return -1;
+	}
+
+	/** Calculates the new position for a dragged item based on drop location.
+	 * @param draggedIndex current index of dragged item
+	 * @param targetIndex index of target item
+	 * @param dropLocation where relative to target (ABOVE, BELOW)
+	 * @return the new position index */
+	private int calculateNewPosition(final int draggedIndex, final int targetIndex, final GridDropLocation dropLocation) {
+		int newPosition = targetIndex;
+		if (dropLocation == GridDropLocation.BELOW) {
+			newPosition++;
+		}
+		// Adjust if dragging from above (because removing from above shifts indices)
+		if (draggedIndex < newPosition) {
+			newPosition--;
+		}
+		return newPosition;
+	}
+
+	/** Updates sprint orders for affected items and saves them to database.
+	 * @param items all current items
+	 * @param draggedIndex index of dragged item
+	 * @param newPosition new position for dragged item */
+	private void updateSprintOrdersAndSave(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
+		if (draggedIndex < newPosition) {
+			updateOrdersForDownwardMove(items, draggedIndex, newPosition);
+		} else {
+			updateOrdersForUpwardMove(items, draggedIndex, newPosition);
+		}
+	}
+
+	/** Updates sprint orders when moving an item down in the list.
+	 * @param items all current items
+	 * @param draggedIndex original position
+	 * @param newPosition target position */
+	private void updateOrdersForDownwardMove(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
+		for (int i = 0; i < items.size(); i++) {
+			final CProjectItem<?> item = items.get(i);
+			if (!(item instanceof ISprintableItem)) continue;
+
+			if (i == draggedIndex) {
+				((ISprintableItem) item).setSprintOrder(newPosition + 1);
+				saveItem(item);
+			} else if (i > draggedIndex && i <= newPosition) {
+				((ISprintableItem) item).setSprintOrder(i);
+				saveItem(item);
+			}
+		}
+	}
+
+	/** Updates sprint orders when moving an item up in the list.
+	 * @param items all current items
+	 * @param draggedIndex original position
+	 * @param newPosition target position */
+	private void updateOrdersForUpwardMove(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
+		for (int i = 0; i < items.size(); i++) {
+			final CProjectItem<?> item = items.get(i);
+			if (!(item instanceof ISprintableItem)) continue;
+
+			if (i == draggedIndex) {
+				((ISprintableItem) item).setSprintOrder(newPosition + 1);
+				saveItem(item);
+			} else if (i >= newPosition && i < draggedIndex) {
+				((ISprintableItem) item).setSprintOrder(i + 2);
+				saveItem(item);
+			}
+		}
+	}
+
+	/** Saves an item using the appropriate service.
+	 * @param item the item to save */
+	private void saveItem(final CProjectItem<?> item) {
+		if (item instanceof CActivity) {
+			activityService.save((CActivity) item);
+		} else if (item instanceof CMeeting) {
+			meetingService.save((CMeeting) item);
+		}
 	}
 
 	@Override
