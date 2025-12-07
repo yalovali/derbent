@@ -122,8 +122,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			componentSprintItems.setDynamicHeight("400px");
 			// Set the current entity (sprint)
 			componentSprintItems.setCurrentEntity(getEntity());
-			// Register listener for item changes
-			componentSprintItems.setOnItemChangeListener(item -> refreshItemCount());
+			// Use the general refresh listener pattern instead of the old setOnItemChangeListener
+			componentSprintItems.addRefreshListener(item -> refreshItemCount());
 			// Create container for sprint items
 			containerSprintItems = new CDiv();
 			containerSprintItems.getStyle().set("margin-top", "8px").set("padding", "8px").set("background-color", "#F5F5F5")

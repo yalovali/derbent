@@ -1,5 +1,6 @@
 package tech.derbent.api.ui.component.enhanced;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
+import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -52,10 +54,12 @@ import tech.derbent.api.utils.Check;
  * @param <MasterEntity> The master/parent entity type
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
-		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity> {
+		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
+	// Refresh listeners for the update-and-notify pattern
+	private final List<Consumer<ChildEntity>> refreshListeners = new ArrayList<>();
 
 	/** Creates an entity type configuration for use with addButtonFromList.
 	 * @param displayName The display name for the entity type
@@ -198,14 +202,18 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected void createGrid() {
 		grid = new CGrid<>(entityClass);
 		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);
-		// Configure height based on useDynamicHeight setting
-		grid.setHeightFull();
-		grid.setMinHeight("120px");
+		// Configure height - if dynamic height enabled, use content-based sizing
+		if (useDynamicHeight) {
+			grid.setDynamicHeight();
+		} else {
+			grid.setHeightFull();
+			grid.setMinHeight("120px");
+		}
 		configureGrid(grid);
 		grid.asSingleSelect().addValueChangeListener(e -> on_gridItems_selected(e.getValue()));
 		// Add double-click listener
 		grid.addItemDoubleClickListener(e -> on_gridItems_doubleClicked(e.getItem()));
-		LOGGER.debug("Grid created and configured for {}", entityClass.getSimpleName());
+		LOGGER.debug("Grid created and configured for {} (dynamic height: {})", entityClass.getSimpleName(), useDynamicHeight);
 	}
 
 	protected abstract ChildEntity createNewEntity();
@@ -283,6 +291,43 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @return The selected item, or null if none selected */
 	public ChildEntity getSelectedItem() { return selectedItem; }
 
+	// IGridRefreshListener implementation
+	/** Adds a listener to be notified when this component's grid data changes. Implements IGridRefreshListener.addRefreshListener()
+	 * @param listener Consumer called when data changes (receives the changed item if available, or null) */
+	@Override
+	public void addRefreshListener(final Consumer<ChildEntity> listener) {
+		Check.notNull(listener, "Refresh listener cannot be null");
+		refreshListeners.add(listener);
+		LOGGER.debug("Added refresh listener to {}", entityClass.getSimpleName());
+	}
+
+	/** Removes a previously added refresh listener. Implements IGridRefreshListener.removeRefreshListener()
+	 * @param listener The listener to remove */
+	@Override
+	public void removeRefreshListener(final Consumer<ChildEntity> listener) {
+		if (listener != null) {
+			refreshListeners.remove(listener);
+			LOGGER.debug("Removed refresh listener from {}", entityClass.getSimpleName());
+		}
+	}
+
+	/** Notifies all registered listeners that this component's data has changed. This is called AFTER the component has updated its own data and
+	 * refreshed its grid. Implements IGridRefreshListener.notifyRefreshListeners()
+	 * @param changedItem The item that changed, or null if multiple items changed or change is general */
+	@Override
+	public void notifyRefreshListeners(final ChildEntity changedItem) {
+		if (!refreshListeners.isEmpty()) {
+			LOGGER.debug("Notifying {} refresh listeners about data change in {}", refreshListeners.size(), entityClass.getSimpleName());
+			for (final Consumer<ChildEntity> listener : refreshListeners) {
+				try {
+					listener.accept(changedItem);
+				} catch (final Exception e) {
+					LOGGER.error("Error notifying refresh listener", e);
+				}
+			}
+		}
+	}
+
 	/** Handle edit operation for selected item.
 	 * @param item The item to edit */
 	protected void handleEdit(final ChildEntity item) {
@@ -329,16 +374,58 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @return List of items to display */
 	protected abstract List<ChildEntity> loadItems(MasterEntity master);
 
+	/** Moves an item down in the ordering by calling the service's moveItemDown method. This is the standard way to move items down and should be used
+	 * by both button clicks and drag-drop reordering.
+	 * @param item the item to move down */
 	protected void moveItemDown(final ChildEntity item) {
 		Check.notNull(item, "Item to move down cannot be null");
 		childService.moveItemDown(item);
 	}
 
+	/** Moves an item up in the ordering by calling the service's moveItemUp method. This is the standard way to move items up and should be used by
+	 * both button clicks and drag-drop reordering.
+	 * @param item the item to move up */
 	protected void moveItemUp(final ChildEntity item) {
 		Check.notNull(item, "Item to move up cannot be null");
 		Check.notNull(item.getId(), "Item must be saved before moving");
-		LOGGER.debug("Moving CSprintItem up: {}", item.getId());
+		LOGGER.debug("Moving item up: {}", item.getId());
 		childService.moveItemUp(item);
+	}
+
+	/** Reorders an item by moving it multiple positions using the service's move methods. This method performs multiple move operations to achieve the
+	 * desired position change, ensuring consistency with the service's move logic.
+	 * @param item           the item to move
+	 * @param currentIndex   the current position index (0-based)
+	 * @param targetIndex    the target position index (0-based)
+	 * @param allItems       list of all items in current order
+	 * @return the number of moves performed */
+	protected int reorderItemByMoving(final ChildEntity item, final int currentIndex, final int targetIndex, final List<ChildEntity> allItems) {
+		Check.notNull(item, "Item cannot be null");
+		Check.notNull(item.getId(), "Item must be saved before reordering");
+		if (currentIndex == targetIndex) {
+			LOGGER.debug("Item already at target position");
+			return 0;
+		}
+		int moves = 0;
+		if (currentIndex < targetIndex) {
+			// Moving down: call moveItemDown multiple times
+			final int movesToMake = targetIndex - currentIndex;
+			LOGGER.debug("Moving item down {} positions (from {} to {})", movesToMake, currentIndex, targetIndex);
+			for (int i = 0; i < movesToMake; i++) {
+				moveItemDown(item);
+				moves++;
+			}
+		} else {
+			// Moving up: call moveItemUp multiple times
+			final int movesToMake = currentIndex - targetIndex;
+			LOGGER.debug("Moving item up {} positions (from {} to {})", movesToMake, currentIndex, targetIndex);
+			for (int i = 0; i < movesToMake; i++) {
+				moveItemUp(item);
+				moves++;
+			}
+		}
+		LOGGER.debug("Reordered item using {} service move operations", moves);
+		return moves;
 	}
 
 	/** Handle add button click. Creates a new entity and opens the edit dialog. */

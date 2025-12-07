@@ -69,7 +69,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	private boolean dragEnabled = false;
 	private CProjectItem<?> draggedItem = null;
 	private Consumer<CProjectItem<?>> externalDropHandler = null;
-	private Consumer<CProjectItem<?>> incomingDropHandler = null;
 	private CSprint sprint;
 
 	/** Constructor for backlog component.
@@ -320,35 +319,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		LOGGER.debug("External drop handler {} for backlog", handler != null ? "set" : "cleared");
 	}
 
-	// IDropTarget - For receiving items FROM sprint
-	/** Sets up the backlog to accept items dropped from sprint. This enables the reverse drag-drop (sprint → backlog).
-	 * @param handler Consumer to handle incoming items from sprint */
-	public void setIncomingDropHandler(final Consumer<CProjectItem<?>> handler) {
-		this.incomingDropHandler = handler;
-		final var grid = getGrid();
-		if (grid != null && handler != null) {
-			grid.setDropMode(GridDropMode.BETWEEN);
-			LOGGER.debug("Incoming drop handler configured for backlog");
-		}
-	}
-
-	/** Handles an item being dropped back from sprint into the backlog. This re-adds the item to backlog display at the specified position.
-	 * @param item         the project item returning to backlog
-	 * @param dropLocation optional drop location for positioning */
-	public void receiveItemFromSprint(final CProjectItem<?> item, final GridDropLocation dropLocation) {
-		try {
-			Check.notNull(item, "Item cannot be null");
-			LOGGER.debug("Receiving item from sprint into backlog: {} ({})", item.getId(), item.getClass().getSimpleName());
-			// Item is already removed from sprint by the sprint items component
-			// We just need to refresh backlog to show it again and potentially reorder
-			refresh();
-			CNotificationService.showSuccess("Item returned to backlog");
-		} catch (final Exception e) {
-			LOGGER.error("Error receiving item from sprint", e);
-			CNotificationService.showException("Error returning item to backlog", e);
-		}
-	}
-
 	@Override
-	public boolean isDropEnabled() { return incomingDropHandler != null; }
+	public boolean isDropEnabled() {
+		// Backlog can always receive drops from sprint items
+		return true;
+	}
 }
