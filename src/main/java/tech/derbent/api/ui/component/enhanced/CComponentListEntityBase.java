@@ -7,9 +7,11 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
@@ -59,7 +61,8 @@ import tech.derbent.api.utils.Check;
  * @param <MasterEntity> The master/parent entity type
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
-		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity> {
+		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>,
+		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -90,6 +93,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	private final List<Consumer<ChildEntity>> refreshListeners = new ArrayList<>();
 	protected ChildEntity selectedItem;
 	protected boolean useDynamicHeight = false;
+	
+	// HasValue interface fields
+	private final List<ValueChangeListener<? super ValueChangeEvent<ChildEntity>>> valueChangeListeners = new ArrayList<>();
+	private ChildEntity previousValue = null;
+	private boolean readOnly = false;
 	
 	// Owner interfaces for notifying parent components
 	private ISelectionOwner<ChildEntity> selectionOwner;
@@ -500,6 +508,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			updateButtonStates(item != null);
 			// Notify selection owner if set
 			notifySelectionOwner();
+			// Fire value change event for HasValue interface
+			fireValueChangeEvent(item, true);
 		} catch (final Exception ex) {
 			LOGGER.error("Error processing selection change", ex);
 			CNotificationService.showException("Error processing selection", ex);
@@ -683,6 +693,147 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected void notifyDropOwner(final Set<ChildEntity> droppedItems, final Object targetComponent) {
 		if (dropOwner != null) {
 			dropOwner.onDropComplete(droppedItems, targetComponent);
+		}
+	}
+	
+	// HasValue interface implementation
+	
+	/** Gets the current value of this component (the selected item).
+	 * @return The currently selected item (can be null) */
+	@Override
+	public ChildEntity getValue() {
+		return selectedItem;
+	}
+	
+	/** Sets the value of this component (the selected item).
+	 * This will update the selection and fire value change events.
+	 * @param value The item to select (can be null to clear selection) */
+	@Override
+	public void setValue(final ChildEntity value) {
+		LOGGER.debug("Setting value programmatically: {}", value != null ? value.getId() : "null");
+		grid.asSingleSelect().setValue(value);
+		selectedItem = value;
+		updateButtonStates(value != null);
+		// Fire value change event (not from client)
+		fireValueChangeEvent(value, false);
+	}
+	
+	/** Clears the selection. Equivalent to calling setValue(null). */
+	@Override
+	public void clear() {
+		LOGGER.debug("Clearing selection");
+		setValue(null);
+	}
+	
+	/** Checks if the selection is empty.
+	 * @return true if no item is selected, false otherwise */
+	@Override
+	public boolean isEmpty() {
+		return selectedItem == null;
+	}
+	
+	/** Sets the read-only state of this component. When read-only, users cannot change the selection.
+	 * @param readOnly true to make read-only, false to make editable */
+	@Override
+	public void setReadOnly(final boolean readOnly) {
+		this.readOnly = readOnly;
+		// Update button states
+		if (readOnly) {
+			buttonAdd.setEnabled(false);
+			buttonDelete.setEnabled(false);
+			buttonMoveUp.setEnabled(false);
+			buttonMoveDown.setEnabled(false);
+			if (buttonAddFromList != null) {
+				buttonAddFromList.setEnabled(false);
+			}
+		} else {
+			updateButtonStates(selectedItem != null);
+			buttonAdd.setEnabled(true);
+			if (buttonAddFromList != null) {
+				buttonAddFromList.setEnabled(true);
+			}
+		}
+		grid.setEnabled(!readOnly);
+	}
+	
+	/** Checks if the component is read-only.
+	 * @return true if read-only, false otherwise */
+	@Override
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	
+	/** Sets whether the required indicator should be visible.
+	 * @param requiredIndicatorVisible true to show required indicator, false to hide */
+	@Override
+	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
+		// Note: CComponentListEntityBase doesn't currently support required indicator
+		// This could be implemented by adding a visual indicator to the component
+		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
+	}
+	
+	/** Checks if the required indicator is visible.
+	 * @return false (required indicator not currently implemented) */
+	@Override
+	public boolean isRequiredIndicatorVisible() {
+		return false;
+	}
+	
+	/** Registers a value change listener. Implements HasValue.addValueChangeListener().
+	 * @param listener The value change listener to register
+	 * @return Registration object to remove the listener */
+	@Override
+	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener) {
+		Check.notNull(listener, "ValueChangeListener cannot be null");
+		valueChangeListeners.add(listener);
+		LOGGER.debug("Added value change listener to {}", entityClass.getSimpleName());
+		return () -> valueChangeListeners.remove(listener);
+	}
+	
+	/** Fires a value change event to all registered listeners.
+	 * @param newValue the new value
+	 * @param fromClient whether the change originated from the client */
+	protected void fireValueChangeEvent(final ChildEntity newValue, final boolean fromClient) {
+		final ChildEntity oldValue = previousValue;
+		previousValue = newValue;
+		
+		if (!valueChangeListeners.isEmpty()) {
+			LOGGER.debug("Firing value change event: old={}, new={}, fromClient={}", 
+				oldValue != null ? oldValue.getId() : "null",
+				newValue != null ? newValue.getId() : "null",
+				fromClient);
+			
+			final ValueChangeEvent<ChildEntity> event = new ValueChangeEvent<ChildEntity>() {
+				private static final long serialVersionUID = 1L;
+				
+				@Override
+				public HasValue<?, ChildEntity> getHasValue() {
+					return CComponentListEntityBase.this;
+				}
+				
+				@Override
+				public ChildEntity getOldValue() {
+					return oldValue;
+				}
+				
+				@Override
+				public ChildEntity getValue() {
+					return newValue;
+				}
+				
+				@Override
+				public boolean isFromClient() {
+					return fromClient;
+				}
+			};
+			
+			for (final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener : valueChangeListeners) {
+				try {
+					listener.valueChanged(event);
+				} catch (final Exception e) {
+					LOGGER.error("Error notifying value change listener", e);
+				}
+			}
 		}
 	}
 }
