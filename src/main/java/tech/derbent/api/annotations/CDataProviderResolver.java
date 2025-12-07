@@ -1,11 +1,7 @@
 package tech.derbent.api.annotations;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,20 +45,10 @@ public final class CDataProviderResolver {
 	}
 
 	private final ApplicationContext applicationContext;
-	/** Cache for resolved bean instances to improve performance. Key format: "beanName" or "className" */
-	private final Map<String, Object> beanCache = new ConcurrentHashMap<>();
-	/** Cache for resolved methods to improve performance. Key format: "beanName:methodName:entityType" */
-	private final Map<String, Method> methodCache = new ConcurrentHashMap<>();
 
 	@Autowired
 	public CDataProviderResolver(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
-	}
-
-	public void clearCaches() {
-		methodCache.clear();
-		beanCache.clear();
-		LOGGER.info("CDataProviderResolver caches cleared");
 	}
 
 	public List<String> getAvailableServiceBeans() {
@@ -70,19 +56,7 @@ public final class CDataProviderResolver {
 				.collect(Collectors.toList());
 	}
 
-	private Object getBeanFromCache(final String cacheKey, final Supplier<Object> beanSupplier) {
-		return beanCache.computeIfAbsent(cacheKey, e -> {
-			final Object bean = beanSupplier.get();
-			if (bean != null) {
-				// LOGGER.debug("Cached bean for key: {}", cacheKey);
-			}
-			return bean;
-		});
-	}
 
-	public String getCacheStats() {
-		return String.format("CDataProviderResolver - Method cache: %d entries, Bean cache: %d entries", methodCache.size(), beanCache.size());
-	}
 
 	public Component resolveDataComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
@@ -163,18 +137,14 @@ public final class CDataProviderResolver {
 		} else if ("session".equals(paramBeanName)) {
 			// session service must be ISessionService of CSessionService or CWebSessionService
 			// Get the actual session service bean from Spring context
-			paramBean = getBeanFromCache("CSessionService", () -> {
-				Check.isTrue(applicationContext.containsBean("CSessionService"),
-						"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
-				return applicationContext.getBean("CSessionService");
-			});
+			Check.isTrue(applicationContext.containsBean("CSessionService"),
+					"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
+			paramBean = applicationContext.getBean("CSessionService");
 		} else {
-			// Get bean from Spring context with caching
-			paramBean = getBeanFromCache(paramBeanName, () -> {
-				Check.isTrue(applicationContext.containsBean(paramBeanName),
-						"Parameter Bean '" + paramBeanName + "' not found in application context of beans:" + getAvailableServiceBeans());
-				return applicationContext.getBean(paramBeanName);
-			});
+			// Get bean from Spring context
+			Check.isTrue(applicationContext.containsBean(paramBeanName),
+					"Parameter Bean '" + paramBeanName + "' not found in application context of beans:" + getAvailableServiceBeans());
+			paramBean = applicationContext.getBean(paramBeanName);
 		}
 		// param bean must be ok now
 		Check.notNull(paramBean, "Parameter Service bean cannot be null for bean name: " + paramBeanName);

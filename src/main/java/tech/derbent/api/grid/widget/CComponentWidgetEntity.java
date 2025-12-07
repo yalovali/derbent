@@ -58,7 +58,6 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntity.class);
-	private static final java.util.Map<String, java.lang.reflect.Method> methodCache = new java.util.concurrent.ConcurrentHashMap<>();
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings ("unchecked")
@@ -106,12 +105,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 				return null;
 			}
 			try {
-				final String cacheKey = entity.getClass().getName() + ":" + getterName;
-				java.lang.reflect.Method getter = methodCache.get(cacheKey);
-				if (getter == null) {
-					getter = entity.getClass().getMethod(getterName);
-					methodCache.put(cacheKey, getter);
-				}
+				final java.lang.reflect.Method getter = entity.getClass().getMethod(getterName);
 				return (V) getter.invoke(entity);
 			} catch (final Exception e) {
 				LOGGER.debug("Could not get property {}: {}", propertyName, e.getMessage());

@@ -403,11 +403,73 @@ Check.notNull(entity, "Entity cannot be null");
 Check.notBlank(name, "Name cannot be blank");
 Check.notEmpty(list, "List cannot be empty");
 Check.isTrue(value > 0, "Value must be positive");
+Check.instanceof(obj, CEntityNamed.class, "Object must be an instance of CEntityNamed");
 
 // ❌ INCORRECT - Manual checks
 if (entity == null) {
     throw new IllegalArgumentException("Entity cannot be null");
 }
+```
+
+#### Avoid Reflection and Caching Patterns
+**IMPORTANT**: Do not use reflection method caching patterns as they make code difficult to read and maintain.
+
+```java
+// ❌ INCORRECT - Reflection with method caching
+private Method cachedGetNameMethod;
+
+private void cacheMethod(Class<?> clazz) {
+    try {
+        cachedGetNameMethod = clazz.getMethod("getName");
+    } catch (NoSuchMethodException e) {
+        cachedGetNameMethod = null;
+    }
+}
+
+private String getName(Object entity) {
+    if (cachedGetNameMethod == null) return "";
+    try {
+        return (String) cachedGetNameMethod.invoke(entity);
+    } catch (Exception e) {
+        return "";
+    }
+}
+
+// ✅ CORRECT - Use instanceof and direct method calls
+private String getName(Object entity) {
+    Check.notNull(entity, "Entity cannot be null");
+    if (entity instanceof CEntityNamed) {
+        return ((CEntityNamed<?>) entity).getName();
+    }
+    return "";
+}
+
+// ✅ CORRECT - Use type-safe interfaces
+private String getStatusName(Object entity) {
+    Check.notNull(entity, "Entity cannot be null");
+    if (entity instanceof IHasStatusAndWorkflow) {
+        final Object status = ((IHasStatusAndWorkflow) entity).getStatus();
+        if (status instanceof CEntityNamed) {
+            return ((CEntityNamed<?>) status).getName();
+        }
+    }
+    return "";
+}
+```
+
+**Why avoid caching patterns?**
+- Makes code harder to read and understand
+- Adds unnecessary complexity
+- Modern JVMs optimize method calls efficiently
+- Type-safe instanceof checks provide better compile-time safety
+- Direct method calls are easier to debug and maintain
+
+**When to use Check.instanceof**:
+```java
+// Validate type before casting
+Check.instanceof(entity, CEntityNamed.class, "Entity must extend CEntityNamed");
+final CEntityNamed<?> named = (CEntityNamed<?>) entity;
+return named.getName();
 ```
 
 #### Bean Validation Annotations
