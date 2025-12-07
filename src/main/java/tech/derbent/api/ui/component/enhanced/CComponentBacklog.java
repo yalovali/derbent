@@ -307,6 +307,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	/** Updates sprint orders when moving an item down in the list.
+	 * When moving down, items between draggedIndex and newPosition shift up to fill the gap.
 	 * @param items all current items
 	 * @param draggedIndex original position
 	 * @param newPosition target position */
@@ -317,9 +318,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			if (!(item instanceof ISprintableItem)) continue;
 
 			if (i == draggedIndex) {
+				// Dragged item moves to new position (1-based)
 				((ISprintableItem) item).setSprintOrder(newPosition + 1);
 				saveItem(item);
 			} else {
+				// Items shift up one position: index i → position (i-1) → sprintOrder i
 				((ISprintableItem) item).setSprintOrder(i);
 				saveItem(item);
 			}
@@ -327,6 +330,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	/** Updates sprint orders when moving an item up in the list.
+	 * When moving up, items between newPosition and draggedIndex shift down to make room.
 	 * @param items all current items
 	 * @param draggedIndex original position
 	 * @param newPosition target position */
@@ -337,9 +341,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			if (!(item instanceof ISprintableItem)) continue;
 
 			if (i == draggedIndex) {
+				// Dragged item moves to new position (1-based)
 				((ISprintableItem) item).setSprintOrder(newPosition + 1);
 				saveItem(item);
 			} else {
+				// Items shift down one position: index i → position (i+1) → sprintOrder (i+2)
 				((ISprintableItem) item).setSprintOrder(i + 2);
 				saveItem(item);
 			}
