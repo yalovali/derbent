@@ -629,9 +629,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		gridSearchToolbar = create_gridSearchToolbar();
 		gridSearchToolbar.addComponentAsFirst(comboBoxEntityType);
 		mainLayout.add(gridSearchToolbar);
-		// Selection indicator and reset
-		final HorizontalLayout layoutSelectionIndicator = create_layoutSelectionIndicator();
-		mainLayout.add(layoutSelectionIndicator);
+		// Selection indicator and reset (only for multi-select mode)
+		if (multiSelect) {
+			final HorizontalLayout layoutSelectionIndicator = create_layoutSelectionIndicator();
+			mainLayout.add(layoutSelectionIndicator);
+		}
 		// Grid
 		create_gridItems();
 		mainLayout.add(grid);
@@ -640,10 +642,13 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	private void updateSelectionIndicator() {
 		final int count = selectedItems.size();
-		labelSelectedCount.setText(count + " selected");
-		// Update button states based on selection
-		final boolean hasSelection = count > 0;
-		buttonReset.setEnabled(hasSelection);
+		// Update UI components only in multi-select mode
+		if (multiSelect && labelSelectedCount != null && buttonReset != null) {
+			labelSelectedCount.setText(count + " selected");
+			// Update button states based on selection
+			final boolean hasSelection = count > 0;
+			buttonReset.setEnabled(hasSelection);
+		}
 		// Notify parent container of selection change
 		if (onSelectionChanged != null) {
 			onSelectionChanged.accept(new HashSet<>(selectedItems));

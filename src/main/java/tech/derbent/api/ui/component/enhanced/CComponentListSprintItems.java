@@ -165,7 +165,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		grid.addIdColumn(CSprintItem::getId, "ID", "id");
 		grid.addIntegerColumn(CSprintItem::getItemOrder, "Order", "order");
 		grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
-		grid.addShortTextColumn(item -> {
+		// Use expanding column for Name to fill remaining width
+		grid.addExpandingShortTextColumn(item -> {
 			if (item.getItem() != null) {
 				return item.getItem().getName();
 			}
