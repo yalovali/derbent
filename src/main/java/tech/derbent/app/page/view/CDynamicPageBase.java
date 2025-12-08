@@ -17,7 +17,7 @@ import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
-public abstract class CDynamicPageBase extends CPageBaseProjectAware implements IPageServiceImplementer {
+public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 
 	private static final long serialVersionUID = 1L;
 	protected Class<?> currentEntityType = null;
@@ -89,10 +89,10 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	}
 
 	@Override
-	public CAbstractService<?> getEntityService() { return entityService; }
+	public Class<?> getEntityClass() { return entityClass; }
 
 	@Override
-	public Class<?> getEntityClass() { return entityClass; }
+	public CAbstractService<?> getEntityService() { return entityService; }
 
 	/** Get the page entity this view represents. */
 	public CPageEntity getPageEntity() { return pageEntity; }

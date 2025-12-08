@@ -2,6 +2,7 @@ package tech.derbent.api.ui.component.enhanced;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,7 +132,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Creates a selection handler for the backlog.
 	 * @return selection handler that logs selection changes */
-	private static java.util.function.Consumer<java.util.Set<CProjectItem<?>>> createSelectionHandler() {
+	private static Consumer<Set<CProjectItem<?>>> createSelectionHandler() {
 		return selectedItems -> {
 			LOGGER.debug("Backlog selection changed: {} items selected", selectedItems.size());
 		};

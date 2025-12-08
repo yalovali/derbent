@@ -29,6 +29,7 @@ import tech.derbent.base.users.domain.CUser;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
+
 	private static ApplicationContext applicationContext;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
 
@@ -115,12 +116,6 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			}
 		}
 		return formLayout;
-	}
-
-	public Component getComponentByName(final String panelName, final String componentName) {
-		final CPanelDetails panel = getSectionPanel(panelName);
-		Check.notNull(panel, "Panel cannot be null");
-		return panel.getComponentByName(componentName);
 	}
 
 	public CFormBuilder<?> getFormBuilder() { return formBuilder; }

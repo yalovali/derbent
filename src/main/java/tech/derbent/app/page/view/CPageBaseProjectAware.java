@@ -1,6 +1,9 @@
 package tech.derbent.app.page.view;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -11,6 +14,7 @@ import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CFlexLayout;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -20,10 +24,12 @@ import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
-public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
+public abstract class CPageBaseProjectAware extends CPageBase
+		implements IProjectChangeListener, IContentOwner, IHasContentOwner, IPageServiceImplementer {
 
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
+	protected Map<String, Component> componentMap = new HashMap<String, Component>();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
 	private CEntityDB<?> currentEntity; // Field to store current entity
 	protected final CDetailsBuilder detailsBuilder;
@@ -121,6 +127,8 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	public CEnhancedBinder<CEntityDB<?>> getBinder() {
 		return currentBinder;
 	}
+
+	public Map<String, Component> getComponentMap() { return componentMap; }
 
 	@Override
 	public IContentOwner getContentOwner() { return parentContent; }

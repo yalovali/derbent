@@ -2,13 +2,16 @@ package tech.derbent.api.entity.view;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
@@ -53,6 +56,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	private CFlexLayout baseDetailsLayout;
 	private final CEnhancedBinder<EntityClass> binder;
+	protected Map<String, Component> componentMap = new HashMap<String, Component>();
 	protected CCrudToolbar crudToolbar;
 	private EntityClass currentEntity;
 	protected String currentSearchText = "";
@@ -297,6 +301,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	@Override
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
+	public Map<String, Component> getComponentMap() { return componentMap; }
+
 	@Override
 	public CCrudToolbar getCrudToolbar() { return crudToolbar; }
 
@@ -354,9 +360,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@Override
-	public CWorkflowStatusRelationService getWorkflowStatusRelationService() {
-		return workflowStatusRelationService;
-	}
+	public CWorkflowStatusRelationService getWorkflowStatusRelationService() { return workflowStatusRelationService; }
 
 	@PostConstruct
 	protected void initPageId() {

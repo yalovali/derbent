@@ -21,10 +21,10 @@ public class CPanelDetails extends CDiv {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelDetails.class);
 	private static final long serialVersionUID = 1L;
-	private final String name;
+	private Component component = null; // call it with getFormContainerComponent
 	final Map<String, Component> componentMap;
 	final Map<String, CHorizontalLayout> horizontalLayoutMap;
-	private Component component = null; // call it with getFormContainerComponent
+	private final String name;
 
 	public CPanelDetails(final String name, final String title, final CUser user) {
 		super();
@@ -37,8 +37,8 @@ public class CPanelDetails extends CDiv {
 			component = new CAccordion(title);
 		}
 		this.name = name;
-		this.componentMap = new HashMap<>();
-		this.horizontalLayoutMap = new HashMap<>();
+		componentMap = new HashMap<>();
+		horizontalLayoutMap = new HashMap<>();
 		add(component);
 	}
 
@@ -46,10 +46,6 @@ public class CPanelDetails extends CDiv {
 	protected void createPanelContent() {}
 
 	public VerticalLayout getBaseLayout() { return getFormContainerComponent().getBaseLayout(); }
-
-	public Component getComponentByName(final String componentName) {
-		return componentMap.get(componentName);
-	}
 
 	IFormContainerComponent getFormContainerComponent() { return (IFormContainerComponent) component; }
 

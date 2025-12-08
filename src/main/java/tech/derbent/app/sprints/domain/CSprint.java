@@ -118,7 +118,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@Transient
 	@AMetaData (
 			displayName = "Total Story Points", required = false, readOnly = true, description = "Sum of story points for all items in this sprint",
-			hidden = false, dataProviderBean = "CSprintService", dataProviderMethod = "getTotalStoryPoints", autoCalculate = true
+			hidden = false, dataProviderBean = "CSprintService", dataProviderMethod = "getTotalStoryPoints", autoCalculate = true,
+			dataProviderParamMethod = "this"
 	)
 	private Long totalStoryPoints;
 

@@ -37,12 +37,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
+	// Custom components registered for method binding (outside of FormBuilder)
+	private final Map<String, Component> customComponents = new HashMap<>();
 	protected CDetailsBuilder detailsBuilder = null;
 	protected CFormBuilder<?> formBuilder = null;
 	private EntityClass previousEntity;
 	private final IPageServiceImplementer<EntityClass> view;
-	// Custom components registered for method binding (outside of FormBuilder)
-	private final Map<String, Component> customComponents = new HashMap<>();
 
 	public CPageService(final IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
@@ -303,28 +303,63 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
-	/** Binds a Grid's drag start event to a page service handler method.
-	 * @param grid       the Grid component
+	/** Binds a component's drag end event to a page service handler method. This method supports any component implementing IHasDragEnd interface.
+	 * Note: GridDragEndEvent doesn't provide dragged items, so we pass an empty event.
+	 * @param component  the component implementing IHasDragEnd
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	private void bindGridDragStart(final Grid<?> grid, final Method method, final String methodName) {
-		grid.addDragStartListener(event -> {
+	private void bindDragEnd(final IHasDragEnd<?> component, final Method method, final String methodName) {
+		// Verify that the component is also a Vaadin Component
+		if (!(component instanceof Component)) {
+			LOGGER.error("Component implementing IHasDragEnd must also extend Component: {}", component.getClass().getSimpleName());
+			return;
+		}
+		final Component vaadinComponent = (Component) component;
+		component.addDragEndListener(event -> {
 			try {
-				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
-				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, grid);
-				method.invoke(this, grid, dragEvent);
+				// GridDragEndEvent doesn't provide dragged items
+				// Handler methods should track items from dragStart event if needed
+				final CDragDropEvent<?> dragEvent = new CDragDropEvent(null, component);
+				method.invoke(this, vaadinComponent, dragEvent);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
 			}
 		});
-		LOGGER.debug("Bound Grid drag start event to method {}", methodName);
+		LOGGER.debug("Bound IHasDragEnd component drag end event to method {}", methodName);
 	}
 
-	/** Binds a Grid's drag end event to a page service handler method.
-	 * Note: GridDragEndEvent doesn't provide dragged items, so we pass an empty event.
+	/** Binds a component's drag start event to a page service handler method. This method supports any component implementing IHasDragStart
+	 * interface.
+	 * @param component  the component implementing IHasDragStart
+	 * @param method     the handler method to invoke
+	 * @param methodName the name of the handler method */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void bindDragStart(final IHasDragStart<?> component, final Method method, final String methodName) {
+		// Verify that the component is also a Vaadin Component
+		if (!(component instanceof Component)) {
+			LOGGER.error("Component implementing IHasDragStart must also extend Component: {}", component.getClass().getSimpleName());
+			return;
+		}
+		final Component vaadinComponent = (Component) component;
+		component.addDragStartListener(event -> {
+			try {
+				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
+				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, component);
+				method.invoke(this, vaadinComponent, dragEvent);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			}
+		});
+		LOGGER.debug("Bound IHasDragStart component drag start event to method {}", methodName);
+	}
+
+	/** Binds a Grid's drag end event to a page service handler method. Note: GridDragEndEvent doesn't provide dragged items, so we pass an empty
+	 * event.
 	 * @param grid       the Grid component
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
@@ -343,6 +378,26 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 		});
 		LOGGER.debug("Bound Grid drag end event to method {}", methodName);
+	}
+
+	/** Binds a Grid's drag start event to a page service handler method.
+	 * @param grid       the Grid component
+	 * @param method     the handler method to invoke
+	 * @param methodName the name of the handler method */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void bindGridDragStart(final Grid<?> grid, final Method method, final String methodName) {
+		grid.addDragStartListener(event -> {
+			try {
+				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
+				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, grid);
+				method.invoke(this, grid, dragEvent);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			}
+		});
+		LOGGER.debug("Bound Grid drag start event to method {}", methodName);
 	}
 
 	/** Binds a Grid's drop event to a page service handler method.
@@ -369,66 +424,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		LOGGER.debug("Bound Grid drop event to method {}", methodName);
 	}
 
-	/** Binds a component's drag start event to a page service handler method.
-	 * This method supports any component implementing IHasDragStart interface.
-	 * @param component  the component implementing IHasDragStart
-	 * @param method     the handler method to invoke
-	 * @param methodName the name of the handler method */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
-	private void bindDragStart(final IHasDragStart<?> component, final Method method, final String methodName) {
-		// Verify that the component is also a Vaadin Component
-		if (!(component instanceof Component)) {
-			LOGGER.error("Component implementing IHasDragStart must also extend Component: {}", 
-					component.getClass().getSimpleName());
-			return;
-		}
-		
-		final Component vaadinComponent = (Component) component;
-		component.addDragStartListener(event -> {
-			try {
-				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
-				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, component);
-				method.invoke(this, vaadinComponent, dragEvent);
-			} catch (final Exception ex) {
-				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-			}
-		});
-		LOGGER.debug("Bound IHasDragStart component drag start event to method {}", methodName);
-	}
-
-	/** Binds a component's drag end event to a page service handler method.
-	 * This method supports any component implementing IHasDragEnd interface.
-	 * Note: GridDragEndEvent doesn't provide dragged items, so we pass an empty event.
-	 * @param component  the component implementing IHasDragEnd
-	 * @param method     the handler method to invoke
-	 * @param methodName the name of the handler method */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
-	private void bindDragEnd(final IHasDragEnd<?> component, final Method method, final String methodName) {
-		// Verify that the component is also a Vaadin Component
-		if (!(component instanceof Component)) {
-			LOGGER.error("Component implementing IHasDragEnd must also extend Component: {}", 
-					component.getClass().getSimpleName());
-			return;
-		}
-		
-		final Component vaadinComponent = (Component) component;
-		component.addDragEndListener(event -> {
-			try {
-				// GridDragEndEvent doesn't provide dragged items
-				// Handler methods should track items from dragStart event if needed
-				final CDragDropEvent<?> dragEvent = new CDragDropEvent(null, component);
-				method.invoke(this, vaadinComponent, dragEvent);
-			} catch (final Exception ex) {
-				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-			}
-		});
-		LOGGER.debug("Bound IHasDragEnd component drag end event to method {}", methodName);
-	}
-
 	protected void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
 		// Combine form components and custom components
@@ -448,7 +443,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			if (!matcher.matches()) {
 				continue;
 			}
-			LOGGER.debug("Found handler method: {}", method.getName());
+			// LOGGER.debug("Found handler method: {}", method.getName());
 			final var componentName = matcher.group(1);
 			final var action = matcher.group(2);
 			final var component = allComponents.get(componentName);
@@ -562,7 +557,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * using the on_{componentName}_{action} pattern.
 	 * <p>
 	 * Example:
-	 * 
+	 *
 	 * <pre>
 	 * CComponentListSprintItems sprintItems = new CComponentListSprintItems(...);
 	 * registerComponent("sprintItems", sprintItems.getGrid());
@@ -570,6 +565,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * // public void on_sprintItems_dragStart(Component component, Object value) { ... }
 	 * // public void on_sprintItems_drop(Component component, Object value) { ... }
 	 * </pre>
+	 *
 	 * @param name      the name to use in handler method names
 	 * @param component the component to register */
 	protected void registerComponent(final String name, final Component component) {
@@ -577,13 +573,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		Check.notNull(component, "Component cannot be null");
 		customComponents.put(name, component);
 		LOGGER.debug("Registered custom component '{}' of type {}", name, component.getClass().getSimpleName());
-	}
-
-	/** Removes a previously registered custom component.
-	 * @param name the name of the component to unregister */
-	protected void unregisterComponent(final String name) {
-		customComponents.remove(name);
-		LOGGER.debug("Unregistered custom component '{}'", name);
 	}
 
 	@SuppressWarnings ({
@@ -625,6 +614,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		} catch (final Exception e) {
 			LOGGER.debug("Could not setup name field validation: {}", e.getMessage());
 		}
+	}
+
+	/** Removes a previously registered custom component.
+	 * @param name the name of the component to unregister */
+	protected void unregisterComponent(final String name) {
+		customComponents.remove(name);
+		LOGGER.debug("Unregistered custom component '{}'", name);
 	}
 
 	/** Validate the current entity. Default implementation checks that the name field is not empty. Subclasses can override this method to add

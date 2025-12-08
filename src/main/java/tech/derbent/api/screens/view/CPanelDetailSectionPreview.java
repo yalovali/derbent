@@ -1,6 +1,9 @@
 package tech.derbent.api.screens.view;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import com.vaadin.flow.component.Component;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -20,6 +23,7 @@ import tech.derbent.base.session.service.ISessionService;
 public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implements IPageServiceImplementer {
 
 	private static final long serialVersionUID = 1L;
+	private Map<String, Component> componentMap = new HashMap<String, Component>();
 	CDiv divPreview;
 	private final ISessionService sessionService;
 
@@ -48,6 +52,11 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 		});
 		divPreview = new CDiv();
 		getBaseLayout().add(divPreview);
+	}
+
+	@Override
+	public Map<String, Component> getComponentMap() { // TODO Auto-generated method stub
+		return componentMap;
 	}
 
 	@Override

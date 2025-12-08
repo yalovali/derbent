@@ -1,5 +1,7 @@
 package tech.derbent.api.services.pageservice;
 
+import java.util.Map;
+import com.vaadin.flow.component.Component;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -14,6 +16,12 @@ import tech.derbent.base.session.service.ISessionService;
 public interface IPageServiceImplementer<EntityClass extends CEntityDB<EntityClass>> extends IContentOwner, IEntityUpdateListener<EntityClass> {
 
 	CEnhancedBinder<EntityClass> getBinder();
+
+	default Component getComponentByName(final String componentName) {
+		return getComponentMap().get(componentName);
+	}
+
+	Map<String, Component> getComponentMap();
 	@Override
 	EntityClass getCurrentEntity();
 	CDetailsBuilder getDetailsBuilder();
