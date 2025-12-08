@@ -13,6 +13,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.services.pageservice.CDragDropEvent;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
@@ -66,6 +67,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
 			componentItemsSelection.enableDragAndDropReordering();
 			componentItemsSelection.setDropHandler(item -> componentItemsSelection.addDroppedItem(item));
+			// Register the grid for method binding
+			if (componentItemsSelection.getGrid() != null) {
+				registerComponent("sprintItems", componentItemsSelection.getGrid());
+				// Re-bind methods to include the newly registered component
+				bindMethods(this);
+			}
 			setupDragAndDrop();
 		}
 		return componentItemsSelection;
@@ -76,8 +83,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	public CComponentBacklog createSpritBacklogComponent() {
 		final CSprint currentSprint = getView().getCurrentEntity();
 		if (componentBacklogItems == null) {
+			componentBacklogItems = new CComponentBacklog(currentSprint);
+			// Register the grid for method binding
+			if (componentBacklogItems.getGrid() != null) {
+				registerComponent("backlogItems", componentBacklogItems.getGrid());
+				// Re-bind methods to include the newly registered component
+				bindMethods(this);
+			}
 			setupDragAndDrop();
-			return new CComponentBacklog(currentSprint);
 		}
 		return componentBacklogItems;
 	}
@@ -113,12 +126,26 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		componentItemDetails.setValue(item);
 	}
 
+	/** Handler for drag end events on backlog items grid.
+	 * @param component the backlog grid component
+	 * @param value     CDragDropEvent (dragged items not available in drag end) */
 	public void on_backlogItems_dragEnd(final Component component, final Object value) {
-		LOGGER.info("function: on_backlogItems_dragEnd for Component type");
+		LOGGER.info("Backlog drag end event received");
+		if (value instanceof CDragDropEvent) {
+			// Clean up any drag-related UI state
+			LOGGER.info("Backlog drag operation completed");
+		}
 	}
 
+	/** Handler for drag start events on backlog items grid.
+	 * @param component the backlog grid component
+	 * @param value     CDragDropEvent containing dragged items */
 	public void on_backlogItems_dragStart(final Component component, final Object value) {
-		LOGGER.info("function: on_backlogItems_dragStart for Component type");
+		LOGGER.info("Backlog drag start event received");
+		if (value instanceof CDragDropEvent) {
+			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			LOGGER.info("Backlog drag started with {} items", event.getDraggedItems() != null ? event.getDraggedItems().size() : 0);
+		}
 	}
 
 	public void on_description_blur(final Component component, final Object value) {
@@ -140,16 +167,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.info("function: on_backlog_clicked for Component type");
 	}
 
-	public void on_sprintItems_dragStart(final Component component, final Object value) {
-		LOGGER.info("function: on_backlog_clicked for Component type");
-	}
-
 	public void on_status_change(final Component component, final Object value) {
-		LOGGER.info("function: on_status_change for Component type: {}",
-				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
-	}
-
-	public void on_status_dragEnd(final Component component, final Object value) {
 		LOGGER.info("function: on_status_change for Component type: {}",
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
