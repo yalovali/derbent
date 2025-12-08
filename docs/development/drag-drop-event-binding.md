@@ -36,10 +36,11 @@ public class CDragDropEvent<T> {
 
 ## Usage Pattern
 
-### Step 1: Register Grid Component
+### Step 1: Register Component
 
-In your page service, register the grid component when it's created:
+In your page service, register the component when it's created. You have two options:
 
+**Option A: Register wrapper component directly (recommended if it implements interfaces)**
 ```java
 public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
     private CComponentListSprintItems componentItemsSelection;
@@ -49,8 +50,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
         if (componentItemsSelection == null) {
             componentItemsSelection = new CComponentListSprintItems(...);
             
-            // Register the grid for method binding
-            registerComponent("sprintItems", componentItemsSelection.getGrid());
+            // Register the component directly (implements IHasDragStart/IHasDragEnd)
+            registerComponent("sprintItems", componentItemsSelection);
             
             // Re-bind methods to include the newly registered component
             bindMethods(this);
@@ -62,13 +63,33 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
         if (componentBacklogItems == null) {
             componentBacklogItems = new CComponentBacklog(...);
             
-            // Register the grid for method binding
-            registerComponent("backlogItems", componentBacklogItems.getGrid());
+            // Register the component directly (implements IHasDragStart/IHasDragEnd)
+            registerComponent("backlogItems", componentBacklogItems);
             
             // Re-bind methods to include the newly registered component
             bindMethods(this);
         }
         return componentBacklogItems;
+    }
+}
+```
+
+**Option B: Register internal grid (backward compatibility)**
+```java
+public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
+    private CComponentListSprintItems componentItemsSelection;
+    
+    public CComponentListSprintItems createSpritActivitiesComponent() {
+        if (componentItemsSelection == null) {
+            componentItemsSelection = new CComponentListSprintItems(...);
+            
+            // Register the grid directly (when component doesn't implement interfaces)
+            if (componentItemsSelection.getGrid() != null) {
+                registerComponent("sprintItems", componentItemsSelection.getGrid());
+                bindMethods(this);
+            }
+        }
+        return componentItemsSelection;
     }
 }
 ```
@@ -314,9 +335,48 @@ public void on_sprintItems_drop(Component component, Object value) {
 
 ## Limitations
 
-1. **Grid Only**: Currently only supports Grid components (not general components)
+1. **Component Interface Support**: Components must implement `IHasDragStart<T>` and/or `IHasDragEnd<T>` interfaces, or be Grid instances directly
 2. **Drag End**: GridDragEndEvent doesn't provide dragged items (track in dragStart)
 3. **Manual Registration**: Components must be explicitly registered with registerComponent()
+
+## Interface-Based Binding
+
+Components implementing `IHasDragStart<T>` and `IHasDragEnd<T>` interfaces are automatically supported without requiring direct Grid access. This provides better encapsulation for wrapper components:
+
+```java
+// Wrapper component with internal grid
+public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> 
+        implements IHasDragStart<CProjectItem<?>>, IHasDragEnd<CProjectItem<?>> {
+    
+    // Internal grid is encapsulated
+    private CGrid<CProjectItem<?>> grid;
+    
+    @Override
+    public Registration addDragStartListener(
+            ComponentEventListener<GridDragStartEvent<CProjectItem<?>>> listener) {
+        // Delegate to internal grid
+        return grid.addDragStartListener(listener);
+    }
+    
+    @Override
+    public Registration addDragEndListener(
+            ComponentEventListener<GridDragEndEvent<CProjectItem<?>>> listener) {
+        // Delegate to internal grid
+        return grid.addDragEndListener(listener);
+    }
+}
+
+// Page service can register the wrapper component directly
+registerComponent("backlogItems", componentBacklogItems);  // No need to access .getGrid()
+bindMethods(this);
+```
+
+The binding precedence:
+1. **First**: Check if component implements `IHasDragStart` / `IHasDragEnd`
+2. **Second**: Check if component is a Grid instance
+3. **Fallback**: Use generic DOM event listeners
+
+This approach allows wrapper components to hide their internal structure while still propagating events properly.
 
 ## Best Practices
 
