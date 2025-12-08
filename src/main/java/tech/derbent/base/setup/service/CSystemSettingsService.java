@@ -71,6 +71,18 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 		return settings.getDefaultLoginView() != null ? settings.getDefaultLoginView() : "home";
 	}
 
+	/** Gets the font size scale setting.
+	 * @return the font size scale ("small", "medium", or "large") */
+	public String getFontSizeScale() {
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		final String scale = settings.getFontSizeScale();
+		// Validate and return with default fallback
+		if ("small".equals(scale) || "medium".equals(scale) || "large".equals(scale)) {
+			return scale;
+		}
+		return "medium"; // Default fallback
+	}
+
 	@Override
 	public Class<CSystemSettings> getEntityClass() { return CSystemSettings.class; }
 
