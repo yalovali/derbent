@@ -2,7 +2,9 @@ package tech.derbent.api.services.pageservice;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;
@@ -37,6 +39,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	protected CFormBuilder<?> formBuilder = null;
 	private EntityClass previousEntity;
 	private final IPageServiceImplementer<EntityClass> view;
+	// Custom components registered for method binding (outside of FormBuilder)
+	private final Map<String, Component> customComponents = new HashMap<>();
 
 	public CPageService(final IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
@@ -359,10 +363,14 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	protected void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
-		Check.notNull(formBuilder, "FormBuilder must not be null to bind methods.");
-		final var components = formBuilder.getComponentMap();
+		// Combine form components and custom components
+		final Map<String, Component> allComponents = new HashMap<>();
+		if (formBuilder != null) {
+			allComponents.putAll(formBuilder.getComponentMap());
+		}
+		allComponents.putAll(customComponents);
 		// print the component names for debugging
-		LOGGER.debug("Binding methods for components: {}", components.keySet());
+		LOGGER.debug("Binding methods for components: {}", allComponents.keySet());
 		// filter methods with name matching regex:("on_[a-zA-Z0-9]+_[a" + "-zA-Z0-9]+")
 		// final var methods = Arrays.stream(page.getClass().getDeclaredMethods()).filter(m ->
 		// m.getName().matches("on_[a-zA-Z0-9]+_[a-zA-Z0-9]+")).toList();
@@ -375,9 +383,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			LOGGER.debug("Found handler method: {}", method.getName());
 			final var componentName = matcher.group(1);
 			final var action = matcher.group(2);
-			final var component = components.get(componentName);
+			final var component = allComponents.get(componentName);
 			if (component == null) {
-				LOGGER.warn("Component '{}' not found in FormBuilder for binding method '{}'", componentName, method.getName());
+				LOGGER.warn("Component '{}' not found in FormBuilder or custom components for binding method '{}'", componentName, method.getName());
 				continue;
 			}
 			bindComponent(method, component, method.getName(), componentName, action);
@@ -480,6 +488,34 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public void populateForm() {
 		// TODO Auto-generated method stub
+	}
+
+	/** Registers a custom component for method binding. This allows components that are not part of the entity form to be bound to handler methods
+	 * using the on_{componentName}_{action} pattern.
+	 * <p>
+	 * Example:
+	 * 
+	 * <pre>
+	 * CComponentListSprintItems sprintItems = new CComponentListSprintItems(...);
+	 * registerComponent("sprintItems", sprintItems.getGrid());
+	 * // Now you can create handler methods like:
+	 * // public void on_sprintItems_dragStart(Component component, Object value) { ... }
+	 * // public void on_sprintItems_drop(Component component, Object value) { ... }
+	 * </pre>
+	 * @param name      the name to use in handler method names
+	 * @param component the component to register */
+	protected void registerComponent(final String name, final Component component) {
+		Check.notBlank(name, "Component name cannot be blank");
+		Check.notNull(component, "Component cannot be null");
+		customComponents.put(name, component);
+		LOGGER.debug("Registered custom component '{}' of type {}", name, component.getClass().getSimpleName());
+	}
+
+	/** Removes a previously registered custom component.
+	 * @param name the name of the component to unregister */
+	protected void unregisterComponent(final String name) {
+		customComponents.remove(name);
+		LOGGER.debug("Unregistered custom component '{}'", name);
 	}
 
 	@SuppressWarnings ({
