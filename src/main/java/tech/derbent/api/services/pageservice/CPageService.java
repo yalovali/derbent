@@ -1,7 +1,6 @@
 package tech.derbent.api.services.pageservice;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;
@@ -245,6 +244,24 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				});
 			}
 		}
+		case "dragStart" -> {
+			component.getElement().addEventListener("dragstart", e -> {
+				try {
+					method.invoke(this, component, null);
+				} catch (final Exception ex) {
+					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+				}
+			});
+		}
+		case "dragEnd" -> {
+			component.getElement().addEventListener("dragend", e -> {
+				try {
+					method.invoke(this, component, null);
+				} catch (final Exception ex) {
+					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+				}
+			});
+		}
 		// add more actions as needed
 		default -> Check.warn("Action {" + action + "} not recognized for binding.");
 		}
@@ -354,7 +371,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public CAbstractService<EntityClass> getEntityService() {
 		Check.notNull(getView(), "View is not set in page service");
-		return getView().getChildService();
+		return getView().getEntityService();
 	}
 
 	public EntityClass getPreviousEntity() { return previousEntity; }

@@ -41,10 +41,10 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public static final String VIEW_NAME = "Sprints View";
 	@Transient
 	@AMetaData (
-			displayName = "Backlog Items", required = false, readOnly = false, description = "Items (activities, meetings, etc.", hidden = false,
+			displayName = "Item Detail", required = false, readOnly = false, description = "Item fields", hidden = false,
 			createComponentMethod = "createSpritBacklogComponent", dataProviderBean = "view", captionVisible = false
 	)
-	private List<CSprintItem> backlogItems = new ArrayList<>();
+	private final List<CSprintItem> backlogItems = new ArrayList<>();
 	@Column (nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (
@@ -81,6 +81,12 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@Transient
 	@AMetaData (displayName = "Item Count", required = false, readOnly = true, description = "Total number of items in this sprint", hidden = false)
 	private Integer itemCount;
+	@Transient
+	@AMetaData (
+			displayName = "Backlog Items", required = false, readOnly = false, description = "Items (activities, meetings, etc.", hidden = false,
+			createComponentMethod = "createItemDetailsComponent", dataProviderBean = "view", captionVisible = false
+	)
+	private final int itemDetails = 0;
 	// Sprint Items - Ordered collection of activities and meetings included in this sprint
 	// Uses OneToMany pattern with CSprintItem join entity for proper ordering
 	// Similar to CDetailLines pattern in CDetailSection
@@ -206,24 +212,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @return total count of sprint items */
 	public Integer getItemCount() { return sprintItems != null ? sprintItems.size() : 0; }
 
-	/** Get the total story points for all items in this sprint. This is a calculated field for UI display.
-	 * @return total story points, or 0 if no items have story points */
-	public Long getTotalStoryPoints() {
-		if (sprintItems == null || sprintItems.isEmpty()) {
-			return 0L;
-		}
-		long total = 0L;
-		for (final CSprintItem sprintItem : sprintItems) {
-			if (sprintItem.getItem() != null && sprintItem.getItem() instanceof tech.derbent.api.interfaces.ISprintableItem) {
-				final Long itemStoryPoint = ((tech.derbent.api.interfaces.ISprintableItem) sprintItem.getItem()).getStoryPoint();
-				if (itemStoryPoint != null) {
-					total += itemStoryPoint;
-				}
-			}
-		}
-		return total;
-	}
-
 	/** Get all sprint items (activities and meetings combined) as a list. This is a convenience method for backward compatibility.
 	 * @return combined list of all sprint items */
 	public List<CProjectItem<?>> getItems() {
@@ -279,6 +267,24 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	@Override
 	public LocalDate getStartDate() { return startDate; }
+
+	/** Get the total story points for all items in this sprint. This is a calculated field for UI display.
+	 * @return total story points, or 0 if no items have story points */
+	public Long getTotalStoryPoints() {
+		if (sprintItems == null || sprintItems.isEmpty()) {
+			return 0L;
+		}
+		long total = 0L;
+		for (final CSprintItem sprintItem : sprintItems) {
+			if (sprintItem.getItem() != null && sprintItem.getItem() instanceof tech.derbent.api.interfaces.ISprintableItem) {
+				final Long itemStoryPoint = ((tech.derbent.api.interfaces.ISprintableItem) sprintItem.getItem()).getStoryPoint();
+				if (itemStoryPoint != null) {
+					total += itemStoryPoint;
+				}
+			}
+		}
+		return total;
+	}
 
 	@Override
 	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub

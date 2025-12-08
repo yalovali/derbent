@@ -9,7 +9,7 @@ public interface IContentOwner {
 	public CEntityDB<?> createNewEntityInstance() throws Exception;
 	CEntityDB<?> getCurrentEntity();
 	String getCurrentEntityIdString();
-	public CAbstractService<?> getChildService();
+	public CAbstractService<?> getEntityService();
 
 	default CWorkflowStatusRelationService getWorkflowStatusRelationService() { return null; }
 

@@ -282,7 +282,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Get the entity service.
 	 * @return The service */
 	@Override
-	public CAbstractService<?> getChildService() { return (CAbstractService<?>) childService; }
+	public CAbstractService<?> getEntityService() { return (CAbstractService<?>) childService; }
 
 	/** Returns the current sprint entity.
 	 * @return The current sprint being edited */

@@ -319,7 +319,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	// protected abstract CallbackDataProvider<EntityClass, Void> getMasterQuery();
 
 	@Override
-	public CAbstractService<EntityClass> getChildService() { return entityService; }
+	public CAbstractService<EntityClass> getEntityService() { return entityService; }
 
 	protected CallbackDataProvider<EntityClass, Void> getMasterQuery() {
 		return new CallbackDataProvider<>(query -> {

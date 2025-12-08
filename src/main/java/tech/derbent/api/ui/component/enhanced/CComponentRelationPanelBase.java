@@ -104,7 +104,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	}
 
 	@Override
-	public CAbstractService<MasterClass> getChildService() { return entityService; }
+	public CAbstractService<MasterClass> getEntityService() { return entityService; }
 
 	/** Get delete confirmation message - subclasses can override. */
 	protected abstract String getDeleteConfirmationMessage(RelationalClass selected);
