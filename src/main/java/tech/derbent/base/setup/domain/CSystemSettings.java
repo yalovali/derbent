@@ -127,6 +127,14 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Default UI theme for the application", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String defaultSystemTheme = "lumo";
+	@Column (name = "font_size_scale", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Font Size Scale", required = true, readOnly = false, defaultValue = "medium",
+			description = "Font size scale for the application UI (small, medium, large)", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String fontSizeScale = "medium";
 	// Backup and Maintenance Settings
 	@Column (name = "enable_automatic_backups", nullable = false)
 	@AMetaData (
@@ -298,6 +306,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public String getDefaultSystemTheme() { return defaultSystemTheme; }
 
+	public String getFontSizeScale() { return fontSizeScale; }
+
 	public Boolean getEnableAutomaticBackups() { return enableAutomaticBackups; }
 
 	public Boolean getEnableCaching() { return enableCaching; }
@@ -397,6 +407,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public void setDefaultLoginView(final String defaultLoginView) { this.defaultLoginView = defaultLoginView; }
 
 	public void setDefaultSystemTheme(final String defaultSystemTheme) { this.defaultSystemTheme = defaultSystemTheme; }
+
+	public void setFontSizeScale(final String fontSizeScale) { this.fontSizeScale = fontSizeScale; }
 
 	public void setEnableAutomaticBackups(final Boolean enableAutomaticBackups) { this.enableAutomaticBackups = enableAutomaticBackups; }
 

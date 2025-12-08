@@ -19,6 +19,7 @@ import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.domain.CSystemSettings;
 import tech.derbent.base.setup.service.CSystemSettingsService;
@@ -296,6 +297,13 @@ public class CSystemSettingsView extends CAbstractPage {
 			// Save through service
 			final var savedSettings = systemSettingsService.updateSystemSettings(currentSettings);
 			currentSettings = savedSettings;
+			// Apply font size scale if it was changed
+			final String fontSizeScale = savedSettings.getFontSizeScale();
+			if (fontSizeScale != null) {
+				CFontSizeService.applyFontSizeScale(fontSizeScale);
+				CFontSizeService.storeFontSizeScale(fontSizeScale);
+				LOGGER.info("Applied font size scale: {}", fontSizeScale);
+			}
 			// Show success notification
 			CNotificationService.showInfo("System settings saved successfully");
 			LOGGER.info("System settings saved successfully with ID: {}", savedSettings.getId());

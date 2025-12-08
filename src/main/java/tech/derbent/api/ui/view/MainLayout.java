@@ -36,6 +36,7 @@ import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.ui.component.enhanced.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.enhanced.CViewToolbar;
+import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
@@ -92,6 +93,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		setSessionUserFromContext();
 		setId("main-layout");
 		setPrimarySection(Section.DRAWER);
+		// Apply font size scale from system settings
+		applyFontSizeFromSettings();
 		// this is the main layout, so we add the side navigation menu and the user menu
 		// to the drawer and the toolbar to the navbar
 		addToDrawer(createHeader());
@@ -286,6 +289,23 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 		// Fall back to user initials if no profile picture is available
 		setupAvatarInitials(avatar, user);
+	}
+
+	/** Applies the font size scale from system settings. */
+	private void applyFontSizeFromSettings() {
+		try {
+			// Get font size scale from system settings
+			final String fontSizeScale = systemSettingsService.getFontSizeScale();
+			LOGGER.info("Applying font size scale from settings: {}", fontSizeScale);
+			// Apply font size scale to UI
+			CFontSizeService.applyFontSizeScale(fontSizeScale);
+			// Store in session for persistence
+			CFontSizeService.storeFontSizeScale(fontSizeScale);
+		} catch (final Exception e) {
+			LOGGER.error("Error applying font size from settings, using default", e);
+			// Fall back to medium if error occurs
+			CFontSizeService.applyFontSizeScale("medium");
+		}
 	}
 
 	private void setSessionUserFromContext() {
