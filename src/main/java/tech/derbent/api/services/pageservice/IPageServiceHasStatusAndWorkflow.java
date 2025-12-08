@@ -46,19 +46,16 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 						currentStatusName, newStatus.getName()));
 				return;
 			}
-			// Status change is valid - apply it
+			// Status change is valid - apply it to entity in memory (does NOT auto-save)
 			final String oldStatusName =
 					((IHasStatusAndWorkflow<?>) entity).getStatus() != null ? ((IHasStatusAndWorkflow<?>) entity).getStatus().getName() : "none";
 			((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
-			LOGGER.info("Status changed from '{}' to '{}' for entity ID: {}", oldStatusName, newStatus.getName(), entity.getId());
-			// Save the entity to persist the status change
-			final EntityClass savedEntity = getEntityService().save(entity);
-			LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
-			setCurrentEntity(savedEntity);
-			// Notify view that entity was saved - this triggers grid refresh
-			getView().onEntitySaved(savedEntity);
+			LOGGER.info("Status set from '{}' to '{}' for entity (not saved yet)", oldStatusName, newStatus.getName());
+			// Update the current entity reference (no save - user must click Save button)
+			setCurrentEntity(entity);
+			// Refresh the form to show the updated status value
 			getView().populateForm();
-			CNotificationService.showInfo(String.format("Status changed to '%s'", newStatus.getName()));
+			CNotificationService.showInfo(String.format("Status set to '%s' (click Save to persist)", newStatus.getName()));
 		} catch (final Exception e) {
 			LOGGER.error("Error changing status: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to change status.", e);
