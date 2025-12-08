@@ -78,8 +78,12 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	)
 	private CSprintType entityType;
 	// Calculated field for display - stored as transient
+	// Uses data provider pattern: service callback computes value dynamically
 	@Transient
-	@AMetaData (displayName = "Item Count", required = false, readOnly = true, description = "Total number of items in this sprint", hidden = false)
+	@AMetaData (
+			displayName = "Item Count", required = false, readOnly = true, description = "Total number of items in this sprint", hidden = false,
+			dataProviderBean = "CSprintService", dataProviderMethod = "getItemCount"
+	)
 	private Integer itemCount;
 	@Transient
 	@AMetaData (
@@ -103,6 +107,15 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint", hidden = false
 	)
 	private LocalDate startDate;
+	// Calculated field for total story points - computed from sprint items
+	// Uses data provider pattern: service callback computes value dynamically
+	@Transient
+	@AMetaData (
+			displayName = "Total Story Points", required = false, readOnly = true,
+			description = "Sum of story points for all items in this sprint", hidden = false,
+			dataProviderBean = "CSprintService", dataProviderMethod = "getTotalStoryPoints"
+	)
+	private Long totalStoryPoints;
 
 	/** Default constructor for JPA. */
 	public CSprint() {
@@ -284,6 +297,12 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			}
 		}
 		return total;
+	}
+
+	/** Sets the total story points. This is typically set by the service when using data provider pattern.
+	 * @param totalStoryPoints the total story points value */
+	public void setTotalStoryPoints(final Long totalStoryPoints) {
+		this.totalStoryPoints = totalStoryPoints;
 	}
 
 	@Override

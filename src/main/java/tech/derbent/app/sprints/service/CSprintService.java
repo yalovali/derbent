@@ -76,4 +76,49 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 
 		LOGGER.debug("Sprint initialization complete with default values");
 	}
+
+	// ====================================
+	// Data Provider Methods for Calculated Fields
+	// ====================================
+	// These methods are called automatically by the form builder when fields
+	// are annotated with @AMetaData(dataProviderBean="CSprintService", dataProviderMethod="methodName")
+	// This pattern allows calculated/derived fields to be computed dynamically
+	// instead of being stored in the database.
+	//
+	// Example usage in entity:
+	// @Transient
+	// @AMetaData(
+	//     displayName = "Total Story Points",
+	//     dataProviderBean = "CSprintService",
+	//     dataProviderMethod = "getTotalStoryPoints"
+	// )
+	// private Long totalStoryPoints;
+
+	/** Data provider callback: Calculates the total number of items in a sprint.
+	 * This method is invoked automatically by the form builder when displaying
+	 * the itemCount field.
+	 * 
+	 * @param sprint the sprint entity to calculate item count for
+	 * @return total number of sprint items */
+	public Integer getItemCount(final CSprint sprint) {
+		if (sprint == null) {
+			LOGGER.warn("getItemCount called with null sprint");
+			return 0;
+		}
+		return sprint.getItemCount(); // Delegates to entity method
+	}
+
+	/** Data provider callback: Calculates the total story points for all items in a sprint.
+	 * This method is invoked automatically by the form builder when displaying
+	 * the totalStoryPoints field.
+	 * 
+	 * @param sprint the sprint entity to calculate story points for
+	 * @return sum of story points for all sprint items */
+	public Long getTotalStoryPoints(final CSprint sprint) {
+		if (sprint == null) {
+			LOGGER.warn("getTotalStoryPoints called with null sprint");
+			return 0L;
+		}
+		return sprint.getTotalStoryPoints(); // Delegates to entity method
+	}
 }
