@@ -54,25 +54,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	@Override
-	public void bind() {
-		// Call parent bind first to setup formBuilder
-		super.bind();
-		// Register custom components for method binding
-		if (componentItemsSelection != null && componentItemsSelection.getGrid() != null) {
-			registerComponent("sprintItems", componentItemsSelection.getGrid());
-			LOGGER.debug("Registered sprintItems grid for method binding");
-		}
-		if (componentBacklogItems != null && componentBacklogItems.getGrid() != null) {
-			registerComponent("backlogItems", componentBacklogItems.getGrid());
-			LOGGER.debug("Registered backlogItems grid for method binding");
-		}
-		// Re-bind methods to include custom components
-		if (componentItemsSelection != null || componentBacklogItems != null) {
-			bindMethods(this);
-		}
-	}
-
 	public CComponentItemDetails createItemDetailsComponent() throws Exception {
 		if (componentItemDetails == null) {
 			componentItemDetails = new CComponentItemDetails(getSessionService());
@@ -85,6 +66,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
 			componentItemsSelection.enableDragAndDropReordering();
 			componentItemsSelection.setDropHandler(item -> componentItemsSelection.addDroppedItem(item));
+			// Register the grid for method binding
+			if (componentItemsSelection.getGrid() != null) {
+				registerComponent("sprintItems", componentItemsSelection.getGrid());
+				// Re-bind methods to include the newly registered component
+				bindMethods(this);
+			}
 			setupDragAndDrop();
 		}
 		return componentItemsSelection;
@@ -95,8 +82,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	public CComponentBacklog createSpritBacklogComponent() {
 		final CSprint currentSprint = getView().getCurrentEntity();
 		if (componentBacklogItems == null) {
+			componentBacklogItems = new CComponentBacklog(currentSprint);
+			// Register the grid for method binding
+			if (componentBacklogItems.getGrid() != null) {
+				registerComponent("backlogItems", componentBacklogItems.getGrid());
+				// Re-bind methods to include the newly registered component
+				bindMethods(this);
+			}
 			setupDragAndDrop();
-			return new CComponentBacklog(currentSprint);
 		}
 		return componentBacklogItems;
 	}
