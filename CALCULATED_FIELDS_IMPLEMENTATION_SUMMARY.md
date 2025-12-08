@@ -1,47 +1,74 @@
 # Calculated Fields Implementation Summary
 
 ## Problem Statement
-Implement a pattern for calculated fields (such as sprint items total story points) using data providers with callback functions in service classes.
+Implement a pattern for calculated fields (such as sprint items total story points) where values are calculated after JPA loads the entity from the database, using data provider service methods. The implementation should follow JPA best practices ("the book") and reuse existing infrastructure.
 
 ## Solution Implemented
 
-### 1. Entity-Level Changes (CSprint.java)
-Added `@AMetaData` annotations with data provider configuration to transient calculated fields:
+### 1. Added autoCalculate Attribute to @AMetaData
+**File**: `src/main/java/tech/derbent/api/annotations/AMetaData.java`
 
 ```java
-// Item Count field
+/** When true, the field value is automatically calculated and populated after entity is loaded from database
+ * using JPA @PostLoad lifecycle callback. */
+boolean autoCalculate() default false;
+```
+
+**Purpose**: Allows selective field calculation - only fields marked with `autoCalculate=true` are processed by `@PostLoad`.
+
+### 2. Entity-Level Changes (CSprint.java)
+**File**: `src/main/java/tech/derbent/app/sprints/domain/CSprint.java`
+
+**Added Import**:
+```java
+import jakarta.persistence.PostLoad;
+```
+
+**Updated Field Annotations**:
+```java
 @Transient
 @AMetaData(
     displayName = "Item Count",
     dataProviderBean = "CSprintService",
-    dataProviderMethod = "getItemCount"
+    dataProviderMethod = "getItemCount",
+    autoCalculate = true  // NEW: Enable auto-calculation
 )
 private Integer itemCount;
 
-// Total Story Points field
 @Transient
 @AMetaData(
     displayName = "Total Story Points",
     dataProviderBean = "CSprintService",
-    dataProviderMethod = "getTotalStoryPoints"
+    dataProviderMethod = "getTotalStoryPoints",
+    autoCalculate = true  // NEW: Enable auto-calculation
 )
 private Long totalStoryPoints;
 ```
 
-### 2. Service-Level Changes (CSprintService.java)
-Implemented data provider callback methods:
+**Added @PostLoad Method**:
+```java
+@PostLoad
+protected void calculateTransientFields() {
+    // Discovers fields with autoCalculate=true
+    // Uses CDataProviderResolver.resolveBean() for service lookup
+    // Uses CAuxillaries.invokeMethod() for method invocation
+    // Populates field values after entity load
+}
+```
+
+### 3. Service-Level Changes (CSprintService.java)
+**File**: `src/main/java/tech/derbent/app/sprints/service/CSprintService.java`
+
+**Updated Comments**:
+- Clarified that methods are called by `@PostLoad` (not form builder)
+- Explained the JPA lifecycle callback pattern
+- Service methods themselves unchanged (still reusable)
 
 ```java
-/** Data provider callback: Calculates the total number of items in a sprint */
-public Integer getItemCount(final CSprint sprint) {
-    if (sprint == null) {
-        LOGGER.warn("getItemCount called with null sprint");
-        return 0;
-    }
-    return sprint.getItemCount();
-}
-
-/** Data provider callback: Calculates the total story points for all items */
+/** Data provider callback: Calculates the total story points for all items in a sprint.
+ * Called automatically by @PostLoad after entity is loaded from database.
+ * @param sprint the sprint entity to calculate story points for
+ * @return sum of story points for all sprint items */
 public Long getTotalStoryPoints(final CSprint sprint) {
     if (sprint == null) {
         LOGGER.warn("getTotalStoryPoints called with null sprint");
@@ -51,87 +78,121 @@ public Long getTotalStoryPoints(final CSprint sprint) {
 }
 ```
 
-### 3. Documentation
-Created comprehensive documentation file: `docs/development/calculated-fields-pattern.md`
+### 4. Documentation Updates
+**File**: `docs/development/calculated-fields-pattern.md`
 
-**Contents:**
-- Pattern overview and use cases
-- Complete implementation examples
-- Step-by-step guide for entity, service, and page service patterns
-- Best practices and performance considerations
-- DO's and DON'Ts
-- Related patterns and references
+- Complete rewrite focusing on JPA `@PostLoad` pattern
+- Added `autoCalculate` attribute documentation
+- Added implementation class references (CDataProviderResolver, CAuxillaries)
+- Added flow diagram showing the calculation process
+- Updated all examples to use new pattern
 
 ## How It Works
 
-1. **Field Declaration**: Entity declares `@Transient` field with `@AMetaData` specifying service bean and method
-2. **Metadata Discovery**: Form builder/grid builder detects the annotation
-3. **Bean Lookup**: Framework uses Spring context to find the service bean
-4. **Method Invocation**: Framework calls the specified method passing entity instance
-5. **Value Display**: Returned value is used for display in UI
+```
+1. JPA loads entity from database
+        ↓
+2. JPA triggers @PostLoad callback
+        ↓
+3. calculateTransientFields() discovers fields with autoCalculate=true
+        ↓
+4. CDataProviderResolver.resolveBean("CSprintService") → service bean
+        ↓
+5. CAuxillaries.invokeMethod(service, "getTotalStoryPoints", entity) → calculated value
+        ↓
+6. field.set(entity, calculatedValue)
+        ↓
+7. Entity ready with populated calculated fields
+```
 
-## Benefits
+## Key Benefits
 
-- ✅ **No Database Storage**: Values computed on-demand, no DB columns needed
-- ✅ **Always Current**: Recalculated each time displayed
-- ✅ **Centralized Logic**: Computation in service layer, not UI
-- ✅ **Reusable**: Same callback for forms, grids, reports
-- ✅ **Type-Safe**: Compile-time checking
-- ✅ **Testable**: Service methods unit-testable
+1. **JPA Lifecycle Integration**: Uses standard `@PostLoad` callback (follows JPA specification)
+2. **Automatic Calculation**: Fields populated immediately when entity loads from database
+3. **Reuses Infrastructure**: Leverages existing `CDataProviderResolver` and `CAuxillaries` patterns
+4. **Selective Calculation**: Only fields with `autoCalculate=true` are processed
+5. **Service Logic Preserved**: Business logic stays in service layer (testable, reusable)
+6. **Works Everywhere**: Not limited to UI context - works in services, repositories, tests
+7. **Annotation-Driven**: Declarative configuration via metadata
+
+## Pattern Comparison
+
+### Before (Form Builder Approach)
+- Calculated when form/grid is built
+- Only works in UI layer
+- Manual invocation required
+
+### After (JPA @PostLoad Approach)
+- ✅ Calculated when entity loads from DB
+- ✅ Works in all contexts (UI, services, tests)
+- ✅ Automatic via JPA lifecycle
+- ✅ Follows JPA best practices
+- ✅ Reuses existing infrastructure
 
 ## Example Usage
 
-### Sprint Total Story Points
-When a sprint form or grid displays the "Total Story Points" field:
-1. Form builder detects `dataProviderBean="CSprintService"`
-2. Calls `CSprintService.getTotalStoryPoints(sprint)`
-3. Service delegates to `sprint.getTotalStoryPoints()`
-4. Entity method sums story points from all sprint items
-5. Computed value displayed in UI
+### In Entity
+```java
+@Transient
+@AMetaData(
+    displayName = "Total Story Points",
+    dataProviderBean = "CSprintService",
+    dataProviderMethod = "getTotalStoryPoints",
+    autoCalculate = true  // Enable @PostLoad calculation
+)
+private Long totalStoryPoints;
+```
 
-### Sprint Item Count
-Same pattern for item count:
-1. Field annotation points to `CSprintService.getItemCount()`
-2. Service method returns `sprint.getItemCount()`
-3. Entity method returns `sprintItems.size()`
-4. Count displayed in UI
+### In Service
+```java
+public Long getTotalStoryPoints(final CSprint sprint) {
+    if (sprint == null) return 0L;
+    return sprint.getTotalStoryPoints();
+}
+```
+
+### Result
+When any code loads a CSprint entity from the database:
+```java
+CSprint sprint = sprintRepository.findById(id);
+// @PostLoad automatically runs
+// sprint.getTotalStoryPoints() is already populated!
+```
 
 ## Files Changed
 
-1. **src/main/java/tech/derbent/app/sprints/domain/CSprint.java**
-   - Added data provider annotations to itemCount field
-   - Added totalStoryPoints field with annotations
-   - Added setter for totalStoryPoints
+1. **src/main/java/tech/derbent/api/annotations/AMetaData.java**
+   - Added `autoCalculate` boolean attribute
 
-2. **src/main/java/tech/derbent/app/sprints/service/CSprintService.java**
-   - Added getItemCount() callback method
-   - Added getTotalStoryPoints() callback method
-   - Added comprehensive documentation comments
+2. **src/main/java/tech/derbent/app/sprints/domain/CSprint.java**
+   - Added `@PostLoad` import
+   - Added `autoCalculate=true` to calculated fields
+   - Implemented `calculateTransientFields()` method
 
-3. **docs/development/calculated-fields-pattern.md** (NEW)
-   - Complete pattern documentation
-   - Implementation guide
-   - Examples and best practices
+3. **src/main/java/tech/derbent/app/sprints/service/CSprintService.java**
+   - Updated documentation comments
+   - Service methods unchanged
 
-## Testing
+4. **docs/development/calculated-fields-pattern.md**
+   - Complete documentation rewrite
+   - JPA @PostLoad focus
+   - Implementation class references
 
-- ✅ Code compiles successfully with `mvn clean compile`
-- ✅ All annotations properly configured
-- ✅ Service methods follow naming conventions
-- ✅ Null safety implemented in callbacks
-- ✅ Documentation complete with examples
+## Infrastructure Classes Used
+
+### CDataProviderResolver
+- **Location**: `tech.derbent.api.annotations.CDataProviderResolver`
+- **Method**: `resolveBean(String beanName, IContentOwner contentOwner)`
+- **Purpose**: Resolves service beans by name, handles special keywords
+
+### CAuxillaries
+- **Location**: `tech.derbent.api.utils.CAuxillaries`
+- **Method**: `invokeMethod(Object target, String methodName, Object... args)`
+- **Purpose**: Reflection utilities for invoking methods dynamically
 
 ## Future Applications
 
 This pattern can now be used for any calculated field in any entity:
-
-**Examples:**
-- Project completion percentage
-- Task time estimates vs actuals
-- Resource utilization percentages
-- Financial totals and summaries
-- Status distribution counts
-- Average ratings or scores
 
 **Template:**
 ```java
@@ -140,23 +201,37 @@ This pattern can now be used for any calculated field in any entity:
 @AMetaData(
     displayName = "Display Name",
     dataProviderBean = "YourEntityService",
-    dataProviderMethod = "calculateFieldName"
+    dataProviderMethod = "calculateFieldName",
+    autoCalculate = true  // Enable @PostLoad
 )
 private ReturnType fieldName;
 
+@PostLoad
+protected void calculateTransientFields() {
+    // Standard @PostLoad implementation (reusable across entities)
+}
+
 // In Service
 public ReturnType calculateFieldName(YourEntity entity) {
-    if (entity == null) {
-        return defaultValue;
-    }
+    if (entity == null) return defaultValue;
     return entity.computeValue();
 }
 ```
 
+## Testing
+
+- ✅ Code compiles successfully with `mvn clean compile`
+- ✅ All annotations properly configured
+- ✅ @PostLoad method follows JPA lifecycle patterns
+- ✅ Uses existing CDataProviderResolver and CAuxillaries infrastructure
+- ✅ Documentation complete with examples
+
 ## References
 
+- JPA Specification: `@PostLoad` lifecycle callback
 - Sprint domain: `tech.derbent.app.sprints.domain.CSprint`
 - Sprint service: `tech.derbent.app.sprints.service.CSprintService`
+- Data provider resolver: `tech.derbent.api.annotations.CDataProviderResolver`
+- Utilities: `tech.derbent.api.utils.CAuxillaries`
 - Metadata annotation: `tech.derbent.api.annotations.AMetaData`
-- Form builder: `tech.derbent.api.annotations.CFormBuilder`
 - Documentation: `docs/development/calculated-fields-pattern.md`
