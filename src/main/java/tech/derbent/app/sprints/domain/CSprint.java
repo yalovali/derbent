@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Size;
@@ -77,12 +78,12 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			dataProviderBean = "CSprintTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CSprintType entityType;
-	// Calculated field for display - stored as transient
-	// Uses data provider pattern: service callback computes value dynamically
+	// Calculated field for display - populated automatically after entity load via @PostLoad
+	// Service callback: CSprintService.getItemCount(CSprint)
 	@Transient
 	@AMetaData (
 			displayName = "Item Count", required = false, readOnly = true, description = "Total number of items in this sprint", hidden = false,
-			dataProviderBean = "CSprintService", dataProviderMethod = "getItemCount"
+			dataProviderBean = "CSprintService", dataProviderMethod = "getItemCount", autoCalculate = true
 	)
 	private Integer itemCount;
 	@Transient
@@ -107,13 +108,13 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint", hidden = false
 	)
 	private LocalDate startDate;
-	// Calculated field for total story points - computed from sprint items
-	// Uses data provider pattern: service callback computes value dynamically
+	// Calculated field for total story points - populated automatically after entity load via @PostLoad
+	// Service callback: CSprintService.getTotalStoryPoints(CSprint)
 	@Transient
 	@AMetaData (
 			displayName = "Total Story Points", required = false, readOnly = true,
 			description = "Sum of story points for all items in this sprint", hidden = false,
-			dataProviderBean = "CSprintService", dataProviderMethod = "getTotalStoryPoints"
+			dataProviderBean = "CSprintService", dataProviderMethod = "getTotalStoryPoints", autoCalculate = true
 	)
 	private Long totalStoryPoints;
 
@@ -299,10 +300,58 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		return total;
 	}
 
-	/** Sets the total story points. This is typically set by the service when using data provider pattern.
+	/** Sets the total story points. This is populated automatically via @PostLoad after entity is loaded.
 	 * @param totalStoryPoints the total story points value */
 	public void setTotalStoryPoints(final Long totalStoryPoints) {
 		this.totalStoryPoints = totalStoryPoints;
+	}
+
+	/** JPA lifecycle callback: Populates transient calculated fields after entity is loaded from database.
+	 * This method automatically discovers fields with @AMetaData(autoCalculate=true) annotations
+	 * and invokes the corresponding service methods using the data provider pattern.
+	 * This approach combines JPA lifecycle callbacks with service-layer business logic. */
+	@PostLoad
+	protected void calculateTransientFields() {
+		try {
+			// Use reflection to find fields with autoCalculate=true
+			final java.lang.reflect.Field[] fields = this.getClass().getDeclaredFields();
+			for (final java.lang.reflect.Field field : fields) {
+				final AMetaData metadata = field.getAnnotation(AMetaData.class);
+				// Only process fields marked with autoCalculate=true
+				if (metadata != null && metadata.autoCalculate() && 
+				    !metadata.dataProviderBean().isEmpty() && !metadata.dataProviderMethod().isEmpty()) {
+					try {
+						// Resolve the service bean using CDataProviderResolver pattern
+						final Object serviceBean = tech.derbent.api.annotations.CDataProviderResolver.resolveBean(
+							metadata.dataProviderBean(), null);
+						
+						if (serviceBean != null) {
+							// Invoke the method using CAuxillaries utility (same as CDataProviderResolver does)
+							final Object value = tech.derbent.api.utils.CAuxillaries.invokeMethod(
+								serviceBean, metadata.dataProviderMethod(), this);
+							
+							// Set the field value
+							field.setAccessible(true);
+							field.set(this, value);
+							
+							LOGGER.debug("Auto-calculated field '{}' using {}#{}", 
+								field.getName(), metadata.dataProviderBean(), metadata.dataProviderMethod());
+						}
+					} catch (final NoSuchMethodException e) {
+						// Method not found with entity parameter, skip this field
+						LOGGER.debug("Method {}#{} not found with entity parameter for field {}", 
+							metadata.dataProviderBean(), metadata.dataProviderMethod(), field.getName());
+					} catch (final Exception e) {
+						// Log but don't fail entity loading
+						LOGGER.warn("Error calculating field {} using {}#{}: {}", 
+							field.getName(), metadata.dataProviderBean(), metadata.dataProviderMethod(), e.getMessage());
+					}
+				}
+			}
+		} catch (final Exception e) {
+			// Don't fail entity loading if calculation fails
+			LOGGER.error("Error in @PostLoad calculateTransientFields: {}", e.getMessage(), e);
+		}
 	}
 
 	@Override

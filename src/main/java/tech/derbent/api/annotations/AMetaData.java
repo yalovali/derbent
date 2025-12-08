@@ -15,6 +15,12 @@ public @interface AMetaData {
 
 	boolean autoSelectFirst() default false;
 
+	/** When true, the field value is automatically calculated and populated after entity is loaded from database
+	 * using JPA @PostLoad lifecycle callback. The calculation uses the dataProviderBean and dataProviderMethod
+	 * to invoke the service method. This is useful for transient calculated fields that should be populated
+	 * immediately after entity load without requiring form builder or UI interaction. */
+	boolean autoCalculate() default false;
+
 	boolean captionVisible() default true;
 
 	boolean clearOnEmptyData() default false;

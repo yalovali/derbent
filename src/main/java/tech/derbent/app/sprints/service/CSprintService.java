@@ -80,10 +80,15 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	// ====================================
 	// Data Provider Methods for Calculated Fields
 	// ====================================
-	// These methods are called automatically by the form builder when fields
-	// are annotated with @AMetaData(dataProviderBean="CSprintService", dataProviderMethod="methodName")
-	// This pattern allows calculated/derived fields to be computed dynamically
-	// instead of being stored in the database.
+	// These methods are called automatically by the entity's @PostLoad method.
+	// The @PostLoad callback uses reflection to discover fields with @AMetaData annotations
+	// that specify dataProviderBean and dataProviderMethod, then invokes these methods
+	// to populate the calculated field values after the entity is loaded from the database.
+	//
+	// This pattern provides:
+	// - Automatic calculation when entity is loaded from DB (via @PostLoad)
+	// - Service-layer business logic (testable, reusable)
+	// - Annotation-driven configuration (declarative)
 	//
 	// Example usage in entity:
 	// @Transient
@@ -95,8 +100,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	// private Long totalStoryPoints;
 
 	/** Data provider callback: Calculates the total number of items in a sprint.
-	 * This method is invoked automatically by the form builder when displaying
-	 * the itemCount field.
+	 * Called automatically by @PostLoad after entity is loaded from database.
 	 * 
 	 * @param sprint the sprint entity to calculate item count for
 	 * @return total number of sprint items */
@@ -109,8 +113,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	}
 
 	/** Data provider callback: Calculates the total story points for all items in a sprint.
-	 * This method is invoked automatically by the form builder when displaying
-	 * the totalStoryPoints field.
+	 * Called automatically by @PostLoad after entity is loaded from database.
 	 * 
 	 * @param sprint the sprint entity to calculate story points for
 	 * @return sum of story points for all sprint items */
