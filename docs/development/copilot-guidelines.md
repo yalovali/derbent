@@ -549,23 +549,24 @@ These files demonstrate Copilot-friendly patterns:
 
 #### ✅ CORRECT - Use CNotificationService
 
+**NOTE**: CNotificationService provides **STATIC METHODS ONLY**. Use them directly without injection.
+
 ```java
-// In components with dependency injection
-@Autowired
-private CNotificationService notificationService;
+// ALWAYS use static methods - NO INJECTION NEEDED
+import tech.derbent.api.ui.notifications.CNotificationService;
 
-notificationService.showSuccess("Data saved successfully");
-notificationService.showError("Save failed");
-notificationService.showWarning("Check your input");
-notificationService.showInfo("Process completed");
-notificationService.showException("Error saving entity", exception);
+CNotificationService.showSuccess("Data saved successfully");
+CNotificationService.showError("Save failed");
+CNotificationService.showWarning("Check your input");
+CNotificationService.showInfo("Process completed");
+CNotificationService.showException("Error saving entity", exception);
 
-// In utility classes or static contexts
-import tech.derbent.api.ui.notifications.CNotifications;
-
-CNotifications.showSuccess("Operation completed");
-CNotifications.showError("Something went wrong");
-CNotifications.showException("Error occurred", exception);
+// Convenience methods for common operations
+CNotificationService.showSaveSuccess();
+CNotificationService.showDeleteSuccess();
+CNotificationService.showCreateSuccess();
+CNotificationService.showSaveError();
+CNotificationService.showDeleteError();
 ```
 
 #### ❌ FORBIDDEN - Do NOT Use These Patterns
