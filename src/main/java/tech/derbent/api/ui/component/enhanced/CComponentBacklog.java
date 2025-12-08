@@ -11,8 +11,6 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IDropTarget;
-import tech.derbent.api.interfaces.IGridDragDropSupport;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -60,8 +58,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <p>
  * The component automatically configures itself with Activities and Meetings entity types. Future entity types can be easily added by extending the
  * createEntityTypes() method. */
-public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>>
-		implements IGridDragDropSupport<CProjectItem<?>>, IDropTarget<CProjectItem<?>> {
+public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
@@ -180,8 +177,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			if (!items.isEmpty()) {
 				draggedItem = items.get(0);
 				LOGGER.debug("Started dragging backlog item for reordering: {}", draggedItem.getId());
-				// Notify drag owner if set
-				notifyDragOwner(new HashSet<>(items));
 			}
 		});
 		// Handle drag end - notify external handler if set
@@ -233,7 +228,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		return grid.getListDataView().getItems().toList();
 	}
 
-	@Override
 	public Consumer<CProjectItem<?>> getDropHandler() { return externalDropHandler; }
 
 	/** Handles internal reordering of items within the backlog when dropped.
@@ -263,10 +257,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			LOGGER.debug("Reordered backlog items: moved from position {} to {}", draggedIndex, newPosition);
 			refreshGrid();
 			CNotificationService.showSuccess("Backlog priority updated");
-			// Notify drop owner about internal drop
-			final Set<CProjectItem<?>> droppedItems = new HashSet<>();
-			droppedItems.add((CProjectItem<?>) draggedItem);
-			notifyDropOwner(droppedItems, this);
 		} catch (final Exception e) {
 			LOGGER.error("Error reordering backlog items", e);
 			CNotificationService.showException("Error reordering backlog items", e);
@@ -373,16 +363,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
-	@Override
 	public boolean isDragEnabled() { return dragEnabled; }
 
-	@Override
 	public boolean isDropEnabled() {
 		// Backlog can always receive drops from sprint items
 		return true;
 	}
 
-	@Override
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
 		final var grid = getGrid();
@@ -393,7 +380,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	// IGridDragDropSupport - For dragging TO sprint
-	@Override
 	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
 		externalDropHandler = handler;
 		LOGGER.debug("External drop handler {} for backlog", handler != null ? "set" : "cleared");

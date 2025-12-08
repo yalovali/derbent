@@ -11,7 +11,6 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.interfaces.IDropTarget;
 import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
@@ -45,7 +44,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <p>
  * Implements IDropTarget to receive dropped items from backlog component. */
 public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem>
-		implements IEntitySelectionDialogSupport<CProjectItem<?>>, IDropTarget<CProjectItem<?>> {
+		implements IEntitySelectionDialogSupport<CProjectItem<?>> {
 
 	// Item type constants
 	private static final String ITEM_TYPE_ACTIVITY = "CActivity";
@@ -286,7 +285,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	/** Gets the current drop handler.
 	 * @return the drop handler, or null if not set */
-	@Override
 	public Consumer<CProjectItem<?>> getDropHandler() { return dropHandler; }
 
 	@Override
@@ -421,7 +419,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	/** Checks if dropping is currently enabled for this component.
 	 * @return true if drops are enabled (handler is set), false otherwise */
-	@Override
 	public boolean isDropEnabled() { return dropHandler != null; }
 
 	@Override
@@ -530,7 +527,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	/** Sets the handler to be called when an item is dropped into this component from backlog. Also configures the grid to accept drops.
 	 * @param handler the consumer to handle dropped items */
-	@Override
 	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
 		dropHandler = handler;
 		if (getGrid() != null) {

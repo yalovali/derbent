@@ -7,10 +7,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
+import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -23,11 +26,10 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
-import tech.derbent.api.interfaces.IDragOwner;
-import tech.derbent.api.interfaces.IDropOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
-
+import tech.derbent.api.interfaces.IHasDragEnd;
+import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -57,7 +59,7 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
  * @param <EntityClass> The entity type being selected */
 public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
 		implements IGridComponent<EntityClass>, IGridRefreshListener<EntityClass>, 
-		HasValue<HasValue.ValueChangeEvent<Set<EntityClass>>, Set<EntityClass>> {
+		HasValue<HasValue.ValueChangeEvent<Set<EntityClass>>, Set<EntityClass>>, IHasDragStart<EntityClass>, IHasDragEnd<EntityClass> {
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
@@ -135,8 +137,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private EntityTypeConfig<?> currentEntityType;
 	// Keep current selection snapshot to compute old/new values when firing events
 	private Set<EntityClass> currentSelectionSnapshot = new HashSet<>();
-	private IDragOwner<EntityClass> dragOwner;
-	private IDropOwner<EntityClass> dropOwner;
 	private final List<EntityTypeConfig<?>> entityTypes;
 	private CGrid<EntityClass> grid;
 	private CComponentGridSearchToolbar gridSearchToolbar;
@@ -452,23 +452,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Notifies the drag owner about drag start events.
-	 * @param draggedItems the set of items being dragged */
-	protected void notifyDragOwner(final Set<EntityClass> draggedItems) {
-		if (dragOwner != null) {
-			dragOwner.onDragStart(draggedItems);
-		}
-	}
-
-	/** Notifies the drop owner about drop complete events.
-	 * @param droppedItems    the set of items that were dropped
-	 * @param targetComponent the component where items were dropped */
-	protected void notifyDropOwner(final Set<EntityClass> droppedItems, final Object targetComponent) {
-		if (dropOwner != null) {
-			dropOwner.onDropComplete(droppedItems, targetComponent);
-		}
-	}
-
 	/** Notifies all registered listeners that this component's data has changed. This is called AFTER the component has updated its own data and
 	 * refreshed its grid. Implements IGridRefreshListener.notifyRefreshListeners()
 	 * @param changedItem The item that changed, or null if multiple items changed or change is general */
@@ -663,13 +646,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		clear();
 	}
 
-	/** Sets the drag owner to be notified when drag operations start.
-	 * @param owner the drag owner (can be null) */
-	public void setDragOwner(final IDragOwner<EntityClass> owner) { dragOwner = owner; }
-
-	/** Sets the drop owner to be notified when drop operations complete.
-	 * @param owner the drop owner (can be null) */
-	public void setDropOwner(final IDropOwner<EntityClass> owner) { dropOwner = owner; }
 	// Owner interface setters and notification methods
 
 	public void setDynamicHeight(final String maxHeight) {
@@ -868,5 +844,31 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Override
 	public boolean isRequiredIndicatorVisible() {
 		return false;
+	}
+	
+	// IHasDragStart interface implementation
+	
+	/** Adds a listener for drag start events from the internal grid.
+	 * The listener will be notified when a drag operation starts on the grid.
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<EntityClass>> listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		Check.notNull(grid, "Grid must be initialized before adding drag start listener");
+		return grid.addDragStartListener(listener);
+	}
+	
+	// IHasDragEnd interface implementation
+	
+	/** Adds a listener for drag end events from the internal grid.
+	 * The listener will be notified when a drag operation ends on the grid.
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<EntityClass>> listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		Check.notNull(grid, "Grid must be initialized before adding drag end listener");
+		return grid.addDragEndListener(listener);
 	}
 }
