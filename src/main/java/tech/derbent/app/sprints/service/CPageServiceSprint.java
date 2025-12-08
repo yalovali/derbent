@@ -13,6 +13,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.services.pageservice.CDragDropEvent;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
@@ -125,30 +126,25 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		componentItemDetails.setValue(item);
 	}
 
-	/** Handler for drag start events on backlog items grid.
-	 * @param component the backlog grid component
-	 * @param value     CDragDropEvent containing dragged items */
-	public void on_backlogItems_dragStart(final Component component, final Object value) {
-		LOGGER.info("Backlog drag start event received");
-		if (value instanceof tech.derbent.api.services.pageservice.CDragDropEvent) {
-			final tech.derbent.api.services.pageservice.CDragDropEvent<?> event =
-					(tech.derbent.api.services.pageservice.CDragDropEvent<?>) value;
-			LOGGER.info("Backlog drag started with {} items", event.getDraggedItems() != null ? event.getDraggedItems().size() : 0);
-			// You can add custom logic here, e.g.:
-			// - Highlight potential drop targets
-			// - Update UI state
-			// - Track dragged items for cross-component drag-drop
-		}
-	}
-
 	/** Handler for drag end events on backlog items grid.
 	 * @param component the backlog grid component
 	 * @param value     CDragDropEvent (dragged items not available in drag end) */
 	public void on_backlogItems_dragEnd(final Component component, final Object value) {
 		LOGGER.info("Backlog drag end event received");
-		if (value instanceof tech.derbent.api.services.pageservice.CDragDropEvent) {
+		if (value instanceof CDragDropEvent) {
 			// Clean up any drag-related UI state
 			LOGGER.info("Backlog drag operation completed");
+		}
+	}
+
+	/** Handler for drag start events on backlog items grid.
+	 * @param component the backlog grid component
+	 * @param value     CDragDropEvent containing dragged items */
+	public void on_backlogItems_dragStart(final Component component, final Object value) {
+		LOGGER.info("Backlog drag start event received");
+		if (value instanceof CDragDropEvent) {
+			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			LOGGER.info("Backlog drag started with {} items", event.getDraggedItems() != null ? event.getDraggedItems().size() : 0);
 		}
 	}
 
