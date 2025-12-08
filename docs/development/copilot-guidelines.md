@@ -541,6 +541,139 @@ These files demonstrate Copilot-friendly patterns:
 ☐ Proper error handling with notifications
 ```
 
+## Notification Pattern Standards (MANDATORY)
+
+### Rule: ALWAYS Use CNotificationService
+
+**NEVER use direct Vaadin Notification.show() calls or manual dialog instantiation. ALWAYS use CNotificationService.**
+
+#### ✅ CORRECT - Use CNotificationService
+
+**NOTE**: CNotificationService provides **STATIC METHODS ONLY**. Use them directly without injection.
+
+```java
+// ALWAYS use static methods - NO INJECTION NEEDED
+import tech.derbent.api.ui.notifications.CNotificationService;
+
+CNotificationService.showSuccess("Data saved successfully");
+CNotificationService.showError("Save failed");
+CNotificationService.showWarning("Check your input");
+CNotificationService.showInfo("Process completed");
+CNotificationService.showException("Error saving entity", exception);
+
+// Convenience methods for common operations
+CNotificationService.showSaveSuccess();
+CNotificationService.showDeleteSuccess();
+CNotificationService.showCreateSuccess();
+CNotificationService.showSaveError();
+CNotificationService.showDeleteError();
+```
+
+#### ❌ FORBIDDEN - Do NOT Use These Patterns
+
+```java
+// ❌ WRONG - Direct Vaadin calls
+Notification.show("message");
+Notification.show("message", 3000, Notification.Position.TOP_CENTER);
+
+// ❌ WRONG - Manual dialog instantiation
+new CWarningDialog("message").open();
+new CInformationDialog("message").open();
+new CExceptionDialog(exception).open();
+
+// ❌ WRONG - Inconsistent positioning/styling
+notification.setPosition(Position.MIDDLE);
+notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+```
+
+### Notification Types and Usage
+
+| Type | Method | Duration | Position | Use Case |
+|------|--------|----------|----------|----------|
+| Success | `showSuccess()` | 2s | bottom-start | Successful operations |
+| Error | `showError()` | 8s | middle | Critical errors |
+| Warning | `showWarning()` | 5s | top-center | Important warnings |
+| Info | `showInfo()` | 5s | bottom-start | Informational messages |
+| Exception | `showException()` | Modal | center | Detailed error info |
+
+### Convenience Methods
+
+```java
+// Common operation notifications
+CNotificationService.showSaveSuccess();
+CNotificationService.showDeleteSuccess();
+CNotificationService.showCreateSuccess();
+CNotificationService.showSaveError();
+CNotificationService.showDeleteError();
+CNotificationService.showOptimisticLockingError();
+```
+
+## Status Change Pattern (MANDATORY)
+
+### Rule: Status Changes Do NOT Auto-Save
+
+**When changing status via CCrudToolbar or any UI component, the entity MUST NOT be saved automatically. Only update the entity in memory. User must explicitly click Save button to persist changes.**
+
+#### ✅ CORRECT - Update Entity in Memory Only
+
+```java
+// In IPageServiceHasStatusAndWorkflow.actionChangeStatus()
+@Override
+public void actionChangeStatus(final CProjectItemStatus newStatus) {
+    // Validate status transition
+    final List<CProjectItemStatus> validStatuses = 
+        getProjectItemStatusService().getValidNextStatuses((IHasStatusAndWorkflow<?>) entity);
+    
+    if (!validStatuses.contains(newStatus)) {
+        CNotificationService.showWarning("Invalid status transition");
+        return;
+    }
+    
+    // Update entity in memory ONLY - do NOT call save()
+    ((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
+    setCurrentEntity(entity);
+    getView().populateForm();
+    
+    // Notify user that change is NOT yet persisted
+    CNotificationService.showInfo(
+        String.format("Status set to '%s' (click Save to persist)", newStatus.getName())
+    );
+}
+```
+
+#### ❌ FORBIDDEN - Auto-Save on Status Change
+
+```java
+// ❌ WRONG - Do NOT auto-save on status change
+@Override
+public void actionChangeStatus(final CProjectItemStatus newStatus) {
+    ((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
+    
+    // ❌ WRONG - This auto-saves, violating the pattern
+    final EntityClass savedEntity = getEntityService().save(entity);
+    
+    // ❌ WRONG - Message implies change is persisted
+    CNotificationService.showInfo("Status changed to '" + newStatus.getName() + "'");
+}
+```
+
+### Rationale
+
+1. **Consistency**: Status fields behave like all other form fields (name, description, etc.)
+2. **User Control**: User explicitly controls when changes are persisted (Save button)
+3. **Batch Changes**: User can change multiple fields including status, then save once
+4. **Undo Capability**: User can use Refresh button to discard all unsaved changes
+
+### Implementation Checklist
+
+```java
+☐ Status change only updates entity in memory
+☐ No call to service.save() in actionChangeStatus()
+☐ Notification says "set to" or "click Save to persist"
+☐ User must click Save button to persist changes
+☐ Refresh button discards unsaved changes
+```
+
 ## Screenshot Documentation Requirements
 
 ### MANDATORY: Screenshots for All Tasks
