@@ -140,7 +140,16 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.info("function: on_backlog_clicked for Component type");
 	}
 
+	public void on_sprintItems_dragStart(final Component component, final Object value) {
+		LOGGER.info("function: on_backlog_clicked for Component type");
+	}
+
 	public void on_status_change(final Component component, final Object value) {
+		LOGGER.info("function: on_status_change for Component type: {}",
+				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
+	}
+
+	public void on_status_dragEnd(final Component component, final Object value) {
 		LOGGER.info("function: on_status_change for Component type: {}",
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
