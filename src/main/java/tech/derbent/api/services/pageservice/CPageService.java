@@ -21,6 +21,8 @@ import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.interfaces.IHasDragEnd;
+import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -252,8 +254,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 		}
 		case "dragStart" -> {
-			// Check if component is a Grid with drag support
-			if (component instanceof Grid<?>) {
+			// Check if component implements IHasDragStart interface first
+			if (component instanceof IHasDragStart<?>) {
+				bindDragStart((IHasDragStart<?>) component, method, methodName);
+			} else if (component instanceof Grid<?>) {
+				// Fallback to direct Grid binding for backward compatibility
 				bindGridDragStart((Grid<?>) component, method, methodName);
 			} else {
 				// Fallback to generic DOM event listener
@@ -267,8 +272,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 		}
 		case "dragEnd" -> {
-			// Check if component is a Grid with drag support
-			if (component instanceof Grid<?>) {
+			// Check if component implements IHasDragEnd interface first
+			if (component instanceof IHasDragEnd<?>) {
+				bindDragEnd((IHasDragEnd<?>) component, method, methodName);
+			} else if (component instanceof Grid<?>) {
+				// Fallback to direct Grid binding for backward compatibility
 				bindGridDragEnd((Grid<?>) component, method, methodName);
 			} else {
 				// Fallback to generic DOM event listener
@@ -359,6 +367,50 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 		});
 		LOGGER.debug("Bound Grid drop event to method {}", methodName);
+	}
+
+	/** Binds a component's drag start event to a page service handler method.
+	 * This method supports any component implementing IHasDragStart interface.
+	 * @param component  the component implementing IHasDragStart
+	 * @param method     the handler method to invoke
+	 * @param methodName the name of the handler method */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void bindDragStart(final IHasDragStart<?> component, final Method method, final String methodName) {
+		component.addDragStartListener(event -> {
+			try {
+				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
+				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, component);
+				method.invoke(this, (Component) component, dragEvent);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			}
+		});
+		LOGGER.debug("Bound IHasDragStart component drag start event to method {}", methodName);
+	}
+
+	/** Binds a component's drag end event to a page service handler method.
+	 * This method supports any component implementing IHasDragEnd interface.
+	 * Note: GridDragEndEvent doesn't provide dragged items, so we pass an empty event.
+	 * @param component  the component implementing IHasDragEnd
+	 * @param method     the handler method to invoke
+	 * @param methodName the name of the handler method */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void bindDragEnd(final IHasDragEnd<?> component, final Method method, final String methodName) {
+		component.addDragEndListener(event -> {
+			try {
+				// GridDragEndEvent doesn't provide dragged items
+				// Handler methods should track items from dragStart event if needed
+				final CDragDropEvent<?> dragEvent = new CDragDropEvent(null, component);
+				method.invoke(this, (Component) component, dragEvent);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			}
+		});
+		LOGGER.debug("Bound IHasDragEnd component drag end event to method {}", methodName);
 	}
 
 	protected void bindMethods(final CPageService<?> page) {
