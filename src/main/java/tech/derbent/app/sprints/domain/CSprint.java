@@ -26,7 +26,6 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -189,46 +188,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			}
 			sprintItems.add(sprintItem);
 			updateLastModified();
-		}
-	}
-
-	/** JPA lifecycle callback: Populates transient calculated fields after entity is loaded from database. This method automatically discovers fields
-	 * with @AMetaData(autoCalculate=true) annotations and invokes the corresponding service methods using the data provider pattern. This approach
-	 * combines JPA lifecycle callbacks with service-layer business logic. */
-	@PostLoad
-	protected void calculateTransientFields() {
-		try {
-			// Use reflection to find fields with autoCalculate=true
-			final Field[] fields = this.getClass().getDeclaredFields();
-			for (final Field field : fields) {
-				final AMetaData metadata = field.getAnnotation(AMetaData.class);
-				// Only process fields marked with autoCalculate=true
-				if (metadata != null && metadata.autoCalculate() && !metadata.dataProviderBean().isEmpty()
-						&& !metadata.dataProviderMethod().isEmpty()) {
-					try {
-						CDataProviderResolver resolver = CSpringContext.getBean(CDataProviderResolver.class);
-						Object xxx = resolver.resolveMethodAnnotations(null, CEntityFieldService.createFieldInfo(metadata));
-						LOGGER.debug("Resolved method annotations: {}", xxx);
-						// Resolve the service bean using CDataProviderResolver pattern
-						final Object serviceBean = CDataProviderResolver.resolveBean(metadata.dataProviderBean(), null);
-						if (serviceBean != null) {
-							// Invoke the method using CAuxillaries utility (same as CDataProviderResolver does)
-							final Object value = CAuxillaries.invokeMethod(serviceBean, metadata.dataProviderMethod(), this);
-							// Set the field value
-							field.setAccessible(true);
-							field.set(this, value);
-							LOGGER.debug("Auto-calculated field '{}' using {}#{}", field.getName(), metadata.dataProviderBean(),
-									metadata.dataProviderMethod());
-						}
-					} catch (final Exception e) {
-						LOGGER.warn("Error calculating field {} using {}#{}: {}", field.getName(), metadata.dataProviderBean(),
-								metadata.dataProviderMethod(), e.getMessage());
-					}
-				}
-			}
-		} catch (final Exception e) {
-			// Don't fail entity loading if calculation fails
-			LOGGER.error("Error in @PostLoad calculateTransientFields: {}", e.getMessage(), e);
 		}
 	}
 
@@ -410,6 +369,28 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			return false;
 		}
 		return LocalDate.now().isAfter(endDate);
+	}
+
+	/** JPA lifecycle callback: Populates transient calculated fields after entity is loaded from database. This method automatically discovers fields
+	 * with @AMetaData(autoCalculate=true) annotations and invokes the corresponding service methods using the data provider pattern. This approach
+	 * combines JPA lifecycle callbacks with service-layer business logic.
+	 * @throws Exception */
+	@PostLoad
+	protected void postLoadEntity() throws Exception {
+		try {
+			CDataProviderResolver resolver = CSpringContext.getBean(CDataProviderResolver.class);
+			List<Field> fields = CEntityFieldService.getAllFields(this.getClass()).stream()
+					.filter(field -> field.isAnnotationPresent(AMetaData.class) && field.getAnnotation(AMetaData.class).autoCalculate()).toList();
+			for (final Field field : fields) {
+				final AMetaData metadata = field.getAnnotation(AMetaData.class);
+				Object value = resolver.resolveMethodAnnotations(this, null, CEntityFieldService.createFieldInfo(metadata));
+				field.setAccessible(true);
+				field.set(this, value);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error in @PostLoad calculateTransientFields: {}", e.getMessage());
+			throw e;
+		}
 	}
 
 	/** Remove an activity from this sprint.

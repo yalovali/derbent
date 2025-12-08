@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
@@ -58,7 +59,7 @@ public final class CDataProviderResolver {
 
 	public Component resolveDataComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
-			final Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
+			final Object result = resolveMethodAnnotations(null, contentOwner, fieldInfo);
 			final Component component = (Component) result;
 			if (component instanceof IHasContentOwner) {
 				((IHasContentOwner) component).setContentOwner(contentOwner);
@@ -76,7 +77,7 @@ public final class CDataProviderResolver {
 			if (fieldInfo.getDataProviderBean().equalsIgnoreCase("none")) {
 				return List.of();
 			}
-			final Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
+			final Object result = resolveMethodAnnotations(null, contentOwner, fieldInfo);
 			return (List<T>) result;
 		} catch (final Exception e) {
 			LOGGER.error("Error resolving data for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
@@ -84,7 +85,7 @@ public final class CDataProviderResolver {
 		}
 	}
 
-	public Object resolveMethodAnnotations(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	public Object resolveMethodAnnotations(CEntityDB<?> entity, final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
 			boolean there_is_param = false;
 			Check.notNull(fieldInfo, "Field info cannot be null");
@@ -99,7 +100,7 @@ public final class CDataProviderResolver {
 			Object paramValue = null;
 			if (!fieldInfo.getDataProviderParamMethod().isEmpty()) {
 				there_is_param = true;
-				paramValue = resolveParamValue(contentOwner, fieldInfo);
+				paramValue = resolveParamValue(entity, contentOwner, fieldInfo);
 			}
 			final Object bean = resolveBean(beanName, contentOwner);
 			Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName + " field: " + fieldInfo.getFieldName());
@@ -117,7 +118,7 @@ public final class CDataProviderResolver {
 		}
 	}
 
-	Object resolveParamValue(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	Object resolveParamValue(CEntityDB<?> entity, final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		Check.notNull(fieldInfo, "Field info cannot be null");
 		Object paramValue = null;
 		Object paramBean = null;
@@ -130,11 +131,11 @@ public final class CDataProviderResolver {
 		Check.notBlank(paramBeanName, "Parameter bean name cannot be empty");
 		// paramBeanName is ok now
 		if ("this".equalsIgnoreCase(paramMethod)) {
-			return contentOwner.getCurrentEntity();
+			return entity;
 		}
 		if ("this".equals(paramBeanName)) {
 			// just the content owner
-			paramBean = contentOwner.getCurrentEntity();
+			paramBean = this;
 		} else if ("context".equals(paramBeanName)) {
 			// just the content owner
 			paramBean = contentOwner;

@@ -323,7 +323,7 @@ public class CEntityFieldService {
 		return beanName.substring(0, beanName.length() - "Service".length());
 	}
 
-	private static List<Field> getAllFields(final Class<?> clazz) {
+	public static List<Field> getAllFields(final Class<?> clazz) {
 		final List<Field> fields = new ArrayList<>();
 		// Get fields from current class and all superclasses
 		Class<?> currentClass = clazz;
