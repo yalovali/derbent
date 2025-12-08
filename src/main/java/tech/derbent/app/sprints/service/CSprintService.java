@@ -76,4 +76,52 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 
 		LOGGER.debug("Sprint initialization complete with default values");
 	}
+
+	// ====================================
+	// Data Provider Methods for Calculated Fields
+	// ====================================
+	// These methods are called automatically by the entity's @PostLoad method.
+	// The @PostLoad callback uses reflection to discover fields with @AMetaData annotations
+	// that specify dataProviderBean and dataProviderMethod, then invokes these methods
+	// to populate the calculated field values after the entity is loaded from the database.
+	//
+	// This pattern provides:
+	// - Automatic calculation when entity is loaded from DB (via @PostLoad)
+	// - Service-layer business logic (testable, reusable)
+	// - Annotation-driven configuration (declarative)
+	//
+	// Example usage in entity:
+	// @Transient
+	// @AMetaData(
+	//     displayName = "Total Story Points",
+	//     dataProviderBean = "CSprintService",
+	//     dataProviderMethod = "getTotalStoryPoints"
+	// )
+	// private Long totalStoryPoints;
+
+	/** Data provider callback: Calculates the total number of items in a sprint.
+	 * Called automatically by @PostLoad after entity is loaded from database.
+	 * 
+	 * @param sprint the sprint entity to calculate item count for
+	 * @return total number of sprint items */
+	public Integer getItemCount(final CSprint sprint) {
+		if (sprint == null) {
+			LOGGER.warn("getItemCount called with null sprint");
+			return 0;
+		}
+		return sprint.getItemCount(); // Delegates to entity method
+	}
+
+	/** Data provider callback: Calculates the total story points for all items in a sprint.
+	 * Called automatically by @PostLoad after entity is loaded from database.
+	 * 
+	 * @param sprint the sprint entity to calculate story points for
+	 * @return sum of story points for all sprint items */
+	public Long getTotalStoryPoints(final CSprint sprint) {
+		if (sprint == null) {
+			LOGGER.warn("getTotalStoryPoints called with null sprint");
+			return 0L;
+		}
+		return sprint.getTotalStoryPoints(); // Delegates to entity method
+	}
 }
