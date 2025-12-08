@@ -52,9 +52,9 @@ public class CPanelDetails extends CDiv {
 	public String getName() { return name; }
 
 	public void processLine(final IContentOwner contentOwner, final int counter, final CDetailSection screen, final CDetailLines line,
-			final CFormBuilder<?> formBuilder) throws Exception {
+			final CFormBuilder<?> formBuilder, final Map<String, Component> centralComponentMap) throws Exception {
 		try {
-			formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, getBaseLayout(), componentMap, horizontalLayoutMap);
+			formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, getBaseLayout(), centralComponentMap, horizontalLayoutMap);
 		} catch (final Exception e) {
 			LOGGER.error("Error processing detail line for field {}", line.getFieldCaption());
 			throw e;

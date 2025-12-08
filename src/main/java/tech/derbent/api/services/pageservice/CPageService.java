@@ -428,10 +428,21 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
 		// Combine form components and custom components
 		final Map<String, Component> allComponents = new HashMap<>();
+		
+		// Get components from detailsBuilder's centralized map if available
+		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
+			allComponents.putAll(detailsBuilder.getComponentMap());
+			LOGGER.debug("Added {} components from detailsBuilder's centralized map", detailsBuilder.getComponentMap().size());
+		}
+		
+		// Also include formBuilder components for backward compatibility
 		if (formBuilder != null) {
 			allComponents.putAll(formBuilder.getComponentMap());
 		}
+		
+		// Add custom registered components (these take precedence)
 		allComponents.putAll(customComponents);
+		
 		// print the component names for debugging
 		LOGGER.debug("Binding methods for components: {}", allComponents.keySet());
 		// filter methods with name matching regex:("on_[a-zA-Z0-9]+_[a" + "-zA-Z0-9]+")
@@ -497,6 +508,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param fieldName the name of the field/component
 	 * @return the component, or null if not found */
 	protected Component getComponentByName(final String fieldName) {
+		// First check detailsBuilder's centralized map (most comprehensive)
+		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
+			final Component component = detailsBuilder.getComponentMap().get(fieldName);
+			if (component != null) {
+				return component;
+			}
+		}
+		
+		// Fall back to formBuilder for backward compatibility
 		if (formBuilder == null) {
 			LOGGER.warn("FormBuilder is null; cannot retrieve component '{}'", fieldName);
 			return null;

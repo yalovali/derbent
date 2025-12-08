@@ -44,6 +44,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		return null;
 	}
 
+	// Centralized component map - stores all components from all panels
+	private final Map<String, Component> componentMap;
 	CFormBuilder<?> formBuilder = null;
 	private HasComponents formLayout = null;
 	private final Map<String, CPanelDetails> mapSectionPanels;
@@ -54,6 +56,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		Check.notNull(sessionService, "Session service cannot be null");
 		this.sessionService = sessionService;
 		mapSectionPanels = new HashMap<>();
+		componentMap = new HashMap<>();
 	}
 
 	public HasComponents buildDetails(final IContentOwner contentOwner, CDetailSection screen, final CEnhancedBinder<?> binder,
@@ -79,7 +82,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		}
 		final Class<?> screenClass = CEntityRegistry.getEntityClass(screen.getEntityType());
 		Check.notNull(screenClass, "Screen class cannot be null");
-		formBuilder = new CFormBuilder<>(null, screenClass, binder);
+		formBuilder = new CFormBuilder<>(null, screenClass, binder, componentMap);
 		//
 		CPanelDetails currentSection = null;
 		final int counter = 0;
@@ -99,7 +102,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				currentSection = null;
 			}
 			if (currentSection != null) {
-				currentSection.processLine(contentOwner, counter, screen, line, getFormBuilder());
+				currentSection.processLine(contentOwner, counter, screen, line, getFormBuilder(), componentMap);
 				continue;
 			}
 			final Component component = processLine(counter, screen, line, user);
@@ -119,6 +122,10 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	}
 
 	public CFormBuilder<?> getFormBuilder() { return formBuilder; }
+
+	/** Gets the centralized component map that contains all components from all panels.
+	 * @return the component map */
+	public Map<String, Component> getComponentMap() { return componentMap; }
 
 	public CPanelDetails getSectionPanel(final String sectionName) {
 		Check.notNull(sectionName, "Section name cannot be null");

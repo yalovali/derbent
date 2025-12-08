@@ -956,6 +956,22 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CFormBuilder.buildForm(entityClass, binder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout, contentOwner);
 	}
 
+	/** Constructor that accepts an external component map for centralized component management.
+	 * @param contentOwner   the content owner (page) for context
+	 * @param entityClass    the entity class
+	 * @param binder         the enhanced binder
+	 * @param externalComponentMap the external component map to use instead of creating a new one
+	 * @throws Exception if form building fails */
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
+			final Map<String, Component> externalComponentMap) throws Exception {
+		Check.notNull(externalComponentMap, "External component map cannot be null");
+		componentMap = externalComponentMap;
+		horizontalLayoutMap = new HashMap<>();
+		formLayout = new CVerticalLayout(false, false, false);
+		this.binder = binder;
+		CFormBuilder.buildForm(entityClass, binder, List.of(), getComponentMap(), horizontalLayoutMap, formLayout, contentOwner);
+	}
+
 	public Component addFieldLine(final EntityFieldInfo fieldInfo) throws Exception {
 		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, getComponentMap());
 	}
@@ -964,7 +980,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final VerticalLayout layout, final Map<String, Component> componentMap2, final Map<String, CHorizontalLayout> horizontalLayoutMap2)
 			throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
-		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, getComponentMap());
+		// Use the provided componentMap2 instead of getComponentMap() to support centralized component maps
+		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap2);
 	}
 
 	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
