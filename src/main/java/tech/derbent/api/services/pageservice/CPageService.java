@@ -378,11 +378,19 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			"rawtypes", "unchecked"
 	})
 	private void bindDragStart(final IHasDragStart<?> component, final Method method, final String methodName) {
+		// Verify that the component is also a Vaadin Component
+		if (!(component instanceof Component)) {
+			LOGGER.error("Component implementing IHasDragStart must also extend Component: {}", 
+					component.getClass().getSimpleName());
+			return;
+		}
+		
+		final Component vaadinComponent = (Component) component;
 		component.addDragStartListener(event -> {
 			try {
 				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
 				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, component);
-				method.invoke(this, (Component) component, dragEvent);
+				method.invoke(this, vaadinComponent, dragEvent);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
 			}
@@ -400,12 +408,20 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			"rawtypes", "unchecked"
 	})
 	private void bindDragEnd(final IHasDragEnd<?> component, final Method method, final String methodName) {
+		// Verify that the component is also a Vaadin Component
+		if (!(component instanceof Component)) {
+			LOGGER.error("Component implementing IHasDragEnd must also extend Component: {}", 
+					component.getClass().getSimpleName());
+			return;
+		}
+		
+		final Component vaadinComponent = (Component) component;
 		component.addDragEndListener(event -> {
 			try {
 				// GridDragEndEvent doesn't provide dragged items
 				// Handler methods should track items from dragStart event if needed
 				final CDragDropEvent<?> dragEvent = new CDragDropEvent(null, component);
-				method.invoke(this, (Component) component, dragEvent);
+				method.invoke(this, vaadinComponent, dragEvent);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
 			}
