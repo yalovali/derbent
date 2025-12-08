@@ -1,6 +1,8 @@
 package tech.derbent.api.services.pageservice;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;
@@ -10,6 +12,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.annotations.CFormBuilder;
@@ -245,26 +248,113 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 		}
 		case "dragStart" -> {
-			component.getElement().addEventListener("dragstart", e -> {
-				try {
-					method.invoke(this, component, null);
-				} catch (final Exception ex) {
-					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-				}
-			});
+			// Check if component is a Grid with drag support
+			if (component instanceof Grid<?>) {
+				bindGridDragStart((Grid<?>) component, method, methodName);
+			} else {
+				// Fallback to generic DOM event listener
+				component.getElement().addEventListener("dragstart", e -> {
+					try {
+						method.invoke(this, component, null);
+					} catch (final Exception ex) {
+						LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+					}
+				});
+			}
 		}
 		case "dragEnd" -> {
-			component.getElement().addEventListener("dragend", e -> {
-				try {
-					method.invoke(this, component, null);
-				} catch (final Exception ex) {
-					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-				}
-			});
+			// Check if component is a Grid with drag support
+			if (component instanceof Grid<?>) {
+				bindGridDragEnd((Grid<?>) component, method, methodName);
+			} else {
+				// Fallback to generic DOM event listener
+				component.getElement().addEventListener("dragend", e -> {
+					try {
+						method.invoke(this, component, null);
+					} catch (final Exception ex) {
+						LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+					}
+				});
+			}
+		}
+		case "drop" -> {
+			// Drop event is only supported for Grid components
+			if (component instanceof Grid<?>) {
+				bindGridDrop((Grid<?>) component, method, methodName);
+			} else {
+				LOGGER.warn("Drop action is only supported for Grid components, component {} is {}", componentName,
+						component.getClass().getSimpleName());
+			}
 		}
 		// add more actions as needed
 		default -> Check.warn("Action {" + action + "} not recognized for binding.");
 		}
+	}
+
+	/** Binds a Grid's drag start event to a page service handler method.
+	 * @param grid       the Grid component
+	 * @param method     the handler method to invoke
+	 * @param methodName the name of the handler method */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void bindGridDragStart(final Grid<?> grid, final Method method, final String methodName) {
+		grid.addDragStartListener(event -> {
+			try {
+				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
+				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, grid);
+				method.invoke(this, grid, dragEvent);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			}
+		});
+		LOGGER.debug("Bound Grid drag start event to method {}", methodName);
+	}
+
+	/** Binds a Grid's drag end event to a page service handler method.
+	 * Note: GridDragEndEvent doesn't provide dragged items, so we pass an empty event.
+	 * @param grid       the Grid component
+	 * @param method     the handler method to invoke
+	 * @param methodName the name of the handler method */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void bindGridDragEnd(final Grid<?> grid, final Method method, final String methodName) {
+		grid.addDragEndListener(event -> {
+			try {
+				// GridDragEndEvent doesn't provide dragged items
+				// Handler methods should track items from dragStart event if needed
+				final CDragDropEvent<?> dragEvent = new CDragDropEvent(null, grid);
+				method.invoke(this, grid, dragEvent);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			}
+		});
+		LOGGER.debug("Bound Grid drag end event to method {}", methodName);
+	}
+
+	/** Binds a Grid's drop event to a page service handler method.
+	 * @param grid       the Grid component
+	 * @param method     the handler method to invoke
+	 * @param methodName the name of the handler method */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void bindGridDrop(final Grid<?> grid, final Method method, final String methodName) {
+		grid.addDropListener(event -> {
+			try {
+				// Get drop information
+				final Object targetItem = event.getDropTargetItem().orElse(null);
+				final var dropLocation = event.getDropLocation();
+				// Note: The dragged items are tracked externally and passed via the drag source
+				// We create an event with null dragged items as they're tracked in the drag start
+				final CDragDropEvent<?> dropEvent = new CDragDropEvent(null, null, targetItem, dropLocation, grid);
+				method.invoke(this, grid, dropEvent);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			}
+		});
+		LOGGER.debug("Bound Grid drop event to method {}", methodName);
 	}
 
 	protected void bindMethods(final CPageService<?> page) {
