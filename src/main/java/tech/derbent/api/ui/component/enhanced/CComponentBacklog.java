@@ -1,9 +1,7 @@
 package tech.derbent.api.ui.component.enhanced;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,6 +158,23 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
 	}
 
+	/** Calculates the new position for a dragged item based on drop location.
+	 * @param draggedIndex current index of dragged item
+	 * @param targetIndex  index of target item
+	 * @param dropLocation where relative to target (ABOVE, BELOW)
+	 * @return the new position index */
+	private int calculateNewPosition(final int draggedIndex, final int targetIndex, final GridDropLocation dropLocation) {
+		int newPosition = targetIndex;
+		if (dropLocation == GridDropLocation.BELOW) {
+			newPosition++;
+		}
+		// Adjust if dragging from above (because removing from above shifts indices)
+		if (draggedIndex < newPosition) {
+			newPosition--;
+		}
+		return newPosition;
+	}
+
 	/** Configures internal drag-and-drop for reordering items within the backlog. This is separate from external drag to sprint items. */
 	private void configureInternalDragAndDrop() {
 		final var grid = getGrid();
@@ -218,6 +233,19 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		LOGGER.debug("Internal drag-and-drop configured for backlog reordering");
 	}
 
+	/** Finds the index of an item in the list by its ID.
+	 * @param items  the list of items
+	 * @param itemId the ID to search for
+	 * @return the index, or -1 if not found */
+	private int findItemIndex(final List<CProjectItem<?>> items, final Long itemId) {
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(itemId)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	/** Gets all items currently displayed in the grid.
 	 * @return list of all items in grid */
 	public List<CProjectItem<?>> getAllItems() {
@@ -263,92 +291,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
-	/** Finds the index of an item in the list by its ID.
-	 * @param items the list of items
-	 * @param itemId the ID to search for
-	 * @return the index, or -1 if not found */
-	private int findItemIndex(final List<CProjectItem<?>> items, final Long itemId) {
-		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getId().equals(itemId)) {
-				return i;
-			}
-		}
-		return -1;
-	}
+	public boolean isDragEnabled() { return dragEnabled; }
 
-	/** Calculates the new position for a dragged item based on drop location.
-	 * @param draggedIndex current index of dragged item
-	 * @param targetIndex index of target item
-	 * @param dropLocation where relative to target (ABOVE, BELOW)
-	 * @return the new position index */
-	private int calculateNewPosition(final int draggedIndex, final int targetIndex, final GridDropLocation dropLocation) {
-		int newPosition = targetIndex;
-		if (dropLocation == GridDropLocation.BELOW) {
-			newPosition++;
-		}
-		// Adjust if dragging from above (because removing from above shifts indices)
-		if (draggedIndex < newPosition) {
-			newPosition--;
-		}
-		return newPosition;
-	}
-
-	/** Updates sprint orders for affected items and saves them to database.
-	 * @param items all current items
-	 * @param draggedIndex index of dragged item
-	 * @param newPosition new position for dragged item */
-	private void updateSprintOrdersAndSave(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
-		if (draggedIndex < newPosition) {
-			updateOrdersForDownwardMove(items, draggedIndex, newPosition);
-		} else {
-			updateOrdersForUpwardMove(items, draggedIndex, newPosition);
-		}
-	}
-
-	/** Updates sprint orders when moving an item down in the list.
-	 * When moving down, items between draggedIndex and newPosition shift up to fill the gap.
-	 * @param items all current items
-	 * @param draggedIndex original position
-	 * @param newPosition target position */
-	private void updateOrdersForDownwardMove(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
-		// Iterate only over the affected range for performance
-		for (int i = draggedIndex; i <= newPosition && i < items.size(); i++) {
-			final CProjectItem<?> item = items.get(i);
-			if (!(item instanceof ISprintableItem)) continue;
-
-			if (i == draggedIndex) {
-				// Dragged item moves to new position (1-based)
-				((ISprintableItem) item).setSprintOrder(newPosition + 1);
-				saveItem(item);
-			} else {
-				// Items shift up one position: index i → position (i-1) → sprintOrder i
-				((ISprintableItem) item).setSprintOrder(i);
-				saveItem(item);
-			}
-		}
-	}
-
-	/** Updates sprint orders when moving an item up in the list.
-	 * When moving up, items between newPosition and draggedIndex shift down to make room.
-	 * @param items all current items
-	 * @param draggedIndex original position
-	 * @param newPosition target position */
-	private void updateOrdersForUpwardMove(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
-		// Iterate only over the affected range for performance
-		for (int i = newPosition; i <= draggedIndex && i < items.size(); i++) {
-			final CProjectItem<?> item = items.get(i);
-			if (!(item instanceof ISprintableItem)) continue;
-
-			if (i == draggedIndex) {
-				// Dragged item moves to new position (1-based)
-				((ISprintableItem) item).setSprintOrder(newPosition + 1);
-				saveItem(item);
-			} else {
-				// Items shift down one position: index i → position (i+1) → sprintOrder (i+2)
-				((ISprintableItem) item).setSprintOrder(i + 2);
-				saveItem(item);
-			}
-		}
+	public boolean isDropEnabled() {
+		// Backlog can always receive drops from sprint items
+		return true;
 	}
 
 	/** Saves an item using the appropriate service.
@@ -363,19 +310,12 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	public boolean isDropEnabled() {
-		// Backlog can always receive drops from sprint items
-		return true;
-	}
-
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
 		final var grid = getGrid();
 		if (grid != null) {
 			grid.setRowsDraggable(enabled);
-			LOGGER.debug("External drag from backlog {}", enabled ? "enabled" : "disabled");
+			// LOGGER.debug("External drag from backlog {}", enabled ? "enabled" : "disabled");
 		}
 	}
 
@@ -383,5 +323,64 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
 		externalDropHandler = handler;
 		LOGGER.debug("External drop handler {} for backlog", handler != null ? "set" : "cleared");
+	}
+
+	/** Updates sprint orders when moving an item down in the list. When moving down, items between draggedIndex and newPosition shift up to fill the
+	 * gap.
+	 * @param items        all current items
+	 * @param draggedIndex original position
+	 * @param newPosition  target position */
+	private void updateOrdersForDownwardMove(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
+		// Iterate only over the affected range for performance
+		for (int i = draggedIndex; i <= newPosition && i < items.size(); i++) {
+			final CProjectItem<?> item = items.get(i);
+			if (!(item instanceof ISprintableItem)) {
+				continue;
+			}
+			if (i == draggedIndex) {
+				// Dragged item moves to new position (1-based)
+				((ISprintableItem) item).setSprintOrder(newPosition + 1);
+				saveItem(item);
+			} else {
+				// Items shift up one position: index i → position (i-1) → sprintOrder i
+				((ISprintableItem) item).setSprintOrder(i);
+				saveItem(item);
+			}
+		}
+	}
+
+	/** Updates sprint orders when moving an item up in the list. When moving up, items between newPosition and draggedIndex shift down to make room.
+	 * @param items        all current items
+	 * @param draggedIndex original position
+	 * @param newPosition  target position */
+	private void updateOrdersForUpwardMove(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
+		// Iterate only over the affected range for performance
+		for (int i = newPosition; i <= draggedIndex && i < items.size(); i++) {
+			final CProjectItem<?> item = items.get(i);
+			if (!(item instanceof ISprintableItem)) {
+				continue;
+			}
+			if (i == draggedIndex) {
+				// Dragged item moves to new position (1-based)
+				((ISprintableItem) item).setSprintOrder(newPosition + 1);
+				saveItem(item);
+			} else {
+				// Items shift down one position: index i → position (i+1) → sprintOrder (i+2)
+				((ISprintableItem) item).setSprintOrder(i + 2);
+				saveItem(item);
+			}
+		}
+	}
+
+	/** Updates sprint orders for affected items and saves them to database.
+	 * @param items        all current items
+	 * @param draggedIndex index of dragged item
+	 * @param newPosition  new position for dragged item */
+	private void updateSprintOrdersAndSave(final List<CProjectItem<?>> items, final int draggedIndex, final int newPosition) {
+		if (draggedIndex < newPosition) {
+			updateOrdersForDownwardMove(items, draggedIndex, newPosition);
+		} else {
+			updateOrdersForUpwardMove(items, draggedIndex, newPosition);
+		}
 	}
 }

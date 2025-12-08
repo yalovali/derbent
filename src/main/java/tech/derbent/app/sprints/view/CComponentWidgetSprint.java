@@ -2,18 +2,13 @@ package tech.derbent.app.sprints.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
-import tech.derbent.api.interfaces.IHasDragEnd;
-import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -60,8 +55,11 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	 * @param sprint the sprint to display in the widget */
 	public CComponentWidgetSprint(final CSprint sprint) {
 		super(sprint);
+		final var grid = getGrid();
+		grid.setRowsDraggable(true);
 	}
 
+	@Override
 	protected void createFirstLine() throws Exception {
 		super.createFirstLine();
 		// Show sprint type with color if available
@@ -150,6 +148,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			CNotificationService.showException("Failed to load sprint items", e);
 		}
 	}
+
+	public CGrid<?> getGrid() { return componentSprintItems.getGrid(); }
 
 	/** Handle click on the item count label. Toggles visibility of the sprint items component. */
 	protected void on_buttonToggleItems_clicked() {

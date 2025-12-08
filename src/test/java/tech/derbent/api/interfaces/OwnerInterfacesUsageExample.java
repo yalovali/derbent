@@ -30,11 +30,11 @@ public class OwnerInterfacesUsageExample {
 	}
 
 	/** Example of a parent component that implements all owner interfaces. */
-	public static class CPageSprintView implements ISelectionOwner<CProjectItem<?>>, IDragOwner<CProjectItem<?>>, IDropOwner<CProjectItem<?>> {
+	public static class CPageSprintView implements ISelectionOwner<CProjectItem<?>> {
 
 		private final CComponentBacklog backlogComponent;
-		private int dragStartCount = 0;
-		private int dropCompleteCount = 0;
+		private final int dragStartCount = 0;
+		private final int dropCompleteCount = 0;
 		private int selectionChangeCount = 0;
 
 		public CPageSprintView(final CSprint sprint) {
@@ -42,8 +42,6 @@ public class OwnerInterfacesUsageExample {
 			backlogComponent = new CComponentBacklog(sprint);
 			// Register this page as the owner for all events
 			backlogComponent.setSelectionOwner(this);
-			backlogComponent.setDragOwner(this);
-			backlogComponent.setDropOwner(this);
 		}
 
 		public int getDragStartCount() { return dragStartCount; }
@@ -52,27 +50,6 @@ public class OwnerInterfacesUsageExample {
 
 		// Getters for testing
 		public int getSelectionChangeCount() { return selectionChangeCount; }
-
-		@Override
-		public void onDragStart(final Set<CProjectItem<?>> draggedItems) {
-			// Handle drag start - prepare drop targets, update UI state, etc.
-			dragStartCount++;
-			System.out.println("Drag started with " + draggedItems.size() + " items");
-			// Example: Enable drop targets when drag starts
-			// enableDropTargets();
-			// highlightValidDropZones();
-		}
-
-		@Override
-		public void onDropComplete(final Set<CProjectItem<?>> droppedItems, final Object targetComponent) {
-			// Handle drop completion - update related components, refresh data, etc.
-			dropCompleteCount++;
-			System.out.println("Drop completed: " + droppedItems.size() + " items on "
-					+ (targetComponent != null ? targetComponent.getClass().getSimpleName() : "null"));
-			// Example: Refresh related components after drop
-			// refreshRelatedComponents();
-			// updateStatistics();
-		}
 
 		@Override
 		public void onSelectionChanged(final Set<CProjectItem<?>> selectedItems) {
