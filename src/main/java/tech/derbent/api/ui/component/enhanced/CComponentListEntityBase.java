@@ -7,8 +7,11 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
+import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
@@ -16,10 +19,10 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IDragOwner;
-import tech.derbent.api.interfaces.IDropOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
+import tech.derbent.api.interfaces.IHasDragEnd;
+import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.screens.service.IOrderedEntityService;
@@ -62,7 +65,7 @@ import tech.derbent.api.utils.Check;
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
 		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>,
-		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity> {
+		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IHasDragStart<ChildEntity>, IHasDragEnd<ChildEntity> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -101,8 +104,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	
 	// Owner interfaces for notifying parent components
 	private ISelectionOwner<ChildEntity> selectionOwner;
-	private IDragOwner<ChildEntity> dragOwner;
-	private IDropOwner<ChildEntity> dropOwner;
 
 	/** Constructor for the entity list component.
 	 * @param title             The title to display above the grid
@@ -656,17 +657,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 	
 	/** Sets the drag owner to be notified when drag operations start.
-	 * @param owner the drag owner (can be null) */
-	public void setDragOwner(final IDragOwner<ChildEntity> owner) {
-		this.dragOwner = owner;
-	}
-	
-	/** Sets the drop owner to be notified when drop operations complete.
-	 * @param owner the drop owner (can be null) */
-	public void setDropOwner(final IDropOwner<ChildEntity> owner) {
-		this.dropOwner = owner;
-	}
-	
 	/** Notifies the selection owner about selection changes.
 	 * Should be called whenever selection changes in the component. */
 	protected void notifySelectionOwner() {
@@ -676,23 +666,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 				selected.add(selectedItem);
 			}
 			selectionOwner.onSelectionChanged(selected);
-		}
-	}
-	
-	/** Notifies the drag owner about drag start events.
-	 * @param draggedItems the set of items being dragged */
-	protected void notifyDragOwner(final Set<ChildEntity> draggedItems) {
-		if (dragOwner != null) {
-			dragOwner.onDragStart(draggedItems);
-		}
-	}
-	
-	/** Notifies the drop owner about drop complete events.
-	 * @param droppedItems the set of items that were dropped
-	 * @param targetComponent the component where items were dropped */
-	protected void notifyDropOwner(final Set<ChildEntity> droppedItems, final Object targetComponent) {
-		if (dropOwner != null) {
-			dropOwner.onDropComplete(droppedItems, targetComponent);
 		}
 	}
 	
@@ -835,5 +808,31 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 				}
 			}
 		}
+	}
+	
+	// IHasDragStart interface implementation
+	
+	/** Adds a listener for drag start events from the internal grid.
+	 * The listener will be notified when a drag operation starts on the grid.
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<ChildEntity>> listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		Check.notNull(grid, "Grid must be initialized before adding drag start listener");
+		return grid.addDragStartListener(listener);
+	}
+	
+	// IHasDragEnd interface implementation
+	
+	/** Adds a listener for drag end events from the internal grid.
+	 * The listener will be notified when a drag operation ends on the grid.
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<ChildEntity>> listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		Check.notNull(grid, "Grid must be initialized before adding drag end listener");
+		return grid.addDragEndListener(listener);
 	}
 }
