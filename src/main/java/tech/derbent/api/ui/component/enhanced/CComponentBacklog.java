@@ -58,7 +58,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * The component automatically configures itself with Activities and Meetings entity types. Future entity types can be easily added by extending the
  * createEntityTypes() method. */
 public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> 
-		implements tech.derbent.api.interfaces.IPageServiceAutoRegistrable {
+		implements tech.derbent.api.interfaces.IPageServiceAutoRegistrable, tech.derbent.api.interfaces.IHasDrop<CProjectItem<?>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
@@ -429,5 +429,24 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	@Override
 	public String getComponentName() {
 		return "backlogItems";
+	}
+	
+	// IHasDrop interface implementation
+	
+	/**
+	 * Adds a drop listener to this component's grid.
+	 * <p>
+	 * Delegates to the parent class's grid to enable external drop events
+	 * from other components (e.g., masterGrid) to be handled by page service.
+	 * 
+	 * @param listener the drop listener to add
+	 * @return registration for removing the listener
+	 */
+	@Override
+	public com.vaadin.flow.shared.Registration addDropListener(
+			com.vaadin.flow.component.ComponentEventListener<com.vaadin.flow.component.grid.dnd.GridDropEvent<CProjectItem<?>>> listener) {
+		final var grid = getGrid();
+		tech.derbent.api.utils.Check.notNull(grid, "Grid not available for drop listener registration");
+		return grid.addDropListener(listener);
 	}
 }
