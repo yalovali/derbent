@@ -436,6 +436,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		if (componentBacklogItems != null) {
 			componentBacklogItems.refreshGrid();
 		}
+		// Populate form to refresh all components including master grid widgets
+		try {
+			getView().populateForm();
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing form after sprint change", e);
+		}
 	}
 
 	public void on_name_change(final Component component, final Object value) {
