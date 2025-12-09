@@ -70,12 +70,13 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
 			componentItemsSelection.enableDragAndDropReordering();
 			componentItemsSelection.setDropHandler(item -> componentItemsSelection.addDroppedItem(item));
-			// Register the grid for method binding
-			// if (componentItemsSelection.getGrid() != null) {
-			// registerComponent("sprintItems", componentItemsSelection.getGrid());
+			
+			// Register the component itself (not just the grid) for automatic drag-drop method binding
+			// This enables CPageService to automatically bind on_sprintItems_dragStart/dragEnd handlers
+			registerComponent("sprintItems", componentItemsSelection);
 			// Re-bind methods to include the newly registered component
-			// bindMethods(this);
-			// }
+			bindMethods(this);
+			
 			// Enable dragging FROM sprint items back to backlog
 			componentItemsSelection.setDragToBacklogEnabled(true);
 			// Set up drop mode for sprint items grid
@@ -100,6 +101,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		if (componentBacklogItems == null) {
 			componentBacklogItems = new CComponentBacklog(currentSprint);
 			componentBacklogItems.setDragEnabled(true);
+			
+			// Register the component itself for automatic drag-drop method binding
+			// This enables CPageService to automatically bind on_backlogItems_dragStart/dragEnd handlers
+			registerComponent("backlogItems", componentBacklogItems);
+			// Re-bind methods to include the newly registered component
+			bindMethods(this);
 		}
 		return componentBacklogItems;
 	}
