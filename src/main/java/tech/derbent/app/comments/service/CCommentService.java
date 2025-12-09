@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
@@ -92,7 +93,7 @@ public class CCommentService extends CAbstractService<CComment> implements IEnti
 		super.initializeNewEntity(entity);
 		// Get current user from session
 		final CUser currentUser = sessionService.getActiveUser()
-				.orElseThrow(() -> new tech.derbent.api.exceptions.CInitializationException("No active user in session - cannot initialize comment"));
+				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize comment"));
 		// Initialize author with current user if not already set
 		if (entity.getAuthor() == null) {
 			entity.setAuthor(currentUser);

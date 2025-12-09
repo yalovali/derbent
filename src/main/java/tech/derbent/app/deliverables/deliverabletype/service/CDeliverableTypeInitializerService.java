@@ -73,8 +73,8 @@ public class CDeliverableTypeInitializerService extends CInitializerServiceBase 
 						"Software Package", "Software releases and packages"
 				}
 		};
-		final tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService service =
-				CSpringContext.getBean(tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService.class);
+		final CDeliverableTypeService service =
+				CSpringContext.getBean(CDeliverableTypeService.class);
 		initializeProjectEntity(deliverableTypes, service, project, minimal, null);
 	}
 }

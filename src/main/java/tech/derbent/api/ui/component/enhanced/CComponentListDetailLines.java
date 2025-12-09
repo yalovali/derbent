@@ -11,30 +11,26 @@ import tech.derbent.api.screens.view.CDialogDetailLinesEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
-/**
- * CComponentListDetailLines - Component for managing CDetailLines in a CDetailSection.
- * Provides full CRUD functionality for screen field definitions with ordering.
- *
- * <p>Features inherited from CComponentListEntityBase:
+/** CComponentListDetailLines - Component for managing CDetailLines in a CDetailSection. Provides full CRUD functionality for screen field definitions
+ * with ordering.
+ * <p>
+ * Features inherited from CComponentListEntityBase:
  * <ul>
- *   <li>Grid display with ID, Order, Caption, Field Name, Required, Status columns</li>
- *   <li>Add/Edit/Delete operations with validation</li>
- *   <li>Move up/down for reordering (uses service moveItemUp/moveItemDown methods)</li>
- *   <li>Dialog-based editing</li>
- *   <li>Selection management</li>
- *   <li>Dynamic grid height (resizes with content up to 600px)</li>
- *   <li>Refresh listener support via IGridRefreshListener interface</li>
+ * <li>Grid display with ID, Order, Caption, Field Name, Required, Status columns</li>
+ * <li>Add/Edit/Delete operations with validation</li>
+ * <li>Move up/down for reordering (uses service moveItemUp/moveItemDown methods)</li>
+ * <li>Dialog-based editing</li>
+ * <li>Selection management</li>
+ * <li>Dynamic grid height (resizes with content up to 600px)</li>
+ * <li>Refresh listener support via IGridRefreshListener interface</li>
  * </ul>
  */
 public class CComponentListDetailLines extends CComponentListEntityBase<CDetailSection, CDetailLines> {
 
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * Constructor for CComponentListDetailLines.
-	 *
-	 * @param detailLinesService The service for CDetailLines operations
-	 */
+	/** Constructor for CComponentListDetailLines.
+	 * @param detailLinesService The service for CDetailLines operations */
 	public CComponentListDetailLines(final CDetailLinesService detailLinesService) {
 		super("Screen Field Definitions", CDetailSection.class, CDetailLines.class, detailLinesService);
 		Check.notNull(detailLinesService, "DetailLinesService cannot be null");

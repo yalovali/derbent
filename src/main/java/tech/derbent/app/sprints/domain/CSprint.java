@@ -1,6 +1,5 @@
 package tech.derbent.app.sprints.domain;
 
-import static tech.derbent.app.workflow.service.IHasStatusAndWorkflow.LOGGER;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -44,6 +43,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
 	public static final String ENTITY_TITLE_PLURAL = "Sprints";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint";
+	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CSprint.class);
 	public static final String VIEW_NAME = "Sprints View";
 	@Transient
 	@AMetaData (

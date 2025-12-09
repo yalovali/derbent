@@ -1076,7 +1076,7 @@ public class CActivityService {
     public tech.derbent.app.activities.domain.CActivity createActivity(
             String name, tech.derbent.app.projects.domain.CProject project) {
         tech.derbent.app.activities.domain.CActivity activity = 
-            new tech.derbent.app.activities.domain.CActivity(name, project);
+            new CActivity(name, project);
         return save(activity);
     }
 }
@@ -1097,8 +1097,8 @@ meetingService.save((CMeeting) item);
 activityService.save((CActivity) item);
 
 // ❌ INCORRECT - Full package path in cast
-meetingService.save((tech.derbent.app.meetings.domain.CMeeting) item);
-activityService.save((tech.derbent.app.activities.domain.CActivity) item);
+meetingService.save((CMeeting) item);
+activityService.save((CActivity) item);
 ```
 
 **This applies to:**

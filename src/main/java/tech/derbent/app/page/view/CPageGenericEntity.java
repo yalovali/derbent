@@ -8,7 +8,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -27,8 +26,8 @@ import tech.derbent.base.session.service.ISessionService;
 /** Generic base class for entity management pages that provides common functionality for displaying and managing different entity types through
  * reflection and generic patterns.
  * @param <EntityClass> The entity type this page manages */
-public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityClass>> extends CPageBaseProjectAware
-		implements ILayoutChangeListener {
+public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityClass>> extends CPageBaseProjectAware implements ILayoutChangeListener {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageGenericEntity.class);
 	private static final long serialVersionUID = 1L;
 	// Current state
@@ -220,7 +219,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Implementation of CEntityUpdateListener - called when an entity is deleted
 	 * @throws Exception */
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ("rawtypes")
 	@Override
 	public void onEntityDeleted(CEntityDB entity) throws Exception {
 		LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");

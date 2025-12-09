@@ -6,11 +6,17 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
+import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasDrop;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
@@ -57,8 +63,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <p>
  * The component automatically configures itself with Activities and Meetings entity types. Future entity types can be easily added by extending the
  * createEntityTypes() method. */
-public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> 
-		implements tech.derbent.api.interfaces.IPageServiceAutoRegistrable, tech.derbent.api.interfaces.IHasDrop<CProjectItem<?>> {
+public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable, IHasDrop<CProjectItem<?>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
@@ -160,6 +165,18 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
 	}
 
+	/** Adds a drop listener to this component's grid.
+	 * <p>
+	 * Delegates to the parent class's grid to enable external drop events from other components (e.g., masterGrid) to be handled by page service.
+	 * @param listener the drop listener to add
+	 * @return registration for removing the listener */
+	@Override
+	public Registration addDropListener(ComponentEventListener<GridDropEvent<CProjectItem<?>>> listener) {
+		final var grid = getGrid();
+		Check.notNull(grid, "Grid not available for drop listener registration");
+		return grid.addDropListener(listener);
+	}
+
 	/** Calculates the new position for a dragged item based on drop location.
 	 * @param draggedIndex current index of dragged item
 	 * @param targetIndex  index of target item
@@ -209,20 +226,17 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		grid.addDropListener(event -> {
 			final CProjectItem<?> targetItem = event.getDropTargetItem().orElse(null);
 			final GridDropLocation dropLocation = event.getDropLocation();
-			
 			// If draggedItem is null, this is an external drop (from masterGrid)
 			// Let it propagate to page service handler
 			if (draggedItem == null) {
 				LOGGER.debug("External drop detected on backlog, letting page service handle it");
 				return;
 			}
-			
 			// Internal drop - handle reordering
 			if (targetItem == null) {
 				draggedItem = null;
 				return;
 			}
-			
 			// Check if this is an internal drop (same grid reordering)
 			if (draggedItem.getId().equals(targetItem.getId())) {
 				LOGGER.debug("Item dropped on itself, ignoring");
@@ -269,6 +283,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		return grid.getListDataView().getItems().toList();
 	}
 
+	/** Returns the component name for method binding.
+	 * <p>
+	 * This component uses "backlogItems" as its name for handler binding.
+	 * @return The component name "backlogItems" */
+	@Override
+	public String getComponentName() { return "backlogItems"; }
+
 	public Consumer<CProjectItem<?>> getDropHandler() { return externalDropHandler; }
 
 	/** Handles internal reordering of items within the backlog when dropped.
@@ -311,6 +332,23 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		return true;
 	}
 
+	/** Registers this component with the page service for automatic event binding.
+	 * <p>
+	 * This component uses "backlogItems" as its name, enabling automatic binding to page service handlers like on_backlogItems_dragStart,
+	 * on_backlogItems_dragEnd, etc.
+	 * <p>
+	 * Note: This method only registers the component. The actual method binding happens when CPageService.bind() is called, which occurs once during
+	 * page initialization.
+	 * @param pageService The page service to register with */
+	@Override
+	public void registerWithPageService(final CPageService<?> pageService) {
+		Check.notNull(pageService, "Page service cannot be null");
+		final String componentName = getComponentName();
+		pageService.registerComponent(componentName, this);
+		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())",
+				getClass().getSimpleName(), componentName);
+	}
+
 	/** Saves an item using the appropriate service.
 	 * @param item the item to save */
 	private void saveItem(final CProjectItem<?> item) {
@@ -337,6 +375,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		externalDropHandler = handler;
 		LOGGER.debug("External drop handler {} for backlog", handler != null ? "set" : "cleared");
 	}
+	// IPageServiceAutoRegistrable interface implementation
 
 	/** Updates sprint orders when moving an item down in the list. When moving down, items between draggedIndex and newPosition shift up to fill the
 	 * gap.
@@ -384,6 +423,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			}
 		}
 	}
+	// IHasDrop interface implementation
 
 	/** Updates sprint orders for affected items and saves them to database.
 	 * @param items        all current items
@@ -395,58 +435,5 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		} else {
 			updateOrdersForUpwardMove(items, draggedIndex, newPosition);
 		}
-	}
-
-	// IPageServiceAutoRegistrable interface implementation
-	
-	/**
-	 * Registers this component with the page service for automatic event binding.
-	 * <p>
-	 * This component uses "backlogItems" as its name, enabling automatic binding
-	 * to page service handlers like on_backlogItems_dragStart, on_backlogItems_dragEnd, etc.
-	 * <p>
-	 * Note: This method only registers the component. The actual method binding happens
-	 * when CPageService.bind() is called, which occurs once during page initialization.
-	 * 
-	 * @param pageService The page service to register with
-	 */
-	@Override
-	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
-		tech.derbent.api.utils.Check.notNull(pageService, "Page service cannot be null");
-		final String componentName = getComponentName();
-		pageService.registerComponent(componentName, this);
-		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())", 
-			getClass().getSimpleName(), componentName);
-	}
-
-	/**
-	 * Returns the component name for method binding.
-	 * <p>
-	 * This component uses "backlogItems" as its name for handler binding.
-	 * 
-	 * @return The component name "backlogItems"
-	 */
-	@Override
-	public String getComponentName() {
-		return "backlogItems";
-	}
-	
-	// IHasDrop interface implementation
-	
-	/**
-	 * Adds a drop listener to this component's grid.
-	 * <p>
-	 * Delegates to the parent class's grid to enable external drop events
-	 * from other components (e.g., masterGrid) to be handled by page service.
-	 * 
-	 * @param listener the drop listener to add
-	 * @return registration for removing the listener
-	 */
-	@Override
-	public com.vaadin.flow.shared.Registration addDropListener(
-			com.vaadin.flow.component.ComponentEventListener<com.vaadin.flow.component.grid.dnd.GridDropEvent<CProjectItem<?>>> listener) {
-		final var grid = getGrid();
-		tech.derbent.api.utils.Check.notNull(grid, "Grid not available for drop listener registration");
-		return grid.addDropListener(listener);
 	}
 }

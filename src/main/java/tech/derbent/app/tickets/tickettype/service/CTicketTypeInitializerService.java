@@ -73,7 +73,7 @@ public class CTicketTypeInitializerService extends CInitializerServiceBase {
 						"Feature Request", "New feature requests and enhancements"
 				}
 		};
-		final CTicketTypeService service = CSpringContext.getBean(tech.derbent.app.tickets.tickettype.service.CTicketTypeService.class);
+		final CTicketTypeService service = CSpringContext.getBean(CTicketTypeService.class);
 		initializeProjectEntity(ticketTypes, service, project, minimal, null);
 	}
 }

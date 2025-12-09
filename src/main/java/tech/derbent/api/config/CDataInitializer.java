@@ -30,8 +30,11 @@ import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.activities.service.CActivityTypeInitializerService;
 import tech.derbent.app.activities.service.CActivityTypeService;
 import tech.derbent.app.assets.asset.service.CAssetInitializerService;
+import tech.derbent.app.assets.asset.service.CAssetService;
 import tech.derbent.app.assets.assettype.service.CAssetTypeInitializerService;
+import tech.derbent.app.assets.assettype.service.CAssetTypeService;
 import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
+import tech.derbent.app.budgets.budget.service.CBudgetService;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.CCommentPriority;
@@ -43,7 +46,9 @@ import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyInitializerService;
 import tech.derbent.app.companies.service.CCompanyService;
 import tech.derbent.app.components.component.service.CComponentInitializerService;
+import tech.derbent.app.components.component.service.CComponentService;
 import tech.derbent.app.components.componenttype.service.CComponentTypeInitializerService;
+import tech.derbent.app.components.componenttype.service.CComponentTypeService;
 import tech.derbent.app.components.componentversion.service.CComponentVersionInitializerService;
 import tech.derbent.app.components.componentversiontype.service.CComponentVersionTypeInitializerService;
 import tech.derbent.app.decisions.domain.CDecision;
@@ -53,7 +58,9 @@ import tech.derbent.app.decisions.service.CDecisionService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
 import tech.derbent.app.deliverables.deliverable.service.CDeliverableInitializerService;
+import tech.derbent.app.deliverables.deliverable.service.CDeliverableService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
+import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.domain.CMeetingType;
@@ -62,7 +69,9 @@ import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.meetings.service.CMeetingTypeInitializerService;
 import tech.derbent.app.meetings.service.CMeetingTypeService;
 import tech.derbent.app.milestones.milestone.service.CMilestoneInitializerService;
+import tech.derbent.app.milestones.milestone.service.CMilestoneService;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeInitializerService;
+import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService;
 import tech.derbent.app.orders.approval.service.CApprovalStatusInitializerService;
 import tech.derbent.app.orders.approval.service.COrderApprovalInitializerService;
 import tech.derbent.app.orders.currency.service.CCurrencyInitializerService;
@@ -74,18 +83,30 @@ import tech.derbent.app.orders.type.service.COrderTypeService;
 import tech.derbent.app.page.service.CPageEntityInitializerService;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.products.product.service.CProductInitializerService;
+import tech.derbent.app.products.product.service.CProductService;
 import tech.derbent.app.products.producttype.service.CProductTypeInitializerService;
+import tech.derbent.app.products.producttype.service.CProductTypeService;
 import tech.derbent.app.products.productversion.service.CProductVersionInitializerService;
 import tech.derbent.app.products.productversiontype.service.CProductVersionTypeInitializerService;
+import tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense;
 import tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseInitializerService;
+import tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseService;
+import tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpenseType;
 import tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeInitializerService;
+import tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService;
+import tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeInitializerService;
+import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeService;
+import tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType;
 import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeInitializerService;
+import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectInitializerService;
 import tech.derbent.app.projects.service.CProjectService;
 import tech.derbent.app.providers.provider.service.CProviderInitializerService;
+import tech.derbent.app.providers.provider.service.CProviderService;
 import tech.derbent.app.providers.providertype.service.CProviderTypeInitializerService;
+import tech.derbent.app.providers.providertype.service.CProviderTypeService;
 import tech.derbent.app.risklevel.risklevel.service.CRiskLevelInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskService;
@@ -99,10 +120,13 @@ import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.sprints.service.CSprintInitializerService;
 import tech.derbent.app.sprints.service.CSprintTypeInitializerService;
+import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.app.teams.team.service.CTeamInitializerService;
 import tech.derbent.app.teams.team.service.CTeamService;
+import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.ticket.service.CTicketInitializerService;
 import tech.derbent.app.tickets.ticket.service.CTicketService;
+import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -211,22 +235,22 @@ public class CDataInitializer {
 		workflowStatusRelationService = CSpringContext.getBean(CWorkflowStatusRelationService.class);
 		jdbcTemplate = CSpringContext.getBean(JdbcTemplate.class);
 		this.sessionService = sessionService;
-		CSpringContext.getBean(tech.derbent.app.assets.asset.service.CAssetService.class);
-		CSpringContext.getBean(tech.derbent.app.assets.assettype.service.CAssetTypeService.class);
-		CSpringContext.getBean(tech.derbent.app.milestones.milestone.service.CMilestoneService.class);
-		CSpringContext.getBean(tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService.class);
-		ticketService = CSpringContext.getBean(tech.derbent.app.tickets.ticket.service.CTicketService.class);
-		ticketTypeService = CSpringContext.getBean(tech.derbent.app.tickets.tickettype.service.CTicketTypeService.class);
-		CSpringContext.getBean(tech.derbent.app.budgets.budget.service.CBudgetService.class);
-		CSpringContext.getBean(tech.derbent.app.deliverables.deliverable.service.CDeliverableService.class);
-		CSpringContext.getBean(tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService.class);
-		CSpringContext.getBean(tech.derbent.app.providers.provider.service.CProviderService.class);
-		CSpringContext.getBean(tech.derbent.app.providers.providertype.service.CProviderTypeService.class);
-		CSpringContext.getBean(tech.derbent.app.products.product.service.CProductService.class);
-		CSpringContext.getBean(tech.derbent.app.products.producttype.service.CProductTypeService.class);
-		CSpringContext.getBean(tech.derbent.app.components.component.service.CComponentService.class);
-		CSpringContext.getBean(tech.derbent.app.components.componenttype.service.CComponentTypeService.class);
-		teamService = CSpringContext.getBean(tech.derbent.app.teams.team.service.CTeamService.class);
+		CSpringContext.getBean(CAssetService.class);
+		CSpringContext.getBean(CAssetTypeService.class);
+		CSpringContext.getBean(CMilestoneService.class);
+		CSpringContext.getBean(CMilestoneTypeService.class);
+		ticketService = CSpringContext.getBean(CTicketService.class);
+		ticketTypeService = CSpringContext.getBean(CTicketTypeService.class);
+		CSpringContext.getBean(CBudgetService.class);
+		CSpringContext.getBean(CDeliverableService.class);
+		CSpringContext.getBean(CDeliverableTypeService.class);
+		CSpringContext.getBean(CProviderService.class);
+		CSpringContext.getBean(CProviderTypeService.class);
+		CSpringContext.getBean(CProductService.class);
+		CSpringContext.getBean(CProductTypeService.class);
+		CSpringContext.getBean(CComponentService.class);
+		CSpringContext.getBean(CComponentTypeService.class);
+		teamService = CSpringContext.getBean(CTeamService.class);
 		LOGGER.info("All service beans obtained successfully");
 	}
 	// ========================================================================
@@ -350,11 +374,11 @@ public class CDataInitializer {
 			final CCommentPriority priority2 = commentPriorityService.getRandom(decision.getProject());
 			final CUser commenter1 = userService.getRandom();
 			final CUser commenter2 = userService.getRandom();
-			final CComment comment1 = new tech.derbent.app.comments.domain.CComment(
-					"This decision looks promising. We should prioritize implementation.", activity, commenter1, priority1);
+			final CComment comment1 =
+					new CComment("This decision looks promising. We should prioritize implementation.", activity, commenter1, priority1);
 			commentService.save(comment1);
-			final CComment comment2 = new tech.derbent.app.comments.domain.CComment(
-					"Agreed. Let's schedule a follow-up meeting to discuss resource allocation.", activity, commenter2, priority2);
+			final CComment comment2 =
+					new CComment("Agreed. Let's schedule a follow-up meeting to discuss resource allocation.", activity, commenter2, priority2);
 			commentService.save(comment2);
 			LOGGER.debug("Created sample activity and comments for decision ID: {}", decision.getId());
 		} catch (final Exception e) {
@@ -385,16 +409,15 @@ public class CDataInitializer {
 			// Create 2 comments for this activity
 			final CCommentPriority priority1 = commentPriorityService.getRandom(meeting.getProject());
 			final CUser commenter1 = userService.getRandom();
-			final CComment comment1 = new CComment("Meeting was productive. Action items are clearly defined.",
-					activity, commenter1, priority1);
+			final CComment comment1 = new CComment("Meeting was productive. Action items are clearly defined.", activity, commenter1, priority1);
 			commentService.save(comment1);
 			if (minimal) {
 				return;
 			}
 			final CUser commenter2 = userService.getRandom();
 			final CCommentPriority priority2 = commentPriorityService.getRandom(meeting.getProject());
-			final CComment comment2 = new CComment(
-					"I'll take ownership of the first two action items. Expected completion in 2 weeks.", activity, commenter2, priority2);
+			final CComment comment2 = new CComment("I'll take ownership of the first two action items. Expected completion in 2 weeks.", activity,
+					commenter2, priority2);
 			commentService.save(comment2);
 			LOGGER.debug("Created sample activity and comments for meeting ID: {}", meeting.getId());
 		} catch (final Exception e) {
@@ -695,14 +718,11 @@ public class CDataInitializer {
 
 	private void initializeSampleProjectExpenses(final CProject project, final boolean minimal) {
 		try {
-			final tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService expenseTypeService =
-					CSpringContext.getBean(tech.derbent.app.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService.class);
-			final tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseService expenseService =
-					CSpringContext.getBean(tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseService.class);
-			final tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpenseType type1 = expenseTypeService.getRandom(project);
+			final CProjectExpenseTypeService expenseTypeService = CSpringContext.getBean(CProjectExpenseTypeService.class);
+			final CProjectExpenseService expenseService = CSpringContext.getBean(CProjectExpenseService.class);
+			final CProjectExpenseType type1 = expenseTypeService.getRandom(project);
 			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense expense1 =
-					new tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense("Cloud Hosting Services", project);
+			final CProjectExpense expense1 = new CProjectExpense("Cloud Hosting Services", project);
 			expense1.setDescription("Monthly cloud infrastructure hosting costs");
 			expense1.setEntityType(type1);
 			expense1.setAssignedTo(user1);
@@ -716,10 +736,9 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			final tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpenseType type2 = expenseTypeService.getRandom(project);
+			final CProjectExpenseType type2 = expenseTypeService.getRandom(project);
 			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense expense2 =
-					new tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense("External Development Team", project);
+			final CProjectExpense expense2 = new CProjectExpense("External Development Team", project);
 			expense2.setDescription("Contracted external development services");
 			expense2.setEntityType(type2);
 			expense2.setAssignedTo(user2);
@@ -739,14 +758,11 @@ public class CDataInitializer {
 
 	private void initializeSampleProjectIncomes(final CProject project, final boolean minimal) {
 		try {
-			final tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService incomeTypeService =
-					CSpringContext.getBean(tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService.class);
-			final tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeService incomeService =
-					CSpringContext.getBean(tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeService.class);
-			final tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType type1 = incomeTypeService.getRandom(project);
+			final CProjectIncomeTypeService incomeTypeService = CSpringContext.getBean(CProjectIncomeTypeService.class);
+			final CProjectIncomeService incomeService = CSpringContext.getBean(CProjectIncomeService.class);
+			final CProjectIncomeType type1 = incomeTypeService.getRandom(project);
 			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome income1 =
-					new tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome("Software License Revenue", project);
+			final CProjectIncome income1 = new CProjectIncome("Software License Revenue", project);
 			income1.setDescription("Revenue from software license sales");
 			income1.setEntityType(type1);
 			income1.setAssignedTo(user1);
@@ -760,10 +776,9 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			final tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType type2 = incomeTypeService.getRandom(project);
+			final CProjectIncomeType type2 = incomeTypeService.getRandom(project);
 			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome income2 =
-					new tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome("Support Contract Revenue", project);
+			final CProjectIncome income2 = new CProjectIncome("Support Contract Revenue", project);
 			income2.setDescription("Annual support and maintenance contracts");
 			income2.setEntityType(type2);
 			income2.setAssignedTo(user2);
@@ -786,7 +801,7 @@ public class CDataInitializer {
 		try {
 			final CCompany company = project.getCompany();
 			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.teams.team.domain.CTeam team1 = new tech.derbent.app.teams.team.domain.CTeam("Development Team", company);
+			final CTeam team1 = new CTeam("Development Team", company);
 			team1.setDescription("Core development team responsible for implementation");
 			team1.setTeamManager(user1);
 			teamService.save(team1);
@@ -794,7 +809,7 @@ public class CDataInitializer {
 				return;
 			}
 			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.teams.team.domain.CTeam team2 = new tech.derbent.app.teams.team.domain.CTeam("QA Team", company);
+			final CTeam team2 = new CTeam("QA Team", company);
 			team2.setDescription("Quality assurance and testing team");
 			team2.setTeamManager(user2);
 			teamService.save(team2);
@@ -807,10 +822,9 @@ public class CDataInitializer {
 
 	private void initializeSampleTickets(final CProject project, final boolean minimal) {
 		try {
-			final tech.derbent.app.tickets.tickettype.domain.CTicketType type1 = ticketTypeService.getRandom(project);
+			final CTicketType type1 = ticketTypeService.getRandom(project);
 			final CUser user1 = userService.getRandom();
-			final tech.derbent.app.tickets.ticket.domain.CTicket ticket1 =
-					new tech.derbent.app.tickets.ticket.domain.CTicket("Login Authentication Bug", project);
+			final CTicket ticket1 = new CTicket("Login Authentication Bug", project);
 			ticket1.setDescription("Users unable to login with correct credentials");
 			ticket1.setEntityType(type1);
 			ticket1.setAssignedTo(user1);
@@ -824,10 +838,9 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			final tech.derbent.app.tickets.tickettype.domain.CTicketType type2 = ticketTypeService.getRandom(project);
+			final CTicketType type2 = ticketTypeService.getRandom(project);
 			final CUser user2 = userService.getRandom();
-			final tech.derbent.app.tickets.ticket.domain.CTicket ticket2 =
-					new tech.derbent.app.tickets.ticket.domain.CTicket("Dashboard Customization Feature", project);
+			final CTicket ticket2 = new CTicket("Dashboard Customization Feature", project);
 			ticket2.setDescription("Allow users to customize their dashboard layout");
 			ticket2.setEntityType(type2);
 			ticket2.setAssignedTo(user2);

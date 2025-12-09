@@ -743,7 +743,7 @@ public class CActivityService {
     public tech.derbent.app.activities.domain.CActivity createActivity(
             String name, tech.derbent.app.projects.domain.CProject project) {
         tech.derbent.app.activities.domain.CActivity activity = 
-            new tech.derbent.app.activities.domain.CActivity(name, project);
+            new CActivity(name, project);
         return save(activity);
     }
 }

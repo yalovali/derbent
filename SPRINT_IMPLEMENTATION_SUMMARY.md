@@ -10,7 +10,7 @@ November 23, 2025
 
 ### 1. Domain Entities
 
-#### CSprint (tech.derbent.app.sprints.domain.CSprint)
+#### CSprint (CSprint)
 - **Extends**: `CProjectItem<CSprint>`
 - **Implements**: `IHasStatusAndWorkflow<CSprint>`, `IGanntEntityItem`
 - **Key Features**:
@@ -44,7 +44,7 @@ November 23, 2025
   - `addMeeting()` / `removeMeeting()`: Manage sprint meetings
   - `getProgressPercentage()`: Calculates progress based on completed activities
 
-#### CSprintStatus (tech.derbent.app.sprints.domain.CSprintStatus)
+#### CSprintStatus (CSprintStatus)
 - **Extends**: `CTypeEntity<CSprintStatus>`
 - **Purpose**: Categorizes sprints (Planning, Active, Review, Completed, Cancelled)
 - **Key Features**:
@@ -68,7 +68,7 @@ November 23, 2025
 
 ### 3. Service Layer
 
-#### CSprintService (tech.derbent.app.sprints.service.CSprintService)
+#### CSprintService (CSprintService)
 - **Extends**: `CProjectItemService<CSprint>`
 - **Implements**: `IEntityRegistrable`
 - **Key Features**:
@@ -79,7 +79,7 @@ November 23, 2025
   - Default sprint duration: 2 weeks
   - Auto-initialization of status and type from project
 
-#### CSprintStatusService (tech.derbent.app.sprints.service.CSprintStatusService)
+#### CSprintStatusService (CSprintStatusService)
 - **Extends**: `CTypeEntityService<CSprintStatus>`
 - **Implements**: `IEntityRegistrable`
 - **Key Features**:
@@ -90,19 +90,19 @@ November 23, 2025
 
 ### 4. UI/View Configuration
 
-#### CPageServiceSprint (tech.derbent.app.sprints.service.CPageServiceSprint)
+#### CPageServiceSprint (CPageServiceSprint)
 - **Extends**: `CPageServiceDynamicPage<CSprint>`
 - **Implements**: `IPageServiceHasStatusAndWorkflow<CSprint>`
 - **Purpose**: Handles UI events and interactions for sprint management
 - **Event Handlers**: description_blur, description_focus, name_change, status_change
 
-#### CPageServiceSprintStatus (tech.derbent.app.sprints.service.CPageServiceSprintStatus)
+#### CPageServiceSprintStatus (CPageServiceSprintStatus)
 - **Extends**: `CPageServiceDynamicPage<CSprintStatus>`
 - **Purpose**: Handles UI events for sprint status management
 
 ### 5. Initializer Services
 
-#### CSprintInitializerService (tech.derbent.app.sprints.service.CSprintInitializerService)
+#### CSprintInitializerService (CSprintInitializerService)
 - **Extends**: `CInitializerServiceProjectItem`
 - **Configuration**:
   - Menu: PROJECT menu, order 3 (after Activities)
@@ -120,7 +120,7 @@ November 23, 2025
   - id, name, entityType, description, startDate, endDate, status, color
   - assignedTo, itemCount, project, createdDate, lastModifiedDate
 
-#### CSprintStatusInitializerService (tech.derbent.app.sprints.service.CSprintStatusInitializerService)
+#### CSprintStatusInitializerService (CSprintStatusInitializerService)
 - **Extends**: `CInitializerServiceBase`
 - **Configuration**:
   - Menu: TYPES menu, order 8

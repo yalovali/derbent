@@ -9,7 +9,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
-import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
@@ -74,38 +73,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		// Enable dynamic height so grid resizes with content
 		setDynamicHeight("600px");
 		LOGGER.debug("CComponentListSprintItems created with dynamic height enabled");
-	}
-
-	/** Handles adding a dropped item to the sprint. This is called by the drop handler.
-	 * @param item the project item to add to the sprint
-	 * @deprecated Use CPageServiceSprint.on_sprintItems_drop() instead. Drop logic should be in page service. */
-	@Deprecated
-	public void addDroppedItem(final CProjectItem<?> item) {
-		LOGGER.warn("addDroppedItem(item) is deprecated. Drop logic should be handled in page service.");
-	}
-
-	/** Handles adding a dropped item to the sprint at a specific position. This is called by the drop handler with position information.
-	 * @param item         the project item to add to the sprint
-	 * @param targetItem   the sprint item near which the drop occurred (null to add at end)
-	 * @param dropLocation the drop location relative to target (ABOVE, BELOW, or null for end)
-	 * @deprecated Use CPageServiceSprint.on_sprintItems_drop() instead. Drop logic should be in page service. */
-	@Deprecated
-	public void addDroppedItem(final CProjectItem<?> item, final CSprintItem targetItem, final GridDropLocation dropLocation) {
-		LOGGER.warn("addDroppedItem(item, target, location) is deprecated. Drop logic should be handled in page service.");
-	}
-
-	/** Calculates the order for inserting a new item at a specific position.
-	 * @param targetItem   the item near which to insert
-	 * @param dropLocation where relative to the target (ABOVE or BELOW)
-	 * @return the order value for the new item
-	 * @deprecated Logic moved to CPageServiceSprint */
-	@Deprecated
-	private int calculateInsertOrder(final CSprintItem targetItem, final GridDropLocation dropLocation) {
-		if (dropLocation == GridDropLocation.BELOW) {
-			return targetItem.getItemOrder() + 1;
-		} else {
-			return targetItem.getItemOrder();
-		}
 	}
 
 	@Override
@@ -240,6 +207,14 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		};
 		return provider;
 	}
+
+	/** Returns the component name for method binding.
+	 * <p>
+	 * This component uses "sprintItems" as its name, enabling automatic binding to page service handlers like on_sprintItems_dragStart,
+	 * on_sprintItems_drop, etc.
+	 * @return The component name "sprintItems" */
+	@Override
+	public String getComponentName() { return "sprintItems"; }
 
 	@Override
 	public List<CComponentEntitySelection.EntityTypeConfig<?>> getDialogEntityTypes() {
@@ -449,6 +424,33 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 	// IDropTarget implementation
 
+	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
+	 * @param event The GridDragEndEvent from the grid */
+	@Override
+	protected void on_grid_dragEnd(final GridDragEndEvent<CSprintItem> event) {
+		super.on_grid_dragEnd(event);
+		try {
+			LOGGER.debug("[DragDebug] CComponentListSprintItems: dragEnd - source=grid");
+		} catch (final Exception ex) {
+			LOGGER.error("Error in drag end handler", ex);
+		}
+	}
+
+	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
+	 * @param event The GridDragStartEvent from the grid */
+	@Override
+	protected void on_grid_dragStart(final GridDragStartEvent<CSprintItem> event) {
+		super.on_grid_dragStart(event);
+		try {
+			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
+			final Long firstItemId =
+					!event.getDraggedItems().isEmpty() && event.getDraggedItems().get(0) != null ? event.getDraggedItems().get(0).getId() : null;
+			LOGGER.debug("[DragDebug] CComponentListSprintItems: dragStart - source=grid, items={}, firstItemId={}", itemCount, firstItemId);
+		} catch (final Exception ex) {
+			LOGGER.error("Error in drag start handler", ex);
+		}
+	}
+
 	@Override
 	protected void on_gridItems_doubleClicked(final CSprintItem item) {
 		// Override to prevent edit dialog from opening on double-click
@@ -467,14 +469,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
 	}
 
-	/** Removes a sprint item from the sprint and deletes it from the database.
-	 * @param sprintItem the sprint item to remove
-	 * @deprecated Use sprintItemService.delete() directly in page service. Business logic should be in page service. */
-	@Deprecated
-	public void removeSprintItem(final CSprintItem sprintItem) {
-		LOGGER.warn("removeSprintItem() is deprecated. Deletion logic should be handled in page service.");
-	}
-
 	// Drag support for reverse drag to backlog (manual, not via interface to avoid method erasure conflicts)
 	/** Enables or disables dragging sprint items back to backlog.
 	 * @param enabled true to enable dragging to backlog */
@@ -485,62 +479,5 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			grid.setRowsDraggable(enabled);
 			LOGGER.debug("Drag to backlog from sprint items {}", enabled ? "enabled" : "disabled");
 		}
-	}
-
-	/** Sets the handler to be called when an item is dropped into this component from backlog. Also configures the grid to accept drops.
-	 * @param handler the consumer to handle dropped items
-	 * @deprecated Drop handling should be done through CPageService binding, not manual handlers. */
-	@Deprecated
-	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
-		LOGGER.warn("setDropHandler() is deprecated. Use CPageService automatic binding instead.");
-	}
-
-	/** Shifts existing items to make room for a new item at the specified position. All items with order >= newOrder will be incremented by 1.
-	 * @param newOrder the order value where the new item will be inserted
-	 * @deprecated Logic moved to CPageServiceSprint.shiftSprintItemsForInsert() */
-	@Deprecated
-	private void shiftItemsForInsert(final int newOrder) {
-		LOGGER.warn("shiftItemsForInsert() is deprecated. Logic moved to page service.");
-	}
-
-	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The GridDragStartEvent from the grid */
-	@Override
-	protected void on_grid_dragStart(final GridDragStartEvent<CSprintItem> event) {
-		super.on_grid_dragStart(event);
-		try {
-			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
-			final Long firstItemId = !event.getDraggedItems().isEmpty() && event.getDraggedItems().get(0) != null
-					? event.getDraggedItems().get(0).getId()
-					: null;
-			LOGGER.debug("[DragDebug] CComponentListSprintItems: dragStart - source=grid, items={}, firstItemId={}", itemCount, firstItemId);
-		} catch (final Exception ex) {
-			LOGGER.error("Error in drag start handler", ex);
-		}
-	}
-
-	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The GridDragEndEvent from the grid */
-	@Override
-	protected void on_grid_dragEnd(final GridDragEndEvent<CSprintItem> event) {
-		super.on_grid_dragEnd(event);
-		try {
-			LOGGER.debug("[DragDebug] CComponentListSprintItems: dragEnd - source=grid");
-		} catch (final Exception ex) {
-			LOGGER.error("Error in drag end handler", ex);
-		}
-	}
-
-	/**
-	 * Returns the component name for method binding.
-	 * <p>
-	 * This component uses "sprintItems" as its name, enabling automatic binding
-	 * to page service handlers like on_sprintItems_dragStart, on_sprintItems_drop, etc.
-	 * 
-	 * @return The component name "sprintItems"
-	 */
-	@Override
-	public String getComponentName() {
-		return "sprintItems";
 	}
 }
