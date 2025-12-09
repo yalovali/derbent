@@ -1,5 +1,7 @@
 package tech.derbent.api.ui.theme;
 
+import java.util.List;
+import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import org.slf4j.Logger;
@@ -7,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 /** CFontSizeService - Service for managing font size scaling across the application. Provides methods to apply different font size scales
  * (small, medium, large) by dynamically injecting CSS variables. */
+@Service
 public class CFontSizeService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFontSizeService.class);
@@ -67,5 +70,12 @@ public class CFontSizeService {
 			}
 		}
 		return "medium";
+	}
+
+	/** Returns the list of available font size scales for use in UI components.
+	 * This method is used as a data provider for the font size scale combobox.
+	 * @return List of available font size scale values */
+	public List<String> getAvailableFontSizeScales() {
+		return List.of("small", "medium", "large");
 	}
 }
