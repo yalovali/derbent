@@ -83,7 +83,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	// Track components created in grid cells for event propagation
 	private final Map<Object, Component> entityToWidgetMap = new HashMap<>();
 	private int widgetComponentCounter = 0;
-	// Store drag event listeners to propagate events from widget components
+	// Drag event listeners - follow the pattern from CComponentListEntityBase
 	private final List<ComponentEventListener<GridDragStartEvent<CEntityDB<?>>>> dragStartListeners = new ArrayList<>();
 	private final List<ComponentEventListener<GridDragEndEvent<CEntityDB<?>>>> dragEndListeners = new ArrayList<>();
 
@@ -776,6 +776,40 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
+	/** Notifies all registered drag start listeners. Called when a widget component fires a drag start event.
+	 * Follows the same pattern as notifyRefreshListeners in CComponentListEntityBase.
+	 * @param event The drag start event from the widget component */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void notifyDragStartListeners(final GridDragStartEvent event) {
+		if (!dragStartListeners.isEmpty()) {
+			LOGGER.debug("[DragDebug] Notifying {} drag start listeners", dragStartListeners.size());
+			for (final ComponentEventListener listener : dragStartListeners) {
+				try {
+					listener.onComponentEvent(event);
+				} catch (final Exception e) {
+					LOGGER.error("[DragDebug] Error notifying drag start listener: {}", e.getMessage());
+				}
+			}
+		}
+	}
+
+	/** Notifies all registered drag end listeners. Called when a widget component fires a drag end event.
+	 * Follows the same pattern as notifyRefreshListeners in CComponentListEntityBase.
+	 * @param event The drag end event from the widget component */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void notifyDragEndListeners(final GridDragEndEvent event) {
+		if (!dragEndListeners.isEmpty()) {
+			LOGGER.debug("[DragDebug] Notifying {} drag end listeners", dragEndListeners.size());
+			for (final ComponentEventListener listener : dragEndListeners) {
+				try {
+					listener.onComponentEvent(event);
+				} catch (final Exception e) {
+					LOGGER.error("[DragDebug] Error notifying drag end listener: {}", e.getMessage());
+				}
+			}
+		}
+	}
+
 	/** Registers a widget component with the page service for event binding if it implements drag/drop interfaces.
 	 * <p>
 	 * This method enables components created dynamically in grid cells (e.g., CComponentWidgetSprint) to have their
@@ -803,36 +837,22 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			entityToWidgetMap.put(entity, component);
 			
 			// Set up drag event propagation from widget component to this CComponentGridEntity
-			// This allows external listeners (page service) to receive events from widget components
+			// Using dedicated notification methods for cleaner, more maintainable code
 			if (component instanceof IHasDragStart<?>) {
 				final IHasDragStart widgetWithDragStart = (IHasDragStart) component;
-				widgetWithDragStart.addDragStartListener(widgetEvent -> {
-					LOGGER.debug("[DragDebug] CComponentGridEntity: Propagating drag start from widget {} to external listeners",
+				widgetWithDragStart.addDragStartListener(event -> {
+					LOGGER.debug("[DragDebug] Widget {} fired drag start, notifying CComponentGridEntity listeners",
 							component.getClass().getSimpleName());
-					// Propagate to all registered listeners on this CComponentGridEntity
-					for (final ComponentEventListener listener : dragStartListeners) {
-						try {
-							listener.onComponentEvent(widgetEvent);
-						} catch (final Exception e) {
-							LOGGER.error("[DragDebug] Error propagating drag start event: {}", e.getMessage());
-						}
-					}
+					notifyDragStartListeners((GridDragStartEvent) event);
 				});
 			}
 			
 			if (component instanceof IHasDragEnd<?>) {
 				final IHasDragEnd widgetWithDragEnd = (IHasDragEnd) component;
-				widgetWithDragEnd.addDragEndListener(widgetEvent -> {
-					LOGGER.debug("[DragDebug] CComponentGridEntity: Propagating drag end from widget {} to external listeners",
+				widgetWithDragEnd.addDragEndListener(event -> {
+					LOGGER.debug("[DragDebug] Widget {} fired drag end, notifying CComponentGridEntity listeners",
 							component.getClass().getSimpleName());
-					// Propagate to all registered listeners on this CComponentGridEntity
-					for (final ComponentEventListener listener : dragEndListeners) {
-						try {
-							listener.onComponentEvent(widgetEvent);
-						} catch (final Exception e) {
-							LOGGER.error("[DragDebug] Error propagating drag end event: {}", e.getMessage());
-						}
-					}
+					notifyDragEndListeners((GridDragEndEvent) event);
 				});
 			}
 			
