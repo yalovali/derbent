@@ -323,21 +323,26 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	private void handleBacklogToSprintDrop(final CDragDropEvent<?> event) {
 		try {
 			final Object targetItem = event.getTargetItem();
+			LOGGER.debug("[DragDebug] handleBacklogToSprintDrop: targetItem type={}, targetItem={}", 
+					targetItem != null ? targetItem.getClass().getSimpleName() : "null", targetItem);
+			
 			if (!(targetItem instanceof CSprint)) {
-				LOGGER.warn("[DragDebug] Target is not a Sprint, cannot add backlog item");
+				LOGGER.warn("[DragDebug] Target is not a Sprint, cannot add backlog item. Target type: {}", 
+						targetItem != null ? targetItem.getClass().getName() : "null");
 				return;
 			}
 			
 			final CSprint targetSprint = (CSprint) targetItem;
 			final CProjectItem<?> itemToAdd = draggedFromBacklog;
-			LOGGER.debug("[DragDebug] Adding backlog item {} to sprint {}", 
-					itemToAdd.getId(), targetSprint.getId());
+			LOGGER.debug("[DragDebug] Adding backlog item {} to sprint {} (Sprint ID: {})", 
+					itemToAdd.getId(), targetSprint.getName(), targetSprint.getId());
 			
 			// Determine item type
 			final String itemType = itemToAdd.getClass().getSimpleName();
 			
 			// Calculate order - add at end of sprint items
 			final int newOrder = getNextSprintItemOrderForSprint(targetSprint);
+			LOGGER.debug("[DragDebug] New sprint item order will be: {}", newOrder);
 			
 			// Create sprint item
 			final CSprintItem sprintItem = new CSprintItem();
@@ -348,13 +353,15 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			sprintItem.setItem(itemToAdd);
 			
 			// Save the new item
+			LOGGER.debug("[DragDebug] Saving sprint item to database");
 			sprintItemService.save(sprintItem);
+			LOGGER.debug("[DragDebug] Sprint item created successfully with ID: {}", sprintItem.getId());
 			
 			// Refresh both grids
+			LOGGER.debug("[DragDebug] Calling refreshAfterSprintChange");
 			refreshAfterSprintChange();
 			
 			CNotificationService.showSuccess("Item added to sprint " + targetSprint.getName());
-			LOGGER.debug("[DragDebug] Sprint item created successfully: {}", sprintItem.getId());
 		} catch (final Exception e) {
 			LOGGER.error("[DragDebug] Error adding backlog item to sprint", e);
 			CNotificationService.showException("Error adding item to sprint", e);
@@ -428,19 +435,27 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	
 	/** Refreshes all relevant grids after a sprint change. */
 	private void refreshAfterSprintChange() {
+		LOGGER.debug("[DragDebug] refreshAfterSprintChange: Starting refresh of all components");
+		
 		// Refresh sprint items list if visible
 		if (componentItemsSelection != null) {
+			LOGGER.debug("[DragDebug] Refreshing componentItemsSelection grid");
 			componentItemsSelection.refreshGrid();
 		}
+		
 		// Refresh backlog
 		if (componentBacklogItems != null) {
+			LOGGER.debug("[DragDebug] Refreshing componentBacklogItems grid");
 			componentBacklogItems.refreshGrid();
 		}
-		// Populate form to refresh all components including master grid widgets
+		
+		// Refresh master grid to update sprint widgets
 		try {
-			getView().populateForm();
+			LOGGER.debug("[DragDebug] Calling getView().refreshGrid() to refresh master grid");
+			getView().refreshGrid();
+			LOGGER.debug("[DragDebug] Master grid refreshed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing form after sprint change", e);
+			LOGGER.error("[DragDebug] Error refreshing master grid after sprint change", e);
 		}
 	}
 
