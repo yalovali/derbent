@@ -209,9 +209,20 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		grid.addDropListener(event -> {
 			final CProjectItem<?> targetItem = event.getDropTargetItem().orElse(null);
 			final GridDropLocation dropLocation = event.getDropLocation();
-			if (draggedItem == null || targetItem == null) {
+			
+			// If draggedItem is null, this is an external drop (from masterGrid)
+			// Let it propagate to page service handler
+			if (draggedItem == null) {
+				LOGGER.debug("External drop detected on backlog, letting page service handle it");
 				return;
 			}
+			
+			// Internal drop - handle reordering
+			if (targetItem == null) {
+				draggedItem = null;
+				return;
+			}
+			
 			// Check if this is an internal drop (same grid reordering)
 			if (draggedItem.getId().equals(targetItem.getId())) {
 				LOGGER.debug("Item dropped on itself, ignoring");
