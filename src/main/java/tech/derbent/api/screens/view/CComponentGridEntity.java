@@ -1074,6 +1074,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * <p>
 	 * This enables page service handlers matching the pattern on_grid_{action}
 	 * to be automatically bound to this grid component for drag-drop and selection events.
+	 * <p>
+	 * Note: This method only registers the component. The actual method binding happens
+	 * when CPageService.bind() is called, which occurs once during page initialization.
 	 * 
 	 * @param pageService The page service to register with
 	 */
@@ -1082,8 +1085,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		Check.notNull(pageService, "Page service cannot be null");
 		final String componentName = getComponentName();
 		pageService.registerComponent(componentName, this);
-		pageService.bindMethods(pageService);
-		LOGGER.debug("[BindDebug] CComponentGridEntity auto-registered with page service as '{}'", componentName);
+		LOGGER.debug("[BindDebug] CComponentGridEntity auto-registered with page service as '{}' (binding will occur during CPageService.bind())", componentName);
 	}
 
 	/**

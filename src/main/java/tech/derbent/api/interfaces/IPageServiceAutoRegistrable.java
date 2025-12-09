@@ -22,14 +22,15 @@ import tech.derbent.api.services.pageservice.CPageService;
  * <p>
  * <b>Usage Pattern:</b>
  * <pre>
- * // Before (manual registration):
+ * // Before (manual registration - DEPRECATED):
  * componentSprintItems = new CComponentListSprintItems(...);
  * registerComponent("sprintItems", componentSprintItems);
- * bindMethods(this);
+ * bindMethods(this);  // Called after EVERY component registration
  * 
- * // After (automatic registration):
+ * // After (automatic registration - RECOMMENDED):
  * componentSprintItems = new CComponentListSprintItems(...);
  * componentSprintItems.registerWithPageService(this);
+ * // Note: bindMethods() is called automatically once during CPageService.bind()
  * </pre>
  * <p>
  * <b>Implementation Example:</b>
@@ -40,10 +41,10 @@ import tech.derbent.api.services.pageservice.CPageService;
  *     &#64;Override
  *     public void registerWithPageService(CPageService<?> pageService) {
  *         Check.notNull(pageService, "Page service cannot be null");
- *         pageService.registerComponent("sprintItems", this);
- *         pageService.bindMethods(pageService);
- *         LOGGER.debug("[BindDebug] {} auto-registered with page service", 
- *             getClass().getSimpleName());
+ *         pageService.registerComponent(getComponentName(), this);
+ *         // Do NOT call bindMethods() here - it's called once during CPageService.bind()
+ *         LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", 
+ *             getClass().getSimpleName(), getComponentName());
  *     }
  *     
  *     &#64;Override
@@ -64,11 +65,23 @@ public interface IPageServiceAutoRegistrable {
 	 * Implementations should:
 	 * <ol>
 	 * <li>Call pageService.registerComponent(getComponentName(), this)</li>
-	 * <li>Call pageService.bindMethods(pageService)</li>
 	 * <li>Log the registration for debugging</li>
+	 * <li><b>Do NOT call pageService.bindMethods()</b> - it's called once during CPageService.bind()</li>
 	 * </ol>
 	 * <p>
 	 * This method is called once during component initialization in the page service.
+	 * The actual method binding happens later when CPageService.bind() is invoked, which
+	 * scans all registered components and binds their event handlers in a single pass.
+	 * <p>
+	 * <b>Why not call bindMethods() here?</b><br>
+	 * Calling bindMethods() after every component registration would cause:
+	 * <ul>
+	 * <li>Redundant scanning of all methods multiple times</li>
+	 * <li>Duplicate event listener registration</li>
+	 * <li>Performance degradation with many components</li>
+	 * </ul>
+	 * Instead, register all components first, then let CPageService.bind() do a single
+	 * binding pass for all registered components.
 	 * 
 	 * @param pageService The page service to register with
 	 * @throws IllegalArgumentException if pageService is null

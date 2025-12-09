@@ -847,8 +847,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * derived from the entity class. Subclasses can override getComponentName() to
 	 * provide a custom name for method binding.
 	 * <p>
-	 * After calling this method, page service handlers matching the pattern
-	 * on_{componentName}_{action} will be automatically bound to this component.
+	 * Note: This method only registers the component. The actual method binding happens
+	 * when CPageService.bind() is called, which occurs once during page initialization.
 	 * 
 	 * @param pageService The page service to register with
 	 */
@@ -857,8 +857,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		Check.notNull(pageService, "Page service cannot be null");
 		final String componentName = getComponentName();
 		pageService.registerComponent(componentName, this);
-		pageService.bindMethods(pageService);
-		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", 
+		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())", 
 			getClass().getSimpleName(), componentName);
 	}
 

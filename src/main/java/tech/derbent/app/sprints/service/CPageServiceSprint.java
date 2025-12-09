@@ -83,12 +83,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				componentItemsSelection.getGrid().setRowsDraggable(true);
 			}
 			
-			// Register the component itself (not just the grid) for automatic drag-drop method binding
-			// This enables CPageService to automatically bind on_sprintItems_dragStart/dragEnd/drop handlers
-			registerComponent("sprintItems", componentItemsSelection);
-			// Re-bind methods to include the newly registered component
-			bindMethods(this);
-			LOGGER.debug("[DragDebug] Sprint items component registered and drag-drop handlers bound");
+			// Register with page service using unified auto-registration pattern
+			componentItemsSelection.registerWithPageService(this);
 			
 			// Set up refresh listener
 			if (componentBacklogItems != null) {
@@ -109,11 +105,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentBacklogItems = new CComponentBacklog(currentSprint);
 			componentBacklogItems.setDragEnabled(true);
 			
-			// Register the component itself for automatic drag-drop method binding
-			// This enables CPageService to automatically bind on_backlogItems_dragStart/dragEnd handlers
-			registerComponent("backlogItems", componentBacklogItems);
-			// Re-bind methods to include the newly registered component
-			bindMethods(this);
+			// Register with page service using unified auto-registration pattern
+			componentBacklogItems.registerWithPageService(this);
 		}
 		return componentBacklogItems;
 	}

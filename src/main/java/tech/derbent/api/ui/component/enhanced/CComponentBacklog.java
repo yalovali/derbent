@@ -57,7 +57,8 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <p>
  * The component automatically configures itself with Activities and Meetings entity types. Future entity types can be easily added by extending the
  * createEntityTypes() method. */
-public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> {
+public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> 
+		implements tech.derbent.api.interfaces.IPageServiceAutoRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
@@ -383,5 +384,39 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		} else {
 			updateOrdersForUpwardMove(items, draggedIndex, newPosition);
 		}
+	}
+
+	// IPageServiceAutoRegistrable interface implementation
+	
+	/**
+	 * Registers this component with the page service for automatic event binding.
+	 * <p>
+	 * This component uses "backlogItems" as its name, enabling automatic binding
+	 * to page service handlers like on_backlogItems_dragStart, on_backlogItems_dragEnd, etc.
+	 * <p>
+	 * Note: This method only registers the component. The actual method binding happens
+	 * when CPageService.bind() is called, which occurs once during page initialization.
+	 * 
+	 * @param pageService The page service to register with
+	 */
+	@Override
+	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
+		tech.derbent.api.utils.Check.notNull(pageService, "Page service cannot be null");
+		final String componentName = getComponentName();
+		pageService.registerComponent(componentName, this);
+		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())", 
+			getClass().getSimpleName(), componentName);
+	}
+
+	/**
+	 * Returns the component name for method binding.
+	 * <p>
+	 * This component uses "backlogItems" as its name for handler binding.
+	 * 
+	 * @return The component name "backlogItems"
+	 */
+	@Override
+	public String getComponentName() {
+		return "backlogItems";
 	}
 }
