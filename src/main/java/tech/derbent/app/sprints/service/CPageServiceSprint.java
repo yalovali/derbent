@@ -262,16 +262,81 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
 
+	/** Handler for drag end events on master grid. Clears tracking of dragged sprint items.
+	 * @param component the master grid component
+	 * @param value     CDragDropEvent (dragged items not available in drag end) */
 	public void on_masterGrid_dragEnd(final Component component, final Object value) {
-		LOGGER.info("function: on_masterGrid_dragEnd for Component type: {}", component.getClass().getSimpleName());
+		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_dragEnd: Clearing dragged sprint item tracker");
+		draggedFromSprint = null;
 	}
 
+	/** Handler for drag start events on master grid. Extracts and tracks sprint items being dragged from widgets in the grid.
+	 * <p>
+	 * The master grid contains widgets (CComponentWidgetSprint), which contain sprint item lists (CComponentListSprintItems).
+	 * When dragging from these nested components, we need to extract the sprint item from the event data to track it
+	 * for cross-component drops (e.g., dragging from master grid to backlog).
+	 * @param component the master grid component
+	 * @param value     CDragDropEvent containing dragged sprint items */
 	public void on_masterGrid_dragStart(final Component component, final Object value) {
-		LOGGER.info("function: on_masterGrid_dragStart for Component type: {}", component.getClass().getSimpleName());
+		if (value instanceof CDragDropEvent) {
+			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			draggedFromSprint = extractSprintItemFromMasterGridEvent(event);
+			if (draggedFromSprint != null) {
+				LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_dragStart: Sprint item drag started from master grid: {} (itemId: {})",
+						draggedFromSprint.getId(), draggedFromSprint.getItemId());
+			} else {
+				LOGGER.warn("[DragDebug] CPageServiceSprint.on_masterGrid_dragStart: Could not extract sprint item from event");
+			}
+		}
 	}
 
+	/** Handler for drop events on master grid. Handles reordering sprint items within widgets or dropping backlog items.
+	 * <p>
+	 * This handler supports two scenarios:
+	 * <ol>
+	 * <li>Reordering sprint items within the same sprint (internal drag-drop within widgets)</li>
+	 * <li>Dropping backlog items into sprint widgets (though widgets handle this directly)</li>
+	 * </ol>
+	 * <p>
+	 * Note: Most drop logic happens at the widget level (CComponentListSprintItems), but this handler
+	 * can refresh the view after complex operations or handle cross-widget drops if needed.
+	 * @param component the master grid component
+	 * @param value     CDragDropEvent containing drop information */
 	public void on_masterGrid_drop(final Component component, final Object value) {
-		LOGGER.info("function: on_masterGrid_drop for Component type: {}", component.getClass().getSimpleName());
+		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Drop event received on master grid");
+		// Most reordering is handled by individual widget components (CComponentListSprintItems)
+		// This handler can be used for cross-widget operations or view-level refreshes if needed
+		
+		// For now, just log - widgets handle their own reordering via on_sprintItems_drop handlers
+		if (value instanceof CDragDropEvent) {
+			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Target={}, Location={}", 
+				event.getTargetItem(), event.getDropLocation());
+		}
+	}
+
+	/** Helper method to extract CSprintItem from master grid drag event.
+	 * <p>
+	 * The master grid contains widgets, which contain sprint item lists. The dragged items in the event
+	 * are CSprintItem objects from those nested lists. This method safely extracts the first sprint item.
+	 * @param event the drag-drop event from master grid
+	 * @return the extracted CSprintItem, or null if extraction fails */
+	private CSprintItem extractSprintItemFromMasterGridEvent(final CDragDropEvent<?> event) {
+		if (event == null || event.getDraggedItems() == null || event.getDraggedItems().isEmpty()) {
+			return null;
+		}
+		try {
+			final Object firstItem = event.getDraggedItem();
+			if (firstItem instanceof CSprintItem) {
+				return (CSprintItem) firstItem;
+			}
+			LOGGER.warn("[DragDebug] Dragged item is not a CSprintItem: {}", 
+				firstItem != null ? firstItem.getClass().getSimpleName() : "null");
+			return null;
+		} catch (final Exception e) {
+			LOGGER.error("[DragDebug] Error extracting sprint item from master grid event", e);
+			return null;
+		}
 	}
 
 	public void on_name_change(final Component component, final Object value) {
