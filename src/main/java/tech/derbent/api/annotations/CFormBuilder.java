@@ -350,26 +350,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
-			} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
-				// it has a dataprovider or entity type
-				if (!hasValidDataProvider(fieldInfo.getDataProviderBean())) {
-					fieldInfo.setDataProviderBean(fieldType.getSimpleName() + "Service");
-				}
-				component = createComboBox(contentOwner, fieldInfo, binder);
-			} else if (fieldType == Boolean.class || fieldType == boolean.class) {
-				component = createCheckbox(fieldInfo, binder);
-			} else if (fieldType == String.class) {
-				if (fieldInfo.isColorField()) {
-					component = createColorPicker(fieldInfo, binder);
-				} else if (fieldInfo.isUseIcon()) {
-					component = createIconComboBox(fieldInfo, binder);
-				} else if (fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION) {
-					component = createTextArea(fieldInfo, binder);
-				} else if (fieldInfo.isPasswordField()) {
-					component = createTextPasswordField(fieldInfo);
-				} else {
-					component = createTextField(fieldInfo, binder);
-				}
 			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class) {
 				// Integer types
 				component = createIntegerField(fieldInfo, binder);
@@ -388,6 +368,28 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				component = createEnumComponent(fieldInfo, binder);
 			} else if (fieldType == byte[].class && fieldInfo.isImageData()) {
 				component = createPictureSelector(fieldInfo, binder);
+			} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
+				// it has a dataprovider or entity type
+				// dont mark everything as a list, when they have a data provider
+				// dataprovider can also return single items !!!
+				if (!hasValidDataProvider(fieldInfo.getDataProviderBean())) {
+					fieldInfo.setDataProviderBean(fieldType.getSimpleName() + "Service");
+				}
+				component = createComboBox(contentOwner, fieldInfo, binder);
+			} else if (fieldType == Boolean.class || fieldType == boolean.class) {
+				component = createCheckbox(fieldInfo, binder);
+			} else if (fieldType == String.class) {
+				if (fieldInfo.isColorField()) {
+					component = createColorPicker(fieldInfo, binder);
+				} else if (fieldInfo.isUseIcon()) {
+					component = createIconComboBox(fieldInfo, binder);
+				} else if (fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION) {
+					component = createTextArea(fieldInfo, binder);
+				} else if (fieldInfo.isPasswordField()) {
+					component = createTextPasswordField(fieldInfo);
+				} else {
+					component = createTextField(fieldInfo, binder);
+				}
 			} else {
 				Check.isTrue(false, "Component field [" + fieldInfo.getFieldName() + "], unsupported field type [" + fieldType.getSimpleName()
 						+ "] for field [" + fieldInfo.getDisplayName() + "]");
@@ -828,6 +830,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		try {
 			Check.notNull(fieldInfo, "field");
 			final Component component = createComponentForField(contentOwner, fieldInfo, binder);
+			Check.notNull(component, "Component for field " + fieldInfo.getFieldName());
 			assignDeterministicComponentId(component, fieldInfo, binder);
 			// Navigation button is now integrated into CNavigableComboBox
 			final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
@@ -835,7 +838,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			if (mapHorizontalLayouts != null) {
 				mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
 			}
-			if (component != null && mapComponents != null) {
+			if (mapComponents != null) {
 				LOGGER.debug("Adding component for field '{}' to component map of type:{}", fieldInfo.getFieldName(),
 						component.getClass().getSimpleName());
 				mapComponents.put(fieldInfo.getFieldName(), component);
@@ -957,9 +960,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	/** Constructor that accepts an external component map for centralized component management.
-	 * @param contentOwner   the content owner (page) for context
-	 * @param entityClass    the entity class
-	 * @param binder         the enhanced binder
+	 * @param contentOwner         the content owner (page) for context
+	 * @param entityClass          the entity class
+	 * @param binder               the enhanced binder
 	 * @param externalComponentMap the external component map to use instead of creating a new one
 	 * @throws Exception if form building fails */
 	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
