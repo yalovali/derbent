@@ -867,8 +867,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			final IPageServiceImplementer<?> pageServiceImpl = (IPageServiceImplementer<?>) contentOwner;
 			pageServiceImpl.getPageService().registerComponent(componentName, component);
 			
-			// Re-bind methods to include the newly registered component
-			pageServiceImpl.getPageService().bindMethods(pageServiceImpl.getPageService());
+			// NOTE: Do NOT call bindMethods() here - it's called once during CPageService.bind()
+			// Calling it repeatedly for each widget causes performance issues and duplicate listeners
 			
 			LOGGER.debug("[DragDebug] Registered widget component '{}' of type {} with page service for entity ID {}",
 					componentName, component.getClass().getSimpleName(), 
