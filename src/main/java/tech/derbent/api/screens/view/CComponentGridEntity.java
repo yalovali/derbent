@@ -83,8 +83,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private final List<ComponentEventListener<GridDragEndEvent<CEntityDB<?>>>> dragEndListeners = new ArrayList<>();
 	// Drag event listeners - follow the pattern from CComponentListEntityBase
 	private final List<ComponentEventListener<GridDragStartEvent<CEntityDB<?>>>> dragStartListeners = new ArrayList<>();
-	// Drop event listeners - for receiving drop events from other components
-	private final List<ComponentEventListener<GridDropEvent<CEntityDB<?>>>> dropListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
@@ -146,7 +144,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	/** Adds a listener for drop events on this grid component.
 	 * <p>
 	 * This method implements IHasDrop interface to allow external listeners (like CPageService) to be notified when items are dropped onto this grid.
-	 * The CComponentGridEntity delegates drop events to its underlying grid component.
+	 * The CComponentGridEntity delegates drop events directly to its underlying grid component.
+	 * </p>
+	 * <p>
+	 * Note: The grid field is declared as CGrid&lt;?&gt; because the entity type is determined at runtime. However, all entities are guaranteed to extend
+	 * CEntityDB by the service architecture, making the cast safe.
 	 * </p>
 	 * @param listener the listener to be notified when items are dropped
 	 * @return a registration object that can be used to remove the listener */
@@ -156,7 +158,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		Check.notNull(listener, "Drop listener cannot be null");
 		Check.notNull(grid, "Grid not available for drop listener registration");
 		LOGGER.debug("[DragDebug] CComponentGridEntity: Adding drop listener to grid");
-		// Cast is safe because grid contains CEntityDB items
+		// Safe cast: grid contains CEntityDB items (enforced by service architecture)
 		return ((CGrid) grid).addDropListener((ComponentEventListener) listener);
 	}
 
