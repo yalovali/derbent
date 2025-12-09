@@ -9,6 +9,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
@@ -134,6 +135,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		}
 		// Enable row dragging for internal reordering
 		grid.setRowsDraggable(true);
+		// Enable drop mode to accept drops between rows
+		grid.setDropMode(GridDropMode.BETWEEN);
 		// Track the dragged item
 		final CSprintItem[] draggedItem = new CSprintItem[1];
 		// Add drag start listener
