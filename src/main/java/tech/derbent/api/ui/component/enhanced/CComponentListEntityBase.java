@@ -66,7 +66,8 @@ import tech.derbent.api.utils.Check;
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
 		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>,
 		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IHasDragStart<ChildEntity>, IHasDragEnd<ChildEntity>,
-		tech.derbent.api.interfaces.IPageServiceAutoRegistrable, tech.derbent.api.interfaces.IHasDragControl {
+		tech.derbent.api.interfaces.IPageServiceAutoRegistrable, tech.derbent.api.interfaces.IHasDragControl,
+		tech.derbent.api.interfaces.IHasDrop<ChildEntity> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -192,6 +193,17 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		Check.notNull(listener, "Drag start listener cannot be null");
 		Check.notNull(grid, "Grid must be initialized before adding drag start listener");
 		return grid.addDragStartListener(listener);
+	}
+
+	/** Adds a listener for drop events on the internal grid. The listener will be notified when items are dropped onto the grid.
+	 * Implements {@link tech.derbent.api.interfaces.IHasDrop#addDropListener(ComponentEventListener)}.
+	 * @param listener the listener to be notified when items are dropped
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDropListener(final ComponentEventListener<com.vaadin.flow.component.grid.dnd.GridDropEvent<ChildEntity>> listener) {
+		Check.notNull(listener, "Drop listener cannot be null");
+		Check.notNull(grid, "Grid must be initialized before adding drop listener");
+		return grid.addDropListener(listener);
 	}
 
 	// IGridRefreshListener implementation
