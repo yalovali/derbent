@@ -195,7 +195,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private void bindComponent(final Method method, final Component component, final String methodName, final String componentName,
 			final String action) {
-		LOGGER.debug("Binding method {} to component {} for action {}.", methodName, componentName, action);
+		LOGGER.debug("[BindDebug] Starting binding for method {} to component {} for action {}.", methodName, componentName, action);
 		// check method parameters
 		final var parameters = method.getParameterTypes();
 		Check.isTrue(parameters.length == 2, "Method {" + methodName + "} has invalid number of parameters. Expected 2 (Component, Object).");
@@ -256,12 +256,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		case "dragStart" -> {
 			// Check if component implements IHasDragStart interface first
 			if (component instanceof IHasDragStart<?>) {
+				LOGGER.debug("[DragDebug] Component {} implements IHasDragStart, binding via interface", componentName);
 				bindDragStart((IHasDragStart<?>) component, method, methodName);
 			} else if (component instanceof Grid<?>) {
 				// Fallback to direct Grid binding for backward compatibility
+				LOGGER.debug("[DragDebug] Component {} is a Grid, binding via direct Grid API", componentName);
 				bindGridDragStart((Grid<?>) component, method, methodName);
 			} else {
 				// Fallback to generic DOM event listener
+				LOGGER.warn("[DragDebug] Component {} does not implement IHasDragStart or Grid, using DOM listener fallback", componentName);
 				component.getElement().addEventListener("dragstart", e -> {
 					try {
 						method.invoke(this, component, null);
@@ -274,12 +277,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		case "dragEnd" -> {
 			// Check if component implements IHasDragEnd interface first
 			if (component instanceof IHasDragEnd<?>) {
+				LOGGER.debug("[DragDebug] Component {} implements IHasDragEnd, binding via interface", componentName);
 				bindDragEnd((IHasDragEnd<?>) component, method, methodName);
 			} else if (component instanceof Grid<?>) {
 				// Fallback to direct Grid binding for backward compatibility
+				LOGGER.debug("[DragDebug] Component {} is a Grid, binding via direct Grid API", componentName);
 				bindGridDragEnd((Grid<?>) component, method, methodName);
 			} else {
 				// Fallback to generic DOM event listener
+				LOGGER.warn("[DragDebug] Component {} does not implement IHasDragEnd or Grid, using DOM listener fallback", componentName);
 				component.getElement().addEventListener("dragend", e -> {
 					try {
 						method.invoke(this, component, null);
@@ -292,15 +298,17 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		case "drop" -> {
 			// Drop event is only supported for Grid components
 			if (component instanceof Grid<?>) {
+				LOGGER.debug("[DragDebug] Component {} is a Grid, binding drop event", componentName);
 				bindGridDrop((Grid<?>) component, method, methodName);
 			} else {
-				LOGGER.warn("Drop action is only supported for Grid components, component {} is {}", componentName,
+				LOGGER.warn("[DragDebug] Drop action is only supported for Grid components, component {} is {}", componentName,
 						component.getClass().getSimpleName());
 			}
 		}
 		// add more actions as needed
 		default -> Check.warn("Action {" + action + "} not recognized for binding.");
 		}
+		LOGGER.debug("[BindDebug] Successfully bound method {} to component {} for action {}", methodName, componentName, action);
 	}
 
 	/** Binds a component's drag end event to a page service handler method. This method supports any component implementing IHasDragEnd interface.
@@ -431,44 +439,52 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
+		LOGGER.debug("[BindDebug] Starting method binding for page service: {}", page.getClass().getSimpleName());
+		
 		// Combine form components and custom components
 		final Map<String, Component> allComponents = new HashMap<>();
 		
 		// Get components from detailsBuilder's centralized map if available
 		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
 			allComponents.putAll(detailsBuilder.getComponentMap());
-			LOGGER.debug("Added {} components from detailsBuilder's centralized map", detailsBuilder.getComponentMap().size());
+			LOGGER.debug("[BindDebug] Added {} components from detailsBuilder's centralized map", detailsBuilder.getComponentMap().size());
 		}
 		
 		// Also include formBuilder components for backward compatibility
 		if (formBuilder != null) {
 			allComponents.putAll(formBuilder.getComponentMap());
+			LOGGER.debug("[BindDebug] Added {} components from formBuilder", formBuilder.getComponentMap().size());
 		}
 		
 		// Add custom registered components (these take precedence)
 		allComponents.putAll(customComponents);
+		LOGGER.debug("[BindDebug] Added {} custom registered components", customComponents.size());
 		
 		// print the component names for debugging
-		LOGGER.debug("Binding methods for components: {}", allComponents.keySet());
-		// filter methods with name matching regex:("on_[a-zA-Z0-9]+_[a" + "-zA-Z0-9]+")
-		// final var methods = Arrays.stream(page.getClass().getDeclaredMethods()).filter(m ->
-		// m.getName().matches("on_[a-zA-Z0-9]+_[a-zA-Z0-9]+")).toList();
+		LOGGER.debug("[BindDebug] Total components available for binding: {} - {}", allComponents.size(), allComponents.keySet());
+		
+		// Scan for handler methods matching on_{componentName}_{action} pattern
 		final var methods = page.getClass().getDeclaredMethods();
+		int boundCount = 0;
 		for (final var method : methods) {
 			final var matcher = HANDLER_PATTERN.matcher(method.getName());
 			if (!matcher.matches()) {
 				continue;
 			}
-			// LOGGER.debug("Found handler method: {}", method.getName());
 			final var componentName = matcher.group(1);
 			final var action = matcher.group(2);
 			final var component = allComponents.get(componentName);
 			if (component == null) {
-				LOGGER.warn("Component '{}' not found in FormBuilder or custom components for binding method '{}'", componentName, method.getName());
+				LOGGER.warn("[BindDebug] Component '{}' not found for binding method '{}' - Available components: {}", 
+					componentName, method.getName(), allComponents.keySet());
 				continue;
 			}
+			LOGGER.debug("[BindDebug] Binding method '{}' to component '{}' (type: {}) for action '{}'", 
+				method.getName(), componentName, component.getClass().getSimpleName(), action);
 			bindComponent(method, component, method.getName(), componentName, action);
+			boundCount++;
 		}
+		LOGGER.debug("[BindDebug] Completed method binding - {} methods bound successfully", boundCount);
 	}
 
 	protected Checkbox getCheckbox(final String fieldName) {
