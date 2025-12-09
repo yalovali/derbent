@@ -320,6 +320,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		final Component vaadinComponent = (Component) component;
 		component.addDragEndListener(event -> {
 			try {
+				LOGGER.debug("[DragDebug] CPageService.bindDragEnd: Invoking {} on component {}", methodName,
+						component.getClass().getSimpleName());
 				// GridDragEndEvent doesn't provide dragged items
 				// Handler methods should track items from dragStart event if needed
 				final CDragDropEvent<?> dragEvent = new CDragDropEvent(null, component);
@@ -349,6 +351,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		component.addDragStartListener(event -> {
 			try {
 				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
+				final int itemCount = draggedItems != null ? draggedItems.size() : 0;
+				LOGGER.debug("[DragDebug] CPageService.bindDragStart: Invoking {} on component {}, items={}", methodName,
+						component.getClass().getSimpleName(), itemCount);
 				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, component);
 				method.invoke(this, vaadinComponent, dragEvent);
 			} catch (final Exception ex) {

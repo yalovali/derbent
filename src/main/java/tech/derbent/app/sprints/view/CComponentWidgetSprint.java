@@ -82,7 +82,12 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.warn("componentSprintItems not initialized, cannot add drag end listener");
 			return () -> {}; // Return empty registration
 		}
-		return componentSprintItems.addDragEndListener(listener);
+		LOGGER.debug("[DragDebug] CComponentWidgetSprint: addDragEndListener called for sprint {}", getEntity().getId());
+		return componentSprintItems.addDragEndListener(event -> {
+			LOGGER.debug("[DragDebug] CComponentWidgetSprint: dragEnd propagated from componentSprintItems to external listener for sprint {}",
+					getEntity().getId());
+			listener.onComponentEvent(event);
+		});
 	}
 
 	/** Adds a listener for drag start events from the internal sprint items grid. The listener will be notified when a drag operation starts on the
@@ -96,7 +101,14 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.warn("componentSprintItems not initialized, cannot add drag start listener");
 			return () -> {}; // Return empty registration
 		}
-		return componentSprintItems.addDragStartListener(listener);
+		LOGGER.debug("[DragDebug] CComponentWidgetSprint: addDragStartListener called for sprint {}", getEntity().getId());
+		return componentSprintItems.addDragStartListener(event -> {
+			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
+			LOGGER.debug(
+					"[DragDebug] CComponentWidgetSprint: dragStart propagated from componentSprintItems to external listener for sprint {}, items={}",
+					getEntity().getId(), itemCount);
+			listener.onComponentEvent(event);
+		});
 	}
 
 	@Override
