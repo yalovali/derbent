@@ -591,6 +591,27 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 	}
 
+	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
+	 * @param event The GridDragEndEvent from the grid */
+	protected void on_grid_dragEnd(final GridDragEndEvent<ChildEntity> event) {
+		try {
+			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragEnd - source=grid", entityClass.getSimpleName());
+		} catch (final Exception e) {
+			LOGGER.error("Error in drag end handler", e);
+		}
+	}
+
+	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
+	 * @param event The GridDragStartEvent from the grid */
+	protected void on_grid_dragStart(final GridDragStartEvent<ChildEntity> event) {
+		try {
+			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
+			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragStart - source=grid, items={}", entityClass.getSimpleName(), itemCount);
+		} catch (final Exception ex) {
+			LOGGER.error("Error in drag start handler", ex);
+		}
+	}
+
 	/** Handle double-click on a grid item. Opens the edit dialog by default.
 	 * @param item The double-clicked item */
 	protected void on_gridItems_doubleClicked(final ChildEntity item) {
@@ -620,27 +641,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		} catch (final Exception ex) {
 			LOGGER.error("Error processing selection change", ex);
 			CNotificationService.showException("Error processing selection", ex);
-		}
-	}
-
-	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The GridDragStartEvent from the grid */
-	protected void on_grid_dragStart(final GridDragStartEvent<ChildEntity> event) {
-		try {
-			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
-			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragStart - source=grid, items={}", entityClass.getSimpleName(), itemCount);
-		} catch (final Exception ex) {
-			LOGGER.error("Error in drag start handler", ex);
-		}
-	}
-
-	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The GridDragEndEvent from the grid */
-	protected void on_grid_dragEnd(final GridDragEndEvent<ChildEntity> event) {
-		try {
-			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragEnd - source=grid", entityClass.getSimpleName());
-		} catch (final Exception ex) {
-			LOGGER.error("Error in drag end handler", ex);
 		}
 	}
 

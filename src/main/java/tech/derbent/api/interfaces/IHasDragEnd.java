@@ -1,5 +1,6 @@
 package tech.derbent.api.interfaces;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.shared.Registration;
 
@@ -9,27 +10,28 @@ import com.vaadin.flow.shared.Registration;
  * operation ends. The component is responsible for binding these events to its internal grid.
  * <p>
  * Example usage:
- * 
+ *
  * <pre>
  * public class CComponentListSprintItems implements IHasDragEnd&lt;CSprintItem&gt; {
- * 	private CGrid&lt;CSprintItem&gt; grid;
  * 
+ * 	private CGrid&lt;CSprintItem&gt; grid;
+ *
  * 	&#64;Override
  * 	public Registration addDragEndListener(ComponentEventListener&lt;GridDragEndEvent&lt;CSprintItem&gt;&gt; listener) {
  * 		return grid.addDragEndListener(listener);
  * 	}
  * }
- * 
  * // Usage in page service
  * componentListSprintItems.addDragEndListener(event -&gt; {
  * 	LOGGER.debug("Drag ended");
  * });
  * </pre>
+ *
  * @param <T> The type of items that can be dragged */
 public interface IHasDragEnd<T> {
 
 	/** Adds a listener for drag end events.
 	 * @param listener the listener to be notified when drag ends
 	 * @return a registration object that can be used to remove the listener */
-	Registration addDragEndListener(com.vaadin.flow.component.ComponentEventListener<GridDragEndEvent<T>> listener);
+	Registration addDragEndListener(ComponentEventListener<GridDragEndEvent<T>> listener);
 }
