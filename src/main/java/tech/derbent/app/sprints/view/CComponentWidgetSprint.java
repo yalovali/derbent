@@ -204,7 +204,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			// Use the general refresh listener pattern instead of the old setOnItemChangeListener
 			componentSprintItems.addRefreshListener(item -> refreshItemCount());
 			// Enable drag-drop on the grid for external drag-drop operations
-			componentSprintItems.setRowsDraggable(true);
+			componentSprintItems.setDragEnabled(true);
+			componentSprintItems.setDropEnabled(true);
 			//
 			//
 			//
