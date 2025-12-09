@@ -450,6 +450,27 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
+	/** Gets the maximum sprint order value from all backlog items.
+	 * @return the maximum sprint order, or 0 if no items have sprint order */
+	private int getMaxBacklogOrder() {
+		try {
+			final List<CProjectItem<?>> allBacklogItems = componentBacklogItems.getAllItems();
+			int maxOrder = 0;
+			for (final CProjectItem<?> item : allBacklogItems) {
+				if (item instanceof ISprintableItem) {
+					final Integer order = ((ISprintableItem) item).getSprintOrder();
+					if (order != null && order > maxOrder) {
+						maxOrder = order;
+					}
+				}
+			}
+			return maxOrder;
+		} catch (final Exception e) {
+			LOGGER.error("Error getting max backlog order", e);
+			return 0;
+		}
+	}
+
 	/** Shifts existing sprint items to make room for a new item at the specified position. All items with order >= newOrder will be incremented by 1.
 	 * @param newOrder the order value where the new item will be inserted */
 	private void shiftSprintItemsForInsert(final int newOrder) {
@@ -485,7 +506,17 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		final ISprintableItem sprintableItem = (ISprintableItem) item;
 		final ISprintableItem targetSprintableItem = (ISprintableItem) targetItem;
 		final Integer targetOrder = targetSprintableItem.getSprintOrder();
-		Check.notNull(targetOrder, "Target item must have sprint order");
+		
+		// Handle null sprint order: assign to end of backlog
+		if (targetOrder == null) {
+			LOGGER.warn("[DragDebug] Target item {} has null sprint order, assigning dropped item to end of backlog", targetItem.getId());
+			final int maxOrder = getMaxBacklogOrder();
+			sprintableItem.setSprintOrder(maxOrder + 1);
+			saveProjectItem(item);
+			LOGGER.debug("[DragDebug] Updated backlog item {} order to {} (end of backlog)", item.getId(), maxOrder + 1);
+			return;
+		}
+		
 		// Calculate new order based on drop location
 		final int newOrder = (dropLocation == GridDropLocation.BELOW) ? targetOrder + 1 : targetOrder;
 		sprintableItem.setSprintOrder(newOrder);

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.shared.Registration;
@@ -15,6 +16,7 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.IHasDragEnd;
 import tech.derbent.api.interfaces.IHasDragStart;
+import tech.derbent.api.interfaces.IHasDrop;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -46,14 +48,14 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * visually appealing badges and labels.
  * </p>
  * <p>
- * Implements IHasDragStart and IHasDragEnd to propagate drag-drop events from the internal sprint items grid to external listeners (e.g., page
- * services). This enables automatic method binding in CPageService for drag-drop operations.
+ * Implements IHasDragStart, IHasDragEnd, and IHasDrop to propagate drag-drop events from the internal sprint items grid to external listeners (e.g.,
+ * page services). This enables automatic method binding in CPageService for drag-drop operations and supports reordering items within the sprint.
  * </p>
  * @author Derbent Framework
  * @since 1.0
  * @see CComponentWidgetEntityOfProject */
 public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint>
-		implements IEntityUpdateListener<CSprintItem>, IHasDragStart<CSprintItem>, IHasDragEnd<CSprintItem> {
+		implements IEntityUpdateListener<CSprintItem>, IHasDragStart<CSprintItem>, IHasDragEnd<CSprintItem>, IHasDrop<CSprintItem> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetSprint.class);
 	private static final long serialVersionUID = 1L;
@@ -107,6 +109,25 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.debug(
 					"[DragDebug] CComponentWidgetSprint: dragStart propagated from componentSprintItems to external listener for sprint {}, items={}",
 					getEntity().getId(), itemCount);
+			listener.onComponentEvent(event);
+		});
+	}
+
+	/** Adds a listener for drop events on the internal sprint items grid. The listener will be notified when items are dropped onto the sprint items
+	 * grid.
+	 * @param listener the listener to be notified when items are dropped
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDropListener(final ComponentEventListener<GridDropEvent<CSprintItem>> listener) {
+		Check.notNull(listener, "Drop listener cannot be null");
+		if (componentSprintItems == null) {
+			LOGGER.warn("componentSprintItems not initialized, cannot add drop listener");
+			return () -> {}; // Return empty registration
+		}
+		LOGGER.debug("[DragDebug] CComponentWidgetSprint: addDropListener called for sprint {}", getEntity().getId());
+		return componentSprintItems.addDropListener(event -> {
+			LOGGER.debug("[DragDebug] CComponentWidgetSprint: drop propagated from componentSprintItems to external listener for sprint {}",
+					getEntity().getId());
 			listener.onComponentEvent(event);
 		});
 	}
