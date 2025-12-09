@@ -132,7 +132,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@AMetaData (
 			displayName = "Font Size Scale", required = true, readOnly = false, defaultValue = "medium",
 			description = "Font size scale for the application UI (small, medium, large)", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
+			maxLength = CEntityConstants.MAX_LENGTH_NAME, dataProviderBean = "CFontSizeService",
+			dataProviderMethod = "getAvailableFontSizeScales"
 	)
 	private String fontSizeScale = "medium";
 	// Backup and Maintenance Settings
