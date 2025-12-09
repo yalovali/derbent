@@ -9,7 +9,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +36,14 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
+import tech.derbent.api.interfaces.IHasDragEnd;
+import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
@@ -72,6 +77,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private CGrid<?> grid;
 	private CGridEntity gridEntity;
 	private ISessionService sessionService;
+	// Track components created in grid cells for event propagation
+	private final Map<Object, Component> entityToWidgetMap = new HashMap<>();
+	private int widgetComponentCounter = 0;
 
 	public CComponentGridEntity(CGridEntity gridEntity, ISessionService sessionService) {
 		super();
@@ -136,6 +144,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * <li>Gets the CPageService from the page</li>
 	 * <li>Invokes the method specified by dataProviderMethod (e.g., "getComponentWidget")</li>
 	 * <li>The method receives the current grid item and returns a widget component</li>
+	 * <li>If the widget implements IHasDragStart/IHasDragEnd, registers it with the page service for event binding</li>
 	 * </ol>
 	 * Example annotation: dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
 	 * </p>
@@ -177,7 +186,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					}
 					final Object result = method.invoke(bean, entity);
 					if (result instanceof Component) {
-						return (Component) result;
+						final Component component = (Component) result;
+						// Register component with page service if it implements drag/drop interfaces
+						registerWidgetComponentWithPageService(component, entity);
+						return component;
 					} else if (result == null) {
 						return createErrorCell("Null widget");
 					} else {
@@ -688,6 +700,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			enableSelectionChangeListener = false;
 			// first get the selected item to restore selection later
 			final CEntityDB<?> selectedItem = getSelectedItem();
+			
+			// Clear the widget component map before refreshing to prevent memory leaks
+			unregisterAllWidgetComponents();
+			
 			//
 			final CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
 			Check.instanceOf(serviceBean, CAbstractService.class,
@@ -718,6 +734,60 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
 		}
+	}
+
+	/** Registers a widget component with the page service for event binding if it implements drag/drop interfaces.
+	 * <p>
+	 * This method enables components created dynamically in grid cells (e.g., CComponentWidgetSprint) to have their
+	 * drag/drop events automatically bound to page service handler methods using the on_{componentName}_{action} pattern.
+	 * </p>
+	 * @param component the widget component to register
+	 * @param entity the entity associated with this widget component */
+	private void registerWidgetComponentWithPageService(final Component component, final Object entity) {
+		try {
+			// Only register if contentOwner is a page service implementer
+			if (!(contentOwner instanceof IPageServiceImplementer<?>)) {
+				LOGGER.debug("ContentOwner is not IPageServiceImplementer, skipping widget component registration");
+				return;
+			}
+			
+			// Only register components that implement drag/drop interfaces
+			if (!(component instanceof IHasDragStart<?>) && !(component instanceof IHasDragEnd<?>)) {
+				LOGGER.debug("Widget component does not implement drag/drop interfaces, skipping registration");
+				return;
+			}
+			
+			// Store the component mapped to its entity for future reference
+			entityToWidgetMap.put(entity, component);
+			
+			// Generate a unique component name for this widget
+			final String componentName = generateWidgetComponentName(component, entity);
+			
+			// Register the component with the page service
+			final IPageServiceImplementer<?> pageServiceImpl = (IPageServiceImplementer<?>) contentOwner;
+			pageServiceImpl.getPageService().registerComponent(componentName, component);
+			
+			// Re-bind methods to include the newly registered component
+			pageServiceImpl.getPageService().bindMethods(pageServiceImpl.getPageService());
+			
+			LOGGER.debug("[DragDebug] Registered widget component '{}' of type {} with page service for entity ID {}",
+					componentName, component.getClass().getSimpleName(), 
+					entity instanceof CEntityDB ? ((CEntityDB<?>) entity).getId() : "N/A");
+		} catch (final Exception e) {
+			LOGGER.error("Error registering widget component with page service: {}", e.getMessage());
+		}
+	}
+	
+	/** Generates a unique component name for a widget component.
+	 * @param component the component to generate a name for
+	 * @param entity the entity associated with the component
+	 * @return a unique component name */
+	private String generateWidgetComponentName(final Component component, final Object entity) {
+		// Use entity ID if available, otherwise use a counter
+		final String entityId = entity instanceof CEntityDB ? String.valueOf(((CEntityDB<?>) entity).getId()) : String.valueOf(widgetComponentCounter++);
+		// Use component class simple name (e.g., "CComponentWidgetSprint") and entity ID
+		final String componentTypeName = component.getClass().getSimpleName().replaceFirst("^C", "").toLowerCase();
+		return componentTypeName + "_" + entityId;
 	}
 
 	/** Resolves the widget provider bean based on the beanName.
@@ -842,6 +912,32 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		} else {
 			// No current selection, select first item
 			selectFirstItem();
+		}
+	}
+
+	/** Unregisters all widget components from the page service to prevent memory leaks. */
+	private void unregisterAllWidgetComponents() {
+		try {
+			// Only unregister if contentOwner is a page service implementer
+			if (!(contentOwner instanceof IPageServiceImplementer<?>)) {
+				return;
+			}
+			
+			final IPageServiceImplementer<?> pageServiceImpl = (IPageServiceImplementer<?>) contentOwner;
+			
+			// Unregister all widget components from the page service
+			for (final Map.Entry<Object, Component> entry : entityToWidgetMap.entrySet()) {
+				final Component component = entry.getValue();
+				final String componentName = generateWidgetComponentName(component, entry.getKey());
+				pageServiceImpl.getPageService().unregisterComponent(componentName);
+				LOGGER.debug("Unregistered widget component '{}' from page service", componentName);
+			}
+			
+			// Clear the map
+			entityToWidgetMap.clear();
+			LOGGER.debug("Cleared all widget component registrations");
+		} catch (final Exception e) {
+			LOGGER.error("Error unregistering widget components: {}", e.getMessage());
 		}
 	}
 
