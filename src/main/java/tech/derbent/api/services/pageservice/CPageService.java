@@ -429,7 +429,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		LOGGER.debug("Bound Grid drop event to method {}", methodName);
 	}
 
-	protected void bindMethods(final CPageService<?> page) {
+	public void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
 		// Combine form components and custom components
 		final Map<String, Component> allComponents = new HashMap<>();
@@ -593,7 +593,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 *
 	 * @param name      the name to use in handler method names
 	 * @param component the component to register */
-	protected void registerComponent(final String name, final Component component) {
+	public void registerComponent(final String name, final Component component) {
 		Check.notBlank(name, "Component name cannot be blank");
 		Check.notNull(component, "Component cannot be null");
 		customComponents.put(name, component);
@@ -643,7 +643,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	/** Removes a previously registered custom component.
 	 * @param name the name of the component to unregister */
-	protected void unregisterComponent(final String name) {
+	public void unregisterComponent(final String name) {
 		customComponents.remove(name);
 		LOGGER.debug("Unregistered custom component '{}'", name);
 	}

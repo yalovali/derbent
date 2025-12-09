@@ -9,7 +9,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +19,12 @@ import org.springframework.data.domain.PageRequest;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
+import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
@@ -34,11 +39,14 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
+import tech.derbent.api.interfaces.IHasDragEnd;
+import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
@@ -47,7 +55,7 @@ import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
-public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner {
+public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragStart<CEntityDB<?>>, IHasDragEnd<CEntityDB<?>> {
 
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent extends ComponentEvent<CComponentGridEntity> {
@@ -72,6 +80,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private CGrid<?> grid;
 	private CGridEntity gridEntity;
 	private ISessionService sessionService;
+	// Track components created in grid cells for event propagation
+	private final Map<Object, Component> entityToWidgetMap = new HashMap<>();
+	private int widgetComponentCounter = 0;
+	// Drag event listeners - follow the pattern from CComponentListEntityBase
+	private final List<ComponentEventListener<GridDragStartEvent<CEntityDB<?>>>> dragStartListeners = new ArrayList<>();
+	private final List<ComponentEventListener<GridDragEndEvent<CEntityDB<?>>>> dragEndListeners = new ArrayList<>();
 
 	public CComponentGridEntity(CGridEntity gridEntity, ISessionService sessionService) {
 		super();
@@ -92,6 +106,40 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	/** Adds a selection change listener to receive notifications when the grid selection changes */
 	public Registration addSelectionChangeListener(com.vaadin.flow.component.ComponentEventListener<SelectionChangeEvent> listener) {
 		return addListener(SelectionChangeEvent.class, listener);
+	}
+
+	/** Adds a listener for drag start events from widget components in grid cells.
+	 * <p>
+	 * This method implements IHasDragStart interface to allow external listeners (like CPageService)
+	 * to be notified when drag operations start on widget components inside grid cells.
+	 * The CComponentGridEntity acts as an aggregator, collecting drag events from all widget components
+	 * it creates and propagating them to registered listeners.
+	 * </p>
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<CEntityDB<?>>> listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		dragStartListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Added drag start listener, total listeners: {}", dragStartListeners.size());
+		return () -> dragStartListeners.remove(listener);
+	}
+
+	/** Adds a listener for drag end events from widget components in grid cells.
+	 * <p>
+	 * This method implements IHasDragEnd interface to allow external listeners (like CPageService)
+	 * to be notified when drag operations end on widget components inside grid cells.
+	 * The CComponentGridEntity acts as an aggregator, collecting drag events from all widget components
+	 * it creates and propagating them to registered listeners.
+	 * </p>
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<CEntityDB<?>>> listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		dragEndListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Added drag end listener, total listeners: {}", dragEndListeners.size());
+		return () -> dragEndListeners.remove(listener);
 	}
 
 	/** Applies search filter to the grid data */
@@ -136,6 +184,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * <li>Gets the CPageService from the page</li>
 	 * <li>Invokes the method specified by dataProviderMethod (e.g., "getComponentWidget")</li>
 	 * <li>The method receives the current grid item and returns a widget component</li>
+	 * <li>If the widget implements IHasDragStart/IHasDragEnd, registers it with the page service for event binding</li>
 	 * </ol>
 	 * Example annotation: dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
 	 * </p>
@@ -177,7 +226,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					}
 					final Object result = method.invoke(bean, entity);
 					if (result instanceof Component) {
-						return (Component) result;
+						final Component component = (Component) result;
+						// Register component with page service if it implements drag/drop interfaces
+						registerWidgetComponentWithPageService(component, entity);
+						return component;
 					} else if (result == null) {
 						return createErrorCell("Null widget");
 					} else {
@@ -688,6 +740,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			enableSelectionChangeListener = false;
 			// first get the selected item to restore selection later
 			final CEntityDB<?> selectedItem = getSelectedItem();
+			
+			// Clear the widget component map before refreshing to prevent memory leaks
+			unregisterAllWidgetComponents();
+			
 			//
 			final CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
 			Check.instanceOf(serviceBean, CAbstractService.class,
@@ -718,6 +774,116 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
 		}
+	}
+
+	/** Notifies all registered drag start listeners. Called when a widget component fires a drag start event.
+	 * Follows the same pattern as notifyRefreshListeners in CComponentListEntityBase.
+	 * @param event The drag start event from the widget component */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void notifyDragStartListeners(final GridDragStartEvent event) {
+		if (!dragStartListeners.isEmpty()) {
+			LOGGER.debug("[DragDebug] Notifying {} drag start listeners", dragStartListeners.size());
+			for (final ComponentEventListener listener : dragStartListeners) {
+				try {
+					listener.onComponentEvent(event);
+				} catch (final Exception e) {
+					LOGGER.error("[DragDebug] Error notifying drag start listener: {}", e.getMessage());
+				}
+			}
+		}
+	}
+
+	/** Notifies all registered drag end listeners. Called when a widget component fires a drag end event.
+	 * Follows the same pattern as notifyRefreshListeners in CComponentListEntityBase.
+	 * @param event The drag end event from the widget component */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void notifyDragEndListeners(final GridDragEndEvent event) {
+		if (!dragEndListeners.isEmpty()) {
+			LOGGER.debug("[DragDebug] Notifying {} drag end listeners", dragEndListeners.size());
+			for (final ComponentEventListener listener : dragEndListeners) {
+				try {
+					listener.onComponentEvent(event);
+				} catch (final Exception e) {
+					LOGGER.error("[DragDebug] Error notifying drag end listener: {}", e.getMessage());
+				}
+			}
+		}
+	}
+
+	/** Registers a widget component with the page service for event binding if it implements drag/drop interfaces.
+	 * <p>
+	 * This method enables components created dynamically in grid cells (e.g., CComponentWidgetSprint) to have their
+	 * drag/drop events automatically bound to page service handler methods using the on_{componentName}_{action} pattern.
+	 * It also sets up listeners on the widget component to propagate drag events through this CComponentGridEntity.
+	 * </p>
+	 * @param component the widget component to register
+	 * @param entity the entity associated with this widget component */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void registerWidgetComponentWithPageService(final Component component, final Object entity) {
+		try {
+			// Only register if contentOwner is a page service implementer
+			if (!(contentOwner instanceof IPageServiceImplementer<?>)) {
+				LOGGER.debug("ContentOwner is not IPageServiceImplementer, skipping widget component registration");
+				return;
+			}
+			
+			// Only register components that implement drag/drop interfaces
+			if (!(component instanceof IHasDragStart<?>) && !(component instanceof IHasDragEnd<?>)) {
+				LOGGER.debug("Widget component does not implement drag/drop interfaces, skipping registration");
+				return;
+			}
+			
+			// Store the component mapped to its entity for future reference
+			entityToWidgetMap.put(entity, component);
+			
+			// Set up drag event propagation from widget component to this CComponentGridEntity
+			// Using dedicated notification methods for cleaner, more maintainable code
+			if (component instanceof IHasDragStart<?>) {
+				final IHasDragStart widgetWithDragStart = (IHasDragStart) component;
+				widgetWithDragStart.addDragStartListener(event -> {
+					LOGGER.debug("[DragDebug] Widget {} fired drag start, notifying CComponentGridEntity listeners",
+							component.getClass().getSimpleName());
+					notifyDragStartListeners((GridDragStartEvent) event);
+				});
+			}
+			
+			if (component instanceof IHasDragEnd<?>) {
+				final IHasDragEnd widgetWithDragEnd = (IHasDragEnd) component;
+				widgetWithDragEnd.addDragEndListener(event -> {
+					LOGGER.debug("[DragDebug] Widget {} fired drag end, notifying CComponentGridEntity listeners",
+							component.getClass().getSimpleName());
+					notifyDragEndListeners((GridDragEndEvent) event);
+				});
+			}
+			
+			// Generate a unique component name for this widget
+			final String componentName = generateWidgetComponentName(component, entity);
+			
+			// Register the component with the page service
+			final IPageServiceImplementer<?> pageServiceImpl = (IPageServiceImplementer<?>) contentOwner;
+			pageServiceImpl.getPageService().registerComponent(componentName, component);
+			
+			// Re-bind methods to include the newly registered component
+			pageServiceImpl.getPageService().bindMethods(pageServiceImpl.getPageService());
+			
+			LOGGER.debug("[DragDebug] Registered widget component '{}' of type {} with page service for entity ID {}",
+					componentName, component.getClass().getSimpleName(), 
+					entity instanceof CEntityDB ? ((CEntityDB<?>) entity).getId() : "N/A");
+		} catch (final Exception e) {
+			LOGGER.error("Error registering widget component with page service: {}", e.getMessage());
+		}
+	}
+	
+	/** Generates a unique component name for a widget component.
+	 * @param component the component to generate a name for
+	 * @param entity the entity associated with the component
+	 * @return a unique component name */
+	private String generateWidgetComponentName(final Component component, final Object entity) {
+		// Use entity ID if available, otherwise use a counter
+		final String entityId = entity instanceof CEntityDB ? String.valueOf(((CEntityDB<?>) entity).getId()) : String.valueOf(widgetComponentCounter++);
+		// Use component class simple name (e.g., "CComponentWidgetSprint") and entity ID
+		final String componentTypeName = component.getClass().getSimpleName().replaceFirst("^C", "").toLowerCase();
+		return componentTypeName + "_" + entityId;
 	}
 
 	/** Resolves the widget provider bean based on the beanName.
@@ -842,6 +1008,32 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		} else {
 			// No current selection, select first item
 			selectFirstItem();
+		}
+	}
+
+	/** Unregisters all widget components from the page service to prevent memory leaks. */
+	private void unregisterAllWidgetComponents() {
+		try {
+			// Only unregister if contentOwner is a page service implementer
+			if (!(contentOwner instanceof IPageServiceImplementer<?>)) {
+				return;
+			}
+			
+			final IPageServiceImplementer<?> pageServiceImpl = (IPageServiceImplementer<?>) contentOwner;
+			
+			// Unregister all widget components from the page service
+			for (final Map.Entry<Object, Component> entry : entityToWidgetMap.entrySet()) {
+				final Component component = entry.getValue();
+				final String componentName = generateWidgetComponentName(component, entry.getKey());
+				pageServiceImpl.getPageService().unregisterComponent(componentName);
+				LOGGER.debug("Unregistered widget component '{}' from page service", componentName);
+			}
+			
+			// Clear the map
+			entityToWidgetMap.clear();
+			LOGGER.debug("Cleared all widget component registrations");
+		} catch (final Exception e) {
+			LOGGER.error("Error unregistering widget components: {}", e.getMessage());
 		}
 	}
 
