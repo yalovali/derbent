@@ -65,7 +65,8 @@ import tech.derbent.api.utils.Check;
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
 		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>,
-		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IHasDragStart<ChildEntity>, IHasDragEnd<ChildEntity> {
+		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IHasDragStart<ChildEntity>, IHasDragEnd<ChildEntity>,
+		tech.derbent.api.interfaces.IPageServiceAutoRegistrable, tech.derbent.api.interfaces.IHasDragControl {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -102,6 +103,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected boolean useDynamicHeight = false;
 	// HasValue interface fields
 	private final List<ValueChangeListener<? super ValueChangeEvent<ChildEntity>>> valueChangeListeners = new ArrayList<>();
+	// Drag control state
+	private boolean dragEnabled = false;
+	private boolean dropEnabled = false;
 
 	/** Constructor for the entity list component.
 	 * @param title             The title to display above the grid
@@ -832,5 +836,115 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		buttonDelete.setEnabled(hasSelection);
 		buttonMoveUp.setEnabled(hasSelection);
 		buttonMoveDown.setEnabled(hasSelection);
+	}
+
+	// IPageServiceAutoRegistrable interface implementation
+	
+	/**
+	 * Registers this component with the page service for automatic event binding.
+	 * <p>
+	 * This default implementation provides automatic registration using a component name
+	 * derived from the entity class. Subclasses can override getComponentName() to
+	 * provide a custom name for method binding.
+	 * <p>
+	 * After calling this method, page service handlers matching the pattern
+	 * on_{componentName}_{action} will be automatically bound to this component.
+	 * 
+	 * @param pageService The page service to register with
+	 */
+	@Override
+	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
+		Check.notNull(pageService, "Page service cannot be null");
+		final String componentName = getComponentName();
+		pageService.registerComponent(componentName, this);
+		pageService.bindMethods(pageService);
+		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", 
+			getClass().getSimpleName(), componentName);
+	}
+
+	/**
+	 * Returns the default component name based on the entity class.
+	 * <p>
+	 * Default implementation converts entity class simple name to camelCase
+	 * (e.g., "CSprintItem" becomes "sprintItem"). Subclasses should override
+	 * to provide a more meaningful name (e.g., "sprintItems", "backlogItems").
+	 * 
+	 * @return The component name for method binding
+	 */
+	@Override
+	public String getComponentName() {
+		// Default: use entity class simple name in camelCase (e.g., "sprintItem")
+		// Subclasses should override to provide better names (e.g., "sprintItems")
+		final String className = entityClass.getSimpleName();
+		// Remove "C" prefix if present
+		final String withoutPrefix = className.startsWith("C") ? className.substring(1) : className;
+		// Convert first letter to lowercase
+		return withoutPrefix.substring(0, 1).toLowerCase() + withoutPrefix.substring(1);
+	}
+
+	// IHasDragControl interface implementation
+	
+	/**
+	 * Enables or disables drag-and-drop functionality for the grid.
+	 * <p>
+	 * When enabled, rows in the grid can be dragged. When disabled, drag operations
+	 * are blocked but the grid can still receive drop events if drop is enabled.
+	 * 
+	 * @param enabled true to enable drag, false to disable
+	 */
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		this.dragEnabled = enabled;
+		if (grid != null) {
+			grid.setRowsDraggable(enabled);
+			LOGGER.debug("[DragDebug] Drag {} for {} ({})", 
+				enabled ? "enabled" : "disabled", 
+				getClass().getSimpleName(),
+				entityClass.getSimpleName());
+		}
+	}
+
+	/**
+	 * Checks whether drag functionality is currently enabled.
+	 * 
+	 * @return true if drag is enabled, false otherwise
+	 */
+	@Override
+	public boolean isDragEnabled() {
+		return dragEnabled;
+	}
+
+	/**
+	 * Enables or disables drop functionality for the grid.
+	 * <p>
+	 * When enabled, the grid can accept drop operations. When disabled, drops are blocked.
+	 * This is independent of drag functionality - a grid can accept drops without being draggable.
+	 * 
+	 * @param enabled true to enable drop, false to disable
+	 */
+	@Override
+	public void setDropEnabled(final boolean enabled) {
+		this.dropEnabled = enabled;
+		if (grid != null) {
+			if (enabled) {
+				grid.setDropMode(com.vaadin.flow.component.grid.dnd.GridDropMode.BETWEEN);
+			} else {
+				grid.setDropMode(null);
+			}
+			LOGGER.debug("[DragDebug] Drop {} for {} ({})", 
+				enabled ? "enabled" : "disabled", 
+				getClass().getSimpleName(),
+				entityClass.getSimpleName());
+		}
+	}
+
+	/**
+	 * Checks whether drop functionality is currently enabled.
+	 * 
+	 * @return true if drop is enabled, false otherwise
+	 */
+	@Override
+	public boolean isDropEnabled() {
+		return dropEnabled;
 	}
 }

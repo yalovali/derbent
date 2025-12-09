@@ -55,7 +55,8 @@ import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
-public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragStart<CEntityDB<?>>, IHasDragEnd<CEntityDB<?>> {
+public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragStart<CEntityDB<?>>, IHasDragEnd<CEntityDB<?>>, 
+		tech.derbent.api.interfaces.IPageServiceAutoRegistrable, tech.derbent.api.interfaces.IHasDragControl {
 
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent extends ComponentEvent<CComponentGridEntity> {
@@ -86,6 +87,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	// Drag event listeners - follow the pattern from CComponentListEntityBase
 	private final List<ComponentEventListener<GridDragStartEvent<CEntityDB<?>>>> dragStartListeners = new ArrayList<>();
 	private final List<ComponentEventListener<GridDragEndEvent<CEntityDB<?>>>> dragEndListeners = new ArrayList<>();
+	// Drag control state
+	private boolean dragEnabled = false;
+	private boolean dropEnabled = false;
 
 	public CComponentGridEntity(CGridEntity gridEntity, ISessionService sessionService) {
 		super();
@@ -1061,5 +1065,103 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.info("Search filter applied: {}", searchValue);
 			applySearchFilter(searchValue.trim().toLowerCase());
 		}
+	}
+
+	// IPageServiceAutoRegistrable interface implementation
+	
+	/**
+	 * Registers this grid component with the page service for automatic event binding.
+	 * <p>
+	 * This enables page service handlers matching the pattern on_grid_{action}
+	 * to be automatically bound to this grid component for drag-drop and selection events.
+	 * 
+	 * @param pageService The page service to register with
+	 */
+	@Override
+	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
+		Check.notNull(pageService, "Page service cannot be null");
+		final String componentName = getComponentName();
+		pageService.registerComponent(componentName, this);
+		pageService.bindMethods(pageService);
+		LOGGER.debug("[BindDebug] CComponentGridEntity auto-registered with page service as '{}'", componentName);
+	}
+
+	/**
+	 * Returns the component name for method binding.
+	 * <p>
+	 * Default name is "grid" for grid-level event handlers like:
+	 * <ul>
+	 * <li>on_grid_dragStart(Component, Object)</li>
+	 * <li>on_grid_dragEnd(Component, Object)</li>
+	 * <li>on_grid_drop(Component, Object)</li>
+	 * </ul>
+	 * 
+	 * @return The component name "grid"
+	 */
+	@Override
+	public String getComponentName() {
+		return "grid";
+	}
+
+	// IHasDragControl interface implementation
+	
+	/**
+	 * Enables or disables drag-and-drop functionality for the grid.
+	 * <p>
+	 * When enabled, rows in the grid can be dragged. When disabled, drag operations
+	 * are blocked but the grid can still receive drop events if drop is enabled.
+	 * 
+	 * @param enabled true to enable drag, false to disable
+	 */
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		this.dragEnabled = enabled;
+		if (grid != null) {
+			grid.setRowsDraggable(enabled);
+			LOGGER.debug("[DragDebug] Drag {} for CComponentGridEntity", 
+				enabled ? "enabled" : "disabled");
+		}
+	}
+
+	/**
+	 * Checks whether drag functionality is currently enabled.
+	 * 
+	 * @return true if drag is enabled, false otherwise
+	 */
+	@Override
+	public boolean isDragEnabled() {
+		return dragEnabled;
+	}
+
+	/**
+	 * Enables or disables drop functionality for the grid.
+	 * <p>
+	 * When enabled, the grid can accept drop operations. When disabled, drops are blocked.
+	 * This is independent of drag functionality - a grid can accept drops without being draggable.
+	 * 
+	 * @param enabled true to enable drop, false to disable
+	 */
+	@Override
+	public void setDropEnabled(final boolean enabled) {
+		this.dropEnabled = enabled;
+		if (grid != null) {
+			if (enabled) {
+				grid.setDropMode(com.vaadin.flow.component.grid.dnd.GridDropMode.BETWEEN);
+			} else {
+				grid.setDropMode(null);
+			}
+			LOGGER.debug("[DragDebug] Drop {} for CComponentGridEntity", 
+				enabled ? "enabled" : "disabled");
+		}
+	}
+
+	/**
+	 * Checks whether drop functionality is currently enabled.
+	 * 
+	 * @return true if drop is enabled, false otherwise
+	 */
+	@Override
+	public boolean isDropEnabled() {
+		return dropEnabled;
 	}
 }
