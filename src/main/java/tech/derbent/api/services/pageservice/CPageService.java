@@ -429,7 +429,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		LOGGER.debug("Bound Grid drop event to method {}", methodName);
 	}
 
-	protected void bindMethods(final CPageService<?> page) {
+	public void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
 		// Combine form components and custom components
 		final Map<String, Component> allComponents = new HashMap<>();
