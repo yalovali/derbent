@@ -56,8 +56,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private final CActivityService activityService;
 	// Drag source support for reverse drag to backlog (manual implementation)
 	private boolean dragEnabledToBacklog = false;
-	// Drop target support
-	private Consumer<CProjectItem<?>> dropHandler = null;
 	// Services for loading items
 	private final CMeetingService meetingService;
 
@@ -79,64 +77,33 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	/** Handles adding a dropped item to the sprint. This is called by the drop handler.
-	 * @param item the project item to add to the sprint */
+	 * @param item the project item to add to the sprint
+	 * @deprecated Use CPageServiceSprint.on_sprintItems_drop() instead. Drop logic should be in page service. */
+	@Deprecated
 	public void addDroppedItem(final CProjectItem<?> item) {
-		addDroppedItem(item, null, null);
+		LOGGER.warn("addDroppedItem(item) is deprecated. Drop logic should be handled in page service.");
 	}
 
 	/** Handles adding a dropped item to the sprint at a specific position. This is called by the drop handler with position information.
 	 * @param item         the project item to add to the sprint
 	 * @param targetItem   the sprint item near which the drop occurred (null to add at end)
-	 * @param dropLocation the drop location relative to target (ABOVE, BELOW, or null for end) */
+	 * @param dropLocation the drop location relative to target (ABOVE, BELOW, or null for end)
+	 * @deprecated Use CPageServiceSprint.on_sprintItems_drop() instead. Drop logic should be in page service. */
+	@Deprecated
 	public void addDroppedItem(final CProjectItem<?> item, final CSprintItem targetItem, final GridDropLocation dropLocation) {
-		try {
-			Check.notNull(item, "Dropped item cannot be null");
-			LOGGER.debug("Adding dropped item to sprint: {} ({}) at location: {} relative to target: {}", item.getId(),
-					item.getClass().getSimpleName(), dropLocation, targetItem != null ? targetItem.getId() : "null");
-			// Determine item type
-			final String itemType = item.getClass().getSimpleName();
-			// Calculate the order for the new item
-			final int newOrder;
-			if (targetItem == null || dropLocation == null) {
-				// No target specified - add at end
-				newOrder = getNextOrder();
-			} else {
-				// Insert at specific position
-				newOrder = calculateInsertOrder(targetItem, dropLocation);
-				// Shift existing items BEFORE inserting the new one
-				shiftItemsForInsert(newOrder);
-			}
-			// Create sprint item
-			final CSprintItem sprintItem = new CSprintItem();
-			sprintItem.setSprint(getMasterEntity());
-			sprintItem.setItemId(item.getId());
-			sprintItem.setItemType(itemType);
-			sprintItem.setItemOrder(newOrder);
-			sprintItem.setItem(item);
-			// Save the new item
-			childService.save(sprintItem);
-			// Update self: refresh grid
-			refreshGrid();
-			// Show success notification
-			CNotificationService.showSuccess("Item added to sprint");
-			// Notify listeners (Update-Then-Notify pattern)
-			notifyRefreshListeners(sprintItem);
-		} catch (final Exception e) {
-			LOGGER.error("Error adding dropped item to sprint", e);
-			CNotificationService.showException("Error adding item to sprint", e);
-		}
+		LOGGER.warn("addDroppedItem(item, target, location) is deprecated. Drop logic should be handled in page service.");
 	}
 
 	/** Calculates the order for inserting a new item at a specific position.
 	 * @param targetItem   the item near which to insert
 	 * @param dropLocation where relative to the target (ABOVE or BELOW)
-	 * @return the order value for the new item */
+	 * @return the order value for the new item
+	 * @deprecated Logic moved to CPageServiceSprint */
+	@Deprecated
 	private int calculateInsertOrder(final CSprintItem targetItem, final GridDropLocation dropLocation) {
 		if (dropLocation == GridDropLocation.BELOW) {
-			// Insert after target
 			return targetItem.getItemOrder() + 1;
 		} else {
-			// Insert before target (ABOVE or ON_TOP)
 			return targetItem.getItemOrder();
 		}
 	}
@@ -286,8 +253,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	public String getDialogTitle() { return "Select Items to Add to Sprint"; }
 
 	/** Gets the current drop handler.
-	 * @return the drop handler, or null if not set */
-	public Consumer<CProjectItem<?>> getDropHandler() { return dropHandler; }
+	 * @return the drop handler, or null if not set
+	 * @deprecated Drop handling moved to CPageService */
+	@Deprecated
+	public Consumer<CProjectItem<?>> getDropHandler() { return null; }
 
 	@Override
 	@SuppressWarnings ("unchecked")
@@ -420,8 +389,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	public boolean isDragToBacklogEnabled() { return dragEnabledToBacklog; }
 
 	/** Checks if dropping is currently enabled for this component.
-	 * @return true if drops are enabled (handler is set), false otherwise */
-	public boolean isDropEnabled() { return dropHandler != null; }
+	 * @return true if drops are enabled (handler is set), false otherwise
+	 * @deprecated Drop handling moved to CPageService */
+	@Deprecated
+	public boolean isDropEnabled() { return false; }
 
 	@Override
 	protected List<CSprintItem> loadItems(final CSprint master) {
@@ -497,22 +468,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	/** Removes a sprint item from the sprint and deletes it from the database.
-	 * @param sprintItem the sprint item to remove */
+	 * @param sprintItem the sprint item to remove
+	 * @deprecated Use sprintItemService.delete() directly in page service. Business logic should be in page service. */
+	@Deprecated
 	public void removeSprintItem(final CSprintItem sprintItem) {
-		try {
-			Check.notNull(sprintItem, "Sprint item cannot be null");
-			LOGGER.debug("Removing sprint item: {} (itemId: {})", sprintItem.getId(), sprintItem.getItemId());
-			// Delete the sprint item
-			childService.delete(sprintItem);
-			// Update self: refresh grid
-			refreshGrid();
-			CNotificationService.showSuccess("Item removed from sprint");
-			// Notify listeners (Update-Then-Notify pattern)
-			notifyRefreshListeners(sprintItem);
-		} catch (final Exception e) {
-			LOGGER.error("Error removing sprint item", e);
-			CNotificationService.showException("Error removing item from sprint", e);
-		}
+		LOGGER.warn("removeSprintItem() is deprecated. Deletion logic should be handled in page service.");
 	}
 
 	// Drag support for reverse drag to backlog (manual, not via interface to avoid method erasure conflicts)
@@ -528,50 +488,19 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	/** Sets the handler to be called when an item is dropped into this component from backlog. Also configures the grid to accept drops.
-	 * @param handler the consumer to handle dropped items */
+	 * @param handler the consumer to handle dropped items
+	 * @deprecated Drop handling should be done through CPageService binding, not manual handlers. */
+	@Deprecated
 	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
-		dropHandler = handler;
-		if (getGrid() != null) {
-			if (handler != null) {
-				// Enable drop mode on the grid
-				getGrid().setDropMode(GridDropMode.BETWEEN);
-				// Add drop listener to handle the drop operation
-				getGrid().addDropListener(event -> {
-					try {
-						// Get the drop location
-						final GridDropLocation dropLocation = event.getDropLocation();
-						LOGGER.debug("Item dropped on sprint items grid at location: {}", dropLocation);
-						// Note: The actual dropped item is tracked in the drag source component
-						// and passed via the drop handler callback from the source component
-					} catch (final Exception e) {
-						LOGGER.error("Error handling drop on sprint items grid", e);
-						CNotificationService.showException("Error handling drop", e);
-					}
-				});
-				LOGGER.debug("Drop handler set and grid configured for drops");
-			} else {
-				// Disable drop mode
-				getGrid().setDropMode(null);
-				LOGGER.debug("Drop handler removed");
-			}
-		}
+		LOGGER.warn("setDropHandler() is deprecated. Use CPageService automatic binding instead.");
 	}
 
 	/** Shifts existing items to make room for a new item at the specified position. All items with order >= newOrder will be incremented by 1.
-	 * @param newOrder the order value where the new item will be inserted */
+	 * @param newOrder the order value where the new item will be inserted
+	 * @deprecated Logic moved to CPageServiceSprint.shiftSprintItemsForInsert() */
+	@Deprecated
 	private void shiftItemsForInsert(final int newOrder) {
-		// Load all current items from the database for the current sprint
-		final List<CSprintItem> allItems = loadItems(getMasterEntity());
-		// Sort by order in descending order to avoid conflicts during update
-		allItems.sort((a, b) -> Integer.compare(b.getItemOrder(), a.getItemOrder()));
-		// Shift items with order >= newOrder
-		for (final CSprintItem item : allItems) {
-			if (item.getItemOrder() >= newOrder) {
-				item.setItemOrder(item.getItemOrder() + 1);
-				childService.save(item);
-				LOGGER.debug("Shifted sprint item {} from order {} to {}", item.getId(), item.getItemOrder() - 1, item.getItemOrder());
-			}
-		}
+		LOGGER.warn("shiftItemsForInsert() is deprecated. Logic moved to page service.");
 	}
 
 	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
