@@ -46,13 +46,13 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * visually appealing badges and labels.
  * </p>
  * <p>
- * Implements IHasDragStart and IHasDragEnd to propagate drag-drop events from the internal sprint items grid to external listeners (e.g., page services).
- * This enables automatic method binding in CPageService for drag-drop operations.
+ * Implements IHasDragStart and IHasDragEnd to propagate drag-drop events from the internal sprint items grid to external listeners (e.g., page
+ * services). This enables automatic method binding in CPageService for drag-drop operations.
  * </p>
  * @author Derbent Framework
  * @since 1.0
  * @see CComponentWidgetEntityOfProject */
-public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint> 
+public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint>
 		implements IEntityUpdateListener<CSprintItem>, IHasDragStart<CSprintItem>, IHasDragEnd<CSprintItem> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetSprint.class);
@@ -69,6 +69,34 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		super(sprint);
 		// Note: componentSprintItems is created in createSecondLine() during super() constructor
 		// Drag-drop is configured in createSprintItemsComponent()
+	}
+
+	/** Adds a listener for drag end events from the internal sprint items grid. The listener will be notified when a drag operation ends on the
+	 * sprint items grid.
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<CSprintItem>> listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		if (componentSprintItems == null) {
+			LOGGER.warn("componentSprintItems not initialized, cannot add drag end listener");
+			return () -> {}; // Return empty registration
+		}
+		return componentSprintItems.addDragEndListener(listener);
+	}
+
+	/** Adds a listener for drag start events from the internal sprint items grid. The listener will be notified when a drag operation starts on the
+	 * sprint items grid.
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<CSprintItem>> listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		if (componentSprintItems == null) {
+			LOGGER.warn("componentSprintItems not initialized, cannot add drag start listener");
+			return () -> {}; // Return empty registration
+		}
+		return componentSprintItems.addDragStartListener(listener);
 	}
 
 	@Override
@@ -142,13 +170,11 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			componentSprintItems.setCurrentEntity(getEntity());
 			// Use the general refresh listener pattern instead of the old setOnItemChangeListener
 			componentSprintItems.addRefreshListener(item -> refreshItemCount());
-			
 			// Enable drag-drop on the grid for external drag-drop operations
-			if (componentSprintItems.getGrid() != null) {
-				componentSprintItems.getGrid().setRowsDraggable(true);
-				LOGGER.debug("Drag-drop enabled on sprint items grid within widget");
-			}
-			
+			componentSprintItems.setRowsDraggable(true);
+			//
+			//
+			//
 			// Create container for sprint items
 			containerSprintItems = new CDiv();
 			containerSprintItems.getStyle().set("margin-top", "8px").set("padding", "8px").set("background-color", "#F5F5F5")
@@ -229,12 +255,14 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		LOGGER.debug("Sprint item refreshed: {}", reloaded.getId());
 		refreshItemCount();
 	}
+	// IHasDragStart interface implementation - propagate drag events from internal grid
 
 	@Override
 	public void onEntitySaved(final CSprintItem savedEntity) throws Exception {
 		LOGGER.debug("Sprint item saved: {}", savedEntity.getId());
 		refreshItemCount();
 	}
+	// IHasDragEnd interface implementation - propagate drag events from internal grid
 
 	/** Refresh the item count display by recreating the label with updated count. */
 	private void refreshItemCount() {
@@ -253,37 +281,5 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing item count", e);
 		}
-	}
-	
-	// IHasDragStart interface implementation - propagate drag events from internal grid
-	
-	/** Adds a listener for drag start events from the internal sprint items grid.
-	 * The listener will be notified when a drag operation starts on the sprint items grid.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<CSprintItem>> listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		if (componentSprintItems == null) {
-			LOGGER.warn("componentSprintItems not initialized, cannot add drag start listener");
-			return () -> {}; // Return empty registration
-		}
-		return componentSprintItems.addDragStartListener(listener);
-	}
-	
-	// IHasDragEnd interface implementation - propagate drag events from internal grid
-	
-	/** Adds a listener for drag end events from the internal sprint items grid.
-	 * The listener will be notified when a drag operation ends on the sprint items grid.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<CSprintItem>> listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		if (componentSprintItems == null) {
-			LOGGER.warn("componentSprintItems not initialized, cannot add drag end listener");
-			return () -> {}; // Return empty registration
-		}
-		return componentSprintItems.addDragEndListener(listener);
 	}
 }

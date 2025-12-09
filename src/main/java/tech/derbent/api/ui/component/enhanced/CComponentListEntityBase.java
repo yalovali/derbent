@@ -92,18 +92,16 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected CHorizontalLayout layoutToolbar;
 	protected MasterEntity masterEntity;
 	protected final Class<MasterEntity> masterEntityClass;
+	private ChildEntity previousValue = null;
+	private boolean readOnly = false;
 	// Refresh listeners for the update-and-notify pattern
 	private final List<Consumer<ChildEntity>> refreshListeners = new ArrayList<>();
 	protected ChildEntity selectedItem;
-	protected boolean useDynamicHeight = false;
-	
-	// HasValue interface fields
-	private final List<ValueChangeListener<? super ValueChangeEvent<ChildEntity>>> valueChangeListeners = new ArrayList<>();
-	private ChildEntity previousValue = null;
-	private boolean readOnly = false;
-	
 	// Owner interfaces for notifying parent components
 	private ISelectionOwner<ChildEntity> selectionOwner;
+	protected boolean useDynamicHeight = false;
+	// HasValue interface fields
+	private final List<ValueChangeListener<? super ValueChangeEvent<ChildEntity>>> valueChangeListeners = new ArrayList<>();
 
 	/** Constructor for the entity list component.
 	 * @param title             The title to display above the grid
@@ -172,6 +170,26 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return button;
 	}
 
+	/** Adds a listener for drag end events from the internal grid. The listener will be notified when a drag operation ends on the grid.
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<ChildEntity>> listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		Check.notNull(grid, "Grid must be initialized before adding drag end listener");
+		return grid.addDragEndListener(listener);
+	}
+
+	/** Adds a listener for drag start events from the internal grid. The listener will be notified when a drag operation starts on the grid.
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<ChildEntity>> listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		Check.notNull(grid, "Grid must be initialized before adding drag start listener");
+		return grid.addDragStartListener(listener);
+	}
+
 	// IGridRefreshListener implementation
 	/** Adds a listener to be notified when this component's grid data changes. Implements IGridRefreshListener.addRefreshListener()
 	 * @param listener Consumer called when data changes (receives the changed item if available, or null) */
@@ -180,6 +198,24 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		Check.notNull(listener, "Refresh listener cannot be null");
 		refreshListeners.add(listener);
 		LOGGER.debug("Added refresh listener to {}", entityClass.getSimpleName());
+	}
+
+	/** Registers a value change listener. Implements HasValue.addValueChangeListener().
+	 * @param listener The value change listener to register
+	 * @return Registration object to remove the listener */
+	@Override
+	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener) {
+		Check.notNull(listener, "ValueChangeListener cannot be null");
+		valueChangeListeners.add(listener);
+		LOGGER.debug("Added value change listener to {}", entityClass.getSimpleName());
+		return () -> valueChangeListeners.remove(listener);
+	}
+
+	/** Clears the selection. Equivalent to calling setValue(null). */
+	@Override
+	public void clear() {
+		LOGGER.debug("Clearing selection");
+		setValue(null);
 	}
 
 	/** Clear the grid. Implements IGridComponent.clearGrid() */
@@ -276,14 +312,44 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		LOGGER.debug("Toolbar created with CRUD buttons");
 	}
 
+	/** Fires a value change event to all registered listeners.
+	 * @param newValue   the new value
+	 * @param fromClient whether the change originated from the client */
+	protected void fireValueChangeEvent(final ChildEntity newValue, final boolean fromClient) {
+		final ChildEntity oldValue = previousValue;
+		previousValue = newValue;
+		if (!valueChangeListeners.isEmpty()) {
+			LOGGER.debug("Firing value change event: old={}, new={}, fromClient={}", oldValue != null ? oldValue.getId() : "null",
+					newValue != null ? newValue.getId() : "null", fromClient);
+			final ValueChangeEvent<ChildEntity> event = new ValueChangeEvent<ChildEntity>() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public HasValue<?, ChildEntity> getHasValue() { return CComponentListEntityBase.this; }
+
+				@Override
+				public ChildEntity getOldValue() { return oldValue; }
+
+				@Override
+				public ChildEntity getValue() { return newValue; }
+
+				@Override
+				public boolean isFromClient() { return fromClient; }
+			};
+			for (final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener : valueChangeListeners) {
+				try {
+					listener.valueChanged(event);
+				} catch (final Exception e) {
+					LOGGER.error("Error notifying value change listener", e);
+				}
+			}
+		}
+	}
+
 	/** Gets the add from list button, if created.
 	 * @return The add from list button, or null if not created */
 	public CButton getButtonAddFromList() { return buttonAddFromList; }
-
-	/** Get the entity service.
-	 * @return The service */
-	@Override
-	public CAbstractService<?> getEntityService() { return (CAbstractService<?>) childService; }
 
 	/** Returns the current sprint entity.
 	 * @return The current sprint being edited */
@@ -296,6 +362,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public String getCurrentEntityIdString() {
 		return (getMasterEntity() != null) && (getMasterEntity().getId() != null) ? getMasterEntity().getId().toString() : null;
 	}
+
+	/** Get the entity service.
+	 * @return The service */
+	@Override
+	public CAbstractService<?> getEntityService() { return (CAbstractService<?>) childService; }
 
 	/** Get the grid component. Implements IGridComponent.getGrid()
 	 * @return The grid */
@@ -315,6 +386,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Get the currently selected item.
 	 * @return The selected item, or null if none selected */
 	public ChildEntity getSelectedItem() { return selectedItem; }
+
+	/** Gets the current value of this component (the selected item).
+	 * @return The currently selected item (can be null) */
+	@Override
+	public ChildEntity getValue() { return selectedItem; }
 
 	/** Handle edit operation for selected item.
 	 * @param item The item to edit */
@@ -357,6 +433,21 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		LOGGER.debug("UI components initialized for {}", entityClass.getSimpleName());
 	}
 
+	/** Checks if the selection is empty.
+	 * @return true if no item is selected, false otherwise */
+	@Override
+	public boolean isEmpty() { return selectedItem == null; }
+
+	/** Checks if the component is read-only.
+	 * @return true if read-only, false otherwise */
+	@Override
+	public boolean isReadOnly() { return readOnly; }
+
+	/** Checks if the required indicator is visible.
+	 * @return false (required indicator not currently implemented) */
+	@Override
+	public boolean isRequiredIndicatorVisible() { return false; }
+
 	/** Load items for the given master entity. Subclasses must implement this to define how items are loaded.
 	 * @param master The master/parent entity
 	 * @return List of items to display */
@@ -394,6 +485,18 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 					LOGGER.error("Error notifying refresh listener", e);
 				}
 			}
+		}
+	}
+
+	/** Sets the drag owner to be notified when drag operations start. /** Notifies the selection owner about selection changes. Should be called
+	 * whenever selection changes in the component. */
+	protected void notifySelectionOwner() {
+		if (selectionOwner != null) {
+			final Set<ChildEntity> selected = new HashSet<>();
+			if (selectedItem != null) {
+				selected.add(selectedItem);
+			}
+			selectionOwner.onSelectionChanged(selected);
 		}
 	}
 
@@ -522,6 +625,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param saveCallback Callback to invoke when saving
 	 * @param isNew        True if this is a new entity */
 	protected abstract void openEditDialog(ChildEntity entity, Consumer<ChildEntity> saveCallback, boolean isNew);
+	// Owner interface setters and notification methods
 
 	@Override
 	public void populateForm() {
@@ -545,6 +649,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		grid.setItems(items);
 		grid.asSingleSelect().setValue(currentValue);
 	}
+	// HasValue interface implementation
 
 	/** Removes a previously added refresh listener. Implements IGridRefreshListener.removeRefreshListener()
 	 * @param listener The listener to remove */
@@ -634,77 +739,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 	}
 
-	/** Set the currently selected item.
-	 * @param item The item to select */
-	public void setSelectedItem(final ChildEntity item) {
-		grid.asSingleSelect().setValue(item);
-	}
-
-	/** Update the enabled state of action buttons based on selection.
-	 * @param hasSelection True if an item is selected */
-	protected void updateButtonStates(final boolean hasSelection) {
-		buttonDelete.setEnabled(hasSelection);
-		buttonMoveUp.setEnabled(hasSelection);
-		buttonMoveDown.setEnabled(hasSelection);
-	}
-	
-	// Owner interface setters and notification methods
-	
-	/** Sets the selection owner to be notified of selection changes.
-	 * @param owner the selection owner (can be null) */
-	public void setSelectionOwner(final ISelectionOwner<ChildEntity> owner) {
-		this.selectionOwner = owner;
-	}
-	
-	/** Sets the drag owner to be notified when drag operations start.
-	/** Notifies the selection owner about selection changes.
-	 * Should be called whenever selection changes in the component. */
-	protected void notifySelectionOwner() {
-		if (selectionOwner != null) {
-			final Set<ChildEntity> selected = new HashSet<>();
-			if (selectedItem != null) {
-				selected.add(selectedItem);
-			}
-			selectionOwner.onSelectionChanged(selected);
-		}
-	}
-	
-	// HasValue interface implementation
-	
-	/** Gets the current value of this component (the selected item).
-	 * @return The currently selected item (can be null) */
-	@Override
-	public ChildEntity getValue() {
-		return selectedItem;
-	}
-	
-	/** Sets the value of this component (the selected item).
-	 * This will update the selection and fire value change events.
-	 * @param value The item to select (can be null to clear selection) */
-	@Override
-	public void setValue(final ChildEntity value) {
-		LOGGER.debug("Setting value programmatically: {}", value != null ? value.getId() : "null");
-		grid.asSingleSelect().setValue(value);
-		selectedItem = value;
-		updateButtonStates(value != null);
-		// Fire value change event (not from client)
-		fireValueChangeEvent(value, false);
-	}
-	
-	/** Clears the selection. Equivalent to calling setValue(null). */
-	@Override
-	public void clear() {
-		LOGGER.debug("Clearing selection");
-		setValue(null);
-	}
-	
-	/** Checks if the selection is empty.
-	 * @return true if no item is selected, false otherwise */
-	@Override
-	public boolean isEmpty() {
-		return selectedItem == null;
-	}
-	
 	/** Sets the read-only state of this component. When read-only, users cannot change the selection.
 	 * @param readOnly true to make read-only, false to make editable */
 	@Override
@@ -728,14 +762,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 		grid.setEnabled(!readOnly);
 	}
-	
-	/** Checks if the component is read-only.
-	 * @return true if read-only, false otherwise */
-	@Override
-	public boolean isReadOnly() {
-		return readOnly;
-	}
-	
+
 	/** Sets whether the required indicator should be visible.
 	 * @param requiredIndicatorVisible true to show required indicator, false to hide */
 	@Override
@@ -744,95 +771,42 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		// This could be implemented by adding a visual indicator to the component
 		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
 	}
-	
-	/** Checks if the required indicator is visible.
-	 * @return false (required indicator not currently implemented) */
-	@Override
-	public boolean isRequiredIndicatorVisible() {
-		return false;
+
+	public void setRowsDraggable(boolean value) {
+		getGrid().setRowsDraggable(true);
 	}
-	
-	/** Registers a value change listener. Implements HasValue.addValueChangeListener().
-	 * @param listener The value change listener to register
-	 * @return Registration object to remove the listener */
-	@Override
-	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener) {
-		Check.notNull(listener, "ValueChangeListener cannot be null");
-		valueChangeListeners.add(listener);
-		LOGGER.debug("Added value change listener to {}", entityClass.getSimpleName());
-		return () -> valueChangeListeners.remove(listener);
+
+	/** Set the currently selected item.
+	 * @param item The item to select */
+	public void setSelectedItem(final ChildEntity item) {
+		grid.asSingleSelect().setValue(item);
 	}
-	
-	/** Fires a value change event to all registered listeners.
-	 * @param newValue the new value
-	 * @param fromClient whether the change originated from the client */
-	protected void fireValueChangeEvent(final ChildEntity newValue, final boolean fromClient) {
-		final ChildEntity oldValue = previousValue;
-		previousValue = newValue;
-		
-		if (!valueChangeListeners.isEmpty()) {
-			LOGGER.debug("Firing value change event: old={}, new={}, fromClient={}", 
-				oldValue != null ? oldValue.getId() : "null",
-				newValue != null ? newValue.getId() : "null",
-				fromClient);
-			
-			final ValueChangeEvent<ChildEntity> event = new ValueChangeEvent<ChildEntity>() {
-				private static final long serialVersionUID = 1L;
-				
-				@Override
-				public HasValue<?, ChildEntity> getHasValue() {
-					return CComponentListEntityBase.this;
-				}
-				
-				@Override
-				public ChildEntity getOldValue() {
-					return oldValue;
-				}
-				
-				@Override
-				public ChildEntity getValue() {
-					return newValue;
-				}
-				
-				@Override
-				public boolean isFromClient() {
-					return fromClient;
-				}
-			};
-			
-			for (final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener : valueChangeListeners) {
-				try {
-					listener.valueChanged(event);
-				} catch (final Exception e) {
-					LOGGER.error("Error notifying value change listener", e);
-				}
-			}
-		}
+
+	/** Sets the selection owner to be notified of selection changes.
+	 * @param owner the selection owner (can be null) */
+	public void setSelectionOwner(final ISelectionOwner<ChildEntity> owner) {
+		this.selectionOwner = owner;
 	}
-	
 	// IHasDragStart interface implementation
-	
-	/** Adds a listener for drag start events from the internal grid.
-	 * The listener will be notified when a drag operation starts on the grid.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
+
+	/** Sets the value of this component (the selected item). This will update the selection and fire value change events.
+	 * @param value The item to select (can be null to clear selection) */
 	@Override
-	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<ChildEntity>> listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		Check.notNull(grid, "Grid must be initialized before adding drag start listener");
-		return grid.addDragStartListener(listener);
+	public void setValue(final ChildEntity value) {
+		LOGGER.debug("Setting value programmatically: {}", value != null ? value.getId() : "null");
+		grid.asSingleSelect().setValue(value);
+		selectedItem = value;
+		updateButtonStates(value != null);
+		// Fire value change event (not from client)
+		fireValueChangeEvent(value, false);
 	}
-	
 	// IHasDragEnd interface implementation
-	
-	/** Adds a listener for drag end events from the internal grid.
-	 * The listener will be notified when a drag operation ends on the grid.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<ChildEntity>> listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		Check.notNull(grid, "Grid must be initialized before adding drag end listener");
-		return grid.addDragEndListener(listener);
+
+	/** Update the enabled state of action buttons based on selection.
+	 * @param hasSelection True if an item is selected */
+	protected void updateButtonStates(final boolean hasSelection) {
+		buttonDelete.setEnabled(hasSelection);
+		buttonMoveUp.setEnabled(hasSelection);
+		buttonMoveDown.setEnabled(hasSelection);
 	}
 }
