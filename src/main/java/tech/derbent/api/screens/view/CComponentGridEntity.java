@@ -40,9 +40,11 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
+import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IHasDragEnd;
 import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.interfaces.IHasDrop;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
@@ -58,7 +60,7 @@ import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragStart<CEntityDB<?>>,
-		IHasDragEnd<CEntityDB<?>>, IHasDrop<CEntityDB<?>>, tech.derbent.api.interfaces.IPageServiceAutoRegistrable, tech.derbent.api.interfaces.IHasDragControl {
+		IHasDragEnd<CEntityDB<?>>, IHasDrop<CEntityDB<?>>, IPageServiceAutoRegistrable, IHasDragControl {
 
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent extends ComponentEvent<CComponentGridEntity> {
@@ -147,13 +149,15 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * The CComponentGridEntity delegates drop events directly to its underlying grid component.
 	 * </p>
 	 * <p>
-	 * Note: The grid field is declared as CGrid&lt;?&gt; because the entity type is determined at runtime. However, all entities are guaranteed to extend
-	 * CEntityDB by the service architecture, making the cast safe.
+	 * Note: The grid field is declared as CGrid&lt;?&gt; because the entity type is determined at runtime. However, all entities are guaranteed to
+	 * extend CEntityDB by the service architecture, making the cast safe.
 	 * </p>
 	 * @param listener the listener to be notified when items are dropped
 	 * @return a registration object that can be used to remove the listener */
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
 	public Registration addDropListener(final ComponentEventListener<GridDropEvent<CEntityDB<?>>> listener) {
 		Check.notNull(listener, "Drop listener cannot be null");
 		Check.notNull(grid, "Grid not available for drop listener registration");

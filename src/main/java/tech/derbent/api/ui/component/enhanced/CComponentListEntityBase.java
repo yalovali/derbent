@@ -21,6 +21,7 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
+import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IHasDragEnd;
 import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.interfaces.ISelectionOwner;
@@ -67,8 +68,7 @@ import tech.derbent.api.utils.Check;
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
 		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>,
 		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IHasDragStart<ChildEntity>, IHasDragEnd<ChildEntity>,
-		tech.derbent.api.interfaces.IPageServiceAutoRegistrable, tech.derbent.api.interfaces.IHasDragControl,
-		tech.derbent.api.interfaces.IHasDrop<ChildEntity> {
+		tech.derbent.api.interfaces.IPageServiceAutoRegistrable, IHasDragControl, tech.derbent.api.interfaces.IHasDrop<ChildEntity> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
