@@ -1,10 +1,29 @@
 package tech.derbent.api.ui.theme;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** Unit tests for CFontSizeService - Font size scaling functionality. Tests CSS variable generation for different font size scales. */
 class CFontSizeServiceTest {
+
+	@Test
+	void testGetAvailableFontSizeScales() {
+		// Given: a CFontSizeService instance
+		final CFontSizeService service = new CFontSizeService();
+		// When: getting available font size scales
+		final List<String> scales = service.getAvailableFontSizeScales();
+		// Then: should return exactly 3 scales
+		assertNotNull(scales, "Scales list should not be null");
+		assertEquals(3, scales.size(), "Should have exactly 3 font size scales");
+		assertTrue(scales.contains("small"), "Should contain 'small' scale");
+		assertTrue(scales.contains("medium"), "Should contain 'medium' scale");
+		assertTrue(scales.contains("large"), "Should contain 'large' scale");
+		// And: scales should be in the correct order
+		assertEquals("small", scales.get(0), "First scale should be 'small'");
+		assertEquals("medium", scales.get(1), "Second scale should be 'medium'");
+		assertEquals("large", scales.get(2), "Third scale should be 'large'");
+	}
 
 	@Test
 	void testGetCssVariablesForSmallScale() {
