@@ -530,4 +530,17 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			LOGGER.error("Error in drag end handler", ex);
 		}
 	}
+
+	/**
+	 * Returns the component name for method binding.
+	 * <p>
+	 * This component uses "sprintItems" as its name, enabling automatic binding
+	 * to page service handlers like on_sprintItems_dragStart, on_sprintItems_drop, etc.
+	 * 
+	 * @return The component name "sprintItems"
+	 */
+	@Override
+	public String getComponentName() {
+		return "sprintItems";
+	}
 }

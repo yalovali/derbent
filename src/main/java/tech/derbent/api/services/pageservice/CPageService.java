@@ -195,7 +195,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private void bindComponent(final Method method, final Component component, final String methodName, final String componentName,
 			final String action) {
-		LOGGER.debug("Binding method {} to component {} for action {}.", methodName, componentName, action);
+		LOGGER.debug("[BindDebug] Starting binding for method {} to component {} for action {}.", methodName, componentName, action);
 		// check method parameters
 		final var parameters = method.getParameterTypes();
 		Check.isTrue(parameters.length == 2, "Method {" + methodName + "} has invalid number of parameters. Expected 2 (Component, Object).");
@@ -256,51 +256,57 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		case "dragStart" -> {
 			// Check if component implements IHasDragStart interface first
 			if (component instanceof IHasDragStart<?>) {
+				LOGGER.debug("[DragDebug] Component {} implements IHasDragStart, binding via interface", componentName);
 				bindDragStart((IHasDragStart<?>) component, method, methodName);
 			} else if (component instanceof Grid<?>) {
 				// Fallback to direct Grid binding for backward compatibility
+				LOGGER.debug("[DragDebug] Component {} is a Grid, binding via direct Grid API", componentName);
 				bindGridDragStart((Grid<?>) component, method, methodName);
 			} else {
-				// Fallback to generic DOM event listener
-				component.getElement().addEventListener("dragstart", e -> {
-					try {
-						method.invoke(this, component, null);
-					} catch (final Exception ex) {
-						LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-					}
-				});
+				// Fail-fast: dragStart handler defined but component doesn't support it
+				throw new IllegalArgumentException(String.format(
+						"DragStart action requires IHasDragStart interface or Grid. Component '%s' is %s which doesn't support drag start. " +
+						"Handler method '%s' cannot be bound. Implement IHasDragStart or use Grid.",
+						componentName, component.getClass().getSimpleName(), methodName));
 			}
 		}
 		case "dragEnd" -> {
 			// Check if component implements IHasDragEnd interface first
 			if (component instanceof IHasDragEnd<?>) {
+				LOGGER.debug("[DragDebug] Component {} implements IHasDragEnd, binding via interface", componentName);
 				bindDragEnd((IHasDragEnd<?>) component, method, methodName);
 			} else if (component instanceof Grid<?>) {
 				// Fallback to direct Grid binding for backward compatibility
+				LOGGER.debug("[DragDebug] Component {} is a Grid, binding via direct Grid API", componentName);
 				bindGridDragEnd((Grid<?>) component, method, methodName);
 			} else {
-				// Fallback to generic DOM event listener
-				component.getElement().addEventListener("dragend", e -> {
-					try {
-						method.invoke(this, component, null);
-					} catch (final Exception ex) {
-						LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-					}
-				});
+				// Fail-fast: dragEnd handler defined but component doesn't support it
+				throw new IllegalArgumentException(String.format(
+						"DragEnd action requires IHasDragEnd interface or Grid. Component '%s' is %s which doesn't support drag end. " +
+						"Handler method '%s' cannot be bound. Implement IHasDragEnd or use Grid.",
+						componentName, component.getClass().getSimpleName(), methodName));
 			}
 		}
 		case "drop" -> {
-			// Drop event is only supported for Grid components
+			// Drop event is supported for Grid components or components implementing IHasDrop
 			if (component instanceof Grid<?>) {
+				LOGGER.debug("[DragDebug] Component {} is a Grid, binding drop event", componentName);
 				bindGridDrop((Grid<?>) component, method, methodName);
+			} else if (component instanceof tech.derbent.api.interfaces.IHasDrop<?>) {
+				LOGGER.debug("[DragDebug] Component {} implements IHasDrop, binding drop event", componentName);
+				bindIHasDropEvent((tech.derbent.api.interfaces.IHasDrop<?>) component, method, methodName);
 			} else {
-				LOGGER.warn("Drop action is only supported for Grid components, component {} is {}", componentName,
-						component.getClass().getSimpleName());
+				// Fail-fast: Drop handler defined but component doesn't support drops
+				throw new IllegalArgumentException(String.format(
+						"Drop action requires Grid or IHasDrop interface. Component '%s' is %s which doesn't support drops. " +
+						"Handler method '%s' cannot be bound.",
+						componentName, component.getClass().getSimpleName(), methodName));
 			}
 		}
 		// add more actions as needed
 		default -> Check.warn("Action {" + action + "} not recognized for binding.");
 		}
+		LOGGER.debug("[BindDebug] Successfully bound method {} to component {} for action {}", methodName, componentName, action);
 	}
 
 	/** Binds a component's drag end event to a page service handler method. This method supports any component implementing IHasDragEnd interface.
@@ -429,46 +435,78 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		LOGGER.debug("Bound Grid drop event to method {}", methodName);
 	}
 
+	/** Binds a component's drop event to a page service handler method. Supports components implementing IHasDrop interface.
+	 * @param component  the component implementing IHasDrop
+	 * @param method     the handler method to invoke
+	 * @param methodName the name of the handler method */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void bindIHasDropEvent(final tech.derbent.api.interfaces.IHasDrop<?> component, final Method method, final String methodName) {
+		component.addDropListener(event -> {
+			try {
+				LOGGER.debug("[DragDebug] CPageService.bindIHasDropEvent: Drop event received on component {}", methodName);
+				// Get drop information from GridDropEvent
+				final Object targetItem = event.getDropTargetItem().orElse(null);
+				final var dropLocation = event.getDropLocation();
+				// Create event wrapper for handler
+				final CDragDropEvent<?> dropEvent = new CDragDropEvent(null, null, targetItem, dropLocation, (com.vaadin.flow.component.Component) component);
+				method.invoke(this, (com.vaadin.flow.component.Component) component, dropEvent);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			}
+		});
+		LOGGER.debug("[BindDebug] Bound IHasDrop drop event to method {}", methodName);
+	}
+
 	public void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
+		LOGGER.debug("[BindDebug] Starting method binding for page service: {}", page.getClass().getSimpleName());
+		
 		// Combine form components and custom components
 		final Map<String, Component> allComponents = new HashMap<>();
 		
 		// Get components from detailsBuilder's centralized map if available
 		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
 			allComponents.putAll(detailsBuilder.getComponentMap());
-			LOGGER.debug("Added {} components from detailsBuilder's centralized map", detailsBuilder.getComponentMap().size());
+			LOGGER.debug("[BindDebug] Added {} components from detailsBuilder's centralized map", detailsBuilder.getComponentMap().size());
 		}
 		
 		// Also include formBuilder components for backward compatibility
 		if (formBuilder != null) {
 			allComponents.putAll(formBuilder.getComponentMap());
+			LOGGER.debug("[BindDebug] Added {} components from formBuilder", formBuilder.getComponentMap().size());
 		}
 		
 		// Add custom registered components (these take precedence)
 		allComponents.putAll(customComponents);
+		LOGGER.debug("[BindDebug] Added {} custom registered components", customComponents.size());
 		
 		// print the component names for debugging
-		LOGGER.debug("Binding methods for components: {}", allComponents.keySet());
-		// filter methods with name matching regex:("on_[a-zA-Z0-9]+_[a" + "-zA-Z0-9]+")
-		// final var methods = Arrays.stream(page.getClass().getDeclaredMethods()).filter(m ->
-		// m.getName().matches("on_[a-zA-Z0-9]+_[a-zA-Z0-9]+")).toList();
+		LOGGER.debug("[BindDebug] Total components available for binding: {} - {}", allComponents.size(), allComponents.keySet());
+		
+		// Scan for handler methods matching on_{componentName}_{action} pattern
 		final var methods = page.getClass().getDeclaredMethods();
+		int boundCount = 0;
 		for (final var method : methods) {
 			final var matcher = HANDLER_PATTERN.matcher(method.getName());
 			if (!matcher.matches()) {
 				continue;
 			}
-			// LOGGER.debug("Found handler method: {}", method.getName());
 			final var componentName = matcher.group(1);
 			final var action = matcher.group(2);
 			final var component = allComponents.get(componentName);
 			if (component == null) {
-				LOGGER.warn("Component '{}' not found in FormBuilder or custom components for binding method '{}'", componentName, method.getName());
+				LOGGER.warn("[BindDebug] Component '{}' not found for binding method '{}' - Available components: {}", 
+					componentName, method.getName(), allComponents.keySet());
 				continue;
 			}
+			LOGGER.debug("[BindDebug] Binding method '{}' to component '{}' (type: {}) for action '{}'", 
+				method.getName(), componentName, component.getClass().getSimpleName(), action);
 			bindComponent(method, component, method.getName(), componentName, action);
+			boundCount++;
 		}
+		LOGGER.debug("[BindDebug] Completed method binding - {} methods bound successfully", boundCount);
 	}
 
 	protected Checkbox getCheckbox(final String fieldName) {
@@ -478,10 +516,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	@SuppressWarnings ("unchecked")
 	protected <T> ComboBox<T> getComboBox(final String fieldName) {
 		final Component component = getComponentByName(fieldName);
-		if (component == null) {
-			LOGGER.warn("Component '{}' not found", fieldName);
-			return null;
-		}
+		Check.notNull(component, String.format("Component '%s' not found. Check component registration and field name.", fieldName));
+		
 		// Check if it's a CNavigableComboBox (which is a CustomField containing a ComboBox)
 		if (component instanceof CNavigableComboBox<?>) {
 			return (ComboBox<T>) ((CNavigableComboBox<?>) component).getComboBox();
@@ -490,21 +526,20 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		if (component instanceof ComboBox) {
 			return (ComboBox<T>) component;
 		}
-		LOGGER.warn("Component '{}' is not a ComboBox (found: {})", fieldName, component.getClass().getSimpleName());
-		return null;
+		// Fail-fast: Component exists but wrong type
+		throw new IllegalArgumentException(String.format(
+				"Component '%s' is not a ComboBox. Found: %s. Expected ComboBox or CNavigableComboBox.",
+				fieldName, component.getClass().getSimpleName()));
 	}
 
 	@SuppressWarnings ("unchecked")
 	protected <T extends Component> T getComponent(final String fieldName, final Class<T> componentType) {
 		final Component component = getComponentByName(fieldName);
-		if (component == null) {
-			LOGGER.warn("Component '{}' not found", fieldName);
-			return null;
-		}
+		Check.notNull(component, String.format("Component '%s' not found. Check component registration and field name.", fieldName));
 		if (!componentType.isInstance(component)) {
-			LOGGER.warn("Component '{}' is of type {} but expected {}", fieldName, component.getClass().getSimpleName(),
-					componentType.getSimpleName());
-			return null;
+			throw new IllegalArgumentException(String.format(
+					"Component '%s' is of type %s but expected %s. Check component type matches handler usage.",
+					fieldName, component.getClass().getSimpleName(), componentType.getSimpleName()));
 		}
 		return (T) component;
 	}
@@ -534,15 +569,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	})
 	protected Object getComponentValue(final String fieldName) {
 		final Component component = getComponentByName(fieldName);
-		if (component == null) {
-			LOGGER.warn("Cannot get value: Component '{}' not found", fieldName);
-			return null;
+		Check.notNull(component, String.format("Cannot get value: Component '%s' not found. Check component registration.", fieldName));
+		if (!(component instanceof HasValue)) {
+			throw new IllegalArgumentException(String.format(
+					"Component '%s' does not have a value (not a HasValue). Found type: %s. Use HasValue components for getValue().",
+					fieldName, component.getClass().getSimpleName()));
 		}
-		if (component instanceof HasValue) {
-			return ((HasValue) component).getValue();
-		}
-		LOGGER.warn("Component '{}' does not have a value (not a HasValue)", fieldName);
-		return null;
+		return ((HasValue) component).getValue();
 	}
 
 	protected EntityClass getCurrentEntity() { return getView().getCurrentEntity(); }
@@ -605,18 +638,21 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	})
 	protected void setComponentValue(final String fieldName, final Object value) {
 		final Component component = getComponentByName(fieldName);
-		if (component == null) {
-			LOGGER.warn("Cannot set value: Component '{}' not found", fieldName);
-			return;
+		Check.notNull(component, String.format("Cannot set value: Component '%s' not found. Check component registration.", fieldName));
+		if (!(component instanceof HasValue)) {
+			throw new IllegalArgumentException(String.format(
+					"Component '%s' does not support setting value (not a HasValue). Found type: %s. Use HasValue components for setValue().",
+					fieldName, component.getClass().getSimpleName()));
 		}
-		if (component instanceof HasValue) {
-			try {
-				((HasValue) component).setValue(value);
-			} catch (final Exception e) {
-				LOGGER.error("Error setting value for component '{}': {}", fieldName, e.getMessage());
-			}
-		} else {
-			LOGGER.warn("Component '{}' does not support setting value (not a HasValue)", fieldName);
+		try {
+			((HasValue) component).setValue(value);
+		} catch (final Exception e) {
+			// Re-throw with more context
+			throw new IllegalStateException(String.format(
+					"Error setting value for component '%s': %s. Value type: %s, Component type: %s",
+					fieldName, e.getMessage(), 
+					value != null ? value.getClass().getSimpleName() : "null",
+					component.getClass().getSimpleName()), e);
 		}
 	}
 
