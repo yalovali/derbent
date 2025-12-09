@@ -6,6 +6,8 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
+import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -569,6 +571,34 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				childService.save(item);
 				LOGGER.debug("Shifted sprint item {} from order {} to {}", item.getId(), item.getItemOrder() - 1, item.getItemOrder());
 			}
+		}
+	}
+
+	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
+	 * @param event The GridDragStartEvent from the grid */
+	@Override
+	protected void on_grid_dragStart(final GridDragStartEvent<CSprintItem> event) {
+		super.on_grid_dragStart(event);
+		try {
+			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
+			final Long firstItemId = !event.getDraggedItems().isEmpty() && event.getDraggedItems().get(0) != null
+					? event.getDraggedItems().get(0).getId()
+					: null;
+			LOGGER.debug("[DragDebug] CComponentListSprintItems: dragStart - source=grid, items={}, firstItemId={}", itemCount, firstItemId);
+		} catch (final Exception ex) {
+			LOGGER.error("Error in drag start handler", ex);
+		}
+	}
+
+	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
+	 * @param event The GridDragEndEvent from the grid */
+	@Override
+	protected void on_grid_dragEnd(final GridDragEndEvent<CSprintItem> event) {
+		super.on_grid_dragEnd(event);
+		try {
+			LOGGER.debug("[DragDebug] CComponentListSprintItems: dragEnd - source=grid");
+		} catch (final Exception ex) {
+			LOGGER.error("Error in drag end handler", ex);
 		}
 	}
 }

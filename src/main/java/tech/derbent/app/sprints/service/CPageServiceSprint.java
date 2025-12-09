@@ -140,7 +140,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param value     CDragDropEvent (dragged items not available in drag end) */
 	public void on_backlogItems_dragEnd(final Component component, final Object value) {
 		if (value instanceof CDragDropEvent) {
-			LOGGER.debug("Backlog drag operation completed");
+			LOGGER.debug("[DragDebug] CPageServiceSprint.on_backlogItems_dragEnd: Backlog drag operation completed");
 			draggedFromBacklog = null;
 		}
 	}
@@ -153,7 +153,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 			if (event.getDraggedItems() != null && !event.getDraggedItems().isEmpty()) {
 				draggedFromBacklog = (CProjectItem<?>) event.getDraggedItem();
-				LOGGER.debug("Item drag started from backlog: {}", draggedFromBacklog.getId());
+				LOGGER.debug("[DragDebug] CPageServiceSprint.on_backlogItems_dragStart: Item drag started from backlog: {}",
+						draggedFromBacklog.getId());
 			}
 		}
 	}
@@ -230,7 +231,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param value     CDragDropEvent (dragged items not available in drag end) */
 	public void on_sprintItems_dragEnd(final Component component, final Object value) {
 		if (value instanceof CDragDropEvent) {
-			LOGGER.debug("Sprint items drag operation completed");
+			LOGGER.debug("[DragDebug] CPageServiceSprint.on_sprintItems_dragEnd: Sprint items drag operation completed");
 			draggedFromSprint = null;
 		}
 	}
@@ -243,7 +244,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 			if (event.getDraggedItems() != null && !event.getDraggedItems().isEmpty()) {
 				draggedFromSprint = (CSprintItem) event.getDraggedItem();
-				LOGGER.debug("Sprint item drag started: {} (itemId: {})", draggedFromSprint.getId(), draggedFromSprint.getItemId());
+				LOGGER.debug("[DragDebug] CPageServiceSprint.on_sprintItems_dragStart: Sprint item drag started: {} (itemId: {})",
+						draggedFromSprint.getId(), draggedFromSprint.getItemId());
 			}
 		}
 	}

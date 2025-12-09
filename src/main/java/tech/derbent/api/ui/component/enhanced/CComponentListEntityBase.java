@@ -280,6 +280,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		grid.asSingleSelect().addValueChangeListener(e -> on_gridItems_selected(e.getValue()));
 		// Add double-click listener
 		grid.addItemDoubleClickListener(e -> on_gridItems_doubleClicked(e.getItem()));
+		// Add internal drag event listeners for debug logging
+		grid.addDragStartListener(e -> on_grid_dragStart(e));
+		grid.addDragEndListener(e -> on_grid_dragEnd(e));
 		LOGGER.debug("Grid created and configured for {} (dynamic height: {})", entityClass.getSimpleName(), useDynamicHeight);
 	}
 
@@ -617,6 +620,27 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		} catch (final Exception ex) {
 			LOGGER.error("Error processing selection change", ex);
 			CNotificationService.showException("Error processing selection", ex);
+		}
+	}
+
+	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
+	 * @param event The GridDragStartEvent from the grid */
+	protected void on_grid_dragStart(final GridDragStartEvent<ChildEntity> event) {
+		try {
+			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
+			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragStart - source=grid, items={}", entityClass.getSimpleName(), itemCount);
+		} catch (final Exception ex) {
+			LOGGER.error("Error in drag start handler", ex);
+		}
+	}
+
+	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
+	 * @param event The GridDragEndEvent from the grid */
+	protected void on_grid_dragEnd(final GridDragEndEvent<ChildEntity> event) {
+		try {
+			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragEnd - source=grid", entityClass.getSimpleName());
+		} catch (final Exception ex) {
+			LOGGER.error("Error in drag end handler", ex);
 		}
 	}
 
