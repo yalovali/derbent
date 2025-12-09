@@ -28,7 +28,7 @@ import tech.derbent.base.session.service.ISessionService;
  * reflection and generic patterns.
  * @param <EntityClass> The entity type this page manages */
 public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityClass>> extends CPageBaseProjectAware
-		implements IEntityUpdateListener<EntityClass>, ILayoutChangeListener {
+		implements ILayoutChangeListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageGenericEntity.class);
 	private static final long serialVersionUID = 1L;
 	// Current state
@@ -220,8 +220,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Implementation of CEntityUpdateListener - called when an entity is deleted
 	 * @throws Exception */
+	@SuppressWarnings ("unchecked")
 	@Override
-	public void onEntityDeleted(EntityClass entity) throws Exception {
+	public void onEntityDeleted(CEntityDB entity) throws Exception {
 		LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 		refreshGrid();
 		getBaseDetailsLayout().removeAll();
