@@ -90,10 +90,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentItemsSelection.registerWithPageService(this);
 			// Set up refresh listener
 			if (componentBacklogItems != null) {
-				componentItemsSelection.addRefreshListener(changedItem -> {
-					LOGGER.debug("Sprint items changed, refreshing backlog");
-					componentBacklogItems.refreshGrid();
-				});
+				componentItemsSelection.addRefreshListener(changedItem -> componentBacklogItems.refreshGrid());
 			}
 		}
 		return componentItemsSelection;
@@ -128,10 +125,10 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			if (firstItem instanceof CSprintItem) {
 				return (CSprintItem) firstItem;
 			}
-			LOGGER.warn("[DragDebug] Dragged item is not a CSprintItem: {}", firstItem != null ? firstItem.getClass().getSimpleName() : "null");
+			LOGGER.warn("Dragged item is not a CSprintItem: {}", firstItem != null ? firstItem.getClass().getSimpleName() : "null");
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("[DragDebug] Error extracting sprint item from master grid event", e);
+			LOGGER.error("Error extracting sprint item from master grid event", e);
 			return null;
 		}
 	}
@@ -171,13 +168,10 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		final CSprint currentSprint = getView().getCurrentEntity();
 		Check.notNull(currentSprint, "Current sprint cannot be null when getting next order");
 		if (currentSprint.getId() == null) {
-			LOGGER.debug("Sprint is new, starting order at 1");
 			return 1;
 		}
 		final List<CSprintItem> items = sprintItemService.findByMasterId(currentSprint.getId());
-		final int nextOrder = items.size() + 1;
-		LOGGER.debug("Next item order for sprint {}: {}", currentSprint.getId(), nextOrder);
-		return nextOrder;
+		return items.size() + 1;
 	}
 
 	/** Gets the next available order for sprint items in a specific sprint.
@@ -226,22 +220,17 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	private void handleBacklogToSprintDrop(final CDragDropEvent<?> event) {
 		try {
 			final Object targetItem = event.getTargetItem();
-			LOGGER.debug("[DragDebug] handleBacklogToSprintDrop: targetItem type={}, targetItem={}",
-					targetItem != null ? targetItem.getClass().getSimpleName() : "null", targetItem);
 			CSprint targetSprint = null;
 			targetSprint = getTargetSprintFromDropTarget(event, targetItem);
 			if (targetSprint == null) {
-				LOGGER.error("[DragDebug] Target sprint could not be determined, aborting add to sprint");
+				LOGGER.error("Target sprint could not be determined, aborting add to sprint");
 				return;
 			}
 			final CProjectItem<?> itemToAdd = draggedFromBacklog;
-			LOGGER.debug("[DragDebug] Adding backlog item {} to sprint {} (Sprint ID: {})", itemToAdd.getId(), targetSprint.getName(),
-					targetSprint.getId());
 			// Determine item type
 			final String itemType = itemToAdd.getClass().getSimpleName();
 			// Calculate order - add at end of sprint items
 			final int newOrder = getNextSprintItemOrderForSprint(targetSprint);
-			LOGGER.debug("[DragDebug] New sprint item order will be: {}", newOrder);
 			// Create sprint item
 			final CSprintItem sprintItem = new CSprintItem();
 			sprintItem.setSprint(targetSprint);
@@ -250,15 +239,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			sprintItem.setItemOrder(newOrder);
 			sprintItem.setItem(itemToAdd);
 			// Save the new item
-			LOGGER.debug("[DragDebug] Saving sprint item to database");
 			sprintItemService.save(sprintItem);
-			LOGGER.debug("[DragDebug] Sprint item created successfully with ID: {}", sprintItem.getId());
 			// Refresh both grids
-			LOGGER.debug("[DragDebug] Calling refreshAfterSprintChange");
 			refreshAfterSprintChange();
 			CNotificationService.showSuccess("Item added to sprint " + targetSprint.getName());
 		} catch (final Exception e) {
-			LOGGER.error("[DragDebug] Error adding backlog item to sprint", e);
+			LOGGER.error("Error adding backlog item to sprint", e);
 			CNotificationService.showException("Error adding item to sprint", e);
 		} finally {
 			draggedFromBacklog = null;
@@ -271,12 +257,11 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		try {
 			final Object targetItem = event.getTargetItem();
 			if (!(targetItem instanceof CSprint)) {
-				LOGGER.warn("[DragDebug] Target is not a Sprint, cannot reorder");
+				LOGGER.warn("Target is not a Sprint, cannot reorder");
 				return;
 			}
 			final CSprint targetSprint = (CSprint) targetItem;
 			final CSprintItem draggedItem = draggedFromSprint;
-			LOGGER.debug("[DragDebug] Moving/reordering sprint item {} to sprint {}", draggedItem.getId(), targetSprint.getId());
 			// Check if moving to different sprint or reordering within same sprint
 			if (!draggedItem.getSprint().getId().equals(targetSprint.getId())) {
 				// Moving to different sprint
@@ -284,19 +269,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				// Add at end of target sprint
 				final int newOrder = getNextSprintItemOrderForSprint(targetSprint);
 				draggedItem.setItemOrder(newOrder);
-			} else {
-				// Reordering within same sprint - for now just keep current order
-				// More complex reordering logic would need to know exact drop position
-				LOGGER.debug("[DragDebug] Reordering within same sprint - keeping current order");
 			}
 			// Save the updated item
 			sprintItemService.save(draggedItem);
 			// Refresh grids
 			refreshAfterSprintChange();
 			CNotificationService.showSuccess("Sprint item updated");
-			LOGGER.debug("[DragDebug] Sprint item updated successfully");
 		} catch (final Exception e) {
-			LOGGER.error("[DragDebug] Error reordering sprint item", e);
+			LOGGER.error("Error reordering sprint item", e);
 			CNotificationService.showException("Error reordering sprint item", e);
 		} finally {
 			draggedFromSprint = null;
@@ -313,7 +293,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		updateBacklogItemOrder(item, event);
 		// Delete sprint item (removes from sprint)
 		sprintItemService.delete(sprintItem);
-		LOGGER.debug("[DragDebug] Sprint item {} deleted, item {} moved to backlog", sprintItem.getId(), item.getId());
 	}
 
 	public void on_backlogItems_change(final Component component, final Object value) {
@@ -341,7 +320,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param value     CDragDropEvent (dragged items not available in drag end) */
 	public void on_backlogItems_dragEnd(final Component component, final Object value) {
 		if (value instanceof CDragDropEvent) {
-			LOGGER.debug("[DragDebug] CPageServiceSprint.on_backlogItems_dragEnd: Backlog drag operation completed");
 			draggedFromBacklog = null;
 		}
 	}
@@ -354,8 +332,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 			if (event.getDraggedItems() != null && !event.getDraggedItems().isEmpty()) {
 				draggedFromBacklog = (CProjectItem<?>) event.getDraggedItem();
-				LOGGER.debug("[DragDebug] CPageServiceSprint.on_backlogItems_dragStart: Item drag started from backlog: {}",
-						draggedFromBacklog.getId());
 			}
 		}
 	}
@@ -368,14 +344,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		Check.notNull(draggedFromSprint, "No sprint item being dragged");
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 		final CSprintItem sprintItem = draggedFromSprint;
-		LOGGER.debug("[DragDebug] CPageServiceSprint.on_backlogItems_drop: Sprint item {} (itemId: {}) dropped on backlog", sprintItem.getId(),
-				sprintItem.getItemId());
 		try {
 			moveSprintItemToBacklog(sprintItem, event);
 			refreshAfterBacklogDrop();
 			CNotificationService.showSuccess("Item removed from sprint");
 		} catch (final Exception e) {
-			LOGGER.error("[DragDebug] Error moving item to backlog", e);
+			LOGGER.error("Error moving item to backlog", e);
 			CNotificationService.showException("Error removing item from sprint", e);
 		} finally {
 			draggedFromSprint = null;
@@ -396,7 +370,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param component the master grid component
 	 * @param value     CDragDropEvent (dragged items not available in drag end) */
 	public void on_masterGrid_dragEnd(final Component component, final Object value) {
-		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_dragEnd: Clearing dragged sprint item tracker");
 		draggedFromSprint = null;
 	}
 
@@ -411,11 +384,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		if (value instanceof CDragDropEvent) {
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 			draggedFromSprint = extractSprintItemFromMasterGridEvent(event);
-			if (draggedFromSprint != null) {
-				LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_dragStart: Sprint item drag started from master grid: {} (itemId: {})",
-						draggedFromSprint.getId(), draggedFromSprint.getItemId());
-			} else {
-				LOGGER.warn("[DragDebug] CPageServiceSprint.on_masterGrid_dragStart: Could not extract sprint item from event");
+			if (draggedFromSprint == null) {
+				LOGGER.warn("Could not extract sprint item from master grid drag event");
 			}
 		}
 	}
@@ -433,13 +403,11 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param component the master grid component
 	 * @param value     CDragDropEvent containing drop information */
 	public void on_masterGrid_drop(final Component component, final Object value) {
-		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Drop event received on master grid");
 		if (!(value instanceof CDragDropEvent)) {
-			LOGGER.warn("[DragDebug] Drop value is not CDragDropEvent");
+			LOGGER.warn("Drop value is not CDragDropEvent");
 			return;
 		}
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Target={}, Location={}", event.getTargetItem(), event.getDropLocation());
 		// Check if dropping backlog item into sprint widget
 		if (draggedFromBacklog != null) {
 			handleBacklogToSprintDrop(event);
@@ -450,7 +418,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			handleSprintItemReorder(event);
 			return;
 		}
-		LOGGER.debug("[DragDebug] No dragged item tracked, ignoring drop");
 	}
 
 	public void on_name_change(final Component component, final Object value) {
@@ -467,7 +434,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param value     CDragDropEvent (dragged items not available in drag end) */
 	public void on_sprintItems_dragEnd(final Component component, final Object value) {
 		if (value instanceof CDragDropEvent) {
-			LOGGER.debug("[DragDebug] CPageServiceSprint.on_sprintItems_dragEnd: Sprint items drag operation completed");
 			draggedFromSprint = null;
 		}
 	}
@@ -480,8 +446,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 			if (event.getDraggedItems() != null && !event.getDraggedItems().isEmpty()) {
 				draggedFromSprint = (CSprintItem) event.getDraggedItem();
-				LOGGER.debug("[DragDebug] CPageServiceSprint.on_sprintItems_dragStart: Sprint item drag started: {} (itemId: {})",
-						draggedFromSprint.getId(), draggedFromSprint.getItemId());
 			}
 		}
 	}
@@ -498,9 +462,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		final CSprintItem targetItem = (CSprintItem) event.getTargetItem();
 		final GridDropLocation dropLocation = event.getDropLocation();
 		final CProjectItem<?> itemToAdd = draggedFromBacklog;
-		LOGGER.debug(
-				"[DragDebug] CPageServiceSprint.on_sprintItems_drop: Item dropped into sprint from backlog: {} at location: {} relative to target: {}",
-				itemToAdd.getId(), dropLocation, targetItem != null ? targetItem.getId() : "null");
 		try {
 			// Determine item type
 			final String itemType = itemToAdd.getClass().getSimpleName();
@@ -528,10 +489,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentItemsSelection.refreshGrid();
 			// Show success notification
 			CNotificationService.showSuccess("Item added to sprint");
-			LOGGER.debug("[DragDebug] CPageServiceSprint.on_sprintItems_drop: Sprint item created successfully: {}", sprintItem.getId());
 			// Note: componentBacklogItems will refresh via the listener
 		} catch (final Exception e) {
-			LOGGER.error("[DragDebug] CPageServiceSprint.on_sprintItems_drop: Error adding dropped item to sprint", e);
+			LOGGER.error("Error adding dropped item to sprint", e);
 			CNotificationService.showException("Error adding item to sprint", e);
 		} finally {
 			// Clear tracker
@@ -553,30 +513,24 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	private void refreshAfterBacklogDrop() {
 		componentItemsSelection.refreshGrid(); // Refresh sprint items
 		componentBacklogItems.refreshGrid(); // Refresh backlog
-		LOGGER.debug("[DragDebug] Refreshed sprint and backlog grids");
 	}
 	// Helper methods for drag-drop operations
 
 	/** Refreshes all relevant grids after a sprint change. */
 	private void refreshAfterSprintChange() {
-		LOGGER.debug("[DragDebug] refreshAfterSprintChange: Starting refresh of all components");
 		// Refresh sprint items list if visible
 		if (componentItemsSelection != null) {
-			LOGGER.debug("[DragDebug] Refreshing componentItemsSelection grid");
 			componentItemsSelection.refreshGrid();
 		}
 		// Refresh backlog
 		if (componentBacklogItems != null) {
-			LOGGER.debug("[DragDebug] Refreshing componentBacklogItems grid");
 			componentBacklogItems.refreshGrid();
 		}
 		// Refresh master grid to update sprint widgets
 		try {
-			LOGGER.debug("[DragDebug] Calling getView().refreshGrid() to refresh master grid");
 			getView().refreshGrid();
-			LOGGER.debug("[DragDebug] Master grid refreshed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("[DragDebug] Error refreshing master grid after sprint change", e);
+			LOGGER.error("Error refreshing master grid after sprint change", e);
 		}
 	}
 
@@ -655,11 +609,10 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		final Integer targetOrder = targetSprintableItem.getSprintOrder();
 		// Handle null sprint order: assign to end of backlog
 		if (targetOrder == null) {
-			LOGGER.warn("[DragDebug] Target item {} has null sprint order, assigning dropped item to end of backlog", targetItem.getId());
+			LOGGER.warn("Target item {} has null sprint order, assigning dropped item to end of backlog", targetItem.getId());
 			final int maxOrder = getMaxBacklogOrder();
 			sprintableItem.setSprintOrder(maxOrder + 1);
 			saveProjectItem(item);
-			LOGGER.debug("[DragDebug] Updated backlog item {} order to {} (end of backlog)", item.getId(), maxOrder + 1);
 			return;
 		}
 		// Calculate new order based on drop location
@@ -669,6 +622,5 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		saveProjectItem(item);
 		// Reorder other backlog items to maintain sequence
 		reorderBacklogItemsAfterInsert(newOrder, item.getId());
-		LOGGER.debug("[DragDebug] Updated backlog item {} order to {}", item.getId(), newOrder);
 	}
 }

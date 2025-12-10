@@ -84,12 +84,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.warn("componentSprintItems not initialized, cannot add drag end listener");
 			return () -> {}; // Return empty registration
 		}
-		LOGGER.debug("[DragDebug] CComponentWidgetSprint: addDragEndListener called for sprint {}", getEntity().getId());
-		return componentSprintItems.addDragEndListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentWidgetSprint: dragEnd propagated from componentSprintItems to external listener for sprint {}",
-					getEntity().getId());
-			listener.onComponentEvent(event);
-		});
+		return componentSprintItems.addDragEndListener(event -> listener.onComponentEvent(event));
 	}
 
 	/** Adds a listener for drag start events from the internal sprint items grid. The listener will be notified when a drag operation starts on the
@@ -103,14 +98,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.warn("componentSprintItems not initialized, cannot add drag start listener");
 			return () -> {}; // Return empty registration
 		}
-		LOGGER.debug("[DragDebug] CComponentWidgetSprint: addDragStartListener called for sprint {}", getEntity().getId());
-		return componentSprintItems.addDragStartListener(event -> {
-			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
-			LOGGER.debug(
-					"[DragDebug] CComponentWidgetSprint: dragStart propagated from componentSprintItems to external listener for sprint {}, items={}",
-					getEntity().getId(), itemCount);
-			listener.onComponentEvent(event);
-		});
+		return componentSprintItems.addDragStartListener(event -> listener.onComponentEvent(event));
 	}
 
 	/** Adds a listener for drop events on the internal sprint items grid. The listener will be notified when items are dropped onto the sprint items
@@ -124,12 +112,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.warn("componentSprintItems not initialized, cannot add drop listener");
 			return () -> {}; // Return empty registration
 		}
-		LOGGER.debug("[DragDebug] CComponentWidgetSprint: addDropListener called for sprint {}", getEntity().getId());
-		return componentSprintItems.addDropListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentWidgetSprint: drop propagated from componentSprintItems to external listener for sprint {}",
-					getEntity().getId());
-			listener.onComponentEvent(event);
-		});
+		return componentSprintItems.addDropListener(event -> listener.onComponentEvent(event));
 	}
 
 	@Override
@@ -189,7 +172,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		if (componentSprintItems != null) {
 			return; // Already created
 		}
-		LOGGER.debug("Creating sprint items component for sprint {}", getEntity().getId());
 		try {
 			// Get services from Spring context
 			final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
@@ -243,7 +225,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 				buttonToggleItems.setIcon(VaadinIcon.ANGLE_DOWN.create());
 				buttonToggleItems.setTooltipText("Show sprint items");
 			}
-			LOGGER.debug("Sprint items visibility toggled to: {}", sprintItemsVisible);
 		} catch (final Exception e) {
 			LOGGER.error("Error toggling sprint items visibility", e);
 			CNotificationService.showException("Error toggling sprint items", e);
@@ -265,7 +246,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 					buttonToggleItems.setTooltipText("Show sprint items");
 				}
 			}
-			LOGGER.debug("Sprint items visibility toggled to: {}", sprintItemsVisible);
 		} catch (final Exception e) {
 			LOGGER.error("Error toggling sprint items visibility", e);
 			CNotificationService.showException("Error toggling sprint items", e);
@@ -274,26 +254,22 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 
 	@Override
 	public void onEntityCreated(final CSprintItem newEntity) throws Exception {
-		LOGGER.debug("Sprint item created: {}", newEntity.getId());
 		refreshItemCount();
 	}
 
 	@Override
 	public void onEntityDeleted(final CSprintItem entity) throws Exception {
-		LOGGER.debug("Sprint item deleted: {}", entity.getId());
 		refreshItemCount();
 	}
 
 	@Override
 	public void onEntityRefreshed(final CSprintItem reloaded) throws Exception {
-		LOGGER.debug("Sprint item refreshed: {}", reloaded.getId());
 		refreshItemCount();
 	}
 	// IHasDragStart interface implementation - propagate drag events from internal grid
 
 	@Override
 	public void onEntitySaved(final CSprintItem savedEntity) throws Exception {
-		LOGGER.debug("Sprint item saved: {}", savedEntity.getId());
 		refreshItemCount();
 	}
 	// IHasDragEnd interface implementation - propagate drag events from internal grid
@@ -310,10 +286,39 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 				itemCountLabel.addClickListener(e -> on_itemCountLabel_clicked());
 				// Add back to layout
 				layoutLineTwo.add(itemCountLabel);
-				LOGGER.debug("Item count refreshed for sprint {}", getEntity().getId());
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing item count", e);
 		}
+	}
+
+	// =============== WIDGET STATE PRESERVATION ===============
+
+	/** Restores widget UI state after reconstruction. Restores the expanded/collapsed state of sprint items. */
+	@Override
+	protected void restoreWidgetState() {
+		super.restoreWidgetState();
+		// Restore sprint items visibility state
+		final Boolean visible = (Boolean) getStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible");
+		if (visible != null && visible) {
+			// State was visible before refresh, restore it
+			sprintItemsVisible = true;
+			if (containerSprintItems != null) {
+				containerSprintItems.setVisible(true);
+				// Update button icon
+				if (buttonToggleItems != null) {
+					buttonToggleItems.setIcon(VaadinIcon.ANGLE_UP.create());
+					buttonToggleItems.setTooltipText("Hide sprint items");
+				}
+			}
+		}
+	}
+
+	/** Saves widget UI state before destruction. Saves the expanded/collapsed state of sprint items. */
+	@Override
+	protected void saveWidgetState() {
+		super.saveWidgetState();
+		// Save sprint items visibility state
+		saveStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible", sprintItemsVisible);
 	}
 }
