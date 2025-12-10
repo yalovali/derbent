@@ -730,6 +730,143 @@ Screenshots are **NOT** required for:
 
 **Note**: If you claim a change has no UI impact, you must explicitly state this and explain why screenshots are not applicable.
 
+## Widget State Preservation Pattern
+
+### Problem
+When grids are refreshed (e.g., after drag-drop operations), widget components are recreated, losing their internal UI state such as:
+- Expanded/collapsed sections
+- Selected tabs
+- Scroll positions
+- Custom visual states
+
+### Solution: State Preservation Mechanism
+
+Derbent provides a built-in state preservation mechanism in `CComponentWidgetEntity` that automatically saves and restores widget state across recreations.
+
+#### How It Works
+
+1. **Before Grid Refresh**: `CComponentGridEntity.unregisterAllWidgetComponents()` calls `saveWidgetState()` on all widgets
+2. **Widget Recreation**: Grid creates fresh widget instances
+3. **After Initialization**: Each widget's `initializeWidget()` calls `restoreWidgetState()` automatically
+
+#### Implementation Pattern
+
+**In Custom Widget Classes** (extending `CComponentWidgetEntity`):
+
+```java
+public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint> {
+    
+    private boolean sprintItemsVisible = false;  // State to preserve
+    
+    // =============== WIDGET STATE PRESERVATION ===============
+    
+    /** Saves widget UI state before destruction. */
+    @Override
+    public void saveWidgetState() {
+        super.saveWidgetState();
+        // Save any boolean, string, or simple object state
+        saveStateValue(getEntity().getClass(), getEntity().getId(), 
+            "sprintItemsVisible", sprintItemsVisible);
+    }
+    
+    /** Restores widget UI state after reconstruction. */
+    @Override
+    protected void restoreWidgetState() {
+        super.restoreWidgetState();
+        // Restore state and update UI accordingly
+        Boolean visible = (Boolean) getStateValue(
+            getEntity().getClass(), getEntity().getId(), "sprintItemsVisible");
+        if (visible != null && visible) {
+            sprintItemsVisible = true;
+            containerSprintItems.setVisible(true);
+            // Update related UI components (buttons, icons, etc.)
+            buttonToggleItems.setIcon(VaadinIcon.ANGLE_UP.create());
+        }
+    }
+}
+```
+
+#### Key Methods
+
+| Method | Access | Purpose | Called By |
+|--------|--------|---------|-----------|
+| `saveWidgetState()` | `public` | Save widget state before destruction | `CComponentGridEntity` before clearing widgets |
+| `restoreWidgetState()` | `protected` | Restore widget state after creation | `initializeWidget()` automatically |
+| `saveStateValue()` | `protected static` | Store a state value | Subclass `saveWidgetState()` |
+| `getStateValue()` | `protected static` | Retrieve a state value | Subclass `restoreWidgetState()` |
+| `clearWidgetState()` | `protected static` | Clear state for specific entity | Optional cleanup |
+| `clearAllWidgetState()` | `public static` | Clear all stored state | When leaving view |
+
+#### State Storage
+
+- State is stored in a **static `ConcurrentHashMap`** keyed by `EntityClass_EntityId` (e.g., "CSprint_123")
+- State persists across widget recreations **within the same session**
+- State is **thread-safe** and can handle concurrent access
+- State should be cleared when leaving the view to prevent memory leaks
+
+#### What Can Be Stored
+
+✅ **Recommended State Types**:
+- Booleans (expanded/collapsed, visible/hidden)
+- Strings (selected values, filter text)
+- Integers (selected indices, scroll positions)
+- Simple value objects (immutable)
+
+❌ **Avoid Storing**:
+- Component references (will be stale after recreation)
+- Large data structures (use data sources instead)
+- Mutable objects shared across widgets
+- Session-specific data (use VaadinSession instead)
+
+#### Best Practices
+
+1. **Always call super**: Both `saveWidgetState()` and `restoreWidgetState()` should call their super method first
+2. **Null checks**: Always check for null when retrieving state
+3. **Idempotent restore**: `restoreWidgetState()` should handle being called multiple times
+4. **Minimal state**: Only store what's necessary to recreate the visual appearance
+5. **Clear on navigation**: Call `clearAllWidgetState()` when leaving the view
+
+#### Example Use Cases
+
+- **CComponentWidgetSprint**: Preserves expanded/collapsed state of sprint items grid
+- **Tab selection**: Remember which tab was active in a multi-tab widget
+- **Accordion panels**: Remember which panels were expanded
+- **Custom filters**: Remember applied filter values
+- **Scroll positions**: Restore scroll position after refresh (advanced)
+
+#### Copilot Pattern Recognition
+
+**Type this**:
+```java
+public class CCustomWidget extends CComponentWidgetEntity<CEntity> {
+    
+    private boolean sectionVisible = false;
+    
+    @Override
+    public void saveWidgetState() {
+```
+
+**Copilot suggests**:
+```java
+    @Override
+    public void saveWidgetState() {
+        super.saveWidgetState();
+        saveStateValue(getEntity().getClass(), getEntity().getId(), 
+            "sectionVisible", sectionVisible);
+    }
+    
+    @Override
+    protected void restoreWidgetState() {
+        super.restoreWidgetState();
+        Boolean visible = (Boolean) getStateValue(
+            getEntity().getClass(), getEntity().getId(), "sectionVisible");
+        if (visible != null && visible) {
+            sectionVisible = true;
+            // Update UI...
+        }
+    }
+```
+
 ## Summary
 
 GitHub Copilot works exceptionally well with Derbent because of:
