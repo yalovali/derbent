@@ -32,4 +32,14 @@ public interface IHasDragStart<T> {
 	 * @param listener the listener to be notified when drag starts
 	 * @return a registration object that can be used to remove the listener */
 	Registration addDragStartListener(com.vaadin.flow.component.ComponentEventListener<GridDragStartEvent<T>> listener);
+	
+	/** Returns a string representation of drag start support for debugging.
+	 * <p>
+	 * This default method provides a helper for implementing classes to include
+	 * drag start state information in their toString() methods.
+	 * </p>
+	 * @return a string indicating drag start support is available */
+	default String toDragStartString() {
+		return "dragStartSupported=true";
+	}
 }

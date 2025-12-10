@@ -170,8 +170,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		if (grid != null) {
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Adding drop listener to underlying grid");
 			// Safe cast: grid contains CEntityDB items (enforced by service architecture)
-			// ComponentEventListener<GridDropEvent<T>> listener
-			gridRegistration = grid.addDropListener(listener);
+			// We need to cast both the grid and listener to match the expected types
+			gridRegistration = ((CGrid) grid).addDropListener((ComponentEventListener) listener);
 		}
 		// Return combined registration that removes from both
 		final Registration finalGridRegistration = gridRegistration;

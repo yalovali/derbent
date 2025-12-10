@@ -117,4 +117,14 @@ public interface IHasDragControl {
 	 * @return true if drop operations are enabled, false otherwise
 	 */
 	boolean isDropEnabled();
+	
+	/** Returns a string representation of drag control state for debugging.
+	 * <p>
+	 * This default method provides a helper for implementing classes to include
+	 * drag control state information in their toString() methods.
+	 * </p>
+	 * @return a string showing drag and drop enabled states, e.g., "dragEnabled=true, dropEnabled=false" */
+	default String toDragControlString() {
+		return "dragEnabled=" + isDragEnabled() + ", dropEnabled=" + isDropEnabled();
+	}
 }

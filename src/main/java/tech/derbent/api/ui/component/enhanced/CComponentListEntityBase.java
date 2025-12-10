@@ -201,10 +201,12 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param listener the listener to be notified when items are dropped
 	 * @return a registration object that can be used to remove the listener */
 	@Override
+	@SuppressWarnings("unchecked")
 	public Registration addDropListener(final ComponentEventListener<com.vaadin.flow.component.grid.dnd.GridDropEvent<?>> listener) {
 		Check.notNull(listener, "Drop listener cannot be null");
 		Check.notNull(grid, "Grid must be initialized before adding drop listener");
-		return grid.addDropListener(listener);
+		// Safe cast: listener accepts any GridDropEvent<?> so it can accept GridDropEvent<ChildEntity>
+		return grid.addDropListener((ComponentEventListener) listener);
 	}
 
 	// IGridRefreshListener implementation

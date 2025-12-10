@@ -23,4 +23,13 @@ public interface IHasDrop<T> {
 	 * @param listener the listener to add
 	 * @return a registration object for removing the listener */
 	Registration addDropListener(ComponentEventListener<GridDropEvent<?>> listener);
+	
+	/** Returns a string representation of drop support for debugging.
+	 * <p>
+	 * This default method provides a helper for implementing classes to include drop state information in their toString() methods.
+	 * </p>
+	 * @return a string indicating drop support is available */
+	default String toDropString() {
+		return "dropSupported=true";
+	}
 }
