@@ -144,7 +144,7 @@ class IHasInterfacesToStringTest {
 	private static class TestHasDrop implements IHasDrop<String> {
 
 		@Override
-		public Registration addDropListener(final ComponentEventListener<GridDropEvent<String>> listener) {
+		public Registration addDropListener(final ComponentEventListener<GridDropEvent<?>> listener) {
 			return () -> {
 			};
 		}
