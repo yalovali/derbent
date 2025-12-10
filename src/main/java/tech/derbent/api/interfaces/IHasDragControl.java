@@ -117,4 +117,14 @@ public interface IHasDragControl {
 	 * @return true if drop operations are enabled, false otherwise
 	 */
 	boolean isDropEnabled();
+	
+	/**
+	 * Returns a string representation of this object including drag and drop state.
+	 * This method can be used by implementing classes to build their toString() output.
+	 * 
+	 * @return a string representation including drag and drop state
+	 */
+	default String toDragControlString() {
+		return String.format("dragEnabled=%s, dropEnabled=%s", isDragEnabled(), isDropEnabled());
+	}
 }
