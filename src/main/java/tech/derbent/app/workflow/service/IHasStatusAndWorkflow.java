@@ -37,4 +37,20 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 	void setEntityType(CTypeEntity<?> typeEntity);
 	void setStatus(CProjectItemStatus status);
 	// void setWorkflow(CWorkflowEntity workflow);
+	
+	/**
+	 * Returns a string representation of this object including entity type, status and workflow information.
+	 * This method can be used by implementing classes to build their toString() output.
+	 * 
+	 * @return a string representation including entity type, status and workflow information
+	 */
+	default String toStatusAndWorkflowString() {
+		final CTypeEntity<?> type = getEntityType();
+		final CProjectItemStatus status = getStatus();
+		final CWorkflowEntity workflow = getWorkflow();
+		return String.format("entityType=%s, status=%s, workflow=%s",
+			type != null ? type.getName() : "null",
+			status != null ? status.getName() : "null",
+			workflow != null ? workflow.getName() : "null");
+	}
 }

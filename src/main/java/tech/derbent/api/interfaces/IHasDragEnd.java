@@ -34,4 +34,14 @@ public interface IHasDragEnd<T> {
 	 * @param listener the listener to be notified when drag ends
 	 * @return a registration object that can be used to remove the listener */
 	Registration addDragEndListener(ComponentEventListener<GridDragEndEvent<T>> listener);
+	
+	/**
+	 * Returns a string representation indicating this component supports drag end events.
+	 * This method can be used by implementing classes to build their toString() output.
+	 * 
+	 * @return a string representation indicating drag end support
+	 */
+	default String toDragEndString() {
+		return "dragEndSupported=true";
+	}
 }
