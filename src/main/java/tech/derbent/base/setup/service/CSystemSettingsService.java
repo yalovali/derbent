@@ -298,10 +298,6 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 		if ((settings.getMaxFileUploadSizeMb() != null) && (settings.getMaxFileUploadSizeMb().doubleValue() <= 0)) {
 			throw new IllegalArgumentException("Max file upload size must be positive");
 		}
-		// Validate SMTP port
-		if ((settings.getSmtpPort() != null) && ((settings.getSmtpPort() < 1) || (settings.getSmtpPort() > 65535))) {
-			throw new IllegalArgumentException("SMTP port must be between 1 and 65535");
-		}
 		// Validate connection pool size
 		if ((settings.getDatabaseConnectionPoolSize() != null)
 				&& ((settings.getDatabaseConnectionPoolSize() < 1) || (settings.getDatabaseConnectionPoolSize() > 100))) {
@@ -314,23 +310,6 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 		// Validate backup retention
 		if ((settings.getBackupRetentionDays() != null) && ((settings.getBackupRetentionDays() < 1) || (settings.getBackupRetentionDays() > 365))) {
 			throw new IllegalArgumentException("Backup retention must be between 1 and 365 days");
-		}
-		// Validate password expiry
-		if ((settings.getPasswordExpiryDays() != null) && ((settings.getPasswordExpiryDays() < 1) || (settings.getPasswordExpiryDays() > 365))) {
-			throw new IllegalArgumentException("Password expiry must be between 1 and 365 days");
-		}
-		// Validate email format
-		if ((settings.getSupportEmail() != null) && !settings.getSupportEmail().trim().isEmpty()) {
-			final String email = settings.getSupportEmail().trim();
-			if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-				throw new IllegalArgumentException("Support email must be a valid email address");
-			}
-		}
-		if ((settings.getSystemEmailFrom() != null) && !settings.getSystemEmailFrom().trim().isEmpty()) {
-			final String email = settings.getSystemEmailFrom().trim();
-			if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-				throw new IllegalArgumentException("System email from must be a valid email address");
-			}
 		}
 		LOGGER.debug("System settings validation passed successfully");
 	}

@@ -395,13 +395,6 @@ public class CSystemSettingsView extends CAbstractPage {
 			testResults.append("✓ Max login attempts: ").append(currentSettings.getMaxLoginAttempts()).append("\n");
 			// Test file settings
 			testResults.append("✓ Max file upload: ").append(currentSettings.getMaxFileUploadSizeMb()).append(" MB\n");
-			// Test email settings
-			if ((currentSettings.getSmtpServer() != null) && !currentSettings.getSmtpServer().trim().isEmpty()) {
-				testResults.append("✓ SMTP server: ").append(currentSettings.getSmtpServer()).append(":").append(currentSettings.getSmtpPort())
-						.append("\n");
-			} else {
-				testResults.append("⚠ SMTP server not configured\n");
-			}
 			// Test maintenance mode
 			if (currentSettings.isMaintenanceModeEnabled()) {
 				testResults.append("⚠ Maintenance mode is ENABLED\n");

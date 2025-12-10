@@ -161,19 +161,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Enable detailed database query logging", hidden = false
 	)
 	private Boolean enableDatabaseLogging = Boolean.FALSE;
-	@Column (name = "enable_file_versioning", nullable = false)
-	@AMetaData (
-			displayName = "Enable File Versioning", required = true, readOnly = false, defaultValue = "true",
-			description = "Enable file version tracking", hidden = false
-	)
-	private Boolean enableFileVersioning = Boolean.TRUE;
-	@Column (name = "file_storage_path", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@AMetaData (
-			displayName = "File Storage Path", required = false, readOnly = false, defaultValue = "./uploads",
-			description = "Base path for file storage", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
-	)
-	private String fileStoragePath = "./uploads";
+
+
 	@Column (name = "last_visited_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
@@ -211,14 +200,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Maximum failed login attempts before lockout", hidden = false
 	)
 	private Integer maxLoginAttempts = 3;
-	@Column (name = "password_expiry_days", nullable = true)
-	@Min (value = 1, message = "Password expiry must be at least 1 day")
-	@Max (value = 365, message = "Password expiry cannot exceed 365 days")
-	@AMetaData (
-			displayName = "Password Expiry (Days)", required = false, readOnly = false, defaultValue = "90",
-			description = "Password expiration in days (null for no expiry)", hidden = false
-	)
-	private Integer passwordExpiryDays = 90;
+
 	@Column (name = "require_strong_passwords", nullable = false)
 	@AMetaData (
 			displayName = "Require Strong Passwords", required = true, readOnly = false, defaultValue = "true",
@@ -234,38 +216,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "User session timeout in minutes", hidden = false
 	)
 	private Integer sessionTimeoutMinutes = 60;
-	@Column (name = "show_system_info", nullable = false)
-	@AMetaData (
-			displayName = "Show System Info", required = true, readOnly = false, defaultValue = "true",
-			description = "Display system information to administrators", hidden = false
-	)
-	private Boolean showSystemInfo = Boolean.TRUE;
-	@Column (name = "smtp_port", nullable = false)
-	@Min (value = 1, message = "SMTP port must be positive")
-	@Max (value = 65535, message = "SMTP port must be valid")
-	@AMetaData (displayName = "SMTP Port", required = true, readOnly = false, defaultValue = "587", description = "SMTP server port", hidden = false)
-	private Integer smtpPort = 587;
+
 	// Email Configuration
-	@Column (name = "smtp_server", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "SMTP Server", required = false, readOnly = false, defaultValue = "localhost", description = "SMTP server hostname",
-			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String smtpServer = "localhost";
-	@Column (name = "smtp_use_tls", nullable = false)
-	@AMetaData (
-			displayName = "SMTP Use TLS", required = true, readOnly = false, defaultValue = "true", description = "Use TLS for SMTP connection",
-			hidden = false
-	)
-	private Boolean smtpUseTls = Boolean.TRUE;
-	@Column (name = "support_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "Support Email", required = false, readOnly = false, defaultValue = "support@derbent.tech",
-			description = "Support contact email", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String supportEmail = "support@derbent.tech";
 	@Column (name = "system_email_from", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
@@ -317,10 +269,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public Boolean getEnableDatabaseLogging() { return enableDatabaseLogging; }
 
-	public Boolean getEnableFileVersioning() { return enableFileVersioning; }
-
-	public String getFileStoragePath() { return fileStoragePath; }
-
 	public String getLastVisitedView() { return lastVisitedView; }
 
 	public String getMaintenanceMessage() { return maintenanceMessage; }
@@ -331,21 +279,9 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public Integer getMaxLoginAttempts() { return maxLoginAttempts; }
 
-	public Integer getPasswordExpiryDays() { return passwordExpiryDays; }
-
 	public Boolean getRequireStrongPasswords() { return requireStrongPasswords; }
 
 	public Integer getSessionTimeoutMinutes() { return sessionTimeoutMinutes; }
-
-	public Boolean getShowSystemInfo() { return showSystemInfo; }
-
-	public Integer getSmtpPort() { return smtpPort; }
-
-	public String getSmtpServer() { return smtpServer; }
-
-	public Boolean getSmtpUseTls() { return smtpUseTls; }
-
-	public String getSupportEmail() { return supportEmail; }
 
 	public String getSystemEmailFrom() { return systemEmailFrom; }
 
@@ -369,15 +305,9 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public Boolean isEnableDatabaseLogging() { return enableDatabaseLogging; }
 
-	public Boolean isEnableFileVersioning() { return enableFileVersioning; }
-
 	public Boolean isMaintenanceModeEnabled() { return maintenanceModeEnabled; }
 
 	public Boolean isRequireStrongPasswords() { return requireStrongPasswords; }
-
-	public Boolean isShowSystemInfo() { return showSystemInfo; }
-
-	public Boolean isSmtpUseTls() { return smtpUseTls; }
 
 	public void setAccountLockoutDurationMinutes(final Integer accountLockoutDurationMinutes) {
 		this.accountLockoutDurationMinutes = accountLockoutDurationMinutes;
@@ -419,10 +349,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public void setEnableDatabaseLogging(final Boolean enableDatabaseLogging) { this.enableDatabaseLogging = enableDatabaseLogging; }
 
-	public void setEnableFileVersioning(final Boolean enableFileVersioning) { this.enableFileVersioning = enableFileVersioning; }
-
-	public void setFileStoragePath(final String fileStoragePath) { this.fileStoragePath = fileStoragePath; }
-
 	public void setLastVisitedView(final String lastVisitedView) { this.lastVisitedView = lastVisitedView; }
 
 	public void setMaintenanceMessage(final String maintenanceMessage) { this.maintenanceMessage = maintenanceMessage; }
@@ -433,21 +359,9 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public void setMaxLoginAttempts(final Integer maxLoginAttempts) { this.maxLoginAttempts = maxLoginAttempts; }
 
-	public void setPasswordExpiryDays(final Integer passwordExpiryDays) { this.passwordExpiryDays = passwordExpiryDays; }
-
 	public void setRequireStrongPasswords(final Boolean requireStrongPasswords) { this.requireStrongPasswords = requireStrongPasswords; }
 
 	public void setSessionTimeoutMinutes(final Integer sessionTimeoutMinutes) { this.sessionTimeoutMinutes = sessionTimeoutMinutes; }
-
-	public void setShowSystemInfo(final Boolean showSystemInfo) { this.showSystemInfo = showSystemInfo; }
-
-	public void setSmtpPort(final Integer smtpPort) { this.smtpPort = smtpPort; }
-
-	public void setSmtpServer(final String smtpServer) { this.smtpServer = smtpServer; }
-
-	public void setSmtpUseTls(final Boolean smtpUseTls) { this.smtpUseTls = smtpUseTls; }
-
-	public void setSupportEmail(final String supportEmail) { this.supportEmail = supportEmail; }
 
 	public void setSystemEmailFrom(final String systemEmailFrom) { this.systemEmailFrom = systemEmailFrom; }
 
