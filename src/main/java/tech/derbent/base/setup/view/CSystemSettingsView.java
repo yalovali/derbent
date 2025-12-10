@@ -95,11 +95,7 @@ public class CSystemSettingsView extends CAbstractPage {
 				e1.printStackTrace();
 			}
 		});
-		// Test Configuration button
-		final var testButton = new CButton("Test Configuration", null, null);
-		testButton.addClassName("success");
-		testButton.addClickListener(e -> testConfiguration());
-		buttonLayout.add(resetDbButton, saveButton, cancelButton, reloadButton, resetDbMinimal, resetButton, testButton);
+		buttonLayout.add(resetDbButton, saveButton, cancelButton, reloadButton, resetDbMinimal, resetButton);
 		return buttonLayout;
 	}
 
@@ -374,46 +370,5 @@ public class CSystemSettingsView extends CAbstractPage {
 	protected void setupToolbar() {
 		LOGGER.debug("setupToolbar called for CSystemSettingsView");
 		// No specific toolbar needed for this view
-	}
-
-	/** Tests the current configuration settings. Performs various checks to validate the configuration. */
-	private void testConfiguration() {
-		LOGGER.debug("testConfiguration called");
-		try {
-			if (currentSettings == null) {
-				CNotificationService.showWarning("System settings could not be loaded. Please refresh the page.");
-				return;
-			}
-			// Perform configuration tests
-			final var testResults = new StringBuilder();
-			testResults.append("Configuration Test Results:\n\n");
-			// Test application info
-			testResults.append("✓ Application: ").append(currentSettings.getApplicationName()).append(" v")
-					.append(currentSettings.getApplicationVersion()).append("\n");
-			// Test security settings
-			testResults.append("✓ Session timeout: ").append(currentSettings.getSessionTimeoutMinutes()).append(" minutes\n");
-			testResults.append("✓ Max login attempts: ").append(currentSettings.getMaxLoginAttempts()).append("\n");
-			// Test file settings
-			testResults.append("✓ Max file upload: ").append(currentSettings.getMaxFileUploadSizeMb()).append(" MB\n");
-			// Test email settings
-			if ((currentSettings.getSmtpServer() != null) && !currentSettings.getSmtpServer().trim().isEmpty()) {
-				testResults.append("✓ SMTP server: ").append(currentSettings.getSmtpServer()).append(":").append(currentSettings.getSmtpPort())
-						.append("\n");
-			} else {
-				testResults.append("⚠ SMTP server not configured\n");
-			}
-			// Test maintenance mode
-			if (currentSettings.isMaintenanceModeEnabled()) {
-				testResults.append("⚠ Maintenance mode is ENABLED\n");
-			} else {
-				testResults.append("✓ Maintenance mode is disabled\n");
-			}
-			testResults.append("\nConfiguration appears to be valid.");
-			// Show test results
-			CNotificationService.showInfoDialog(testResults.toString());
-			LOGGER.info("Configuration test completed successfully");
-		} catch (final Exception e) {
-			CNotificationService.showException("Error testing configuration: " + e.getMessage(), e);
-		}
 	}
 }

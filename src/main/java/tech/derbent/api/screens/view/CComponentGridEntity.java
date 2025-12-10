@@ -85,8 +85,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private final List<ComponentEventListener<GridDragEndEvent<CEntityDB<?>>>> dragEndListeners = new ArrayList<>();
 	// Drag event listeners - follow the pattern from CComponentListEntityBase
 	private final List<ComponentEventListener<GridDragStartEvent<CEntityDB<?>>>> dragStartListeners = new ArrayList<>();
-	private final List<ComponentEventListener<GridDropEvent<CEntityDB<?>>>> dropListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
+	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
 	// Track components created in grid cells for event propagation
@@ -160,21 +160,19 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	public Registration addDropListener(final ComponentEventListener<GridDropEvent<CEntityDB<?>>> listener) {
+	public Registration addDropListener(final ComponentEventListener<GridDropEvent<?>> listener) {
 		Check.notNull(listener, "Drop listener cannot be null");
-		
 		// Add to our listeners list for widget drop event propagation
 		dropListeners.add(listener);
 		LOGGER.debug("[DragDebug] CComponentGridEntity: Added drop listener, total listeners: {}", dropListeners.size());
-		
 		// Also add to grid for direct drops if grid is available
 		Registration gridRegistration = null;
 		if (grid != null) {
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Adding drop listener to underlying grid");
 			// Safe cast: grid contains CEntityDB items (enforced by service architecture)
-			gridRegistration = ((CGrid) grid).addDropListener((ComponentEventListener) listener);
+			// ComponentEventListener<GridDropEvent<T>> listener
+			gridRegistration = grid.addDropListener(listener);
 		}
-		
 		// Return combined registration that removes from both
 		final Registration finalGridRegistration = gridRegistration;
 		return () -> {
@@ -962,8 +960,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			if (component instanceof IHasDrop<?>) {
 				final IHasDrop widgetWithDrop = (IHasDrop) component;
 				widgetWithDrop.addDropListener(event -> {
-					LOGGER.debug("[DragDebug] Widget {} fired drop, notifying CComponentGridEntity listeners",
-							component.getClass().getSimpleName());
+					LOGGER.debug("[DragDebug] Widget {} fired drop, notifying CComponentGridEntity listeners", component.getClass().getSimpleName());
 					notifyDropListeners((GridDropEvent) event);
 				});
 			}
@@ -1181,6 +1178,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.info("Search filter applied: {}", searchValue);
 			applySearchFilter(searchValue.trim().toLowerCase());
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "CComponentGridEntity for " + (entityClass != null ? entityClass.getSimpleName() : "Unknown Entity");
 	}
 
 	/** Unregisters all widget components from the page service to prevent memory leaks. */

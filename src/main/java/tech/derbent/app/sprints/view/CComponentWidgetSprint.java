@@ -118,7 +118,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	 * @param listener the listener to be notified when items are dropped
 	 * @return a registration object that can be used to remove the listener */
 	@Override
-	public Registration addDropListener(final ComponentEventListener<GridDropEvent<CSprintItem>> listener) {
+	public Registration addDropListener(final ComponentEventListener<GridDropEvent<?>> listener) {
 		Check.notNull(listener, "Drop listener cannot be null");
 		if (componentSprintItems == null) {
 			LOGGER.warn("componentSprintItems not initialized, cannot add drop listener");
