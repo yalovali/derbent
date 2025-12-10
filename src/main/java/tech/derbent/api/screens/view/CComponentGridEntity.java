@@ -85,6 +85,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private final List<ComponentEventListener<GridDragEndEvent<CEntityDB<?>>>> dragEndListeners = new ArrayList<>();
 	// Drag event listeners - follow the pattern from CComponentListEntityBase
 	private final List<ComponentEventListener<GridDragStartEvent<CEntityDB<?>>>> dragStartListeners = new ArrayList<>();
+	private final List<ComponentEventListener<GridDropEvent<CEntityDB<?>>>> dropListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
@@ -146,7 +147,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	/** Adds a listener for drop events on this grid component.
 	 * <p>
 	 * This method implements IHasDrop interface to allow external listeners (like CPageService) to be notified when items are dropped onto this grid.
-	 * The CComponentGridEntity delegates drop events directly to its underlying grid component.
+	 * The CComponentGridEntity stores the listener for propagating drop events from widget components, and also delegates to the underlying grid for
+	 * direct drops onto the grid itself.
 	 * </p>
 	 * <p>
 	 * Note: The grid field is declared as CGrid&lt;?&gt; because the entity type is determined at runtime. However, all entities are guaranteed to
@@ -160,10 +162,27 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	})
 	public Registration addDropListener(final ComponentEventListener<GridDropEvent<CEntityDB<?>>> listener) {
 		Check.notNull(listener, "Drop listener cannot be null");
-		Check.notNull(grid, "Grid not available for drop listener registration");
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Adding drop listener to grid");
-		// Safe cast: grid contains CEntityDB items (enforced by service architecture)
-		return ((CGrid) grid).addDropListener((ComponentEventListener) listener);
+		
+		// Add to our listeners list for widget drop event propagation
+		dropListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Added drop listener, total listeners: {}", dropListeners.size());
+		
+		// Also add to grid for direct drops if grid is available
+		Registration gridRegistration = null;
+		if (grid != null) {
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Adding drop listener to underlying grid");
+			// Safe cast: grid contains CEntityDB items (enforced by service architecture)
+			gridRegistration = ((CGrid) grid).addDropListener((ComponentEventListener) listener);
+		}
+		
+		// Return combined registration that removes from both
+		final Registration finalGridRegistration = gridRegistration;
+		return () -> {
+			dropListeners.remove(listener);
+			if (finalGridRegistration != null) {
+				finalGridRegistration.remove();
+			}
+		};
 	}
 
 	/** Adds a selection change listener to receive notifications when the grid selection changes */
@@ -769,6 +788,25 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
+	/** Notifies all registered drop listeners. Called when a widget component fires a drop event. Follows the same pattern as
+	 * notifyDragStartListeners and notifyDragEndListeners.
+	 * @param event The drop event from the widget component */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	private void notifyDropListeners(final GridDropEvent event) {
+		if (!dropListeners.isEmpty()) {
+			LOGGER.debug("[DragDebug] Notifying {} drop listeners", dropListeners.size());
+			for (final ComponentEventListener listener : dropListeners) {
+				try {
+					listener.onComponentEvent(event);
+				} catch (final Exception e) {
+					LOGGER.error("[DragDebug] Error notifying drop listener: {}", e.getMessage());
+				}
+			}
+		}
+	}
+
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
@@ -897,7 +935,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				return;
 			}
 			// Only register components that implement drag/drop interfaces
-			if (!(component instanceof IHasDragStart<?>) && !(component instanceof IHasDragEnd<?>)) {
+			if (!(component instanceof IHasDragStart<?>) && !(component instanceof IHasDragEnd<?>) && !(component instanceof IHasDrop<?>)) {
 				LOGGER.debug("Widget component does not implement drag/drop interfaces, skipping registration");
 				return;
 			}
@@ -919,6 +957,14 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					LOGGER.debug("[DragDebug] Widget {} fired drag end, notifying CComponentGridEntity listeners",
 							component.getClass().getSimpleName());
 					notifyDragEndListeners((GridDragEndEvent) event);
+				});
+			}
+			if (component instanceof IHasDrop<?>) {
+				final IHasDrop widgetWithDrop = (IHasDrop) component;
+				widgetWithDrop.addDropListener(event -> {
+					LOGGER.debug("[DragDebug] Widget {} fired drop, notifying CComponentGridEntity listeners",
+							component.getClass().getSimpleName());
+					notifyDropListeners((GridDropEvent) event);
 				});
 			}
 			// Generate a unique component name for this widget
