@@ -318,12 +318,23 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(fieldInfo, "Field");
 			final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 			Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
+			
 			// Check for custom component creation method first (highest priority)
 			if (fieldInfo.getCreateComponentMethod() != null && !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
 				component = createCustomComponent(contentOwner, fieldInfo, binder);
 				Check.notNull(component, "Custom component for field " + fieldInfo.getFieldName());
 				return component;
 			}
+			
+			// Check for explicit componentType specification (second priority)
+			if (fieldInfo.getComponentType() != null && fieldInfo.getComponentType() != ComponentType.AUTO) {
+				component = createComponentByType(contentOwner, fieldInfo, binder);
+				if (component != null) {
+					Check.notNull(component, "Component for field " + fieldInfo.getFieldName() + " with explicit type " + fieldInfo.getComponentType());
+					return component;
+				}
+			}
+			
 			if (fieldInfo.getFieldName().equals("approvals") || fieldInfo.getFieldName().equals("status")) {
 				LOGGER.info("Skipping field 'approvals' as it is handled separately");
 			}
@@ -404,6 +415,91 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating component for field '{}", fieldInfo.getFieldName());
+			throw e;
+		}
+	}
+
+	/** Creates a component based on explicitly specified ComponentType.
+	 * This method is called when fieldInfo.componentType is set to a value other than AUTO.
+	 * 
+	 * @param contentOwner the content owner (page) for context
+	 * @param fieldInfo    field information containing component type
+	 * @param binder       the enhanced binder for form binding
+	 * @return the component matching the specified type, or null if type cannot be created
+	 * @throws Exception if component creation fails */
+	private static Component createComponentByType(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
+		try {
+			final ComponentType componentType = fieldInfo.getComponentType();
+			Check.notNull(componentType, "ComponentType for explicit component creation");
+			
+			switch (componentType) {
+				case COMBOBOX:
+					// Ensure dataProviderBean is set
+					if (!hasValidDataProvider(fieldInfo.getDataProviderBean())) {
+						final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+						if (fieldType != null && CEntityDB.class.isAssignableFrom(fieldType)) {
+							fieldInfo.setDataProviderBean(fieldType.getSimpleName() + "Service");
+						}
+					}
+					return createComboBox(contentOwner, fieldInfo, binder);
+					
+				case MULTISELECT_COMBOBOX:
+					return createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
+					
+				case GRID_SELECTOR:
+					return createGridListSelector(contentOwner, fieldInfo, binder);
+					
+				case DUAL_LIST_SELECTOR:
+					return createDualListSelector2(contentOwner, fieldInfo, binder);
+					
+				case TEXTFIELD:
+					return createTextField(fieldInfo, binder);
+					
+				case TEXTAREA:
+					return createTextArea(fieldInfo, binder);
+					
+				case NUMBERFIELD:
+					return createIntegerField(fieldInfo, binder);
+					
+				case DATEPICKER:
+					return createDatePicker(fieldInfo, binder);
+					
+				case TIMEPICKER:
+					return createTimePicker(fieldInfo, binder);
+					
+				case DATETIMEPICKER:
+					return createDateTimePicker(fieldInfo, binder);
+					
+				case CHECKBOX:
+					return createCheckbox(fieldInfo, binder);
+					
+				case RADIOBUTTONS:
+					// For radio buttons, try enum component first, then custom handling
+					if (fieldInfo.getFieldTypeClass() != null && fieldInfo.getFieldTypeClass().isEnum()) {
+						return createEnumComponent(fieldInfo, binder);
+					}
+					LOGGER.warn("RADIOBUTTONS componentType specified for non-enum field '{}', falling back to auto-detection", 
+							fieldInfo.getFieldName());
+					return null;
+					
+				case COLORPICKER:
+					return createColorPicker(fieldInfo, binder);
+					
+				case ICONSELECTOR:
+					return createIconComboBox(fieldInfo, binder);
+					
+				case PICTURESELECTOR:
+					return createPictureSelector(fieldInfo, binder);
+					
+				case AUTO:
+				default:
+					// Should not reach here, but return null to fall back to auto-detection
+					return null;
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error creating component by explicit type {} for field '{}': {}", 
+					fieldInfo.getComponentType(), fieldInfo.getFieldName(), e.getMessage());
 			throw e;
 		}
 	}
