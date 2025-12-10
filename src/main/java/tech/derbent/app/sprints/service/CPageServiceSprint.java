@@ -300,8 +300,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 		
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+		// Safe logging: extract type and ID instead of using toString() which may fail on lazy-loaded fields
+		final Object targetItem = event.getTargetItem();
+		final String targetInfo = targetItem != null 
+				? targetItem.getClass().getSimpleName() + (targetItem instanceof tech.derbent.api.entity.domain.CEntityDB ? 
+						"[id=" + ((tech.derbent.api.entity.domain.CEntityDB<?>) targetItem).getId() + "]" : "") 
+				: "null";
 		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Target={}, Location={}", 
-				event.getTargetItem(), event.getDropLocation());
+				targetInfo, event.getDropLocation());
 		
 		// Check if dropping backlog item into sprint widget
 		if (draggedFromBacklog != null) {
@@ -559,7 +565,15 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	private void refreshAfterBacklogDrop() {
 		componentItemsSelection.refreshGrid(); // Refresh sprint items
 		componentBacklogItems.refreshGrid(); // Refresh backlog
-		LOGGER.debug("[DragDebug] Refreshed sprint and backlog grids");
+		// Refresh master grid to update sprint widgets (item counts, etc.)
+		try {
+			LOGGER.debug("[DragDebug] Calling getView().refreshGrid() to refresh master grid after backlog drop");
+			getView().refreshGrid();
+			LOGGER.debug("[DragDebug] Master grid refreshed successfully");
+		} catch (final Exception e) {
+			LOGGER.error("[DragDebug] Error refreshing master grid after backlog drop", e);
+		}
+		LOGGER.debug("[DragDebug] Refreshed sprint items, backlog, and master grids");
 	}
 	// Helper methods for drag-drop operations
 
