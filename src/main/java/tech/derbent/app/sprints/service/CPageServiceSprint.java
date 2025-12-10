@@ -300,8 +300,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 		
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+		// Safe logging: extract type and ID instead of using toString() which may fail on lazy-loaded fields
+		final Object targetItem = event.getTargetItem();
+		final String targetInfo = targetItem != null 
+				? targetItem.getClass().getSimpleName() + (targetItem instanceof tech.derbent.api.entity.domain.CEntityDB ? 
+						"[id=" + ((tech.derbent.api.entity.domain.CEntityDB<?>) targetItem).getId() + "]" : "") 
+				: "null";
 		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Target={}, Location={}", 
-				event.getTargetItem(), event.getDropLocation());
+				targetInfo, event.getDropLocation());
 		
 		// Check if dropping backlog item into sprint widget
 		if (draggedFromBacklog != null) {
