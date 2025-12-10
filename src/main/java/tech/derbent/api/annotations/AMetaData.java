@@ -29,6 +29,19 @@ public @interface AMetaData {
 
 	boolean comboboxReadOnly() default false;
 
+	/** Explicitly specifies the UI component type to create for this field.
+	 * When set to AUTO (default), the component type is automatically inferred from the field type,
+	 * data provider, and other metadata. Setting a specific type overrides the automatic inference.
+	 * 
+	 * Examples:
+	 * - COMBOBOX: Force single-select ComboBox even for entity types
+	 * - MULTISELECT_COMBOBOX: Force multi-select ComboBox for Set/List fields
+	 * - GRID_SELECTOR: Use grid-based selector instead of ComboBox
+	 * - TEXTAREA: Force text area instead of text field for strings
+	 * 
+	 * @see ComponentType */
+	ComponentType componentType() default ComponentType.AUTO;
+
 	String createComponentMethod() default "";
 
 	String dataProviderBean() default "";

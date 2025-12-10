@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.annotations.ComponentType;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.utils.Check;
@@ -31,6 +32,7 @@ public class CEntityFieldService {
 		private boolean clearOnEmptyData = false;
 		private boolean colorField = false;
 		private boolean comboboxReadOnly = false;
+		private ComponentType componentType = ComponentType.AUTO;
 		private String createComponentMethod = "";
 		private String dataProviderBean = "";
 		private String dataProviderMethod = "";
@@ -59,6 +61,8 @@ public class CEntityFieldService {
 		private boolean useIcon = false;
 		private boolean useRadioButtons = false;
 		private String width = "";
+
+		public ComponentType getComponentType() { return componentType; }
 
 		public String getCreateComponentMethod() { return createComponentMethod; }
 
@@ -136,6 +140,8 @@ public class CEntityFieldService {
 		public void setColorField(final boolean colorField) { this.colorField = colorField; }
 
 		public void setComboboxReadOnly(final boolean comboboxReadOnly) { this.comboboxReadOnly = comboboxReadOnly; }
+
+		public void setComponentType(final ComponentType componentType) { this.componentType = componentType; }
 
 		public void setCreateComponentMethod(final String createComponentMethod) { this.createComponentMethod = createComponentMethod; }
 
@@ -232,6 +238,7 @@ public class CEntityFieldService {
 			info.setComboboxReadOnly(metaData.comboboxReadOnly());
 			info.setClearOnEmptyData(metaData.clearOnEmptyData());
 			info.setColorField(metaData.colorField());
+			info.setComponentType(metaData.componentType());
 			info.setCreateComponentMethod(metaData.createComponentMethod());
 			info.setSetBackgroundFromColor(metaData.setBackgroundFromColor());
 			info.setWidth(metaData.width());
