@@ -1188,6 +1188,14 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	/** Unregisters all widget components from the page service to prevent memory leaks. */
 	private void unregisterAllWidgetComponents() {
 		try {
+			// Save widget state before clearing
+			for (final Map.Entry<Object, Component> entry : entityToWidgetMap.entrySet()) {
+				final Component component = entry.getValue();
+				if (component instanceof tech.derbent.api.grid.widget.CComponentWidgetEntity) {
+					final tech.derbent.api.grid.widget.CComponentWidgetEntity<?> widget = (tech.derbent.api.grid.widget.CComponentWidgetEntity<?>) component;
+					widget.saveWidgetState();
+				}
+			}
 			// Only unregister if contentOwner is a page service implementer
 			if (!(contentOwner instanceof IPageServiceImplementer<?>)) {
 				return;
