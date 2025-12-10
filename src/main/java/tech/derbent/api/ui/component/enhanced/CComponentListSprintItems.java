@@ -124,52 +124,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		return null;
 	}
 
-	/** Enables drag-and-drop reordering within the sprint items grid. This allows users to reorder sprint items by dragging and dropping them within
-	 * the grid. The itemOrder field is automatically updated to reflect the new order. */
-	public void enableDragAndDropReordering() {
-		final CGrid<CSprintItem> grid = getGrid();
-		if (grid == null) {
-			LOGGER.warn("Grid not available for drag-and-drop configuration");
-			return;
-		}
-		// Enable row dragging for internal reordering
-		grid.setRowsDraggable(true);
-		// Track the dragged item
-		final CSprintItem[] draggedItem = new CSprintItem[1];
-		// Add drag start listener
-		grid.addDragStartListener(event -> {
-			draggedItem[0] = event.getDraggedItems().isEmpty() ? null : event.getDraggedItems().get(0);
-			if (draggedItem[0] != null) {
-				LOGGER.debug("Started dragging sprint item: {} (order: {})", draggedItem[0].getId(), draggedItem[0].getItemOrder());
-			}
-		});
-		// Add drag end listener
-		grid.addDragEndListener(event -> {
-			LOGGER.debug("Drag ended");
-			draggedItem[0] = null;
-		});
-		// Add drop listener for internal reordering
-		grid.addDropListener(event -> {
-			final CSprintItem targetItem = event.getDropTargetItem().orElse(null);
-			final GridDropLocation dropLocation = event.getDropLocation();
-			if (draggedItem[0] == null || targetItem == null) {
-				LOGGER.debug("Drag or target item is null, ignoring drop");
-				return;
-			}
-			if (draggedItem[0].getId().equals(targetItem.getId())) {
-				LOGGER.debug("Item dropped on itself, ignoring");
-				return;
-			}
-			try {
-				handleInternalReordering(draggedItem[0], targetItem, dropLocation);
-			} catch (final Exception e) {
-				LOGGER.error("Error handling internal reordering", e);
-				CNotificationService.showException("Error reordering sprint items", e);
-			}
-		});
-		LOGGER.debug("Drag-and-drop reordering enabled for sprint items grid");
-	}
-
 	@Override
 	public CComponentEntitySelection.AlreadySelectedMode getAlreadySelectedMode() {
 		return CComponentEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED;

@@ -83,15 +83,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	public CComponentListSprintItems createSpritActivitiesComponent() {
 		if (componentItemsSelection == null) {
 			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
-			// Enable drag-and-drop reordering within the sprint items grid
-			componentItemsSelection.enableDragAndDropReordering();
-			// Enable dragging FROM sprint items back to backlog
-			componentItemsSelection.setDragToBacklogEnabled(true);
-			// Set up drop mode for sprint items grid to accept drops from backlog
-			if (componentItemsSelection.getGrid() != null) {
-				componentItemsSelection.getGrid().setDropMode(GridDropMode.BETWEEN);
-				componentItemsSelection.getGrid().setRowsDraggable(true);
-			}
+			// Enable drag-and-drop for sprint items grid (uses parent class methods)
+			componentItemsSelection.setDragEnabled(true);
+			componentItemsSelection.setDropEnabled(true);
 			// Register with page service using unified auto-registration pattern
 			componentItemsSelection.registerWithPageService(this);
 			// Set up refresh listener
@@ -290,7 +284,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * This handler supports two scenarios:
 	 * <ol>
 	 * <li>Reordering sprint items within the same sprint (internal drag-drop within widgets)</li>
-	 * <li>Dropping backlog items into sprint widgets (though widgets handle this directly)</li>
+	 * <li>Dropping backlog items into sprint widgets</li>
 	 * </ol>
 	 * <p>
 	 * Note: Most drop logic happens at the widget level (CComponentListSprintItems), but this handler can refresh the view after complex operations
@@ -299,12 +293,169 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param value     CDragDropEvent containing drop information */
 	public void on_masterGrid_drop(final Component component, final Object value) {
 		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Drop event received on master grid");
-		// Most reordering is handled by individual widget components (CComponentListSprintItems)
-		// This handler can be used for cross-widget operations or view-level refreshes if needed
-		// For now, just log - widgets handle their own reordering via on_sprintItems_drop handlers
-		if (value instanceof CDragDropEvent) {
-			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-			LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Target={}, Location={}", event.getTargetItem(), event.getDropLocation());
+		
+		if (!(value instanceof CDragDropEvent)) {
+			LOGGER.warn("[DragDebug] Drop value is not CDragDropEvent");
+			return;
+		}
+		
+		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+		LOGGER.debug("[DragDebug] CPageServiceSprint.on_masterGrid_drop: Target={}, Location={}", 
+				event.getTargetItem(), event.getDropLocation());
+		
+		// Check if dropping backlog item into sprint widget
+		if (draggedFromBacklog != null) {
+			handleBacklogToSprintDrop(event);
+			return;
+		}
+		
+		// Check if reordering sprint item within same sprint
+		if (draggedFromSprint != null) {
+			handleSprintItemReorder(event);
+			return;
+		}
+		
+		LOGGER.debug("[DragDebug] No dragged item tracked, ignoring drop");
+	}
+	
+	/** Handles dropping a backlog item into a sprint widget.
+	 * @param event the drop event containing target and location */
+	private void handleBacklogToSprintDrop(final CDragDropEvent<?> event) {
+		try {
+			final Object targetItem = event.getTargetItem();
+			LOGGER.debug("[DragDebug] handleBacklogToSprintDrop: targetItem type={}, targetItem={}", 
+					targetItem != null ? targetItem.getClass().getSimpleName() : "null", targetItem);
+			
+			if (!(targetItem instanceof CSprint)) {
+				LOGGER.warn("[DragDebug] Target is not a Sprint, cannot add backlog item. Target type: {}", 
+						targetItem != null ? targetItem.getClass().getName() : "null");
+				return;
+			}
+			
+			final CSprint targetSprint = (CSprint) targetItem;
+			final CProjectItem<?> itemToAdd = draggedFromBacklog;
+			LOGGER.debug("[DragDebug] Adding backlog item {} to sprint {} (Sprint ID: {})", 
+					itemToAdd.getId(), targetSprint.getName(), targetSprint.getId());
+			
+			// Determine item type
+			final String itemType = itemToAdd.getClass().getSimpleName();
+			
+			// Calculate order - add at end of sprint items
+			final int newOrder = getNextSprintItemOrderForSprint(targetSprint);
+			LOGGER.debug("[DragDebug] New sprint item order will be: {}", newOrder);
+			
+			// Create sprint item
+			final CSprintItem sprintItem = new CSprintItem();
+			sprintItem.setSprint(targetSprint);
+			sprintItem.setItemId(itemToAdd.getId());
+			sprintItem.setItemType(itemType);
+			sprintItem.setItemOrder(newOrder);
+			sprintItem.setItem(itemToAdd);
+			
+			// Save the new item
+			LOGGER.debug("[DragDebug] Saving sprint item to database");
+			sprintItemService.save(sprintItem);
+			LOGGER.debug("[DragDebug] Sprint item created successfully with ID: {}", sprintItem.getId());
+			
+			// Refresh both grids
+			LOGGER.debug("[DragDebug] Calling refreshAfterSprintChange");
+			refreshAfterSprintChange();
+			
+			CNotificationService.showSuccess("Item added to sprint " + targetSprint.getName());
+		} catch (final Exception e) {
+			LOGGER.error("[DragDebug] Error adding backlog item to sprint", e);
+			CNotificationService.showException("Error adding item to sprint", e);
+		} finally {
+			draggedFromBacklog = null;
+		}
+	}
+	
+	/** Handles reordering a sprint item within its sprint or moving to another sprint.
+	 * @param event the drop event containing target and location */
+	private void handleSprintItemReorder(final CDragDropEvent<?> event) {
+		try {
+			final Object targetItem = event.getTargetItem();
+			if (!(targetItem instanceof CSprint)) {
+				LOGGER.warn("[DragDebug] Target is not a Sprint, cannot reorder");
+				return;
+			}
+			
+			final CSprint targetSprint = (CSprint) targetItem;
+			final CSprintItem draggedItem = draggedFromSprint;
+			LOGGER.debug("[DragDebug] Moving/reordering sprint item {} to sprint {}", 
+					draggedItem.getId(), targetSprint.getId());
+			
+			// Check if moving to different sprint or reordering within same sprint
+			if (!draggedItem.getSprint().getId().equals(targetSprint.getId())) {
+				// Moving to different sprint
+				draggedItem.setSprint(targetSprint);
+				// Add at end of target sprint
+				final int newOrder = getNextSprintItemOrderForSprint(targetSprint);
+				draggedItem.setItemOrder(newOrder);
+			} else {
+				// Reordering within same sprint - for now just keep current order
+				// More complex reordering logic would need to know exact drop position
+				LOGGER.debug("[DragDebug] Reordering within same sprint - keeping current order");
+			}
+			
+			// Save the updated item
+			sprintItemService.save(draggedItem);
+			
+			// Refresh grids
+			refreshAfterSprintChange();
+			
+			CNotificationService.showSuccess("Sprint item updated");
+			LOGGER.debug("[DragDebug] Sprint item updated successfully");
+		} catch (final Exception e) {
+			LOGGER.error("[DragDebug] Error reordering sprint item", e);
+			CNotificationService.showException("Error reordering sprint item", e);
+		} finally {
+			draggedFromSprint = null;
+		}
+	}
+	
+	/** Gets the next available order for sprint items in a specific sprint.
+	 * @param sprint the sprint to get next order for
+	 * @return the next order value */
+	private int getNextSprintItemOrderForSprint(final CSprint sprint) {
+		try {
+			final List<CSprintItem> items = sprintItemService.findByMasterId(sprint.getId());
+			if (items.isEmpty()) {
+				return 1;
+			}
+			return items.stream()
+					.mapToInt(CSprintItem::getItemOrder)
+					.max()
+					.orElse(0) + 1;
+		} catch (final Exception e) {
+			LOGGER.error("Error getting next sprint item order", e);
+			return 1;
+		}
+	}
+	
+	/** Refreshes all relevant grids after a sprint change. */
+	private void refreshAfterSprintChange() {
+		LOGGER.debug("[DragDebug] refreshAfterSprintChange: Starting refresh of all components");
+		
+		// Refresh sprint items list if visible
+		if (componentItemsSelection != null) {
+			LOGGER.debug("[DragDebug] Refreshing componentItemsSelection grid");
+			componentItemsSelection.refreshGrid();
+		}
+		
+		// Refresh backlog
+		if (componentBacklogItems != null) {
+			LOGGER.debug("[DragDebug] Refreshing componentBacklogItems grid");
+			componentBacklogItems.refreshGrid();
+		}
+		
+		// Refresh master grid to update sprint widgets
+		try {
+			LOGGER.debug("[DragDebug] Calling getView().refreshGrid() to refresh master grid");
+			getView().refreshGrid();
+			LOGGER.debug("[DragDebug] Master grid refreshed successfully");
+		} catch (final Exception e) {
+			LOGGER.error("[DragDebug] Error refreshing master grid after sprint change", e);
 		}
 	}
 
@@ -450,6 +601,27 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
+	/** Gets the maximum sprint order value from all backlog items.
+	 * @return the maximum sprint order, or 0 if no items have sprint order */
+	private int getMaxBacklogOrder() {
+		try {
+			final List<CProjectItem<?>> allBacklogItems = componentBacklogItems.getAllItems();
+			int maxOrder = 0;
+			for (final CProjectItem<?> item : allBacklogItems) {
+				if (item instanceof ISprintableItem) {
+					final Integer order = ((ISprintableItem) item).getSprintOrder();
+					if (order != null && order > maxOrder) {
+						maxOrder = order;
+					}
+				}
+			}
+			return maxOrder;
+		} catch (final Exception e) {
+			LOGGER.error("Error getting max backlog order", e);
+			return 0;
+		}
+	}
+
 	/** Shifts existing sprint items to make room for a new item at the specified position. All items with order >= newOrder will be incremented by 1.
 	 * @param newOrder the order value where the new item will be inserted */
 	private void shiftSprintItemsForInsert(final int newOrder) {
@@ -485,7 +657,17 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		final ISprintableItem sprintableItem = (ISprintableItem) item;
 		final ISprintableItem targetSprintableItem = (ISprintableItem) targetItem;
 		final Integer targetOrder = targetSprintableItem.getSprintOrder();
-		Check.notNull(targetOrder, "Target item must have sprint order");
+		
+		// Handle null sprint order: assign to end of backlog
+		if (targetOrder == null) {
+			LOGGER.warn("[DragDebug] Target item {} has null sprint order, assigning dropped item to end of backlog", targetItem.getId());
+			final int maxOrder = getMaxBacklogOrder();
+			sprintableItem.setSprintOrder(maxOrder + 1);
+			saveProjectItem(item);
+			LOGGER.debug("[DragDebug] Updated backlog item {} order to {} (end of backlog)", item.getId(), maxOrder + 1);
+			return;
+		}
+		
 		// Calculate new order based on drop location
 		final int newOrder = (dropLocation == GridDropLocation.BELOW) ? targetOrder + 1 : targetOrder;
 		sprintableItem.setSprintOrder(newOrder);
