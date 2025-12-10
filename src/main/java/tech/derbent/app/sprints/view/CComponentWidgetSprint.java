@@ -316,7 +316,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 
 	/** Saves widget UI state before destruction. Saves the expanded/collapsed state of sprint items. */
 	@Override
-	protected void saveWidgetState() {
+	public void saveWidgetState() {
 		super.saveWidgetState();
 		// Save sprint items visibility state
 		saveStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible", sprintItemsVisible);

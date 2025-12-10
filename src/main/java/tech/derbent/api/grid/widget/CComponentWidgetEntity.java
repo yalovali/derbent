@@ -353,7 +353,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	 * <pre>
 	 * {@code
 	 * @Override
-	 * protected void saveWidgetState() {
+	 * public void saveWidgetState() {
 	 *     super.saveWidgetState();
 	 *     saveStateValue(entity.getClass(), entity.getId(), "itemsVisible", sprintItemsVisible);
 	 * }
@@ -361,7 +361,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	 * </pre>
 	 * 
 	 * </p> */
-	protected void saveWidgetState() {
+	public void saveWidgetState() {
 		// Default implementation: no state to save
 		// Subclasses should override to save their specific UI state
 	}
