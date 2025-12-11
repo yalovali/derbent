@@ -34,20 +34,6 @@ import tech.derbent.app.sprints.view.CComponentWidgetSprint;
 public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		implements IPageServiceHasStatusAndWorkflow<CSprint>, IComponentWidgetEntityProvider<CSprint> {
 
-	/** Enum defining the types of drag-drop operations in sprint planning. */
-	private enum DragDropOperationType {
-		/** Reordering items within the backlog */
-		BACKLOG_REORDER,
-		/** Moving a sprint item back to backlog */
-		SPRINT_TO_BACKLOG,
-		/** Adding a backlog item to a sprint */
-		BACKLOG_TO_SPRINT,
-		/** Reordering items within a sprint */
-		SPRINT_REORDER,
-		/** Unknown or unsupported operation */
-		UNKNOWN
-	}
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
 	private CActivityService activityService;
 	private CComponentBacklog componentBacklogItems;
@@ -324,112 +310,47 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	/** Determines the type of drag-drop operation based on source and destination.
-	 * @param event the drag-drop event
-	 * @return the drag-drop operation type */
-	private DragDropOperationType determineDragDropOperation(final CDragDropEvent<?> event) {
-		final Object dragSource = event.getDragSource();
-		final Object dropTarget = event.getDropTarget();
-		
-		// Scenario 1: Backlog → Backlog (internal reordering)
-		if (dragSource instanceof CComponentBacklog && dropTarget instanceof CComponentBacklog) {
-			return DragDropOperationType.BACKLOG_REORDER;
-		}
-		
-		// Scenario 2: Sprint Items → Backlog (remove from sprint)
-		if (dragSource instanceof CComponentListSprintItems && dropTarget instanceof CComponentBacklog) {
-			return DragDropOperationType.SPRINT_TO_BACKLOG;
-		}
-		
-		// Scenario 3: Backlog → Sprint Items (add to sprint)
-		if (dragSource instanceof CComponentBacklog && dropTarget instanceof CComponentListSprintItems) {
-			return DragDropOperationType.BACKLOG_TO_SPRINT;
-		}
-		
-		// Scenario 4: Sprint Items → Sprint Items (reorder within sprint)
-		if (dragSource instanceof CComponentListSprintItems && dropTarget instanceof CComponentListSprintItems) {
-			return DragDropOperationType.SPRINT_REORDER;
-		}
-		
-		// Unknown scenario
-		LOGGER.warn("Unknown drag-drop scenario: source={}, target={}", 
-			dragSource != null ? dragSource.getClass().getSimpleName() : "null",
-			dropTarget != null ? dropTarget.getClass().getSimpleName() : "null");
-		return DragDropOperationType.UNKNOWN;
-	}
-
 	/** Handler for drop events on backlog items grid. Handles both internal reordering and sprint-to-backlog drops.
 	 * @param component the backlog grid component
 	 * @param value     CDragDropEvent containing drop information */
 	public void on_backlogItems_drop(final Component component, final Object value) {
-		LOGGER.info("[DragSourceDebug] ========== on_backlogItems_drop CALLED ==========");
 		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 		
-		// NEW REQUIREMENT: Log comprehensive drag source information
-		LOGGER.info("[DragSourceDebug] ========== BACKLOG DROP EVENT START ==========");
-		LOGGER.info("[DragSourceDebug] Drop target component: {}", component != null ? component.getClass().getSimpleName() : "null");
-		LOGGER.info("[DragSourceDebug] Drag source: {}", event.getDragSource() != null ? event.getDragSource().getClass().getSimpleName() : "null");
-		LOGGER.info("[DragSourceDebug] Drop target: {}", event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null");
-		LOGGER.info("[DragSourceDebug] Dragged items count: {}", event.getDraggedItems() != null ? event.getDraggedItems().size() : 0);
-		if (event.getDraggedItems() != null && !event.getDraggedItems().isEmpty()) {
-			LOGGER.info("[DragSourceDebug] First dragged item type: {}", event.getDraggedItem() != null ? event.getDraggedItem().getClass().getSimpleName() : "null");
-			LOGGER.info("[DragSourceDebug] First dragged item: {}", event.getDraggedItem());
-		}
-		LOGGER.info("[DragSourceDebug] Target item: {}", event.getTargetItem());
-		LOGGER.info("[DragSourceDebug] Drop location: {}", event.getDropLocation());
-		LOGGER.info("[DragSourceDebug] draggedFromBacklog field: {}", draggedFromBacklog != null ? draggedFromBacklog.getClass().getSimpleName() + "#" + draggedFromBacklog.getId() : "null");
-		LOGGER.info("[DragSourceDebug] draggedFromSprint field: {}", draggedFromSprint != null ? "CSprintItem#" + draggedFromSprint.getId() : "null");
+		// Simple logic: Check source and destination
+		final Object dragSource = event.getDragSource();
+		final Object dropTarget = event.getDropTarget();
 		
-		// Log component hierarchy from drag source
-		final List<Component> hierarchy = event.getDragSourceHierarchy();
-		LOGGER.info("[DragSourceDebug] Drag source hierarchy (source to root):");
-		for (int i = 0; i < hierarchy.size(); i++) {
-			final Component comp = hierarchy.get(i);
-			LOGGER.info("[DragSourceDebug]   [{}] {}", i, comp.getClass().getSimpleName());
+		LOGGER.info("=== Drop on Backlog ===");
+		LOGGER.info("Source: {}", dragSource != null ? dragSource.getClass().getSimpleName() : "null");
+		LOGGER.info("Target: {}", dropTarget != null ? dropTarget.getClass().getSimpleName() : "null");
+		LOGGER.info("draggedFromSprint: {}", draggedFromSprint != null ? draggedFromSprint.getId() : "null");
+		
+		// If drag source is backlog itself, it's internal reordering - let CComponentBacklog handle it
+		if (dragSource instanceof CComponentBacklog) {
+			LOGGER.info("Internal backlog reordering - CComponentBacklog will handle it");
+			return;
 		}
 		
-		// Determine operation type based on source and destination
-		final DragDropOperationType operationType = determineDragDropOperation(event);
-		LOGGER.info("[DragSourceDebug] Determined operation type: {}", operationType);
-		LOGGER.info("[DragSourceDebug] ========== BACKLOG DROP EVENT END ==========");
-		
-		// Handle based on operation type
-		switch (operationType) {
-			case BACKLOG_REORDER:
-				// Internal backlog reordering is handled by CComponentBacklog itself
-				LOGGER.info("[DragSourceDebug] Internal backlog reordering detected - letting CComponentBacklog handle it");
-				return;
-				
-			case SPRINT_TO_BACKLOG:
-				// Move sprint item back to backlog
-				// KEEP FAST ERROR DETECTION: Check immediately fails if sprintItem is null
-				final CSprintItem sprintItem = draggedFromSprint;
-				LOGGER.info("[DragSourceDebug] SPRINT_TO_BACKLOG operation - sprintItem: {}", sprintItem != null ? "CSprintItem#" + sprintItem.getId() : "null");
-				Check.notNull(sprintItem, "Sprint item cannot be null when dropping from sprint to backlog - drag source: " 
-					+ (event.getDragSource() != null ? event.getDragSource().getClass().getSimpleName() : "null"));
-				
-				try {
-					LOGGER.info("[DragSourceDebug] Calling moveSprintItemToBacklog");
-					moveSprintItemToBacklog(sprintItem, event);
-					refreshAfterBacklogDrop();
-					CNotificationService.showSuccess("Item removed from sprint");
-					LOGGER.info("[DragSourceDebug] Successfully moved sprint item to backlog");
-				} catch (final Exception e) {
-					LOGGER.error("Error moving item to backlog", e);
-					CNotificationService.showException("Error removing item from sprint", e);
-				} finally {
-					draggedFromSprint = null;
-				}
-				break;
-				
-			case BACKLOG_TO_SPRINT:
-			case SPRINT_REORDER:
-			case UNKNOWN:
-			default:
-				LOGGER.warn("[DragSourceDebug] Unexpected drag-drop operation on backlog: {}", operationType);
-				break;
+		// If dragging from sprint to backlog, move the item back
+		if (draggedFromSprint != null) {
+			LOGGER.info("Moving sprint item {} back to backlog", draggedFromSprint.getId());
+			try {
+				moveSprintItemToBacklog(draggedFromSprint, event);
+				refreshAfterBacklogDrop();
+				CNotificationService.showSuccess("Item removed from sprint");
+			} catch (final Exception e) {
+				LOGGER.error("Error moving item to backlog", e);
+				CNotificationService.showException("Error removing item from sprint", e);
+			} finally {
+				draggedFromSprint = null;
+			}
+			return;
 		}
+		
+		LOGGER.warn("Unhandled drop scenario - source: {}, target: {}", 
+			dragSource != null ? dragSource.getClass().getSimpleName() : "null",
+			dropTarget != null ? dropTarget.getClass().getSimpleName() : "null");
 	}
 
 	public void on_description_blur(final Component component, final Object value) {

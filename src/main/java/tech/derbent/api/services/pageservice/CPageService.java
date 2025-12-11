@@ -442,17 +442,23 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	private void bindIHasDropEvent(final IHasDrop<?> component, final Method method, final String methodName) {
 		component.addDropListener(event -> {
 			try {
-				LOGGER.debug("[DragDebug] CPageService.bindIHasDropEvent: Drop event received on component {}", methodName);
+				LOGGER.info("[DragDebug] CPageService.bindIHasDropEvent: Drop event received on component {}", methodName);
+				LOGGER.info("[DragDebug] About to invoke method: {}", method.getName());
+				LOGGER.info("[DragDebug] activeDragSource: {}", activeDragSource != null ? activeDragSource.getClass().getSimpleName() : "null");
+				LOGGER.info("[DragDebug] activeDraggedItems: {}", activeDraggedItems != null ? activeDraggedItems.size() : "null");
 				// Get drop information from GridDropEvent
 				final Object targetItem = event.getDropTargetItem().orElse(null);
 				final var dropLocation = event.getDropLocation();
+				LOGGER.info("[DragDebug] targetItem: {}, dropLocation: {}", targetItem, dropLocation);
 				// Use tracked drag source and items from drag start event
 				// This provides handlers with information about where the drag originated
 				final CDragDropEvent<?> dropEvent = new CDragDropEvent(activeDraggedItems, activeDragSource, targetItem, dropLocation,
 						(Component) component);
+				LOGGER.info("[DragDebug] Invoking method {} on page service", method.getName());
 				method.invoke(this, (Component) component, dropEvent);
+				LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
 			} catch (final Exception ex) {
-				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
 			}
 		});
 		LOGGER.debug("[BindDebug] Bound IHasDrop drop event to method {}", methodName);
