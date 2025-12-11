@@ -171,7 +171,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param listener the drop listener to add
 	 * @return registration for removing the listener */
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	public Registration addDropListener(ComponentEventListener<GridDropEvent<?>> listener) {
 		final var grid = getGrid();
 		Check.notNull(grid, "Grid not available for drop listener registration");

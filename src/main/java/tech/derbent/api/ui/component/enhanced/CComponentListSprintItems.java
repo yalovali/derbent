@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
@@ -258,70 +257,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		};
 	}
 
-	/** Handles reordering of sprint items when dropped within the same grid. Uses the standard service move methods for consistency with up/down
-	 * buttons.
-	 * @param draggedItem  the sprint item being dragged
-	 * @param targetItem   the sprint item it's being dropped on/near
-	 * @param dropLocation where relative to target (ABOVE, BELOW, ON_TOP) */
-	private void handleInternalReordering(final CSprintItem draggedItem, final CSprintItem targetItem, final GridDropLocation dropLocation) {
-		LOGGER.debug("Handling internal reorder: dragged={} (order={}), target={} (order={}), location={}", draggedItem.getId(),
-				draggedItem.getItemOrder(), targetItem.getId(), targetItem.getItemOrder(), dropLocation);
-		// Get current items from grid
-		final List<CSprintItem> currentItems = getGrid().getListDataView().getItems().toList();
-		if (currentItems.isEmpty()) {
-			LOGGER.warn("No items in grid for reordering");
-			return;
-		}
-		// Find indices
-		int draggedIndex = -1;
-		int targetIndex = -1;
-		for (int i = 0; i < currentItems.size(); i++) {
-			if (currentItems.get(i).getId().equals(draggedItem.getId())) {
-				draggedIndex = i;
-			}
-			if (currentItems.get(i).getId().equals(targetItem.getId())) {
-				targetIndex = i;
-			}
-		}
-		if (draggedIndex == -1 || targetIndex == -1) {
-			LOGGER.warn("Could not find dragged or target item in list");
-			return;
-		}
-		// Calculate new position
-		int newPosition = targetIndex;
-		if (dropLocation == GridDropLocation.BELOW) {
-			newPosition = targetIndex + 1;
-		}
-		// Adjust if dragging from above
-		if (draggedIndex < newPosition) {
-			newPosition--;
-		}
-		if (draggedIndex == newPosition) {
-			LOGGER.debug("Item dropped at same position, no reordering needed");
-			return;
-		}
-		// Use the generalized service-based reordering from base class
-		// This ensures consistency with up/down buttons
-		final int moves = reorderItemByMoving(draggedItem, draggedIndex, newPosition, currentItems);
-		if (moves > 0) {
-			LOGGER.debug("Reordered sprint item using {} service move operations", moves);
-			// Update self and refresh grid
-			refreshGrid();
-			CNotificationService.showSuccess("Sprint items reordered");
-			// Notify listeners (Update-Then-Notify pattern)
-			notifyRefreshListeners(draggedItem);
-		}
-	}
-
 	/** Checks if dragging to backlog is enabled.
 	 * @return true if drag to backlog is enabled */
 	public boolean isDragToBacklogEnabled() { return dragEnabledToBacklog; }
-
-	/** Checks if dropping is currently enabled for this component.
-	 * @return true if drops are enabled (handler is set), false otherwise
-	 * @deprecated Drop handling moved to CPageService */
-	@Deprecated
-	public boolean isDropEnabled() { return false; }
 
 	@Override
 	protected List<CSprintItem> loadItems(final CSprint master) {

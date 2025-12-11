@@ -59,20 +59,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	/** Calculates the order for inserting a new item at a specific position.
-	 * @param targetItem   the item near which to insert
-	 * @param dropLocation where relative to the target (ABOVE or BELOW)
-	 * @return the order value for the new item */
-	private int calculateInsertOrder(final CSprintItem targetItem, final GridDropLocation dropLocation) {
-		if (dropLocation == GridDropLocation.BELOW) {
-			// Insert after target
-			return targetItem.getItemOrder() + 1;
-		} else {
-			// Insert before target (ABOVE or ON_TOP)
-			return targetItem.getItemOrder();
-		}
-	}
-
 	public CComponentItemDetails createItemDetailsComponent() throws Exception {
 		if (componentItemDetails == null) {
 			componentItemDetails = new CComponentItemDetails(getSessionService());
@@ -160,18 +146,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			LOGGER.error("Error getting max backlog order", e);
 			return 0;
 		}
-	}
-
-	/** Gets the next order number for a new sprint item.
-	 * @return The next order number */
-	private Integer getNextSprintItemOrder() {
-		final CSprint currentSprint = getView().getCurrentEntity();
-		Check.notNull(currentSprint, "Current sprint cannot be null when getting next order");
-		if (currentSprint.getId() == null) {
-			return 1;
-		}
-		final List<CSprintItem> items = sprintItemService.findByMasterId(currentSprint.getId());
-		return items.size() + 1;
 	}
 
 	/** Gets the next available order for sprint items in a specific sprint.
@@ -341,7 +315,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param value     CDragDropEvent containing drop information */
 	public void on_backlogItems_drop(final Component component, final Object value) {
 		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
-		Check.notNull(draggedFromSprint, "No sprint item being dragged");
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 		final CSprintItem sprintItem = draggedFromSprint;
 		try {
@@ -425,80 +398,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
 
-	public void on_sprintItems_change(final Component component, final Object value) {
-		LOGGER.info("function: on_backlog_clicked for Component type");
-	}
-
-	/** Handler for drag end events on sprint items grid. Clears tracking of dragged items.
-	 * @param component the sprint items grid component
-	 * @param value     CDragDropEvent (dragged items not available in drag end) */
-	public void on_sprintItems_dragEnd(final Component component, final Object value) {
-		if (value instanceof CDragDropEvent) {
-			draggedFromSprint = null;
-		}
-	}
-
-	/** Handler for drag start events on sprint items grid. Tracks items being dragged from sprint for cross-component drag-drop.
-	 * @param component the sprint items grid component
-	 * @param value     CDragDropEvent containing dragged items */
-	public void on_sprintItems_dragStart(final Component component, final Object value) {
-		if (value instanceof CDragDropEvent) {
-			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-			if (event.getDraggedItems() != null && !event.getDraggedItems().isEmpty()) {
-				draggedFromSprint = (CSprintItem) event.getDraggedItem();
-			}
-		}
-	}
-
-	/** Handler for drop events on sprint items grid. Handles dropping backlog items into the sprint with position-based ordering. All drop logic is
-	 * centralized here in the page service for better separation of concerns.
-	 * @param component the sprint items grid component
-	 * @param value     CDragDropEvent containing drop information */
-	public void on_sprintItems_drop(final Component component, final Object value) {
-		if (!(value instanceof CDragDropEvent) || draggedFromBacklog == null) {
-			return;
-		}
-		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-		final CSprintItem targetItem = (CSprintItem) event.getTargetItem();
-		final GridDropLocation dropLocation = event.getDropLocation();
-		final CProjectItem<?> itemToAdd = draggedFromBacklog;
-		try {
-			// Determine item type
-			final String itemType = itemToAdd.getClass().getSimpleName();
-			// Calculate the order for the new item
-			final int newOrder;
-			if (targetItem == null || dropLocation == null) {
-				// No target specified - add at end
-				newOrder = getNextSprintItemOrder();
-			} else {
-				// Insert at specific position
-				newOrder = calculateInsertOrder(targetItem, dropLocation);
-				// Shift existing items BEFORE inserting the new one
-				shiftSprintItemsForInsert(newOrder);
-			}
-			// Create sprint item
-			final CSprintItem sprintItem = new CSprintItem();
-			sprintItem.setSprint(getView().getCurrentEntity());
-			sprintItem.setItemId(itemToAdd.getId());
-			sprintItem.setItemType(itemType);
-			sprintItem.setItemOrder(newOrder);
-			sprintItem.setItem(itemToAdd);
-			// Save the new item
-			sprintItemService.save(sprintItem);
-			// Refresh sprint items grid
-			componentItemsSelection.refreshGrid();
-			// Show success notification
-			CNotificationService.showSuccess("Item added to sprint");
-			// Note: componentBacklogItems will refresh via the listener
-		} catch (final Exception e) {
-			LOGGER.error("Error adding dropped item to sprint", e);
-			CNotificationService.showException("Error adding item to sprint", e);
-		} finally {
-			// Clear tracker
-			draggedFromBacklog = null;
-		}
-	}
-
 	public void on_status_change(final Component component, final Object value) {
 		LOGGER.info("function: on_status_change for Component type: {}",
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
@@ -569,27 +468,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			activityService.save((CActivity) item);
 		} else if (item instanceof CMeeting) {
 			meetingService.save((CMeeting) item);
-		}
-	}
-
-	/** Shifts existing sprint items to make room for a new item at the specified position. All items with order >= newOrder will be incremented by 1.
-	 * @param newOrder the order value where the new item will be inserted */
-	private void shiftSprintItemsForInsert(final int newOrder) {
-		try {
-			final CSprint currentSprint = getView().getCurrentEntity();
-			final List<CSprintItem> allItems = sprintItemService.findByMasterId(currentSprint.getId());
-			// Sort by order in descending order to avoid conflicts during update
-			allItems.sort((a, b) -> Integer.compare(b.getItemOrder(), a.getItemOrder()));
-			// Shift items with order >= newOrder
-			for (final CSprintItem item : allItems) {
-				if (item.getItemOrder() >= newOrder) {
-					item.setItemOrder(item.getItemOrder() + 1);
-					sprintItemService.save(item);
-					LOGGER.debug("Shifted sprint item {} from order {} to {}", item.getId(), item.getItemOrder() - 1, item.getItemOrder());
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error shifting sprint items for insert", e);
 		}
 	}
 

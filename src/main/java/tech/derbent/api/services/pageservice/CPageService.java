@@ -23,6 +23,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.IHasDragEnd;
 import tech.derbent.api.interfaces.IHasDragStart;
+import tech.derbent.api.interfaces.IHasDrop;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -159,23 +160,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
-	/** Update the save button state based on validation results. This method is called automatically when the name field changes. */
-	protected void baselistener_on_name_change() {
-		try {
-			LOGGER.debug("Validating entity to update save button state.");
-			final boolean isSaveValid = validateEntitySave();
-			// Try to access the CRUD toolbar from the view
-			if (getView() instanceof ICrudToolbarOwnerPage) {
-				final ICrudToolbarOwnerPage crudView = (ICrudToolbarOwnerPage) getView();
-				final CCrudToolbar toolbar = crudView.getCrudToolbar();
-				Check.notNull(toolbar, "CRUD Toolbar must not be null to update save button state.");
-				toolbar.setSaveButtonEnabled(isSaveValid);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not update save button state: {}", e.getMessage());
-		}
-	}
-
 	public void bind() {
 		try {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CActivity.class.getSimpleName());
@@ -185,7 +169,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				formBuilder = detailsBuilder.getFormBuilder();
 			}
 			bindMethods(this);
-			setup_base_listeners();
 		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CActivity.class.getSimpleName(),
 					e.getMessage());
@@ -265,8 +248,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			} else {
 				// Fail-fast: dragStart handler defined but component doesn't support it
 				throw new IllegalArgumentException(String.format(
-						"DragStart action requires IHasDragStart interface or Grid. Component '%s' is %s which doesn't support drag start. " +
-						"Handler method '%s' cannot be bound. Implement IHasDragStart or use Grid.",
+						"DragStart action requires IHasDragStart interface or Grid. Component '%s' is %s which doesn't support drag start. "
+								+ "Handler method '%s' cannot be bound. Implement IHasDragStart or use Grid.",
 						componentName, component.getClass().getSimpleName(), methodName));
 			}
 		}
@@ -282,8 +265,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			} else {
 				// Fail-fast: dragEnd handler defined but component doesn't support it
 				throw new IllegalArgumentException(String.format(
-						"DragEnd action requires IHasDragEnd interface or Grid. Component '%s' is %s which doesn't support drag end. " +
-						"Handler method '%s' cannot be bound. Implement IHasDragEnd or use Grid.",
+						"DragEnd action requires IHasDragEnd interface or Grid. Component '%s' is %s which doesn't support drag end. "
+								+ "Handler method '%s' cannot be bound. Implement IHasDragEnd or use Grid.",
 						componentName, component.getClass().getSimpleName(), methodName));
 			}
 		}
@@ -297,10 +280,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				bindIHasDropEvent((tech.derbent.api.interfaces.IHasDrop<?>) component, method, methodName);
 			} else {
 				// Fail-fast: Drop handler defined but component doesn't support drops
-				throw new IllegalArgumentException(String.format(
-						"Drop action requires Grid or IHasDrop interface. Component '%s' is %s which doesn't support drops. " +
-						"Handler method '%s' cannot be bound.",
-						componentName, component.getClass().getSimpleName(), methodName));
+				throw new IllegalArgumentException(
+						String.format("Drop action requires Grid or IHasDrop interface. Component '%s' is %s which doesn't support drops. "
+								+ "Handler method '%s' cannot be bound.", componentName, component.getClass().getSimpleName(), methodName));
 			}
 		}
 		// add more actions as needed
@@ -326,8 +308,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		final Component vaadinComponent = (Component) component;
 		component.addDragEndListener(event -> {
 			try {
-				LOGGER.debug("[DragDebug] CPageService.bindDragEnd: Invoking {} on component {}", methodName,
-						component.getClass().getSimpleName());
+				LOGGER.debug("[DragDebug] CPageService.bindDragEnd: Invoking {} on component {}", methodName, component.getClass().getSimpleName());
 				// GridDragEndEvent doesn't provide dragged items
 				// Handler methods should track items from dragStart event if needed
 				final CDragDropEvent<?> dragEvent = new CDragDropEvent(null, component);
@@ -442,7 +423,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	private void bindIHasDropEvent(final tech.derbent.api.interfaces.IHasDrop<?> component, final Method method, final String methodName) {
+	private void bindIHasDropEvent(final IHasDrop<?> component, final Method method, final String methodName) {
 		component.addDropListener(event -> {
 			try {
 				LOGGER.debug("[DragDebug] CPageService.bindIHasDropEvent: Drop event received on component {}", methodName);
@@ -450,8 +431,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				final Object targetItem = event.getDropTargetItem().orElse(null);
 				final var dropLocation = event.getDropLocation();
 				// Create event wrapper for handler
-				final CDragDropEvent<?> dropEvent = new CDragDropEvent(null, null, targetItem, dropLocation, (com.vaadin.flow.component.Component) component);
-				method.invoke(this, (com.vaadin.flow.component.Component) component, dropEvent);
+				final CDragDropEvent<?> dropEvent = new CDragDropEvent(null, null, targetItem, dropLocation, (Component) component);
+				method.invoke(this, (Component) component, dropEvent);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
 			}
@@ -462,29 +443,23 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	public void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
 		LOGGER.debug("[BindDebug] Starting method binding for page service: {}", page.getClass().getSimpleName());
-		
 		// Combine form components and custom components
 		final Map<String, Component> allComponents = new HashMap<>();
-		
 		// Get components from detailsBuilder's centralized map if available
 		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
 			allComponents.putAll(detailsBuilder.getComponentMap());
 			LOGGER.debug("[BindDebug] Added {} components from detailsBuilder's centralized map", detailsBuilder.getComponentMap().size());
 		}
-		
 		// Also include formBuilder components for backward compatibility
 		if (formBuilder != null) {
 			allComponents.putAll(formBuilder.getComponentMap());
 			LOGGER.debug("[BindDebug] Added {} components from formBuilder", formBuilder.getComponentMap().size());
 		}
-		
 		// Add custom registered components (these take precedence)
 		allComponents.putAll(customComponents);
 		LOGGER.debug("[BindDebug] Added {} custom registered components", customComponents.size());
-		
 		// print the component names for debugging
 		LOGGER.debug("[BindDebug] Total components available for binding: {} - {}", allComponents.size(), allComponents.keySet());
-		
 		// Scan for handler methods matching on_{componentName}_{action} pattern
 		final var methods = page.getClass().getDeclaredMethods();
 		int boundCount = 0;
@@ -497,12 +472,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			final var action = matcher.group(2);
 			final var component = allComponents.get(componentName);
 			if (component == null) {
-				LOGGER.warn("[BindDebug] Component '{}' not found for binding method '{}' - Available components: {}", 
-					componentName, method.getName(), allComponents.keySet());
+				LOGGER.warn("[BindDebug] Component '{}' not found for binding method '{}' - Available components: {}", componentName,
+						method.getName(), allComponents.keySet());
 				continue;
 			}
-			LOGGER.debug("[BindDebug] Binding method '{}' to component '{}' (type: {}) for action '{}'", 
-				method.getName(), componentName, component.getClass().getSimpleName(), action);
+			LOGGER.debug("[BindDebug] Binding method '{}' to component '{}' (type: {}) for action '{}'", method.getName(), componentName,
+					component.getClass().getSimpleName(), action);
 			bindComponent(method, component, method.getName(), componentName, action);
 			boundCount++;
 		}
@@ -517,7 +492,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	protected <T> ComboBox<T> getComboBox(final String fieldName) {
 		final Component component = getComponentByName(fieldName);
 		Check.notNull(component, String.format("Component '%s' not found. Check component registration and field name.", fieldName));
-		
 		// Check if it's a CNavigableComboBox (which is a CustomField containing a ComboBox)
 		if (component instanceof CNavigableComboBox<?>) {
 			return (ComboBox<T>) ((CNavigableComboBox<?>) component).getComboBox();
@@ -527,8 +501,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			return (ComboBox<T>) component;
 		}
 		// Fail-fast: Component exists but wrong type
-		throw new IllegalArgumentException(String.format(
-				"Component '%s' is not a ComboBox. Found: %s. Expected ComboBox or CNavigableComboBox.",
+		throw new IllegalArgumentException(String.format("Component '%s' is not a ComboBox. Found: %s. Expected ComboBox or CNavigableComboBox.",
 				fieldName, component.getClass().getSimpleName()));
 	}
 
@@ -537,9 +510,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		final Component component = getComponentByName(fieldName);
 		Check.notNull(component, String.format("Component '%s' not found. Check component registration and field name.", fieldName));
 		if (!componentType.isInstance(component)) {
-			throw new IllegalArgumentException(String.format(
-					"Component '%s' is of type %s but expected %s. Check component type matches handler usage.",
-					fieldName, component.getClass().getSimpleName(), componentType.getSimpleName()));
+			throw new IllegalArgumentException(
+					String.format("Component '%s' is of type %s but expected %s. Check component type matches handler usage.", fieldName,
+							component.getClass().getSimpleName(), componentType.getSimpleName()));
 		}
 		return (T) component;
 	}
@@ -555,7 +528,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				return component;
 			}
 		}
-		
 		// Fall back to formBuilder for backward compatibility
 		if (formBuilder == null) {
 			LOGGER.warn("FormBuilder is null; cannot retrieve component '{}'", fieldName);
@@ -571,9 +543,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		final Component component = getComponentByName(fieldName);
 		Check.notNull(component, String.format("Cannot get value: Component '%s' not found. Check component registration.", fieldName));
 		if (!(component instanceof HasValue)) {
-			throw new IllegalArgumentException(String.format(
-					"Component '%s' does not have a value (not a HasValue). Found type: %s. Use HasValue components for getValue().",
-					fieldName, component.getClass().getSimpleName()));
+			throw new IllegalArgumentException(
+					String.format("Component '%s' does not have a value (not a HasValue). Found type: %s. Use HasValue components for getValue().",
+							fieldName, component.getClass().getSimpleName()));
 		}
 		return ((HasValue) component).getValue();
 	}
@@ -606,6 +578,23 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	}
 
 	public IPageServiceImplementer<EntityClass> getView() { return view; }
+
+	/** Update the save button state based on validation results. This method is called automatically when the name field changes. */
+	protected void on_name_change() {
+		try {
+			LOGGER.debug("Validating entity to update save button state.");
+			final boolean isSaveValid = validateEntitySave();
+			// Try to access the CRUD toolbar from the view
+			if (getView() instanceof ICrudToolbarOwnerPage) {
+				final ICrudToolbarOwnerPage crudView = (ICrudToolbarOwnerPage) getView();
+				final CCrudToolbar toolbar = crudView.getCrudToolbar();
+				Check.notNull(toolbar, "CRUD Toolbar must not be null to update save button state.");
+				toolbar.setSaveButtonEnabled(isSaveValid);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not update save button state: {}", e.getMessage());
+		}
+	}
 
 	public void populateForm() {
 		// TODO Auto-generated method stub
@@ -648,11 +637,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			((HasValue) component).setValue(value);
 		} catch (final Exception e) {
 			// Re-throw with more context
-			throw new IllegalStateException(String.format(
-					"Error setting value for component '%s': %s. Value type: %s, Component type: %s",
-					fieldName, e.getMessage(), 
-					value != null ? value.getClass().getSimpleName() : "null",
-					component.getClass().getSimpleName()), e);
+			throw new IllegalStateException(String.format("Error setting value for component '%s': %s. Value type: %s, Component type: %s", fieldName,
+					e.getMessage(), value != null ? value.getClass().getSimpleName() : "null", component.getClass().getSimpleName()), e);
 		}
 	}
 
@@ -661,21 +647,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	}
 
 	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }
-
-	/** Setup validation for the name field. Automatically disables the save button when the name field is empty. This method is called automatically
-	 * during bind(). Subclasses can override validateEntity() to add additional validation logic. */
-	protected void setup_base_listeners() {
-		try {
-			final TextField nameField = getTextField("name");
-			if (nameField != null) {
-				nameField.addValueChangeListener(event -> baselistener_on_name_change());
-				// Also validate on initial load
-				baselistener_on_name_change();
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not setup name field validation: {}", e.getMessage());
-		}
-	}
 
 	/** Removes a previously registered custom component.
 	 * @param name the name of the component to unregister */
