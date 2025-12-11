@@ -362,55 +362,59 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param component the backlog grid component
 	 * @param value     CDragDropEvent containing drop information */
 	public void on_backlogItems_drop(final Component component, final Object value) {
+		LOGGER.info("[DragSourceDebug] ========== on_backlogItems_drop CALLED ==========");
 		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 		
 		// NEW REQUIREMENT: Log comprehensive drag source information
-		LOGGER.debug("[DragSourceDebug] ========== BACKLOG DROP EVENT START ==========");
-		LOGGER.debug("[DragSourceDebug] Drop target component: {}", component != null ? component.getClass().getSimpleName() : "null");
-		LOGGER.debug("[DragSourceDebug] Drag source: {}", event.getDragSource() != null ? event.getDragSource().getClass().getSimpleName() : "null");
-		LOGGER.debug("[DragSourceDebug] Drop target: {}", event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null");
-		LOGGER.debug("[DragSourceDebug] Dragged items count: {}", event.getDraggedItems() != null ? event.getDraggedItems().size() : 0);
+		LOGGER.info("[DragSourceDebug] ========== BACKLOG DROP EVENT START ==========");
+		LOGGER.info("[DragSourceDebug] Drop target component: {}", component != null ? component.getClass().getSimpleName() : "null");
+		LOGGER.info("[DragSourceDebug] Drag source: {}", event.getDragSource() != null ? event.getDragSource().getClass().getSimpleName() : "null");
+		LOGGER.info("[DragSourceDebug] Drop target: {}", event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null");
+		LOGGER.info("[DragSourceDebug] Dragged items count: {}", event.getDraggedItems() != null ? event.getDraggedItems().size() : 0);
 		if (event.getDraggedItems() != null && !event.getDraggedItems().isEmpty()) {
-			LOGGER.debug("[DragSourceDebug] First dragged item type: {}", event.getDraggedItem() != null ? event.getDraggedItem().getClass().getSimpleName() : "null");
-			LOGGER.debug("[DragSourceDebug] First dragged item: {}", event.getDraggedItem());
+			LOGGER.info("[DragSourceDebug] First dragged item type: {}", event.getDraggedItem() != null ? event.getDraggedItem().getClass().getSimpleName() : "null");
+			LOGGER.info("[DragSourceDebug] First dragged item: {}", event.getDraggedItem());
 		}
-		LOGGER.debug("[DragSourceDebug] Target item: {}", event.getTargetItem());
-		LOGGER.debug("[DragSourceDebug] Drop location: {}", event.getDropLocation());
-		LOGGER.debug("[DragSourceDebug] draggedFromBacklog field: {}", draggedFromBacklog != null ? draggedFromBacklog.getClass().getSimpleName() + "#" + draggedFromBacklog.getId() : "null");
-		LOGGER.debug("[DragSourceDebug] draggedFromSprint field: {}", draggedFromSprint != null ? "CSprintItem#" + draggedFromSprint.getId() : "null");
+		LOGGER.info("[DragSourceDebug] Target item: {}", event.getTargetItem());
+		LOGGER.info("[DragSourceDebug] Drop location: {}", event.getDropLocation());
+		LOGGER.info("[DragSourceDebug] draggedFromBacklog field: {}", draggedFromBacklog != null ? draggedFromBacklog.getClass().getSimpleName() + "#" + draggedFromBacklog.getId() : "null");
+		LOGGER.info("[DragSourceDebug] draggedFromSprint field: {}", draggedFromSprint != null ? "CSprintItem#" + draggedFromSprint.getId() : "null");
 		
 		// Log component hierarchy from drag source
 		final List<Component> hierarchy = event.getDragSourceHierarchy();
-		LOGGER.debug("[DragSourceDebug] Drag source hierarchy (source to root):");
+		LOGGER.info("[DragSourceDebug] Drag source hierarchy (source to root):");
 		for (int i = 0; i < hierarchy.size(); i++) {
 			final Component comp = hierarchy.get(i);
-			LOGGER.debug("[DragSourceDebug]   [{}] {}", i, comp.getClass().getSimpleName());
+			LOGGER.info("[DragSourceDebug]   [{}] {}", i, comp.getClass().getSimpleName());
 		}
 		
 		// Determine operation type based on source and destination
 		final DragDropOperationType operationType = determineDragDropOperation(event);
-		LOGGER.debug("[DragSourceDebug] Determined operation type: {}", operationType);
-		LOGGER.debug("[DragSourceDebug] ========== BACKLOG DROP EVENT END ==========");
+		LOGGER.info("[DragSourceDebug] Determined operation type: {}", operationType);
+		LOGGER.info("[DragSourceDebug] ========== BACKLOG DROP EVENT END ==========");
 		
 		// Handle based on operation type
 		switch (operationType) {
 			case BACKLOG_REORDER:
 				// Internal backlog reordering is handled by CComponentBacklog itself
-				LOGGER.debug("Internal backlog reordering detected - letting CComponentBacklog handle it");
+				LOGGER.info("[DragSourceDebug] Internal backlog reordering detected - letting CComponentBacklog handle it");
 				return;
 				
 			case SPRINT_TO_BACKLOG:
 				// Move sprint item back to backlog
 				// KEEP FAST ERROR DETECTION: Check immediately fails if sprintItem is null
 				final CSprintItem sprintItem = draggedFromSprint;
+				LOGGER.info("[DragSourceDebug] SPRINT_TO_BACKLOG operation - sprintItem: {}", sprintItem != null ? "CSprintItem#" + sprintItem.getId() : "null");
 				Check.notNull(sprintItem, "Sprint item cannot be null when dropping from sprint to backlog - drag source: " 
 					+ (event.getDragSource() != null ? event.getDragSource().getClass().getSimpleName() : "null"));
 				
 				try {
+					LOGGER.info("[DragSourceDebug] Calling moveSprintItemToBacklog");
 					moveSprintItemToBacklog(sprintItem, event);
 					refreshAfterBacklogDrop();
 					CNotificationService.showSuccess("Item removed from sprint");
+					LOGGER.info("[DragSourceDebug] Successfully moved sprint item to backlog");
 				} catch (final Exception e) {
 					LOGGER.error("Error moving item to backlog", e);
 					CNotificationService.showException("Error removing item from sprint", e);
@@ -423,7 +427,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			case SPRINT_REORDER:
 			case UNKNOWN:
 			default:
-				LOGGER.warn("Unexpected drag-drop operation on backlog: {}", operationType);
+				LOGGER.warn("[DragSourceDebug] Unexpected drag-drop operation on backlog: {}", operationType);
 				break;
 		}
 	}
@@ -453,11 +457,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param component the master grid component
 	 * @param value     CDragDropEvent containing dragged sprint items */
 	public void on_masterGrid_dragStart(final Component component, final Object value) {
+		LOGGER.info("[DragSourceDebug] on_masterGrid_dragStart called");
 		if (value instanceof CDragDropEvent) {
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 			draggedFromSprint = extractSprintItemFromMasterGridEvent(event);
 			if (draggedFromSprint == null) {
-				LOGGER.warn("Could not extract sprint item from master grid drag event");
+				LOGGER.warn("[DragSourceDebug] Could not extract sprint item from master grid drag event");
+			} else {
+				LOGGER.info("[DragSourceDebug] Extracted sprint item: CSprintItem#{}", draggedFromSprint.getId());
 			}
 		}
 	}
