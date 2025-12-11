@@ -38,6 +38,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
+	// Drag-drop state tracking
+	private Component activeDragSource = null;
+	private List<?> activeDraggedItems = null;
 	// Custom components registered for method binding (outside of FormBuilder)
 	private final Map<String, Component> customComponents = new HashMap<>();
 	protected CDetailsBuilder detailsBuilder = null;
@@ -315,6 +318,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				method.invoke(this, vaadinComponent, dragEvent);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			} finally {
+				// Clear drag tracking after drag ends
+				activeDragSource = null;
+				activeDraggedItems = null;
 			}
 		});
 		LOGGER.debug("Bound IHasDragEnd component drag end event to method {}", methodName);
@@ -341,6 +348,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				final int itemCount = draggedItems != null ? draggedItems.size() : 0;
 				LOGGER.debug("[DragDebug] CPageService.bindDragStart: Invoking {} on component {}, items={}", methodName,
 						component.getClass().getSimpleName(), itemCount);
+				// Track drag source and items for use in drop events
+				activeDragSource = vaadinComponent;
+				activeDraggedItems = draggedItems;
 				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, component);
 				method.invoke(this, vaadinComponent, dragEvent);
 			} catch (final Exception ex) {
@@ -367,6 +377,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				method.invoke(this, grid, dragEvent);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
+			} finally {
+				// Clear drag tracking after drag ends
+				activeDragSource = null;
+				activeDraggedItems = null;
 			}
 		});
 		LOGGER.debug("Bound Grid drag end event to method {}", methodName);
@@ -383,6 +397,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		grid.addDragStartListener(event -> {
 			try {
 				final List<?> draggedItems = new ArrayList<>(event.getDraggedItems());
+				// Track drag source and items for use in drop events
+				activeDragSource = grid;
+				activeDraggedItems = draggedItems;
 				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, grid);
 				method.invoke(this, grid, dragEvent);
 			} catch (final Exception ex) {
@@ -405,9 +422,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				// Get drop information
 				final Object targetItem = event.getDropTargetItem().orElse(null);
 				final var dropLocation = event.getDropLocation();
-				// Note: The dragged items are tracked externally and passed via the drag source
-				// We create an event with null dragged items as they're tracked in the drag start
-				final CDragDropEvent<?> dropEvent = new CDragDropEvent(null, null, targetItem, dropLocation, grid);
+				// Use tracked drag source and items from drag start event
+				final CDragDropEvent<?> dropEvent = new CDragDropEvent(activeDraggedItems, activeDragSource, targetItem, dropLocation, grid);
 				method.invoke(this, grid, dropEvent);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
@@ -430,8 +446,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				// Get drop information from GridDropEvent
 				final Object targetItem = event.getDropTargetItem().orElse(null);
 				final var dropLocation = event.getDropLocation();
-				// Create event wrapper for handler
-				final CDragDropEvent<?> dropEvent = new CDragDropEvent(null, null, targetItem, dropLocation, (Component) component);
+				// Use tracked drag source and items from drag start event
+				// This provides handlers with information about where the drag originated
+				final CDragDropEvent<?> dropEvent = new CDragDropEvent(activeDraggedItems, activeDragSource, targetItem, dropLocation,
+						(Component) component);
 				method.invoke(this, (Component) component, dropEvent);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
