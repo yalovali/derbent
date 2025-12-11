@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -168,23 +169,36 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
 	private CSprint getTargetSprintFromDropTarget(final CDragDropEvent<?> event, final Object targetItem) {
+		LOGGER.info("[DropTargetDebug] Determining target sprint - targetItem: {}, dropTarget: {}", 
+			targetItem != null ? targetItem.getClass().getSimpleName() + "#" + 
+				(targetItem instanceof CEntityDB ? ((CEntityDB<?>) targetItem).getId() : "?") : "null",
+			event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null");
+		
 		if (targetItem == null) {
 			// no target sprintitem under mouse
 			if (event.getDropTarget() instanceof CComponentGridEntity) {
 				// Dropped on empty area of grid - treat as dropping on the sprint itself
 				final CComponentGridEntity dropTargetGrid = (CComponentGridEntity) event.getDropTarget();
-				return (CSprint) dropTargetGrid.getSelectedItem();
+				final CSprint sprint = (CSprint) dropTargetGrid.getSelectedItem();
+				LOGGER.info("[DropTargetDebug] No target item - using selected sprint from grid: Sprint#{}", 
+					sprint != null ? sprint.getId() : "null");
+				return sprint;
 			} else {
-				LOGGER.warn("[DragDebug] Target item is null and drop location is not ON_TOP, cannot add backlog item to sprint");
+				LOGGER.warn("[DropTargetDebug] Target item is null and drop target is not CComponentGridEntity, cannot add backlog item to sprint");
 				return null;
 			}
 		}
 		if (targetItem instanceof CSprint) {
+			LOGGER.info("[DropTargetDebug] Target is Sprint#{}", ((CSprint) targetItem).getId());
 			return (CSprint) targetItem;
 		} else if (targetItem instanceof CSprintItem) {
-			return ((CSprintItem) targetItem).getSprint();
+			final CSprint sprint = ((CSprintItem) targetItem).getSprint();
+			LOGGER.info("[DropTargetDebug] Target is CSprintItem#{}, belongs to Sprint#{}", 
+				((CSprintItem) targetItem).getId(), sprint != null ? sprint.getId() : "null");
+			return sprint;
 		} else {
-			LOGGER.warn("[DragDebug] Target is not a Sprint or SprintItem, cannot add backlog item to sprint");
+			LOGGER.warn("[DropTargetDebug] Target is not a Sprint or SprintItem (it's {}), cannot add backlog item to sprint", 
+				targetItem.getClass().getSimpleName());
 			return null;
 		}
 	}

@@ -300,6 +300,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		super.restoreWidgetState();
 		// Restore sprint items visibility state
 		final Boolean visible = (Boolean) getStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible");
+		LOGGER.info("[StateDebug] Restoring state for Sprint#{}: sprintItemsVisible={}", 
+			getEntity().getId(), visible);
 		if (visible != null && visible) {
 			// State was visible before refresh, restore it
 			sprintItemsVisible = true;
@@ -310,7 +312,12 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 					buttonToggleItems.setIcon(VaadinIcon.ANGLE_UP.create());
 					buttonToggleItems.setTooltipText("Hide sprint items");
 				}
+				LOGGER.info("[StateDebug] Restored Sprint#{} items grid to VISIBLE", getEntity().getId());
+			} else {
+				LOGGER.warn("[StateDebug] Sprint#{} containerSprintItems is null, cannot restore visibility", getEntity().getId());
 			}
+		} else {
+			LOGGER.info("[StateDebug] Sprint#{} items grid remains HIDDEN (state was null or false)", getEntity().getId());
 		}
 	}
 
@@ -319,6 +326,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	public void saveWidgetState() {
 		super.saveWidgetState();
 		// Save sprint items visibility state
+		LOGGER.info("[StateDebug] Saving state for Sprint#{}: sprintItemsVisible={}", 
+			getEntity().getId(), sprintItemsVisible);
 		saveStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible", sprintItemsVisible);
 	}
 }
