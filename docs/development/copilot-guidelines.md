@@ -876,20 +876,68 @@ The `IStateOwnerComponent` interface provides a standardized way to save and res
 ### Pattern Usage in CGrid
 
 CGrid implements `IStateOwnerComponent` and provides automatic state preservation for:
-- Selected item (by ID for CEntityDB entities)
-- Child component states (widgets in grid cells)
+- **Selected item** (by ID for CEntityDB entities)
+- **Child component states** (widgets in grid cells that implement IStateOwnerComponent)
+
+The implementation automatically:
+1. Iterates through all grid rows during state save
+2. For each row, checks all widget columns
+3. Collects state from widgets implementing IStateOwnerComponent
+4. Stores metadata (rowIndex, itemId, columnKey) to identify widget states
+5. Restores widget states by matching items and recreating widgets
 
 **Key Methods:**
 
 ```java
-// Get current state as JSON
+// Get current state as JSON (includes child widget states)
 JsonObject state = grid.getStateInformation();
 
-// Restore state from JSON
+// Restore state from JSON (restores selection and child widget states)
 grid.restoreStateInformation(state);
 
 // Refresh grid with automatic state preservation
 grid.setItemsWithStatePreservation(newItems);
+```
+
+### How Widget State Collection Works
+
+When `grid.getStateInformation()` is called:
+
+```java
+// CGrid tracks widget providers for each column
+private final Map<String, Function<EntityClass, ? extends Component>> widgetProviders;
+
+// During state collection:
+1. Iterate through all items in grid
+2. For each item, iterate through widget columns
+3. Create widget instance using provider: widget = widgetProvider.apply(item)
+4. Check if widget instanceof IStateOwnerComponent
+5. If yes, call widget.getStateInformation()
+6. Add metadata: rowIndex, itemId, columnKey
+7. Store in childStates array
+```
+
+**Example collected state:**
+```json
+{
+  "selectedItemId": 3.0,
+  "childStates": [
+    {
+      "rowIndex": 0.0,
+      "itemId": 1.0,
+      "columnKey": "widget_column_0",
+      "expanded": false,
+      "customValue": "some-value"
+    },
+    {
+      "rowIndex": 1.0,
+      "itemId": 2.0,
+      "columnKey": "widget_column_0",
+      "expanded": true,
+      "customValue": "another-value"
+    }
+  ]
+}
 ```
 
 ### Example: Grid Refresh with State Preservation
@@ -909,6 +957,38 @@ public void refreshGrid() {
 public void refreshGrid() {
     final List<ChildEntity> items = loadItems(master);
     grid.setItemsWithStatePreservation(items);  // Automatic state preservation
+}
+```
+
+### Creating Widgets with State Management
+
+When adding widget columns to CGrid, widgets that implement IStateOwnerComponent will have their state automatically preserved:
+
+```java
+// Add a widget column with state-aware widgets
+grid.addWidgetColumn(entity -> new CComponentWidgetSprint(entity));
+
+// CComponentWidgetSprint implements IStateOwnerComponent:
+public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint> 
+        implements IStateOwnerComponent {
+    
+    private boolean sprintItemsVisible = false;
+    
+    @Override
+    public JsonObject getStateInformation() {
+        final JsonObject state = Json.createObject();
+        state.put("sprintItemsVisible", sprintItemsVisible);
+        return state;
+    }
+    
+    @Override
+    public void restoreStateInformation(final JsonObject state) {
+        if (state == null) return;
+        if (state.hasKey("sprintItemsVisible")) {
+            sprintItemsVisible = state.getBoolean("sprintItemsVisible");
+            containerSprintItems.setVisible(sprintItemsVisible);
+        }
+    }
 }
 ```
 
