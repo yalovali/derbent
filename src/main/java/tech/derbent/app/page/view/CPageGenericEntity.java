@@ -18,6 +18,7 @@ import tech.derbent.api.ui.component.basic.CScroller;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentDetailsMasterToolbar;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.CLayoutService;
@@ -221,18 +222,23 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	 * @throws Exception */
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityDeleted(CEntityDB entity) throws Exception {
-		LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
-		refreshGrid();
-		getBaseDetailsLayout().removeAll();
-		grid.selectNextItem();
+	public void on_entity_deleted(CEntityDB entity) {
+		try {
+			LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
+			refreshGrid();
+			getBaseDetailsLayout().removeAll();
+			grid.selectNextItem();
+		} catch (Exception e) {
+			LOGGER.error("Error handling entity deletion: {}", e.getMessage());
+			CNotificationService.showException("Error handling entity deletion", e);
+		}
 	}
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved
 	 * @throws Exception */
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntitySaved(CEntityDB entity) throws Exception {
+	public void on_entity_saved(CEntityDB entity) {
 		try {
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(entity, "Saved entity cannot be null");
@@ -245,7 +251,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			LOGGER.debug("Re-selected saved entity in grid: {}", entity.getId());
 		} catch (Exception e) {
 			LOGGER.error("Error re-selecting entity after save: {}", e.getMessage());
-			throw e;
+			CNotificationService.showException("Error re-selecting entity after save", e);
 		}
 	}
 

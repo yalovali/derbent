@@ -26,6 +26,7 @@ import tech.derbent.base.users.domain.CUser;
  * instances with configurable grid and detail sections. */
 @PermitAll
 public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
 	// State tracking for performance optimization
@@ -64,13 +65,11 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			grid = new CComponentGridEntity(pageEntity.getGridEntity(), getSessionService());
 			// Set the content owner so widget columns can access page service
 			grid.setContentOwner(this);
-			
 			// Register the grid component with page service using unified auto-registration pattern
 			// This enables automatic binding of on_grid_dragStart/dragEnd/drop handlers
 			if (pageService != null) {
 				grid.registerWithPageService(pageService);
 			}
-			
 			// Listen for selection changes from the grid
 			grid.addSelectionChangeListener(event -> {
 				try {
@@ -191,7 +190,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 	// Implementation of CEntityUpdateListener
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityDeleted(final CEntityDB entity) {
+	public void on_entity_deleted(final CEntityDB entity) {
 		try {
 			LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(grid, "Grid component is not initialized");
@@ -202,13 +201,13 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			CNotificationService.showDeleteSuccess();
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity deleted notification:" + e.getMessage());
-			throw e;
+			CNotificationService.showException("Error handling entity deleted notification", e);
 		}
 	}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntitySaved(final CEntityDB entity) {
+	public void on_entity_saved(final CEntityDB entity) {
 		try {
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(grid, "Grid component is not initialized");
@@ -225,7 +224,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity saved notification:" + e.getMessage());
-			throw e;
+			CNotificationService.showException("Error handling entity saved notification", e);
 		}
 	}
 
@@ -234,13 +233,14 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 		LOGGER.debug("Entity selection changed event received: {}", event);
 		Check.notNull(event, "Selection change event cannot be null");
 		final CEntityDB<?> selectedEntity = event.getSelectedItem();
-		onEntitySelected(selectedEntity);
+		on_entity_selected(selectedEntity);
 	}
 
-	/** Refresh the grid to show updated data. */
+	/** Refresh the grid to show updated data.
+	 * @throws Exception */
 	@Override
-	public void refreshGrid() {
-		grid.refreshGridData();
+	public void refreshGrid() throws Exception {
+		grid.populateForm();
 	}
 
 	/** Select the first item in the grid. Used after discarding unsaved new entities. */

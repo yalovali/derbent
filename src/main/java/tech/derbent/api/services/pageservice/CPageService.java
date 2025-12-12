@@ -87,7 +87,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				try {
 					getEntityService().delete(entity.getId());
 					LOGGER.info("Entity deleted successfully with ID: {}", entity.getId());
-					getView().onEntityDeleted(entity);
+					getView().on_entity_deleted(entity);
 				} catch (final Exception ex) {
 					CNotificationService.showException("Error deleting entity with ID:" + entity.getId(), ex);
 				}
@@ -154,7 +154,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			final EntityClass savedEntity = getEntityService().save(entity);
 			LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 			setCurrentEntity(savedEntity);
-			getView().onEntitySaved(savedEntity);
+			getView().on_entity_saved(savedEntity);
 			getView().populateForm();
 			CNotificationService.showSaveSuccess();
 		} catch (final Exception e) {

@@ -388,6 +388,37 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 	}
 
+	@Override
+	public void on_entity_deleted(final EntityClass entity) {
+		try {
+			LOGGER.debug("Entity deleted, refreshing grid");
+			masterViewSection.selectLastOrFirst(null);
+			refreshGrid();
+			CNotificationService.showDeleteSuccess();
+		} catch (Exception e) {
+			LOGGER.error("Error handling entity deleted notification: {}", e.getMessage());
+			CNotificationService.showException("Error handling entity deleted notification", e);
+		}
+	}
+
+	@Override
+	public void on_entity_saved(final EntityClass entity) {
+		try {
+			LOGGER.debug("Entity saved, refreshing grid");
+			refreshGrid();
+			// Update current entity with saved version
+			final EntityClass savedEntity = entity;
+			setCurrentEntity(savedEntity);
+			populateForm();
+			// Show success notification
+			CNotificationService.showSaveSuccess();
+			navigateToClass();
+		} catch (final Exception e) {
+			LOGGER.error("Error handling entity saved notification: {}", e.getMessage());
+			CNotificationService.showException("Error handling entity saved notification", e);
+		}
+	}
+
 	// this method is called when the page is attached to the UI
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
@@ -428,27 +459,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		final EntityClass newEntity = entity;
 		setCurrentEntity(newEntity);
 		populateForm();
-	}
-
-	@Override
-	public void onEntityDeleted(final EntityClass entity) throws Exception {
-		LOGGER.debug("Entity deleted, refreshing grid");
-		masterViewSection.selectLastOrFirst(null);
-		refreshGrid();
-		CNotificationService.showDeleteSuccess();
-	}
-
-	@Override
-	public void onEntitySaved(final EntityClass entity) throws Exception {
-		LOGGER.debug("Entity saved, refreshing grid");
-		refreshGrid();
-		// Update current entity with saved version
-		final EntityClass savedEntity = entity;
-		setCurrentEntity(savedEntity);
-		populateForm();
-		// Show success notification
-		CNotificationService.showSaveSuccess();
-		navigateToClass();
 	}
 
 	@Override

@@ -82,17 +82,17 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 	}
 
 	@Override
+	public void on_entity_deleted(CEntityDB entity) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void on_entity_saved(CEntityDB savedEntity) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	public void onEntityCreated(CEntityDB newEntity) throws Exception {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void onEntityDeleted(CEntityDB entity) throws Exception {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void onEntitySaved(CEntityDB savedEntity) throws Exception {
 		// TODO Auto-generated method stub
 	}
 

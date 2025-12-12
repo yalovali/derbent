@@ -231,6 +231,17 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		}
 	}
 
+	@Override
+	public void on_entity_deleted(final CSprintItem entity) {
+		refreshItemCount();
+	}
+
+	@Override
+	public void on_entity_saved(final CSprintItem savedEntity) {
+		refreshItemCount();
+	}
+	// IHasDragEnd interface implementation - propagate drag events from internal grid
+
 	/** Handle click on the item count label. Toggles visibility of the sprint items component. */
 	protected void on_itemCountLabel_clicked() {
 		try {
@@ -258,21 +269,10 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	}
 
 	@Override
-	public void onEntityDeleted(final CSprintItem entity) throws Exception {
-		refreshItemCount();
-	}
-
-	@Override
 	public void onEntityRefreshed(final CSprintItem reloaded) throws Exception {
 		refreshItemCount();
 	}
 	// IHasDragStart interface implementation - propagate drag events from internal grid
-
-	@Override
-	public void onEntitySaved(final CSprintItem savedEntity) throws Exception {
-		refreshItemCount();
-	}
-	// IHasDragEnd interface implementation - propagate drag events from internal grid
 
 	/** Refresh the item count display by recreating the label with updated count. */
 	private void refreshItemCount() {
@@ -291,7 +291,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.error("Error refreshing item count", e);
 		}
 	}
-
 	// =============== WIDGET STATE PRESERVATION ===============
 
 	/** Restores widget UI state after reconstruction. Restores the expanded/collapsed state of sprint items. */
@@ -300,8 +299,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		super.restoreWidgetState();
 		// Restore sprint items visibility state
 		final Boolean visible = (Boolean) getStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible");
-		LOGGER.info("[StateDebug] Restoring state for Sprint#{}: sprintItemsVisible={}", 
-			getEntity().getId(), visible);
+		LOGGER.info("[StateDebug] Restoring state for Sprint#{}: sprintItemsVisible={}", getEntity().getId(), visible);
 		if (visible != null && visible) {
 			// State was visible before refresh, restore it
 			sprintItemsVisible = true;
@@ -326,8 +324,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	public void saveWidgetState() {
 		super.saveWidgetState();
 		// Save sprint items visibility state
-		LOGGER.info("[StateDebug] Saving state for Sprint#{}: sprintItemsVisible={}", 
-			getEntity().getId(), sprintItemsVisible);
+		LOGGER.info("[StateDebug] Saving state for Sprint#{}: sprintItemsVisible={}", getEntity().getId(), sprintItemsVisible);
 		saveStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible", sprintItemsVisible);
 	}
 }

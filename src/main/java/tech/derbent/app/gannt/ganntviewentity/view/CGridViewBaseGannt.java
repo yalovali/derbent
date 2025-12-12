@@ -44,7 +44,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		this.pageEntityService = pageEntityService;
 		CDetailSectionService detailSectionService = CSpringContext.getBean(CDetailSectionService.class);
 		// CGridEntityService gridEntityService = CSpringContext.getBean(CGridEntityService.class);
-		this.currentEntityPageRouter = new CDynamicPageRouter(pageEntityService, sessionService, detailSectionService, null);
+		currentEntityPageRouter = new CDynamicPageRouter(pageEntityService, sessionService, detailSectionService, null);
 		getBaseDetailsLayout().add(currentEntityPageRouter);
 		// currentEntityPageRouter.setHeight("50%");
 		getBaseDetailsLayout().add(currentEntityPageRouter);
@@ -142,7 +142,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	}
 
 	@Override
-	public void onEntitySaved(final EntityClass entity) throws Exception {}
+	public void on_entity_saved(final EntityClass entity) {}
 
 	/** Override to handle CGanttItem selection - it's a DTO wrapper, not the actual entity. Selection is logged but no form editing occurs since
 	 * CGanttItem is read-only. */

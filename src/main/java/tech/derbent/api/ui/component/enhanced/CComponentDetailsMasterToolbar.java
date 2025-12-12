@@ -15,6 +15,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentDetailsMasterToolbar.class);
 	private static final long serialVersionUID = 1L;
 	private CButton btnEditGrid;
@@ -46,7 +47,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
 			searchField.setClearButtonVisible(true);
 			searchField.setValueChangeMode(com.vaadin.flow.data.value.ValueChangeMode.LAZY);
-			searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
+			searchField.addValueChangeListener(e -> on_searchField_change(e.getValue()));
 			// Edit Grid Columns Button
 			btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), e1 -> {
 				try {
@@ -104,7 +105,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 					gridEntityService.save(gridEntity);
 					// Refresh grid
 					grid.createGridColumns();
-					grid.refreshGridData();
+					grid.populateForm();
 					CNotificationService.showSuccess("Grid columns updated successfully");
 				} catch (Exception e) {
 					CNotificationService.showException("Error saving grid columns", e);
@@ -117,12 +118,18 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		}
 	}
 
-	/** Handles search field value changes */
-	private void handleSearch(final String searchValue) {
-		Check.notNull(searchValue, "Search value is null");
-		Check.notNull(grid, "Grid component is not set");
-		// Apply search filter to grid
-		grid.setSearchFilter(searchValue);
+	/** Handles search field value changes
+	 * @throws Exception */
+	private void on_searchField_change(final String searchValue) {
+		try {
+			Check.notNull(searchValue, "Search value is null");
+			Check.notNull(grid, "Grid component is not set");
+			// Apply search filter to grid
+			grid.setSearchFilter(searchValue);
+		} catch (Exception e) {
+			LOGGER.error("Error applying search filter:" + e.getMessage());
+			CNotificationService.showException("Error applying search filter", e);
+		}
 	}
 
 	private void updateButtonStates() {

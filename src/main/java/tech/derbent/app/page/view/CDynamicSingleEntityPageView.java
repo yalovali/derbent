@@ -18,6 +18,7 @@ import tech.derbent.base.session.service.ISessionService;
  * true */
 @PermitAll
 public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicSingleEntityPageView.class);
 	private static final long serialVersionUID = 1L;
 
@@ -79,7 +80,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 			List<? extends CEntityDB<?>> entities = entityService.findAll();
 			Check.notEmpty(entities, "No entities found for single entity page.");
 			CEntityDB<?> entity = entities.get(0);
-			onEntitySelected(entity);
+			on_entity_selected(entity);
 		} catch (Exception e) {
 			LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
 		}
@@ -95,7 +96,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 			LOGGER.debug("Locating item by ID: {}", pageItemId);
 			final CEntityDB<?> entity = entityService.getById(pageItemId).orElse(null);
 			Check.notNull(entity, "No entity found for ID: " + pageItemId);
-			onEntitySelected(entity);
+			on_entity_selected(entity);
 		} catch (final Exception e) {
 			LOGGER.error("Error locating item by ID {}: {}", pageItemId, e.getMessage());
 			throw new IllegalStateException("Error locating item by ID " + pageItemId + ": " + e.getMessage());
@@ -104,13 +105,13 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityDeleted(CEntityDB entity) throws Exception {
+	public void on_entity_deleted(CEntityDB entity) {
 		loadAndDisplaySingleEntity();
 	}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntitySaved(CEntityDB entity) throws Exception {
-		onEntitySelected(entity);
+	public void on_entity_saved(CEntityDB entity) {
+		on_entity_selected(entity);
 	}
 }

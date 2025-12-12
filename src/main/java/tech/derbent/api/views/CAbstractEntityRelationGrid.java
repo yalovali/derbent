@@ -13,18 +13,52 @@ import tech.derbent.api.utils.CAuxillaries;
 public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<RelationEntity>> extends Grid<RelationEntity> {
 
 	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	public static final String WIDTH_ID = "80px";
-	public static final String WIDTH_ENTITY_NAME = "200px";
-	public static final String WIDTH_ROLE = "150px";
-	public static final String WIDTH_PERMISSION = "150px";
-	public static final String WIDTH_STATUS = "120px";
 	public static final String WIDTH_DATE = "150px";
+	public static final String WIDTH_ENTITY_NAME = "200px";
+	public static final String WIDTH_ID = "80px";
+	public static final String WIDTH_PERMISSION = "150px";
+	public static final String WIDTH_ROLE = "150px";
+	public static final String WIDTH_STATUS = "120px";
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Constructor for relation grid */
 	public CAbstractEntityRelationGrid(final Class<RelationEntity> relationClass) {
 		super(relationClass, false);
 		initializeGrid();
+	}
+
+	/** Add a column for entity names with consistent styling */
+	protected Column<RelationEntity> addEntityNameColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> nameProvider,
+			final String header) {
+		final var column = addColumn(nameProvider).setWidth(WIDTH_ENTITY_NAME).setFlexGrow(0).setSortable(true);
+		return CGrid.styleColumnHeader(column, header);
+	}
+
+	/** Add an ID column with standard styling */
+	protected Column<RelationEntity> addIdColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, Long> idProvider, final String header) {
+		final var column = addColumn(idProvider).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true);
+		return CGrid.styleColumnHeader(column, header);
+	}
+
+	/** Add a column for permissions with consistent styling */
+	protected Column<RelationEntity> addPermissionColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> permissionProvider,
+			final String header) {
+		final var column = addColumn(permissionProvider).setWidth(WIDTH_PERMISSION).setFlexGrow(0).setSortable(true);
+		return CGrid.styleColumnHeader(column, header);
+	}
+
+	/** Add a column for roles with consistent styling */
+	protected Column<RelationEntity> addRoleColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> roleProvider,
+			final String header) {
+		final var column = addColumn(roleProvider).setWidth(WIDTH_ROLE).setFlexGrow(0).setSortable(true);
+		return CGrid.styleColumnHeader(column, header);
+	}
+
+	/** Add a column for status with consistent styling */
+	protected Column<RelationEntity> addStatusColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> statusProvider,
+			final String header) {
+		final var column = addColumn(statusProvider).setWidth(WIDTH_STATUS).setFlexGrow(0).setSortable(true);
+		return CGrid.styleColumnHeader(column, header);
 	}
 
 	/** Initialize grid with common settings and styling */
@@ -37,39 +71,5 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) getSelectionModel();
 		sm.setDeselectAllowed(false);
 		CAuxillaries.setId(this);
-	}
-
-	/** Add a column for entity names with consistent styling */
-	protected Column<RelationEntity> addEntityNameColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> nameProvider,
-			final String header) {
-		final var column = addColumn(nameProvider).setWidth(WIDTH_ENTITY_NAME).setFlexGrow(0).setSortable(true);
-		return CGrid.styleColumnHeader(column, header);
-	}
-
-	/** Add a column for roles with consistent styling */
-	protected Column<RelationEntity> addRoleColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> roleProvider,
-			final String header) {
-		final var column = addColumn(roleProvider).setWidth(WIDTH_ROLE).setFlexGrow(0).setSortable(true);
-		return CGrid.styleColumnHeader(column, header);
-	}
-
-	/** Add a column for permissions with consistent styling */
-	protected Column<RelationEntity> addPermissionColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> permissionProvider,
-			final String header) {
-		final var column = addColumn(permissionProvider).setWidth(WIDTH_PERMISSION).setFlexGrow(0).setSortable(true);
-		return CGrid.styleColumnHeader(column, header);
-	}
-
-	/** Add a column for status with consistent styling */
-	protected Column<RelationEntity> addStatusColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> statusProvider,
-			final String header) {
-		final var column = addColumn(statusProvider).setWidth(WIDTH_STATUS).setFlexGrow(0).setSortable(true);
-		return CGrid.styleColumnHeader(column, header);
-	}
-
-	/** Add an ID column with standard styling */
-	protected Column<RelationEntity> addIdColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, Long> idProvider, final String header) {
-		final var column = addColumn(idProvider).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true);
-		return CGrid.styleColumnHeader(column, header);
 	}
 }

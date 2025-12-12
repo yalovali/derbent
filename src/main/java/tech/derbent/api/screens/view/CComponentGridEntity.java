@@ -188,11 +188,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return addListener(SelectionChangeEvent.class, listener);
 	}
 
-	/** Applies search filter to the grid data */
+	/** Applies search filter to the grid data
+	 * @throws Exception */
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
-	private void applySearchFilter(String searchText) {
+	private void applySearchFilter(String searchText) throws Exception {
 		try {
 			final String serviceBeanName = gridEntity.getDataServiceBeanName();
 			Check.notBlank(serviceBeanName, "Service bean name is blank for search filtering");
@@ -218,7 +219,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		} catch (final Exception e) {
 			LOGGER.error("Error applying search filter.");
 			// Fallback to refresh data on error
-			refreshGridData();
+			populateForm();
 		}
 	}
 
@@ -523,7 +524,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			grid = new CGrid(entityClass);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 			createGridColumns();
-			refreshGridData();
+			populateForm();
 			this.add(grid);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating grid content.");
@@ -822,7 +823,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	@Override
-	public void onProjectChanged(CProject newProject) {
+	public void onProjectChanged(CProject newProject) throws Exception {
 		LOGGER.debug("Project change notification received in CComponentGridEntity: {} old {}", newProject != null ? newProject.getName() : "null",
 				currentProject != null ? currentProject.getName() : "null");
 		// Refresh grid data with new project
@@ -831,7 +832,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 		currentProject = newProject;
 		if (gridEntity != null) {
-			refreshGridData();
+			populateForm();
 		}
 	}
 
@@ -864,16 +865,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return fieldConfigs;
 	}
 
-	@Override
-	public void populateForm() throws Exception {
-		// Grid component doesn't have a form to populate; implementation exists for interface compliance
-	}
-
-	/** Refresh grid data based on current project */
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	public void refreshGridData() {
+	@Override
+	public void populateForm() throws Exception {
 		LOGGER.debug("Refreshing grid data for grid entity: {}", gridEntity != null ? gridEntity.getName() : "null");
 		try {
 			final boolean old_enableSelectionChangeListener = enableSelectionChangeListener;
@@ -1166,13 +1162,14 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
 
-	/** Sets a search filter on the grid */
-	public void setSearchFilter(String searchValue) {
+	/** Sets a search filter on the grid
+	 * @throws Exception */
+	public void setSearchFilter(String searchValue) throws Exception {
 		Check.notNull(grid, "Grid is not set");
 		// Apply filter to grid
 		if (searchValue == null || searchValue.trim().isEmpty()) {
 			// Clear filter by refreshing data
-			refreshGridData();
+			populateForm();
 		} else {
 			// Apply search filter
 			LOGGER.info("Search filter applied: {}", searchValue);
@@ -1192,7 +1189,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			for (final Map.Entry<Object, Component> entry : entityToWidgetMap.entrySet()) {
 				final Component component = entry.getValue();
 				if (component instanceof tech.derbent.api.grid.widget.CComponentWidgetEntity) {
-					final tech.derbent.api.grid.widget.CComponentWidgetEntity<?> widget = (tech.derbent.api.grid.widget.CComponentWidgetEntity<?>) component;
+					final tech.derbent.api.grid.widget.CComponentWidgetEntity<?> widget =
+							(tech.derbent.api.grid.widget.CComponentWidgetEntity<?>) component;
 					widget.saveWidgetState();
 				}
 			}

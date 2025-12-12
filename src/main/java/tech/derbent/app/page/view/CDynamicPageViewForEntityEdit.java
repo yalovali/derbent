@@ -32,6 +32,28 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 		super.initializePage();
 	}
 
+	protected void on_entity_selected(CEntityDB<?> selectedEntity) {
+		try {
+			setCurrentEntity(selectedEntity);
+			if (selectedEntity == null) {
+				// No selection - clear details
+				clearEntityDetails();
+				populateForm();
+			} else {
+				setCurrentEntity(selectedEntity);
+				// Rebuild details if VIEW_NAME changed or not yet built
+				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
+					// rebuildEntityDetails(selectedEntity.getClass());
+					rebuildEntityDetailsById(pageEntity.getDetailSection().getId());
+				}
+				// Always attempt to populate form, even if rebuild failed
+				populateForm();
+			}
+		} catch (final Exception e) {
+			CNotificationService.showException("Error handling entity selection", e);
+		}
+	}
+
 	@SuppressWarnings ("rawtypes")
 	@Override
 	public void onEntityCreated(CEntityDB entity) throws Exception {
@@ -57,27 +79,5 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 	@Override
 	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {
 		// TODO Auto-generated method stub
-	}
-
-	protected void onEntitySelected(CEntityDB<?> selectedEntity) throws Exception {
-		try {
-			setCurrentEntity(selectedEntity);
-			if (selectedEntity == null) {
-				// No selection - clear details
-				clearEntityDetails();
-				populateForm();
-			} else {
-				setCurrentEntity(selectedEntity);
-				// Rebuild details if VIEW_NAME changed or not yet built
-				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
-					// rebuildEntityDetails(selectedEntity.getClass());
-					rebuildEntityDetailsById(pageEntity.getDetailSection().getId());
-				}
-				// Always attempt to populate form, even if rebuild failed
-				populateForm();
-			}
-		} catch (final Exception e) {
-			CNotificationService.showException("Error handling entity selection", e);
-		}
 	}
 }
