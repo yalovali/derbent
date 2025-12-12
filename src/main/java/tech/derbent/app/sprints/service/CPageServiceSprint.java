@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -168,23 +169,36 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
 	private CSprint getTargetSprintFromDropTarget(final CDragDropEvent<?> event, final Object targetItem) {
+		LOGGER.info("[DropTargetDebug] Determining target sprint - targetItem: {}, dropTarget: {}", 
+			targetItem != null ? targetItem.getClass().getSimpleName() + "#" + 
+				(targetItem instanceof CEntityDB ? ((CEntityDB<?>) targetItem).getId() : "?") : "null",
+			event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null");
+		
 		if (targetItem == null) {
 			// no target sprintitem under mouse
 			if (event.getDropTarget() instanceof CComponentGridEntity) {
 				// Dropped on empty area of grid - treat as dropping on the sprint itself
 				final CComponentGridEntity dropTargetGrid = (CComponentGridEntity) event.getDropTarget();
-				return (CSprint) dropTargetGrid.getSelectedItem();
+				final CSprint sprint = (CSprint) dropTargetGrid.getSelectedItem();
+				LOGGER.info("[DropTargetDebug] No target item - using selected sprint from grid: Sprint#{}", 
+					sprint != null ? sprint.getId() : "null");
+				return sprint;
 			} else {
-				LOGGER.warn("[DragDebug] Target item is null and drop location is not ON_TOP, cannot add backlog item to sprint");
+				LOGGER.warn("[DropTargetDebug] Target item is null and drop target is not CComponentGridEntity, cannot add backlog item to sprint");
 				return null;
 			}
 		}
 		if (targetItem instanceof CSprint) {
+			LOGGER.info("[DropTargetDebug] Target is Sprint#{}", ((CSprint) targetItem).getId());
 			return (CSprint) targetItem;
 		} else if (targetItem instanceof CSprintItem) {
-			return ((CSprintItem) targetItem).getSprint();
+			final CSprint sprint = ((CSprintItem) targetItem).getSprint();
+			LOGGER.info("[DropTargetDebug] Target is CSprintItem#{}, belongs to Sprint#{}", 
+				((CSprintItem) targetItem).getId(), sprint != null ? sprint.getId() : "null");
+			return sprint;
 		} else {
-			LOGGER.warn("[DragDebug] Target is not a Sprint or SprintItem, cannot add backlog item to sprint");
+			LOGGER.warn("[DropTargetDebug] Target is not a Sprint or SprintItem (it's {}), cannot add backlog item to sprint", 
+				targetItem.getClass().getSimpleName());
 			return null;
 		}
 	}
@@ -310,23 +324,90 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	/** Handler for drop events on backlog items grid. Removes sprint items and moves them back to backlog.
+	/** Handler for drop events on backlog items grid. Handles both internal reordering and sprint-to-backlog drops.
+	 * <p>
+	 * <b>CRITICAL: DO NOT MODIFY THIS LOGIC WITHOUT UNDERSTANDING THE DRAG-DROP FLOW</b>
+	 * </p>
+	 * <p>
+	 * This handler uses simple source/destination checks to route drop operations:
+	 * <ul>
+	 * <li><b>Scenario 1:</b> Backlog → Backlog (dragSource instanceof CComponentBacklog)
+	 * <ul>
+	 * <li>Action: Return early - CComponentBacklog handles internal reordering itself</li>
+	 * <li>Reason: Prevents duplicate handling and NullPointerException (draggedFromSprint would be null)</li>
+	 * </ul>
+	 * </li>
+	 * <li><b>Scenario 2:</b> Sprint Items → Backlog (draggedFromSprint != null)
+	 * <ul>
+	 * <li>Action: Move sprint item back to backlog via moveSprintItemToBacklog()</li>
+	 * <li>Reason: User is removing an item from sprint and putting it back in backlog</li>
+	 * <li>Note: draggedFromSprint is set in on_masterGrid_dragStart() during drag operation</li>
+	 * </ul>
+	 * </li>
+	 * <li><b>Scenario 3:</b> Unknown/Unhandled drops
+	 * <ul>
+	 * <li>Action: Log warning for debugging</li>
+	 * <li>Reason: Helps identify unexpected drag-drop scenarios</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * <b>State Preservation:</b> After successful drop, refreshAfterBacklogDrop() is called which:
+	 * <ol>
+	 * <li>Saves widget state (expanded/collapsed sprint items grids) via CComponentWidgetEntity.saveWidgetState()</li>
+	 * <li>Refreshes all grids (master grid, sprint items, backlog)</li>
+	 * <li>Restores widget state via CComponentWidgetEntity.restoreWidgetState()</li>
+	 * <li>Preserves grid selection via CComponentGridEntity.refreshGridData()</li>
+	 * </ol>
+	 * </p>
 	 * @param component the backlog grid component
 	 * @param value     CDragDropEvent containing drop information */
 	public void on_backlogItems_drop(final Component component, final Object value) {
 		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-		final CSprintItem sprintItem = draggedFromSprint;
-		try {
-			moveSprintItemToBacklog(sprintItem, event);
-			refreshAfterBacklogDrop();
-			CNotificationService.showSuccess("Item removed from sprint");
-		} catch (final Exception e) {
-			LOGGER.error("Error moving item to backlog", e);
-			CNotificationService.showException("Error removing item from sprint", e);
-		} finally {
-			draggedFromSprint = null;
+		
+		// Simple logic: Check source and destination to route the drop operation
+		final Object dragSource = event.getDragSource();
+		final Object dropTarget = event.getDropTarget();
+		
+		LOGGER.info("=== Drop on Backlog ===");
+		LOGGER.info("Source: {}", dragSource != null ? dragSource.getClass().getSimpleName() : "null");
+		LOGGER.info("Target: {}", dropTarget != null ? dropTarget.getClass().getSimpleName() : "null");
+		LOGGER.info("draggedFromSprint: {}", draggedFromSprint != null ? draggedFromSprint.getId() : "null");
+		
+		// SCENARIO 1: Internal backlog reordering (backlog → backlog)
+		// If drag source is backlog itself, it's internal reordering - let CComponentBacklog handle it
+		// DO NOT call moveSprintItemToBacklog() here as draggedFromSprint would be null!
+		if (dragSource instanceof CComponentBacklog) {
+			LOGGER.info("Internal backlog reordering - CComponentBacklog will handle it");
+			return;
 		}
+		
+		// SCENARIO 2: Sprint-to-backlog drop (sprint items → backlog)
+		// If dragging from sprint to backlog, move the item back
+		// draggedFromSprint is set in on_masterGrid_dragStart() when user starts dragging from sprint
+		if (draggedFromSprint != null) {
+			LOGGER.info("Moving sprint item {} back to backlog", draggedFromSprint.getId());
+			try {
+				moveSprintItemToBacklog(draggedFromSprint, event);
+				// Refresh grids with state preservation (selection, widget states)
+				refreshAfterBacklogDrop();
+				CNotificationService.showSuccess("Item removed from sprint");
+			} catch (final Exception e) {
+				LOGGER.error("Error moving item to backlog", e);
+				CNotificationService.showException("Error removing item from sprint", e);
+			} finally {
+				// Always clear the tracked sprint item after drop
+				draggedFromSprint = null;
+			}
+			return;
+		}
+		
+		// SCENARIO 3: Unknown/unhandled drop scenario
+		LOGGER.warn("Unhandled drop scenario - source: {}, target: {}", 
+			dragSource != null ? dragSource.getClass().getSimpleName() : "null",
+			dropTarget != null ? dropTarget.getClass().getSimpleName() : "null");
 	}
 
 	public void on_description_blur(final Component component, final Object value) {
@@ -354,11 +435,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param component the master grid component
 	 * @param value     CDragDropEvent containing dragged sprint items */
 	public void on_masterGrid_dragStart(final Component component, final Object value) {
+		LOGGER.info("[DragSourceDebug] on_masterGrid_dragStart called");
 		if (value instanceof CDragDropEvent) {
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
 			draggedFromSprint = extractSprintItemFromMasterGridEvent(event);
 			if (draggedFromSprint == null) {
-				LOGGER.warn("Could not extract sprint item from master grid drag event");
+				LOGGER.warn("[DragSourceDebug] Could not extract sprint item from master grid drag event");
+			} else {
+				LOGGER.info("[DragSourceDebug] Extracted sprint item: CSprintItem#{}", draggedFromSprint.getId());
 			}
 		}
 	}
@@ -409,9 +493,40 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Refreshes UI components after backlog drop operation. */
+	/** Refreshes all grids after a backlog drop operation with state preservation.
+	 * <p>
+	 * This method ensures proper state preservation during refresh:
+	 * <ol>
+	 * <li>Widget state is automatically saved in CComponentGridEntity.unregisterAllWidgetComponents()</li>
+	 * <li>All grids are refreshed with new data</li>
+	 * <li>Widget state is automatically restored in CComponentWidgetEntity.initializeWidget()</li>
+	 * <li>Grid selection is preserved in CComponentGridEntity.refreshGridData()</li>
+	 * </ol>
+	 * </p>
+	 * <p>
+	 * <b>Components refreshed:</b>
+	 * <ul>
+	 * <li>Sprint items grid (componentItemsSelection)</li>
+	 * <li>Backlog grid (componentBacklogItems)</li>
+	 * <li>Master grid showing sprint widgets (getView().refreshGrid())</li>
+	 * </ul>
+	 * </p> */
 	private void refreshAfterBacklogDrop() {
-		componentItemsSelection.refreshGrid(); // Refresh sprint items
-		componentBacklogItems.refreshGrid(); // Refresh backlog
+		// Refresh sprint items list
+		if (componentItemsSelection != null) {
+			componentItemsSelection.refreshGrid();
+		}
+		// Refresh backlog
+		if (componentBacklogItems != null) {
+			componentBacklogItems.refreshGrid();
+		}
+		// Refresh master grid to update sprint widgets
+		// This will trigger widget state save/restore automatically
+		try {
+			getView().refreshGrid();
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing master grid after backlog drop", e);
+		}
 	}
 	// Helper methods for drag-drop operations
 

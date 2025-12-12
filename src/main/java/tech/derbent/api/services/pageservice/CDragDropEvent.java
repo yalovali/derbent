@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import tech.derbent.api.utils.Check;
 
 /** Wrapper class for drag and drop event data. This class is used to pass drag and drop event information to page service handler methods.
  * <p>
@@ -20,8 +21,9 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
  * during drag operations. Drop handlers no longer receive null for dragSource - they receive the actual component from which items were dragged.
  * <p>
  * Usage in page service handler methods:
- * 
+ *
  * <pre>
+ *
  * public void on_sprintItems_dragStart(final Component component, final Object value) {
  * 	if (value instanceof CDragDropEvent) {
  * 		final CDragDropEvent event = (CDragDropEvent) value;
@@ -29,7 +31,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
  * 		// Handle drag start...
  * 	}
  * }
- * 
+ *
  * public void on_sprintGrid_drop(final Component component, final Object value) {
  * 	if (value instanceof CDragDropEvent) {
  * 		final CDragDropEvent event = (CDragDropEvent) value;
@@ -44,6 +46,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
  * 	}
  * }
  * </pre>
+ *
  * @param <T> The type of items being dragged/dropped */
 public class CDragDropEvent<T> {
 
@@ -57,11 +60,13 @@ public class CDragDropEvent<T> {
 	 * @param draggedItems the list of items being dragged
 	 * @param dragSource   the component from which items are being dragged */
 	public CDragDropEvent(final List<T> draggedItems, final Object dragSource) {
+		Check.notNull(draggedItems, "draggedItems cannot be null");
+		Check.notNull(dragSource, "dragSource cannot be null");
 		this.draggedItems = draggedItems;
 		this.dragSource = dragSource;
-		this.targetItem = null;
-		this.dropLocation = null;
-		this.dropTarget = null;
+		targetItem = null;
+		dropLocation = null;
+		dropTarget = null;
 	}
 
 	/** Constructor for drop events.
@@ -72,6 +77,8 @@ public class CDragDropEvent<T> {
 	 * @param dropTarget   the component where items are being dropped */
 	public CDragDropEvent(final List<T> draggedItems, final Object dragSource, final T targetItem, final GridDropLocation dropLocation,
 			final Object dropTarget) {
+		Check.notNull(draggedItems, "draggedItems cannot be null");
+		Check.notNull(dragSource, "dragSource cannot be null");
 		this.draggedItems = draggedItems;
 		this.dragSource = dragSource;
 		this.targetItem = targetItem;
@@ -79,37 +86,19 @@ public class CDragDropEvent<T> {
 		this.dropTarget = dropTarget;
 	}
 
+	/** Gets the first dragged item (convenience method for single-item drags).
+	 * @return the first dragged item, or null if the list is empty */
+	public T getDraggedItem() {
+		return (draggedItems != null && !draggedItems.isEmpty()) ? draggedItems.get(0) : null;
+	}
+
 	/** Gets the list of items being dragged.
 	 * @return the dragged items */
 	public List<T> getDraggedItems() { return draggedItems; }
 
-	/** Gets the first dragged item (convenience method for single-item drags).
-	 * @return the first dragged item, or null if the list is empty */
-	public T getDraggedItem() { return (draggedItems != null && !draggedItems.isEmpty()) ? draggedItems.get(0) : null; }
-
 	/** Gets the component from which items are being dragged.
 	 * @return the drag source component */
 	public Object getDragSource() { return dragSource; }
-
-	/** Gets the drop location relative to the target item.
-	 * @return the drop location (ABOVE, BELOW, ON_TOP) or null for drag start events */
-	public GridDropLocation getDropLocation() { return dropLocation; }
-
-	/** Gets the component where items are being dropped.
-	 * @return the drop target component, or null for drag start events */
-	public Object getDropTarget() { return dropTarget; }
-
-	/** Gets the item at the drop location.
-	 * @return the target item, or null if dropping at the end or for drag start events */
-	public T getTargetItem() { return targetItem; }
-
-	/** Checks if this is a drag end event (has drop location and target).
-	 * @return true if this is a drop event, false if it's a drag start event */
-	public boolean isDropEvent() { return dropLocation != null; }
-
-	/** Checks if this is a drag start event (no drop location).
-	 * @return true if this is a drag start event, false if it's a drop event */
-	public boolean isDragStartEvent() { return dropLocation == null; }
 
 	/** Gets the component hierarchy chain from the drag source to its root container.
 	 * <p>
@@ -131,4 +120,26 @@ public class CDragDropEvent<T> {
 		}
 		return hierarchy;
 	}
+
+	/** Gets the drop location relative to the target item.
+	 * @return the drop location (ABOVE, BELOW, ON_TOP) or null for drag start events */
+	public GridDropLocation getDropLocation() {
+		return dropLocation;
+	}
+
+	/** Gets the component where items are being dropped.
+	 * @return the drop target component, or null for drag start events */
+	public Object getDropTarget() { return dropTarget; }
+
+	/** Gets the item at the drop location.
+	 * @return the target item, or null if dropping at the end or for drag start events */
+	public T getTargetItem() { return targetItem; }
+
+	/** Checks if this is a drag start event (no drop location).
+	 * @return true if this is a drag start event, false if it's a drop event */
+	public boolean isDragStartEvent() { return dropLocation == null; }
+
+	/** Checks if this is a drag end event (has drop location and target).
+	 * @return true if this is a drop event, false if it's a drag start event */
+	public boolean isDropEvent() { return dropLocation != null; }
 }
