@@ -1,6 +1,5 @@
 package tech.derbent.base.setup.view;
 
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -53,9 +52,6 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
-		LOGGER.debug("beforeEnter called for CSystemSettingsView");
-		// Load settings when entering the view, but only if systemSettingsService is
-		// available and settings haven't been loaded yet
 		if ((systemSettingsService != null) && (currentSettings == null)) {
 			loadSystemSettings();
 		}
@@ -64,38 +60,25 @@ public class CSystemSettingsView extends CAbstractPage {
 	private Div createButtonLayout() {
 		final var buttonLayout = new Div();
 		buttonLayout.addClassName("button-layout");
-		// reset database for developer
-		final var resetDbMinimal = new CButton("Reset DB (Dev)", null, null);
-		resetDbMinimal.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		final var resetDbMinimal = new CButton("Reset DB Min", null, null);
 		resetDbMinimal.addClickListener(e -> on_actionResetDatabaseMinimal());
-		// Reset Database button
-		final var resetDbButton = new CButton("Reset Database", null, null);
-		resetDbButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		final var resetDbButton = new CButton("Reset DB Full", null, null);
 		resetDbButton.addClickListener(e -> on_actionResetDatabase());
-		// Save Settings button
 		final var saveButton = new CButton("Save Settings", null, null);
-		saveButton.addClassName("primary");
 		saveButton.addClickListener(e -> on_actionSaveSettings());
-		// Cancel button - to reject changes and revert to original state
 		final var cancelButton = new CButton("Cancel", null, null);
-		cancelButton.addClassName("tertiary");
 		cancelButton.addClickListener(e -> on_actionCancelChanges());
-		// Reload Settings button
-		final var reloadButton = new CButton("Reload Settings", null, null);
-		reloadButton.addClassName("tertiary");
-		reloadButton.addClickListener(e -> on_actionReloadSettings());
 		// Reset to Defaults button
 		final var resetButton = new CButton("Reset to Defaults", null, null);
-		resetButton.addClassName("error");
 		resetButton.addClickListener(e -> {
 			try {
-				resetToDefaults();
+				on_resetToDefaults();
 			} catch (final Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		});
-		buttonLayout.add(resetDbButton, saveButton, cancelButton, reloadButton, resetDbMinimal, resetButton);
+		buttonLayout.add(resetDbButton, resetDbMinimal, saveButton, cancelButton, resetButton);
 		return buttonLayout;
 	}
 
@@ -118,7 +101,6 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	/** Creates the main layout for the settings form. */
 	private void createMainLayout() {
-		LOGGER.debug("createMainLayout called");
 		mainLayout = new VerticalLayout();
 		mainLayout.addClassName("main-content");
 		mainLayout.setPadding(true);
@@ -131,19 +113,12 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	/** Creates the system settings form using AMetaData annotations. */
 	private void createSystemSettingsForm() {
-		LOGGER.debug("createSystemSettingsForm called");
 		try {
-			// Clear existing content
 			formContainer.removeAll();
-			// Create form using AMetaData annotations and CEntityFormBuilder
 			final var formLayout = CFormBuilder.buildForm(CSystemSettings.class, binder);
-			// Bind current settings to form
 			binder.readBean(currentSettings);
-			// Create button layout
 			final var buttonLayout = createButtonLayout();
-			// Add form and buttons to container
 			formContainer.add(buttonLayout, formLayout);
-			LOGGER.debug("System settings form created successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating system settings form", e);
 			CNotificationService.showException("Error creating form", e);
@@ -169,9 +144,6 @@ public class CSystemSettingsView extends CAbstractPage {
 		try {
 			createHeaderSection();
 			createMainLayout();
-			// Note: loadSystemSettings() is called in postConstruct() after dependency
-			// injection is complete
-			LOGGER.debug("System settings view initialized successfully (data loading deferred)");
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing system settings view", e);
 			CNotificationService.showException("Error initializing view", e);
@@ -180,8 +152,6 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	/** Loads the current system settings and creates the form. */
 	private void loadSystemSettings() {
-		LOGGER.debug("loadSystemSettings called");
-		// Safety check to ensure systemSettingsService is not null
 		if (systemSettingsService == null) {
 			LOGGER.error("systemSettingsService is null - dependency injection may not be complete");
 			final var errorDiv = new Div();
@@ -209,7 +179,6 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	private void on_actionCancelChanges() {
 		try {
-			LOGGER.debug("cancelChanges called for CSystemSettingsView");
 			if (currentSettings == null) {
 				LOGGER.warn("No current settings available to revert to");
 				CNotificationService.showWarning("No settings loaded to revert to.");
@@ -225,21 +194,6 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.info("Changes cancelled successfully, form reverted to saved state");
 		} catch (final Exception e) {
 			CNotificationService.showException("Error cancelling changes", e);
-		}
-	}
-
-	/** Reloads the system settings from the database. */
-	private void on_actionReloadSettings() {
-		LOGGER.debug("reloadSettings called");
-		try {
-			// Reload settings from database
-			currentSettings = systemSettingsService.getOrCreateSystemSettings();
-			// Refresh form
-			binder.readBean(currentSettings);
-			CNotificationService.showInfo("Settings reloaded from database");
-			LOGGER.info("System settings reloaded successfully");
-		} catch (final Exception e) {
-			CNotificationService.showException("Error reloading system settings", e);
 		}
 	}
 
@@ -310,6 +264,21 @@ public class CSystemSettingsView extends CAbstractPage {
 		}
 	}
 
+	/** Resets all settings to default values. Shows confirmation dialog before proceeding.
+	 * @throws Exception */
+	private void on_resetToDefaults() {
+		try {
+			// Show confirmation dialog
+			CNotificationService.showConfirmationDialog(
+					"Are you sure you want to reset ALL system settings to default values? "
+							+ "This will affect application behavior, security settings, and file management. " + "This action cannot be undone.",
+					() -> performReset());
+			CNotificationService.showSuccess("System settings reset to defaults successfully");
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
+	}
+
 	/** Performs the actual reset to default values. */
 	private void performReset() {
 		LOGGER.debug("performReset called for CSystemSettings");
@@ -342,21 +311,6 @@ public class CSystemSettingsView extends CAbstractPage {
 		LOGGER.debug("postConstruct called for CSystemSettingsView - loading system settings");
 		// Now it's safe to load system settings since all dependencies are injected
 		loadSystemSettings();
-	}
-
-	/** Resets all settings to default values. Shows confirmation dialog before proceeding.
-	 * @throws Exception */
-	private void resetToDefaults() throws Exception {
-		LOGGER.debug("resetToDefaults called for CSystemSettings");
-		if (currentSettings == null) {
-			CNotificationService.showWarning("System settings could not be loaded. Please refresh the page.");
-			return;
-		}
-		// Show confirmation dialog
-		CNotificationService.showConfirmationDialog(
-				"Are you sure you want to reset ALL system settings to default values? "
-						+ "This will affect application behavior, security settings, and file management. " + "This action cannot be undone.",
-				() -> performReset());
 	}
 
 	/** Sets the session service. This is called after bean creation via configuration class.
