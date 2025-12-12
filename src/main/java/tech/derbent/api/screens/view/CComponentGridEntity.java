@@ -541,8 +541,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	/** Sets up drag-drop listeners on the grid to propagate events to this component's listeners.
 	 * <p>
 	 * This method binds the grid's drag start, drag end, and drop events to propagate to
-	 * this component's registered listeners. It also adds the component name to the drag
-	 * source tracking for proper event handling in the page service.
+	 * this component's registered listeners. The contentOwner (parent) should register to
+	 * this component's notifications, not vice versa.
 	 * </p> */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void setupGridDragDropListeners() {
@@ -555,14 +555,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag start detected, notifying {} listeners", 
 				dragStartListeners.size());
 			notifyDragStartListeners(event);
-			// Propagate to parent if parent implements IHasDragStart
-			if (contentOwner instanceof IHasDragStart) {
-				LOGGER.debug("[DragDebug] CComponentGridEntity: Propagating drag start to parent {}", 
-					contentOwner.getClass().getSimpleName());
-				((IHasDragStart) contentOwner).addDragStartListener(e -> {
-					LOGGER.debug("[DragDebug] CComponentGridEntity: Parent received drag start notification");
-				});
-			}
 		});
 		
 		// Add drag end listener to grid
@@ -570,14 +562,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", 
 				dragEndListeners.size());
 			notifyDragEndListeners(event);
-			// Propagate to parent if parent implements IHasDragEnd
-			if (contentOwner instanceof IHasDragEnd) {
-				LOGGER.debug("[DragDebug] CComponentGridEntity: Propagating drag end to parent {}", 
-					contentOwner.getClass().getSimpleName());
-				((IHasDragEnd) contentOwner).addDragEndListener(e -> {
-					LOGGER.debug("[DragDebug] CComponentGridEntity: Parent received drag end notification");
-				});
-			}
 		});
 		
 		// Add drop listener to grid
@@ -585,14 +569,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drop detected, notifying {} listeners", 
 				dropListeners.size());
 			notifyDropListeners(event);
-			// Propagate to parent if parent implements IHasDrop
-			if (contentOwner instanceof IHasDrop) {
-				LOGGER.debug("[DragDebug] CComponentGridEntity: Propagating drop to parent {}", 
-					contentOwner.getClass().getSimpleName());
-				((IHasDrop) contentOwner).addDropListener(e -> {
-					LOGGER.debug("[DragDebug] CComponentGridEntity: Parent received drop notification");
-				});
-			}
 		});
 		
 		LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag-drop listeners setup complete");
@@ -1250,30 +1226,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		LOGGER.debug("[DragDebug] CComponentGridEntity: Registering with owner {}", 
 			dragDropOwner.getClass().getSimpleName());
 		
-		// Register this component's drag-drop events with the owner
-		// The owner will be notified when drag-drop events occur on this component
-		if (dragDropOwner instanceof IHasDragStart) {
-			// Add this component's drag start events to the owner's listener chain
-			this.addDragStartListener(event -> {
-				LOGGER.debug("[DragDebug] CComponentGridEntity: Event from grid propagated to owner");
-			});
-		}
+		// The owner should register to this component's notifications by calling
+		// addDragStartListener(), addDragEndListener(), addDropListener() on this component.
+		// This method exists to satisfy the IHasDragControl interface contract.
+		// The actual registration is the owner's responsibility, not ours.
 		
-		if (dragDropOwner instanceof IHasDragEnd) {
-			// Add this component's drag end events to the owner's listener chain
-			this.addDragEndListener(event -> {
-				LOGGER.debug("[DragDebug] CComponentGridEntity: Drag end event from grid propagated to owner");
-			});
-		}
-		
-		if (dragDropOwner instanceof IHasDrop) {
-			// Add this component's drop events to the owner's listener chain
-			this.addDropListener(event -> {
-				LOGGER.debug("[DragDebug] CComponentGridEntity: Drop event from grid propagated to owner");
-			});
-		}
-		
-		// Also register the grid with the owner
+		// Register the grid with the owner
 		if (grid != null) {
 			grid.registerWithOwner();
 		}
