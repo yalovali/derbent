@@ -867,6 +867,141 @@ public class CCustomWidget extends CComponentWidgetEntity<CEntity> {
     }
 ```
 
+## Component State Management with IStateOwnerComponent
+
+### Overview
+
+The `IStateOwnerComponent` interface provides a standardized way to save and restore component UI state to/from JSON. This is particularly useful for preserving user context during operations like grid refresh or page navigation.
+
+### Pattern Usage in CGrid
+
+CGrid implements `IStateOwnerComponent` and provides automatic state preservation for:
+- Selected item (by ID for CEntityDB entities)
+- Child component states (widgets in grid cells)
+
+**Key Methods:**
+
+```java
+// Get current state as JSON
+JsonObject state = grid.getStateInformation();
+
+// Restore state from JSON
+grid.restoreStateInformation(state);
+
+// Refresh grid with automatic state preservation
+grid.setItemsWithStatePreservation(newItems);
+```
+
+### Example: Grid Refresh with State Preservation
+
+**Before (manual state management):**
+```java
+public void refreshGrid() {
+    final ChildEntity currentValue = grid.asSingleSelect().getValue();
+    final List<ChildEntity> items = loadItems(master);
+    grid.setItems(items);
+    grid.asSingleSelect().setValue(currentValue);  // Manual restore
+}
+```
+
+**After (using IStateOwnerComponent):**
+```java
+public void refreshGrid() {
+    final List<ChildEntity> items = loadItems(master);
+    grid.setItemsWithStatePreservation(items);  // Automatic state preservation
+}
+```
+
+### Implementing IStateOwnerComponent in Custom Components
+
+Components can implement this interface to provide their own state management:
+
+```java
+public class CCustomPanel extends VerticalLayout implements IStateOwnerComponent {
+    
+    private boolean expanded = false;
+    private String selectedTabId;
+    
+    @Override
+    public JsonObject getStateInformation() {
+        final JsonObject state = Json.createObject();
+        state.put("expanded", expanded);
+        if (selectedTabId != null) {
+            state.put("selectedTabId", selectedTabId);
+        }
+        
+        // Collect child component states
+        final JsonArray childStates = Json.createArray();
+        int index = 0;
+        for (Component child : getChildren().toList()) {
+            if (child instanceof IStateOwnerComponent) {
+                final JsonObject childState = ((IStateOwnerComponent) child).getStateInformation();
+                childState.put("componentIndex", index);
+                childStates.set(index++, childState);
+            }
+        }
+        if (childStates.length() > 0) {
+            state.put("childStates", childStates);
+        }
+        
+        return state;
+    }
+    
+    @Override
+    public void restoreStateInformation(final JsonObject state) {
+        if (state == null) return;
+        
+        // Restore own state
+        if (state.hasKey("expanded")) {
+            expanded = state.getBoolean("expanded");
+            updateExpandedState();
+        }
+        if (state.hasKey("selectedTabId")) {
+            selectedTabId = state.getString("selectedTabId");
+            selectTab(selectedTabId);
+        }
+        
+        // Restore child states
+        if (state.hasKey("childStates")) {
+            final JsonArray childStates = state.getArray("childStates");
+            final List<Component> children = getChildren().toList();
+            for (int i = 0; i < childStates.length(); i++) {
+                final JsonObject childState = childStates.getObject(i);
+                if (i < children.size() && children.get(i) instanceof IStateOwnerComponent) {
+                    ((IStateOwnerComponent) children.get(i)).restoreStateInformation(childState);
+                }
+            }
+        }
+    }
+}
+```
+
+### Best Practices
+
+1. **Save Minimal State**: Only save what's necessary to restore user context
+2. **Handle Nulls**: Always check for null state in `restoreStateInformation()`
+3. **Log State Operations**: Use `LOGGER.debug("[StateOwner] ...")` for debugging
+4. **Recursive Collection**: Collect state from child components implementing the interface
+5. **Fail Gracefully**: Wrap state operations in try-catch to avoid breaking functionality
+
+### Debugging State Issues
+
+Enable debug logging to trace state operations:
+
+```java
+// In logback.xml or application.properties
+<logger name="tech.derbent.api.grid.domain.CGrid" level="DEBUG"/>
+```
+
+Look for `[StateOwner]` prefix in logs:
+```
+[StateOwner] Saved selected item ID: 42
+[StateOwner] Grid state saved successfully
+[StateOwner] Attempting to restore selected item ID: 42
+[StateOwner] Restored selection to item ID: 42
+[StateOwner] Grid state restored successfully
+```
+
 ## Summary
 
 GitHub Copilot works exceptionally well with Derbent because of:
@@ -876,5 +1011,6 @@ GitHub Copilot works exceptionally well with Derbent because of:
 3. **Clear Naming**: Descriptive names that indicate purpose
 4. **Good Documentation**: Comments and JavaDoc that provide context
 5. **Type Safety**: Strong typing with generics
+6. **State Management**: Standardized component state preservation with IStateOwnerComponent
 
 By following these guidelines, you'll maximize Copilot's effectiveness and accelerate development while maintaining code quality.
