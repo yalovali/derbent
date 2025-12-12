@@ -59,8 +59,8 @@ import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
-public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragStart<CEntityDB<?>>,
-		IHasDragEnd<CEntityDB<?>>, IHasDrop<CEntityDB<?>>, IPageServiceAutoRegistrable, IHasDragControl {
+public class CComponentGridEntity extends CDiv
+		implements IProjectChangeListener, IHasContentOwner, IHasDragStart, IHasDragEnd, IHasDrop, IPageServiceAutoRegistrable, IHasDragControl {
 
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent extends ComponentEvent<CComponentGridEntity> {
@@ -82,9 +82,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	protected CProject currentProject;
 	// Drag control state
 	private boolean dragEnabled = false;
-	private final List<ComponentEventListener<GridDragEndEvent<CEntityDB<?>>>> dragEndListeners = new ArrayList<>();
-	// Drag event listeners - follow the pattern from CComponentListEntityBase
-	private final List<ComponentEventListener<GridDragStartEvent<CEntityDB<?>>>> dragStartListeners = new ArrayList<>();
+	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
+	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
 	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
 	private boolean enableSelectionChangeListener;
@@ -110,77 +109,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error initializing CComponentGridEntity: {}", e.getMessage());
 			throw e;
 		}
-	}
-
-	/** Adds a listener for drag end events from widget components in grid cells.
-	 * <p>
-	 * This method implements IHasDragEnd interface to allow external listeners (like CPageService) to be notified when drag operations end on widget
-	 * components inside grid cells. The CComponentGridEntity acts as an aggregator, collecting drag events from all widget components it creates and
-	 * propagating them to registered listeners.
-	 * </p>
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<CEntityDB<?>>> listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Added drag end listener, total listeners: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag start events from widget components in grid cells.
-	 * <p>
-	 * This method implements IHasDragStart interface to allow external listeners (like CPageService) to be notified when drag operations start on
-	 * widget components inside grid cells. The CComponentGridEntity acts as an aggregator, collecting drag events from all widget components it
-	 * creates and propagating them to registered listeners.
-	 * </p>
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<CEntityDB<?>>> listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Added drag start listener, total listeners: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a listener for drop events on this grid component.
-	 * <p>
-	 * This method implements IHasDrop interface to allow external listeners (like CPageService) to be notified when items are dropped onto this grid.
-	 * The CComponentGridEntity stores the listener for propagating drop events from widget components, and also delegates to the underlying grid for
-	 * direct drops onto the grid itself.
-	 * </p>
-	 * <p>
-	 * Note: The grid field is declared as CGrid&lt;?&gt; because the entity type is determined at runtime. However, all entities are guaranteed to
-	 * extend CEntityDB by the service architecture, making the cast safe.
-	 * </p>
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
-	public Registration addDropListener(final ComponentEventListener<GridDropEvent<?>> listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		// Add to our listeners list for widget drop event propagation
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Added drop listener, total listeners: {}", dropListeners.size());
-		// Also add to grid for direct drops if grid is available
-		Registration gridRegistration = null;
-		if (grid != null) {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Adding drop listener to underlying grid");
-			// Safe cast: grid contains CEntityDB items (enforced by service architecture)
-			// We need to cast both the grid and listener to match the expected types
-			gridRegistration = grid.addDropListener(listener);
-		}
-		// Return combined registration that removes from both
-		final Registration finalGridRegistration = gridRegistration;
-		return () -> {
-			dropListeners.remove(listener);
-			if (finalGridRegistration != null) {
-				finalGridRegistration.remove();
-			}
-		};
 	}
 
 	/** Adds a selection change listener to receive notifications when the grid selection changes */
@@ -645,6 +573,14 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@Override
 	public IContentOwner getContentOwner() { return contentOwner; }
 
+	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
+
+	@Override
+	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+
+	@Override
+	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
+
 	private Class<?> getEntityClassFromService(CAbstractService<?> service) throws Exception {
 		try {
 			Class<?> serviceClass = service.getClass();
@@ -757,11 +693,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			"unchecked", "rawtypes"
 	})
 	private void notifyDragEndListeners(final GridDragEndEvent event) {
-		if (dragEndListeners.isEmpty()) {
+		if (getDragEndListeners().isEmpty()) {
 			return;
 		}
-		LOGGER.debug("[DragDebug] Notifying {} drag end listeners", dragEndListeners.size());
-		for (final ComponentEventListener listener : dragEndListeners) {
+		LOGGER.debug("[DragDebug] Notifying {} drag end listeners", getDragEndListeners().size());
+		for (final ComponentEventListener listener : getDragEndListeners()) {
 			try {
 				listener.onComponentEvent(event);
 			} catch (final Exception e) {
@@ -777,9 +713,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			"unchecked", "rawtypes"
 	})
 	private void notifyDragStartListeners(final GridDragStartEvent event) {
-		if (!dragStartListeners.isEmpty()) {
-			LOGGER.debug("[DragDebug] Notifying {} drag start listeners", dragStartListeners.size());
-			for (final ComponentEventListener listener : dragStartListeners) {
+		if (!getDragStartListeners().isEmpty()) {
+			LOGGER.debug("[DragDebug] Notifying {} drag start listeners", getDragStartListeners().size());
+			for (final ComponentEventListener listener : getDragStartListeners()) {
 				try {
 					listener.onComponentEvent(event);
 				} catch (final Exception e) {
@@ -796,11 +732,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			"unchecked", "rawtypes"
 	})
 	private void notifyDropListeners(final GridDropEvent event) {
-		if (dropListeners.isEmpty()) {
+		if (getDropListeners().isEmpty()) {
 			return;
 		}
-		LOGGER.debug("[DragDebug] Notifying {} drop listeners", dropListeners.size());
-		for (final ComponentEventListener listener : dropListeners) {
+		LOGGER.debug("[DragDebug] Notifying {} drop listeners", getDropListeners().size());
+		for (final ComponentEventListener listener : getDropListeners()) {
 			try {
 				listener.onComponentEvent(event);
 			} catch (final Exception e) {
@@ -937,7 +873,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				return;
 			}
 			// Only register components that implement drag/drop interfaces
-			if (!(component instanceof IHasDragStart<?>) && !(component instanceof IHasDragEnd<?>) && !(component instanceof IHasDrop<?>)) {
+			if (!(component instanceof IHasDragStart) && !(component instanceof IHasDragEnd) && !(component instanceof IHasDrop)) {
 				LOGGER.debug("Widget component does not implement drag/drop interfaces, skipping registration");
 				return;
 			}
@@ -945,27 +881,27 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			entityToWidgetMap.put(entity, component);
 			// Set up drag event propagation from widget component to this CComponentGridEntity
 			// Using dedicated notification methods for cleaner, more maintainable code
-			if (component instanceof IHasDragStart<?>) {
+			if (component instanceof IHasDragStart) {
 				final IHasDragStart widgetWithDragStart = (IHasDragStart) component;
 				widgetWithDragStart.addDragStartListener(event -> {
 					LOGGER.debug("[DragDebug] Widget {} fired drag start, notifying CComponentGridEntity listeners",
 							component.getClass().getSimpleName());
-					notifyDragStartListeners((GridDragStartEvent) event);
+					notifyDragStartListeners(event);
 				});
 			}
-			if (component instanceof IHasDragEnd<?>) {
+			if (component instanceof IHasDragEnd) {
 				final IHasDragEnd widgetWithDragEnd = (IHasDragEnd) component;
 				widgetWithDragEnd.addDragEndListener(event -> {
 					LOGGER.debug("[DragDebug] Widget {} fired drag end, notifying CComponentGridEntity listeners",
 							component.getClass().getSimpleName());
-					notifyDragEndListeners((GridDragEndEvent) event);
+					notifyDragEndListeners(event);
 				});
 			}
-			if (component instanceof IHasDrop<?>) {
+			if (component instanceof IHasDrop) {
 				final IHasDrop widgetWithDrop = (IHasDrop) component;
 				widgetWithDrop.addDropListener(event -> {
 					LOGGER.debug("[DragDebug] Widget {} fired drop, notifying CComponentGridEntity listeners", component.getClass().getSimpleName());
-					notifyDropListeners((GridDropEvent) event);
+					notifyDropListeners(event);
 				});
 			}
 			// Generate a unique component name for this widget
@@ -1190,25 +1126,23 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * (parent) should register to this component's notifications, not vice versa.
 	 * </p>
 	 */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
+	@SuppressWarnings ({})
 	private void setupGridDragDropListeners() {
 		Check.notNull(grid, "Grid must be created before setting up drag-drop listeners");
 		LOGGER.debug("[DragDebug] CComponentGridEntity: Setting up grid drag-drop listeners");
 		// Add drag start listener to grid
 		grid.addDragStartListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag start detected, notifying {} listeners", dragStartListeners.size());
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag start detected, notifying {} listeners", getDragStartListeners().size());
 			notifyDragStartListeners(event);
 		});
 		// Add drag end listener to grid
 		grid.addDragEndListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", dragEndListeners.size());
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", getDragEndListeners().size());
 			notifyDragEndListeners(event);
 		});
 		// Add drop listener to grid
 		grid.addDropListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drop detected, notifying {} listeners", dropListeners.size());
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drop detected, notifying {} listeners", getDropListeners().size());
 			notifyDropListeners(event);
 		});
 		LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag-drop listeners setup complete");

@@ -14,6 +14,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -30,6 +31,7 @@ import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IHasDragEnd;
 import tech.derbent.api.interfaces.IHasDragStart;
+import tech.derbent.api.interfaces.IHasDrop;
 import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -40,8 +42,8 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 /** CComponentEntitySelection - Reusable component for selecting entities from a grid with search/filter capabilities.
  * <p>
- * This component can be embedded in dialogs, pages, or panels for entity selection functionality.
- * Implements HasValue interface for full Vaadin binder integration.
+ * This component can be embedded in dialogs, pages, or panels for entity selection functionality. Implements HasValue interface for full Vaadin
+ * binder integration.
  * <p>
  * Features:
  * <ul>
@@ -58,8 +60,8 @@ import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
  * </ul>
  * @param <EntityClass> The entity type being selected */
 public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
-		implements IGridComponent<EntityClass>, IGridRefreshListener<EntityClass>, 
-		HasValue<HasValue.ValueChangeEvent<Set<EntityClass>>, Set<EntityClass>>, IHasDragStart<EntityClass>, IHasDragEnd<EntityClass> {
+		implements IGridComponent<EntityClass>, IGridRefreshListener<EntityClass>,
+		HasValue<HasValue.ValueChangeEvent<Set<EntityClass>>, Set<EntityClass>>, IHasDragStart, IHasDragEnd, IHasDrop {
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
@@ -128,6 +130,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
 	private static final long serialVersionUID = 1L;
+	// Drag control state
+	private final boolean dragEnabled = false;
+	private final boolean dropEnabled = false;
+	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
+	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private List<EntityClass> allItems = new ArrayList<>();
 	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	private final AlreadySelectedMode alreadySelectedMode;
@@ -229,25 +237,25 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				Check.notNull(item, "Item in allItems cannot be null");
 				boolean matches = true;
 				// ID filter - search in "id" field (use mutable list for matchesFilter)
-				if (matches && (idValue != null) && !idValue.isBlank()) {
+				if (matches && idValue != null && !idValue.isBlank()) {
 					if (!item.matchesFilter(idValue, new ArrayList<>(List.of("id")))) {
 						matches = false;
 					}
 				}
 				// Name filter - search in "name" field (use mutable list for matchesFilter)
-				if (matches && (nameValue != null) && !nameValue.isBlank()) {
+				if (matches && nameValue != null && !nameValue.isBlank()) {
 					if (!item.matchesFilter(nameValue, new ArrayList<>(List.of("name")))) {
 						matches = false;
 					}
 				}
 				// Description filter - search in "description" field (use mutable list for matchesFilter)
-				if (matches && (descValue != null) && !descValue.isBlank()) {
+				if (matches && descValue != null && !descValue.isBlank()) {
 					if (!item.matchesFilter(descValue, new ArrayList<>(List.of("description")))) {
 						matches = false;
 					}
 				}
 				// Status filter - search in "status" field (use mutable list for matchesFilter)
-				if (matches && (statusValue != null) && !statusValue.isBlank()) {
+				if (matches && statusValue != null && !statusValue.isBlank()) {
 					if (!item.matchesFilter(statusValue, new ArrayList<>(List.of("status")))) {
 						matches = false;
 					}
@@ -270,6 +278,19 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			LOGGER.error("Error applying filters", e);
 			throw new IllegalStateException("Failed to apply filters", e);
 		}
+	}
+
+	/** Clears the selection. Equivalent to calling setValue with an empty set. */
+	@Override
+	public void clear() {
+		LOGGER.debug("Clearing all selected items");
+		selectedItems.clear();
+		if (multiSelect) {
+			grid.deselectAll();
+		} else {
+			grid.asSingleSelect().clear();
+		}
+		updateSelectionIndicator();
 	}
 
 	/** Clears all items from the grid. Implements IGridComponent.clearGrid() */
@@ -394,6 +415,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return The AlreadySelectedMode */
 	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
 
+	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
+
+	@Override
+	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+
+	@Override
+	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
+
 	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {
 		Check.notNull(item, "Item cannot be null");
@@ -420,19 +449,39 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	/** Gets the grid component for external configuration (e.g., drag and drop).
 	 * @return the CGrid instance */
+	@Override
 	public CGrid<EntityClass> getGrid() { return grid; }
 
 	/** Returns the currently selected items.
 	 * <p>
-	 * Note: This method is functionally equivalent to {@link #getValue()} from the HasValue interface.
-	 * Both methods return the same set of selected items. Use getValue() when working with Vaadin binders,
-	 * or getSelectedItems() for direct access in application code.
+	 * Note: This method is functionally equivalent to {@link #getValue()} from the HasValue interface. Both methods return the same set of selected
+	 * items. Use getValue() when working with Vaadin binders, or getSelectedItems() for direct access in application code.
 	 * @return Set of selected items (never null) */
 	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
+
+	/** Gets the current value of this component (the selected items).
+	 * @return Set of currently selected items (never null) */
+	@Override
+	public Set<EntityClass> getValue() { return new HashSet<>(selectedItems); }
+
+	/** Checks if the selection is empty.
+	 * @return true if no items are selected, false otherwise */
+	@Override
+	public boolean isEmpty() { return selectedItems.isEmpty(); }
 
 	/** Returns whether the component is configured for multi-select.
 	 * @return true if multi-select mode */
 	public boolean isMultiSelect() { return multiSelect; }
+
+	/** Checks if the component is read-only.
+	 * @return false (read-only mode not currently implemented) */
+	@Override
+	public boolean isReadOnly() { return false; }
+
+	/** Checks if the required indicator is visible.
+	 * @return false (required indicator not currently implemented) */
+	@Override
+	public boolean isRequiredIndicatorVisible() { return false; }
 
 	/** Loads already selected items from the provider if available. */
 	private void loadAlreadySelectedItems(final EntityTypeConfig<?> config) {
@@ -549,6 +598,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			CNotificationService.showException("Error selecting items", e);
 		}
 	}
+	// Owner interface setters and notification methods
 
 	/** Handle grid single-select value change. */
 	protected void on_gridItems_singleSelectionChanged(final EntityClass value) {
@@ -584,7 +634,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			// Filter out already selected items from the available items list
 			final List<EntityClass> filteredItems = new ArrayList<>();
 			for (final EntityClass item : allItems) {
-				if ((item.getId() == null) || !alreadySelectedIds.contains(item.getId())) {
+				if (item.getId() == null || !alreadySelectedIds.contains(item.getId())) {
 					filteredItems.add(item);
 				}
 			}
@@ -596,7 +646,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			// Pre-select the already selected items (they will be visually marked in the grid)
 			// In single-select mode, only pre-select the first matching item
 			for (final EntityClass item : allItems) {
-				if ((item.getId() != null) && alreadySelectedIds.contains(item.getId())) {
+				if (item.getId() != null && alreadySelectedIds.contains(item.getId())) {
 					selectedItems.add(item);
 					// In single-select mode, only allow one item to be pre-selected
 					if (!multiSelect) {
@@ -638,15 +688,13 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	/** Resets the component selection state.
 	 * <p>
-	 * Note: This method is functionally equivalent to {@link #clear()} from the HasValue interface.
-	 * Prefer using clear() for consistency with standard Vaadin components.
+	 * Note: This method is functionally equivalent to {@link #clear()} from the HasValue interface. Prefer using clear() for consistency with
+	 * standard Vaadin components.
 	 * @deprecated Use {@link #clear()} instead */
 	@Deprecated
 	public void reset() {
 		clear();
 	}
-
-	// Owner interface setters and notification methods
 
 	public void setDynamicHeight(final String maxHeight) {
 		getContent().setSizeUndefined();
@@ -655,6 +703,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		getContent().setMaxHeight(maxHeight);
 		grid.setDynamicHeight();
 	}
+	// HasValue interface implementation
 
 	/** Sets the entity type for the component.
 	 * @param config The entity type configuration to set */
@@ -662,6 +711,24 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (config != null && entityTypes.contains(config)) {
 			comboBoxEntityType.setValue(config);
 		}
+	}
+
+	/** Sets the read-only state of this component. When read-only, users cannot change the selection.
+	 * @param readOnly true to make read-only, false to make editable */
+	@Override
+	public void setReadOnly(final boolean readOnly) {
+		// Note: CComponentEntitySelection doesn't currently support read-only mode
+		// This could be implemented by disabling the grid and controls
+		LOGGER.debug("setReadOnly({}) called - not currently implemented", readOnly);
+	}
+
+	/** Sets whether the required indicator should be visible.
+	 * @param requiredIndicatorVisible true to show required indicator, false to hide */
+	@Override
+	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
+		// Note: CComponentEntitySelection doesn't currently support required indicator
+		// This could be implemented by adding a visual indicator to the component
+		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
 	}
 
 	/** Sets the selection owner to be notified of selection changes.
@@ -689,6 +756,28 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		create_gridItems();
 		mainLayout.add(grid);
 		mainLayout.setFlexGrow(1, grid); // Make grid expand
+	}
+
+	/** Sets the value of this component (the selected items). This will update the selection and fire value change events.
+	 * @param value Set of items to select (must not be null) */
+	@Override
+	public void setValue(final Set<EntityClass> value) {
+		Check.notNull(value, "Value cannot be null");
+		LOGGER.debug("Setting value with {} items", value.size());
+		selectedItems.clear();
+		selectedItems.addAll(value);
+		// Update grid selection
+		if (multiSelect) {
+			grid.deselectAll();
+			for (final EntityClass item : selectedItems) {
+				grid.select(item);
+			}
+		} else if (!selectedItems.isEmpty()) {
+			grid.asSingleSelect().setValue(selectedItems.iterator().next());
+		} else {
+			grid.asSingleSelect().clear();
+		}
+		updateSelectionIndicator();
 	}
 
 	private void updateSelectionIndicator() {
@@ -761,114 +850,5 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 		}
 		gridSearchToolbar.setStatusOptions(statuses);
-	}
-
-	// HasValue interface implementation
-
-	/** Gets the current value of this component (the selected items).
-	 * @return Set of currently selected items (never null) */
-	@Override
-	public Set<EntityClass> getValue() {
-		return new HashSet<>(selectedItems);
-	}
-
-	/** Sets the value of this component (the selected items). This will update the selection and fire value change events.
-	 * @param value Set of items to select (must not be null) */
-	@Override
-	public void setValue(final Set<EntityClass> value) {
-		Check.notNull(value, "Value cannot be null");
-		LOGGER.debug("Setting value with {} items", value.size());
-		selectedItems.clear();
-		selectedItems.addAll(value);
-		// Update grid selection
-		if (multiSelect) {
-			grid.deselectAll();
-			for (final EntityClass item : selectedItems) {
-				grid.select(item);
-			}
-		} else if (!selectedItems.isEmpty()) {
-			grid.asSingleSelect().setValue(selectedItems.iterator().next());
-		} else {
-			grid.asSingleSelect().clear();
-		}
-		updateSelectionIndicator();
-	}
-
-	/** Clears the selection. Equivalent to calling setValue with an empty set. */
-	@Override
-	public void clear() {
-		LOGGER.debug("Clearing all selected items");
-		selectedItems.clear();
-		if (multiSelect) {
-			grid.deselectAll();
-		} else {
-			grid.asSingleSelect().clear();
-		}
-		updateSelectionIndicator();
-	}
-
-	/** Checks if the selection is empty.
-	 * @return true if no items are selected, false otherwise */
-	@Override
-	public boolean isEmpty() {
-		return selectedItems.isEmpty();
-	}
-
-	/** Sets the read-only state of this component. When read-only, users cannot change the selection.
-	 * @param readOnly true to make read-only, false to make editable */
-	@Override
-	public void setReadOnly(final boolean readOnly) {
-		// Note: CComponentEntitySelection doesn't currently support read-only mode
-		// This could be implemented by disabling the grid and controls
-		LOGGER.debug("setReadOnly({}) called - not currently implemented", readOnly);
-	}
-
-	/** Checks if the component is read-only.
-	 * @return false (read-only mode not currently implemented) */
-	@Override
-	public boolean isReadOnly() {
-		return false;
-	}
-
-	/** Sets whether the required indicator should be visible.
-	 * @param requiredIndicatorVisible true to show required indicator, false to hide */
-	@Override
-	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
-		// Note: CComponentEntitySelection doesn't currently support required indicator
-		// This could be implemented by adding a visual indicator to the component
-		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
-	}
-
-	/** Checks if the required indicator is visible.
-	 * @return false (required indicator not currently implemented) */
-	@Override
-	public boolean isRequiredIndicatorVisible() {
-		return false;
-	}
-	
-	// IHasDragStart interface implementation
-	
-	/** Adds a listener for drag start events from the internal grid.
-	 * The listener will be notified when a drag operation starts on the grid.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<EntityClass>> listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		Check.notNull(grid, "Grid must be initialized before adding drag start listener");
-		return grid.addDragStartListener(listener);
-	}
-	
-	// IHasDragEnd interface implementation
-	
-	/** Adds a listener for drag end events from the internal grid.
-	 * The listener will be notified when a drag operation ends on the grid.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<EntityClass>> listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		Check.notNull(grid, "Grid must be initialized before adding drag end listener");
-		return grid.addDragEndListener(listener);
 	}
 }

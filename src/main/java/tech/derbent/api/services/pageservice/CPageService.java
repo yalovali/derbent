@@ -241,9 +241,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 		case "dragStart" -> {
 			// Check if component implements IHasDragStart interface first
-			if (component instanceof IHasDragStart<?>) {
+			if (component instanceof IHasDragStart) {
 				LOGGER.debug("[DragDebug] Component {} implements IHasDragStart, binding via interface", componentName);
-				bindDragStart((IHasDragStart<?>) component, method, methodName);
+				bindDragStart((IHasDragStart) component, method, methodName);
 			} else if (component instanceof Grid<?>) {
 				// Fallback to direct Grid binding for backward compatibility
 				LOGGER.debug("[DragDebug] Component {} is a Grid, binding via direct Grid API", componentName);
@@ -258,9 +258,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 		case "dragEnd" -> {
 			// Check if component implements IHasDragEnd interface first
-			if (component instanceof IHasDragEnd<?>) {
+			if (component instanceof IHasDragEnd) {
 				LOGGER.debug("[DragDebug] Component {} implements IHasDragEnd, binding via interface", componentName);
-				bindDragEnd((IHasDragEnd<?>) component, method, methodName);
+				bindDragEnd((IHasDragEnd) component, method, methodName);
 			} else if (component instanceof Grid<?>) {
 				// Fallback to direct Grid binding for backward compatibility
 				LOGGER.debug("[DragDebug] Component {} is a Grid, binding via direct Grid API", componentName);
@@ -278,9 +278,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			if (component instanceof Grid<?>) {
 				LOGGER.debug("[DragDebug] Component {} is a Grid, binding drop event", componentName);
 				bindGridDrop((Grid<?>) component, method, methodName);
-			} else if (component instanceof tech.derbent.api.interfaces.IHasDrop<?>) {
+			} else if (component instanceof IHasDrop) {
 				LOGGER.debug("[DragDebug] Component {} implements IHasDrop, binding drop event", componentName);
-				bindIHasDropEvent((tech.derbent.api.interfaces.IHasDrop<?>) component, method, methodName);
+				bindIHasDropEvent((IHasDrop) component, method, methodName);
 			} else {
 				// Fail-fast: Drop handler defined but component doesn't support drops
 				throw new IllegalArgumentException(
@@ -302,7 +302,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	private void bindDragEnd(final IHasDragEnd<?> component, final Method method, final String methodName) {
+	private void bindDragEnd(final IHasDragEnd component, final Method method, final String methodName) {
 		// Verify that the component is also a Vaadin Component
 		if (!(component instanceof Component)) {
 			LOGGER.error("Component implementing IHasDragEnd must also extend Component: {}", component.getClass().getSimpleName());
@@ -335,7 +335,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	private void bindDragStart(final IHasDragStart<?> component, final Method method, final String methodName) {
+	private void bindDragStart(final IHasDragStart component, final Method method, final String methodName) {
 		// Verify that the component is also a Vaadin Component
 		if (!(component instanceof Component)) {
 			LOGGER.error("Component implementing IHasDragStart must also extend Component: {}", component.getClass().getSimpleName());
@@ -439,7 +439,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	private void bindIHasDropEvent(final IHasDrop<?> component, final Method method, final String methodName) {
+	private void bindIHasDropEvent(final IHasDrop component, final Method method, final String methodName) {
 		component.addDropListener(event -> {
 			try {
 				LOGGER.info("[DragDebug] CPageService.bindIHasDropEvent: Drop event received on component {}", methodName);
@@ -452,10 +452,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				LOGGER.info("[DragDebug] targetItem: {}, dropLocation: {}", targetItem, dropLocation);
 				// Use tracked drag source and items from drag start event
 				// This provides handlers with information about where the drag originated
-				final CDragDropEvent<?> dropEvent = new CDragDropEvent(activeDraggedItems, activeDragSource, targetItem, dropLocation,
-						(Component) component);
+				final CDragDropEvent<?> dropEvent = new CDragDropEvent(activeDraggedItems, activeDragSource, targetItem, dropLocation, component);
 				LOGGER.info("[DragDebug] Invoking method {} on page service", method.getName());
-				method.invoke(this, (Component) component, dropEvent);
+				method.invoke(this, component, dropEvent);
 				LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
@@ -687,7 +686,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			final TextField nameField = getTextField("name");
 			if (nameField != null) {
 				final String name = nameField.getValue();
-				return (name != null) && !name.trim().isEmpty();
+				return name != null && !name.trim().isEmpty();
 			}
 			// If there's no name field, consider it valid
 			return true;

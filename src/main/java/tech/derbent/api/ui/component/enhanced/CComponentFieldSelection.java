@@ -2,6 +2,7 @@ package tech.derbent.api.ui.component.enhanced;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -361,11 +362,26 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			Check.notNull(items, "Source items list cannot be null");
 			LOGGER.info("Setting {} source items for selection component", items.size());
 			sourceItems.clear();
-			sourceItems.addAll(items);
+			
+			// Filter out null items before adding
+			final List<DetailEntity> validItems = items.stream()
+				.filter(Objects::nonNull)
+				.collect(java.util.stream.Collectors.toList());
+			
+			sourceItems.addAll(validItems);
+			
+			// Safe sorting with null checks
 			sourceItems.sort((a, b) -> {
 				try {
-					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : a.toString();
-					final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : b.toString();
+					if (a == null && b == null) return 0;
+					if (a == null) return 1;
+					if (b == null) return -1;
+					
+					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : 
+						(a.toString() != null ? a.toString() : "");
+					final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : 
+						(b.toString() != null ? b.toString() : "");
+					
 					return labelA.compareToIgnoreCase(labelB);
 				} catch (final Exception e) {
 					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
@@ -468,15 +484,28 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.info("Binder triggered setValue on CComponentFieldSelection - reading {} selected items from entity field",
 					value != null ? value.size() : 0);
 			selectedItems.clear();
+			
 			// Only update source items if dataProviderResolver is available
 			if ((dataProviderResolver != null) && (fieldInfo != null)) {
-				updateSourceItems();
+				try {
+					updateSourceItems();
+				} catch (final Exception e) {
+					LOGGER.error("Error updating source items during setValue: {}", e.getMessage(), e);
+					// Continue with the setValue operation even if source items update fails
+				}
 			}
+			
 			if (value != null) {
-				// Preserve the order from the entity's list field
-				selectedItems.addAll(value);
+				// Filter out null items and preserve the order from the entity's list field
+				final List<DetailEntity> validItems = value.stream()
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList());
+				
+				selectedItems.addAll(validItems);
 				LOGGER.debug("Selected items loaded from binder: {}",
-						selectedItems.stream().map(Object::toString).collect(java.util.stream.Collectors.joining(", ")));
+						validItems.stream()
+							.map(item -> item != null ? item.toString() : "null")
+							.collect(Collectors.joining(", ")));
 			}
 			populateForm();
 		} catch (final Exception e) {

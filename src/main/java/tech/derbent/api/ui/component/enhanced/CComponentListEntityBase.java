@@ -12,6 +12,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
@@ -24,6 +25,8 @@ import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IHasDragEnd;
 import tech.derbent.api.interfaces.IHasDragStart;
+import tech.derbent.api.interfaces.IHasDrop;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.screens.service.IOrderedEntityService;
@@ -67,8 +70,8 @@ import tech.derbent.api.utils.Check;
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
 		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>,
-		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IHasDragStart<ChildEntity>, IHasDragEnd<ChildEntity>,
-		tech.derbent.api.interfaces.IPageServiceAutoRegistrable, IHasDragControl, tech.derbent.api.interfaces.IHasDrop<ChildEntity> {
+		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IHasDragStart, IHasDragEnd, IPageServiceAutoRegistrable, IHasDragControl,
+		IHasDrop {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -84,15 +87,18 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
 	}
 
+	// Drag control state
+	private boolean dragEnabled = false;
+	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
+	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
+	private boolean dropEnabled = false;
+	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
 	protected CButton buttonAdd;
 	protected CButton buttonAddFromList;
 	protected CButton buttonDelete;
 	protected CButton buttonMoveDown;
 	protected CButton buttonMoveUp;
 	protected final IOrderedEntityService<ChildEntity> childService;
-	// Drag control state
-	private boolean dragEnabled = false;
-	private boolean dropEnabled = false;
 	protected final Class<ChildEntity> entityClass;
 	protected CGrid<ChildEntity> grid;
 	protected CHorizontalLayout layoutToolbar;
@@ -174,41 +180,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		button.addClickListener(e -> on_buttonFromList_clicked(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
 				alreadySelectedProvider, alreadySelectedMode));
 		return button;
-	}
-
-	/** Adds a listener for drag end events from the internal grid. The listener will be notified when a drag operation ends on the grid.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<ChildEntity>> listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		Check.notNull(grid, "Grid must be initialized before adding drag end listener");
-		return grid.addDragEndListener(listener);
-	}
-
-	/** Adds a listener for drag start events from the internal grid. The listener will be notified when a drag operation starts on the grid.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<ChildEntity>> listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		Check.notNull(grid, "Grid must be initialized before adding drag start listener");
-		return grid.addDragStartListener(listener);
-	}
-
-	/** Adds a listener for drop events on the internal grid. The listener will be notified when items are dropped onto the grid. Implements
-	 * {@link tech.derbent.api.interfaces.IHasDrop#addDropListener(ComponentEventListener)}.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(final ComponentEventListener<com.vaadin.flow.component.grid.dnd.GridDropEvent<?>> listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		Check.notNull(grid, "Grid must be initialized before adding drop listener");
-		// Safe cast: listener accepts any GridDropEvent<?> so it can accept GridDropEvent<ChildEntity>
-		return grid.addDropListener((ComponentEventListener) listener);
 	}
 
 	// IGridRefreshListener implementation
@@ -400,8 +371,16 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @return The ID string or null if no sprint is set */
 	@Override
 	public String getCurrentEntityIdString() {
-		return (getMasterEntity() != null) && (getMasterEntity().getId() != null) ? getMasterEntity().getId().toString() : null;
+		return getMasterEntity() != null && getMasterEntity().getId() != null ? getMasterEntity().getId().toString() : null;
 	}
+
+	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
+
+	@Override
+	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+
+	@Override
+	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Get the entity service.
 	 * @return The service */
@@ -701,7 +680,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@Override
 	public void populateForm() {
 		LOGGER.debug("populateForm called - refreshing sprint items grid");
-		if ((getMasterEntity() != null) && (getMasterEntity().getId() != null)) {
+		if (getMasterEntity() != null && getMasterEntity().getId() != null) {
 			refreshGrid();
 		} else {
 			clearGrid();
@@ -838,7 +817,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 	}
 
-		
 	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.
 	 * This must be called before the component is initialized.
 	 * @param maxHeight Optional maximum height (e.g., "400px", "50vh"), or null for no maximum */

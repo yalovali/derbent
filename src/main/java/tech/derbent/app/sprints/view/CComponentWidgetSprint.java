@@ -2,28 +2,19 @@ package tech.derbent.app.sprints.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
-import tech.derbent.api.interfaces.IHasDragEnd;
-import tech.derbent.api.interfaces.IHasDragStart;
-import tech.derbent.api.interfaces.IHasDrop;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
@@ -54,8 +45,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * @author Derbent Framework
  * @since 1.0
  * @see CComponentWidgetEntityOfProject */
-public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint>
-		implements IEntityUpdateListener<CSprintItem>, IHasDragStart<CSprintItem>, IHasDragEnd<CSprintItem>, IHasDrop<CSprintItem> {
+public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSprint> implements IEntityUpdateListener<CSprintItem> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetSprint.class);
 	private static final long serialVersionUID = 1L;
@@ -71,48 +61,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		super(sprint);
 		// Note: componentSprintItems is created in createSecondLine() during super() constructor
 		// Drag-drop is configured in createSprintItemsComponent()
-	}
-
-	/** Adds a listener for drag end events from the internal sprint items grid. The listener will be notified when a drag operation ends on the
-	 * sprint items grid.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragEndListener(final ComponentEventListener<GridDragEndEvent<CSprintItem>> listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		if (componentSprintItems == null) {
-			LOGGER.warn("componentSprintItems not initialized, cannot add drag end listener");
-			return () -> {}; // Return empty registration
-		}
-		return componentSprintItems.addDragEndListener(event -> listener.onComponentEvent(event));
-	}
-
-	/** Adds a listener for drag start events from the internal sprint items grid. The listener will be notified when a drag operation starts on the
-	 * sprint items grid.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<CSprintItem>> listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		if (componentSprintItems == null) {
-			LOGGER.warn("componentSprintItems not initialized, cannot add drag start listener");
-			return () -> {}; // Return empty registration
-		}
-		return componentSprintItems.addDragStartListener(event -> listener.onComponentEvent(event));
-	}
-
-	/** Adds a listener for drop events on the internal sprint items grid. The listener will be notified when items are dropped onto the sprint items
-	 * grid.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	public Registration addDropListener(final ComponentEventListener<GridDropEvent<?>> listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		if (componentSprintItems == null) {
-			LOGGER.warn("componentSprintItems not initialized, cannot add drop listener");
-			return () -> {}; // Return empty registration
-		}
-		return componentSprintItems.addDropListener(event -> listener.onComponentEvent(event));
 	}
 
 	@Override
@@ -142,7 +90,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		icon.getStyle().set("width", "14px").set("height", "14px").set("color", "#1976D2");
 		label.add(icon);
 		// Add count text with story points
-		final String countText = (itemCount != null ? itemCount : 0) + " item" + ((itemCount != null && itemCount != 1) ? "s" : "");
+		final String countText = (itemCount != null ? itemCount : 0) + " item" + (itemCount != null && itemCount != 1 ? "s" : "");
 		final String storyPointsText = totalStoryPoints != null && totalStoryPoints > 0 ? " (" + totalStoryPoints + " SP)" : "";
 		label.setText(countText + storyPointsText);
 		return label;
@@ -291,7 +239,6 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.error("Error refreshing item count", e);
 		}
 	}
-
 	// =============== WIDGET STATE PRESERVATION ===============
 
 	/** Restores widget UI state after reconstruction. Restores the expanded/collapsed state of sprint items. */
@@ -300,8 +247,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		super.restoreWidgetState();
 		// Restore sprint items visibility state
 		final Boolean visible = (Boolean) getStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible");
-		LOGGER.info("[StateDebug] Restoring state for Sprint#{}: sprintItemsVisible={}", 
-			getEntity().getId(), visible);
+		LOGGER.info("[StateDebug] Restoring state for Sprint#{}: sprintItemsVisible={}", getEntity().getId(), visible);
 		if (visible != null && visible) {
 			// State was visible before refresh, restore it
 			sprintItemsVisible = true;
@@ -326,8 +272,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	public void saveWidgetState() {
 		super.saveWidgetState();
 		// Save sprint items visibility state
-		LOGGER.info("[StateDebug] Saving state for Sprint#{}: sprintItemsVisible={}", 
-			getEntity().getId(), sprintItemsVisible);
+		LOGGER.info("[StateDebug] Saving state for Sprint#{}: sprintItemsVisible={}", getEntity().getId(), sprintItemsVisible);
 		saveStateValue(getEntity().getClass(), getEntity().getId(), "sprintItemsVisible", sprintItemsVisible);
 	}
 }

@@ -6,14 +6,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
-import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IHasDrop;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.services.pageservice.CPageService;
@@ -63,7 +59,7 @@ import tech.derbent.app.sprints.service.CSprintItemService;
  * <p>
  * The component automatically configures itself with Activities and Meetings entity types. Future entity types can be easily added by extending the
  * createEntityTypes() method. */
-public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable, IHasDrop<CProjectItem<?>> {
+public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
@@ -163,22 +159,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		configureInternalDragAndDrop();
 		setDynamicHeight("600px");
 		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
-	}
-
-	/** Adds a drop listener to this component's grid.
-	 * <p>
-	 * Delegates to the parent class's grid to enable external drop events from other components (e.g., masterGrid) to be handled by page service.
-	 * @param listener the drop listener to add
-	 * @return registration for removing the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(ComponentEventListener<GridDropEvent<?>> listener) {
-		final var grid = getGrid();
-		Check.notNull(grid, "Grid not available for drop listener registration");
-		// Safe cast: listener accepts any GridDropEvent<?> so it can accept the grid's specific type
-		return grid.addDropListener((ComponentEventListener) listener);
 	}
 
 	/** Calculates the new position for a dragged item based on drop location.
