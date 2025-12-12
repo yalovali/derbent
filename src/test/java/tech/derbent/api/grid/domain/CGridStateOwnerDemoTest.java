@@ -169,10 +169,19 @@ class CGridStateOwnerDemoTest {
 				new Task(3L, "Fix bug in module Y", "Done"), new Task(4L, "Write documentation", "Done"), // Status changed
 				new Task(5L, "Deploy to staging", "Pending"));
 
-		// Use setItemsWithStatePreservation to automatically preserve state
-		grid.setItemsWithStatePreservation(updatedTasks);
+		// Step 5: Refresh grid data using explicit save/restore pattern
+		System.out.println("\nStep 5: Refreshing grid with updated data using explicit pattern...");
+		System.out.println("   - Save state: JsonObject state = grid.getStateInformation()");
+		final JsonObject savedState = grid.getStateInformation();
+		
+		System.out.println("   - Update grid: grid.setItems(updatedTasks)");
+		grid.setItems(updatedTasks);
+		
+		System.out.println("   - Restore state: grid.restoreStateInformation(state)");
+		grid.restoreStateInformation(savedState);
+		
 		System.out.println("   ✓ Grid refreshed with updated data");
-		System.out.println("   ✓ State automatically preserved and restored");
+		System.out.println("   ✓ State manually saved and restored");
 
 		// Step 6: Verify state was preserved
 		System.out.println("\nStep 6: Verifying state was preserved...");

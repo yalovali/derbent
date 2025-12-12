@@ -121,9 +121,16 @@ grid.setItems(tasks);
 // Add widget column with state-aware widgets
 grid.addWidgetColumn(task -> new TaskWidget(task));
 
-// Refresh grid with automatic state preservation
-grid.setItemsWithStatePreservation(updatedTasks);
-// Selection and widget states automatically preserved!
+// Refresh grid with explicit state preservation pattern
+// Step 1: Save state
+JsonObject savedState = grid.getStateInformation();
+
+// Step 2: Update data
+grid.setItems(updatedTasks);
+
+// Step 3: Restore state
+grid.restoreStateInformation(savedState);
+// Selection and widget states preserved!
 ```
 
 ### Creating State-Aware Widgets

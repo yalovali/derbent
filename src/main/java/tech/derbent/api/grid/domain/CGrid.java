@@ -788,21 +788,4 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		}
 	}
 
-	/** Refreshes the grid items while preserving state (selection, scroll position).
-	 * <p>
-	 * This method saves the current grid state before updating items, then restores the state after the update. This ensures that user context is
-	 * preserved during grid refresh operations. Use this method instead of setItems() when you want to preserve grid state.
-	 * </p>
-	 * @param items The new items to display in the grid */
-	public void setItemsWithStatePreservation(final Collection<EntityClass> items) {
-		LOGGER.debug("[StateOwner] setItemsWithStatePreservation called - saving state before refresh");
-		final JsonObject savedState = getStateInformation();
-
-		// Update grid items
-		setItems(items);
-
-		// Restore state after items are set
-		LOGGER.debug("[StateOwner] Restoring state after refresh");
-		restoreStateInformation(savedState);
-	}
 }

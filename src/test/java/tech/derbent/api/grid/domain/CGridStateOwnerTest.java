@@ -195,8 +195,8 @@ class CGridStateOwnerTest {
 	}
 
 	@Test
-	@DisplayName("setItemsWithStatePreservation should preserve selection")
-	void testSetItemsWithStatePreservationPreservesSelection() {
+	@DisplayName("Manual state save and restore should preserve selection")
+	void testManualStateSaveRestorePreservesSelection() {
 		// Given
 		grid.setItems(testItems);
 		grid.select(testItems.get(2)); // Select item with ID=3
@@ -205,8 +205,10 @@ class CGridStateOwnerTest {
 		final List<TestEntity> newItems = Arrays.asList(new TestEntity(1L, "Item 1 Updated"), new TestEntity(2L, "Item 2 Updated"),
 				new TestEntity(3L, "Item 3 Updated"), new TestEntity(4L, "Item 4 Updated"), new TestEntity(5L, "Item 5 Updated"));
 
-		// When
-		grid.setItemsWithStatePreservation(newItems);
+		// When - explicit pattern: save, change, restore
+		final JsonObject savedState = grid.getStateInformation();
+		grid.setItems(newItems);
+		grid.restoreStateInformation(savedState);
 
 		// Then
 		final TestEntity selectedItem = grid.asSingleSelect().getValue();

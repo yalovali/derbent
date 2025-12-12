@@ -889,14 +889,26 @@ The implementation automatically:
 **Key Methods:**
 
 ```java
-// Get current state as JSON (includes child widget states)
+// Save current state as JSON (includes child widget states)
 JsonObject state = grid.getStateInformation();
+
+// Update grid data
+grid.setItems(newItems);
 
 // Restore state from JSON (restores selection and child widget states)
 grid.restoreStateInformation(state);
+```
 
-// Refresh grid with automatic state preservation
-grid.setItemsWithStatePreservation(newItems);
+**Explicit State Management Pattern:**
+```java
+// Step 1: Save state before making changes
+final JsonObject savedState = grid.getStateInformation();
+
+// Step 2: Make changes (refresh data, navigate, etc.)
+grid.setItems(updatedItems);
+
+// Step 3: Restore state after changes
+grid.restoreStateInformation(savedState);
 ```
 
 ### How Widget State Collection Works
@@ -942,21 +954,28 @@ private final Map<String, Function<EntityClass, ? extends Component>> widgetProv
 
 ### Example: Grid Refresh with State Preservation
 
-**Before (manual state management):**
+**Before (manual selection tracking only):**
 ```java
 public void refreshGrid() {
     final ChildEntity currentValue = grid.asSingleSelect().getValue();
     final List<ChildEntity> items = loadItems(master);
     grid.setItems(items);
-    grid.asSingleSelect().setValue(currentValue);  // Manual restore
+    grid.asSingleSelect().setValue(currentValue);  // Only restores selection
 }
 ```
 
-**After (using IStateOwnerComponent):**
+**After (using IStateOwnerComponent - preserves selection AND widget states):**
 ```java
 public void refreshGrid() {
+    // Step 1: Save complete state (selection + all widget states)
+    final JsonObject savedState = grid.getStateInformation();
+    
+    // Step 2: Update data
     final List<ChildEntity> items = loadItems(master);
-    grid.setItemsWithStatePreservation(items);  // Automatic state preservation
+    grid.setItems(items);
+    
+    // Step 3: Restore complete state
+    grid.restoreStateInformation(savedState);
 }
 ```
 
