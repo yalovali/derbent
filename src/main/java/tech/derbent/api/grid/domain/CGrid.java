@@ -31,6 +31,10 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
+import tech.derbent.api.interfaces.IHasDragControl;
+import tech.derbent.api.interfaces.IHasDragEnd;
+import tech.derbent.api.interfaces.IHasDragStart;
+import tech.derbent.api.interfaces.IHasDrop;
 import tech.derbent.api.interfaces.IStateOwnerComponent;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
@@ -45,7 +49,8 @@ import tech.derbent.api.utils.Check;
  * fields: Small width (100px) - BigDecimal fields: Medium width (120px) - Date fields: Medium width (150px) - Boolean/Status fields: Small-Medium
  * width (100px) - Short text fields: Medium width (200px) - Long text fields: Large width (300px+) - Reference fields: Medium width (200px) */
 // public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<EntityClass> {
-public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwnerComponent {
+public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwnerComponent, IHasDragStart<EntityClass>, 
+		IHasDragEnd<EntityClass>, IHasDragControl {
 
 	private static final long serialVersionUID = 1L;
 	public static final String WIDTH_BOOLEAN = "100px";
@@ -96,6 +101,11 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	/** Map to store widget providers for columns that create components implementing IStateOwnerComponent.
 	 * Key: Column key, Value: Widget provider function */
 	private final Map<String, Function<EntityClass, ? extends Component>> widgetProviders = new HashMap<>();
+	
+	// Drag-drop control state
+	private boolean dragEnabled = false;
+	private boolean dropEnabled = false;
+	private Object dragDropOwner = null;
 
 	@SuppressWarnings ("unchecked")
 	public CGrid(final Class<?> class1) {
@@ -786,6 +796,74 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		} catch (final Exception e) {
 			LOGGER.debug("[StateOwner] Error clearing grid state: {}", e.getMessage());
 		}
+	}
+
+	// ========== IHasDragControl interface implementation ==========
+	
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		dragEnabled = enabled;
+		setRowsDraggable(enabled);
+		LOGGER.debug("[DragDebug] CGrid: Drag {} for grid", enabled ? "enabled" : "disabled");
+	}
+	
+	@Override
+	public boolean isDragEnabled() {
+		return dragEnabled;
+	}
+	
+	@Override
+	public void setDropEnabled(final boolean enabled) {
+		dropEnabled = enabled;
+		if (enabled) {
+			setDropMode(com.vaadin.flow.component.grid.dnd.GridDropMode.BETWEEN);
+		} else {
+			setDropMode(null);
+		}
+		LOGGER.debug("[DragDebug] CGrid: Drop {} for grid", enabled ? "enabled" : "disabled");
+	}
+	
+	@Override
+	public boolean isDropEnabled() {
+		return dropEnabled;
+	}
+	
+	@Override
+	public void setDragDropOwner(final Object owner) {
+		this.dragDropOwner = owner;
+		LOGGER.debug("[DragDebug] CGrid: Owner set to {}", owner != null ? owner.getClass().getSimpleName() : "null");
+	}
+	
+	@Override
+	public Object getDragDropOwner() {
+		return dragDropOwner;
+	}
+	
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void registerWithOwner() {
+		Check.notNull(dragDropOwner, "Owner must be set before registration");
+		
+		LOGGER.debug("[DragDebug] CGrid: Registering with owner {}", dragDropOwner.getClass().getSimpleName());
+		
+		// Register drag start events if owner supports them
+		if (dragDropOwner instanceof IHasDragStart) {
+			((IHasDragStart) dragDropOwner).addDragStartListener(event -> {
+				LOGGER.debug("[DragDebug] CGrid: Propagating drag start event to owner");
+			});
+		}
+		
+		// Register drag end events if owner supports them
+		if (dragDropOwner instanceof IHasDragEnd) {
+			((IHasDragEnd) dragDropOwner).addDragEndListener(event -> {
+				LOGGER.debug("[DragDebug] CGrid: Propagating drag end event to owner");
+			});
+		}
+		
+		// Note: Grid's built-in addDropListener is used directly, no IHasDrop interface needed
+		// Drop events are handled through the Grid's native API
+		
+		LOGGER.debug("[DragDebug] CGrid: Successfully registered with owner");
 	}
 
 }

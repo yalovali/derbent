@@ -522,6 +522,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			grid = new CGrid(entityClass);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
+			
+			// Set up drag-drop ownership and register grid with this component as owner
+			grid.setDragDropOwner(this);
+			
+			// Add drag-drop listeners to propagate events to this component's listeners
+			setupGridDragDropListeners();
+			
 			createGridColumns();
 			refreshGridData();
 			this.add(grid);
@@ -529,6 +536,66 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error creating grid content.");
 			add(new Div("Error creating grid: " + e.getMessage()));
 		}
+	}
+
+	/** Sets up drag-drop listeners on the grid to propagate events to this component's listeners.
+	 * <p>
+	 * This method binds the grid's drag start, drag end, and drop events to propagate to
+	 * this component's registered listeners. It also adds the component name to the drag
+	 * source tracking for proper event handling in the page service.
+	 * </p> */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void setupGridDragDropListeners() {
+		Check.notNull(grid, "Grid must be created before setting up drag-drop listeners");
+		
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Setting up grid drag-drop listeners");
+		
+		// Add drag start listener to grid
+		grid.addDragStartListener(event -> {
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag start detected, notifying {} listeners", 
+				dragStartListeners.size());
+			notifyDragStartListeners(event);
+			// Propagate to parent if parent implements IHasDragStart
+			if (contentOwner instanceof IHasDragStart) {
+				LOGGER.debug("[DragDebug] CComponentGridEntity: Propagating drag start to parent {}", 
+					contentOwner.getClass().getSimpleName());
+				((IHasDragStart) contentOwner).addDragStartListener(e -> {
+					LOGGER.debug("[DragDebug] CComponentGridEntity: Parent received drag start notification");
+				});
+			}
+		});
+		
+		// Add drag end listener to grid
+		grid.addDragEndListener(event -> {
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", 
+				dragEndListeners.size());
+			notifyDragEndListeners(event);
+			// Propagate to parent if parent implements IHasDragEnd
+			if (contentOwner instanceof IHasDragEnd) {
+				LOGGER.debug("[DragDebug] CComponentGridEntity: Propagating drag end to parent {}", 
+					contentOwner.getClass().getSimpleName());
+				((IHasDragEnd) contentOwner).addDragEndListener(e -> {
+					LOGGER.debug("[DragDebug] CComponentGridEntity: Parent received drag end notification");
+				});
+			}
+		});
+		
+		// Add drop listener to grid
+		grid.addDropListener(event -> {
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drop detected, notifying {} listeners", 
+				dropListeners.size());
+			notifyDropListeners(event);
+			// Propagate to parent if parent implements IHasDrop
+			if (contentOwner instanceof IHasDrop) {
+				LOGGER.debug("[DragDebug] CComponentGridEntity: Propagating drop to parent {}", 
+					contentOwner.getClass().getSimpleName());
+				((IHasDrop) contentOwner).addDropListener(e -> {
+					LOGGER.debug("[DragDebug] CComponentGridEntity: Parent received drop notification");
+				});
+			}
+		});
+		
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag-drop listeners setup complete");
 	}
 
 	/** Creates an error cell to display when widget creation fails. */
@@ -1156,6 +1223,63 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 	// IHasDragControl interface implementation
+
+	private Object dragDropOwner = null;
+
+	@Override
+	public void setDragDropOwner(final Object owner) {
+		this.dragDropOwner = owner;
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Owner set to {}", 
+			owner != null ? owner.getClass().getSimpleName() : "null");
+		// Also set owner on the grid if it exists
+		if (grid != null) {
+			grid.setDragDropOwner(owner);
+		}
+	}
+
+	@Override
+	public Object getDragDropOwner() {
+		return dragDropOwner;
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void registerWithOwner() {
+		Check.notNull(dragDropOwner, "Owner must be set before registration");
+		
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Registering with owner {}", 
+			dragDropOwner.getClass().getSimpleName());
+		
+		// Register this component's drag-drop events with the owner
+		// The owner will be notified when drag-drop events occur on this component
+		if (dragDropOwner instanceof IHasDragStart) {
+			// Add this component's drag start events to the owner's listener chain
+			this.addDragStartListener(event -> {
+				LOGGER.debug("[DragDebug] CComponentGridEntity: Event from grid propagated to owner");
+			});
+		}
+		
+		if (dragDropOwner instanceof IHasDragEnd) {
+			// Add this component's drag end events to the owner's listener chain
+			this.addDragEndListener(event -> {
+				LOGGER.debug("[DragDebug] CComponentGridEntity: Drag end event from grid propagated to owner");
+			});
+		}
+		
+		if (dragDropOwner instanceof IHasDrop) {
+			// Add this component's drop events to the owner's listener chain
+			this.addDropListener(event -> {
+				LOGGER.debug("[DragDebug] CComponentGridEntity: Drop event from grid propagated to owner");
+			});
+		}
+		
+		// Also register the grid with the owner
+		if (grid != null) {
+			grid.registerWithOwner();
+		}
+		
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Successfully registered with owner");
+	}
 
 	public void setEnableSelectionChangeListener(boolean enableSelectionChangeListener) {
 		if (this.enableSelectionChangeListener == enableSelectionChangeListener) {

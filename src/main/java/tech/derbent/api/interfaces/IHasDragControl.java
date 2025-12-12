@@ -10,13 +10,21 @@ package tech.derbent.api.interfaces;
  * This interface should be implemented alongside {@link IHasDragStart} and {@link IHasDragEnd}
  * to provide complete drag-and-drop control.
  * <p>
+ * <b>Owner Registration Pattern:</b>
+ * This interface supports an owner registration mechanism where components register with their
+ * owner (typically a parent component or page service) for automatic drag-drop event binding.
+ * The owner binds all drag operations to itself for immediate notification. Third-party classes
+ * should NOT register directly to component fields.
+ * <p>
  * <b>Hierarchy Pattern:</b>
  * <pre>
  * Component implements IHasDragStart, IHasDragEnd, IHasDragControl
- *     ↓ controls
+ *     ↓ registers with owner via setDragDropOwner()
+ * Owner (Parent Component or PageService)
+ *     ↓ binds drag events via registerWithOwner()
  * Internal Grid with drag-enabled state
  *     ↓ propagates events to
- * External listeners (Page Service handlers)
+ * Owner's event handlers
  * </pre>
  * <p>
  * <b>Usage Example:</b>
@@ -127,4 +135,58 @@ public interface IHasDragControl {
 	default String toDragControlString() {
 		return "dragEnabled=" + isDragEnabled() + ", dropEnabled=" + isDropEnabled();
 	}
+
+	/** Sets the owner of this drag-drop component.
+	 * <p>
+	 * The owner is responsible for binding all drag-drop events and receiving notifications.
+	 * This ensures a clean ownership hierarchy and prevents third-party classes from
+	 * registering directly to component fields.
+	 * </p>
+	 * <p>
+	 * Usage Pattern:
+	 * 
+	 * <pre>
+	 * // In parent component or page service
+	 * gridComponent.setDragDropOwner(this);
+	 * gridComponent.registerWithOwner();
+	 * </pre>
+	 * 
+	 * @param owner the owner component or page service that will receive drag-drop notifications */
+	void setDragDropOwner(Object owner);
+
+	/** Gets the current owner of this drag-drop component.
+	 * @return the owner, or null if no owner is set */
+	Object getDragDropOwner();
+
+	/** Registers this component's drag-drop events with its owner.
+	 * <p>
+	 * This method should be called after setDragDropOwner() to establish the event binding.
+	 * The component will automatically bind its drag start, drag end, and drop events to
+	 * the owner's event handlers.
+	 * </p>
+	 * <p>
+	 * Implementation should:
+	 * <ol>
+	 * <li>Check that owner is set (fail-fast if null)</li>
+	 * <li>If owner implements IHasDragStart, add this component's drag start listener to owner</li>
+	 * <li>If owner implements IHasDragEnd, add this component's drag end listener to owner</li>
+	 * <li>If owner implements IHasDrop, add this component's drop listener to owner</li>
+	 * <li>Log successful registration for debugging</li>
+	 * </ol>
+	 * <p>
+	 * Example:
+	 * 
+	 * <pre>
+	 * // Component implementation
+	 * public void registerWithOwner() {
+	 * 	Check.notNull(dragDropOwner, "Owner must be set before registration");
+	 * 	if (dragDropOwner instanceof IHasDragStart) {
+	 * 		((IHasDragStart) dragDropOwner).addDragStartListener(this::handleDragStart);
+	 * 	}
+	 * 	// ... register other events
+	 * }
+	 * </pre>
+	 * 
+	 * @throws IllegalStateException if owner is not set */
+	void registerWithOwner();
 }
