@@ -25,6 +25,7 @@ import java.util.Set;
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver",
+		"spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
 		"spring.jpa.hibernate.ddl-auto=create-drop",
 		"server.port=0"
 })

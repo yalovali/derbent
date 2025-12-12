@@ -472,26 +472,39 @@ public abstract class CBaseUITest {
 							"vaadin-button:has-text('DB Min'), button:has-text('DB Min'), vaadin-button[id*='db-min'], button[id*='db-min'], vaadin-button[title*='Minimum'], button[title*='Minimum']");
 					final Locator fullButton = page.locator(
 							"vaadin-button:has-text('DB Full'), button:has-text('DB Full'), vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), vaadin-button[id*='reset'], button[id*='reset']");
-					final Locator targetButton = minimalButton.count() > 0 ? minimalButton.first()
-							: (fullButton.count() > 0 ? fullButton.first() : null);
+					final Locator targetButton = fullButton.count() > 0 ? fullButton.first()
+							: (minimalButton.count() > 0 ? minimalButton.first() : null);
 					if (targetButton == null) {
 						LOGGER.info("ℹ️ 'Reset Database' button not present on login view; assuming sample data is available");
 						SAMPLE_DATA_INITIALIZED.compareAndSet(false, true);
 						return;
 					}
-					LOGGER.info("📥 Loading sample data via login screen button ({})",
-							minimalButton.count() > 0 ? "DB Min" : "DB Full");
+					String buttonType = fullButton.count() > 0 ? "DB Full" : "DB Min";
+					LOGGER.info("📥 Loading sample data via login screen button ({})", buttonType);
 					Locator button = targetButton;
+					
+					try {
+						String buttonText = button.textContent();
+						LOGGER.info("🔍 Found database reset button: '{}'", buttonText);
+					} catch (Exception e) {
+						LOGGER.debug("Unable to read button text: {}", e.getMessage());
+					}
+					
 					try {
 						button.scrollIntoViewIfNeeded();
+						LOGGER.debug("📜 Scrolled reset button into view");
 					} catch (PlaywrightException scrollError) {
 						LOGGER.debug("ℹ️ Unable to scroll reset button into view: {}", scrollError.getMessage());
 					}
+					
 				try {
+					LOGGER.info("🖱️ Clicking database reset button...");
 					button.click();
+					LOGGER.info("✅ Database reset button clicked successfully");
 				} catch (PlaywrightException clickError) {
-					LOGGER.debug("ℹ️ Retry reset button click with force due to: {}", clickError.getMessage());
+					LOGGER.warn("⚠️ First click failed, retrying with force: {}", clickError.getMessage());
 					button.click(new Locator.ClickOptions().setForce(true));
+					LOGGER.info("✅ Database reset button clicked with force");
 				}
 					wait_500();
 					acceptConfirmDialogIfPresent();
@@ -518,18 +531,54 @@ public abstract class CBaseUITest {
 
 	/** Accepts the confirmation dialog that appears when reloading sample data. */
 	private void acceptConfirmDialogIfPresent() {
-		final int maxAttempts = 5; // Reduced from 10 to 5 attempts (2.5 seconds max)
+		final int maxAttempts = 10; // Increased for DB Full reset (5 seconds max)
+		LOGGER.info("🔍 Looking for confirmation dialog to reset database...");
+		
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			final Locator overlay = page.locator("vaadin-confirm-dialog-overlay[opened]");
+			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
 			if (overlay.count() > 0) {
-				final Locator confirmButton =
-						overlay.locator("vaadin-button:has-text('Evet, sıfırla'), vaadin-button:has-text('Yes'), vaadin-button[theme*='primary']");
+				LOGGER.info("📋 Confirmation dialog detected (attempt {}/{})", attempt + 1, maxAttempts);
+				
+				// Try multiple button selectors for OK/Yes/Confirm
+				final Locator confirmButton = overlay.locator(
+					"vaadin-button:has-text('OK'), " +
+					"vaadin-button:has-text('Tamam'), " +
+					"vaadin-button:has-text('Evet'), " +
+					"vaadin-button:has-text('Yes'), " +
+					"vaadin-button:has-text('Confirm'), " +
+					"vaadin-button:has-text('Evet, sıfırla'), " +
+					"vaadin-button[theme*='primary'], " +
+					"button:has-text('OK'), " +
+					"button:has-text('Yes')"
+				);
+				
 				if (confirmButton.count() > 0) {
+					String buttonText = confirmButton.first().textContent();
+					LOGGER.info("🖱️ Clicking confirmation button: '{}'", buttonText);
 					confirmButton.first().click();
-					waitForOverlayToClose("vaadin-confirm-dialog-overlay[opened]");
-					LOGGER.info("✅ Sample data reload confirmed");
+					LOGGER.info("✅ Confirmation button clicked successfully");
+					
+					// Wait for dialog to close
+					waitForOverlayToClose("vaadin-dialog-overlay[opened]");
+					LOGGER.info("✅ Sample data reload confirmed - dialog closed");
 					return;
+				} else {
+					LOGGER.warn("⚠️ Confirmation dialog found but no OK/Yes button detected");
+					// Log available buttons for debugging
+					Locator allButtons = overlay.locator("vaadin-button, button");
+					int buttonCount = allButtons.count();
+					LOGGER.info("🔍 Found {} buttons in dialog:", buttonCount);
+					for (int i = 0; i < buttonCount; i++) {
+						try {
+							String text = allButtons.nth(i).textContent();
+							LOGGER.info("  - Button {}: '{}'", i + 1, text);
+						} catch (Exception e) {
+							LOGGER.warn("  - Button {}: Unable to read text", i + 1);
+						}
+					}
 				}
+			} else {
+				LOGGER.debug("🔍 No confirmation dialog found (attempt {}/{})", attempt + 1, maxAttempts);
 			}
 			wait_500();
 		}
@@ -538,19 +587,49 @@ public abstract class CBaseUITest {
 
 	/** Closes the informational dialog that appears after sample data reload completion. */
 	private void closeInformationDialogIfPresent() {
-		final int maxAttempts = 5; // Reduced from 10 to 5 attempts (2.5 seconds max)
+		final int maxAttempts = 10; // Increased timeout for information dialog (5 seconds max)
+		LOGGER.info("🔍 Looking for information dialog after database reset...");
+		
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
 			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
 			if (overlay.count() == 0) {
+				LOGGER.debug("🔍 No information dialog found (attempt {}/{})", attempt + 1, maxAttempts);
 				wait_500();
 				continue;
 			}
-			final Locator okButton = overlay.locator("vaadin-button:has-text('OK'), vaadin-button:has-text('Tamam'), button:has-text('OK')");
+			
+			LOGGER.info("📋 Information dialog detected (attempt {}/{})", attempt + 1, maxAttempts);
+			final Locator okButton = overlay.locator(
+				"vaadin-button:has-text('OK'), " +
+				"vaadin-button:has-text('Tamam'), " +
+				"vaadin-button:has-text('Close'), " +
+				"button:has-text('OK'), " +
+				"button:has-text('Close')"
+			);
+			
 			if (okButton.count() > 0) {
+				String buttonText = okButton.first().textContent();
+				LOGGER.info("🖱️ Clicking information dialog OK button: '{}'", buttonText);
 				okButton.first().click();
+				LOGGER.info("✅ Information dialog OK button clicked");
+				
 				waitForOverlayToClose("vaadin-dialog-overlay[opened]");
 				LOGGER.info("✅ Information dialog dismissed after sample data reload");
 				return;
+			} else {
+				LOGGER.warn("⚠️ Information dialog found but no OK button detected");
+				// Log available buttons for debugging
+				Locator allButtons = overlay.locator("vaadin-button, button");
+				int buttonCount = allButtons.count();
+				LOGGER.info("🔍 Found {} buttons in information dialog:", buttonCount);
+				for (int i = 0; i < buttonCount; i++) {
+					try {
+						String text = allButtons.nth(i).textContent();
+						LOGGER.info("  - Button {}: '{}'", i + 1, text);
+					} catch (Exception e) {
+						LOGGER.warn("  - Button {}: Unable to read text", i + 1);
+					}
+				}
 			}
 			wait_500();
 		}

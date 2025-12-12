@@ -222,15 +222,19 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	/** Handle reset database button click. */
 	private void on_buttonResetDb_clicked() {
 		try {
+			LOGGER.info("🔄 Showing DB Full reset confirmation dialog...");
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
 						try {
+							LOGGER.info("✅ DB Full reset confirmed - starting database initialization...");
 							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(false);
+							LOGGER.info("🗄️ DB Full reset completed successfully");
 							CNotificationService.showSuccess("Sample data yeniden yüklendi.");
 							CNotificationService.showInfoDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 							populateForm();
 						} catch (final Exception ex) {
+							LOGGER.error("❌ DB Full reset failed", ex);
 							CNotificationService.showException("Hata", ex);
 						}
 					});
@@ -242,15 +246,19 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	/** Handle reset database minimal button click. */
 	private void on_buttonResetDbMinimal_clicked() {
 		try {
+			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
 			CNotificationService.showConfirmationDialog(
 					"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", () -> {
 						try {
+							LOGGER.info("✅ DB Min reset confirmed - starting minimal database initialization...");
 							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(true);
+							LOGGER.info("🗄️ DB Min reset completed successfully");
 							CNotificationService.showSuccess("Minimum örnek veri yeniden yüklendi.");
 							CNotificationService.showInfoDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 							populateForm();
 						} catch (final Exception ex) {
+							LOGGER.error("❌ DB Min reset failed", ex);
 							CNotificationService.showException("Hata", ex);
 						}
 					});
