@@ -273,8 +273,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		// Add double-click listener
 		grid.addItemDoubleClickListener(e -> on_gridItems_doubleClicked(e.getItem()));
 		// Add internal drag event listeners for debug logging
-		grid.addDragStartListener(e -> on_grid_dragStart(e));
-		grid.addDragEndListener(e -> on_grid_dragEnd(e));
+		grid.addDragStartListener(e -> on_grid_dragStart((GridDragStartEvent<ChildEntity>) e));
+		grid.addDragEndListener(e -> on_grid_dragEnd((GridDragEndEvent<ChildEntity>) e));
 		LOGGER.debug("Grid created and configured for {} (dynamic height: {})", entityClass.getSimpleName(), useDynamicHeight);
 	}
 

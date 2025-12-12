@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import tech.derbent.api.config.CSpringContext;
@@ -191,7 +192,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		grid.setDropMode(GridDropMode.BETWEEN);
 		// Track dragged item for internal reordering
 		grid.addDragStartListener(event -> {
-			final List<CProjectItem<?>> items = event.getDraggedItems();
+			final GridDragStartEvent<CProjectItem<?>> gridEvent = (GridDragStartEvent<CProjectItem<?>>) event;
+			final List<CProjectItem<?>> items = gridEvent.getDraggedItems();
 			if (!items.isEmpty()) {
 				draggedItem = items.get(0);
 				LOGGER.debug("Started dragging backlog item for reordering: {}", draggedItem.getId());

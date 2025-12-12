@@ -925,7 +925,7 @@ public class CComponentGridEntity extends CDiv
 				widgetWithDragStart.addDragStartListener(event -> {
 					LOGGER.debug("[DragDebug] Widget {} fired drag start, notifying CComponentGridEntity listeners",
 							component.getClass().getSimpleName());
-					notifyDragStartListeners(event);
+					notifyDragStartListeners((GridDragStartEvent) event);
 				});
 			}
 			if (component instanceof IHasDragEnd) {
@@ -933,14 +933,14 @@ public class CComponentGridEntity extends CDiv
 				widgetWithDragEnd.addDragEndListener(event -> {
 					LOGGER.debug("[DragDebug] Widget {} fired drag end, notifying CComponentGridEntity listeners",
 							component.getClass().getSimpleName());
-					notifyDragEndListeners(event);
+					notifyDragEndListeners((GridDragEndEvent) event);
 				});
 			}
 			if (component instanceof IHasDrop) {
 				final IHasDrop widgetWithDrop = (IHasDrop) component;
 				widgetWithDrop.addDropListener(event -> {
 					LOGGER.debug("[DragDebug] Widget {} fired drop, notifying CComponentGridEntity listeners", component.getClass().getSimpleName());
-					notifyDropListeners(event);
+					notifyDropListeners((GridDropEvent) event);
 				});
 			}
 			// Generate a unique component name for this widget
@@ -1172,12 +1172,12 @@ public class CComponentGridEntity extends CDiv
 		// Add drag start listener to grid
 		grid.addDragStartListener(event -> {
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag start detected, notifying {} listeners", getDragStartListeners().size());
-			notifyDragStartListeners(event);
+			notifyDragStartListeners((GridDragStartEvent) event);
 		});
 		// Add drag end listener to grid
 		grid.addDragEndListener(event -> {
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", getDragEndListeners().size());
-			notifyDragEndListeners(event);
+			notifyDragEndListeners((GridDragEndEvent) event);
 		});
 		// Add drop listener to grid
 		grid.addDropListener(event -> {
