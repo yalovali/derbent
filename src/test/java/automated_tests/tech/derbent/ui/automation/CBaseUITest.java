@@ -398,7 +398,9 @@ public abstract class CBaseUITest {
 				wait_500();
 				LOGGER.info("✅ Company selection completed");
 			} else {
-				LOGGER.warn("⚠️ No company options found in ComboBox");
+				// FAIL-FAST: No companies means database reset failed
+				LOGGER.error("❌ CRITICAL: No company options found in ComboBox - database reset failed!");
+				throw new RuntimeException("FAIL-FAST: No companies available for login. Database initialization/reset failed.");
 			}
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Failed to select company on login page: {}", e.getMessage());
@@ -539,50 +541,86 @@ public abstract class CBaseUITest {
 			if (overlay.count() > 0) {
 				LOGGER.info("📋 Confirmation dialog detected (attempt {}/{})", attempt + 1, maxAttempts);
 				
-				// Try multiple button selectors for OK/Yes/Confirm
-				final Locator confirmButton = overlay.locator(
-					"vaadin-button:has-text('OK'), " +
-					"vaadin-button:has-text('Tamam'), " +
-					"vaadin-button:has-text('Evet'), " +
-					"vaadin-button:has-text('Yes'), " +
-					"vaadin-button:has-text('Confirm'), " +
-					"vaadin-button:has-text('Evet, sıfırla'), " +
-					"vaadin-button[theme*='primary'], " +
-					"button:has-text('OK'), " +
-					"button:has-text('Yes')"
-				);
-				
-				if (confirmButton.count() > 0) {
-					String buttonText = confirmButton.first().textContent();
-					LOGGER.info("🖱️ Clicking confirmation button: '{}'", buttonText);
-					confirmButton.first().click();
-					LOGGER.info("✅ Confirmation button clicked successfully");
+				// Method 1: Try keyboard navigation (Tab to Yes + Enter)
+				try {
+					LOGGER.info("🎯 Trying keyboard navigation method...");
+					page.keyboard().press("Tab"); // Move to Yes button
+					wait_500();
+					page.keyboard().press("Enter"); // Press Enter to click Yes
+					LOGGER.info("✅ Confirmation button activated via keyboard (Tab + Enter)");
 					
 					// Wait for dialog to close
 					waitForOverlayToClose("vaadin-dialog-overlay[opened]");
-					LOGGER.info("✅ Sample data reload confirmed - dialog closed");
+					LOGGER.info("✅ Sample data reload confirmed - dialog closed via keyboard");
 					return;
-				} else {
-					LOGGER.warn("⚠️ Confirmation dialog found but no OK/Yes button detected");
-					// Log available buttons for debugging
+				} catch (Exception keyboardError) {
+					LOGGER.warn("⚠️ Keyboard method failed: {}", keyboardError.getMessage());
+				}
+				
+				// Method 2: Try direct button selector without overlay
+				try {
+					LOGGER.info("🎯 Trying direct button selector method...");
+					final Locator directButton = page.locator("vaadin-button:has-text('Yes')");
+					if (directButton.count() > 0) {
+						directButton.first().click(new Locator.ClickOptions().setForce(true));
+						LOGGER.info("✅ Confirmation button clicked via direct selector");
+						
+						waitForOverlayToClose("vaadin-dialog-overlay[opened]");
+						LOGGER.info("✅ Sample data reload confirmed - dialog closed via direct click");
+						return;
+					}
+				} catch (Exception directClickError) {
+					LOGGER.warn("⚠️ Direct button click failed: {}", directClickError.getMessage());
+				}
+				
+				// Method 3: Try JavaScript click on button inside overlay
+				try {
+					LOGGER.info("🎯 Trying JavaScript method...");
+					final Locator confirmButton = overlay.locator("vaadin-button:has-text('Yes')");
+					if (confirmButton.count() > 0) {
+						String buttonText = confirmButton.first().textContent();
+						LOGGER.info("🖱️ Found confirmation button: '{}', clicking with JavaScript", buttonText);
+						
+						// Use JavaScript to directly trigger the click event
+						page.evaluate("arguments[0].click()", confirmButton.first());
+						LOGGER.info("✅ Confirmation button clicked via JavaScript");
+						
+						waitForOverlayToClose("vaadin-dialog-overlay[opened]");
+						LOGGER.info("✅ Sample data reload confirmed - dialog closed via JavaScript");
+						return;
+					}
+				} catch (Exception jsError) {
+					LOGGER.error("❌ JavaScript click failed: {}", jsError.getMessage());
+				}
+				
+				// FAIL-FAST: If all methods failed, throw exception immediately
+				LOGGER.error("❌ CRITICAL: All confirmation dialog interaction methods failed!");
+				try {
 					Locator allButtons = overlay.locator("vaadin-button, button");
 					int buttonCount = allButtons.count();
-					LOGGER.info("🔍 Found {} buttons in dialog:", buttonCount);
+					LOGGER.error("🔍 Debug info - Found {} buttons in dialog:", buttonCount);
 					for (int i = 0; i < buttonCount; i++) {
 						try {
 							String text = allButtons.nth(i).textContent();
-							LOGGER.info("  - Button {}: '{}'", i + 1, text);
+							LOGGER.error("  - Button {}: '{}'", i + 1, text);
 						} catch (Exception e) {
-							LOGGER.warn("  - Button {}: Unable to read text", i + 1);
+							LOGGER.error("  - Button {}: Unable to read text", i + 1);
 						}
 					}
+				} catch (Exception debugError) {
+					LOGGER.error("❌ Failed to debug buttons: {}", debugError.getMessage());
 				}
+				
+				// FAIL-FAST: Throw exception to stop test execution immediately
+				throw new RuntimeException("FAIL-FAST: Cannot interact with confirmation dialog. All methods (keyboard, direct click, JavaScript) failed. Test cannot continue without database reset.");
 			} else {
 				LOGGER.debug("🔍 No confirmation dialog found (attempt {}/{})", attempt + 1, maxAttempts);
 			}
 			wait_500();
 		}
-		LOGGER.warn("⚠️ Confirmation dialog not detected after {} attempts ({} seconds)", maxAttempts, maxAttempts * 0.5);
+		// FAIL-FAST: If no confirmation dialog appears, database reset is broken
+		LOGGER.error("❌ CRITICAL: Confirmation dialog not detected after {} attempts ({} seconds)", maxAttempts, maxAttempts * 0.5);
+		throw new RuntimeException("FAIL-FAST: No confirmation dialog appeared after clicking database reset button. Database reset functionality may be broken.");
 	}
 
 	/** Closes the informational dialog that appears after sample data reload completion. */
