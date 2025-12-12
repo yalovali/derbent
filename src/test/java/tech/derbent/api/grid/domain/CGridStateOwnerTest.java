@@ -9,8 +9,12 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.vaadin.flow.component.html.Div;
+import elemental.json.Json;
+import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.interfaces.IStateOwnerComponent;
 
 /** Unit tests for CGrid's IStateOwnerComponent implementation.
  * <p>
@@ -47,6 +51,63 @@ class CGridStateOwnerTest {
 		@Override
 		public String toString() {
 			return "TestEntity{id=" + getId() + ", name='" + name + "'}";
+		}
+	}
+	
+	/** Test widget that implements IStateOwnerComponent for testing state collection. */
+	static class TestWidget extends Div implements IStateOwnerComponent {
+		
+		private static final long serialVersionUID = 1L;
+		private boolean expanded = false;
+		private String customValue = "";
+		private final TestEntity entity;
+		
+		public TestWidget(final TestEntity entity) {
+			this.entity = entity;
+			setText("Widget for " + entity.getName());
+		}
+		
+		public void setExpanded(final boolean expanded) {
+			this.expanded = expanded;
+		}
+		
+		public boolean isExpanded() {
+			return expanded;
+		}
+		
+		public void setCustomValue(final String value) {
+			this.customValue = value;
+		}
+		
+		public String getCustomValue() {
+			return customValue;
+		}
+		
+		@Override
+		public JsonObject getStateInformation() {
+			final JsonObject state = Json.createObject();
+			state.put("expanded", expanded);
+			state.put("customValue", customValue);
+			state.put("widgetEntityId", entity.getId().doubleValue());
+			return state;
+		}
+		
+		@Override
+		public void restoreStateInformation(final JsonObject state) {
+			if (state == null) return;
+			
+			if (state.hasKey("expanded")) {
+				expanded = state.getBoolean("expanded");
+			}
+			if (state.hasKey("customValue")) {
+				customValue = state.getString("customValue");
+			}
+		}
+		
+		@Override
+		public void clearStateInformation() {
+			expanded = false;
+			customValue = "";
 		}
 	}
 
@@ -177,5 +238,99 @@ class CGridStateOwnerTest {
 		// Then - no exception should be thrown
 		assertNotNull(state, "State should be created even for empty grid");
 		assertFalse(state.hasKey("selectedItemId"), "Empty grid should not have selected item");
+	}
+	
+	@Test
+	@DisplayName("getStateInformation should collect state from widget columns")
+	void testGetStateInformationCollectsWidgetStates() {
+		// Given - grid with widget column that implements IStateOwnerComponent
+		grid.setItems(testItems);
+		
+		// Add a widget column
+		grid.addWidgetColumn(entity -> new TestWidget(entity));
+		
+		// When - get state
+		final JsonObject state = grid.getStateInformation();
+		
+		// Then - should have childStates
+		assertTrue(state.hasKey("childStates"), "State should contain childStates");
+		final JsonArray childStates = state.getArray("childStates");
+		assertEquals(testItems.size(), childStates.length(), 
+				"Should have collected state from all widget rows");
+		
+		// Verify first child state has required metadata
+		final JsonObject firstChildState = childStates.getObject(0);
+		assertTrue(firstChildState.hasKey("rowIndex"), "Child state should have rowIndex");
+		assertTrue(firstChildState.hasKey("itemId"), "Child state should have itemId");
+		assertTrue(firstChildState.hasKey("columnKey"), "Child state should have columnKey");
+	}
+	
+	@Test
+	@DisplayName("getStateInformation should not collect state from non-IStateOwnerComponent widgets")
+	void testGetStateInformationSkipsNonStateOwnerWidgets() {
+		// Given - grid with regular widget column (not IStateOwnerComponent)
+		grid.setItems(testItems);
+		
+		// Add a regular widget column that doesn't implement IStateOwnerComponent
+		grid.addWidgetColumn(entity -> {
+			final Div div = new Div();
+			div.setText("Non-state widget for " + entity.getName());
+			return div;
+		});
+		
+		// When - get state
+		final JsonObject state = grid.getStateInformation();
+		
+		// Then - should not have childStates (or empty array)
+		if (state.hasKey("childStates")) {
+			final JsonArray childStates = state.getArray("childStates");
+			assertEquals(0, childStates.length(), 
+					"Should not collect state from non-IStateOwnerComponent widgets");
+		}
+	}
+	
+	@Test
+	@DisplayName("Widget state should be preserved across grid refresh")
+	void testWidgetStatePreservationAcrossRefresh() {
+		// Given - grid with widget column
+		grid.setItems(testItems);
+		
+		// Track widget instances to verify state
+		final java.util.Map<Long, TestWidget> widgetTracker = new java.util.HashMap<>();
+		
+		// Add widget column with state tracking
+		grid.addWidgetColumn(entity -> {
+			final TestWidget widget = new TestWidget(entity);
+			// Simulate user interaction - expand second item's widget
+			if (entity.getId().equals(2L)) {
+				widget.setExpanded(true);
+				widget.setCustomValue("custom-value-2");
+			}
+			widgetTracker.put(entity.getId(), widget);
+			return widget;
+		});
+		
+		// Get initial state
+		final JsonObject state = grid.getStateInformation();
+		
+		// Verify widget state was collected
+		assertTrue(state.hasKey("childStates"), "State should contain childStates");
+		final JsonArray childStates = state.getArray("childStates");
+		
+		// Find the state for entity ID 2
+		JsonObject entityTwoState = null;
+		for (int i = 0; i < childStates.length(); i++) {
+			final JsonObject childState = childStates.getObject(i);
+			if (childState.hasKey("widgetEntityId") && 
+					(long) childState.getNumber("widgetEntityId") == 2L) {
+				entityTwoState = childState;
+				break;
+			}
+		}
+		
+		assertNotNull(entityTwoState, "Should have collected state for entity ID 2");
+		assertTrue(entityTwoState.getBoolean("expanded"), "Widget should be expanded");
+		assertEquals("custom-value-2", entityTwoState.getString("customValue"), 
+				"Widget should have custom value");
 	}
 }
