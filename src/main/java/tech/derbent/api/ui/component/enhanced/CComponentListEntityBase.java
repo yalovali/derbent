@@ -838,6 +838,44 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 	}
 
+	// Owner registration support for IHasDragControl
+	private Object dragDropOwner = null;
+
+	@Override
+	public void setDragDropOwner(final Object owner) {
+		this.dragDropOwner = owner;
+		LOGGER.debug("[DragDebug] {} Owner set to {}", getClass().getSimpleName(), 
+			owner != null ? owner.getClass().getSimpleName() : "null");
+		// Also set owner on the grid if it implements IHasDragControl
+		if (grid instanceof IHasDragControl) {
+			((IHasDragControl) grid).setDragDropOwner(owner);
+		}
+	}
+
+	@Override
+	public Object getDragDropOwner() {
+		return dragDropOwner;
+	}
+
+	@Override
+	public void registerWithOwner() {
+		Check.notNull(dragDropOwner, "Owner must be set before registration");
+		
+		LOGGER.debug("[DragDebug] {} Registering with owner {}", getClass().getSimpleName(), 
+			dragDropOwner.getClass().getSimpleName());
+		
+		// The owner will bind this component's events via its own event binding mechanism
+		// This component's IHasDragStart, IHasDragEnd, and IHasDrop implementations
+		// are already available for the owner to add listeners to
+		
+		// Also register the grid with the owner if it supports registration
+		if (grid instanceof IHasDragControl) {
+			((IHasDragControl) grid).registerWithOwner();
+		}
+		
+		LOGGER.debug("[DragDebug] {} Successfully registered with owner", getClass().getSimpleName());
+	}
+
 	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.
 	 * This must be called before the component is initialized.
 	 * @param maxHeight Optional maximum height (e.g., "400px", "50vh"), or null for no maximum */
