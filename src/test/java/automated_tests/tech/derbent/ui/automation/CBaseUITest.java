@@ -53,6 +53,10 @@ public abstract class CBaseUITest {
 	private static final String FORCE_SAMPLE_RELOAD_PROPERTY = "playwright.forceSampleReload";
 	private static final AtomicBoolean SAMPLE_DATA_INITIALIZED = new AtomicBoolean(false);
 	private static final Object SAMPLE_DATA_LOCK = new Object();
+	
+	// Exception detection for fail-fast behavior
+	private static final List<String> DETECTED_EXCEPTIONS = new ArrayList<>();
+	private static final Object EXCEPTION_LOCK = new Object();
 	/** Admin view classes */
 	protected Class<?>[] adminViewClasses = {};
 	protected Class<?>[] allViewClasses = {};
@@ -342,9 +346,21 @@ public abstract class CBaseUITest {
 				throw new AssertionError("Password input field not found on login page");
 			}
 			clickLoginButton();
+			
+			// FAIL-FAST CHECK: After login button click
+			performFailFastCheck("After Login Button Click");
+			
 			wait_afterlogin();
+			
+			// FAIL-FAST CHECK: After login wait  
+			performFailFastCheck("After Login Wait");
+			
 			LOGGER.info("✅ Login successful - application shell detected");
 			takeScreenshot("post-login", false);
+			
+			// FAIL-FAST CHECK: After application load
+			performFailFastCheck("After Application Load");
+			
 			primeNavigationMenu();
 		} catch (PlaywrightException e) {
 			LOGGER.warn("⚠️ Login attempt failed for {}: {}", username, e.getMessage());
@@ -509,8 +525,20 @@ public abstract class CBaseUITest {
 					LOGGER.info("✅ Database reset button clicked with force");
 				}
 					wait_500();
+					
+					// FAIL-FAST CHECK: After database reset button click
+					performFailFastCheck("After Database Reset Button Click");
+					
 					acceptConfirmDialogIfPresent();
+					
+					// FAIL-FAST CHECK: After confirmation dialog
+					performFailFastCheck("After Confirmation Dialog");
+					
 					closeInformationDialogIfPresent();
+					
+					// FAIL-FAST CHECK: After information dialog
+					performFailFastCheck("After Information Dialog");
+					
 					wait_loginscreen();
 					try {
 						LOGGER.info("🔄 Reloading login page after sample data reset");
@@ -1988,5 +2016,94 @@ public abstract class CBaseUITest {
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to fill form fields for " + entityType + ": " + e.getMessage(), e);
 		}
+	}
+	
+	// ================================================================================
+	// EXCEPTION DETECTION SYSTEM FOR FAIL-FAST BEHAVIOR  
+	// ================================================================================
+	
+	/**
+	 * CRITICAL: Check for exceptions in application logs and fail-fast if found.
+	 * This method should be called at EVERY control point in tests.
+	 * 
+	 * @param controlPoint Description of where this check is being performed
+	 * @throws RuntimeException if any ERROR or Exception is found in logs
+	 */
+	protected void checkForExceptionsAndFailFast(String controlPoint) {
+		try {
+			// Set up log listener to capture console errors
+			page.onConsoleMessage(msg -> {
+				String text = msg.text();
+				if (text != null && (text.contains("ERROR") || text.contains("Exception") || 
+					text.contains("CRITICAL") || text.contains("FATAL"))) {
+					synchronized (EXCEPTION_LOCK) {
+						DETECTED_EXCEPTIONS.add(controlPoint + ": " + text);
+					}
+				}
+			});
+			
+			// Check if any exceptions were detected
+			synchronized (EXCEPTION_LOCK) {
+				if (!DETECTED_EXCEPTIONS.isEmpty()) {
+					StringBuilder errorReport = new StringBuilder();
+					errorReport.append("❌ FAIL-FAST: Exceptions detected at control point '").append(controlPoint).append("':\n");
+					for (String exception : DETECTED_EXCEPTIONS) {
+						errorReport.append("  - ").append(exception).append("\n");
+					}
+					
+					LOGGER.error(errorReport.toString());
+					
+					// Clear exceptions after reporting
+					DETECTED_EXCEPTIONS.clear();
+					
+					// Fail immediately
+					throw new RuntimeException("FAIL-FAST: Exceptions found at control point: " + controlPoint);
+				}
+			}
+			
+			LOGGER.debug("✅ No exceptions detected at control point: {}", controlPoint);
+			
+		} catch (RuntimeException e) {
+			// Re-throw fail-fast exceptions
+			throw e;
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Exception checking failed at {}: {}", controlPoint, e.getMessage());
+		}
+	}
+	
+	/**
+	 * Enhanced exception check that also scans browser console for errors
+	 */
+	protected void checkBrowserConsoleForErrors(String controlPoint) {
+		try {
+			// Execute JavaScript to check for console errors
+			Object errors = page.evaluate("""
+				() => {
+					// Capture any console errors that were logged
+					const errors = window.console.errors || [];
+					return errors.map(err => err.toString());
+				}
+			""");
+			
+			if (errors != null && !errors.toString().equals("[]")) {
+				LOGGER.error("❌ FAIL-FAST: Browser console errors found at {}: {}", controlPoint, errors);
+				throw new RuntimeException("FAIL-FAST: Browser console errors at " + controlPoint + ": " + errors);
+			}
+			
+			LOGGER.debug("✅ No browser console errors at: {}", controlPoint);
+			
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Browser console check failed at {}: {}", controlPoint, e.getMessage());
+		}
+	}
+	
+	/**
+	 * Comprehensive exception check - combines log scanning and browser console checks
+	 */
+	protected void performFailFastCheck(String controlPoint) {
+		checkForExceptionsAndFailFast(controlPoint);
+		checkBrowserConsoleForErrors(controlPoint);
 	}
 }

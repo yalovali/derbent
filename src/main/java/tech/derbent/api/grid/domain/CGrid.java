@@ -105,7 +105,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	// Drag-drop control state
 	private boolean dragEnabled = false;
 	private boolean dropEnabled = false;
-	private Object dragDropOwner = null;
 
 	@SuppressWarnings ("unchecked")
 	public CGrid(final Class<?> class1) {
@@ -828,42 +827,4 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		return dropEnabled;
 	}
 	
-	@Override
-	public void setDragDropOwner(final Object owner) {
-		this.dragDropOwner = owner;
-		LOGGER.debug("[DragDebug] CGrid: Owner set to {}", owner != null ? owner.getClass().getSimpleName() : "null");
-	}
-	
-	@Override
-	public Object getDragDropOwner() {
-		return dragDropOwner;
-	}
-	
-	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void registerWithOwner() {
-		Check.notNull(dragDropOwner, "Owner must be set before registration");
-		
-		LOGGER.debug("[DragDebug] CGrid: Registering with owner {}", dragDropOwner.getClass().getSimpleName());
-		
-		// Register drag start events if owner supports them
-		if (dragDropOwner instanceof IHasDragStart) {
-			((IHasDragStart) dragDropOwner).addDragStartListener(event -> {
-				LOGGER.debug("[DragDebug] CGrid: Propagating drag start event to owner");
-			});
-		}
-		
-		// Register drag end events if owner supports them
-		if (dragDropOwner instanceof IHasDragEnd) {
-			((IHasDragEnd) dragDropOwner).addDragEndListener(event -> {
-				LOGGER.debug("[DragDebug] CGrid: Propagating drag end event to owner");
-			});
-		}
-		
-		// Note: Grid's built-in addDropListener is used directly, no IHasDrop interface needed
-		// Drop events are handled through the Grid's native API
-		
-		LOGGER.debug("[DragDebug] CGrid: Successfully registered with owner");
-	}
-
 }

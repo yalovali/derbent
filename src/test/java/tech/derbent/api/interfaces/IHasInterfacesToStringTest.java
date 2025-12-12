@@ -64,7 +64,6 @@ class IHasInterfacesToStringTest {
 
 		private boolean dragEnabled;
 		private boolean dropEnabled;
-		private Object dragDropOwner;
 
 		public TestHasDragControl(final boolean dragEnabled, final boolean dropEnabled) {
 			this.dragEnabled = dragEnabled;
@@ -82,17 +81,6 @@ class IHasInterfacesToStringTest {
 
 		@Override
 		public void setDropEnabled(final boolean enabled) { this.dropEnabled = enabled; }
-
-		@Override
-		public void setDragDropOwner(final Object owner) { this.dragDropOwner = owner; }
-
-		@Override
-		public Object getDragDropOwner() { return dragDropOwner; }
-
-		@Override
-		public void registerWithOwner() {
-			// Test implementation - no-op
-		}
 
 		@Override
 		public String toString() {

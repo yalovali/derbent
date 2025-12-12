@@ -37,7 +37,6 @@ class IHasDragControlOwnerRegistrationTest {
 		private boolean dragEnabled = false;
 		private boolean dropEnabled = false;
 		private Object dragDropOwner = null;
-		private boolean registeredWithOwner = false;
 
 		@Override
 		public Registration addDragStartListener(final ComponentEventListener<GridDragStartEvent<String>> listener) {
@@ -77,27 +76,6 @@ class IHasDragControlOwnerRegistrationTest {
 			return dropEnabled;
 		}
 
-		@Override
-		public void setDragDropOwner(final Object owner) {
-			dragDropOwner = owner;
-		}
-
-		@Override
-		public Object getDragDropOwner() {
-			return dragDropOwner;
-		}
-
-		@Override
-		public void registerWithOwner() {
-			if (dragDropOwner == null) {
-				throw new IllegalStateException("Owner must be set before registration");
-			}
-			registeredWithOwner = true;
-		}
-
-		public boolean isRegisteredWithOwner() {
-			return registeredWithOwner;
-		}
 
 		public int getDragStartListenerCount() {
 			return dragStartListeners.size();
@@ -161,42 +139,8 @@ class IHasDragControlOwnerRegistrationTest {
 		owner = new TestOwnerComponent();
 	}
 
-	/** Test that owner can be set and retrieved. */
-	@Test
-	void testSetAndGetOwner() {
-		component.setDragDropOwner(owner);
-		assertNotNull(component.getDragDropOwner(), "Owner should be set");
-		assertEquals(owner, component.getDragDropOwner(), "Retrieved owner should match set owner");
-	}
 
-	/** Test that registerWithOwner fails when owner is not set. */
-	@Test
-	void testRegisterWithoutOwnerThrowsException() {
-		assertThrows(IllegalStateException.class, () -> component.registerWithOwner(),
-			"registerWithOwner should throw IllegalStateException when owner is not set");
-	}
 
-	/** Test that registerWithOwner succeeds when owner is set. */
-	@Test
-	void testRegisterWithOwnerSucceeds() {
-		component.setDragDropOwner(owner);
-		component.registerWithOwner();
-		assertEquals(true, component.isRegisteredWithOwner(), "Component should be marked as registered");
-	}
-
-	/** Test the complete owner registration workflow. */
-	@Test
-	void testOwnerRegistrationWorkflow() {
-		// Step 1: Set the owner
-		component.setDragDropOwner(owner);
-
-		// Step 2: Register with owner
-		component.registerWithOwner();
-
-		// Step 3: Verify registration
-		assertEquals(true, component.isRegisteredWithOwner(), "Component should be registered with owner");
-		assertNotNull(component.getDragDropOwner(), "Owner should still be accessible after registration");
-	}
 
 	/** Test that drag-drop control methods work correctly. */
 	@Test

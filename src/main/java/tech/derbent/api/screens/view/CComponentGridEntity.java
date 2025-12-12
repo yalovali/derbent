@@ -171,7 +171,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Adding drop listener to underlying grid");
 			// Safe cast: grid contains CEntityDB items (enforced by service architecture)
 			// We need to cast both the grid and listener to match the expected types
-			gridRegistration = ((CGrid) grid).addDropListener((ComponentEventListener) listener);
+			gridRegistration = grid.addDropListener(listener);
 		}
 		// Return combined registration that removes from both
 		final Registration finalGridRegistration = gridRegistration;
@@ -415,7 +415,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				};
 				grid.addBooleanColumn(valueProvider, displayName, "Yes", "No");
 			} else if (fieldName.toLowerCase().contains("description") || fieldName.toLowerCase().contains("comment")
-					|| (fieldInfo.getMaxLength() > 100)) {
+					|| fieldInfo.getMaxLength() > 100) {
 				// Long text fields - use addLongTextColumn
 				final ValueProvider valueProvider = entity -> {
 					try {
@@ -522,13 +522,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			grid = new CGrid(entityClass);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
-			
-			// Set up drag-drop ownership and register grid with this component as owner
-			grid.setDragDropOwner(this);
-			
 			// Add drag-drop listeners to propagate events to this component's listeners
 			setupGridDragDropListeners();
-			
 			createGridColumns();
 			refreshGridData();
 			this.add(grid);
@@ -536,42 +531,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error creating grid content.");
 			add(new Div("Error creating grid: " + e.getMessage()));
 		}
-	}
-
-	/** Sets up drag-drop listeners on the grid to propagate events to this component's listeners.
-	 * <p>
-	 * This method binds the grid's drag start, drag end, and drop events to propagate to
-	 * this component's registered listeners. The contentOwner (parent) should register to
-	 * this component's notifications, not vice versa.
-	 * </p> */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void setupGridDragDropListeners() {
-		Check.notNull(grid, "Grid must be created before setting up drag-drop listeners");
-		
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Setting up grid drag-drop listeners");
-		
-		// Add drag start listener to grid
-		grid.addDragStartListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag start detected, notifying {} listeners", 
-				dragStartListeners.size());
-			notifyDragStartListeners(event);
-		});
-		
-		// Add drag end listener to grid
-		grid.addDragEndListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", 
-				dragEndListeners.size());
-			notifyDragEndListeners(event);
-		});
-		
-		// Add drop listener to grid
-		grid.addDropListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drop detected, notifying {} listeners", 
-				dropListeners.size());
-			notifyDropListeners(event);
-		});
-		
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag-drop listeners setup complete");
 	}
 
 	/** Creates an error cell to display when widget creation fails. */
@@ -743,7 +702,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			final int g = Integer.parseInt(hex.substring(2, 4), 16);
 			final int b = Integer.parseInt(hex.substring(4, 6), 16);
 			// Calculate brightness (0-255)
-			final double brightness = (r * 0.299 + g * 0.587 + b * 0.114);
+			final double brightness = r * 0.299 + g * 0.587 + b * 0.114;
 			return brightness > 127; // Threshold for light vs dark
 		} catch (final Exception e) {
 			return true; // Default to light on error
@@ -770,7 +729,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * @return true if the entity matches the search text
 	 * @throws Exception if there's an error during matching */
 	private boolean matchesSearchText(Object entity, String searchText) throws Exception {
-		if ((entity == null) || (searchText == null) || searchText.isEmpty()) {
+		if (entity == null || searchText == null || searchText.isEmpty()) {
 			return true;
 		}
 		try {
@@ -798,14 +757,15 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			"unchecked", "rawtypes"
 	})
 	private void notifyDragEndListeners(final GridDragEndEvent event) {
-		if (!dragEndListeners.isEmpty()) {
-			LOGGER.debug("[DragDebug] Notifying {} drag end listeners", dragEndListeners.size());
-			for (final ComponentEventListener listener : dragEndListeners) {
-				try {
-					listener.onComponentEvent(event);
-				} catch (final Exception e) {
-					LOGGER.error("[DragDebug] Error notifying drag end listener: {}", e.getMessage());
-				}
+		if (dragEndListeners.isEmpty()) {
+			return;
+		}
+		LOGGER.debug("[DragDebug] Notifying {} drag end listeners", dragEndListeners.size());
+		for (final ComponentEventListener listener : dragEndListeners) {
+			try {
+				listener.onComponentEvent(event);
+			} catch (final Exception e) {
+				LOGGER.error("[DragDebug] Error notifying drag end listener: {}", e.getMessage());
 			}
 		}
 	}
@@ -836,14 +796,15 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			"unchecked", "rawtypes"
 	})
 	private void notifyDropListeners(final GridDropEvent event) {
-		if (!dropListeners.isEmpty()) {
-			LOGGER.debug("[DragDebug] Notifying {} drop listeners", dropListeners.size());
-			for (final ComponentEventListener listener : dropListeners) {
-				try {
-					listener.onComponentEvent(event);
-				} catch (final Exception e) {
-					LOGGER.error("[DragDebug] Error notifying drop listener: {}", e.getMessage());
-				}
+		if (dropListeners.isEmpty()) {
+			return;
+		}
+		LOGGER.debug("[DragDebug] Notifying {} drop listeners", dropListeners.size());
+		for (final ComponentEventListener listener : dropListeners) {
+			try {
+				listener.onComponentEvent(event);
+			} catch (final Exception e) {
+				LOGGER.error("[DragDebug] Error notifying drop listener: {}", e.getMessage());
 			}
 		}
 	}
@@ -1153,7 +1114,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				}
 			}
 			// Select next item, or first item if we were at the end
-			final int nextIndex = (currentIndex + 1) < items.size() ? (currentIndex + 1) : 0;
+			final int nextIndex = currentIndex + 1 < items.size() ? currentIndex + 1 : 0;
 			final Object nextItem = items.get(nextIndex);
 			rawGrid.select(nextItem);
 			// LOGGER.debug("Selected next item at index: {}", nextIndex);
@@ -1200,45 +1161,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 	// IHasDragControl interface implementation
 
-	private Object dragDropOwner = null;
-
-	@Override
-	public void setDragDropOwner(final Object owner) {
-		this.dragDropOwner = owner;
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Owner set to {}", 
-			owner != null ? owner.getClass().getSimpleName() : "null");
-		// Also set owner on the grid if it exists
-		if (grid != null) {
-			grid.setDragDropOwner(owner);
-		}
-	}
-
-	@Override
-	public Object getDragDropOwner() {
-		return dragDropOwner;
-	}
-
-	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void registerWithOwner() {
-		Check.notNull(dragDropOwner, "Owner must be set before registration");
-		
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Registering with owner {}", 
-			dragDropOwner.getClass().getSimpleName());
-		
-		// The owner should register to this component's notifications by calling
-		// addDragStartListener(), addDragEndListener(), addDropListener() on this component.
-		// This method exists to satisfy the IHasDragControl interface contract.
-		// The actual registration is the owner's responsibility, not ours.
-		
-		// Register the grid with the owner
-		if (grid != null) {
-			grid.registerWithOwner();
-		}
-		
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Successfully registered with owner");
-	}
-
 	public void setEnableSelectionChangeListener(boolean enableSelectionChangeListener) {
 		if (this.enableSelectionChangeListener == enableSelectionChangeListener) {
 			LOGGER.debug("Selection change listener already set to {}", enableSelectionChangeListener);
@@ -1262,6 +1184,36 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
+	/** Sets up drag-drop listeners on the grid to propagate events to this component's listeners.
+	 * <p>
+	 * This method binds the grid's drag start, drag end, and drop events to propagate to this component's registered listeners. The contentOwner
+	 * (parent) should register to this component's notifications, not vice versa.
+	 * </p>
+	 */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private void setupGridDragDropListeners() {
+		Check.notNull(grid, "Grid must be created before setting up drag-drop listeners");
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Setting up grid drag-drop listeners");
+		// Add drag start listener to grid
+		grid.addDragStartListener(event -> {
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag start detected, notifying {} listeners", dragStartListeners.size());
+			notifyDragStartListeners(event);
+		});
+		// Add drag end listener to grid
+		grid.addDragEndListener(event -> {
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", dragEndListeners.size());
+			notifyDragEndListeners(event);
+		});
+		// Add drop listener to grid
+		grid.addDropListener(event -> {
+			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drop detected, notifying {} listeners", dropListeners.size());
+			notifyDropListeners(event);
+		});
+		LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag-drop listeners setup complete");
+	}
+
 	@Override
 	public String toString() {
 		return "CComponentGridEntity for " + (entityClass != null ? entityClass.getSimpleName() : "Unknown Entity");
@@ -1274,7 +1226,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			for (final Map.Entry<Object, Component> entry : entityToWidgetMap.entrySet()) {
 				final Component component = entry.getValue();
 				if (component instanceof tech.derbent.api.grid.widget.CComponentWidgetEntity) {
-					final tech.derbent.api.grid.widget.CComponentWidgetEntity<?> widget = (tech.derbent.api.grid.widget.CComponentWidgetEntity<?>) component;
+					final tech.derbent.api.grid.widget.CComponentWidgetEntity<?> widget =
+							(tech.derbent.api.grid.widget.CComponentWidgetEntity<?>) component;
 					widget.saveWidgetState();
 				}
 			}

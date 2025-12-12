@@ -50,13 +50,22 @@ public class CMenuNavigationTest extends CBaseUITest {
 			loginToApplication();
 			LOGGER.info("✅ Login successful");
 			takeScreenshot(String.format("%03d-after-login", screenshotCounter++), false);
+			
+			// FAIL-FAST CHECK: After login
+			performFailFastCheck("After Login Complete");
 
 			// Wait for menu to be ready
 			page.waitForSelector(MENU_ITEM_SELECTOR, new Page.WaitForSelectorOptions().setTimeout(5000));
+			
+			// FAIL-FAST CHECK: After menu load
+			performFailFastCheck("After Menu Load");
 
 			// Browse all menu levels starting from root
 			LOGGER.info("📋 Starting hierarchical menu navigation from root level");
 			exploreMenuLevel(0);
+			
+			// FAIL-FAST CHECK: After menu navigation
+			performFailFastCheck("After Menu Navigation Complete");
 
 			LOGGER.info("✅ Menu navigation test completed - visited {} unique pages", visitedPages.size());
 		} catch (Exception e) {

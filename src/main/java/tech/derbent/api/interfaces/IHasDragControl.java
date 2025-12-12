@@ -81,7 +81,7 @@ public interface IHasDragControl {
 	 * <ol>
 	 * <li>Update internal state to track enabled/disabled status</li>
 	 * <li>Enable/disable drag on the underlying grid or component</li>
-	 * <li>Log the state change for debugging</li>
+	 * <li>Log the state change for debugging</li> 
 	 * </ol>
 	 * 
 	 * @param enabled true to enable drag operations, false to disable
@@ -136,57 +136,5 @@ public interface IHasDragControl {
 		return "dragEnabled=" + isDragEnabled() + ", dropEnabled=" + isDropEnabled();
 	}
 
-	/** Sets the owner of this drag-drop component.
-	 * <p>
-	 * The owner is responsible for binding all drag-drop events and receiving notifications.
-	 * This ensures a clean ownership hierarchy and prevents third-party classes from
-	 * registering directly to component fields.
-	 * </p>
-	 * <p>
-	 * Usage Pattern:
-	 * 
-	 * <pre>
-	 * // In parent component or page service
-	 * gridComponent.setDragDropOwner(this);
-	 * gridComponent.registerWithOwner();
-	 * </pre>
-	 * 
-	 * @param owner the owner component or page service that will receive drag-drop notifications */
-	void setDragDropOwner(Object owner);
 
-	/** Gets the current owner of this drag-drop component.
-	 * @return the owner, or null if no owner is set */
-	Object getDragDropOwner();
-
-	/** Registers this component's drag-drop events with its owner.
-	 * <p>
-	 * This method should be called after setDragDropOwner() to establish the event binding.
-	 * The component will automatically bind its drag start, drag end, and drop events to
-	 * the owner's event handlers.
-	 * </p>
-	 * <p>
-	 * Implementation should:
-	 * <ol>
-	 * <li>Check that owner is set (fail-fast if null)</li>
-	 * <li>If owner implements IHasDragStart, add this component's drag start listener to owner</li>
-	 * <li>If owner implements IHasDragEnd, add this component's drag end listener to owner</li>
-	 * <li>If owner implements IHasDrop, add this component's drop listener to owner</li>
-	 * <li>Log successful registration for debugging</li>
-	 * </ol>
-	 * <p>
-	 * Example:
-	 * 
-	 * <pre>
-	 * // Component implementation
-	 * public void registerWithOwner() {
-	 * 	Check.notNull(dragDropOwner, "Owner must be set before registration");
-	 * 	if (dragDropOwner instanceof IHasDragStart) {
-	 * 		((IHasDragStart) dragDropOwner).addDragStartListener(this::handleDragStart);
-	 * 	}
-	 * 	// ... register other events
-	 * }
-	 * </pre>
-	 * 
-	 * @throws IllegalStateException if owner is not set */
-	void registerWithOwner();
 }
