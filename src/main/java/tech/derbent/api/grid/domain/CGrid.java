@@ -25,6 +25,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
@@ -650,7 +651,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 				// Note: GridDropEvent doesn't provide dragged items - use tracked items from drag start
 				final List<EntityClass> draggedItems = activeDraggedItems != null ? activeDraggedItems : Collections.emptyList();
 				final EntityClass targetItem = event.getDropTargetItem().orElse(null);
-				final com.vaadin.flow.component.grid.dnd.GridDropLocation dropLocation = event.getDropLocation();
+				final GridDropLocation dropLocation = event.getDropLocation();
 				final CDropEvent<EntityClass> dropEvent = new CDropEvent<>(this, draggedItems, this, targetItem, dropLocation, true);
 				notifyDropListeners(dropEvent);
 			} catch (final Exception e) {
