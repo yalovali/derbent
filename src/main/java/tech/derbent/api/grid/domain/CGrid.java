@@ -28,6 +28,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -548,10 +549,36 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 
 	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
 
-	@Override
 	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
+
+	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
+
+	/** Adds a listener for drag start events.
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public Registration addDragStartListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		dragStartListeners.add(listener);
+		LOGGER.debug("[DragDebug] CGrid: Added drag start listener, total: {}", dragStartListeners.size());
+		return () -> dragStartListeners.remove(listener);
+	}
+
+	/** Adds a listener for drag end events.
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public Registration addDragEndListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		dragEndListeners.add(listener);
+		LOGGER.debug("[DragDebug] CGrid: Added drag end listener, total: {}", dragEndListeners.size());
+		return () -> dragEndListeners.remove(listener);
+	}
+
 	// ==================== IStateOwnerComponent Implementation ====================
 
 	@Override
