@@ -37,9 +37,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
-	// Drag-drop state tracking
-	private Component activeDragSource = null;
-	private List<?> activeDraggedItems = null;
 	// Custom components registered for method binding (outside of FormBuilder)
 	private final Map<String, Component> customComponents = new HashMap<>();
 	protected CDetailsBuilder detailsBuilder = null;
@@ -282,7 +279,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	}
 
 	/** Binds a component's drag end event to a page service handler method. This method supports any component implementing IHasDragEnd interface.
-	 * Note: GridDragEndEvent doesn't provide dragged items, so we pass an empty event.
+	 * Note: CDragEndEvent is passed directly to handler methods.
 	 * @param component  the component implementing IHasDragEnd
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
@@ -290,25 +287,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			"rawtypes", "unchecked"
 	})
 	private void bindDragEnd(final IHasDragControl component, final Method method, final String methodName) {
-		// Verify that the component is also a Vaadin Component
-		if (!(component instanceof Component)) {
-			LOGGER.error("Component implementing IHasDragEnd must also extend Component: {}", component.getClass().getSimpleName());
-			return;
-		}
+		Check.instanceOf(component, Component.class, "Component implementing IHasDragEnd must also extend Component");
 		final Component vaadinComponent = (Component) component;
 		component.addEventListener_dragEnd(event -> {
 			try {
 				LOGGER.debug("[DragDebug] CPageService.bindDragEnd: Invoking {} on component {}", methodName, component.getClass().getSimpleName());
-				// GridDragEndEvent doesn't provide dragged items
-				// Handler methods should track items from dragStart event if needed
-				final CDragDropEvent<?> dragEvent = new CDragDropEvent(null, component);
-				method.invoke(this, vaadinComponent, dragEvent);
+				// Pass CDragEndEvent directly to handler
+				method.invoke(this, vaadinComponent, event);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-			} finally {
-				// Clear drag tracking after drag ends
-				activeDragSource = null;
-				activeDraggedItems = null;
 			}
 		});
 		LOGGER.debug("Bound IHasDragEnd component drag end event to method {}", methodName);
@@ -323,25 +310,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			"rawtypes", "unchecked"
 	})
 	private void bindDragStart(final IHasDragControl component, final Method method, final String methodName) {
-		// Verify that the component is also a Vaadin Component
-		if (!(component instanceof Component)) {
-			LOGGER.error("Component implementing IHasDragStart must also extend Component: {}", component.getClass().getSimpleName());
-			return;
-		}
+		Check.instanceOf(component, Component.class, "Component implementing IHasDragStart must also extend Component");
 		final Component vaadinComponent = (Component) component;
 		component.addEventListener_dragStart(event -> {
 			try {
-				@SuppressWarnings ("unchecked")
-				final CDragStartEvent<?> customEvent = event;
-				final List<?> draggedItems = new ArrayList<>(customEvent.getDraggedItems());
-				final int itemCount = draggedItems != null ? draggedItems.size() : 0;
-				LOGGER.debug("[DragDebug] CPageService.bindDragStart: Invoking {} on component {}, items={}", methodName,
-						component.getClass().getSimpleName(), itemCount);
-				// Track drag source and items for use in drop events
-				activeDragSource = vaadinComponent;
-				activeDraggedItems = draggedItems;
-				final CDragDropEvent<?> dragEvent = new CDragDropEvent(draggedItems, component);
-				method.invoke(this, vaadinComponent, dragEvent);
+				// Pass CDragStartEvent as Object for generalization - handlers cast to specific type
+				method.invoke(this, vaadinComponent, event);
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
 			}
@@ -359,21 +333,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
 		component.addEventListener_dragDrop(event -> {
 			try {
-				@SuppressWarnings ("unchecked")
-				final CDropEvent<?> customEvent = event;
-				LOGGER.info("[DragDebug] CPageService.bindIHasDropEvent: Drop event received on component {}", methodName);
-				LOGGER.info("[DragDebug] About to invoke method: {}", method.getName());
-				LOGGER.info("[DragDebug] activeDragSource: {}", activeDragSource != null ? activeDragSource.getClass().getSimpleName() : "null");
-				LOGGER.info("[DragDebug] activeDraggedItems: {}", activeDraggedItems != null ? activeDraggedItems.size() : "null");
-				// Get drop information from CDropEvent
-				final Object targetItem = customEvent.getDropTargetItem().orElse(null);
-				final var dropLocation = customEvent.getDropLocation();
-				LOGGER.info("[DragDebug] targetItem: {}, dropLocation: {}", targetItem, dropLocation);
-				// Use tracked drag source and items from drag start event
-				// This provides handlers with information about where the drag originated
-				final CDragDropEvent<?> dropEvent = new CDragDropEvent(activeDraggedItems, activeDragSource, targetItem, dropLocation, component);
-				LOGGER.info("[DragDebug] Invoking method {} on page service", method.getName());
-				method.invoke(this, component, dropEvent);
+				LOGGER.info("[DragDebug] CPageService.bindIHasDropEvent: Drop event received, invoking {}", methodName);
+				// Pass CDropEvent as Object for generalization - handlers cast to specific type
+				method.invoke(this, component, event);
 				LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
 			} catch (final Exception ex) {
 				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);

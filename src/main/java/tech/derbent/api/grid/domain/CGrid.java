@@ -42,7 +42,6 @@ import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CDropEvent;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.services.pageservice.CDragDropEvent;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
@@ -103,6 +102,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
 	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
+	// Track dragged items from drag start for use in drop event (GridDropEvent doesn't provide them)
+	private List<EntityClass> activeDraggedItems = null;
 	/** Constructor for CGrid with entity class.
 	 * @param entityClass The entity class for the grid */
 	Class<EntityClass> clazz;
@@ -643,18 +644,49 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	public boolean isDropEnabled() { return dropEnabled; }
 
 	private ComponentEventListener<GridDropEvent<EntityClass>> on_grid_dragDrop() {
-		CDragDropEvent<EntityClass> dragEvent = new CDragDropEvent<CGrid.EntityClass>(null, this);
-		notifyEvents(dragEvent);
+		return event -> {
+			try {
+				// Convert Vaadin GridDropEvent to our CDropEvent
+				// Note: GridDropEvent doesn't provide dragged items - use tracked items from drag start
+				final List<EntityClass> draggedItems = activeDraggedItems != null ? activeDraggedItems : Collections.emptyList();
+				final EntityClass targetItem = event.getDropTargetItem().orElse(null);
+				final com.vaadin.flow.component.grid.dnd.GridDropLocation dropLocation = event.getDropLocation();
+				final CDropEvent<EntityClass> dropEvent = new CDropEvent<>(this, draggedItems, this, targetItem, dropLocation, true);
+				notifyDropListeners(dropEvent);
+			} catch (final Exception e) {
+				LOGGER.error("Error handling grid drop event", e);
+			}
+		};
 	}
 
 	private ComponentEventListener<GridDragEndEvent<EntityClass>> on_grid_dragEnd() {
-		// TODO Auto-generated method stub
-		return null;
+		return event -> {
+			try {
+				// Convert Vaadin GridDragEndEvent to our CDragEndEvent
+				final CDragEndEvent dragEndEvent = new CDragEndEvent(this, true);
+				notifyDragEndListeners(dragEndEvent);
+			} catch (final Exception e) {
+				LOGGER.error("Error handling grid drag end event", e);
+			} finally {
+				// Clear tracked items after drag ends
+				activeDraggedItems = null;
+			}
+		};
 	}
 
 	private ComponentEventListener<GridDragStartEvent<EntityClass>> on_grid_dragStart() {
-		// TODO Auto-generated method stub
-		return null;
+		return event -> {
+			try {
+				// Convert Vaadin GridDragStartEvent to our CDragStartEvent
+				final List<EntityClass> draggedItems = new ArrayList<>(event.getDraggedItems());
+				// Track dragged items for use in drop event (GridDropEvent doesn't provide them)
+				activeDraggedItems = draggedItems;
+				final CDragStartEvent<EntityClass> dragStartEvent = new CDragStartEvent<>(this, draggedItems, true);
+				notifyDragStartListeners(dragStartEvent);
+			} catch (final Exception e) {
+				LOGGER.error("Error handling grid drag start event", e);
+			}
+		};
 	}
 
 	/** Restores the grid state from a JSON object.
