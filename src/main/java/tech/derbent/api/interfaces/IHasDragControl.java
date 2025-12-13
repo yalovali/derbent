@@ -10,27 +10,27 @@ import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.shared.Registration;
 
-/** Interface for components that support enabling/disabling drag-and-drop functionality.
+/** Unified interface for components that support drag-and-drop functionality.
  * <p>
- * Components implementing this interface provide control over their drag-and-drop state, allowing parent components or page services to enable or
- * disable drag operations dynamically based on application state.
+ * This is the ONLY interface that should be used for drag-and-drop operations in the application. It consolidates all drag-start, drag-end, and drop
+ * event handling into a single interface. Components implementing this interface provide complete control over their drag-and-drop state, allowing
+ * parent components or page services to enable or disable drag operations dynamically based on application state.
  * <p>
- * This interface should be implemented alongside {@link IHasDragStart} and {@link IHasDragEnd} to provide complete drag-and-drop control.
+ * <b>IMPORTANT:</b> Do NOT use Vaadin's Grid.addDragStartListener(), Grid.addDragEndListener(), or Grid.addDropListener() directly. Always use
+ * IHasDragControl interface methods. CGrid automatically forwards its internal Grid events to IHasDragControl listeners.
  * <p>
- * <b>Owner Registration Pattern:</b> This interface supports an owner registration mechanism where components register with their owner (typically a
- * parent component or page service) for automatic drag-drop event binding. The owner binds all drag operations to itself for immediate notification.
- * Third-party classes should NOT register directly to component fields.
+ * <b>Recursive Event Propagation Pattern:</b> Components implementing IHasDragControl forward their drag-drop events to parent components up the
+ * hierarchy. This enables automatic event bubbling where each level can process events and forward them upward.
  * <p>
  * <b>Hierarchy Pattern:</b>
  *
  * <pre>
- * Component implements IHasDragStart, IHasDragEnd, IHasDragControl
- *     ↓ registers with owner via setDragDropOwner()
- * Owner (Parent Component or PageService)
- *     ↓ binds drag events via registerWithOwner()
- * Internal Grid with drag-enabled state
+ * CGrid (implements IHasDragControl)
+ *     ↓ forwards internal Grid events to
+ * CComponentListEntityBase (implements IHasDragControl)
  *     ↓ propagates events to
- * Owner's event handlers
+ * Parent Component or PageService
+ *     ↓ handles drag-drop logic
  * </pre>
  * <p>
  * <b>Usage Example:</b>
@@ -38,37 +38,46 @@ import com.vaadin.flow.shared.Registration;
  * <pre>
  * // Enable drag-and-drop for a component
  * componentSprintItems.setDragEnabled(true);
+ * componentSprintItems.setDropEnabled(true);
+ * 
+ * // Register listeners via IHasDragControl interface
+ * componentSprintItems.addDragStartListener(event -> {
+ *     // Handle drag start
+ * });
+ * 
+ * componentSprintItems.addDropListener(event -> {
+ *     // Handle drop
+ * });
+ * 
  * // Disable drag-and-drop (e.g., when editing is locked)
  * componentBacklog.setDragEnabled(false);
+ * 
  * // Check if drag is enabled
  * if (grid.isDragEnabled()) {
- * 	// Handle drag operation
+ *     // Handle drag operation
  * }
  * </pre>
  * <p>
  * <b>Implementation Pattern:</b>
  *
  * <pre>
- * public class CComponentListSprintItems extends CComponentListEntityBase implements IHasDragStart, IHasDragEnd, IHasDragControl {
+ * public class CComponentListSprintItems extends CComponentListEntityBase implements IHasDragControl {
  *
- * 	private boolean dragEnabled = false;
+ *     private boolean dragEnabled = false;
  *
- * 	&#64;Override
- * 	public void setDragEnabled(boolean enabled) {
- * 		this.dragEnabled = enabled;
- * 		if (grid != null) {
- * 			grid.setRowsDraggable(enabled);
- * 			LOGGER.debug("[DragDebug] Drag {} for {}", enabled ? "enabled" : "disabled", getClass().getSimpleName());
- * 		}
- * 	}
+ *     &#64;Override
+ *     public void setDragEnabled(boolean enabled) {
+ *         this.dragEnabled = enabled;
+ *         if (grid != null) {
+ *             grid.setDragEnabled(enabled);  // Use CGrid's IHasDragControl method
+ *             LOGGER.debug("[DragDebug] Drag {} for {}", enabled ? "enabled" : "disabled", getClass().getSimpleName());
+ *         }
+ *     }
  *
- * 	&#64;Override
- * 	public boolean isDragEnabled() { return dragEnabled; }
+ *     &#64;Override
+ *     public boolean isDragEnabled() { return dragEnabled; }
  * }
- * </pre>
- *
- * @see IHasDragStart
- * @see IHasDragEnd */
+ * </pre> */
 public interface IHasDragControl {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(IHasDragControl.class);

@@ -368,7 +368,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		dragEnabledToBacklog = enabled;
 		final var grid = getGrid();
 		if (grid != null) {
-			grid.setRowsDraggable(enabled);
+			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 			LOGGER.debug("Drag to backlog from sprint items {}", enabled ? "enabled" : "disabled");
 		}
 	}

@@ -285,6 +285,24 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		return () -> dragStartListeners.remove(listener);
 	}
 
+	/** Adds a drop listener to this component.
+	 * <p>
+	 * The listener will be notified whenever items are dropped onto this grid. Multiple listeners can be registered, and they will all be notified of
+	 * drop events.
+	 * </p>
+	 * @param listener the listener to add
+	 * @return a registration object for removing the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDropListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drop listener cannot be null");
+		dropListeners.add(listener);
+		LOGGER.debug("[DragDebug] CGrid: Added drop listener, total: {}", dropListeners.size());
+		return () -> dropListeners.remove(listener);
+	}
+
 	/** Adds an editable image column using CPictureSelector in icon mode. Clicking on the profile picture opens a dialog for editing.
 	 * @param imageDataProvider Provider that returns byte array of image data
 	 * @param imageDataSetter   Setter function to update the image data when changed
@@ -654,6 +672,39 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		});
 		final GridSingleSelectionModel<EntityClass> sm = (GridSingleSelectionModel<EntityClass>) getSelectionModel();
 		sm.setDeselectAllowed(false);
+		// Forward Grid's internal drag-drop events to IHasDragControl listeners
+		setupDragDropForwarding();
+	}
+
+	/** Sets up forwarding of Grid's internal drag-drop events to IHasDragControl listeners.
+	 * <p>
+	 * This ensures that CGrid's internal Grid events are propagated to all registered IHasDragControl listeners, enabling the recursive event
+	 * propagation pattern where events bubble up through the component hierarchy. */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	private void setupDragDropForwarding() {
+		// Forward drag start events from Grid to IHasDragControl listeners
+		super.addDragStartListener(event -> {
+			LOGGER.debug("[DragDebug] CGrid: Forwarding drag start event to {} listeners", dragStartListeners.size());
+			for (final ComponentEventListener listener : dragStartListeners) {
+				listener.onComponentEvent(event);
+			}
+		});
+		// Forward drag end events from Grid to IHasDragControl listeners
+		super.addDragEndListener(event -> {
+			LOGGER.debug("[DragDebug] CGrid: Forwarding drag end event to {} listeners", dragEndListeners.size());
+			for (final ComponentEventListener listener : dragEndListeners) {
+				listener.onComponentEvent(event);
+			}
+		});
+		// Forward drop events from Grid to IHasDragControl listeners
+		super.addDropListener(event -> {
+			LOGGER.debug("[DragDebug] CGrid: Forwarding drop event to {} listeners", dropListeners.size());
+			for (final ComponentEventListener listener : dropListeners) {
+				listener.onComponentEvent(event);
+			}
+		});
 	}
 
 	@Override

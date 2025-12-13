@@ -1104,7 +1104,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
 		if (grid != null) {
-			grid.setRowsDraggable(enabled);
+			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 			LOGGER.debug("[DragDebug] Drag {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
 		}
 	}
@@ -1118,11 +1118,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public void setDropEnabled(final boolean enabled) {
 		dropEnabled = enabled;
 		if (grid != null) {
-			if (enabled) {
-				grid.setDropMode(com.vaadin.flow.component.grid.dnd.GridDropMode.BETWEEN);
-			} else {
-				grid.setDropMode(null);
-			}
+			grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
 			LOGGER.debug("[DragDebug] Drop {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
 		}
 	}

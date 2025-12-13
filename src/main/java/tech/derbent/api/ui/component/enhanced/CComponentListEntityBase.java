@@ -832,7 +832,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
 		if (grid != null) {
-			grid.setRowsDraggable(enabled);
+			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 			LOGGER.debug("[DragDebug] Drag {} for {} ({})", enabled ? "enabled" : "disabled", getClass().getSimpleName(),
 					entityClass.getSimpleName());
 		}
@@ -847,11 +847,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public void setDropEnabled(final boolean enabled) {
 		dropEnabled = enabled;
 		if (grid != null) {
-			if (enabled) {
-				grid.setDropMode(com.vaadin.flow.component.grid.dnd.GridDropMode.BETWEEN);
-			} else {
-				grid.setDropMode(null);
-			}
+			grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
 			LOGGER.debug("[DragDebug] Drop {} for {} ({})", enabled ? "enabled" : "disabled", getClass().getSimpleName(),
 					entityClass.getSimpleName());
 		}
@@ -913,11 +909,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		// This could be implemented by adding a visual indicator to the component
 		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
 	}
-
-	public void setRowsDraggable(boolean value) {
-		getGrid().setRowsDraggable(true);
-	}
-	// IHasDragControl interface implementation
 
 	/** Set the currently selected item.
 	 * @param item The item to select */

@@ -187,9 +187,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			return;
 		}
 		// Enable row dragging for reordering within backlog
-		grid.setRowsDraggable(true);
+		grid.setDragEnabled(true); // Use CGrid's IHasDragControl method
 		// Enable drop mode for receiving drops within same grid
-		grid.setDropMode(GridDropMode.BETWEEN);
+		grid.setDropEnabled(true); // Use CGrid's IHasDragControl method
 		// Track dragged item for internal reordering
 		grid.addDragStartListener(event -> {
 			final GridDragStartEvent<CProjectItem<?>> gridEvent = (GridDragStartEvent<CProjectItem<?>>) event;
@@ -351,7 +351,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		dragEnabled = enabled;
 		final var grid = getGrid();
 		if (grid != null) {
-			grid.setRowsDraggable(enabled);
+			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 			// LOGGER.debug("External drag from backlog {}", enabled ? "enabled" : "disabled");
 		}
 	}
