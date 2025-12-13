@@ -71,7 +71,7 @@ class CComponentWidgetSprintDragDropTest {
 		// Create the widget (this will initialize componentSprintItems in createSecondLine)
 		final CComponentWidgetSprint widget = new CComponentWidgetSprint(sprint);
 		// Verify we can add a drag end listener
-		final Registration registration = widget.addDragEndListener((GridDragEndEvent<CSprintItem> event) -> {
+		final Registration registration = widget.addDragEndListener(event -> {
 			// Listener body - will be called when drag ends
 		});
 		// Verify registration was returned (even if empty)
@@ -88,7 +88,7 @@ class CComponentWidgetSprintDragDropTest {
 		// Create the widget (this will initialize componentSprintItems in createSecondLine)
 		final CComponentWidgetSprint widget = new CComponentWidgetSprint(sprint);
 		// Verify we can add a drag start listener
-		final Registration registration = widget.addDragStartListener((GridDragStartEvent<CSprintItem> event) -> {
+		final Registration registration = widget.addDragStartListener(event -> {
 			// Listener body - will be called when drag starts
 		});
 		// Verify registration was returned (even if empty)
@@ -105,7 +105,7 @@ class CComponentWidgetSprintDragDropTest {
 		// Create the widget (this will initialize componentSprintItems in createSecondLine)
 		final CComponentWidgetSprint widget = new CComponentWidgetSprint(sprint);
 		// Verify we can add a drop listener
-		final Registration registration = widget.addDropListener((GridDropEvent<?> event) -> {
+		final Registration registration = widget.addDropListener(event -> {
 			// Listener body - will be called when items are dropped
 		});
 		// Verify registration was returned (even if empty)

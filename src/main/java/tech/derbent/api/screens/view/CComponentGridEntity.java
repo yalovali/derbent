@@ -726,64 +726,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
-	/** Notifies all registered drag end listeners. Called when a widget component fires a drag end event. Follows the same pattern as
-	 * notifyRefreshListeners in CComponentListEntityBase.
-	 * @param event The drag end event from the widget component */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void notifyDragEndListeners(final GridDragEndEvent event) {
-		if (getDragEndListeners().isEmpty()) {
-			return;
-		}
-		LOGGER.debug("[DragDebug] Notifying {} drag end listeners", getDragEndListeners().size());
-		for (final ComponentEventListener listener : getDragEndListeners()) {
-			try {
-				listener.onComponentEvent(event);
-			} catch (final Exception e) {
-				LOGGER.error("[DragDebug] Error notifying drag end listener: {}", e.getMessage());
-			}
-		}
-	}
-
-	/** Notifies all registered drag start listeners. Called when a widget component fires a drag start event. Follows the same pattern as
-	 * notifyRefreshListeners in CComponentListEntityBase.
-	 * @param event The drag start event from the widget component */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void notifyDragStartListeners(final GridDragStartEvent event) {
-		if (!getDragStartListeners().isEmpty()) {
-			LOGGER.debug("[DragDebug] Notifying {} drag start listeners", getDragStartListeners().size());
-			for (final ComponentEventListener listener : getDragStartListeners()) {
-				try {
-					listener.onComponentEvent(event);
-				} catch (final Exception e) {
-					LOGGER.error("[DragDebug] Error notifying drag start listener: {}", e.getMessage());
-				}
-			}
-		}
-	}
-
-	/** Notifies all registered drop listeners. Called when a widget component fires a drop event. Follows the same pattern as
-	 * notifyDragStartListeners and notifyDragEndListeners.
-	 * @param event The drop event from the widget component */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void notifyDropListeners(final GridDropEvent event) {
-		if (getDropListeners().isEmpty()) {
-			return;
-		}
-		LOGGER.debug("[DragDebug] Notifying {} drop listeners", getDropListeners().size());
-		for (final ComponentEventListener listener : getDropListeners()) {
-			try {
-				listener.onComponentEvent(event);
-			} catch (final Exception e) {
-				LOGGER.error("[DragDebug] Error notifying drop listener: {}", e.getMessage());
-			}
-		}
-	}
+	// Drag-drop event notification methods now provided by IHasDragControl interface default methods
+	// notifyDragStartListeners(), notifyDragEndListeners(), notifyDropListeners() are inherited
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {

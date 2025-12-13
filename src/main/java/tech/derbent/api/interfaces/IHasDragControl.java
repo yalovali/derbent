@@ -112,26 +112,99 @@ public interface IHasDragControl {
 	 * @return true if drop operations are enabled, false otherwise */
 	boolean isDropEnabled();
 
+	/** Notifies all registered drag start listeners.
+	 * <p>
+	 * This method is called when a drag operation starts. It automatically notifies all registered drag start listeners with proper error handling.
+	 * Implementations can call this method to propagate drag start events up the component hierarchy.
+	 * @param event The drag start event to notify listeners about */
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	default void notifyEvents(ComponentEvent<?> event) {
+	default void notifyDragStartListeners(final GridDragStartEvent<?> event) {
+		if (getDragStartListeners().isEmpty()) {
+			return;
+		}
+		LOGGER.debug("[DragDebug] {} notifying {} drag start listeners", getClass().getSimpleName(), getDragStartListeners().size());
+		for (final ComponentEventListener listener : getDragStartListeners()) {
+			try {
+				listener.onComponentEvent(event);
+			} catch (final Exception e) {
+				LOGGER.error("[DragDebug] Error notifying drag start listener in {}: {}", getClass().getSimpleName(), e.getMessage());
+			}
+		}
+	}
+
+	/** Notifies all registered drag end listeners.
+	 * <p>
+	 * This method is called when a drag operation ends. It automatically notifies all registered drag end listeners with proper error handling.
+	 * Implementations can call this method to propagate drag end events up the component hierarchy.
+	 * @param event The drag end event to notify listeners about */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	default void notifyDragEndListeners(final GridDragEndEvent<?> event) {
+		if (getDragEndListeners().isEmpty()) {
+			return;
+		}
+		LOGGER.debug("[DragDebug] {} notifying {} drag end listeners", getClass().getSimpleName(), getDragEndListeners().size());
+		for (final ComponentEventListener listener : getDragEndListeners()) {
+			try {
+				listener.onComponentEvent(event);
+			} catch (final Exception e) {
+				LOGGER.error("[DragDebug] Error notifying drag end listener in {}: {}", getClass().getSimpleName(), e.getMessage());
+			}
+		}
+	}
+
+	/** Notifies all registered drop listeners.
+	 * <p>
+	 * This method is called when items are dropped onto this component. It automatically notifies all registered drop listeners with proper error
+	 * handling. Implementations can call this method to propagate drop events up the component hierarchy.
+	 * @param event The drop event to notify listeners about */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	default void notifyDropListeners(final GridDropEvent<?> event) {
+		if (getDropListeners().isEmpty()) {
+			return;
+		}
+		LOGGER.debug("[DragDebug] {} notifying {} drop listeners", getClass().getSimpleName(), getDropListeners().size());
+		for (final ComponentEventListener listener : getDropListeners()) {
+			try {
+				listener.onComponentEvent(event);
+			} catch (final Exception e) {
+				LOGGER.error("[DragDebug] Error notifying drop listener in {}: {}", getClass().getSimpleName(), e.getMessage());
+			}
+		}
+	}
+
+	/** Automatically notifies listeners based on event type.
+	 * <p>
+	 * This is a convenience method that automatically detects the event type and calls the appropriate notify method (notifyDragStartListeners,
+	 * notifyDragEndListeners, or notifyDropListeners). This simplifies event propagation in component hierarchies.
+	 * <p>
+	 * Usage example:
+	 *
+	 * <pre>
+	 * grid.addDragStartListener(event -> notifyEvents(event));
+	 * grid.addDragEndListener(event -> notifyEvents(event));
+	 * grid.addDropListener(event -> notifyEvents(event));
+	 * </pre>
+	 * @param event The component event to process and notify listeners about */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	default void notifyEvents(final ComponentEvent<?> event) {
 		try {
-			if (event instanceof GridDragStartEvent<?> && !getDragStartListeners().isEmpty()) {
-				for (final ComponentEventListener listener : getDragStartListeners()) {
-					listener.onComponentEvent(event);
-				}
-			} else if (event instanceof GridDropEvent<?> && !getDropListeners().isEmpty()) {
-				for (final ComponentEventListener listener : getDropListeners()) {
-					listener.onComponentEvent(event);
-				}
-			} else if (event instanceof GridDragEndEvent<?> && !getDragEndListeners().isEmpty()) {
-				for (final ComponentEventListener listener : getDragEndListeners()) {
-					listener.onComponentEvent(event);
-				}
+			if (event instanceof GridDragStartEvent<?>) {
+				notifyDragStartListeners((GridDragStartEvent<?>) event);
+			} else if (event instanceof GridDropEvent<?>) {
+				notifyDropListeners((GridDropEvent<?>) event);
+			} else if (event instanceof GridDragEndEvent<?>) {
+				notifyDragEndListeners((GridDragEndEvent<?>) event);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error in notifyevents for event:" + event.toString());
+			LOGGER.error("Error in notifyEvents for event: {}", event.toString(), e);
 			throw e;
 		}
 	}
