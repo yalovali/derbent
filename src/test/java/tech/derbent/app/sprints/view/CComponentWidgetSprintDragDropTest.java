@@ -2,12 +2,8 @@ package tech.derbent.app.sprints.view;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** Test class for CComponentWidgetSprint drag-drop interface implementation. Verifies that CComponentWidgetSprint properly implements IHasDragStart,
  * IHasDragEnd, and IHasDrop interfaces and can propagate drag-drop events from its internal grid. */

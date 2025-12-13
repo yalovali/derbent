@@ -294,6 +294,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 
 	/** Create and configure the grid component. */
+	@SuppressWarnings ("unchecked")
 	protected void createGrid() {
 		grid = new CGrid<>(entityClass);
 		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);

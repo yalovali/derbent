@@ -725,7 +725,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			throw e;
 		}
 	}
-
 	// Drag-drop event notification methods now provided by IHasDragControl interface default methods
 	// notifyDragStartListeners(), notifyDragEndListeners(), notifyDropListeners() are inherited
 
@@ -846,9 +845,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * </p>
 	 * @param component the widget component to register
 	 * @param entity    the entity associated with this widget component */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
+	@SuppressWarnings ({})
 	private void registerWidgetComponentWithPageService(final Component component, final Object entity) {
 		try {
 			// Only register if contentOwner is a page service implementer
@@ -1097,7 +1094,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * (parent) should register to this component's notifications, not vice versa.
 	 * </p>
 	 */
-	@SuppressWarnings ({})
+	@SuppressWarnings ({
+			"rawtypes"
+	})
 	private void setupGridDragDropListeners() {
 		Check.notNull(grid, "Grid must be created before setting up drag-drop listeners");
 		LOGGER.debug("[DragDebug] CComponentGridEntity: Setting up grid drag-drop listeners");

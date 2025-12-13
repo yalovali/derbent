@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
-import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
@@ -181,6 +180,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	/** Configures internal drag-and-drop for reordering items within the backlog. This is separate from external drag to sprint items. */
+	@SuppressWarnings ("unchecked")
 	private void configureInternalDragAndDrop() {
 		final var grid = getGrid();
 		if (grid == null) {
@@ -313,8 +313,10 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
+	@Override
 	public boolean isDragEnabled() { return dragEnabled; }
 
+	@Override
 	public boolean isDropEnabled() {
 		// Backlog can always receive drops from sprint items
 		return true;
@@ -349,6 +351,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
+	@Override
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
 		final var grid = getGrid();

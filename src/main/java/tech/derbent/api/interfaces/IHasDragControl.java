@@ -39,22 +39,18 @@ import com.vaadin.flow.shared.Registration;
  * // Enable drag-and-drop for a component
  * componentSprintItems.setDragEnabled(true);
  * componentSprintItems.setDropEnabled(true);
- * 
  * // Register listeners via IHasDragControl interface
  * componentSprintItems.addDragStartListener(event -> {
- *     // Handle drag start
+ * 	// Handle drag start
  * });
- * 
  * componentSprintItems.addDropListener(event -> {
- *     // Handle drop
+ * 	// Handle drop
  * });
- * 
  * // Disable drag-and-drop (e.g., when editing is locked)
  * componentBacklog.setDragEnabled(false);
- * 
  * // Check if drag is enabled
  * if (grid.isDragEnabled()) {
- *     // Handle drag operation
+ * 	// Handle drag operation
  * }
  * </pre>
  * <p>
@@ -63,21 +59,22 @@ import com.vaadin.flow.shared.Registration;
  * <pre>
  * public class CComponentListSprintItems extends CComponentListEntityBase implements IHasDragControl {
  *
- *     private boolean dragEnabled = false;
+ * 	private boolean dragEnabled = false;
  *
- *     &#64;Override
- *     public void setDragEnabled(boolean enabled) {
- *         this.dragEnabled = enabled;
- *         if (grid != null) {
- *             grid.setDragEnabled(enabled);  // Use CGrid's IHasDragControl method
- *             LOGGER.debug("[DragDebug] Drag {} for {}", enabled ? "enabled" : "disabled", getClass().getSimpleName());
- *         }
- *     }
+ * 	&#64;Override
+ * 	public void setDragEnabled(boolean enabled) {
+ * 		this.dragEnabled = enabled;
+ * 		if (grid != null) {
+ * 			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
+ * 			LOGGER.debug("[DragDebug] Drag {} for {}", enabled ? "enabled" : "disabled", getClass().getSimpleName());
+ * 		}
+ * 	}
  *
- *     &#64;Override
- *     public boolean isDragEnabled() { return dragEnabled; }
+ * 	&#64;Override
+ * 	public boolean isDragEnabled() { return dragEnabled; }
  * }
- * </pre> */
+ * </pre>
+ */
 public interface IHasDragControl {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(IHasDragControl.class);
@@ -112,28 +109,6 @@ public interface IHasDragControl {
 	 * @return true if drop operations are enabled, false otherwise */
 	boolean isDropEnabled();
 
-	/** Notifies all registered drag start listeners.
-	 * <p>
-	 * This method is called when a drag operation starts. It automatically notifies all registered drag start listeners with proper error handling.
-	 * Implementations can call this method to propagate drag start events up the component hierarchy.
-	 * @param event The drag start event to notify listeners about */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
-	default void notifyDragStartListeners(final GridDragStartEvent<?> event) {
-		if (getDragStartListeners().isEmpty()) {
-			return;
-		}
-		LOGGER.debug("[DragDebug] {} notifying {} drag start listeners", getClass().getSimpleName(), getDragStartListeners().size());
-		for (final ComponentEventListener listener : getDragStartListeners()) {
-			try {
-				listener.onComponentEvent(event);
-			} catch (final Exception e) {
-				LOGGER.error("[DragDebug] Error notifying drag start listener in {}: {}", getClass().getSimpleName(), e.getMessage());
-			}
-		}
-	}
-
 	/** Notifies all registered drag end listeners.
 	 * <p>
 	 * This method is called when a drag operation ends. It automatically notifies all registered drag end listeners with proper error handling.
@@ -152,6 +127,28 @@ public interface IHasDragControl {
 				listener.onComponentEvent(event);
 			} catch (final Exception e) {
 				LOGGER.error("[DragDebug] Error notifying drag end listener in {}: {}", getClass().getSimpleName(), e.getMessage());
+			}
+		}
+	}
+
+	/** Notifies all registered drag start listeners.
+	 * <p>
+	 * This method is called when a drag operation starts. It automatically notifies all registered drag start listeners with proper error handling.
+	 * Implementations can call this method to propagate drag start events up the component hierarchy.
+	 * @param event The drag start event to notify listeners about */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	default void notifyDragStartListeners(final GridDragStartEvent<?> event) {
+		if (getDragStartListeners().isEmpty()) {
+			return;
+		}
+		LOGGER.debug("[DragDebug] {} notifying {} drag start listeners", getClass().getSimpleName(), getDragStartListeners().size());
+		for (final ComponentEventListener listener : getDragStartListeners()) {
+			try {
+				listener.onComponentEvent(event);
+			} catch (final Exception e) {
+				LOGGER.error("[DragDebug] Error notifying drag start listener in {}: {}", getClass().getSimpleName(), e.getMessage());
 			}
 		}
 	}
@@ -190,9 +187,9 @@ public interface IHasDragControl {
 	 * grid.addDragEndListener(event -> notifyEvents(event));
 	 * grid.addDropListener(event -> notifyEvents(event));
 	 * </pre>
+	 *
 	 * @param event The component event to process and notify listeners about */
 	@SuppressWarnings ({
-			"rawtypes", "unchecked"
 	})
 	default void notifyEvents(final ComponentEvent<?> event) {
 		try {
