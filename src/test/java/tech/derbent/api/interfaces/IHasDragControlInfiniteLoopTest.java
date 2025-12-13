@@ -21,8 +21,7 @@ import tech.derbent.api.interfaces.drag.CDropEvent;
  * <li>setupChildDragDropForwarding() properly accepts a child parameter</li>
  * <li>Events are forwarded from child to parent without infinite loops</li>
  * <li>Event notification only happens once per event</li>
- * </ol>
- */
+ * </ol> */
 class IHasDragControlInfiniteLoopTest {
 
 	/** Mock child component that implements IHasDragControl for testing. */
@@ -185,14 +184,15 @@ class IHasDragControlInfiniteLoopTest {
 		final MockChildComponent child = new MockChildComponent();
 		parent.setupChildDragDropForwarding(child);
 		final Grid<String> mockGrid = new Grid<>();
-		// Fire 3 different events
+		// Fire 3 different events and verify each triggers exactly 1 notification
 		child.notifyDragStartListeners(new CDragStartEvent<>(mockGrid, List.of("item1"), true));
+		assertEquals(1, parent.getNotifyCallCount(), "Drag start event should trigger exactly one notification");
 		parent.resetNotifyCallCount();
 		child.notifyDragEndListeners(new CDragEndEvent(mockGrid, true));
+		assertEquals(1, parent.getNotifyCallCount(), "Drag end event should trigger exactly one notification");
 		parent.resetNotifyCallCount();
 		child.notifyDropListeners(new CDropEvent<>(mockGrid, List.of("item1"), mockGrid, null, null, true));
-		// Each event should have caused exactly 1 notification
-		assertEquals(1, parent.getNotifyCallCount(), "Each event should trigger exactly one notification");
+		assertEquals(1, parent.getNotifyCallCount(), "Drop event should trigger exactly one notification");
 	}
 
 	/** Basic sanity test that the interface is available and functional. */
