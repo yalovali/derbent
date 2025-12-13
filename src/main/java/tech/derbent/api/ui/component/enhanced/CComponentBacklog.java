@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDropEvent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
@@ -193,8 +193,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		grid.setDropEnabled(true); // Use CGrid's IHasDragControl method
 		// Track dragged item for internal reordering
 		grid.addEventListener_dragStart(event -> {
-			final GridDragStartEvent<CProjectItem<?>> gridEvent = (GridDragStartEvent<CProjectItem<?>>) event;
-			final List<CProjectItem<?>> items = gridEvent.getDraggedItems();
+			@SuppressWarnings ("unchecked")
+			final CDragStartEvent<CProjectItem<?>> dragEvent = (CDragStartEvent<CProjectItem<?>>) event;
+			final List<CProjectItem<?>> items = dragEvent.getDraggedItems();
 			if (!items.isEmpty()) {
 				draggedItem = items.get(0);
 				LOGGER.debug("Started dragging backlog item for reordering: {}", draggedItem.getId());
@@ -211,7 +212,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		});
 		// Handle internal drops (reordering within backlog)
 		grid.addEventListener_dragDrop(e -> {
-			final GridDropEvent<CProjectItem<?>> event = (GridDropEvent<CProjectItem<?>>) e;
+			@SuppressWarnings ("unchecked")
+			final CDropEvent<CProjectItem<?>> event = (CDropEvent<CProjectItem<?>>) e;
 			final CProjectItem<?> targetItem = event.getDropTargetItem().orElse(null);
 			final GridDropLocation dropLocation = event.getDropLocation();
 			// If draggedItem is null, this is an external drop (from masterGrid)

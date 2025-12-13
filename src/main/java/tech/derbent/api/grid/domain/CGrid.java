@@ -37,6 +37,9 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IStateOwnerComponent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDropEvent;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
@@ -95,10 +98,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 
 	// Drag control state
 	private boolean dragEnabled = false;
-	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
 	/** Constructor for CGrid with entity class.
 	 * @param entityClass The entity class for the grid */
 	Class<EntityClass> clazz;
@@ -113,6 +116,62 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		setEmptyStateText("No entites ...");
 		setClazz(class1);
 		initializeGrid();
+	}
+
+	/** Override to hook into Vaadin Grid's drag start events and convert to our custom event type.
+	 * <p>
+	 * This is where CGrid bridges Vaadin Grid events to our unified IHasDragControl event system. */
+	@Override
+	@SuppressWarnings ("unchecked")
+	public void addEventListener_dragStart(final ComponentEventListener<CDragStartEvent<?>> listener) {
+		dragStartListeners.add(listener);
+		// Only register with Vaadin Grid once (on first listener)
+		if (dragStartListeners.size() == 1) {
+			super.addDragStartListener(gridEvent -> {
+				// Convert Vaadin GridDragStartEvent to our CDragStartEvent
+				final CDragStartEvent<EntityClass> customEvent = new CDragStartEvent<>(this, new ArrayList<>(gridEvent.getDraggedItems()),
+						gridEvent.isFromClient());
+				// Notify all our listeners
+				notifyDragStartListeners(customEvent);
+			});
+		}
+	}
+
+	/** Override to hook into Vaadin Grid's drag end events and convert to our custom event type. */
+	@Override
+	public void addEventListener_dragEnd(final ComponentEventListener<CDragEndEvent> listener) {
+		dragEndListeners.add(listener);
+		// Only register with Vaadin Grid once (on first listener)
+		if (dragEndListeners.size() == 1) {
+			super.addDragEndListener(gridEvent -> {
+				// Convert Vaadin GridDragEndEvent to our CDragEndEvent
+				final CDragEndEvent customEvent = new CDragEndEvent(this, gridEvent.isFromClient());
+				// Notify all our listeners
+				notifyDragEndListeners(customEvent);
+			});
+		}
+	}
+
+	/** Override to hook into Vaadin Grid's drop events and convert to our custom event type. */
+	@Override
+	@SuppressWarnings ("unchecked")
+	public void addEventListener_dragDrop(final ComponentEventListener<CDropEvent<?>> listener) {
+		dropListeners.add(listener);
+		// Only register with Vaadin Grid once (on first listener)
+		if (dropListeners.size() == 1) {
+			super.addDropListener(gridEvent -> {
+				// Convert Vaadin GridDropEvent to our CDropEvent
+				// Note: We need to track dragged items from drag start - for now pass empty list
+				// The drag source tracking is handled by CPageService
+				final CDropEvent<EntityClass> customEvent = new CDropEvent<>(this, new ArrayList<>(), // Dragged items tracked elsewhere
+						gridEvent.getSource(), // Drag source
+						gridEvent.getDropTargetItem().orElse(null), // Target item
+						gridEvent.getDropLocation(), // Drop location
+						gridEvent.isFromClient());
+				// Notify all our listeners
+				notifyDropListeners(customEvent);
+			});
+		}
 	}
 
 	public Column<EntityClass> addBooleanColumn(final ValueProvider<EntityClass, Boolean> valueProvider, final String header, final String trueText,
@@ -545,14 +604,14 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	}
 
 	@Override
-	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
+	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
 
 	@Override
-	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners() { return dropListeners; }
 	// ==================== IStateOwnerComponent Implementation ====================
 
 	@Override

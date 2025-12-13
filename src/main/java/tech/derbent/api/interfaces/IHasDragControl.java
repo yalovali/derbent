@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDropEvent;
 
 /** Unified interface for components that support drag-and-drop functionality.
  * <p>
@@ -85,27 +85,27 @@ public interface IHasDragControl {
 	 * </p>
 	 * @param listener the listener to add
 	 * @return a registration object for removing the listener */
-	default void addEventListener_dragDrop(ComponentEventListener<GridDropEvent<?>> listener) {
+	default void addEventListener_dragDrop(ComponentEventListener<CDropEvent<?>> listener) {
 		getDropListeners().add(listener);
 	}
 
 	/** Adds a listener for drag end events.
 	 * @param listener the listener to be notified when drag ends
 	 * @return a registration object that can be used to remove the listener */
-	default void addEventListener_dragEnd(ComponentEventListener<GridDragEndEvent<?>> listener) {
+	default void addEventListener_dragEnd(ComponentEventListener<CDragEndEvent> listener) {
 		getDragEndListeners().add(listener);
 	}
 
 	/** Adds a listener for drag start events.
 	 * @param listener the listener to be notified when drag starts
 	 * @return a registration object that can be used to remove the listener */
-	default void addEventListener_dragStart(ComponentEventListener<GridDragStartEvent<?>> listener) {
+	default void addEventListener_dragStart(ComponentEventListener<CDragStartEvent<?>> listener) {
 		getDragStartListeners().add(listener);
 	}
 
-	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners();
-	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners();
-	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners();
+	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners();
+	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners();
+	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners();
 	/** Checks whether drag-and-drop functionality is currently enabled.
 	 * <p>
 	 * This can be used to conditionally show drag handles, change cursor styles, or display UI feedback about the component's drag state.
@@ -125,7 +125,7 @@ public interface IHasDragControl {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	default void notifyDragEndListeners(final GridDragEndEvent<?> event) {
+	default void notifyDragEndListeners(final CDragEndEvent event) {
 		if (getDragEndListeners().isEmpty()) {
 			return;
 		}
@@ -147,7 +147,7 @@ public interface IHasDragControl {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	default void notifyDragStartListeners(final GridDragStartEvent<?> event) {
+	default void notifyDragStartListeners(final CDragStartEvent<?> event) {
 		if (getDragStartListeners().isEmpty()) {
 			return;
 		}
@@ -169,7 +169,7 @@ public interface IHasDragControl {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	default void notifyDropListeners(final GridDropEvent<?> event) {
+	default void notifyDropListeners(final CDropEvent<?> event) {
 		if (getDropListeners().isEmpty()) {
 			return;
 		}
@@ -191,21 +191,21 @@ public interface IHasDragControl {
 	 * Usage example:
 	 *
 	 * <pre>
-	 * grid.addDragStartListener(event -> notifyEvents(event));
-	 * grid.addDragEndListener(event -> notifyEvents(event));
-	 * grid.addDropListener(event -> notifyEvents(event));
+	 * addEventListener_dragStart(event -> notifyEvents(event));
+	 * addEventListener_dragEnd(event -> notifyEvents(event));
+	 * addEventListener_dragDrop(event -> notifyEvents(event));
 	 * </pre>
 	 *
 	 * @param event The component event to process and notify listeners about */
 	@SuppressWarnings ({})
 	default void notifyEvents(final ComponentEvent<?> event) {
 		try {
-			if (event instanceof GridDragStartEvent<?>) {
-				notifyDragStartListeners((GridDragStartEvent<?>) event);
-			} else if (event instanceof GridDropEvent<?>) {
-				notifyDropListeners((GridDropEvent<?>) event);
-			} else if (event instanceof GridDragEndEvent<?>) {
-				notifyDragEndListeners((GridDragEndEvent<?>) event);
+			if (event instanceof CDragStartEvent<?>) {
+				notifyDragStartListeners((CDragStartEvent<?>) event);
+			} else if (event instanceof CDropEvent<?>) {
+				notifyDropListeners((CDropEvent<?>) event);
+			} else if (event instanceof CDragEndEvent) {
+				notifyDragEndListeners((CDragEndEvent) event);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error in notifyEvents for event: {}", event.toString(), e);
