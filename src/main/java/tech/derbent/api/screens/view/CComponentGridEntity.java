@@ -1097,25 +1097,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@SuppressWarnings ({
 			"rawtypes"
 	})
+	/** Sets up drag-drop event forwarding from grid to parent component.
+	 * <p>
+	 * Uses the interface's default setupChildDragDropForwarding() method to eliminate code duplication. */
 	private void setupGridDragDropListeners() {
 		Check.notNull(grid, "Grid must be created before setting up drag-drop listeners");
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Setting up grid drag-drop listeners");
-		// Add drag start listener to grid
-		grid.addDragStartListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag start detected, notifying {} listeners", getDragStartListeners().size());
-			notifyDragStartListeners((GridDragStartEvent) event);
-		});
-		// Add drag end listener to grid
-		grid.addDragEndListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", getDragEndListeners().size());
-			notifyDragEndListeners((GridDragEndEvent<?>) event);
-		});
-		// Add drop listener to grid
-		grid.addDropListener(event -> {
-			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drop detected, notifying {} listeners", getDropListeners().size());
-			notifyDropListeners((GridDropEvent<?>) event);
-		});
-		LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag-drop listeners setup complete");
+		// Use interface's default method for forwarding - eliminates duplicate code
+		setupChildDragDropForwarding(grid);
 	}
 
 	@Override

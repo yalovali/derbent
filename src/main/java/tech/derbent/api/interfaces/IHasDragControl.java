@@ -206,6 +206,60 @@ public interface IHasDragControl {
 		}
 	}
 
+	/** Sets up automatic forwarding of drag-drop events from a child component to this parent component.
+	 * <p>
+	 * This is the standard pattern for event propagation in the component hierarchy. When a child component fires drag-drop events, they are
+	 * automatically forwarded to this parent's listeners, enabling recursive event bubbling up to the page service level.
+	 * <p>
+	 * <b>Usage in parent components:</b>
+	 *
+	 * <pre>
+	 * // In parent component's initialization
+	 * protected void setupChildComponents() {
+	 * 	CGrid<Entity> grid = new CGrid<>(Entity.class);
+	 * 	setupChildDragDropForwarding(grid); // Automatically forwards grid's events to parent
+	 * }
+	 * </pre>
+	 * <p>
+	 * <b>This eliminates the need for manual forwarding code like:</b>
+	 *
+	 * <pre>
+	 * grid.addDragStartListener(event -> notifyDragStartListeners(event));
+	 * grid.addDragEndListener(event -> notifyDragEndListeners(event));
+	 * grid.addDropListener(event -> notifyDropListeners(event));
+	 * </pre>
+	 *
+	 * @param child The child component implementing IHasDragControl whose events should be forwarded to this parent */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	default void setupChildDragDropForwarding(final IHasDragControl child) {
+		if (child == null) {
+			LOGGER.warn("Cannot setup drag-drop forwarding for null child component");
+			return;
+		}
+		LOGGER.debug("[DragDebug] Setting up drag-drop forwarding from child {} to parent {}", child.getClass().getSimpleName(),
+				getClass().getSimpleName());
+		// Forward drag start events from child to parent
+		child.addDragStartListener(event -> {
+			LOGGER.debug("[DragDebug] Forwarding drag start from {} to {} ({} listeners)", child.getClass().getSimpleName(),
+					getClass().getSimpleName(), getDragStartListeners().size());
+			notifyDragStartListeners((GridDragStartEvent<?>) event);
+		});
+		// Forward drag end events from child to parent
+		child.addDragEndListener(event -> {
+			LOGGER.debug("[DragDebug] Forwarding drag end from {} to {} ({} listeners)", child.getClass().getSimpleName(),
+					getClass().getSimpleName(), getDragEndListeners().size());
+			notifyDragEndListeners((GridDragEndEvent<?>) event);
+		});
+		// Forward drop events from child to parent
+		child.addDropListener(event -> {
+			LOGGER.debug("[DragDebug] Forwarding drop from {} to {} ({} listeners)", child.getClass().getSimpleName(), getClass().getSimpleName(),
+					getDropListeners().size());
+			notifyDropListeners((GridDropEvent<?>) event);
+		});
+	}
+
 	/** Enables or disables drag-and-drop functionality for this component.
 	 * <p>
 	 * When disabled, the component should not allow drag operations to start, but should still support drop operations if configured as a drop

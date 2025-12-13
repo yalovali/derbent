@@ -676,29 +676,39 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		setupDragDropForwarding();
 	}
 
-	/** Sets up forwarding of Grid's internal drag-drop events to IHasDragControl listeners.
+	/** Sets up forwarding of Vaadin Grid's internal drag-drop events to IHasDragControl listeners.
 	 * <p>
-	 * This ensures that CGrid's internal Grid events are propagated to all registered IHasDragControl listeners, enabling the recursive event
-	 * propagation pattern where events bubble up through the component hierarchy. */
+	 * <b>Special Case:</b> CGrid extends Vaadin's Grid class, so it must use super.addDragStartListener() to listen to the underlying Grid's native
+	 * events. This is different from other components that use the interface's setupChildDragDropForwarding() method.
+	 * <p>
+	 * <b>Why CGrid is different:</b>
+	 * <ul>
+	 * <li>CGrid extends Grid and wraps its drag-drop functionality</li>
+	 * <li>Must call super.addXxxListener() to intercept Vaadin Grid's native events</li>
+	 * <li>Cannot use setupChildDragDropForwarding(this) as that would cause infinite recursion</li>
+	 * <li>This is the ONLY class that should call super.addXxxListener() - all others use setupChildDragDropForwarding()</li>
+	 * </ul>
+	 * <p>
+	 * All other components should use the interface's default setupChildDragDropForwarding() method instead. */
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
 	private void setupDragDropForwarding() {
-		// Forward drag start events from Grid to IHasDragControl listeners
+		// Forward drag start events from internal Vaadin Grid to IHasDragControl listeners
 		super.addDragStartListener(event -> {
 			LOGGER.debug("[DragDebug] CGrid: Forwarding drag start event to {} listeners", dragStartListeners.size());
 			for (final ComponentEventListener listener : dragStartListeners) {
 				listener.onComponentEvent(event);
 			}
 		});
-		// Forward drag end events from Grid to IHasDragControl listeners
+		// Forward drag end events from internal Vaadin Grid to IHasDragControl listeners
 		super.addDragEndListener(event -> {
 			LOGGER.debug("[DragDebug] CGrid: Forwarding drag end event to {} listeners", dragEndListeners.size());
 			for (final ComponentEventListener listener : dragEndListeners) {
 				listener.onComponentEvent(event);
 			}
 		});
-		// Forward drop events from Grid to IHasDragControl listeners
+		// Forward drop events from internal Vaadin Grid to IHasDragControl listeners
 		super.addDropListener(event -> {
 			LOGGER.debug("[DragDebug] CGrid: Forwarding drop event to {} listeners", dropListeners.size());
 			for (final ComponentEventListener listener : dropListeners) {
