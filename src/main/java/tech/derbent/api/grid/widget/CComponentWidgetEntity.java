@@ -193,10 +193,10 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	// Drag control state
-	private final boolean dragEnabled = false;
+	private boolean dragEnabled = false;
 	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
 	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
-	private final boolean dropEnabled = false;
+	private boolean dropEnabled = false;
 	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
 	// =============== INSTANCE MEMBERS ===============
 	protected final EntityClass entity;
@@ -308,6 +308,12 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	 * @return the entity */
 	public EntityClass getEntity() { return entity; }
 
+	@Override
+	public boolean isDragEnabled() { return dragEnabled; }
+
+	@Override
+	public boolean isDropEnabled() { return dropEnabled; }
+
 	/** Initializes the widget structure and content. */
 	protected void initializeWidget() {
 		try {
@@ -413,6 +419,18 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	public void saveWidgetState() {
 		// Default implementation: no state to save
 		// Subclasses should override to save their specific UI state
+	}
+
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		dragEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drag {} for widget entity {}", enabled ? "enabled" : "disabled", entity.getClass().getSimpleName());
+	}
+
+	@Override
+	public void setDropEnabled(final boolean enabled) {
+		dropEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drop {} for widget entity {}", enabled ? "enabled" : "disabled", entity.getClass().getSimpleName());
 	}
 
 	public void setSelected(final boolean selected) {

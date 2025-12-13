@@ -128,8 +128,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
 	private static final long serialVersionUID = 1L;
 	// Drag control state
-	private final boolean dragEnabled = false;
-	private final boolean dropEnabled = false;
+	private boolean dragEnabled = false;
+	private boolean dropEnabled = false;
 	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
 	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
 	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
@@ -460,6 +460,24 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
+
+	@Override
+	public boolean isDragEnabled() { return dragEnabled; }
+
+	@Override
+	public boolean isDropEnabled() { return dropEnabled; }
+
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		dragEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
+	}
+
+	@Override
+	public void setDropEnabled(final boolean enabled) {
+		dropEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
+	}
 
 	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {

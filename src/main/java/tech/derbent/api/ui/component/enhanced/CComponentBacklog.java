@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import tech.derbent.api.config.CSpringContext;
@@ -209,7 +210,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			LOGGER.debug("Drag ended from backlog");
 		});
 		// Handle internal drops (reordering within backlog)
-		grid.addDropListener(event -> {
+		grid.addDropListener(e -> {
+			final GridDropEvent<CProjectItem<?>> event = (GridDropEvent<CProjectItem<?>>) e;
 			final CProjectItem<?> targetItem = event.getDropTargetItem().orElse(null);
 			final GridDropLocation dropLocation = event.getDropLocation();
 			// If draggedItem is null, this is an external drop (from masterGrid)
@@ -237,9 +239,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			}
 			try {
 				handleInternalReordering((ISprintableItem) draggedItem, (ISprintableItem) targetItem, dropLocation);
-			} catch (final Exception e) {
-				LOGGER.error("Error handling internal reordering", e);
-				CNotificationService.showException("Error reordering backlog items", e);
+			} catch (final Exception ex) {
+				LOGGER.error("Error handling internal reordering", ex);
+				CNotificationService.showException("Error reordering backlog items", ex);
 			}
 			draggedItem = null;
 		});

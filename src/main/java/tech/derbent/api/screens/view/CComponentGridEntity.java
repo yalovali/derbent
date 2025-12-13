@@ -1165,12 +1165,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		// Add drag end listener to grid
 		grid.addDragEndListener(event -> {
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag end detected, notifying {} listeners", getDragEndListeners().size());
-			notifyDragEndListeners((GridDragEndEvent) event);
+			notifyDragEndListeners((GridDragEndEvent<?>) event);
 		});
 		// Add drop listener to grid
 		grid.addDropListener(event -> {
 			LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drop detected, notifying {} listeners", getDropListeners().size());
-			notifyDropListeners(event);
+			notifyDropListeners((GridDropEvent<?>) event);
 		});
 		LOGGER.debug("[DragDebug] CComponentGridEntity: Grid drag-drop listeners setup complete");
 	}
