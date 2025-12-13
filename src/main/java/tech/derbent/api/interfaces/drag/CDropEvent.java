@@ -61,6 +61,12 @@ public class CDropEvent<T> extends CEvent {
 		return Optional.ofNullable(targetItem);
 	}
 
+	/** Gets the component where items are being dropped (convenience method).
+	 * <p>
+	 * This is equivalent to getSource() but provides clearer semantics for drop operations.
+	 * @return the drop target component (same as getSource()) */
+	public Component getDropTarget() { return (Component) getSource(); }
+
 	/** Gets the item at the drop location (direct access).
 	 * @return the target item, or null if dropping at the end or in an empty grid */
 	public T getTargetItem() { return targetItem; }
