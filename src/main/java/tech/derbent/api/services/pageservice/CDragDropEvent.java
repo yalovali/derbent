@@ -61,6 +61,7 @@ public class CDragDropEvent<T> extends CEvent {
 	 * @param draggedItems the list of items being dragged
 	 * @param dragSource   the component from which items are being dragged */
 	public CDragDropEvent(final List<T> draggedItems, final Object dragSource) {
+		super(dragSource instanceof Component ? (Component) dragSource : null, false);
 		Check.notNull(draggedItems, "draggedItems cannot be null");
 		Check.notNull(dragSource, "dragSource cannot be null");
 		this.draggedItems = draggedItems;
@@ -78,6 +79,7 @@ public class CDragDropEvent<T> extends CEvent {
 	 * @param dropTarget   the component where items are being dropped */
 	public CDragDropEvent(final List<T> draggedItems, final Object dragSource, final T targetItem, final GridDropLocation dropLocation,
 			final Object dropTarget) {
+		super(dropTarget instanceof Component ? (Component) dropTarget : null, false);
 		Check.notNull(draggedItems, "draggedItems cannot be null");
 		Check.notNull(dragSource, "dragSource cannot be null");
 		this.draggedItems = draggedItems;
