@@ -6,8 +6,8 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
@@ -317,9 +317,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	// IDropTarget implementation
 
 	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The GridDragEndEvent from the grid */
+	 * @param event The drag end event from the grid */
 	@Override
-	protected void on_grid_dragEnd(final GridDragEndEvent<CSprintItem> event) {
+	protected void on_grid_dragEnd(final CDragEndEvent event) {
 		super.on_grid_dragEnd(event);
 		try {
 			LOGGER.debug("[DragDebug] CComponentListSprintItems: dragEnd - source=grid");
@@ -329,14 +329,15 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The GridDragStartEvent from the grid */
+	 * @param event The drag start event from the grid */
 	@Override
-	protected void on_grid_dragStart(final GridDragStartEvent<CSprintItem> event) {
+	protected void on_grid_dragStart(final CDragStartEvent<?> event) {
 		super.on_grid_dragStart(event);
 		try {
 			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
-			final Long firstItemId =
-					!event.getDraggedItems().isEmpty() && event.getDraggedItems().get(0) != null ? event.getDraggedItems().get(0).getId() : null;
+			@SuppressWarnings ("unchecked")
+			final List<CSprintItem> items = (List<CSprintItem>) event.getDraggedItems();
+			final Long firstItemId = !items.isEmpty() && items.get(0) != null ? items.get(0).getId() : null;
 			LOGGER.debug("[DragDebug] CComponentListSprintItems: dragStart - source=grid, items={}, firstItemId={}", itemCount, firstItemId);
 		} catch (final Exception ex) {
 			LOGGER.error("Error in drag start handler", ex);
@@ -368,7 +369,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		dragEnabledToBacklog = enabled;
 		final var grid = getGrid();
 		if (grid != null) {
-			grid.setRowsDraggable(enabled);
+			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 			LOGGER.debug("Drag to backlog from sprint items {}", enabled ? "enabled" : "disabled");
 		}
 	}

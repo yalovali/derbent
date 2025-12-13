@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDropEvent;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
@@ -85,10 +85,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	// Drag control state
 	private boolean dragEnabled = false;
-	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
 	protected CButton buttonAdd;
 	protected CButton buttonAddFromList;
 	protected CButton buttonDelete;
@@ -178,48 +178,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return button;
 	}
 
-	/** Adds a listener for drag end events from the grid. Implements IHasDragEnd interface.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag start events from the grid. Implements IHasDragStart interface.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a listener for drop events on the grid. Implements IHasDrop interface.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
-	}
-
 	// IGridRefreshListener implementation
 	/** Adds a listener to be notified when this component's grid data changes. Implements IGridRefreshListener.addRefreshListener()
 	 * @param listener Consumer called when data changes (receives the changed item if available, or null) */
@@ -294,6 +252,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 
 	/** Create and configure the grid component. */
+	@SuppressWarnings ("unchecked")
 	protected void createGrid() {
 		grid = new CGrid<>(entityClass);
 		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);
@@ -311,8 +270,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		// Add double-click listener
 		grid.addItemDoubleClickListener(e -> on_gridItems_doubleClicked(e.getItem()));
 		// Add internal drag event listeners for debug logging
-		grid.addDragStartListener(e -> on_grid_dragStart((GridDragStartEvent<ChildEntity>) e));
-		grid.addDragEndListener(e -> on_grid_dragEnd((GridDragEndEvent<ChildEntity>) e));
+		grid.addEventListener_dragStart(e -> on_grid_dragStart(e));
+		grid.addEventListener_dragEnd(e -> on_grid_dragEnd(e));
 		LOGGER.debug("Grid created and configured for {} (dynamic height: {})", entityClass.getSimpleName(), useDynamicHeight);
 	}
 
@@ -414,13 +373,13 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	@Override
-	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
+	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Get the entity service.
 	 * @return The service */
@@ -658,8 +617,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 
 	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The GridDragEndEvent from the grid */
-	protected void on_grid_dragEnd(final GridDragEndEvent<ChildEntity> event) {
+	 * @param event The drag end event from the grid */
+	protected void on_grid_dragEnd(final CDragEndEvent event) {
 		try {
 			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragEnd - source=grid", entityClass.getSimpleName());
 		} catch (final Exception e) {
@@ -668,8 +627,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 
 	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The GridDragStartEvent from the grid */
-	protected void on_grid_dragStart(final GridDragStartEvent<ChildEntity> event) {
+	 * @param event The drag start event from the grid */
+	protected void on_grid_dragStart(final CDragStartEvent<?> event) {
 		try {
 			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
 			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragStart - source=grid, items={}", entityClass.getSimpleName(), itemCount);
@@ -832,7 +791,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
 		if (grid != null) {
-			grid.setRowsDraggable(enabled);
+			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 			LOGGER.debug("[DragDebug] Drag {} for {} ({})", enabled ? "enabled" : "disabled", getClass().getSimpleName(),
 					entityClass.getSimpleName());
 		}
@@ -847,11 +806,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public void setDropEnabled(final boolean enabled) {
 		dropEnabled = enabled;
 		if (grid != null) {
-			if (enabled) {
-				grid.setDropMode(com.vaadin.flow.component.grid.dnd.GridDropMode.BETWEEN);
-			} else {
-				grid.setDropMode(null);
-			}
+			grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
 			LOGGER.debug("[DragDebug] Drop {} for {} ({})", enabled ? "enabled" : "disabled", getClass().getSimpleName(),
 					entityClass.getSimpleName());
 		}
@@ -913,11 +868,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		// This could be implemented by adding a visual indicator to the component
 		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
 	}
-
-	public void setRowsDraggable(boolean value) {
-		getGrid().setRowsDraggable(true);
-	}
-	// IHasDragControl interface implementation
 
 	/** Set the currently selected item.
 	 * @param item The item to select */

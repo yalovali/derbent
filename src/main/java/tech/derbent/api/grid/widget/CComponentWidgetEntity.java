@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDropEvent;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.function.ValueProvider;
@@ -193,11 +193,11 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	// Drag control state
-	private final boolean dragEnabled = false;
-	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
-	private final boolean dropEnabled = false;
-	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
+	private boolean dragEnabled = false;
+	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
+	private boolean dropEnabled = false;
+	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
 	// =============== INSTANCE MEMBERS ===============
 	protected final EntityClass entity;
 	protected CVerticalLayout layoutLeft = new CVerticalLayout();
@@ -239,48 +239,6 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		addActionButton(VaadinIcon.TRASH, "Delete", "DELETE");
 	}
 
-	/** Adds a listener for drag end events. Implements IHasDragEnd interface.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag start events. Implements IHasDragStart interface.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a listener for drop events. Implements IHasDrop interface.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
-	}
-
 	/** Adds an edit action button to the widget. */
 	protected void addEditAction() {
 		addActionButton(VaadinIcon.EDIT, "Edit", "EDIT");
@@ -298,11 +256,14 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	protected void createThirdLine() throws Exception {}
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
-	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
+	@Override
+	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
-	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	@Override
+	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
-	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
+	@Override
+	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Gets the entity displayed in this widget.
 	 * @return the entity */
@@ -333,6 +294,12 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 			layoutLeft.add(new CDiv("Exception occured"));
 		}
 	}
+
+	@Override
+	public boolean isDragEnabled() { return dragEnabled; }
+
+	@Override
+	public boolean isDropEnabled() { return dropEnabled; }
 
 	/** Checks if the widget is selected.
 	 * @return true if selected */
@@ -413,6 +380,18 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	public void saveWidgetState() {
 		// Default implementation: no state to save
 		// Subclasses should override to save their specific UI state
+	}
+
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		dragEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drag {} for widget entity {}", enabled ? "enabled" : "disabled", entity.getClass().getSimpleName());
+	}
+
+	@Override
+	public void setDropEnabled(final boolean enabled) {
+		dropEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drop {} for widget entity {}", enabled ? "enabled" : "disabled", entity.getClass().getSimpleName());
 	}
 
 	public void setSelected(final boolean selected) {

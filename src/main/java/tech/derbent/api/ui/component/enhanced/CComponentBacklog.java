@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
-import com.vaadin.flow.component.grid.dnd.GridDropMode;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDropEvent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
@@ -180,6 +180,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	/** Configures internal drag-and-drop for reordering items within the backlog. This is separate from external drag to sprint items. */
+	@SuppressWarnings ("unchecked")
 	private void configureInternalDragAndDrop() {
 		final var grid = getGrid();
 		if (grid == null) {
@@ -187,20 +188,21 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			return;
 		}
 		// Enable row dragging for reordering within backlog
-		grid.setRowsDraggable(true);
+		grid.setDragEnabled(true); // Use CGrid's IHasDragControl method
 		// Enable drop mode for receiving drops within same grid
-		grid.setDropMode(GridDropMode.BETWEEN);
+		grid.setDropEnabled(true); // Use CGrid's IHasDragControl method
 		// Track dragged item for internal reordering
-		grid.addDragStartListener(event -> {
-			final GridDragStartEvent<CProjectItem<?>> gridEvent = (GridDragStartEvent<CProjectItem<?>>) event;
-			final List<CProjectItem<?>> items = gridEvent.getDraggedItems();
+		grid.addEventListener_dragStart(event -> {
+			@SuppressWarnings ("unchecked")
+			final CDragStartEvent<CProjectItem<?>> dragEvent = (CDragStartEvent<CProjectItem<?>>) event;
+			final List<CProjectItem<?>> items = dragEvent.getDraggedItems();
 			if (!items.isEmpty()) {
 				draggedItem = items.get(0);
 				LOGGER.debug("Started dragging backlog item for reordering: {}", draggedItem.getId());
 			}
 		});
 		// Handle drag end - notify external handler if set
-		grid.addDragEndListener(event -> {
+		grid.addEventListener_dragEnd(event -> {
 			if (dragEnabled && externalDropHandler != null && draggedItem != null) {
 				// Item was dragged outside the backlog grid
 				LOGGER.debug("Item dragged from backlog: {}", draggedItem.getId());
@@ -209,7 +211,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			LOGGER.debug("Drag ended from backlog");
 		});
 		// Handle internal drops (reordering within backlog)
-		grid.addDropListener(event -> {
+		grid.addEventListener_dragDrop(e -> {
+			@SuppressWarnings ("unchecked")
+			final CDropEvent<CProjectItem<?>> event = (CDropEvent<CProjectItem<?>>) e;
 			final CProjectItem<?> targetItem = event.getDropTargetItem().orElse(null);
 			final GridDropLocation dropLocation = event.getDropLocation();
 			// If draggedItem is null, this is an external drop (from masterGrid)
@@ -237,9 +241,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			}
 			try {
 				handleInternalReordering((ISprintableItem) draggedItem, (ISprintableItem) targetItem, dropLocation);
-			} catch (final Exception e) {
-				LOGGER.error("Error handling internal reordering", e);
-				CNotificationService.showException("Error reordering backlog items", e);
+			} catch (final Exception ex) {
+				LOGGER.error("Error handling internal reordering", ex);
+				CNotificationService.showException("Error reordering backlog items", ex);
 			}
 			draggedItem = null;
 		});
@@ -311,8 +315,10 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
+	@Override
 	public boolean isDragEnabled() { return dragEnabled; }
 
+	@Override
 	public boolean isDropEnabled() {
 		// Backlog can always receive drops from sprint items
 		return true;
@@ -347,11 +353,12 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
+	@Override
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
 		final var grid = getGrid();
 		if (grid != null) {
-			grid.setRowsDraggable(enabled);
+			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 			// LOGGER.debug("External drag from backlog {}", enabled ? "enabled" : "disabled");
 		}
 	}

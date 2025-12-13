@@ -12,9 +12,9 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDropEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -128,11 +128,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
 	private static final long serialVersionUID = 1L;
 	// Drag control state
-	private final boolean dragEnabled = false;
-	private final boolean dropEnabled = false;
-	private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
-	private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
+	private boolean dragEnabled = false;
+	private boolean dropEnabled = false;
+	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private List<EntityClass> allItems = new ArrayList<>();
 	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	private final AlreadySelectedMode alreadySelectedMode;
@@ -198,48 +198,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			LOGGER.error("Error setting up entity selection component", e);
 			CNotificationService.showException("Error creating component", e);
 		}
-	}
-
-	/** Adds a listener for drag end events from the grid. Implements IHasDragEnd interface.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentEntitySelection: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag start events from the grid. Implements IHasDragStart interface.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentEntitySelection: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a listener for drop events on the grid. Implements IHasDrop interface.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentEntitySelection: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
 	}
 
 	// IGridRefreshListener implementation
@@ -455,11 +413,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
-	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
+	@Override
+	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
-	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	@Override
+	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
-	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
+	@Override
+	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {
@@ -501,6 +462,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return Set of currently selected items (never null) */
 	@Override
 	public Set<EntityClass> getValue() { return new HashSet<>(selectedItems); }
+
+	@Override
+	public boolean isDragEnabled() { return dragEnabled; }
+
+	@Override
+	public boolean isDropEnabled() { return dropEnabled; }
 
 	/** Checks if the selection is empty.
 	 * @return true if no items are selected, false otherwise */
@@ -732,6 +699,18 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Deprecated
 	public void reset() {
 		clear();
+	}
+
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		dragEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
+	}
+
+	@Override
+	public void setDropEnabled(final boolean enabled) {
+		dropEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 
 	public void setDynamicHeight(final String maxHeight) {
