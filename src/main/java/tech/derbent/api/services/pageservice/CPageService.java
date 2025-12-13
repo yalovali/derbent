@@ -314,8 +314,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		final Component vaadinComponent = (Component) component;
 		component.addEventListener_dragStart(event -> {
 			try {
-				LOGGER.debug("[DragDebug] CPageService.bindDragStart: Invoking {} on component {}, items={}", methodName,
-						component.getClass().getSimpleName(), event instanceof CDragStartEvent ? ((CDragStartEvent<?>) event).getDraggedItems().size() : 0);
 				// Pass CDragStartEvent as Object for generalization - handlers cast to specific type
 				method.invoke(this, vaadinComponent, event);
 			} catch (final Exception ex) {

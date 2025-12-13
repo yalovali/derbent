@@ -174,21 +174,18 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.info("[DropTargetDebug] Determining target sprint - targetItem: {}, dropTarget: {}", 
 			targetItem != null ? targetItem.getClass().getSimpleName() + "#" + 
 				(targetItem instanceof CEntityDB ? ((CEntityDB<?>) targetItem).getId() : "?") : "null",
-			event.getSource() != null ? event.getSource().getClass().getSimpleName() : "null");
+			event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null");
 		
 		if (targetItem == null) {
 			// no target sprintitem under mouse
-			if (event.getSource() instanceof CComponentGridEntity) {
-				// Dropped on empty area of grid - treat as dropping on the sprint itself
-				final CComponentGridEntity dropTargetGrid = (CComponentGridEntity) event.getSource();
-				final CSprint sprint = (CSprint) dropTargetGrid.getSelectedItem();
-				LOGGER.info("[DropTargetDebug] No target item - using selected sprint from grid: Sprint#{}", 
-					sprint != null ? sprint.getId() : "null");
-				return sprint;
-			} else {
-				LOGGER.warn("[DropTargetDebug] Target item is null and drop target is not CComponentGridEntity, cannot add backlog item to sprint");
-				return null;
-			}
+			Check.instanceOf(event.getDropTarget(), CComponentGridEntity.class, 
+				"Drop target must be CComponentGridEntity when target item is null");
+			// Dropped on empty area of grid - treat as dropping on the sprint itself
+			final CComponentGridEntity dropTargetGrid = (CComponentGridEntity) event.getDropTarget();
+			final CSprint sprint = (CSprint) dropTargetGrid.getSelectedItem();
+			LOGGER.info("[DropTargetDebug] No target item - using selected sprint from grid: Sprint#{}", 
+				sprint != null ? sprint.getId() : "null");
+			return sprint;
 		}
 		if (targetItem instanceof CSprint) {
 			LOGGER.info("[DropTargetDebug] Target is Sprint#{}", ((CSprint) targetItem).getId());
@@ -371,7 +368,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		
 		// Simple logic: Check source and destination to route the drop operation
 		final Object dragSource = event.getDragSource();
-		final Object dropTarget = event.getSource();
+		final Object dropTarget = event.getDropTarget();
 		
 		LOGGER.info("=== Drop on Backlog ===");
 		LOGGER.info("Source: {}", dragSource != null ? dragSource.getClass().getSimpleName() : "null");
