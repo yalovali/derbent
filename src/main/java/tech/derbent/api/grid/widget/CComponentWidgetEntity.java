@@ -21,9 +21,7 @@ import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
-import tech.derbent.api.interfaces.IHasDragEnd;
-import tech.derbent.api.interfaces.IHasDragStart;
-import tech.derbent.api.interfaces.IHasDrop;
+import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
@@ -32,7 +30,7 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
-public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CHorizontalLayout implements IHasDragStart, IHasDragEnd, IHasDrop {
+public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CHorizontalLayout implements IHasDragControl {
 
 	/** Event fired when a widget action is triggered (e.g., delete button clicked). */
 	public static class CEntityWidgetEvent<T extends CEntityDB<?>> extends ComponentEvent<CComponentWidgetEntity<T>> {
@@ -241,6 +239,48 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		addActionButton(VaadinIcon.TRASH, "Delete", "DELETE");
 	}
 
+	/** Adds a listener for drag end events. Implements IHasDragEnd interface.
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDragEndListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		dragEndListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drag end listener, total: {}", dragEndListeners.size());
+		return () -> dragEndListeners.remove(listener);
+	}
+
+	/** Adds a listener for drag start events. Implements IHasDragStart interface.
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDragStartListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		dragStartListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drag start listener, total: {}", dragStartListeners.size());
+		return () -> dragStartListeners.remove(listener);
+	}
+
+	/** Adds a listener for drop events. Implements IHasDrop interface.
+	 * @param listener the listener to be notified when items are dropped
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDropListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drop listener cannot be null");
+		dropListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drop listener, total: {}", dropListeners.size());
+		return () -> dropListeners.remove(listener);
+	}
+
 	/** Adds an edit action button to the widget. */
 	protected void addEditAction() {
 		addActionButton(VaadinIcon.EDIT, "Edit", "EDIT");
@@ -256,53 +296,13 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	protected void createSecondLine() throws Exception {}
 
 	protected void createThirdLine() throws Exception {}
+	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
 
 	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
-
-	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
-
-	/** Adds a listener for drag start events.
-	 * Implements IHasDragStart interface.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag end events.
-	 * Implements IHasDragEnd interface.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drop events.
-	 * Implements IHasDrop interface.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
-	}
 
 	/** Gets the entity displayed in this widget.
 	 * @return the entity */

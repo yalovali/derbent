@@ -37,8 +37,6 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IHasDragControl;
-import tech.derbent.api.interfaces.IHasDragEnd;
-import tech.derbent.api.interfaces.IHasDragStart;
 import tech.derbent.api.interfaces.IStateOwnerComponent;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
@@ -53,7 +51,7 @@ import tech.derbent.api.utils.Check;
  * fields: Small width (100px) - BigDecimal fields: Medium width (120px) - Date fields: Medium width (150px) - Boolean/Status fields: Small-Medium
  * width (100px) - Short text fields: Medium width (200px) - Long text fields: Large width (300px+) - Reference fields: Medium width (200px) */
 // public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<EntityClass> {
-public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwnerComponent, IHasDragStart, IHasDragEnd, IHasDragControl {
+public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwnerComponent, IHasDragControl {
 
 	private static final long serialVersionUID = 1L;
 	public static final String WIDTH_BOOLEAN = "100px";
@@ -257,6 +255,34 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_DECIMAL, key, 0);
+	}
+
+	/** Adds a listener for drag end events.
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDragEndListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		dragEndListeners.add(listener);
+		LOGGER.debug("[DragDebug] CGrid: Added drag end listener, total: {}", dragEndListeners.size());
+		return () -> dragEndListeners.remove(listener);
+	}
+
+	/** Adds a listener for drag start events.
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDragStartListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		dragStartListeners.add(listener);
+		LOGGER.debug("[DragDebug] CGrid: Added drag start listener, total: {}", dragStartListeners.size());
+		return () -> dragStartListeners.remove(listener);
 	}
 
 	/** Adds an editable image column using CPictureSelector in icon mode. Clicking on the profile picture opens a dialog for editing.
@@ -547,38 +573,15 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		return width;
 	}
 
+	@Override
 	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
-
-	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
-
-	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
-
 	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
 
-	/** Adds a listener for drag start events.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CGrid: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
+	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
-	/** Adds a listener for drag end events.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CGrid: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
+	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
 	// ==================== IStateOwnerComponent Implementation ====================
 
 	@Override

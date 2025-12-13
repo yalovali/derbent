@@ -23,9 +23,6 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IHasDragControl;
-import tech.derbent.api.interfaces.IHasDragEnd;
-import tech.derbent.api.interfaces.IHasDragStart;
-import tech.derbent.api.interfaces.IHasDrop;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.screens.service.IOrderedEntity;
@@ -70,8 +67,7 @@ import tech.derbent.api.utils.Check;
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
 		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>,
-		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IHasDragStart, IHasDragEnd, IPageServiceAutoRegistrable, IHasDragControl,
-		IHasDrop {
+		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IPageServiceAutoRegistrable, IHasDragControl {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -180,6 +176,48 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		button.addClickListener(e -> on_buttonFromList_clicked(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
 				alreadySelectedProvider, alreadySelectedMode));
 		return button;
+	}
+
+	/** Adds a listener for drag end events from the grid. Implements IHasDragEnd interface.
+	 * @param listener the listener to be notified when drag ends
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDragEndListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drag end listener cannot be null");
+		dragEndListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drag end listener, total: {}", dragEndListeners.size());
+		return () -> dragEndListeners.remove(listener);
+	}
+
+	/** Adds a listener for drag start events from the grid. Implements IHasDragStart interface.
+	 * @param listener the listener to be notified when drag starts
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDragStartListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drag start listener cannot be null");
+		dragStartListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drag start listener, total: {}", dragStartListeners.size());
+		return () -> dragStartListeners.remove(listener);
+	}
+
+	/** Adds a listener for drop events on the grid. Implements IHasDrop interface.
+	 * @param listener the listener to be notified when items are dropped
+	 * @return a registration object that can be used to remove the listener */
+	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public Registration addDropListener(final ComponentEventListener listener) {
+		Check.notNull(listener, "Drop listener cannot be null");
+		dropListeners.add(listener);
+		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drop listener, total: {}", dropListeners.size());
+		return () -> dropListeners.remove(listener);
 	}
 
 	// IGridRefreshListener implementation
@@ -373,53 +411,16 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public String getCurrentEntityIdString() {
 		return getMasterEntity() != null && getMasterEntity().getId() != null ? getMasterEntity().getId().toString() : null;
 	}
-
-	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
-
-	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
-
-	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
-
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
-	/** Adds a listener for drag start events from the grid.
-	 * Implements IHasDragStart interface.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
+	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
 
-	/** Adds a listener for drag end events from the grid.
-	 * Implements IHasDragEnd interface.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
+	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
-	/** Adds a listener for drop events on the grid.
-	 * Implements IHasDrop interface.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
-	}
+	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Get the entity service.
 	 * @return The service */
