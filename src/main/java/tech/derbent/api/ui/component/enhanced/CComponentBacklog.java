@@ -192,7 +192,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		// Enable drop mode for receiving drops within same grid
 		grid.setDropEnabled(true); // Use CGrid's IHasDragControl method
 		// Track dragged item for internal reordering
-		grid.addDragStartListener(event -> {
+		grid.addEventListener_dragStart(event -> {
 			final GridDragStartEvent<CProjectItem<?>> gridEvent = (GridDragStartEvent<CProjectItem<?>>) event;
 			final List<CProjectItem<?>> items = gridEvent.getDraggedItems();
 			if (!items.isEmpty()) {
@@ -201,7 +201,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			}
 		});
 		// Handle drag end - notify external handler if set
-		grid.addDragEndListener(event -> {
+		grid.addEventListener_dragEnd(event -> {
 			if (dragEnabled && externalDropHandler != null && draggedItem != null) {
 				// Item was dragged outside the backlog grid
 				LOGGER.debug("Item dragged from backlog: {}", draggedItem.getId());
@@ -210,7 +210,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			LOGGER.debug("Drag ended from backlog");
 		});
 		// Handle internal drops (reordering within backlog)
-		grid.addDropListener(e -> {
+		grid.addEventListener_dragDrop(e -> {
 			final GridDropEvent<CProjectItem<?>> event = (GridDropEvent<CProjectItem<?>>) e;
 			final CProjectItem<?> targetItem = event.getDropTargetItem().orElse(null);
 			final GridDropLocation dropLocation = event.getDropLocation();

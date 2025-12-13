@@ -200,48 +200,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Adds a listener for drag end events from the grid. Implements IHasDragEnd interface.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentEntitySelection: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag start events from the grid. Implements IHasDragStart interface.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentEntitySelection: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a listener for drop events on the grid. Implements IHasDrop interface.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentEntitySelection: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
-	}
-
 	// IGridRefreshListener implementation
 	/** Adds a listener to be notified when this component's grid data changes. Implements IGridRefreshListener.addRefreshListener()
 	 * @param listener Consumer called when data changes (receives the changed item if available, or null) */
@@ -455,29 +413,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
+	@Override
 	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
 
+	@Override
 	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
+	@Override
 	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
-
-	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	@Override
-	public boolean isDropEnabled() { return dropEnabled; }
-
-	@Override
-	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
-	}
-
-	@Override
-	public void setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
-		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
-	}
 
 	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {
@@ -519,6 +462,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return Set of currently selected items (never null) */
 	@Override
 	public Set<EntityClass> getValue() { return new HashSet<>(selectedItems); }
+
+	@Override
+	public boolean isDragEnabled() { return dragEnabled; }
+
+	@Override
+	public boolean isDropEnabled() { return dropEnabled; }
 
 	/** Checks if the selection is empty.
 	 * @return true if no items are selected, false otherwise */
@@ -750,6 +699,18 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Deprecated
 	public void reset() {
 		clear();
+	}
+
+	@Override
+	public void setDragEnabled(final boolean enabled) {
+		dragEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
+	}
+
+	@Override
+	public void setDropEnabled(final boolean enabled) {
+		dropEnabled = enabled;
+		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 
 	public void setDynamicHeight(final String maxHeight) {

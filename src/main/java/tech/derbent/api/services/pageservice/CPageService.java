@@ -296,7 +296,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			return;
 		}
 		final Component vaadinComponent = (Component) component;
-		component.addDragEndListener(event -> {
+		component.addEventListener_dragEnd(event -> {
 			try {
 				LOGGER.debug("[DragDebug] CPageService.bindDragEnd: Invoking {} on component {}", methodName, component.getClass().getSimpleName());
 				// GridDragEndEvent doesn't provide dragged items
@@ -329,7 +329,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			return;
 		}
 		final Component vaadinComponent = (Component) component;
-		component.addDragStartListener(event -> {
+		component.addEventListener_dragStart(event -> {
 			try {
 				final GridDragStartEvent<?> gridEvent = event;
 				final List<?> draggedItems = new ArrayList<>(gridEvent.getDraggedItems());
@@ -356,7 +356,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			"rawtypes", "unchecked"
 	})
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
-		component.addDropListener(event -> {
+		component.addEventListener_dragDrop(event -> {
 			try {
 				final GridDropEvent<?> gridEvent = event;
 				LOGGER.info("[DragDebug] CPageService.bindIHasDropEvent: Drop event received on component {}", methodName);

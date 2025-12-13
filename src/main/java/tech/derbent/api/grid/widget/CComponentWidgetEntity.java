@@ -239,48 +239,6 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		addActionButton(VaadinIcon.TRASH, "Delete", "DELETE");
 	}
 
-	/** Adds a listener for drag end events. Implements IHasDragEnd interface.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag start events. Implements IHasDragStart interface.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a listener for drop events. Implements IHasDrop interface.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentWidgetEntity: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
-	}
-
 	/** Adds an edit action button to the widget. */
 	protected void addEditAction() {
 		addActionButton(VaadinIcon.EDIT, "Edit", "EDIT");
@@ -298,21 +256,18 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	protected void createThirdLine() throws Exception {}
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
+	@Override
 	public List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners() { return dragEndListeners; }
 
+	@Override
 	public List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
+	@Override
 	public List<ComponentEventListener<GridDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Gets the entity displayed in this widget.
 	 * @return the entity */
 	public EntityClass getEntity() { return entity; }
-
-	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	@Override
-	public boolean isDropEnabled() { return dropEnabled; }
 
 	/** Initializes the widget structure and content. */
 	protected void initializeWidget() {
@@ -339,6 +294,12 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 			layoutLeft.add(new CDiv("Exception occured"));
 		}
 	}
+
+	@Override
+	public boolean isDragEnabled() { return dragEnabled; }
+
+	@Override
+	public boolean isDropEnabled() { return dropEnabled; }
 
 	/** Checks if the widget is selected.
 	 * @return true if selected */

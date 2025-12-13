@@ -178,48 +178,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return button;
 	}
 
-	/** Adds a listener for drag end events from the grid. Implements IHasDragEnd interface.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag start events from the grid. Implements IHasDragStart interface.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a listener for drop events on the grid. Implements IHasDrop interface.
-	 * @param listener the listener to be notified when items are dropped
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CComponentListEntityBase: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
-	}
-
 	// IGridRefreshListener implementation
 	/** Adds a listener to be notified when this component's grid data changes. Implements IGridRefreshListener.addRefreshListener()
 	 * @param listener Consumer called when data changes (receives the changed item if available, or null) */
@@ -312,8 +270,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		// Add double-click listener
 		grid.addItemDoubleClickListener(e -> on_gridItems_doubleClicked(e.getItem()));
 		// Add internal drag event listeners for debug logging
-		grid.addDragStartListener(e -> on_grid_dragStart((GridDragStartEvent<ChildEntity>) e));
-		grid.addDragEndListener(e -> on_grid_dragEnd((GridDragEndEvent<ChildEntity>) e));
+		grid.addEventListener_dragStart(e -> on_grid_dragStart((GridDragStartEvent<ChildEntity>) e));
+		grid.addEventListener_dragEnd(e -> on_grid_dragEnd((GridDragEndEvent<ChildEntity>) e));
 		LOGGER.debug("Grid created and configured for {} (dynamic height: {})", entityClass.getSimpleName(), useDynamicHeight);
 	}
 

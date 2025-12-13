@@ -28,7 +28,6 @@ import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -255,52 +254,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_DECIMAL, key, 0);
-	}
-
-	/** Adds a listener for drag end events.
-	 * @param listener the listener to be notified when drag ends
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragEndListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag end listener cannot be null");
-		dragEndListeners.add(listener);
-		LOGGER.debug("[DragDebug] CGrid: Added drag end listener, total: {}", dragEndListeners.size());
-		return () -> dragEndListeners.remove(listener);
-	}
-
-	/** Adds a listener for drag start events.
-	 * @param listener the listener to be notified when drag starts
-	 * @return a registration object that can be used to remove the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDragStartListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drag start listener cannot be null");
-		dragStartListeners.add(listener);
-		LOGGER.debug("[DragDebug] CGrid: Added drag start listener, total: {}", dragStartListeners.size());
-		return () -> dragStartListeners.remove(listener);
-	}
-
-	/** Adds a drop listener to this component.
-	 * <p>
-	 * The listener will be notified whenever items are dropped onto this grid. Multiple listeners can be registered, and they will all be notified of
-	 * drop events.
-	 * </p>
-	 * @param listener the listener to add
-	 * @return a registration object for removing the listener */
-	@Override
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addDropListener(final ComponentEventListener listener) {
-		Check.notNull(listener, "Drop listener cannot be null");
-		dropListeners.add(listener);
-		LOGGER.debug("[DragDebug] CGrid: Added drop listener, total: {}", dropListeners.size());
-		return () -> dropListeners.remove(listener);
 	}
 
 	/** Adds an editable image column using CPictureSelector in icon mode. Clicking on the profile picture opens a dialog for editing.
@@ -673,48 +626,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		final GridSingleSelectionModel<EntityClass> sm = (GridSingleSelectionModel<EntityClass>) getSelectionModel();
 		sm.setDeselectAllowed(false);
 		// Forward Grid's internal drag-drop events to IHasDragControl listeners
-		setupDragDropForwarding();
-	}
-
-	/** Sets up forwarding of Vaadin Grid's internal drag-drop events to IHasDragControl listeners.
-	 * <p>
-	 * <b>Special Case:</b> CGrid extends Vaadin's Grid class, so it must use super.addDragStartListener() to listen to the underlying Grid's native
-	 * events. This is different from other components that use the interface's setupChildDragDropForwarding() method.
-	 * <p>
-	 * <b>Why CGrid is different:</b>
-	 * <ul>
-	 * <li>CGrid extends Grid and wraps its drag-drop functionality</li>
-	 * <li>Must call super.addXxxListener() to intercept Vaadin Grid's native events</li>
-	 * <li>Cannot use setupChildDragDropForwarding(this) as that would cause infinite recursion</li>
-	 * <li>This is the ONLY class that should call super.addXxxListener() - all others use setupChildDragDropForwarding()</li>
-	 * </ul>
-	 * <p>
-	 * All other components should use the interface's default setupChildDragDropForwarding() method instead. */
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void setupDragDropForwarding() {
-		// Forward drag start events from internal Vaadin Grid to IHasDragControl listeners
-		super.addDragStartListener(event -> {
-			LOGGER.debug("[DragDebug] CGrid: Forwarding drag start event to {} listeners", dragStartListeners.size());
-			for (final ComponentEventListener listener : dragStartListeners) {
-				listener.onComponentEvent(event);
-			}
-		});
-		// Forward drag end events from internal Vaadin Grid to IHasDragControl listeners
-		super.addDragEndListener(event -> {
-			LOGGER.debug("[DragDebug] CGrid: Forwarding drag end event to {} listeners", dragEndListeners.size());
-			for (final ComponentEventListener listener : dragEndListeners) {
-				listener.onComponentEvent(event);
-			}
-		});
-		// Forward drop events from internal Vaadin Grid to IHasDragControl listeners
-		super.addDropListener(event -> {
-			LOGGER.debug("[DragDebug] CGrid: Forwarding drop event to {} listeners", dropListeners.size());
-			for (final ComponentEventListener listener : dropListeners) {
-				listener.onComponentEvent(event);
-			}
-		});
+		setupChildDragDropForwarding();
 	}
 
 	@Override
