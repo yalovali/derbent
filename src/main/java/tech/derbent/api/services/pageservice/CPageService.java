@@ -14,8 +14,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
-import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CDropEvent;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.annotations.CFormBuilder;
@@ -331,8 +331,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		final Component vaadinComponent = (Component) component;
 		component.addEventListener_dragStart(event -> {
 			try {
-				final GridDragStartEvent<?> gridEvent = event;
-				final List<?> draggedItems = new ArrayList<>(gridEvent.getDraggedItems());
+				@SuppressWarnings ("unchecked")
+				final CDragStartEvent<?> customEvent = event;
+				final List<?> draggedItems = new ArrayList<>(customEvent.getDraggedItems());
 				final int itemCount = draggedItems != null ? draggedItems.size() : 0;
 				LOGGER.debug("[DragDebug] CPageService.bindDragStart: Invoking {} on component {}, items={}", methodName,
 						component.getClass().getSimpleName(), itemCount);
@@ -358,14 +359,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
 		component.addEventListener_dragDrop(event -> {
 			try {
-				final GridDropEvent<?> gridEvent = event;
+				@SuppressWarnings ("unchecked")
+				final CDropEvent<?> customEvent = event;
 				LOGGER.info("[DragDebug] CPageService.bindIHasDropEvent: Drop event received on component {}", methodName);
 				LOGGER.info("[DragDebug] About to invoke method: {}", method.getName());
 				LOGGER.info("[DragDebug] activeDragSource: {}", activeDragSource != null ? activeDragSource.getClass().getSimpleName() : "null");
 				LOGGER.info("[DragDebug] activeDraggedItems: {}", activeDraggedItems != null ? activeDraggedItems.size() : "null");
-				// Get drop information from GridDropEvent
-				final Object targetItem = gridEvent.getDropTargetItem().orElse(null);
-				final var dropLocation = gridEvent.getDropLocation();
+				// Get drop information from CDropEvent
+				final Object targetItem = customEvent.getDropTargetItem().orElse(null);
+				final var dropLocation = customEvent.getDropLocation();
 				LOGGER.info("[DragDebug] targetItem: {}, dropLocation: {}", targetItem, dropLocation);
 				// Use tracked drag source and items from drag start event
 				// This provides handlers with information about where the drag originated
