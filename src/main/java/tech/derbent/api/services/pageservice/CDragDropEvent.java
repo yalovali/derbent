@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.utils.Check;
 
 /** Wrapper class for drag and drop event data. This class is used to pass drag and drop event information to page service handler methods.
@@ -48,7 +49,7 @@ import tech.derbent.api.utils.Check;
  * </pre>
  *
  * @param <T> The type of items being dragged/dropped */
-public class CDragDropEvent<T> {
+public class CDragDropEvent<T> extends CEvent {
 
 	private final List<T> draggedItems;
 	private final Object dragSource;
@@ -89,7 +90,7 @@ public class CDragDropEvent<T> {
 	/** Gets the first dragged item (convenience method for single-item drags).
 	 * @return the first dragged item, or null if the list is empty */
 	public T getDraggedItem() {
-		return (draggedItems != null && !draggedItems.isEmpty()) ? draggedItems.get(0) : null;
+		return draggedItems != null && !draggedItems.isEmpty() ? draggedItems.get(0) : null;
 	}
 
 	/** Gets the list of items being dragged.

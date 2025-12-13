@@ -14,7 +14,7 @@ import tech.derbent.base.users.domain.CUser;
  * entities such as: - Comments - Notifications - Activity logs - Status changes This class extends CEntityOfProject to maintain project context for
  * all events. */
 @MappedSuperclass
-public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
+public abstract class CEventEntity<EntityClass> extends CEntityDB<EntityClass> {
 
 	// Author of the event
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -30,13 +30,13 @@ public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
 	private LocalDateTime eventDate;
 
 	/** Default constructor for JPA. */
-	protected CEvent() {
+	protected CEventEntity() {
 		super();
 		this.eventDate = LocalDateTime.now();
 	}
 
 	// Default constructor for JPA
-	public CEvent(final Class<EntityClass> clazz) {
+	public CEventEntity(final Class<EntityClass> clazz) {
 		super(clazz);
 		this.eventDate = LocalDateTime.now();
 	}

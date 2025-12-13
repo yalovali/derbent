@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEvent;
+import tech.derbent.api.domains.CEventEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.base.users.domain.CUser;
@@ -23,7 +23,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "ccomment")
 @AttributeOverride (name = "id", column = @Column (name = "comment_id"))
-public class CComment extends CEvent<CComment> {
+public class CComment extends CEventEntity<CComment> {
 
 	public static final String DEFAULT_COLOR = "#B8860B"; // X11 DarkGoldenrod - discussion (darker)
 	public static final String DEFAULT_ICON = "vaadin:comment";

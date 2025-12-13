@@ -3,11 +3,11 @@ package tech.derbent.api.interfaces;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CDropEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 
 /** Unified interface for components that support drag-and-drop functionality.
  * <p>
@@ -198,7 +198,7 @@ public interface IHasDragControl {
 	 *
 	 * @param event The component event to process and notify listeners about */
 	@SuppressWarnings ({})
-	default void notifyEvents(final ComponentEvent<?> event) {
+	default void notifyEvents(final CEvent event) {
 		try {
 			if (event instanceof CDragStartEvent<?>) {
 				notifyDragStartListeners((CDragStartEvent<?>) event);

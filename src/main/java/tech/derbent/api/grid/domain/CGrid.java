@@ -42,6 +42,7 @@ import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CDropEvent;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.services.pageservice.CDragDropEvent;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
@@ -116,62 +117,9 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		setEmptyStateText("No entites ...");
 		setClazz(class1);
 		initializeGrid();
-	}
-
-	/** Override to hook into Vaadin Grid's drag start events and convert to our custom event type.
-	 * <p>
-	 * This is where CGrid bridges Vaadin Grid events to our unified IHasDragControl event system. */
-	@Override
-	@SuppressWarnings ("unchecked")
-	public void addEventListener_dragStart(final ComponentEventListener<CDragStartEvent<?>> listener) {
-		dragStartListeners.add(listener);
-		// Only register with Vaadin Grid once (on first listener)
-		if (dragStartListeners.size() == 1) {
-			super.addDragStartListener(gridEvent -> {
-				// Convert Vaadin GridDragStartEvent to our CDragStartEvent
-				final CDragStartEvent<EntityClass> customEvent = new CDragStartEvent<>(this, new ArrayList<>(gridEvent.getDraggedItems()),
-						gridEvent.isFromClient());
-				// Notify all our listeners
-				notifyDragStartListeners(customEvent);
-			});
-		}
-	}
-
-	/** Override to hook into Vaadin Grid's drag end events and convert to our custom event type. */
-	@Override
-	public void addEventListener_dragEnd(final ComponentEventListener<CDragEndEvent> listener) {
-		dragEndListeners.add(listener);
-		// Only register with Vaadin Grid once (on first listener)
-		if (dragEndListeners.size() == 1) {
-			super.addDragEndListener(gridEvent -> {
-				// Convert Vaadin GridDragEndEvent to our CDragEndEvent
-				final CDragEndEvent customEvent = new CDragEndEvent(this, gridEvent.isFromClient());
-				// Notify all our listeners
-				notifyDragEndListeners(customEvent);
-			});
-		}
-	}
-
-	/** Override to hook into Vaadin Grid's drop events and convert to our custom event type. */
-	@Override
-	@SuppressWarnings ("unchecked")
-	public void addEventListener_dragDrop(final ComponentEventListener<CDropEvent<?>> listener) {
-		dropListeners.add(listener);
-		// Only register with Vaadin Grid once (on first listener)
-		if (dropListeners.size() == 1) {
-			super.addDropListener(gridEvent -> {
-				// Convert Vaadin GridDropEvent to our CDropEvent
-				// Note: We need to track dragged items from drag start - for now pass empty list
-				// The drag source tracking is handled by CPageService
-				final CDropEvent<EntityClass> customEvent = new CDropEvent<>(this, new ArrayList<>(), // Dragged items tracked elsewhere
-						gridEvent.getSource(), // Drag source
-						gridEvent.getDropTargetItem().orElse(null), // Target item
-						gridEvent.getDropLocation(), // Drop location
-						gridEvent.isFromClient());
-				// Notify all our listeners
-				notifyDropListeners(customEvent);
-			});
-		}
+		addDragStartListener(on_grid_dragStart());
+		addDragEndListener(on_grid_dragEnd());
+		addDropListener(on_grid_dragDrop());
 	}
 
 	public Column<EntityClass> addBooleanColumn(final ValueProvider<EntityClass, Boolean> valueProvider, final String header, final String trueText,
@@ -693,6 +641,21 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 
 	@Override
 	public boolean isDropEnabled() { return dropEnabled; }
+
+	private ComponentEventListener<GridDropEvent<EntityClass>> on_grid_dragDrop() {
+		CDragDropEvent<EntityClass> dragEvent = new CDragDropEvent<CGrid.EntityClass>(null, this);
+		notifyEvents(dragEvent);
+	}
+
+	private ComponentEventListener<GridDragEndEvent<EntityClass>> on_grid_dragEnd() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private ComponentEventListener<GridDragStartEvent<EntityClass>> on_grid_dragStart() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/** Restores the grid state from a JSON object.
 	 * @param state The JSON object containing the saved state */
