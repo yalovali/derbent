@@ -231,8 +231,25 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	/** Handles moving a sprint item to a different sprint (from sprint items grid to sprint widget on master grid).
-	 * This method is called when a CSprintItem is dragged from a sprint items grid and dropped onto a sprint widget in the master grid.
+	/** Handles moving a sprint item back to the backlog (from sprint items grid to backlog).
+	 * @param event the drop event containing the dragged sprint item, target position, and drop location */
+	private void handleSprintItemToBacklogDrop(final CDragDropEvent<?> event) {
+		final CSprintItem sprintItem = (CSprintItem) event.getDraggedItem();
+		Check.notNull(sprintItem, "Dragged sprint item cannot be null");
+		LOGGER.info("Moving sprint item {} back to backlog", sprintItem.getId());
+		try {
+			moveSprintItemToBacklog(sprintItem, event);
+			// Refresh grids with state preservation (selection, widget states)
+			refreshAfterBacklogDrop();
+			CNotificationService.showSuccess("Item removed from sprint");
+		} catch (final Exception e) {
+			LOGGER.error("Error moving item to backlog", e);
+			CNotificationService.showException("Error removing item from sprint", e);
+		}
+	}
+
+	/** Handles moving a sprint item to a different sprint (from sprint items grid to sprint widget on master grid). This method is called when a
+	 * CSprintItem is dragged from a sprint items grid and dropped onto a sprint widget in the master grid.
 	 * @param event the drop event containing target and location */
 	private void handleSprintItemToSprintDrop(final CDragDropEvent<?> event) {
 		try {
@@ -250,9 +267,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			final CSprintItem draggedItem = (CSprintItem) draggedObject;
 			Check.notNull(draggedItem.getSprint(), "Sprint item must have a sprint");
-			LOGGER.debug("Moving sprint item {} from sprint {} to sprint {}", 
-					draggedItem.getId(), 
-					draggedItem.getSprint().getId(), 
+			LOGGER.debug("Moving sprint item {} from sprint {} to sprint {}", draggedItem.getId(), draggedItem.getSprint().getId(),
 					targetSprint.getId());
 			// Check if moving to different sprint
 			if (!draggedItem.getSprint().getId().equals(targetSprint.getId())) {
@@ -261,11 +276,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				// Add at end of target sprint
 				final int newOrder = getNextSprintItemOrderForSprint(targetSprint);
 				draggedItem.setItemOrder(newOrder);
-				LOGGER.debug("Sprint item {} moved to sprint {} with order {}", 
-						draggedItem.getId(), targetSprint.getId(), newOrder);
+				LOGGER.debug("Sprint item {} moved to sprint {} with order {}", draggedItem.getId(), targetSprint.getId(), newOrder);
 			} else {
-				LOGGER.debug("Sprint item {} already in sprint {}, no change needed", 
-						draggedItem.getId(), targetSprint.getId());
+				LOGGER.debug("Sprint item {} already in sprint {}, no change needed", draggedItem.getId(), targetSprint.getId());
 			}
 			// Save the updated item
 			sprintItemService.save(draggedItem);
@@ -275,23 +288,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		} catch (final Exception e) {
 			LOGGER.error("Error moving sprint item to sprint", e);
 			CNotificationService.showException("Error moving sprint item", e);
-		}
-	}
-
-	/** Handles moving a sprint item back to the backlog (from sprint items grid to backlog).
-	 * @param event the drop event containing the dragged sprint item, target position, and drop location */
-	private void handleSprintItemToBacklogDrop(final CDragDropEvent<?> event) {
-		final CSprintItem sprintItem = (CSprintItem) event.getDraggedItem();
-		Check.notNull(sprintItem, "Dragged sprint item cannot be null");
-		LOGGER.info("Moving sprint item {} back to backlog", sprintItem.getId());
-		try {
-			moveSprintItemToBacklog(sprintItem, event);
-			// Refresh grids with state preservation (selection, widget states)
-			refreshAfterBacklogDrop();
-			CNotificationService.showSuccess("Item removed from sprint");
-		} catch (final Exception e) {
-			LOGGER.error("Error moving item to backlog", e);
-			CNotificationService.showException("Error removing item from sprint", e);
 		}
 	}
 
@@ -332,25 +328,20 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		try {
 			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-			// Check if this is an internal drag (source list contains the drop target itself)
-			// When target and source are the same, it's a reordering request
 			final boolean isInternalDrag = event.getSourceList().contains(component);
 			final Object draggedItem = event.getDraggedItem();
 			LOGGER.info("=== Drop on Backlog === (internal: {}, draggedItem type: {})", isInternalDrag,
 					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
-			
 			// SCENARIO 1: Internal backlog reordering (backlog → backlog)
-			if (isInternalDrag && draggedItem instanceof CProjectItem) {
+			if (isInternalDrag) {
 				handleBacklogItemReorder(event);
 				return;
 			}
-			
 			// SCENARIO 2: Sprint-to-backlog drop (sprint items → backlog)
 			if (draggedItem instanceof CSprintItem) {
 				handleSprintItemToBacklogDrop(event);
 				return;
 			}
-			
 			// SCENARIO 3: Unknown/unhandled drop scenario
 			LOGGER.error("Unhandled drop on backlog - draggedItem type: {}, isInternal: {}",
 					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null", isInternalDrag);
@@ -378,78 +369,28 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			final Object draggedItem = event.getDraggedItem();
 			LOGGER.info("=== Drop on Master Grid === (internal: {}, draggedItem type: {})", isInternalDrag,
 					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
-			
-			// SCENARIO 1: Internal drag on master grid (reordering sprints themselves)
-			if (isInternalDrag && draggedItem instanceof CSprint) {
-				LOGGER.info("Internal sprint reordering not yet implemented");
-				CNotificationService.showInfo("Sprint reordering will be implemented in a future update");
+			// SCENARIO 1: Internal backlog reordering (backlog → backlog)
+			if (isInternalDrag) {
+				// handleSprintItemReorder(event);
 				return;
 			}
-			
-			// SCENARIO 2: Drag from backlog to master grid (add backlog item to sprint)
-			if (draggedItem instanceof CProjectItem) {
-				handleBacklogToSprintDrop(event);
+			// SCENARIO 2: backlog-to-sprint drop (sprint items → backlog)
+			if (draggedItem instanceof ISprintableItem) {
+				// handleBacklogItemToSprintDrop(event);
 				return;
 			}
-			
-			// SCENARIO 3: Drag sprint item from sprint items grid to different sprint
-			if (draggedItem instanceof CSprintItem) {
-				handleSprintItemToSprintDrop(event);
-				return;
-			}
-			
-			// Unhandled scenario
+			// error scenrio
 			LOGGER.error("Unhandled drop on master grid - draggedItem type: {}, isInternal: {}",
 					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null", isInternalDrag);
 		} catch (final Exception e) {
-			LOGGER.error("Error handling drop on master grid", e);
-			CNotificationService.showException("Error handling drop on master grid", e);
+			LOGGER.error("Error handling drop on backlog", e);
+			CNotificationService.showException("Error handling drop on backlog", e);
 		}
 	}
 
 	public void on_name_change(final Component component, final Object value) {
 		LOGGER.info("function: on_name_change for Component type: {}",
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
-	}
-
-	/** Handles drop events on the sprint items grid (internal reordering within a sprint).
-	 * This method is called when items are reordered within a sprint's item list.
-	 * @param component the sprint items component
-	 * @param value     the drop event */
-	public void on_sprintItems_drop(final Component component, final Object value) {
-		try {
-			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
-			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-			final boolean isInternalDrag = event.getSourceList().contains(component);
-			final Object draggedItem = event.getDraggedItem();
-			LOGGER.info("=== Drop on Sprint Items Grid === (internal: {}, draggedItem type: {})", isInternalDrag,
-					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
-			
-			// SCENARIO 1: Internal reordering within sprint items grid
-			if (isInternalDrag && draggedItem instanceof CSprintItem) {
-				LOGGER.info("Internal sprint item reordering - handled by grid component");
-				// The CComponentListSprintItems handles internal reordering via move up/down buttons
-				// For drag-drop reordering, we would need to implement position-based reordering
-				// similar to backlog items. For now, just log it.
-				CNotificationService.showInfo("Drag-drop reordering within sprint items not yet fully implemented. Use move up/down buttons.");
-				return;
-			}
-			
-			// SCENARIO 2: External drop (from backlog or other sprint)
-			// These should be handled by on_masterGrid_drop, not here
-			if (!isInternalDrag) {
-				LOGGER.debug("External drop on sprint items - will be handled by master grid handler");
-				// Don't handle external drops here - they should go through master grid
-				return;
-			}
-			
-			// Unhandled scenario
-			LOGGER.warn("Unhandled drop on sprint items - draggedItem type: {}, isInternal: {}",
-					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null", isInternalDrag);
-		} catch (final Exception e) {
-			LOGGER.error("Error handling drop on sprint items", e);
-			CNotificationService.showException("Error handling drop on sprint items", e);
-		}
 	}
 
 	public void on_status_change(final Component component, final Object value) {

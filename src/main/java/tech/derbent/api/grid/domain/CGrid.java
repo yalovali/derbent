@@ -648,8 +648,11 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	private ComponentEventListener<GridDropEvent<EntityClass>> on_grid_dragDrop() {
 		return event -> {
 			try {
-				// Convert Vaadin GridDropEvent to our CDropEvent
-				// Note: GridDropEvent doesn't provide dragged items - use tracked items from drag start
+				LOGGER.debug("Handling grid drop event for grid id: {}", getId());
+				if (activeDraggedItems == null) {
+					LOGGER.warn("No active dragged items tracked for drop event");
+					return;
+				}
 				final List<EntityClass> draggedItems = activeDraggedItems != null ? activeDraggedItems : Collections.emptyList();
 				final EntityClass targetItem = event.getDropTargetItem().orElse(null);
 				final GridDropLocation dropLocation = event.getDropLocation();
@@ -679,7 +682,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	private ComponentEventListener<GridDragStartEvent<EntityClass>> on_grid_dragStart() {
 		return event -> {
 			try {
-				// Convert Vaadin GridDragStartEvent to our CDragStartEvent
+				LOGGER.debug("Handling grid drop start for grid id: {}", getId());
 				final List<EntityClass> draggedItems = new ArrayList<>(event.getDraggedItems());
 				// Track dragged items for use in drop event (GridDropEvent doesn't provide them)
 				activeDraggedItems = draggedItems;

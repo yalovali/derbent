@@ -77,10 +77,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private IContentOwner contentOwner;
 	protected CProject currentProject;
 	// Drag control state
-	private boolean dragEnabled = false;
 	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
 	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
-	private boolean dropEnabled = false;
 	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
@@ -196,8 +194,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					final Object result = method.invoke(bean, entity);
 					if (result instanceof Component) {
 						final Component component = (Component) result;
-						// Register component with page service if it implements drag/drop interfaces
-						registerWidgetComponentWithPageService(component, entity);
+						if (result instanceof IHasDragControl) {
+							((IHasDragControl) result).setupChildDragDropForwarding(this);
+						}
 						return component;
 					} else if (result == null) {
 						return createErrorCell("Null widget");
@@ -646,12 +645,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	/** Checks whether drag functionality is currently enabled.
 	 * @return true if drag is enabled, false otherwise */
 	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
+	public boolean isDragEnabled() { return grid.isDragEnabled(); }
 
 	/** Checks whether drop functionality is currently enabled.
 	 * @return true if drop is enabled, false otherwise */
 	@Override
-	public boolean isDropEnabled() { return dropEnabled; }
+	public boolean isDropEnabled() { return grid.isDropEnabled(); }
 
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
 
@@ -792,55 +791,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		} catch (final Exception e) {
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
-		}
-	}
-
-	/** Registers a widget component with the page service for event binding if it implements drag/drop interfaces.
-	 * <p>
-	 * This method enables components created dynamically in grid cells (e.g., CComponentWidgetSprint) to have their drag/drop events automatically
-	 * bound to page service handler methods using the on_{componentName}_{action} pattern. It also sets up listeners on the widget component to
-	 * propagate drag events through this CComponentGridEntity.
-	 * </p>
-	 * @param component the widget component to register
-	 * @param entity    the entity associated with this widget component */
-	@SuppressWarnings ({})
-	private void registerWidgetComponentWithPageService(final Component component, final Object entity) {
-		try {
-			// Only register if contentOwner is a page service implementer
-			if (!(contentOwner instanceof IPageServiceImplementer<?>)) {
-				LOGGER.debug("ContentOwner is not IPageServiceImplementer, skipping widget component registration");
-				return;
-			}
-			// Only register components that implement drag/drop interfaces
-			if (!(component instanceof IHasDragControl)) {
-				LOGGER.debug("Widget component does not implement drag/drop interfaces, skipping registration");
-				return;
-			}
-			final IHasDragControl dragComponent = (IHasDragControl) component;
-			// Store the component mapped to its entity for future reference
-			entityToWidgetMap.put(entity, component);
-			// Set up drag event propagation from widget component to this CComponentGridEntity
-			// Using dedicated notification methods for cleaner, more maintainable code
-			dragComponent.addEventListener_dragStart(event -> {
-				notifyEvents(event);
-			});
-			dragComponent.addEventListener_dragEnd(event -> {
-				notifyEvents(event);
-			});
-			dragComponent.addEventListener_dragDrop(event -> {
-				notifyEvents(event);
-			});
-			// Generate a unique component name for this widget
-			final String componentName = generateWidgetComponentName(component, entity);
-			// Register the component with the page service
-			final IPageServiceImplementer<?> pageServiceImpl = (IPageServiceImplementer<?>) contentOwner;
-			pageServiceImpl.getPageService().registerComponent(componentName, component);
-			// NOTE: Do NOT call bindMethods() here - it's called once during CPageService.bind()
-			// Calling it repeatedly for each widget causes performance issues and duplicate listeners
-			LOGGER.debug("[DragDebug] Registered widget component '{}' of type {} with page service for entity ID {}", componentName,
-					component.getClass().getSimpleName(), entity instanceof CEntityDB ? ((CEntityDB<?>) entity).getId() : "N/A");
-		} catch (final Exception e) {
-			LOGGER.error("Error registering widget component with page service: {}", e.getMessage());
 		}
 	}
 
@@ -997,11 +947,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * @param enabled true to enable drag, false to disable */
 	@Override
 	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		if (grid != null) {
-			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
-			LOGGER.debug("[DragDebug] Drag {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
-		}
+		grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
+		LOGGER.debug("[DragDebug] Drag {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
 	}
 
 	/** Enables or disables drop functionality for the grid.
@@ -1011,11 +958,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * @param enabled true to enable drop, false to disable */
 	@Override
 	public void setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
-		if (grid != null) {
-			grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
-			LOGGER.debug("[DragDebug] Drop {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
-		}
+		grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
+		LOGGER.debug("[DragDebug] Drop {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
 	}
 	// IHasDragControl interface implementation
 

@@ -26,6 +26,7 @@ import tech.derbent.base.users.domain.CUser;
  * instances with configurable grid and detail sections. */
 @PermitAll
 public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
 	// State tracking for performance optimization
@@ -64,13 +65,13 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			grid = new CComponentGridEntity(pageEntity.getGridEntity(), getSessionService());
 			// Set the content owner so widget columns can access page service
 			grid.setContentOwner(this);
-			
+			grid.setDropEnabled(false);
+			grid.setDragEnabled(false);
 			// Register the grid component with page service using unified auto-registration pattern
 			// This enables automatic binding of on_grid_dragStart/dragEnd/drop handlers
 			if (pageService != null) {
 				grid.registerWithPageService(pageService);
 			}
-			
 			// Listen for selection changes from the grid
 			grid.addSelectionChangeListener(event -> {
 				try {
@@ -145,7 +146,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			super.initializePage();
 			LOGGER.debug("Initializing dynamic page view with sections for: {}", pageEntity.getPageTitle());
 			setSizeFull();
-			if ((pageEntity.getPageTitle() != null) && !pageEntity.getPageTitle().trim().isEmpty()) {
+			if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 				getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
 			}
 			initializeEntityService();
@@ -217,7 +218,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			// Select the saved entity in the grid to maintain selection after save
 			// Only select if not already selected to avoid triggering selection change loop
 			final CEntityDB<?> currentSelection = grid.getSelectedItem();
-			if ((currentSelection == null) || !entity.getId().equals(currentSelection.getId())) {
+			if (currentSelection == null || !entity.getId().equals(currentSelection.getId())) {
 				grid.selectEntity(entity);
 				LOGGER.debug("Selected saved entity in grid: {}", entity.getId());
 			} else {
