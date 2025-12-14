@@ -634,8 +634,9 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		});
 		final GridSingleSelectionModel<EntityClass> sm = (GridSingleSelectionModel<EntityClass>) getSelectionModel();
 		sm.setDeselectAllowed(false);
-		// Forward Grid's internal drag-drop events to IHasDragControl listeners
-		setupChildDragDropForwarding();
+		// Note: Do NOT call setupChildDragDropForwarding() here - CGrid already forwards
+		// Vaadin Grid events to IHasDragControl listeners via on_grid_dragStart(), on_grid_dragEnd(), on_grid_dragDrop()
+		// Calling setupChildDragDropForwarding() would create an infinite loop
 	}
 
 	@Override

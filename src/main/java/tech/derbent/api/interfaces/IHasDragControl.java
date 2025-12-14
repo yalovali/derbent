@@ -8,6 +8,7 @@ import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CDropEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.utils.Check;
 
 /** Unified interface for components that support drag-and-drop functionality.
  * <p>
@@ -266,16 +267,18 @@ public interface IHasDragControl {
 	 *
 	 * @param child The child component implementing IHasDragControl whose events should be forwarded to this parent */
 	@SuppressWarnings ({})
-	default void setupChildDragDropForwarding() {
-		addEventListener_dragStart(event -> {
+	default void setupChildDragDropForwarding(final IHasDragControl child) {
+		Check.notNull(child, "Child component cannot be null");
+		// Forward drag start events from child to parent
+		child.addEventListener_dragStart(event -> {
 			notifyDragStartListeners(event);
 		});
 		// Forward drag end events from child to parent
-		addEventListener_dragEnd(event -> {
+		child.addEventListener_dragEnd(event -> {
 			notifyDragEndListeners(event);
 		});
 		// Forward drop events from child to parent
-		addEventListener_dragDrop(event -> {
+		child.addEventListener_dragDrop(event -> {
 			notifyDropListeners(event);
 		});
 	}

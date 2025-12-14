@@ -1058,8 +1058,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * Uses the interface's default setupChildDragDropForwarding() method to eliminate code duplication. */
 	private void setupGridDragDropListeners() {
 		Check.notNull(grid, "Grid must be created before setting up drag-drop listeners");
-		// Use interface's default method for forwarding - eliminates duplicate code
-		setupChildDragDropForwarding();
+		// Use interface's default method for forwarding - forwards grid events to this component's listeners
+		setupChildDragDropForwarding(grid);
 	}
 
 	@Override
