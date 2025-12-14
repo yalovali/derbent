@@ -173,7 +173,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Handles reordering a backlog item within the backlog grid.
-	 * @param event the drop event containing target and location */
+	 * @param event the drop event containing the dragged item, target position, and drop location */
 	private void handleBacklogItemReorder(final CDragDropEvent<?> event) {
 		LOGGER.info("Internal backlog reordering");
 		try {
@@ -249,7 +249,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				return;
 			}
 			final CSprintItem draggedItem = (CSprintItem) draggedObject;
-			LOGGER.info("Moving sprint item {} from sprint {} to sprint {}", 
+			Check.notNull(draggedItem.getSprint(), "Sprint item must have a sprint");
+			LOGGER.debug("Moving sprint item {} from sprint {} to sprint {}", 
 					draggedItem.getId(), 
 					draggedItem.getSprint().getId(), 
 					targetSprint.getId());
@@ -260,10 +261,10 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				// Add at end of target sprint
 				final int newOrder = getNextSprintItemOrderForSprint(targetSprint);
 				draggedItem.setItemOrder(newOrder);
-				LOGGER.info("Sprint item {} moved to sprint {} with order {}", 
+				LOGGER.debug("Sprint item {} moved to sprint {} with order {}", 
 						draggedItem.getId(), targetSprint.getId(), newOrder);
 			} else {
-				LOGGER.info("Sprint item {} already in sprint {}, no change needed", 
+				LOGGER.debug("Sprint item {} already in sprint {}, no change needed", 
 						draggedItem.getId(), targetSprint.getId());
 			}
 			// Save the updated item
@@ -278,7 +279,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Handles moving a sprint item back to the backlog (from sprint items grid to backlog).
-	 * @param event the drop event containing the sprint item and target position */
+	 * @param event the drop event containing the dragged sprint item, target position, and drop location */
 	private void handleSprintItemToBacklogDrop(final CDragDropEvent<?> event) {
 		final CSprintItem sprintItem = (CSprintItem) event.getDraggedItem();
 		Check.notNull(sprintItem, "Dragged sprint item cannot be null");
