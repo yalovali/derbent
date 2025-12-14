@@ -178,11 +178,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public String getDialogTitle() { return "Select Items to Add to Sprint"; }
 
-	/** Gets the current drop handler.
-	 * @return the drop handler, or null if not set
-	 * @deprecated Drop handling moved to CPageService */
-	@Deprecated
-	public Consumer<CProjectItem<?>> getDropHandler() { return null; }
+
 
 	@Override
 	@SuppressWarnings ("unchecked")
