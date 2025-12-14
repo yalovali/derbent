@@ -14,7 +14,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -36,7 +35,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	// Custom components registered for method binding (outside of FormBuilder)
 	private final Map<String, Component> customComponents = new HashMap<>();
 	protected CDetailsBuilder detailsBuilder = null;
-	protected CFormBuilder<?> formBuilder = null;
 	private EntityClass previousEntity;
 	private final IPageServiceImplementer<EntityClass> view;
 
@@ -160,9 +158,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CActivity.class.getSimpleName());
 			Check.notNull(getView(), "View must not be null to bind page service.");
 			detailsBuilder = getView().getDetailsBuilder();
-			if (detailsBuilder != null) {
-				formBuilder = detailsBuilder.getFormBuilder();
-			}
 			bindMethods(this);
 		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CActivity.class.getSimpleName(),
@@ -279,8 +274,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param component  the component implementing IHasDragEnd
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
-	@SuppressWarnings ({
-	})
+	@SuppressWarnings ({})
 	private void bindDragEnd(final IHasDragControl component, final Method method, final String methodName) {
 		Check.instanceOf(component, Component.class, "Component implementing IHasDragEnd must also extend Component");
 		final Component vaadinComponent = (Component) component;
@@ -301,8 +295,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param component  the component implementing IHasDragStart
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
-	@SuppressWarnings ({
-	})
+	@SuppressWarnings ({})
 	private void bindDragStart(final IHasDragControl component, final Method method, final String methodName) {
 		Check.instanceOf(component, Component.class, "Component implementing IHasDragStart must also extend Component");
 		final Component vaadinComponent = (Component) component;
@@ -321,8 +314,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param component  the component implementing IHasDrop
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
-	@SuppressWarnings ({
-	})
+	@SuppressWarnings ({})
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
 		component.addEventListener_dragDrop(event -> {
 			try {
@@ -339,27 +331,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
-		LOGGER.debug("[BindDebug] Starting method binding for page service: {}", page.getClass().getSimpleName());
-		// Combine form components and custom components
-		final Map<String, Component> allComponents = new HashMap<>();
-		// Get components from detailsBuilder's centralized map if available
-		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
-			allComponents.putAll(detailsBuilder.getComponentMap());
-			LOGGER.debug("[BindDebug] Added {} components from detailsBuilder's centralized map", detailsBuilder.getComponentMap().size());
-		}
-		// Also include formBuilder components for backward compatibility
-		if (formBuilder != null) {
-			allComponents.putAll(formBuilder.getComponentMap());
-			LOGGER.debug("[BindDebug] Added {} components from formBuilder", formBuilder.getComponentMap().size());
-		}
-		// Add custom registered components (these take precedence)
-		allComponents.putAll(customComponents);
-		LOGGER.debug("[BindDebug] Added {} custom registered components", customComponents.size());
-		// print the component names for debugging
+		final Map<String, Component> allComponents = getAllComponents();
 		LOGGER.debug("[BindDebug] Total components available for binding: {} - {}", allComponents.size(), allComponents.keySet());
 		// Scan for handler methods matching on_{componentName}_{action} pattern
 		final var methods = page.getClass().getDeclaredMethods();
-		int boundCount = 0;
 		for (final var method : methods) {
 			final var matcher = HANDLER_PATTERN.matcher(method.getName());
 			if (!matcher.matches()) {
@@ -376,9 +351,18 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			LOGGER.debug("[BindDebug] Binding method '{}' to component '{}' (type: {}) for action '{}'", method.getName(), componentName,
 					component.getClass().getSimpleName(), action);
 			bindComponent(method, component, method.getName(), componentName, action);
-			boundCount++;
 		}
-		LOGGER.debug("[BindDebug] Completed method binding - {} methods bound successfully", boundCount);
+	}
+
+	public Map<String, Component> getAllComponents() {
+		final Map<String, Component> allComponents = new HashMap<>();
+		// Get components from detailsBuilder's centralized map if available
+		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
+			allComponents.putAll(detailsBuilder.getComponentMap());
+		}
+		// Add custom registered components (these take precedence)
+		allComponents.putAll(customComponents);
+		return allComponents;
 	}
 
 	protected Checkbox getCheckbox(final String fieldName) {
@@ -418,19 +402,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param fieldName the name of the field/component
 	 * @return the component, or null if not found */
 	protected Component getComponentByName(final String fieldName) {
-		// First check detailsBuilder's centralized map (most comprehensive)
-		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
-			final Component component = detailsBuilder.getComponentMap().get(fieldName);
-			if (component != null) {
-				return component;
-			}
+		final Component component = getAllComponents().get(fieldName);
+		if (component != null) {
+			return component;
 		}
-		// Fall back to formBuilder for backward compatibility
-		if (formBuilder == null) {
-			LOGGER.warn("FormBuilder is null; cannot retrieve component '{}'", fieldName);
-			return null;
-		}
-		return formBuilder.getComponentMap().get(fieldName);
+		LOGGER.warn("Component '{}' not found in detailsBuilder component map.", fieldName);
+		return null;
 	}
 
 	@SuppressWarnings ({
@@ -523,17 +500,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	protected void setComponentValue(final String fieldName, final Object value) {
 		final Component component = getComponentByName(fieldName);
 		Check.notNull(component, String.format("Cannot set value: Component '%s' not found. Check component registration.", fieldName));
-		if (!(component instanceof HasValue)) {
-			throw new IllegalArgumentException(String.format(
-					"Component '%s' does not support setting value (not a HasValue). Found type: %s. Use HasValue components for setValue().",
-					fieldName, component.getClass().getSimpleName()));
-		}
+		Check.instanceOf(component, HasValue.class, String.format("Component '%s' does not support setting value (not a HasValue)", fieldName));
 		try {
 			((HasValue) component).setValue(value);
 		} catch (final Exception e) {
-			// Re-throw with more context
-			throw new IllegalStateException(String.format("Error setting value for component '%s': %s. Value type: %s, Component type: %s", fieldName,
-					e.getMessage(), value != null ? value.getClass().getSimpleName() : "null", component.getClass().getSimpleName()), e);
+			LOGGER.error("Error setting value for component '{}': {}. Value type: {}, Component type: {}", fieldName, e.getMessage(),
+					value != null ? value.getClass().getSimpleName() : "null", component.getClass().getSimpleName());
+			throw e;
 		}
 	}
 

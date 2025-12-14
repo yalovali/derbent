@@ -11,16 +11,16 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.components.component.domain.CComponent;
-import tech.derbent.app.components.componentversiontype.domain.CComponentVersionType;
+import tech.derbent.app.components.component.domain.CProjectComponent;
+import tech.derbent.app.components.componentversiontype.domain.CProjectComponentVersionType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 @Entity
-@Table (name = "\"ccomponentversion\"")
-@AttributeOverride (name = "id", column = @Column (name = "componentversion_id"))
-public class CComponentVersion extends CProjectItem<CComponentVersion> implements IHasStatusAndWorkflow<CComponentVersion> {
+@Table (name = "\"cprojectcomponentversion\"")
+@AttributeOverride (name = "id", column = @Column (name = "projectcomponentversion_id"))
+public class CProjectComponentVersion extends CProjectItem<CProjectComponentVersion> implements IHasStatusAndWorkflow<CProjectComponentVersion> {
 
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - component versions (darker)
 	public static final String DEFAULT_ICON = "vaadin:tag";
@@ -28,34 +28,34 @@ public class CComponentVersion extends CProjectItem<CComponentVersion> implement
 	public static final String ENTITY_TITLE_SINGULAR = "Component Version";
 	public static final String VIEW_NAME = "Component Versions View";
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "component_id", nullable = false)
+	@JoinColumn (name = "projectcomponent_id", nullable = false)
 	@AMetaData (
 			displayName = "Component", required = true, readOnly = false, description = "Parent component", hidden = false,
-			dataProviderBean = "CComponentService"
+			dataProviderBean = "CProjectComponentService"
 	)
-	private CComponent component;
+	private CProjectComponent component;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Version Type", required = false, readOnly = false, description = "Type category of the version", hidden = false,
-			dataProviderBean = "CComponentVersionTypeService", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "CProjectComponentVersionTypeService", setBackgroundFromColor = true, useIcon = true
 	)
-	private CComponentVersionType entityType;
+	private CProjectComponentVersionType entityType;
 	@Column (nullable = true, length = 50)
 	@AMetaData (displayName = "Version Number", required = false, readOnly = false, description = "Version identifier (e.g., 1.0.0)", hidden = false)
 	private String versionNumber;
 
-	public CComponentVersion() {
+	public CProjectComponentVersion() {
 		super();
 		initializeDefaults();
 	}
 
-	public CComponentVersion(final String name, final CProject project) {
-		super(CComponentVersion.class, name, project);
+	public CProjectComponentVersion(final String name, final CProject project) {
+		super(CProjectComponentVersion.class, name, project);
 		initializeDefaults();
 	}
 
-	public CComponent getComponent() { return component; }
+	public CProjectComponent getComponent() { return component; }
 
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
@@ -89,15 +89,15 @@ public class CComponentVersion extends CProjectItem<CComponentVersion> implement
 		super.initializeDefaults();
 	}
 
-	public void setComponent(final CComponent component) {
+	public void setComponent(final CProjectComponent component) {
 		this.component = component;
 		updateLastModified();
 	}
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
-		Check.instanceOf(typeEntity, CComponentVersionType.class, "Type entity must be an instance of CComponentVersionType");
-		entityType = (CComponentVersionType) typeEntity;
+		Check.instanceOf(typeEntity, CProjectComponentVersionType.class, "Type entity must be an instance of CComponentVersionType");
+		entityType = (CProjectComponentVersionType) typeEntity;
 		updateLastModified();
 	}
 

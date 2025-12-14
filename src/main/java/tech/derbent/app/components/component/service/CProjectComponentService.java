@@ -11,8 +11,8 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.components.component.domain.CComponent;
-import tech.derbent.app.components.componenttype.service.CComponentTypeService;
+import tech.derbent.app.components.component.domain.CProjectComponent;
+import tech.derbent.app.components.componenttype.service.CProjectComponentTypeService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
@@ -21,40 +21,40 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Menu ( icon = "vaadin:file-o", title = "Settings.Components")
 @PermitAll
-public class CComponentService extends CProjectItemService<CComponent> implements IEntityRegistrable {
+public class CProjectComponentService extends CProjectItemService<CProjectComponent> implements IEntityRegistrable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentService.class);
-	private final CComponentTypeService componentTypeService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentService.class);
+	private final CProjectComponentTypeService projectComponentTypeService;
 
-	CComponentService(final IComponentRepository repository, final Clock clock, final ISessionService sessionService,
-			final CComponentTypeService componentTypeService, final CProjectItemStatusService projectItemStatusService) {
+	CProjectComponentService(final IProjectComponentRepository repository, final Clock clock, final ISessionService sessionService,
+			final CProjectComponentTypeService projectComponentTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
-		this.componentTypeService = componentTypeService;
+		this.projectComponentTypeService = projectComponentTypeService;
 	}
 
 	@Override
-	public String checkDeleteAllowed(final CComponent entity) {
+	public String checkDeleteAllowed(final CProjectComponent entity) {
 		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override
-	public Class<CComponent> getEntityClass() { return CComponent.class; }
+	public Class<CProjectComponent> getEntityClass() { return CProjectComponent.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return CComponentInitializerService.class; }
+	public Class<?> getInitializerServiceClass() { return CProjectComponentInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceComponent.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceProjectComponent.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CComponent entity) {
+	public void initializeNewEntity(final CProjectComponent entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new component entity");
 		final CProject currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, componentTypeService, projectItemStatusService);
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, projectComponentTypeService, projectItemStatusService);
 		LOGGER.debug("Component initialization complete");
 	}
 }

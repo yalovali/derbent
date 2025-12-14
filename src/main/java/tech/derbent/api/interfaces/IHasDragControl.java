@@ -152,7 +152,6 @@ public interface IHasDragControl {
 		if (getDragStartListeners().isEmpty()) {
 			return;
 		}
-		LOGGER.debug("[DragDebug] {} notifying {} drag start listeners", getClass().getSimpleName(), getDragStartListeners().size());
 		for (final ComponentEventListener listener : getDragStartListeners()) {
 			try {
 				listener.onComponentEvent(event);
@@ -174,7 +173,6 @@ public interface IHasDragControl {
 		if (getDropListeners().isEmpty()) {
 			return;
 		}
-		LOGGER.debug("[DragDebug] {} notifying {} drop listeners", getClass().getSimpleName(), getDropListeners().size());
 		for (final ComponentEventListener listener : getDropListeners()) {
 			try {
 				listener.onComponentEvent(event);

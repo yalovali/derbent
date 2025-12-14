@@ -1,4 +1,4 @@
-package tech.derbent.app.components.componenttype.service;
+package tech.derbent.app.components.component.service;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -13,49 +13,45 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.utils.Check;
-import tech.derbent.app.components.componenttype.domain.CComponentType;
+import tech.derbent.app.components.component.domain.CProjectComponent;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 
-public class CComponentTypeInitializerService extends CInitializerServiceBase {
+public class CProjectComponentInitializerService extends CInitializerServiceBase {
 
-	private static final Class<?> clazz = CComponentType.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentTypeInitializerService.class);
-	private static final String menuOrder = Menu_Order_TYPES + ".30";
-	private static final String menuTitle = MenuTitle_TYPES + ".ComponentTypes";
-	private static final String pageDescription = "Manage componenttype type categories";
-	private static final String pageTitle = "ComponentType Management";
+	private static final Class<?> clazz = CProjectComponent.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentInitializerService.class);
+	private static final String menuOrder = Menu_Order_PROJECT + ".30";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Components";
+	private static final String pageDescription = "Component management";
+	private static final String pageTitle = "Component Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
-		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-   
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
    
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating componenttype type view.");
+			LOGGER.error("Error creating component view.");
 			throw e;
 		}
 	}
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "project"));
+		grid.setColumnFields(List.of("id", "name", "description", "status", "project", "assignedTo", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -70,12 +66,17 @@ public class CComponentTypeInitializerService extends CInitializerServiceBase {
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
-						"Module", "Software modules and packages"
+						"Authentication Module", "User authentication and authorization module"
 				}, {
-						"Library", "Reusable libraries and frameworks"
+						"Payment Gateway Integration", "Third-party payment gateway integration library"
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+				(item, index) -> {
+					final CProjectComponent component = (CProjectComponent) item;
+					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
+					component.setAssignedTo(user);
+				});
 	}
 }

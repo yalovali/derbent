@@ -1,4 +1,4 @@
-package tech.derbent.app.components.componentversion.service;
+package tech.derbent.app.components.componentversiontype.service;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -10,44 +10,49 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.app.components.componentversion.domain.CComponentVersion;
+import tech.derbent.api.utils.Check;
+import tech.derbent.app.components.componentversiontype.domain.CProjectComponentVersionType;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
-public class CComponentVersionInitializerService extends CInitializerServiceBase {
+public class CProjectComponentVersionTypeInitializerService extends CInitializerServiceBase {
 
-	private static final Class<?> clazz = CComponentVersion.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentVersionInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".30";
-	private static final String menuTitle = MenuTitle_PROJECT + ".ComponentVersions";
-	private static final String pageDescription = "ComponentVersion management";
-	private static final String pageTitle = "ComponentVersion Management";
+	private static final Class<?> clazz = CProjectComponentVersionType.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionTypeInitializerService.class);
+	private static final String menuOrder = Menu_Order_TYPES + ".30";
+	private static final String menuTitle = MenuTitle_TYPES + ".ComponentVersionTypes";
+	private static final String pageDescription = "Manage componentversiontype type categories";
+	private static final String pageTitle = "ComponentVersionType Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
+		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "component"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
    
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating componentversion view.");
+			LOGGER.error("Error creating componentversiontype type view.");
 			throw e;
 		}
 	}
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "component", "name", "description", "status", "project", "assignedTo", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "project"));
 		return grid;
 	}
 

@@ -1,8 +1,11 @@
-package tech.derbent.app.components.componentversiontype.service;
+package tech.derbent.app.components.componenttype.service;
 
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -11,18 +14,18 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.components.componentversiontype.domain.CComponentVersionType;
+import tech.derbent.app.components.componenttype.domain.CProjectComponentType;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
-public class CComponentVersionTypeInitializerService extends CInitializerServiceBase {
+public class CProjectComponentTypeInitializerService extends CInitializerServiceBase {
 
-	private static final Class<?> clazz = CComponentVersionType.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentVersionTypeInitializerService.class);
+	private static final Class<?> clazz = CProjectComponentType.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";
-	private static final String menuTitle = MenuTitle_TYPES + ".ComponentVersionTypes";
-	private static final String pageDescription = "Manage componentversiontype type categories";
-	private static final String pageTitle = "ComponentVersionType Management";
+	private static final String menuTitle = MenuTitle_TYPES + ".ComponentTypes";
+	private static final String pageDescription = "Manage componenttype type categories";
+	private static final String pageTitle = "ComponentType Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -45,7 +48,7 @@ public class CComponentVersionTypeInitializerService extends CInitializerService
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating componentversiontype type view.");
+			LOGGER.error("Error creating componenttype type view.");
 			throw e;
 		}
 	}
@@ -62,5 +65,17 @@ public class CComponentVersionTypeInitializerService extends CInitializerService
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		final String[][] nameAndDescriptions = {
+				{
+						"Module", "Software modules and packages"
+				}, {
+						"Library", "Reusable libraries and frameworks"
+				}
+		};
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
 	}
 }

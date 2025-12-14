@@ -14,8 +14,6 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
-import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
@@ -95,8 +93,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 		return componentBacklogItems;
 	}
-
-
 
 	/** Creates a widget component for displaying the given sprint entity.
 	 * @param item the sprint to create a widget for
@@ -284,59 +280,57 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		componentItemDetails.setValue(item);
 	}
 
-
-
+	@SuppressWarnings ("unlikely-arg-type")
 	public void on_backlogItems_drop(final Component component, final Object value) {
-		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
-		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-		// Check if this is an internal drag (source list contains the drop target itself)
-		// When target and source are the same, it's a reordering request
-		final boolean isInternalDrag = event.getSourceList().contains(component);
-		LOGGER.info("=== Drop on Backlog === (internal: {}, target is source: {})", isInternalDrag, 
-				event.getSourceList().contains(component));
-		
-		final Object draggedItem = event.getDraggedItem();
-		
-		// SCENARIO 1: Internal backlog reordering (backlog → backlog)
-		// Target and source are the same = reordering within backlog
-		if (isInternalDrag && draggedItem instanceof CProjectItem) {
-			LOGGER.info("Internal backlog reordering - handling in CPageServiceSprint");
-			try {
-				final CProjectItem<?> projectItem = (CProjectItem<?>) draggedItem;
-				updateBacklogItemOrder(projectItem, event);
-				// Refresh backlog grid to show new order
-				if (componentBacklogItems != null) {
-					componentBacklogItems.refreshGrid();
+		try {
+			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
+			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			// Check if this is an internal drag (source list contains the drop target itself)
+			// When target and source are the same, it's a reordering request
+			final boolean isInternalDrag = event.getSourceList().contains(component);
+			LOGGER.info("=== Drop on Backlog === (internal: {}, target is source: {})", isInternalDrag, event.getSourceList().contains(component));
+			final Object draggedItem = event.getDraggedItem();
+			// SCENARIO 1: Internal backlog reordering (backlog → backlog)
+			// Target and source are the same = reordering within backlog
+			if (isInternalDrag && draggedItem instanceof CProjectItem) {
+				LOGGER.info("Internal backlog reordering - handling in CPageServiceSprint");
+				try {
+					final CProjectItem<?> projectItem = (CProjectItem<?>) draggedItem;
+					updateBacklogItemOrder(projectItem, event);
+					// Refresh backlog grid to show new order
+					if (componentBacklogItems != null) {
+						componentBacklogItems.refreshGrid();
+					}
+					CNotificationService.showSuccess("Backlog item reordered");
+				} catch (final Exception e) {
+					LOGGER.error("Error reordering backlog item", e);
+					CNotificationService.showException("Error reordering backlog item", e);
 				}
-				CNotificationService.showSuccess("Backlog item reordered");
-			} catch (final Exception e) {
-				LOGGER.error("Error reordering backlog item", e);
-				CNotificationService.showException("Error reordering backlog item", e);
+				return;
 			}
-			return;
-		}
-		
-		// SCENARIO 2: Sprint-to-backlog drop (sprint items → backlog)
-		// If dragging from sprint to backlog, move the item back
-		if (draggedItem instanceof CSprintItem) {
-			final CSprintItem sprintItem = (CSprintItem) draggedItem;
-			LOGGER.info("Moving sprint item {} back to backlog", sprintItem.getId());
-			try {
-				moveSprintItemToBacklog(sprintItem, event);
-				// Refresh grids with state preservation (selection, widget states)
-				refreshAfterBacklogDrop();
-				CNotificationService.showSuccess("Item removed from sprint");
-			} catch (final Exception e) {
-				LOGGER.error("Error moving item to backlog", e);
-				CNotificationService.showException("Error removing item from sprint", e);
+			// SCENARIO 2: Sprint-to-backlog drop (sprint items → backlog)
+			// If dragging from sprint to backlog, move the item back
+			if (draggedItem instanceof CSprintItem) {
+				final CSprintItem sprintItem = (CSprintItem) draggedItem;
+				LOGGER.info("Moving sprint item {} back to backlog", sprintItem.getId());
+				try {
+					moveSprintItemToBacklog(sprintItem, event);
+					// Refresh grids with state preservation (selection, widget states)
+					refreshAfterBacklogDrop();
+					CNotificationService.showSuccess("Item removed from sprint");
+				} catch (final Exception e) {
+					LOGGER.error("Error moving item to backlog", e);
+					CNotificationService.showException("Error removing item from sprint", e);
+				}
+				return;
 			}
-			return;
+			// SCENARIO 3: Unknown/unhandled drop scenario
+			LOGGER.error("Unhandled drop scenario - draggedItem type: {}, internal: {}",
+					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null", isInternalDrag);
+		} catch (final Exception e) {
+			LOGGER.error("Error handling drop on backlog", e);
+			CNotificationService.showException("Error handling drop on backlog", e);
 		}
-		
-		// SCENARIO 3: Unknown/unhandled drop scenario
-		LOGGER.warn("Unhandled drop scenario - draggedItem type: {}, internal: {}",
-				draggedItem != null ? draggedItem.getClass().getSimpleName() : "null",
-				isInternalDrag);
 	}
 
 	public void on_description_blur(final Component component, final Object value) {
@@ -349,39 +343,29 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
 
-
-
-	/** Handler for drop events on master grid. Handles reordering sprint items within widgets or dropping backlog items.
-	 * <p>
-	 * This handler supports two scenarios:
-	 * <ol>
-	 * <li>Reordering sprint items within the same sprint (internal drag-drop within widgets)</li>
-	 * <li>Dropping backlog items into sprint widgets</li>
-	 * </ol>
-	 * <p>
-	 * Note: Most drop logic happens at the widget level (CComponentListSprintItems), but this handler can refresh the view after complex operations
-	 * or handle cross-widget drops if needed.
-	 * @param component the master grid component
-	 * @param value     CDragDropEvent containing drop information */
 	public void on_masterGrid_drop(final Component component, final Object value) {
-		if (!(value instanceof CDragDropEvent)) {
-			LOGGER.warn("Drop value is not CDragDropEvent");
-			return;
+		try {
+			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
+			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			final boolean isInternalDrag = event.getSourceList().contains(component);
+			final Object draggedItem = event.getDraggedItem();
+			LOGGER.info("=== Drop on Master Grid === (internal: {}, target is source: {})", isInternalDrag,
+					event.getSourceList().contains(component));
+			if (isInternalDrag) {
+				handleSprintItemReorder(event);
+				return;
+			}
+			if (draggedItem instanceof CProjectItem) {
+				handleBacklogToSprintDrop(event);
+				return;
+			}
+			// Check if reordering sprint item within same sprint (draggedItem is CSprintItem)
+			LOGGER.error("Unhandled drop on master grid - dragged item type: {}",
+					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
+		} catch (final Exception e) {
+			LOGGER.error("Error handling drop on master grid", e);
+			CNotificationService.showException("Error handling drop on master grid", e);
 		}
-		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-		final Object draggedItem = event.getDraggedItem();
-		// Check if dropping backlog item into sprint widget (draggedItem is CProjectItem)
-		if (draggedItem instanceof CProjectItem) {
-			handleBacklogToSprintDrop(event);
-			return;
-		}
-		// Check if reordering sprint item within same sprint (draggedItem is CSprintItem)
-		if (draggedItem instanceof CSprintItem) {
-			handleSprintItemReorder(event);
-			return;
-		}
-		LOGGER.warn("Unhandled drop on master grid - dragged item type: {}",
-				draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
 	}
 
 	public void on_name_change(final Component component, final Object value) {

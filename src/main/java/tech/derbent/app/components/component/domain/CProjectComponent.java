@@ -11,15 +11,15 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.components.componenttype.domain.CComponentType;
+import tech.derbent.app.components.componenttype.domain.CProjectComponentType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 @Entity
-@Table (name = "\"ccomponent\"")
-@AttributeOverride (name = "id", column = @Column (name = "component_id"))
-public class CComponent extends CProjectItem<CComponent> implements IHasStatusAndWorkflow<CComponent> {
+@Table (name = "\"cprojectcomponent\"")
+@AttributeOverride (name = "id", column = @Column (name = "projectcomponent_id"))
+public class CProjectComponent extends CProjectItem<CProjectComponent> implements IHasStatusAndWorkflow<CProjectComponent> {
 
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - component parts (darker)
 	public static final String DEFAULT_ICON = "vaadin:cogs";
@@ -37,15 +37,15 @@ public class CComponent extends CProjectItem<CComponent> implements IHasStatusAn
 			displayName = "Component Type", required = false, readOnly = false, description = "Type category of the component", hidden = false,
 			dataProviderBean = "CComponentTypeService", setBackgroundFromColor = true, useIcon = true
 	)
-	private CComponentType entityType;
+	private CProjectComponentType entityType;
 
-	public CComponent() {
+	public CProjectComponent() {
 		super();
 		initializeDefaults();
 	}
 
-	public CComponent(final String name, final CProject project) {
-		super(CComponent.class, name, project);
+	public CProjectComponent(final String name, final CProject project) {
+		super(CProjectComponent.class, name, project);
 		initializeDefaults();
 	}
 
@@ -85,8 +85,8 @@ public class CComponent extends CProjectItem<CComponent> implements IHasStatusAn
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
-		Check.instanceOf(typeEntity, CComponentType.class, "Type entity must be an instance of CComponentType");
-		entityType = (CComponentType) typeEntity;
+		Check.instanceOf(typeEntity, CProjectComponentType.class, "Type entity must be an instance of CComponentType");
+		entityType = (CProjectComponentType) typeEntity;
 		updateLastModified();
 	}
 }

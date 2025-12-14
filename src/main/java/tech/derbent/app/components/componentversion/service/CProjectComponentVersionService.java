@@ -11,9 +11,9 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.components.component.service.CComponentService;
-import tech.derbent.app.components.componentversion.domain.CComponentVersion;
-import tech.derbent.app.components.componentversiontype.service.CComponentVersionTypeService;
+import tech.derbent.app.components.component.service.CProjectComponentService;
+import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
+import tech.derbent.app.components.componentversiontype.service.CProjectComponentVersionTypeService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
@@ -22,28 +22,28 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Menu ( icon = "vaadin:file-o", title = "Settings.ComponentVersions")
 @PermitAll
-public class CComponentVersionService extends CProjectItemService<CComponentVersion> implements IEntityRegistrable {
+public class CProjectComponentVersionService extends CProjectItemService<CProjectComponentVersion> implements IEntityRegistrable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentVersionService.class);
-	private final CComponentVersionTypeService componentversionTypeService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionService.class);
+	private final CProjectComponentVersionTypeService componentversionTypeService;
 
-	CComponentVersionService(final IComponentVersionRepository repository, final Clock clock, final ISessionService sessionService,
-			final CComponentVersionTypeService componentversionTypeService, final CComponentService cComponentService,
+	CProjectComponentVersionService(final IProjectComponentVersionRepository repository, final Clock clock, final ISessionService sessionService,
+			final CProjectComponentVersionTypeService componentversionTypeService, final CProjectComponentService cComponentService,
 			final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.componentversionTypeService = componentversionTypeService;
 	}
 
 	@Override
-	public String checkDeleteAllowed(final CComponentVersion entity) {
+	public String checkDeleteAllowed(final CProjectComponentVersion entity) {
 		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override
-	public Class<CComponentVersion> getEntityClass() { return CComponentVersion.class; }
+	public Class<CProjectComponentVersion> getEntityClass() { return CProjectComponentVersion.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return CComponentVersionInitializerService.class; }
+	public Class<?> getInitializerServiceClass() { return CProjectComponentVersionInitializerService.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceComponentVersion.class; }
@@ -52,7 +52,7 @@ public class CComponentVersionService extends CProjectItemService<CComponentVers
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CComponentVersion entity) {
+	public void initializeNewEntity(final CProjectComponentVersion entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new componentversion entity");
 		final CProject currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
