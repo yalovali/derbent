@@ -555,10 +555,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * <p>
 	 * Default name is "masterGrid" for master grid-level event handlers like:
 	 * <ul>
-	 * <li>on_masterGrid_dragStart(Component, Object)</li>
-	 * <li>on_masterGrid_dragEnd(Component, Object)</li>
-	 * <li>on_masterGrid_drop(Component, Object)</li>
+	 * <li>on_masterGrid_drop(Component, Object) - handle drop events</li>
 	 * </ul>
+	 * <p>
+	 * Note: dragStart and dragEnd handlers are rarely needed in application code since
+	 * all drag data is carried in events. Use drop handlers with event.getDraggedItem()
+	 * and event.getSourceList() instead.
 	 * <p>
 	 * The name "masterGrid" is used because this grid represents the master component in a master-detail view pattern.
 	 * @return The component name "masterGrid" */
