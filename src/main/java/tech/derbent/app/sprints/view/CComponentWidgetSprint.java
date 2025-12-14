@@ -136,9 +136,9 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			// Enable drag-drop on the grid for external drag-drop operations
 			componentSprintItems.setDragEnabled(true);
 			componentSprintItems.setDropEnabled(true);
-			//
-			//
-			//
+			// Set up drag-drop event forwarding from componentSprintItems to this widget
+			// This ensures events from the internal grid propagate up through the widget hierarchy
+			setupChildDragDropForwarding(componentSprintItems);
 			// Create container for sprint items
 			containerSprintItems = new CDiv();
 			containerSprintItems.getStyle().set("margin-top", "8px").set("padding", "8px").set("background-color", "#F5F5F5")
