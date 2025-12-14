@@ -180,9 +180,21 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
 - Fewer potential bugs
 - Clearer code flow
 
-## CGrid Internal Tracking
+## CGrid Internal Tracking (Framework Boundary Exception)
 
-**Note:** `CGrid` internally tracks `activeDraggedItems` because Vaadin's `GridDropEvent` doesn't provide dragged items. This is acceptable as it's contained within the boundary between Vaadin Grid and our custom event system. Application code should never track drag state manually.
+**Important:** The "No Manual State Tracking" rule applies to **application code** only, not framework boundary layers.
+
+`CGrid` is the **only exception** because it bridges Vaadin Grid to our custom event system:
+- **Why tracking exists**: Vaadin's `GridDropEvent` API limitation - doesn't provide dragged items
+- **Where it lives**: Inside `CGrid` class only (framework boundary)
+- **Scope**: Tracks items from `GridDragStartEvent` to `GridDropEvent` conversion
+- **Cleanup**: Automatically cleared in `GridDragEndEvent` handler
+
+**Key distinction:**
+- ❌ **Application code** (CPageServiceSprint, components) - NEVER track drag state
+- ✅ **Framework boundary** (CGrid Vaadin bridge) - Acceptable for API limitations
+
+Application developers should never need to know about `activeDraggedItems` - it's an internal implementation detail of CGrid's Vaadin Grid integration.
 
 ## Migration from Old Pattern
 

@@ -287,18 +287,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 
 	public void on_backlogItems_drop(final Component component, final Object value) {
-		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDropEvent");
+		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-		// Simple logic: Check source list to detect internal vs external drag
-		final Object dragSource = event.getDragSource();
-		final Object dropTarget = event.getDropTarget();
-		LOGGER.info("=== Drop on Backlog ===");
-		LOGGER.info("Source: {}", dragSource != null ? dragSource.getClass().getSimpleName() : "null");
-		LOGGER.info("Target: {}", dropTarget != null ? dropTarget.getClass().getSimpleName() : "null");
 		// Check if this is an internal drag (source list contains CComponentBacklog)
 		final boolean isInternalDrag = event.getSourceList().stream()
 				.anyMatch(source -> source instanceof CComponentBacklog);
-		LOGGER.info("Is internal drag: {}", isInternalDrag);
+		LOGGER.info("=== Drop on Backlog === (internal: {})", isInternalDrag);
 		// SCENARIO 1: Internal backlog reordering (backlog → backlog)
 		// If source list contains backlog, it's internal reordering - let CComponentBacklog handle it
 		if (isInternalDrag) {
@@ -324,10 +318,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			return;
 		}
 		// SCENARIO 3: Unknown/unhandled drop scenario
-		LOGGER.warn("Unhandled drop scenario - source: {}, target: {}, draggedItem type: {}",
-				dragSource != null ? dragSource.getClass().getSimpleName() : "null",
-				dropTarget != null ? dropTarget.getClass().getSimpleName() : "null",
-				draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
+		LOGGER.warn("Unhandled drop scenario - draggedItem type: {}, internal: {}",
+				draggedItem != null ? draggedItem.getClass().getSimpleName() : "null",
+				isInternalDrag);
 	}
 
 	public void on_description_blur(final Component component, final Object value) {
