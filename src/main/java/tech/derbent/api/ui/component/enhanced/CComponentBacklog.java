@@ -147,8 +147,10 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Registers this component with the page service for automatic event binding.
 	 * <p>
-	 * This component uses "backlogItems" as its name, enabling automatic binding to page service handlers like on_backlogItems_dragStart,
-	 * on_backlogItems_dragEnd, etc.
+	 * This component uses "backlogItems" as its name, enabling automatic binding to page service handlers like
+	 * on_backlogItems_drop, on_backlogItems_change, etc.
+	 * <p>
+	 * Note: dragStart and dragEnd handlers are rarely needed since all drag data is carried in events.
 	 * <p>
 	 * Note: This method only registers the component. The actual method binding happens when CPageService.bind() is called, which occurs once during
 	 * page initialization.
