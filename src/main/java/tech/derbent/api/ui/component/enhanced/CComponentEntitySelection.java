@@ -368,6 +368,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (multiSelect) {
 			grid.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
+		// Set up drag-drop event forwarding from grid to this component
+		setupChildDragDropForwarding(grid);
 		// Note: configureGrid() is called later when entity type is selected
 		LOGGER.debug("Grid created for entity selection component");
 	}
@@ -704,12 +706,18 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Override
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
+		if (grid != null) {
+			grid.setDragEnabled(enabled);
+		}
 		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 
 	@Override
 	public void setDropEnabled(final boolean enabled) {
 		dropEnabled = enabled;
+		if (grid != null) {
+			grid.setDropEnabled(enabled);
+		}
 		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 

@@ -89,7 +89,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		if (componentBacklogItems == null) {
 			componentBacklogItems = new CComponentBacklog(currentSprint);
 			componentBacklogItems.setDragEnabled(true);
-			// Note: Drop is already enabled in CComponentBacklog constructor (GridDropMode.BETWEEN)
+			componentBacklogItems.setDropEnabled(true);
 			// Register with page service using unified auto-registration pattern
 			componentBacklogItems.registerWithPageService(this);
 		}
@@ -289,20 +289,35 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	public void on_backlogItems_drop(final Component component, final Object value) {
 		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-		// Check if this is an internal drag (source list contains CComponentBacklog)
-		final boolean isInternalDrag = event.getSourceList().stream()
-				.anyMatch(source -> source instanceof CComponentBacklog);
-		LOGGER.info("=== Drop on Backlog === (internal: {})", isInternalDrag);
+		// Check if this is an internal drag (source list contains the drop target itself)
+		// When target and source are the same, it's a reordering request
+		final boolean isInternalDrag = event.getSourceList().contains(component);
+		LOGGER.info("=== Drop on Backlog === (internal: {}, target is source: {})", isInternalDrag, 
+				event.getSourceList().contains(component));
+		
+		final Object draggedItem = event.getDraggedItem();
+		
 		// SCENARIO 1: Internal backlog reordering (backlog → backlog)
-		// If source list contains backlog, it's internal reordering - let CComponentBacklog handle it
-		if (isInternalDrag) {
-			LOGGER.info("Internal backlog reordering - CComponentBacklog will handle it");
+		// Target and source are the same = reordering within backlog
+		if (isInternalDrag && draggedItem instanceof CProjectItem) {
+			LOGGER.info("Internal backlog reordering - handling in CPageServiceSprint");
+			try {
+				final CProjectItem<?> projectItem = (CProjectItem<?>) draggedItem;
+				updateBacklogItemOrder(projectItem, event);
+				// Refresh backlog grid to show new order
+				if (componentBacklogItems != null) {
+					componentBacklogItems.refreshGrid();
+				}
+				CNotificationService.showSuccess("Backlog item reordered");
+			} catch (final Exception e) {
+				LOGGER.error("Error reordering backlog item", e);
+				CNotificationService.showException("Error reordering backlog item", e);
+			}
 			return;
 		}
+		
 		// SCENARIO 2: Sprint-to-backlog drop (sprint items → backlog)
 		// If dragging from sprint to backlog, move the item back
-		// Check if dragged item is a CSprintItem
-		final Object draggedItem = event.getDraggedItem();
 		if (draggedItem instanceof CSprintItem) {
 			final CSprintItem sprintItem = (CSprintItem) draggedItem;
 			LOGGER.info("Moving sprint item {} back to backlog", sprintItem.getId());
@@ -317,6 +332,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			return;
 		}
+		
 		// SCENARIO 3: Unknown/unhandled drop scenario
 		LOGGER.warn("Unhandled drop scenario - draggedItem type: {}, internal: {}",
 				draggedItem != null ? draggedItem.getClass().getSimpleName() : "null",
