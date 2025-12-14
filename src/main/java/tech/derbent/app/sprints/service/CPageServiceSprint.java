@@ -346,10 +346,10 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * Note: Most drop logic happens at the widget level (CComponentListSprintItems), but this handler can refresh the view after complex operations
 	 * or handle cross-widget drops if needed.
 	 * @param component the master grid component
-	 * @param value     CDropEvent containing drop information */
+	 * @param value     CDragDropEvent containing drop information */
 	public void on_masterGrid_drop(final Component component, final Object value) {
 		if (!(value instanceof CDragDropEvent)) {
-			LOGGER.warn("Drop value is not CDropEvent");
+			LOGGER.warn("Drop value is not CDragDropEvent");
 			return;
 		}
 		final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
