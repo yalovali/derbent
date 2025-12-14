@@ -102,7 +102,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	private boolean dragEnabled = false;
-	private Consumer<CProjectItem<?>> externalDropHandler = null;
 
 	/** Constructor for backlog component.
 	 * @param sprint The sprint for which to display the backlog (items NOT in this sprint) */
@@ -133,8 +132,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @return The component name "backlogItems" */
 	@Override
 	public String getComponentName() { return "backlogItems"; }
-
-	public Consumer<CProjectItem<?>> getDropHandler() { return externalDropHandler; }
 
 	@Override
 	public boolean isDragEnabled() { return dragEnabled; }
@@ -174,10 +171,5 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
-	// IGridDragDropSupport - For dragging TO sprint
-	public void setDropHandler(final Consumer<CProjectItem<?>> handler) {
-		externalDropHandler = handler;
-		LOGGER.debug("External drop handler {} for backlog", handler != null ? "set" : "cleared");
-	}
 	// IPageServiceAutoRegistrable interface implementation
 }
