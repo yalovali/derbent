@@ -412,6 +412,46 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
 
+	/** Handles drop events on the sprint items grid (internal reordering within a sprint).
+	 * This method is called when items are reordered within a sprint's item list.
+	 * @param component the sprint items component
+	 * @param value     the drop event */
+	public void on_sprintItems_drop(final Component component, final Object value) {
+		try {
+			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
+			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			final boolean isInternalDrag = event.getSourceList().contains(component);
+			final Object draggedItem = event.getDraggedItem();
+			LOGGER.info("=== Drop on Sprint Items Grid === (internal: {}, draggedItem type: {})", isInternalDrag,
+					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
+			
+			// SCENARIO 1: Internal reordering within sprint items grid
+			if (isInternalDrag && draggedItem instanceof CSprintItem) {
+				LOGGER.info("Internal sprint item reordering - handled by grid component");
+				// The CComponentListSprintItems handles internal reordering via move up/down buttons
+				// For drag-drop reordering, we would need to implement position-based reordering
+				// similar to backlog items. For now, just log it.
+				CNotificationService.showInfo("Drag-drop reordering within sprint items not yet fully implemented. Use move up/down buttons.");
+				return;
+			}
+			
+			// SCENARIO 2: External drop (from backlog or other sprint)
+			// These should be handled by on_masterGrid_drop, not here
+			if (!isInternalDrag) {
+				LOGGER.debug("External drop on sprint items - will be handled by master grid handler");
+				// Don't handle external drops here - they should go through master grid
+				return;
+			}
+			
+			// Unhandled scenario
+			LOGGER.warn("Unhandled drop on sprint items - draggedItem type: {}, isInternal: {}",
+					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null", isInternalDrag);
+		} catch (final Exception e) {
+			LOGGER.error("Error handling drop on sprint items", e);
+			CNotificationService.showException("Error handling drop on sprint items", e);
+		}
+	}
+
 	public void on_status_change(final Component component, final Object value) {
 		LOGGER.info("function: on_status_change for Component type: {}",
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
