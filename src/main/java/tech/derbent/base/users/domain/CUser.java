@@ -222,7 +222,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
 
 	@Override
-	public Class<?> getClassName() { // TODO Auto-generated method stub
+	public Class<?> getClassName() { 
 		return CUser.class;
 	}
 

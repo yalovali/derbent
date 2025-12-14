@@ -123,7 +123,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	public LocalDate getStartDate() { return implementationDate != null ? implementationDate.toLocalDate() : null; }
 
 	@Override
-	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
+	public CWorkflowEntity getWorkflow() { 
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
 	}

@@ -56,7 +56,7 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 	@SuppressWarnings ("rawtypes")
 	@Override
 	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {
-		// TODO Auto-generated method stub
+		
 	}
 
 	protected void onEntitySelected(CEntityDB<?> selectedEntity) throws Exception {

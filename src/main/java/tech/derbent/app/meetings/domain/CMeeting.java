@@ -198,7 +198,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Set<CUser> getParticipants() { return participants == null ? new HashSet<>() : new HashSet<>(participants); }
 
 	@Override
-	public Integer getProgressPercentage() { // TODO Auto-generated method stub
+	public Integer getProgressPercentage() { 
 		return 21;
 	}
 
@@ -216,7 +216,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public LocalTime getStartTime() { return startTime; }
 
 	@Override
-	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
+	public CWorkflowEntity getWorkflow() { 
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
 	}

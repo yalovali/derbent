@@ -19,7 +19,7 @@ public class CPanelDetailSectionBasicInfo extends CPanelDetailSectionBase {
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 

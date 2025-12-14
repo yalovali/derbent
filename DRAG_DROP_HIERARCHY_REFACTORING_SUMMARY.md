@@ -28,7 +28,7 @@ Fixed incomplete event handler methods in CGrid:
 **Before:**
 ```java
 private ComponentEventListener<GridDragStartEvent<EntityClass>> on_grid_dragStart() {
-    // TODO Auto-generated method stub
+    
     return null;
 }
 ```

@@ -132,17 +132,17 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	public Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getInitializerServiceClass() { 
 		return CUserCompanySettingInitializerService.class;
 	}
 
 	@Override
-	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getPageServiceClass() { 
 		return CPageServiceUserCompanySetting.class;
 	}
 
 	@Override
-	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getServiceClass() { 
 		return this.getClass();
 	}
 

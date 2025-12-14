@@ -27,7 +27,7 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 

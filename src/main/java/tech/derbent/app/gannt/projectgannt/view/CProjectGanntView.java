@@ -53,12 +53,12 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
-	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
+	public CDetailsBuilder getDetailsBuilder() { 
 		return null;
 	}
 
@@ -66,18 +66,18 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	public CPageService<CGanntViewEntity> getPageService() { // TODO Auto-generated method stub
+	public CPageService<CGanntViewEntity> getPageService() { 
 		return pageService;
 	}
 
 	@Override
-	public ISessionService getSessionService() { // TODO Auto-generated method stub
+	public ISessionService getSessionService() { 
 		return null;
 	}
 
 	@Override
 	public void selectFirstInGrid() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

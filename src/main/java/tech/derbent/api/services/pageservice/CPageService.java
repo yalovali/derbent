@@ -1,9 +1,7 @@
 package tech.derbent.api.services.pageservice;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -14,8 +12,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.interfaces.drag.CDropEvent;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.annotations.CFormBuilder;
@@ -284,7 +280,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
 	@SuppressWarnings ({
-			"rawtypes", "unchecked"
 	})
 	private void bindDragEnd(final IHasDragControl component, final Method method, final String methodName) {
 		Check.instanceOf(component, Component.class, "Component implementing IHasDragEnd must also extend Component");
@@ -307,7 +302,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
 	@SuppressWarnings ({
-			"rawtypes", "unchecked"
 	})
 	private void bindDragStart(final IHasDragControl component, final Method method, final String methodName) {
 		Check.instanceOf(component, Component.class, "Component implementing IHasDragStart must also extend Component");
@@ -328,7 +322,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
 	@SuppressWarnings ({
-			"rawtypes", "unchecked"
 	})
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
 		component.addEventListener_dragDrop(event -> {
@@ -500,9 +493,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
-	public void populateForm() {
-		// TODO Auto-generated method stub
-	}
+	public void populateForm() {}
 
 	/** Registers a custom component for method binding. This allows components that are not part of the entity form to be bound to handler methods
 	 * using the on_{componentName}_{action} pattern.

@@ -122,17 +122,17 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	public Class<CUserProjectSettings> getEntityClass() { return CUserProjectSettings.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getInitializerServiceClass() { 
 		return CUserProjectSettingsInitializerService.class;
 	}
 
 	@Override
-	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getPageServiceClass() { 
 		return CPageServiceUserProjectSettings.class;
 	}
 
 	@Override
-	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getServiceClass() { 
 		return this.getClass();
 	}
 

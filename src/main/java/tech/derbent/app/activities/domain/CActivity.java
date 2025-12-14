@@ -283,7 +283,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public LocalDate getStartDate() { return startDate; }
 
 	@Override
-	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
+	public CWorkflowEntity getWorkflow() { 
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
 	}

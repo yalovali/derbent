@@ -37,7 +37,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -55,45 +55,45 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 	}
 
 	@Override
-	public Map<String, Component> getComponentMap() { // TODO Auto-generated method stub
+	public Map<String, Component> getComponentMap() { 
 		return componentMap;
 	}
 
 	@Override
-	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
+	public CDetailsBuilder getDetailsBuilder() { 
 		return null;
 	}
 
 	@Override
-	public Class getEntityClass() { // TODO Auto-generated method stub
+	public Class getEntityClass() { 
 		return entityClass;
 	}
 
 	@Override
-	public CPageService getPageService() { // TODO Auto-generated method stub
+	public CPageService getPageService() { 
 		Check.instanceOf(parentContent, IPageServiceImplementer.class,
 				"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
 		return ((IPageServiceImplementer) parentContent).getPageService();
 	}
 
 	@Override
-	public ISessionService getSessionService() { // TODO Auto-generated method stub
+	public ISessionService getSessionService() { 
 		return sessionService;
 	}
 
 	@Override
 	public void onEntityCreated(CEntityDB newEntity) throws Exception {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void onEntityDeleted(CEntityDB entity) throws Exception {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void onEntitySaved(CEntityDB savedEntity) throws Exception {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -133,14 +133,14 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 				objectBinder.readBean(item);
 			}
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void selectFirstInGrid() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

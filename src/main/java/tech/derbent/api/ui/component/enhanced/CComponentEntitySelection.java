@@ -14,7 +14,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.interfaces.drag.CDropEvent;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -130,7 +130,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	// Drag control state
 	private boolean dragEnabled = false;
 	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
 	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
 	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private List<EntityClass> allItems = new ArrayList<>();
@@ -420,7 +420,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {

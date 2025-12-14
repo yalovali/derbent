@@ -33,13 +33,13 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 
 	@Override
 	protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 

@@ -56,17 +56,17 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 	}
 
 	@Override
-	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getInitializerServiceClass() { 
 		return CGridEntityInitializerService.class;
 	}
 
 	@Override
-	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getPageServiceClass() { 
 		return CPageServiceGridEntity.class;
 	}
 
 	@Override
-	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getServiceClass() { 
 		return this.getClass();
 	}
 

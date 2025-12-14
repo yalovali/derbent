@@ -4,9 +4,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.interfaces.drag.CDropEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.utils.Check;
 
@@ -86,7 +86,7 @@ public interface IHasDragControl {
 	 * </p>
 	 * @param listener the listener to add
 	 * @return a registration object for removing the listener */
-	default void addEventListener_dragDrop(ComponentEventListener<CDropEvent<?>> listener) {
+	default void addEventListener_dragDrop(ComponentEventListener<CDragDropEvent<?>> listener) {
 		getDropListeners().add(listener);
 	}
 
@@ -106,7 +106,7 @@ public interface IHasDragControl {
 
 	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners();
 	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners();
-	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners();
+	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners();
 	/** Checks whether drag-and-drop functionality is currently enabled.
 	 * <p>
 	 * This can be used to conditionally show drag handles, change cursor styles, or display UI feedback about the component's drag state.
@@ -126,7 +126,7 @@ public interface IHasDragControl {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	default void notifyDragEndListeners(final CDragEndEvent event) {
+	private void notifyDragEndListeners(final CDragEndEvent event) {
 		if (getDragEndListeners().isEmpty()) {
 			return;
 		}
@@ -148,7 +148,7 @@ public interface IHasDragControl {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	default void notifyDragStartListeners(final CDragStartEvent<?> event) {
+	private void notifyDragStartListeners(final CDragStartEvent<?> event) {
 		if (getDragStartListeners().isEmpty()) {
 			return;
 		}
@@ -170,7 +170,7 @@ public interface IHasDragControl {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	default void notifyDropListeners(final CDropEvent<?> event) {
+	private void notifyDropListeners(final CDragDropEvent<?> event) {
 		if (getDropListeners().isEmpty()) {
 			return;
 		}
@@ -201,10 +201,11 @@ public interface IHasDragControl {
 	@SuppressWarnings ({})
 	default void notifyEvents(final CEvent event) {
 		try {
+			event.addSource(this);
 			if (event instanceof CDragStartEvent<?>) {
 				notifyDragStartListeners((CDragStartEvent<?>) event);
-			} else if (event instanceof CDropEvent<?>) {
-				notifyDropListeners((CDropEvent<?>) event);
+			} else if (event instanceof CDragDropEvent<?>) {
+				notifyDropListeners((CDragDropEvent<?>) event);
 			} else if (event instanceof CDragEndEvent) {
 				notifyDragEndListeners((CDragEndEvent) event);
 			}
@@ -214,72 +215,35 @@ public interface IHasDragControl {
 		}
 	}
 
-	/** Enables or disables drag-and-drop functionality for this component.
-	 * <p>
-	 * When disabled, the component should not allow drag operations to start, but should still support drop operations if configured as a drop
-	 * target.
-	 * <p>
-	 * Implementations should:
-	 * <ol>
-	 * <li>Update internal state to track enabled/disabled status</li>
-	 * <li>Enable/disable drag on the underlying grid or component</li>
-	 * <li>Log the state change for debugging</li>
-	 * </ol>
-	 * @param enabled true to enable drag operations, false to disable */
+	default void on_dragDrop(CDragDropEvent<?> event) {
+		notifyEvents(event);
+	}
+
+	default void on_dragEnd(CDragEndEvent event) {
+		notifyEvents(event);
+	}
+
+	default void on_dragStart(CDragStartEvent<?> event) {
+		notifyEvents(event);
+	}
+
 	void setDragEnabled(boolean enabled);
-	/** Enables or disables drop functionality for this component.
-	 * <p>
-	 * When disabled, the component should not accept drop operations. This is independent of drag enable/disable - a component can accept drops
-	 * without being draggable itself.
-	 * <p>
-	 * Implementations should:
-	 * <ol>
-	 * <li>Update internal state to track enabled/disabled status</li>
-	 * <li>Configure drop mode on the underlying grid or component</li>
-	 * <li>Log the state change for debugging</li>
-	 * </ol>
-	 * @param enabled true to enable drop operations, false to disable */
 	void setDropEnabled(boolean enabled);
 
-	/** Sets up automatic forwarding of drag-drop events from a child component to this parent component.
-	 * <p>
-	 * This is the standard pattern for event propagation in the component hierarchy. When a child component fires drag-drop events, they are
-	 * automatically forwarded to this parent's listeners, enabling recursive event bubbling up to the page service level.
-	 * <p>
-	 * <b>Usage in parent components:</b>
-	 *
-	 * <pre>
-	 *
-	 * // In parent component's initialization
-	 * protected void setupChildComponents() {
-	 * 	CGrid<Entity> grid = new CGrid<>(Entity.class);
-	 * 	setupChildDragDropForwarding(grid); // Automatically forwards grid's events to parent
-	 * }
-	 * </pre>
-	 * <p>
-	 * <b>This eliminates the need for manual forwarding code like:</b>
-	 *
-	 * <pre>
-	 * grid.addDragStartListener(event -> notifyDragStartListeners(event));
-	 * grid.addDragEndListener(event -> notifyDragEndListeners(event));
-	 * grid.addDropListener(event -> notifyDropListeners(event));
-	 * </pre>
-	 *
-	 * @param child The child component implementing IHasDragControl whose events should be forwarded to this parent */
 	@SuppressWarnings ({})
 	default void setupChildDragDropForwarding(final IHasDragControl child) {
 		Check.notNull(child, "Child component cannot be null");
 		// Forward drag start events from child to parent
 		child.addEventListener_dragStart(event -> {
-			notifyDragStartListeners(event);
+			on_dragStart(event);
 		});
 		// Forward drag end events from child to parent
 		child.addEventListener_dragEnd(event -> {
-			notifyDragEndListeners(event);
+			on_dragEnd(event);
 		});
 		// Forward drop events from child to parent
 		child.addEventListener_dragDrop(event -> {
-			notifyDropListeners(event);
+			on_dragDrop(event);
 		});
 	}
 }

@@ -23,9 +23,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.grid.Grid;
-import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.interfaces.drag.CDropEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
@@ -43,6 +40,9 @@ import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.api.screens.service.CEntityFieldService;
@@ -81,7 +81,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
 	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
 	// Track components created in grid cells for event propagation
@@ -131,7 +131,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				try {
 					return matchesSearchText(entity, searchText);
 				} catch (final Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 					return false;
 				}
@@ -577,7 +576,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	private Class<?> getEntityClassFromService(CAbstractService<?> service) throws Exception {
 		try {
@@ -822,17 +821,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Set up drag event propagation from widget component to this CComponentGridEntity
 			// Using dedicated notification methods for cleaner, more maintainable code
 			dragComponent.addEventListener_dragStart(event -> {
-				LOGGER.debug("[DragDebug] Widget {} fired drag start, notifying CComponentGridEntity listeners",
-						component.getClass().getSimpleName());
-				notifyDragStartListeners(event);
+				notifyEvents(event);
 			});
 			dragComponent.addEventListener_dragEnd(event -> {
-				LOGGER.debug("[DragDebug] Widget {} fired drag end, notifying CComponentGridEntity listeners", component.getClass().getSimpleName());
-				notifyDragEndListeners(event);
+				notifyEvents(event);
 			});
 			dragComponent.addEventListener_dragDrop(event -> {
-				LOGGER.debug("[DragDebug] Widget {} fired drop, notifying CComponentGridEntity listeners", component.getClass().getSimpleName());
-				notifyDropListeners(event);
+				notifyEvents(event);
 			});
 			// Generate a unique component name for this widget
 			final String componentName = generateWidgetComponentName(component, entity);

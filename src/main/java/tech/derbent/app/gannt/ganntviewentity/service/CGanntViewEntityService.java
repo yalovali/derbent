@@ -31,17 +31,17 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	public Class<CGanntViewEntity> getEntityClass() { return CGanntViewEntity.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getInitializerServiceClass() { 
 		return CGanntViewEntityInitializerService.class;
 	}
 
 	@Override
-	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getPageServiceClass() { 
 		return CPageServiceGanntViewEntity.class;
 	}
 
 	@Override
-	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getServiceClass() { 
 		return this.getClass();
 	}
 

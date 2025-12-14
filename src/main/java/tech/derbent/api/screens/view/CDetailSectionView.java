@@ -65,12 +65,12 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
-	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
+	public CDetailsBuilder getDetailsBuilder() { 
 		return null;
 	}
 
@@ -78,18 +78,18 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	public CPageService<CDetailSection> getPageService() { // TODO Auto-generated method stub
+	public CPageService<CDetailSection> getPageService() { 
 		return pageService;
 	}
 
 	@Override
-	public ISessionService getSessionService() { // TODO Auto-generated method stub
+	public ISessionService getSessionService() { 
 		return null;
 	}
 
 	@Override
 	public void selectFirstInGrid() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

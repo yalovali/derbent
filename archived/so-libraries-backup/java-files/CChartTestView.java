@@ -54,7 +54,7 @@ public class CChartTestView extends Main {
 			simpleLineChart();
 			simpleGanttChart();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

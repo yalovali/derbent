@@ -45,28 +45,28 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
-	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
+	protected String getEntityRouteIdField() { 
 		return null;
 	}
 
 	@Override
-	public CPageService<CGanntViewEntity> getPageService() { // TODO Auto-generated method stub
+	public CPageService<CGanntViewEntity> getPageService() { 
 		return null;
 	}
 
 	@Override
-	public ISessionService getSessionService() { // TODO Auto-generated method stub
+	public ISessionService getSessionService() { 
 		return null;
 	}
 
 	@Override
 	public void selectFirstInGrid() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -75,6 +75,6 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 	}
 
 	@Override
-	public CDetailsBuilder getDetailsBuilder() { // TODO Auto-generated method stub
+	public CDetailsBuilder getDetailsBuilder() { 
 	return null; }
 }

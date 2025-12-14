@@ -13,7 +13,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	private static final long serialVersionUID = 1L;
 
 	public static List<String> getAvailableTypes() {
-		// TODO Auto-generated method stub
+		
 		return List.of("Type1", "Type2", "Type3");
 	}
 
@@ -23,7 +23,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	}
 
 	@Override
-	public String getDialogTitleString() { // TODO Auto-generated method stub
+	public String getDialogTitleString() { 
 		final String title = "Clone " + getEntity().toString();
 		return title;
 	}
@@ -32,13 +32,13 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	protected Icon getFormIcon() throws Exception { return CColorUtils.getIconForEntity(getEntity()); }
 
 	@Override
-	protected String getFormTitleString() { // TODO Auto-generated method stub
+	protected String getFormTitleString() { 
 		return "Clone";
 	}
 
 	@Override
 	protected void populateForm() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -62,6 +62,6 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 
 	@Override
 	protected void validateForm() {
-		// TODO Auto-generated method stub
+		
 	}
 }

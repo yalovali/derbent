@@ -13,11 +13,10 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
  * Unlike Vaadin's GridDropEvent which is specific to Grid components, this event works with any component implementing IHasDragControl, enabling a
  * unified drag-drop API across the application.
  * @param <T> The type of items being dropped */
-public class CDropEvent<T> extends CEvent {
+public class CDragDropEvent<T> extends CDragBaseEvent {
 
 	private static final long serialVersionUID = 1L;
 	private final List<T> draggedItems;
-	private final Component dragSource;
 	private final GridDropLocation dropLocation;
 	private final T targetItem;
 
@@ -28,11 +27,10 @@ public class CDropEvent<T> extends CEvent {
 	 * @param targetItem   the item at the drop location (may be null)
 	 * @param dropLocation the location relative to the target item
 	 * @param fromClient   true if the event originated from the client, false otherwise */
-	public CDropEvent(final Component source, final List<T> draggedItems, final Component dragSource, final T targetItem,
+	public CDragDropEvent(final Component source, final List<T> draggedItems, final Component dragSource, final T targetItem,
 			final GridDropLocation dropLocation, final boolean fromClient) {
 		super(source, fromClient);
 		this.draggedItems = draggedItems;
-		this.dragSource = dragSource;
 		this.targetItem = targetItem;
 		this.dropLocation = dropLocation;
 	}
@@ -47,25 +45,21 @@ public class CDropEvent<T> extends CEvent {
 	 * @return the dragged items (never null, but may be empty) */
 	public List<T> getDraggedItems() { return draggedItems; }
 
-	/** Gets the component from which items were dragged.
-	 * @return the drag source component */
-	public Component getDragSource() { return dragSource; }
-
 	/** Gets the drop location relative to the target item.
 	 * @return the drop location (ABOVE, BELOW, ON_TOP, or EMPTY) */
 	public GridDropLocation getDropLocation() { return dropLocation; }
+
+	/** Gets the component where items are being dropped (convenience method).
+	 * <p>
+	 * This is equivalent to getSource() but provides clearer semantics for drop operations.
+	 * @return the drop target component (same as getSource()) */
+	public Component getDropTarget() { return getSource(); }
 
 	/** Gets the item at the drop location.
 	 * @return Optional containing the target item, or empty if dropping at the end or in an empty grid */
 	public Optional<T> getDropTargetItem() {
 		return Optional.ofNullable(targetItem);
 	}
-
-	/** Gets the component where items are being dropped (convenience method).
-	 * <p>
-	 * This is equivalent to getSource() but provides clearer semantics for drop operations.
-	 * @return the drop target component (same as getSource()) */
-	public Component getDropTarget() { return (Component) getSource(); }
 
 	/** Gets the item at the drop location (direct access).
 	 * @return the target item, or null if dropping at the end or in an empty grid */

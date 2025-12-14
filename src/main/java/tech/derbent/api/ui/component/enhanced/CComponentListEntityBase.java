@@ -10,9 +10,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
-import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.interfaces.drag.CDropEvent;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
@@ -25,6 +22,9 @@ import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISelectionOwner;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.services.pageservice.CPageService;
@@ -88,7 +88,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
 	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
 	protected CButton buttonAdd;
 	protected CButton buttonAddFromList;
 	protected CButton buttonDelete;
@@ -252,7 +252,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 
 	/** Create and configure the grid component. */
-	@SuppressWarnings ("unchecked")
 	protected void createGrid() {
 		grid = new CGrid<>(entityClass);
 		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);
@@ -270,9 +269,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		// Add double-click listener
 		grid.addItemDoubleClickListener(e -> on_gridItems_doubleClicked(e.getItem()));
 		// Add internal drag event listeners for debug logging
-		grid.addEventListener_dragStart(e -> on_grid_dragStart(e));
-		grid.addEventListener_dragEnd(e -> on_grid_dragEnd(e));
-		LOGGER.debug("Grid created and configured for {} (dynamic height: {})", entityClass.getSimpleName(), useDynamicHeight);
+		setupChildDragDropForwarding(grid);
 	}
 
 	protected abstract ChildEntity createNewEntity();
@@ -379,7 +376,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Get the entity service.
 	 * @return The service */
@@ -613,27 +610,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		} catch (final Exception e) {
 			LOGGER.error("Error moving item up", e);
 			CNotificationService.showException("Error moving item up", e);
-		}
-	}
-
-	/** Handle drag end event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The drag end event from the grid */
-	protected void on_grid_dragEnd(final CDragEndEvent event) {
-		try {
-			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragEnd - source=grid", entityClass.getSimpleName());
-		} catch (final Exception e) {
-			LOGGER.error("Error in drag end handler", e);
-		}
-	}
-
-	/** Handle drag start event from the internal grid. Logs the event for debugging drag-drop propagation chain.
-	 * @param event The drag start event from the grid */
-	protected void on_grid_dragStart(final CDragStartEvent<?> event) {
-		try {
-			final int itemCount = event.getDraggedItems() != null ? event.getDraggedItems().size() : 0;
-			LOGGER.debug("[DragDebug] CComponentListEntityBase<{}>: dragStart - source=grid, items={}", entityClass.getSimpleName(), itemCount);
-		} catch (final Exception ex) {
-			LOGGER.error("Error in drag start handler", ex);
 		}
 	}
 

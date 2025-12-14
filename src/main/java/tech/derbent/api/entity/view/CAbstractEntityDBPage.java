@@ -262,7 +262,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					currentSearchText = event.getSearchText();
 					refreshGrid();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					
 					e.printStackTrace();
 				}
 			});
@@ -579,7 +579,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					currentSearchText = event.getSearchText();
 					refreshGrid();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					
 					e.printStackTrace();
 				}
 			});

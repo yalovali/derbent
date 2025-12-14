@@ -45,17 +45,17 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public Class<CActivity> getEntityClass() { return CActivity.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getInitializerServiceClass() { 
 		return CActivityInitializerService.class;
 	}
 
 	@Override
-	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getPageServiceClass() { 
 		return CPageServiceActivity.class;
 	}
 
 	@Override
-	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getServiceClass() { 
 		return this.getClass();
 	}
 

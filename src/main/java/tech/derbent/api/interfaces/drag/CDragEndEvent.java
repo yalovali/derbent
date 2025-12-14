@@ -12,7 +12,7 @@ import com.vaadin.flow.component.Component;
  * <p>
  * Note: This event does not include the dragged items. If you need to track items across drag start and drag end, store them in the drag start
  * handler. */
-public class CDragEndEvent extends CEvent {
+public class CDragEndEvent extends CDragBaseEvent {
 
 	private static final long serialVersionUID = 1L;
 

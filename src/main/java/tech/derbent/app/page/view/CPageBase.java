@@ -13,11 +13,11 @@ public abstract class CPageBase extends CAbstractPage {
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	protected void setupToolbar() {
-		// TODO Auto-generated method stub
+		
 	}
 }

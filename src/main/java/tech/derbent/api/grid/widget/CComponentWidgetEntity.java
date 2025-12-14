@@ -13,7 +13,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.interfaces.drag.CDropEvent;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.function.ValueProvider;
@@ -197,7 +197,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
 	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<CDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
 	// =============== INSTANCE MEMBERS ===============
 	protected final EntityClass entity;
 	protected CVerticalLayout layoutLeft = new CVerticalLayout();
@@ -263,7 +263,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Gets the entity displayed in this widget.
 	 * @return the entity */

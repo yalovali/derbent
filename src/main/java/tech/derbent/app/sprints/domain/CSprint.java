@@ -306,7 +306,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	}
 
 	@Override
-	public CWorkflowEntity getWorkflow() { // TODO Auto-generated method stub
+	public CWorkflowEntity getWorkflow() { 
 		return getEntityType().getWorkflow();
 	}
 

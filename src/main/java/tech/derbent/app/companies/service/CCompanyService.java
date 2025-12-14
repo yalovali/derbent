@@ -87,7 +87,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
 	public List<CCompany> getAvailableCompanyForUser(Long id) {
-		// TODO Auto-generated method stub
+		
 		Check.notNull(id, "ID must not be null");
 		return ((ICompanyRepository) repository).findCompaniesNotAssignedToUser(id);
 	}

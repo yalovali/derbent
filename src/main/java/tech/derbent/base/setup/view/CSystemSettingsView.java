@@ -74,7 +74,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			try {
 				on_resetToDefaults();
 			} catch (final Exception e1) {
-				// TODO Auto-generated catch block
+				
 				e1.printStackTrace();
 			}
 		});
@@ -134,7 +134,7 @@ public class CSystemSettingsView extends CAbstractPage {
 	public CSystemSettings getCurrentSettings() { return currentSettings; }
 
 	@Override
-	public String getPageTitle() { // TODO Auto-generated method stub
+	public String getPageTitle() { 
 		return "System Setup & Configuration";
 	}
 

@@ -404,7 +404,7 @@ public final class CDashboardView extends CAbstractPage {
 	}
 
 	@Override
-	public String getPageTitle() { // TODO Auto-generated method stub
+	public String getPageTitle() { 
 		return "Home";
 	}
 

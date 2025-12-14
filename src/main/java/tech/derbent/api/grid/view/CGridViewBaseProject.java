@@ -17,7 +17,7 @@ public abstract class CGridViewBaseProject<EntityClass extends CEntityOfProject<
 
 	@Override
 	protected void createDetailsComponent() throws Exception {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

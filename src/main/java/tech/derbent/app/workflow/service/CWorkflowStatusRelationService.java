@@ -153,17 +153,17 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	public Class<CWorkflowStatusRelation> getEntityClass() { return CWorkflowStatusRelation.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getInitializerServiceClass() { 
 		return CWorkflowStatusRelationInitializerService.class;
 	}
 
 	@Override
-	public Class<?> getPageServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getPageServiceClass() { 
 		return CPageServiceWorkflowStatusRelation.class;
 	}
 
 	@Override
-	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+	public Class<?> getServiceClass() { 
 		return this.getClass();
 	}
 
