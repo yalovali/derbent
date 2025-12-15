@@ -195,7 +195,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					if (result instanceof Component) {
 						final Component component = (Component) result;
 						if (result instanceof IHasDragControl) {
-							((IHasDragControl) result).setupChildDragDropForwarding(this);
+							// Set up forwarding from the widget (child) to this grid entity (parent)
+							this.setupChildDragDropForwarding((IHasDragControl) result);
 						}
 						return component;
 					} else if (result == null) {
