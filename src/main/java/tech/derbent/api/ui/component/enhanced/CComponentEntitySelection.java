@@ -368,6 +368,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (multiSelect) {
 			grid.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
+		grid.setRefreshConsumer(e -> applyFilters());
 		// Set up drag-drop event forwarding from grid to this component
 		setupChildDragDropForwarding(grid);
 		// Note: configureGrid() is called later when entity type is selected
@@ -691,16 +692,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			refreshListeners.remove(listener);
 			LOGGER.debug("Removed refresh listener from CComponentEntitySelection");
 		}
-	}
-
-	/** Resets the component selection state.
-	 * <p>
-	 * Note: This method is functionally equivalent to {@link #clear()} from the HasValue interface. Prefer using clear() for consistency with
-	 * standard Vaadin components.
-	 * @deprecated Use {@link #clear()} instead */
-	@Deprecated
-	public void reset() {
-		clear();
 	}
 
 	@Override

@@ -126,8 +126,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		this.masterEntityClass = masterEntityClass;
 		this.entityClass = entityClass;
 		this.childService = childService;
-		LOGGER.debug("Creating CComponentListEntityBase for entity class: {} with master: {}", entityClass.getSimpleName(),
-				masterEntityClass.getSimpleName());
+		// LOGGER.debug("Creating CComponentListEntityBase for entity class: {} with master: {}", entityClass.getSimpleName(),
+		// masterEntityClass.getSimpleName());
 		// Initialize UI components
 		initializeComponents(title);
 	}
@@ -185,7 +185,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public void addRefreshListener(final Consumer<ChildEntity> listener) {
 		Check.notNull(listener, "Refresh listener cannot be null");
 		refreshListeners.add(listener);
-		LOGGER.debug("Added refresh listener to {}", entityClass.getSimpleName());
 	}
 
 	/** Registers a value change listener. Implements HasValue.addValueChangeListener().
@@ -255,15 +254,14 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected void createGrid() {
 		grid = new CGrid<>(entityClass);
 		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);
-		// Configure size - grid should expand to fill container width
 		grid.setWidthFull(); // Enable grid to expand horizontally with container
-		// Configure height - if dynamic height enabled, use content-based sizing
 		if (useDynamicHeight) {
 			grid.setDynamicHeight();
 		} else {
 			grid.setHeightFull();
 			grid.setMinHeight("120px");
 		}
+		grid.setRefreshConsumer(e -> grid_refresh_consumer());
 		configureGrid(grid);
 		grid.asSingleSelect().addValueChangeListener(e -> on_gridItems_selected(e.getValue()));
 		// Add double-click listener
@@ -407,6 +405,18 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@Override
 	public ChildEntity getValue() { return selectedItem; }
 
+	public void grid_refresh_consumer() {
+		final MasterEntity master = getMasterEntity();
+		Check.notNull(master, "Master entity cannot be null when refreshing grid");
+		final ChildEntity currentValue = grid.asSingleSelect().getValue();
+		final List<ChildEntity> items = loadItems(master);
+		Check.notNull(items, "Loaded items cannot be null");
+		LOGGER.debug("Refreshing grid with {} items", items.size());
+		grid.setItems(items);
+		grid.asSingleSelect().setValue(currentValue);
+	}
+	// HasValue interface implementation
+
 	/** Handle edit operation for selected item.
 	 * @param item The item to edit */
 	protected void handleEdit(final ChildEntity item) {
@@ -445,7 +455,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		createGrid();
 		createToolbar(titleText);
 		add(layoutToolbar, grid);
-		LOGGER.debug("UI components initialized for {}", entityClass.getSimpleName());
+		// LOGGER.debug("UI components initialized for {}", entityClass.getSimpleName());
 	}
 
 	/** Checks whether drag functionality is currently enabled.
@@ -665,16 +675,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Refresh the grid to show updated data. */
 	@Override
 	public void refreshGrid() {
-		final MasterEntity master = getMasterEntity();
-		Check.notNull(master, "Master entity cannot be null when refreshing grid");
-		final ChildEntity currentValue = grid.asSingleSelect().getValue();
-		final List<ChildEntity> items = loadItems(master);
-		Check.notNull(items, "Loaded items cannot be null");
-		LOGGER.debug("Refreshing grid with {} items", items.size());
-		grid.setItems(items);
-		grid.asSingleSelect().setValue(currentValue);
+		grid.refreshGrid();
 	}
-	// HasValue interface implementation
 
 	/** Registers this component with the page service for automatic event binding.
 	 * <p>
@@ -783,8 +785,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		dropEnabled = enabled;
 		if (grid != null) {
 			grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
-			LOGGER.debug("[DragDebug] Drop {} for {} ({})", enabled ? "enabled" : "disabled", getClass().getSimpleName(),
-					entityClass.getSimpleName());
 		}
 	}
 

@@ -241,7 +241,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 	/** Refresh the grid to show updated data. */
 	@Override
 	public void refreshGrid() {
-		grid.refreshGridData();
+		grid.refreshGrid();
 	}
 
 	/** Select the first item in the grid. Used after discarding unsaved new entities. */

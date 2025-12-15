@@ -69,15 +69,13 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		this.meetingService = meetingService;
 		// Enable dynamic height so grid resizes with content
 		setDynamicHeight("600px");
-		LOGGER.debug("CComponentListSprintItems created with dynamic height enabled");
+		// LOGGER.debug("CComponentListSprintItems created with dynamic height enabled");
 	}
 
 	@Override
 	public void configureGrid(final CGrid<CSprintItem> grid) {
 		Check.notNull(grid, "Grid cannot be null");
-		// LOGGER.debug("Configuring grid columns for CSprintItem");
 		grid.addIdColumn(CSprintItem::getId, "ID", "id");
-		// grid.addIntegerColumn(CSprintItem::getItemOrder, "Order", "order");
 		grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
 		// Use expanding column for Name to fill remaining width
 		grid.addShortTextColumn(item -> {
@@ -264,7 +262,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		final CSprintItemService service = (CSprintItemService) childService;
 		final List<CSprintItem> items = service.findByMasterIdWithItems(master.getId());
 		Check.notNull(items, "Loaded sprint items cannot be null");
-		LOGGER.debug("Loaded {} sprint items", items.size());
 		return items;
 	}
 

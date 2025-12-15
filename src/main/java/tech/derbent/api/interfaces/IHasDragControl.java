@@ -39,7 +39,7 @@ public interface IHasDragControl {
 		if (getDragEndListeners().isEmpty()) {
 			return;
 		}
-		LOGGER.debug("[DragDebug] {} notifying {} drag end listeners", getClass().getSimpleName(), getDragEndListeners().size());
+		// LOGGER.debug("[DragDebug] {} notifying {} drag end listeners", getClass().getSimpleName(), getDragEndListeners().size());
 		for (final ComponentEventListener listener : getDragEndListeners()) {
 			try {
 				listener.onComponentEvent(event);
@@ -125,8 +125,8 @@ public interface IHasDragControl {
 
 	@SuppressWarnings ({})
 	default void setupChildDragDropForwarding(final IHasDragControl child) {
-		LOGGER.debug("Setting up drag-drop event forwarding from child {} to parent {} parent: {} child:{}", child.getClass().getSimpleName(),
-				getClass().getSimpleName(), toString(), child.toString());
+		// LOGGER.debug("Setting up drag-drop event forwarding from child {} to parent {} parent: {} child:{}",
+		// child.getClass().getSimpleName(),getClass().getSimpleName(), toString(), child.toString());
 		Check.notNull(child, "Child component cannot be null");
 		// Forward drag start events from child to parent
 		child.addEventListener_dragStart(event -> {

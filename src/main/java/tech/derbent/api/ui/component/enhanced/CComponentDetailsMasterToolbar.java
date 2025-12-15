@@ -104,7 +104,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 					gridEntityService.save(gridEntity);
 					// Refresh grid
 					grid.createGridColumns();
-					grid.refreshGridData();
+					grid.refreshGrid();
 					CNotificationService.showSuccess("Grid columns updated successfully");
 				} catch (Exception e) {
 					CNotificationService.showException("Error saving grid columns", e);

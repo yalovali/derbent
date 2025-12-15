@@ -151,7 +151,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			final CSprintItem targetSprintItem = event.getTargetItem() instanceof CSprintItem ? (CSprintItem) event.getTargetItem() : null;
 			drop_insertBacklogItemIntoSprint(targetSprint, itemToAdd, dropLocation, targetSprintItem);
 			// refresh only needed components
-			componentBacklogItems.refreshGrid();
+			// componentBacklogItems.refreshGrid();
 			refreshForEvent(event);
 			// refreshAfterSprintChange();
 			CNotificationService.showSuccess("Item added to sprint " + targetSprint.getName());
@@ -347,7 +347,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				final int newOrder = i + 1;
 				item.setItemOrder(newOrder);
 				sprintItemService.save(item);
-				LOGGER.debug("[SprintInsert] Saved sprint item {} with order {}", item.getId(), newOrder);
+				// LOGGER.debug("[SprintInsert] Saved sprint item {} with order {}", item.getId(), newOrder);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error inserting backlog item into sprint {}", targetSprint.getId(), e);
@@ -560,18 +560,19 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		Object first = null;
 		first = event.getSourceList().get(0);
 		if (first instanceof CGrid) {
-			((CGrid<?>) first).getDataProvider().refreshAll();
+			// ((CGrid<?>) first).getDataProvider().refreshAll();
+			((CGrid<?>) first).refreshGrid();
 		} else if (first instanceof CComponentGridEntity) {
-			((CComponentGridEntity) first).refreshGridData();
+			((CComponentGridEntity) first).refreshGrid();
 		}
 		final CDragStartEvent<?> startEvent = getActiveDragStartEvent();
 		if (startEvent != null) {
 			// first and second can be same component, so check dont refresh twice
 			final Object second = startEvent.getSourceList().get(0);
 			if (second instanceof CGrid && second != first) {
-				((CGrid<?>) second).getDataProvider().refreshAll();
+				((CGrid<?>) second).refreshGrid();
 			} else if (second instanceof CComponentGridEntity && second != first) {
-				((CComponentGridEntity) second).refreshGridData();
+				((CComponentGridEntity) second).refreshGrid();
 			}
 		}
 	}

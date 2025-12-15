@@ -139,7 +139,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		} catch (final Exception e) {
 			LOGGER.error("Error applying search filter.");
 			// Fallback to refresh data on error
-			refreshGridData();
+			refreshGrid();
 		}
 	}
 
@@ -196,7 +196,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						final Component component = (Component) result;
 						if (result instanceof IHasDragControl) {
 							// Set up forwarding from the widget (child) to this grid entity (parent)
-							this.setupChildDragDropForwarding((IHasDragControl) result);
+							setupChildDragDropForwarding((IHasDragControl) result);
 						}
 						return component;
 					} else if (result == null) {
@@ -448,7 +448,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Add drag-drop listeners to propagate events to this component's listeners
 			setupGridDragDropListeners();
 			createGridColumns();
-			refreshGridData();
+			grid.setRefreshConsumer(e -> grid_refresh_consumer());
+			refreshGrid();
 			this.add(grid);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating grid content.");
@@ -614,6 +615,51 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return null;
 	}
 
+	/** Refresh grid data based on current project */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	public void grid_refresh_consumer() {
+		LOGGER.debug("Refreshing grid data for grid entity: {}", gridEntity != null ? gridEntity.getName() : "null");
+		try {
+			final boolean old_enableSelectionChangeListener = enableSelectionChangeListener;
+			enableSelectionChangeListener = false;
+			// first get the selected item to restore selection later
+			final CEntityDB<?> selectedItem = getSelectedItem();
+			// Clear the widget component map before refreshing to prevent memory leaks
+			unregisterAllWidgetComponents();
+			//
+			final CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
+			Check.instanceOf(serviceBean, CAbstractService.class,
+					"Service bean does not extend CAbstractService: " + gridEntity.getDataServiceBeanName());
+			// Use pageable to get data - limit to first 1000 records for performance
+			final PageRequest pageRequest = PageRequest.of(0, 1000);
+			List data;
+			// Check if this is a project-specific service and filter by the gridEntity's project
+			if (serviceBean instanceof CEntityOfProjectService) {
+				final CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
+				Check.notNull(project, "Project is null");
+				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
+				data = projectService.listByProject(project, pageRequest).getContent();
+			} else if (serviceBean instanceof CEntityOfCompanyService) {
+				final CCompany company = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company found."));
+				Check.notNull(company, "Company is null");
+				final CEntityOfCompanyService<?> projectService = (CEntityOfCompanyService<?>) serviceBean;
+				data = projectService.findByCompany(company, pageRequest).getContent();
+			} else {
+				// For non-project or company services, use regular list method
+				data = serviceBean.list(pageRequest).getContent();
+			}
+			Check.notNull(data, "Data loaded from service is null");
+			grid.setItems(data);
+			enableSelectionChangeListener = old_enableSelectionChangeListener;
+			selectEntity(selectedItem);
+		} catch (final Exception e) {
+			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
+			grid.setItems(Collections.emptyList());
+		}
+	}
+
 	/** Helper method to determine if a color is light or dark for text contrast
 	 * @param color hex color string (e.g., "#FF0000")
 	 * @return true if the color is light, false if dark */
@@ -712,7 +758,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 		currentProject = newProject;
 		if (gridEntity != null) {
-			refreshGridData();
+			refreshGrid();
 		}
 	}
 
@@ -750,49 +796,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		// Grid component doesn't have a form to populate; implementation exists for interface compliance
 	}
 
-	/** Refresh grid data based on current project */
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
-	public void refreshGridData() {
-		LOGGER.debug("Refreshing grid data for grid entity: {}", gridEntity != null ? gridEntity.getName() : "null");
-		try {
-			final boolean old_enableSelectionChangeListener = enableSelectionChangeListener;
-			enableSelectionChangeListener = false;
-			// first get the selected item to restore selection later
-			final CEntityDB<?> selectedItem = getSelectedItem();
-			// Clear the widget component map before refreshing to prevent memory leaks
-			unregisterAllWidgetComponents();
-			//
-			final CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
-			Check.instanceOf(serviceBean, CAbstractService.class,
-					"Service bean does not extend CAbstractService: " + gridEntity.getDataServiceBeanName());
-			// Use pageable to get data - limit to first 1000 records for performance
-			final PageRequest pageRequest = PageRequest.of(0, 1000);
-			List data;
-			// Check if this is a project-specific service and filter by the gridEntity's project
-			if (serviceBean instanceof CEntityOfProjectService) {
-				final CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
-				Check.notNull(project, "Project is null");
-				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
-				data = projectService.listByProject(project, pageRequest).getContent();
-			} else if (serviceBean instanceof CEntityOfCompanyService) {
-				final CCompany company = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company found."));
-				Check.notNull(company, "Company is null");
-				final CEntityOfCompanyService<?> projectService = (CEntityOfCompanyService<?>) serviceBean;
-				data = projectService.findByCompany(company, pageRequest).getContent();
-			} else {
-				// For non-project or company services, use regular list method
-				data = serviceBean.list(pageRequest).getContent();
-			}
-			Check.notNull(data, "Data loaded from service is null");
-			grid.setItems(data);
-			enableSelectionChangeListener = old_enableSelectionChangeListener;
-			selectEntity(selectedItem);
-		} catch (final Exception e) {
-			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
-			grid.setItems(Collections.emptyList());
-		}
+	public void refreshGrid() {
+		grid.refreshGrid();
 	}
 
 	/** Registers this grid component with the page service for automatic event binding.
@@ -979,7 +984,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		// Apply filter to grid
 		if (searchValue == null || searchValue.trim().isEmpty()) {
 			// Clear filter by refreshing data
-			refreshGridData();
+			refreshGrid();
 		} else {
 			// Apply search filter
 			LOGGER.info("Search filter applied: {}", searchValue);
@@ -1011,15 +1016,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	/** Unregisters all widget components from the page service to prevent memory leaks. */
 	private void unregisterAllWidgetComponents() {
 		try {
-			// Save widget state before clearing
-			for (final Map.Entry<Object, Component> entry : entityToWidgetMap.entrySet()) {
-				final Component component = entry.getValue();
-				if (component instanceof tech.derbent.api.grid.widget.CComponentWidgetEntity) {
-					final tech.derbent.api.grid.widget.CComponentWidgetEntity<?> widget =
-							(tech.derbent.api.grid.widget.CComponentWidgetEntity<?>) component;
-					widget.saveWidgetState();
-				}
-			}
 			// Only unregister if contentOwner is a page service implementer
 			if (!(contentOwner instanceof IPageServiceImplementer<?>)) {
 				return;

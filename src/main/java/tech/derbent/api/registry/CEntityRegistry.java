@@ -24,7 +24,6 @@ public class CEntityRegistry {
 	private static final Map<String, Class<?>> serviceClasses = new ConcurrentHashMap<>();
 	private static final Map<Class<?>, Class<?>> serviceClassesByEntity = new ConcurrentHashMap<>();
 	private static final Map<String, Class<?>> serviceClassesByName = new ConcurrentHashMap<>();
-
 	// Entity title mappings
 	private static final Map<Class<?>, String> entityTitlesSingular = new ConcurrentHashMap<>();
 	private static final Map<Class<?>, String> entityTitlesPlural = new ConcurrentHashMap<>();
@@ -49,7 +48,7 @@ public class CEntityRegistry {
 		entityClassesBySingularTitle.clear();
 		entityClassesByPluralTitle.clear();
 		initialized = false;
-		LOGGER.info("Entity registry cleared");
+		// LOGGER.info("Entity registry cleared");
 	}
 
 	public static String getDefaultColor(final Class<?> entityClass) {
@@ -72,28 +71,11 @@ public class CEntityRegistry {
 		return defaultIconsByName.get(className);
 	}
 
-	/** Gets the singular title for an entity class.
-	 * @param entityClass the entity class
-	 * @return the singular title or null if not registered */
-	public static String getEntityTitleSingular(final Class<?> entityClass) {
-		Check.notNull(entityClass, "Entity class cannot be null");
-		return entityTitlesSingular.get(entityClass);
-	}
-
-	/** Gets the plural title for an entity class.
-	 * @param entityClass the entity class
-	 * @return the plural title or null if not registered */
-	public static String getEntityTitlePlural(final Class<?> entityClass) {
-		Check.notNull(entityClass, "Entity class cannot be null");
-		return entityTitlesPlural.get(entityClass);
-	}
-
-	/** Gets the entity class by its singular title.
-	 * @param singularTitle the singular title (e.g., "Activity")
-	 * @return the entity class or null if not found */
-	public static Class<?> getEntityClassBySingularTitle(final String singularTitle) {
-		Check.notBlank(singularTitle, "Singular title cannot be blank");
-		return entityClassesBySingularTitle.get(singularTitle);
+	public static Class<?> getEntityClass(final String simpleName) {
+		Check.notBlank(simpleName, "Simple name cannot be blank");
+		final Class<?> clazz = entityClasses.get(simpleName);
+		Check.notNull(clazz, "Entity class not found for name: " + simpleName);
+		return clazz;
 	}
 
 	/** Gets the entity class by its plural title.
@@ -104,13 +86,21 @@ public class CEntityRegistry {
 		return entityClassesByPluralTitle.get(pluralTitle);
 	}
 
+	/** Gets the entity class by its singular title.
+	 * @param singularTitle the singular title (e.g., "Activity")
+	 * @return the entity class or null if not found */
+	public static Class<?> getEntityClassBySingularTitle(final String singularTitle) {
+		Check.notBlank(singularTitle, "Singular title cannot be blank");
+		return entityClassesBySingularTitle.get(singularTitle);
+	}
+
 	/** Gets the entity class by either singular or plural title.
 	 * @param title the title (singular or plural)
 	 * @return the entity class or null if not found */
 	public static Class<?> getEntityClassByTitle(final String title) {
 		Check.notBlank(title, "Title cannot be blank");
 		// Try singular first
-		Class<?> clazz = entityClassesBySingularTitle.get(title);
+		final Class<?> clazz = entityClassesBySingularTitle.get(title);
 		if (clazz != null) {
 			return clazz;
 		}
@@ -118,18 +108,27 @@ public class CEntityRegistry {
 		return entityClassesByPluralTitle.get(title);
 	}
 
-	public static Class<?> getEntityClass(final String simpleName) {
-		Check.notBlank(simpleName, "Simple name cannot be blank");
-		final Class<?> clazz = entityClasses.get(simpleName);
-		Check.notNull(clazz, "Entity class not found for name: " + simpleName);
-		return clazz;
-	}
-
 	public static Class<?> getEntityServiceClass(final String simpleName) {
 		Check.notBlank(simpleName, "Simple name cannot be blank");
 		final Class<?> clazz = serviceClasses.get(simpleName);
 		Check.notNull(clazz, "Service class not found for entity: " + simpleName);
 		return clazz;
+	}
+
+	/** Gets the plural title for an entity class.
+	 * @param entityClass the entity class
+	 * @return the plural title or null if not registered */
+	public static String getEntityTitlePlural(final Class<?> entityClass) {
+		Check.notNull(entityClass, "Entity class cannot be null");
+		return entityTitlesPlural.get(entityClass);
+	}
+
+	/** Gets the singular title for an entity class.
+	 * @param entityClass the entity class
+	 * @return the singular title or null if not registered */
+	public static String getEntityTitleSingular(final Class<?> entityClass) {
+		Check.notNull(entityClass, "Entity class cannot be null");
+		return entityTitlesSingular.get(entityClass);
 	}
 
 	public static Class<?> getInitializerService(final Class<?> entityClass) {
@@ -193,41 +192,35 @@ public class CEntityRegistry {
 			serviceClasses.put(simpleName, serviceClass);
 			serviceClassesByEntity.put(entityClass, serviceClass);
 			serviceClassesByName.put(serviceClass.getSimpleName(), serviceClass);
-
 			// Optional initializer service
 			final Class<?> initializer = registrable.getInitializerServiceClass();
 			if (initializer != null) {
 				initializerServices.put(entityClass, initializer);
 			}
-
 			// Optional page service
 			final Class<?> pageService = registrable.getPageServiceClass();
 			if (pageService != null) {
 				pageServiceClasses.put(entityClass, pageService);
 				pageServiceClassesByName.put(pageService.getSimpleName(), pageService);
 			}
-
 			// Optional default icon
 			final String defaultIconName = registrable.getDefaultIconName();
 			if (defaultIconName != null && !defaultIconName.isBlank()) {
 				defaultIcons.put(entityClass, defaultIconName);
 				defaultIconsByName.put(entityClass.getName(), defaultIconName);
 			}
-
 			// Optional default color
 			final String defaultColor = registrable.getDefaultColor();
 			if (defaultColor != null && !defaultColor.isBlank()) {
 				defaultColors.put(entityClass, defaultColor);
 				defaultColorsByName.put(entityClass.getName(), defaultColor);
 			}
-
 			// Entity titles (singular and plural)
 			final String singularTitle = registrable.getEntityTitleSingular();
 			if (singularTitle != null && !singularTitle.isBlank()) {
 				entityTitlesSingular.put(entityClass, singularTitle);
 				entityClassesBySingularTitle.put(singularTitle, entityClass);
 			}
-
 			final String pluralTitle = registrable.getEntityTitlePlural();
 			if (pluralTitle != null && !pluralTitle.isBlank()) {
 				entityTitlesPlural.put(entityClass, pluralTitle);

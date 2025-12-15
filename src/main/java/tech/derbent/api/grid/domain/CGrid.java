@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hibernate.Hibernate;
@@ -29,15 +30,11 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IHasDragControl;
-import tech.derbent.api.interfaces.IStateOwnerComponent;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
@@ -54,7 +51,7 @@ import tech.derbent.api.utils.Check;
  * fields: Small width (100px) - BigDecimal fields: Medium width (120px) - Date fields: Medium width (150px) - Boolean/Status fields: Small-Medium
  * width (100px) - Short text fields: Medium width (200px) - Long text fields: Large width (300px+) - Reference fields: Medium width (200px) */
 // public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<EntityClass> {
-public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwnerComponent, IHasDragControl {
+public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragControl {
 
 	private static final long serialVersionUID = 1L;
 	public static final String WIDTH_BOOLEAN = "100px";
@@ -110,6 +107,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	/** Map to store widget providers for columns that create components implementing IStateOwnerComponent. Key: Column key, Value: Widget provider
 	 * function */
 	private final Map<String, Function<EntityClass, ? extends Component>> widgetProviders = new HashMap<>();
+	private Consumer<CGrid<EntityClass>> refreshConsumer;
 
 	@SuppressWarnings ("unchecked")
 	public CGrid(final Class<?> class1) {
@@ -479,30 +477,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		return column;
 	}
 
-	@Override
-	public void clearStateInformation() {
-		LOGGER.debug("[StateOwner] Clearing grid state information");
-		try {
-			// Clear state from child components (widgets)
-			final List<EntityClass> items = getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
-			for (final EntityClass item : items) {
-				for (final Map.Entry<String, Function<EntityClass, ? extends Component>> entry : widgetProviders.entrySet()) {
-					try {
-						final Component widget = entry.getValue().apply(item);
-						if (widget instanceof IStateOwnerComponent) {
-							((IStateOwnerComponent) widget).clearStateInformation();
-						}
-					} catch (final Exception e) {
-						LOGGER.debug("[StateOwner] Error clearing state for widget: {}", e.getMessage());
-					}
-				}
-			}
-			LOGGER.debug("[StateOwner] Grid state cleared successfully");
-		} catch (final Exception e) {
-			LOGGER.debug("[StateOwner] Error clearing grid state: {}", e.getMessage());
-		}
-	}
-
 	/** Ensures that the grid has a selected row when data is available. This method is called automatically when data changes and follows the coding
 	 * guideline that grids should always have a selected row. */
 	public void ensureSelectionWhenDataAvailable() {
@@ -563,62 +537,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	// ==================== IStateOwnerComponent Implementation ====================
 
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
-
-	@Override
-	public JsonObject getStateInformation() {
-		final JsonObject state = saveGridState();
-		// Collect state from child components (widget columns)
-		final JsonArray childStates = Json.createArray();
-		int childIndex = 0;
-		try {
-			LOGGER.debug("[StateOwner] Collecting state from grid columns and rows...");
-			// Get all items currently in the grid
-			final List<EntityClass> items = getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
-			LOGGER.debug("[StateOwner] Processing {} rows for state collection", items.size());
-			// Iterate through each row (item)
-			for (int rowIndex = 0; rowIndex < items.size(); rowIndex++) {
-				final EntityClass item = items.get(rowIndex);
-				final Long itemId = item instanceof CEntityDB ? ((CEntityDB<?>) item).getId() : null;
-				LOGGER.debug("[StateOwner] Processing row {}: item ID {}", rowIndex, itemId);
-				// Iterate through columns that have widget providers
-				for (final Map.Entry<String, Function<EntityClass, ? extends Component>> entry : widgetProviders.entrySet()) {
-					final String columnKey = entry.getKey();
-					final Function<EntityClass, ? extends Component> widgetProvider = entry.getValue();
-					try {
-						LOGGER.debug("[StateOwner]   Checking column '{}' for IStateOwnerComponent implementation", columnKey);
-						// Create the widget for this item using the provider
-						final Component widget = widgetProvider.apply(item);
-						if (widget instanceof IStateOwnerComponent) {
-							LOGGER.debug("[StateOwner]   Widget implements IStateOwnerComponent, collecting state");
-							final IStateOwnerComponent stateOwner = (IStateOwnerComponent) widget;
-							final JsonObject widgetState = stateOwner.getStateInformation();
-							// Add metadata to identify which row/column this state belongs to
-							widgetState.put("rowIndex", rowIndex);
-							if (itemId != null) {
-								widgetState.put("itemId", itemId.doubleValue());
-							}
-							widgetState.put("columnKey", columnKey);
-							childStates.set(childIndex++, widgetState);
-							LOGGER.debug("[StateOwner]   Collected state from widget at row {} column '{}'", rowIndex, columnKey);
-						} else {
-							LOGGER.debug("[StateOwner]   Widget does not implement IStateOwnerComponent, skipping");
-						}
-					} catch (final Exception e) {
-						LOGGER.debug("[StateOwner]   Error collecting state from column '{}' at row {}: {}", columnKey, rowIndex, e.getMessage());
-					}
-				}
-			}
-			if (childStates.length() > 0) {
-				state.put("childStates", childStates);
-				LOGGER.debug("[StateOwner] Collected state from {} child components", childStates.length());
-			} else {
-				LOGGER.debug("[StateOwner] No child component states collected");
-			}
-		} catch (final Exception e) {
-			LOGGER.error("[StateOwner] Error collecting child component states: {}", e.getMessage(), e);
-		}
-		return state;
-	}
 
 	/** Initialize grid with common settings and styling. */
 	private void initializeGrid() {
@@ -684,127 +602,13 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		};
 	}
 
-	/** Restores the grid state from a JSON object.
-	 * @param state The JSON object containing the saved state */
-	private void restoreGridState(final JsonObject state) {
-		if (state == null) {
-			LOGGER.debug("[StateOwner] No grid state to restore");
-			return;
+	public void refreshGrid() {
+		if (refreshConsumer != null) {
+			LOGGER.debug("Refreshing grid id: {} via refresh consumer", getId());
+			refreshConsumer.accept(this);
+		} else {
+			LOGGER.error("Refresh consumer is not set for grid id: {}", getId());
 		}
-		try {
-			// Restore selected item by ID
-			if (state.hasKey("selectedItemId")) {
-				final double selectedIdDouble = state.getNumber("selectedItemId");
-				final Long selectedId = (long) selectedIdDouble;
-				LOGGER.debug("[StateOwner] Attempting to restore selected item ID: {}", selectedId);
-				// Find and select the item with matching ID
-				getDataProvider().fetch(new Query<>()).filter(item -> {
-					if (item instanceof CEntityDB) {
-						final Long itemId = ((CEntityDB<?>) item).getId();
-						return itemId != null && itemId.equals(selectedId);
-					}
-					return false;
-				}).findFirst().ifPresent(item -> {
-					select(item);
-					LOGGER.debug("[StateOwner] Restored selection to item ID: {}", selectedId);
-				});
-			}
-			LOGGER.debug("[StateOwner] Grid state restored successfully");
-		} catch (final Exception e) {
-			LOGGER.error("[StateOwner] Error restoring grid state: {}", e.getMessage(), e);
-		}
-	}
-	// ========== IHasDragControl interface implementation ==========
-
-	@Override
-	public void restoreStateInformation(final JsonObject state) {
-		if (state == null) {
-			LOGGER.debug("[StateOwner] No state to restore");
-			return;
-		}
-		// Restore grid state
-		restoreGridState(state);
-		// Restore child component states
-		if (state.hasKey("childStates")) {
-			try {
-				final JsonArray childStates = state.getArray("childStates");
-				LOGGER.debug("[StateOwner] Restoring state for {} child components...", childStates.length());
-				// Get all items currently in the grid
-				final List<EntityClass> items = getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
-				for (int i = 0; i < childStates.length(); i++) {
-					final JsonObject childState = childStates.getObject(i);
-					try {
-						// Extract metadata to identify which widget this state belongs to
-						final int rowIndex = childState.hasKey("rowIndex") ? (int) childState.getNumber("rowIndex") : -1;
-						final String columnKey = childState.hasKey("columnKey") ? childState.getString("columnKey") : null;
-						final Long itemId = childState.hasKey("itemId") ? (long) childState.getNumber("itemId") : null;
-						LOGGER.debug("[StateOwner] Processing child state {}: rowIndex={}, columnKey={}, itemId={}", i, rowIndex, columnKey, itemId);
-						if (columnKey != null && widgetProviders.containsKey(columnKey)) {
-							// Find the matching item
-							EntityClass targetItem = null;
-							if (itemId != null && rowIndex >= 0 && rowIndex < items.size()) {
-								final EntityClass item = items.get(rowIndex);
-								if (item instanceof CEntityDB) {
-									final Long currentItemId = ((CEntityDB<?>) item).getId();
-									if (itemId.equals(currentItemId)) {
-										targetItem = item;
-									}
-								}
-							}
-							if (targetItem != null) {
-								// Create the widget for this item
-								final Function<EntityClass, ? extends Component> widgetProvider = widgetProviders.get(columnKey);
-								final Component widget = widgetProvider.apply(targetItem);
-								if (widget instanceof IStateOwnerComponent) {
-									LOGGER.debug("[StateOwner] Restoring state to widget at row {} column '{}'", rowIndex, columnKey);
-									((IStateOwnerComponent) widget).restoreStateInformation(childState);
-								} else {
-									LOGGER.debug("[StateOwner] Widget at row {} column '{}' does not implement IStateOwnerComponent", rowIndex,
-											columnKey);
-								}
-							} else {
-								LOGGER.debug("[StateOwner] Could not find matching item for child state {} (itemId={}, rowIndex={})", i, itemId,
-										rowIndex);
-							}
-						} else {
-							LOGGER.debug("[StateOwner] Column key '{}' not found in widget providers", columnKey);
-						}
-					} catch (final Exception e) {
-						LOGGER.error("[StateOwner] Error restoring child state at index {}: {}", i, e.getMessage(), e);
-					}
-				}
-			} catch (final Exception e) {
-				LOGGER.error("[StateOwner] Error restoring child component states: {}", e.getMessage(), e);
-			}
-		}
-	}
-
-	/** Saves the current grid state including selected item and scroll position.
-	 * @return JsonObject containing the grid state */
-	private JsonObject saveGridState() {
-		final JsonObject state = Json.createObject();
-		try {
-			// Save selected item ID if entity has getId()
-			final EntityClass selectedItem = asSingleSelect().getValue();
-			if (selectedItem != null) {
-				if (selectedItem instanceof CEntityDB) {
-					final Long id = ((CEntityDB<?>) selectedItem).getId();
-					if (id != null) {
-						state.put("selectedItemId", id.doubleValue());
-						LOGGER.debug("[StateOwner] Saved selected item ID: {}", id);
-					}
-				} else {
-					// For non-entity items, try to use toString() or index
-					LOGGER.debug("[StateOwner] Selected item is not CEntityDB, cannot save ID");
-				}
-			}
-			// Note: Vaadin Grid does not expose scroll position API directly
-			// We save what we can - the selected item will help restore visible area
-			LOGGER.debug("[StateOwner] Grid state saved successfully");
-		} catch (final Exception e) {
-			LOGGER.error("[StateOwner] Error saving grid state: {}", e.getMessage(), e);
-		}
-		return state;
 	}
 
 	@Override
@@ -828,7 +632,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	public void setDragEnabled(final boolean enabled) {
 		dragEnabled = enabled;
 		setRowsDraggable(enabled);
-		LOGGER.debug("[DragDebug] CGrid: Drag {} for grid", enabled ? "enabled" : "disabled");
 	}
 
 	@Override
@@ -848,5 +651,11 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		setMinHeight("60px");
 		setWidthFull();
 		setAllRowsVisible(true);
+	}
+
+	// set grid a refresh consumer method
+	public void setRefreshConsumer(final Consumer<CGrid<EntityClass>> refreshConsumer) {
+		Check.notNull(refreshConsumer, "Refresh consumer cannot be null");
+		this.refreshConsumer = refreshConsumer;
 	}
 }
