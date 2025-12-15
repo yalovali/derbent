@@ -651,7 +651,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 				LOGGER.debug("Handling grid drop event for grid id: {}", getId());
 				final EntityClass targetItem = event.getDropTargetItem().orElse(null);
 				final GridDropLocation dropLocation = event.getDropLocation();
-				final CDragDropEvent<EntityClass> dropEvent = new CDragDropEvent<>(this, this, targetItem, dropLocation, true);
+				// Note: Vaadin reports the drop target as the event source; we pass the true drag source separately for clarity.
+				final CDragDropEvent<EntityClass> dropEvent = new CDragDropEvent<>(this, targetItem, dropLocation, true);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {
 				LOGGER.error("Error handling grid drop event", e);

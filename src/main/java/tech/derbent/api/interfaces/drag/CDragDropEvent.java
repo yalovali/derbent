@@ -25,8 +25,7 @@ public class CDragDropEvent<T> extends CDragBaseEvent {
 	 * @param targetItem   the item at the drop location (may be null)
 	 * @param dropLocation the location relative to the target item
 	 * @param fromClient   true if the event originated from the client, false otherwise */
-	public CDragDropEvent(final Component source, final Component dragSource, final T targetItem, final GridDropLocation dropLocation,
-			final boolean fromClient) {
+	public CDragDropEvent(final Component source, final T targetItem, final GridDropLocation dropLocation, final boolean fromClient) {
 		super(source, fromClient);
 		this.targetItem = targetItem;
 		this.dropLocation = dropLocation;

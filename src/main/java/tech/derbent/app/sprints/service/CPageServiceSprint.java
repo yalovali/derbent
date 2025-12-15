@@ -198,7 +198,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			final CProjectItem<?> itemToAdd = (CProjectItem<?>) draggedItem;
 			final GridDropLocation dropLocation = event.getDropLocation();
-			insertBacklogItemIntoSprint(targetSprint, itemToAdd, dropLocation);
+			final CSprintItem targetSprintItem = event.getTargetItem() instanceof CSprintItem ? (CSprintItem) event.getTargetItem() : null;
+			insertBacklogItemIntoSprint(targetSprint, itemToAdd, dropLocation, targetSprintItem);
 			refreshAfterSprintChange();
 			CNotificationService.showSuccess("Item added to sprint " + targetSprint.getName());
 		} catch (final Exception e) {
@@ -360,16 +361,22 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param itemToAdd    backlog item
 	 * @param targetObject drop target (sprint item or sprint)
 	 * @param dropLocation drop location */
-	private void insertBacklogItemIntoSprint(final CSprint targetSprint, final CProjectItem<?> itemToAdd, final GridDropLocation dropLocation) {
+	private void insertBacklogItemIntoSprint(final CSprint targetSprint, final CProjectItem<?> itemToAdd, final GridDropLocation dropLocation,
+			final CSprintItem targetSprintItem) {
 		try {
 			final List<CSprintItem> existingItems = new ArrayList<>(sprintItemService.findByMasterId(targetSprint.getId()));
 			existingItems.sort(Comparator.comparingInt(item -> item.getItemOrder() != null ? item.getItemOrder() : Integer.MAX_VALUE));
 			int insertIndex = existingItems.size();
-			for (int i = 0; i < existingItems.size(); i++) {
-				if (existingItems.get(i).getId() != null && existingItems.get(i).getId().equals(targetSprint.getId())) {
-					insertIndex = dropLocation == GridDropLocation.BELOW ? i + 1 : i;
-					break;
+			if (targetSprintItem != null) {
+				for (int i = 0; i < existingItems.size(); i++) {
+					if (existingItems.get(i).getId() != null && existingItems.get(i).getId().equals(targetSprintItem.getId())) {
+						insertIndex = dropLocation == GridDropLocation.BELOW ? i + 1 : i;
+						break;
+					}
 				}
+			} else if (dropLocation == GridDropLocation.ABOVE) {
+				// Without an explicit target item, ABOVE means prepend instead of append.
+				insertIndex = 0;
 			}
 			insertIndex = Math.max(0, Math.min(insertIndex, existingItems.size()));
 			final CSprintItem newItem = new CSprintItem();
@@ -497,10 +504,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for master grid drop");
 			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
-			final boolean isInternalDrag = event.getSourceList().contains(component);
+			// Vaadin sets the drop target as the ComponentEvent source; drag origin lives on the stored dragStart event.
+			final boolean isInternalDrag = getActiveDragStartEvent().getSourceList().contains(component);
 			final Object draggedItem = getActiveDragStartEvent().getDraggedItems().get(0);
-			LOGGER.info("=== Drop on Master Grid === (internal: {}, draggedItem type: {})", isInternalDrag,
-					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
+			final String dragSourceName = getActiveDragStartEvent().getSourceList().isEmpty() ? "unknown"
+					: getActiveDragStartEvent().getSourceList().get(0).getClass().getSimpleName();
+			LOGGER.info("=== Drop on Master Grid === (internal: {}, draggedItem type: {}, dragSource: {}, dropTarget: {})", isInternalDrag,
+					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null", dragSourceName,
+					event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null");
 			if (draggedItem instanceof CSprintItem) {
 				if (isInternalDrag && event.getTargetItem() instanceof CSprintItem) {
 					final CSprintItem draggedSprintItem = (CSprintItem) draggedItem;
