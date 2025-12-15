@@ -12,9 +12,6 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -31,6 +28,9 @@ import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.ISelectionOwner;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -127,12 +127,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
 	private static final long serialVersionUID = 1L;
-	// Drag control state
-	private boolean dragEnabled = false;
-	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
-	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private List<EntityClass> allItems = new ArrayList<>();
 	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
 	private final AlreadySelectedMode alreadySelectedMode;
@@ -142,6 +136,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private EntityTypeConfig<?> currentEntityType;
 	// Keep current selection snapshot to compute old/new values when firing events
 	private Set<EntityClass> currentSelectionSnapshot = new HashSet<>();
+	// Drag control state
+	private boolean dragEnabled = false;
+	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
+	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
+	private boolean dropEnabled = false;
+	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
 	private final List<EntityTypeConfig<?>> entityTypes;
 	private CGrid<EntityClass> grid;
 	private CComponentGridSearchToolbar gridSearchToolbar;

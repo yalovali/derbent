@@ -178,8 +178,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public String getDialogTitle() { return "Select Items to Add to Sprint"; }
 
-
-
 	@Override
 	@SuppressWarnings ("unchecked")
 	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {

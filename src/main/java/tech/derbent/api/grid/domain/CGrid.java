@@ -97,17 +97,15 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		return column;
 	}
 
+	/** Constructor for CGrid with entity class.
+	 * @param entityClass The entity class for the grid */
+	Class<EntityClass> clazz;
 	// Drag control state
 	private boolean dragEnabled = false;
 	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
 	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
 	private boolean dropEnabled = false;
 	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
-	// Track dragged items from drag start for use in drop event (GridDropEvent doesn't provide them)
-	private List<EntityClass> activeDraggedItems = null;
-	/** Constructor for CGrid with entity class.
-	 * @param entityClass The entity class for the grid */
-	Class<EntityClass> clazz;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	/** Map to store widget providers for columns that create components implementing IStateOwnerComponent. Key: Column key, Value: Widget provider
 	 * function */
@@ -564,6 +562,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 	// ==================== IStateOwnerComponent Implementation ====================
 
+	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
+
 	@Override
 	public JsonObject getStateInformation() {
 		final JsonObject state = saveGridState();
@@ -649,14 +649,9 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 		return event -> {
 			try {
 				LOGGER.debug("Handling grid drop event for grid id: {}", getId());
-				if (activeDraggedItems == null) {
-					LOGGER.warn("No active dragged items tracked for drop event");
-					return;
-				}
-				final List<EntityClass> draggedItems = activeDraggedItems != null ? activeDraggedItems : Collections.emptyList();
 				final EntityClass targetItem = event.getDropTargetItem().orElse(null);
 				final GridDropLocation dropLocation = event.getDropLocation();
-				final CDragDropEvent<EntityClass> dropEvent = new CDragDropEvent<>(this, draggedItems, this, targetItem, dropLocation, true);
+				final CDragDropEvent<EntityClass> dropEvent = new CDragDropEvent<>(this, this, targetItem, dropLocation, true);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {
 				LOGGER.error("Error handling grid drop event", e);
@@ -667,14 +662,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 	private ComponentEventListener<GridDragEndEvent<EntityClass>> on_grid_dragEnd() {
 		return event -> {
 			try {
-				// Convert Vaadin GridDragEndEvent to our CDragEndEvent
 				final CDragEndEvent dragEndEvent = new CDragEndEvent(this, true);
 				notifyEvents(dragEndEvent);
 			} catch (final Exception e) {
 				LOGGER.error("Error handling grid drag end event", e);
-			} finally {
-				// Clear tracked items after drag ends
-				activeDraggedItems = null;
 			}
 		};
 	}
@@ -684,8 +675,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IStateOwner
 			try {
 				LOGGER.debug("Handling grid drop start for grid id: {}", getId());
 				final List<EntityClass> draggedItems = new ArrayList<>(event.getDraggedItems());
-				// Track dragged items for use in drop event (GridDropEvent doesn't provide them)
-				activeDraggedItems = draggedItems;
 				final CDragStartEvent<EntityClass> dragStartEvent = new CDragStartEvent<>(this, draggedItems, true);
 				notifyEvents(dragStartEvent);
 			} catch (final Exception e) {

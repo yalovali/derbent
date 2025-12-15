@@ -18,6 +18,8 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.IHasDragControl;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -32,6 +34,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
+	private CDragStartEvent<?> activeDragStartEvent = null;
 	// Custom components registered for method binding (outside of FormBuilder)
 	private final Map<String, Component> customComponents = new HashMap<>();
 	protected CDetailsBuilder detailsBuilder = null;
@@ -298,6 +301,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	@SuppressWarnings ({})
 	private void bindDragStart(final IHasDragControl component, final Method method, final String methodName) {
 		Check.instanceOf(component, Component.class, "Component implementing IHasDragStart must also extend Component");
+		Check.notNull(component, "Component for drag start binding cannot be null");
+		Check.notNull(method, "Method for drag start binding cannot be null");
 		final Component vaadinComponent = (Component) component;
 		component.addEventListener_dragStart(event -> {
 			try {
@@ -353,6 +358,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			bindComponent(method, component, method.getName(), componentName, action);
 		}
 	}
+
+	protected CDragStartEvent<?> getActiveDragStartEvent() { return activeDragStartEvent; }
 
 	public Map<String, Component> getAllComponents() {
 		final Map<String, Component> allComponents = new HashMap<>();
@@ -453,6 +460,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public IPageServiceImplementer<EntityClass> getView() { return view; }
 
+	protected void on_dragEnd(CDragDropEvent<?> event) {
+		setActiveDragStartEvent(null);
+	}
+
+	//
+	protected void on_dragStart(CDragDropEvent<?> event) {
+		LOGGER.debug("Drag start event received in base CPageService.");
+	}
+
 	/** Update the save button state based on validation results. This method is called automatically when the name field changes. */
 	protected void on_name_change() {
 		try {
@@ -493,6 +509,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		customComponents.put(name, component);
 		LOGGER.debug("Registered custom component '{}' of type {}", name, component.getClass().getSimpleName());
 	}
+
+	protected void setActiveDragStartEvent(final CDragStartEvent<?> activeDragStartEvent) { this.activeDragStartEvent = activeDragStartEvent; }
 
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"

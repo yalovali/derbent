@@ -1,6 +1,5 @@
 package tech.derbent.api.interfaces.drag;
 
-import java.util.List;
 import java.util.Optional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
@@ -16,7 +15,6 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 public class CDragDropEvent<T> extends CDragBaseEvent {
 
 	private static final long serialVersionUID = 1L;
-	private final List<T> draggedItems;
 	private final GridDropLocation dropLocation;
 	private final T targetItem;
 
@@ -27,23 +25,12 @@ public class CDragDropEvent<T> extends CDragBaseEvent {
 	 * @param targetItem   the item at the drop location (may be null)
 	 * @param dropLocation the location relative to the target item
 	 * @param fromClient   true if the event originated from the client, false otherwise */
-	public CDragDropEvent(final Component source, final List<T> draggedItems, final Component dragSource, final T targetItem,
-			final GridDropLocation dropLocation, final boolean fromClient) {
+	public CDragDropEvent(final Component source, final Component dragSource, final T targetItem, final GridDropLocation dropLocation,
+			final boolean fromClient) {
 		super(source, fromClient);
-		this.draggedItems = draggedItems;
 		this.targetItem = targetItem;
 		this.dropLocation = dropLocation;
 	}
-
-	/** Gets the first dragged item (convenience method for single-item drops).
-	 * @return the first dragged item, or null if the list is empty */
-	public T getDraggedItem() {
-		return draggedItems != null && !draggedItems.isEmpty() ? draggedItems.get(0) : null;
-	}
-
-	/** Gets the list of items being dropped.
-	 * @return the dragged items (never null, but may be empty) */
-	public List<T> getDraggedItems() { return draggedItems; }
 
 	/** Gets the drop location relative to the target item.
 	 * @return the drop location (ABOVE, BELOW, ON_TOP, or EMPTY) */
