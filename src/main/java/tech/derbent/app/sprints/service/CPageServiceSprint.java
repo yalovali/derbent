@@ -556,63 +556,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
 	}
 
-	/** Refreshes UI components after backlog drop operation. */
-	/** Refreshes all grids after a backlog drop operation with state preservation.
-	 * <p>
-	 * This method ensures proper state preservation during refresh:
-	 * <ol>
-	 * <li>Widget state is automatically saved in CComponentGridEntity.unregisterAllWidgetComponents()</li>
-	 * <li>All grids are refreshed with new data</li>
-	 * <li>Widget state is automatically restored in CComponentWidgetEntity.initializeWidget()</li>
-	 * <li>Grid selection is preserved in CComponentGridEntity.refreshGridData()</li>
-	 * </ol>
-	 * </p>
-	 * <p>
-	 * <b>Components refreshed:</b>
-	 * <ul>
-	 * <li>Sprint items grid (componentItemsSelection)</li>
-	 * <li>Backlog grid (componentBacklogItems)</li>
-	 * <li>Master grid showing sprint widgets (getView().refreshGrid())</li>
-	 * </ul>
-	 * </p>
-	 */
-	private void refreshAfterBacklogDrop() {
-		// Refresh sprint items list
-		if (componentItemsSelection != null) {
-			componentItemsSelection.refreshGrid();
-		}
-		// Refresh backlog
-		if (componentBacklogItems != null) {
-			componentBacklogItems.refreshGrid();
-		}
-		// Refresh master grid to update sprint widgets
-		// This will trigger widget state save/restore automatically
-		try {
-			getView().refreshGrid();
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing master grid after backlog drop", e);
-		}
-	}
-	// Helper methods for drag-drop operations
-
-	/** Refreshes all relevant grids after a sprint change. */
-	private void refreshAfterSprintChange() {
-		// Refresh sprint items list if visible
-		if (componentItemsSelection != null) {
-			componentItemsSelection.refreshGrid();
-		}
-		// Refresh backlog
-		if (componentBacklogItems != null) {
-			componentBacklogItems.refreshGrid();
-		}
-		// Refresh master grid to update sprint widgets
-		try {
-			getView().refreshGrid();
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing master grid after sprint change", e);
-		}
-	}
-
 	private void refreshForEvent(CDragDropEvent<?> event) {
 		Object first = null;
 		first = event.getSourceList().get(0);
