@@ -625,7 +625,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			final boolean old_enableSelectionChangeListener = enableSelectionChangeListener;
 			enableSelectionChangeListener = false;
 			// first get the selected item to restore selection later
-			final CEntityDB<?> selectedItem = getSelectedItem();
 			// Clear the widget component map before refreshing to prevent memory leaks
 			unregisterAllWidgetComponents();
 			//
@@ -653,7 +652,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			Check.notNull(data, "Data loaded from service is null");
 			grid.setItems(data);
 			enableSelectionChangeListener = old_enableSelectionChangeListener;
-			selectEntity(selectedItem);
 		} catch (final Exception e) {
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
@@ -797,7 +795,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	public void refreshGrid() {
+		final CEntityDB<?> selectedItem = getSelectedItem();
 		grid.refreshGrid();
+		selectEntity(selectedItem);
 	}
 
 	/** Registers this grid component with the page service for automatic event binding.

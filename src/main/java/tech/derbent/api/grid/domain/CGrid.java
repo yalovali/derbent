@@ -104,10 +104,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	private boolean dropEnabled = false;
 	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private Consumer<CGrid<EntityClass>> refreshConsumer;
 	/** Map to store widget providers for columns that create components implementing IStateOwnerComponent. Key: Column key, Value: Widget provider
 	 * function */
 	private final Map<String, Function<EntityClass, ? extends Component>> widgetProviders = new HashMap<>();
-	private Consumer<CGrid<EntityClass>> refreshConsumer;
 
 	@SuppressWarnings ("unchecked")
 	public CGrid(final Class<?> class1) {
@@ -603,6 +603,13 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	public void refreshGrid() {
+		// TODO: consider preserving selection state during refresh
+		// TODO: consider preserving scroll position during refresh
+		// TODO: consider re-applying sort order during refresh
+		// TODO: store the current selection, scroll position, and sort order before refresh
+		// TODO: restore the selection, scroll position, and sort order after refresh
+		// TODO: disable the selection listener temporarily during refresh to avoid unwanted side effects
+		// Refresh the grid data via the refresh consumer
 		if (refreshConsumer != null) {
 			LOGGER.debug("Refreshing grid id: {} via refresh consumer", getId());
 			refreshConsumer.accept(this);
