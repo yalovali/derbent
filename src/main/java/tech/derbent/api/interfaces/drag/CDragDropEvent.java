@@ -12,11 +12,12 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
  * Unlike Vaadin's GridDropEvent which is specific to Grid components, this event works with any component implementing IHasDragControl, enabling a
  * unified drag-drop API across the application.
  * @param <T> The type of items being dropped */
-public class CDragDropEvent<T> extends CDragBaseEvent {
+public class CDragDropEvent extends CDragBaseEvent {
 
 	private static final long serialVersionUID = 1L;
 	private final GridDropLocation dropLocation;
-	private final T targetItem;
+	private final Object targetItem;
+	private final String originId;
 
 	/** Creates a new drop event.
 	 * @param source       the component that fired the event (drop target)
@@ -25,8 +26,10 @@ public class CDragDropEvent<T> extends CDragBaseEvent {
 	 * @param targetItem   the item at the drop location (may be null)
 	 * @param dropLocation the location relative to the target item
 	 * @param fromClient   true if the event originated from the client, false otherwise */
-	public CDragDropEvent(final Component source, final T targetItem, final GridDropLocation dropLocation, final boolean fromClient) {
+	public CDragDropEvent(final String originId, final Component source, final Object targetItem, final GridDropLocation dropLocation,
+			final boolean fromClient) {
 		super(source, fromClient);
+		this.originId = originId;
 		this.targetItem = targetItem;
 		this.dropLocation = dropLocation;
 	}
@@ -43,11 +46,15 @@ public class CDragDropEvent<T> extends CDragBaseEvent {
 
 	/** Gets the item at the drop location.
 	 * @return Optional containing the target item, or empty if dropping at the end or in an empty grid */
-	public Optional<T> getDropTargetItem() {
+	public Optional<Object> getDropTargetItem() {
 		return Optional.ofNullable(targetItem);
 	}
 
 	/** Gets the item at the drop location (direct access).
 	 * @return the target item, or null if dropping at the end or in an empty grid */
-	public T getTargetItem() { return targetItem; }
+	public Object getTargetItem() { return targetItem; }
+
+	public String getOriginId() {
+		return originId;
+	}
 }

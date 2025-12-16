@@ -94,7 +94,7 @@ public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<Entit
 public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
     extends CMasterViewSectionBase<EntityClass> {
 
-    protected void onSelectionChange(final ValueChangeEvent<?> event) {
+    protected void onSelectionChange(final ValueChangeEvent event) {
         final EntityClass value = (EntityClass) event.getValue();
         // Fire base class event - works automatically!
         fireEvent(new SelectionChangeEvent<>(this, value));
@@ -110,7 +110,7 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>>
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> 
     extends CMasterViewSectionBase<EntityClass> {
 
-    protected void onSelectionChange(final ValueChangeEvent<?> event) {
+    protected void onSelectionChange(final ValueChangeEvent event) {
         final EntityClass value = (EntityClass) event.getValue();
         // Fire base class event - same as Grid!
         fireEvent(new SelectionChangeEvent<>(this, value));
@@ -187,7 +187,7 @@ public class CMasterViewSectionCustom<EntityClass extends CEntityDB<EntityClass>
     extends CMasterViewSectionBase<EntityClass> {
 
     @Override
-    protected void onSelectionChange(final ValueChangeEvent<?> event) {
+    protected void onSelectionChange(final ValueChangeEvent event) {
         final EntityClass value = (EntityClass) event.getValue();
         // Just fire the base class event - automatic handling!
         fireEvent(new SelectionChangeEvent<>(this, value));

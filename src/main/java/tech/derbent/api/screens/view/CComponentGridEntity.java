@@ -80,8 +80,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	protected CProject currentProject;
 	// Drag control state
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
 	// Track components created in grid cells for event propagation
@@ -577,10 +577,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
 
 	private Class<?> getEntityClassFromService(CAbstractService<?> service) throws Exception {
 		try {

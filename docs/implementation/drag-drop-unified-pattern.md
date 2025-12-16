@@ -27,7 +27,7 @@ public void on_sprint_drop(...) {
 ```java
 // GOOD: Use event data directly
 public void on_sprint_drop(Component component, Object value) {
-    CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+    CDragDropEvent event = (CDragDropEvent) value;
     Object draggedItem = event.getDraggedItem();
     if (draggedItem instanceof CProjectItem) {
         // Handle the drop using event data
@@ -49,7 +49,7 @@ Use `event.getSourceList()` to detect if a drag is internal or external:
 
 ```java
 public void on_backlogItems_drop(Component component, Object value) {
-    CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+    CDragDropEvent event = (CDragDropEvent) value;
     
     // Check if source list contains backlog component
     boolean isInternalDrag = event.getSourceList().stream()
@@ -105,13 +105,13 @@ public class CComponentBacklog extends CComponentListEntityBase<CProjectItem<?>>
         implements IHasDragControl {
     
     @Override
-    public void on_dragStart(CDragStartEvent<?> event) {
+    public void on_dragStart(CDragStartEvent event) {
         // Forward to parent
         notifyEvents(event);
     }
     
     @Override
-    public void on_dragDrop(CDragDropEvent<?> event) {
+    public void on_dragDrop(CDragDropEvent event) {
         // Handle internal logic first
         handleInternalDrop(event);
         // Then forward to parent
@@ -128,7 +128,7 @@ Page services handle drop events using `on_{component}_{action}` pattern:
 public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
     
     public void on_backlogItems_drop(Component component, Object value) {
-        CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+        CDragDropEvent event = (CDragDropEvent) value;
         
         // Detect drag type using source list
         boolean isInternal = event.getSourceList().stream()
@@ -145,7 +145,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
     }
     
     public void on_masterGrid_drop(Component component, Object value) {
-        CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+        CDragDropEvent event = (CDragDropEvent) value;
         Object draggedItem = event.getDraggedItem();
         
         // Route based on dragged item type
@@ -210,7 +210,7 @@ If you find code with manual tracking:
 ```java
 // Drop backlog item onto sprint
 public void on_masterGrid_drop(Component component, Object value) {
-    CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+    CDragDropEvent event = (CDragDropEvent) value;
     
     // Get dragged item from event (no manual tracking!)
     Object draggedItem = event.getDraggedItem();
@@ -228,7 +228,7 @@ public void on_masterGrid_drop(Component component, Object value) {
 
 // Drop sprint item back to backlog
 public void on_backlogItems_drop(Component component, Object value) {
-    CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+    CDragDropEvent event = (CDragDropEvent) value;
     
     // Detect internal vs external using source list
     boolean isInternal = event.getSourceList().stream()

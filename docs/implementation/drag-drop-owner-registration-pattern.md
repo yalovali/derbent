@@ -156,14 +156,14 @@ public class CPageServiceActivity extends CPageService<CActivity> {
     // Handler methods are automatically bound via CPageService.bindMethods()
     public void on_gridActivities_dragStart(Component component, Object value) {
         if (value instanceof CDragDropEvent) {
-            final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+            final CDragDropEvent event = (CDragDropEvent) value;
             LOGGER.debug("Drag started with {} items", event.getDraggedItems().size());
         }
     }
     
     public void on_gridActivities_drop(Component component, Object value) {
         if (value instanceof CDragDropEvent) {
-            final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+            final CDragDropEvent event = (CDragDropEvent) value;
             LOGGER.debug("Drop received from {}", event.getDragSource());
         }
     }

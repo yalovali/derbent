@@ -14,21 +14,33 @@ public interface IHasDragControl {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(IHasDragControl.class);
 
-	default void addEventListener_dragDrop(ComponentEventListener<CDragDropEvent<?>> listener) {
+	default void addEventListener_dragDrop(ComponentEventListener<CDragDropEvent> listener) {
+		if (listener == null) {
+			return;
+		}
+		LOGGER.debug("[DragDebug] {} adding drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
 		getDropListeners().add(listener);
 	}
 
 	default void addEventListener_dragEnd(ComponentEventListener<CDragEndEvent> listener) {
+		if (listener == null) {
+			return;
+		}
+		// LOGGER.debug("[DragDebug] {} adding drag end listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
 		getDragEndListeners().add(listener);
 	}
 
-	default void addEventListener_dragStart(ComponentEventListener<CDragStartEvent<?>> listener) {
+	default void addEventListener_dragStart(ComponentEventListener<CDragStartEvent> listener) {
+		if (listener == null) {
+			return;
+		}
+		// LOGGER.debug("[DragDebug] {} adding drag start listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
 		getDragStartListeners().add(listener);
 	}
 
 	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners();
-	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners();
-	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners();
+	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners();
+	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners();
 
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
@@ -55,7 +67,7 @@ public interface IHasDragControl {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	private void notifyDragStartListeners(final CDragStartEvent<?> event) {
+	private void notifyDragStartListeners(final CDragStartEvent event) {
 		if (getDragStartListeners().isEmpty()) {
 			return;
 		}
@@ -76,7 +88,7 @@ public interface IHasDragControl {
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	private void notifyDropListeners(final CDragDropEvent<?> event) {
+	private void notifyDropListeners(final CDragDropEvent event) {
 		if (getDropListeners().isEmpty()) {
 			return;
 		}
@@ -94,10 +106,10 @@ public interface IHasDragControl {
 	default void notifyEvents(final CEvent event) {
 		try {
 			event.addSource(this);
-			if (event instanceof CDragStartEvent<?>) {
-				notifyDragStartListeners((CDragStartEvent<?>) event);
-			} else if (event instanceof CDragDropEvent<?>) {
-				notifyDropListeners((CDragDropEvent<?>) event);
+			if (event instanceof CDragStartEvent) {
+				notifyDragStartListeners((CDragStartEvent) event);
+			} else if (event instanceof CDragDropEvent) {
+				notifyDropListeners((CDragDropEvent) event);
 			} else if (event instanceof CDragEndEvent) {
 				notifyDragEndListeners((CDragEndEvent) event);
 			}
@@ -107,7 +119,7 @@ public interface IHasDragControl {
 		}
 	}
 
-	default void on_dragDrop(CDragDropEvent<?> event) {
+	default void on_dragDrop(CDragDropEvent event) {
 		notifyEvents(event);
 	}
 
@@ -115,7 +127,7 @@ public interface IHasDragControl {
 		notifyEvents(event);
 	}
 
-	default void on_dragStart(CDragStartEvent<?> event) {
+	default void on_dragStart(CDragStartEvent event) {
 		notifyEvents(event);
 	}
 

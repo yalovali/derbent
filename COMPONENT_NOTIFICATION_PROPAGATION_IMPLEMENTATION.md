@@ -431,7 +431,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
     public void on_componentwidgetsprint_1_dragStart(Component component, Object value) {
         LOGGER.info("[DragDebug] Sprint widget drag started");
         
-        CDragDropEvent<?> dragEvent = (CDragDropEvent<?>) value;
+        CDragDropEvent dragEvent = (CDragDropEvent) value;
         List<?> draggedItems = dragEvent.getDraggedItems();
         
         // Business logic here
@@ -491,7 +491,7 @@ addDoubleClickListener() / notifyDoubleClickListeners()
 ### 2. Event Filtering
 ```java
 // Filter events based on entity type or conditions
-private boolean shouldPropagateEvent(GridDragStartEvent<?> event) {
+private boolean shouldPropagateEvent(GridDragStartEvent event) {
     return event.getDraggedItems().size() > 0;
 }
 ```
@@ -499,7 +499,7 @@ private boolean shouldPropagateEvent(GridDragStartEvent<?> event) {
 ### 3. Event Transformation
 ```java
 // Transform widget events before propagation
-private GridDragStartEvent<?> transformEvent(GridDragStartEvent<?> originalEvent) {
+private GridDragStartEvent transformEvent(GridDragStartEvent originalEvent) {
     // Add additional context or modify event
     return enhancedEvent;
 }

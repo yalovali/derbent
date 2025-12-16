@@ -138,8 +138,8 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 
 	// Drag control state
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	// =============== INSTANCE MEMBERS ===============
 	protected final EntityClass entity;
 	protected CVerticalLayout layoutLeft = new CVerticalLayout();
@@ -202,10 +202,10 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
 
 	/** Gets the entity displayed in this widget.
 	 * @return the entity */

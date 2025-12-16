@@ -210,7 +210,7 @@ protected void bindMethods(final CPageService<?> page) {
 
 If you have a component that manages selection:
 
-1. Add `HasValue<ValueChangeEvent<T>, T>` to implements clause
+1. Add `HasValue<ValueChangeEvent, T>` to implements clause
 2. Add value change listener list and tracking fields
 3. Implement getValue(), setValue(), clear(), isEmpty()
 4. Implement addValueChangeListener() returning Registration

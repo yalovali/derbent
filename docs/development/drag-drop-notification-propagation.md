@@ -14,7 +14,7 @@ When components contain internal grids with drag-drop functionality, external li
 Components implementing this interface can expose drag start events from their internal grids:
 ```java
 public interface IHasDragStart<T> {
-    Registration addDragStartListener(ComponentEventListener<GridDragStartEvent<T>> listener);
+    Registration addDragStartListener(ComponentEventListener<GridDragStartEvent> listener);
 }
 ```
 
@@ -22,7 +22,7 @@ public interface IHasDragStart<T> {
 Components implementing this interface can expose drag end events from their internal grids:
 ```java
 public interface IHasDragEnd<T> {
-    Registration addDragEndListener(ComponentEventListener<GridDragEndEvent<T>> listener);
+    Registration addDragEndListener(ComponentEventListener<GridDragEndEvent> listener);
 }
 ```
 
@@ -166,17 +166,17 @@ bindMethods(this);
 
 // Automatic binding creates these handlers:
 public void on_sprintItems_dragStart(Component component, Object value) {
-    CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+    CDragDropEvent event = (CDragDropEvent) value;
     // Handle drag start
 }
 
 public void on_sprintItems_dragEnd(Component component, Object value) {
-    CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+    CDragDropEvent event = (CDragDropEvent) value;
     // Handle drag end
 }
 
 public void on_sprintItems_drop(Component component, Object value) {
-    CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+    CDragDropEvent event = (CDragDropEvent) value;
     // Handle drop
 }
 ```

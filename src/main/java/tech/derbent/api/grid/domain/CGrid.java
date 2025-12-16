@@ -101,8 +101,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	 * @param entityClass The entity class for the grid */
 	Class<EntityClass> clazz;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private Consumer<CGrid<EntityClass>> refreshConsumer;
 	/** Map to store widget providers for columns that create components implementing IStateOwnerComponent. Key: Column key, Value: Widget provider
@@ -530,10 +530,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
 
 	@Override
-	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
 	// ==================== IStateOwnerComponent Implementation ====================
 
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
@@ -564,7 +564,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 				final EntityClass targetItem = event.getDropTargetItem().orElse(null);
 				final GridDropLocation dropLocation = event.getDropLocation();
 				// Note: Vaadin reports the drop target as the event source; we pass the true drag source separately for clarity.
-				final CDragDropEvent<EntityClass> dropEvent = new CDragDropEvent<>(this, targetItem, dropLocation, true);
+				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, targetItem, dropLocation, true);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {
 				LOGGER.error("Error handling grid drop event", e);
@@ -587,8 +587,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return event -> {
 			try {
 				LOGGER.debug("Handling grid drop start for grid id: {}", getId());
-				final List<EntityClass> draggedItems = new ArrayList<>(event.getDraggedItems());
-				final CDragStartEvent<EntityClass> dragStartEvent = new CDragStartEvent<>(this, draggedItems, true);
+				final List<Object> draggedItems = new ArrayList<>(event.getDraggedItems());
+				final CDragStartEvent dragStartEvent = new CDragStartEvent(this, draggedItems, true);
 				notifyEvents(dragStartEvent);
 			} catch (final Exception e) {
 				LOGGER.error("Error handling grid drag start event", e);

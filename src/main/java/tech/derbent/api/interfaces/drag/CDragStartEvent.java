@@ -11,27 +11,27 @@ import com.vaadin.flow.component.Component;
  * Unlike Vaadin's GridDragStartEvent which is specific to Grid components, this event works with any component implementing IHasDragControl, enabling
  * a unified drag-drop API across the application.
  * @param <T> The type of items being dragged */
-public class CDragStartEvent<T> extends CDragBaseEvent {
+public class CDragStartEvent extends CDragBaseEvent {
 
 	private static final long serialVersionUID = 1L;
-	private final List<T> draggedItems;
+	private final List<Object> draggedItems;
 
 	/** Creates a new drag start event.
 	 * @param source       the component that fired the event (drag source)
 	 * @param draggedItems the items being dragged
 	 * @param fromClient   true if the event originated from the client, false otherwise */
-	public CDragStartEvent(final Component source, final List<T> draggedItems, final boolean fromClient) {
+	public CDragStartEvent(final Component source, final List<Object> draggedItems, final boolean fromClient) {
 		super(source, fromClient);
 		this.draggedItems = draggedItems;
 	}
 
 	/** Gets the first dragged item (convenience method for single-item drags).
 	 * @return the first dragged item, or null if the list is empty */
-	public T getDraggedItem() {
+	public Object getDraggedItem() {
 		return draggedItems != null && !draggedItems.isEmpty() ? draggedItems.get(0) : null;
 	}
 
 	/** Gets the list of items being dragged.
 	 * @return the dragged items (never null, but may be empty) */
-	public List<T> getDraggedItems() { return draggedItems; }
+	public List<Object> getDraggedItems() { return draggedItems; }
 }

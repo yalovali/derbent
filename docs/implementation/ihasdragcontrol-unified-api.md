@@ -81,14 +81,14 @@ grid.addDragStartListener(event -> {
 ```java
 public interface IHasDragControl {
     // Listener registration
-    Registration addDragStartListener(ComponentEventListener<GridDragStartEvent<?>> listener);
-    Registration addDragEndListener(ComponentEventListener<GridDragEndEvent<?>> listener);
-    Registration addDropListener(ComponentEventListener<GridDropEvent<?>> listener);
+    Registration addDragStartListener(ComponentEventListener<GridDragStartEvent> listener);
+    Registration addDragEndListener(ComponentEventListener<GridDragEndEvent> listener);
+    Registration addDropListener(ComponentEventListener<GridDropEvent> listener);
     
     // Listener access (for notifyEvents)
-    List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners();
-    List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners();
-    List<ComponentEventListener<GridDropEvent<?>>> getDropListeners();
+    List<ComponentEventListener<GridDragStartEvent>> getDragStartListeners();
+    List<ComponentEventListener<GridDragEndEvent>> getDragEndListeners();
+    List<ComponentEventListener<GridDropEvent>> getDropListeners();
     
     // Enable/disable functionality
     void setDragEnabled(boolean enabled);
@@ -97,7 +97,7 @@ public interface IHasDragControl {
     boolean isDropEnabled();
     
     // Event notification helper
-    default void notifyEvents(ComponentEvent<?> event) {
+    default void notifyEvents(ComponentEvent event) {
         // Automatically notifies all registered listeners
     }
 }
@@ -111,13 +111,13 @@ public class CComponentListEntityBase implements IHasDragControl {
     // State fields
     private boolean dragEnabled = false;
     private boolean dropEnabled = false;
-    private final List<ComponentEventListener<GridDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
-    private final List<ComponentEventListener<GridDragEndEvent<?>>> dragEndListeners = new ArrayList<>();
-    private final List<ComponentEventListener<GridDropEvent<?>>> dropListeners = new ArrayList<>();
+    private final List<ComponentEventListener<GridDragStartEvent>> dragStartListeners = new ArrayList<>();
+    private final List<ComponentEventListener<GridDragEndEvent>> dragEndListeners = new ArrayList<>();
+    private final List<ComponentEventListener<GridDropEvent>> dropListeners = new ArrayList<>();
     
     // Listener registration
     @Override
-    public Registration addDragStartListener(ComponentEventListener<GridDragStartEvent<?>> listener) {
+    public Registration addDragStartListener(ComponentEventListener<GridDragStartEvent> listener) {
         dragStartListeners.add(listener);
         return () -> dragStartListeners.remove(listener);
     }
@@ -145,9 +145,9 @@ public class CComponentListEntityBase implements IHasDragControl {
 
 For richer event data, the application provides custom event classes that extend `ComponentEvent`:
 
-### CDragStartEvent<T>
+### CDragStartEvent
 ```java
-public class CDragStartEvent<T> extends ComponentEvent<Component> {
+public class CDragStartEvent extends ComponentEvent<Component> {
     private final List<T> draggedItems;
     
     public List<T> getDraggedItems() { return draggedItems; }
@@ -162,9 +162,9 @@ public class CDragEndEvent extends ComponentEvent<Component> {
 }
 ```
 
-### CDropEvent<T>
+### CDropEvent
 ```java
-public class CDropEvent<T> extends ComponentEvent<Component> {
+public class CDropEvent extends ComponentEvent<Component> {
     private final List<T> draggedItems;
     private final Component dragSource;
     private final T targetItem;
@@ -212,13 +212,13 @@ grid.setDragEnabled(true);
 grid.setDropEnabled(true);
 
 grid.addDragStartListener(event -> {
-    GridDragStartEvent<?> gridEvent = (GridDragStartEvent<?>) event;
+    GridDragStartEvent gridEvent = (GridDragStartEvent) event;
     List<?> items = gridEvent.getDraggedItems();
     // Handle drag start
 });
 
 grid.addDropListener(event -> {
-    GridDropEvent<?> dropEvent = (GridDropEvent<?>) event;
+    GridDropEvent dropEvent = (GridDropEvent) event;
     Object targetItem = dropEvent.getDropTargetItem().orElse(null);
     GridDropLocation location = dropEvent.getDropLocation();
     // Handle drop
@@ -245,7 +245,7 @@ public class CPageServiceSprint extends CPageService<CSprint> {
         });
         
         componentSprintItems.addDropListener(event -> {
-            GridDropEvent<?> dropEvent = (GridDropEvent<?>) event;
+            GridDropEvent dropEvent = (GridDropEvent) event;
             // Determine if drop came from backlog
             // Move items from backlog to sprint
         });
@@ -373,7 +373,7 @@ childComponent.addDragStartListener(event -> {
 **Solution:**
 ```java
 grid.addDragStartListener(event -> {
-    GridDragStartEvent<?> gridEvent = (GridDragStartEvent<?>) event;
+    GridDragStartEvent gridEvent = (GridDragStartEvent) event;
     List<?> items = gridEvent.getDraggedItems();
 });
 ```
@@ -396,9 +396,9 @@ In the future, IHasDragControl could be updated to use custom event classes:
 
 ```java
 public interface IHasDragControl {
-    Registration addDragStartListener(ComponentEventListener<CDragStartEvent<?>> listener);
+    Registration addDragStartListener(ComponentEventListener<CDragStartEvent> listener);
     Registration addDragEndListener(ComponentEventListener<CDragEndEvent> listener);
-    Registration addDropListener(ComponentEventListener<CDropEvent<?>> listener);
+    Registration addDropListener(ComponentEventListener<CDropEvent> listener);
 }
 ```
 

@@ -138,8 +138,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private Set<EntityClass> currentSelectionSnapshot = new HashSet<>();
 	// Drag control state
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	private final List<EntityTypeConfig<?>> entityTypes;
 	private CGrid<EntityClass> grid;
 	private CComponentGridSearchToolbar gridSearchToolbar;
@@ -418,10 +418,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
 
 	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {

@@ -21,14 +21,14 @@ Before this refactoring:
 ```java
 public interface IHasDragControl {
     // Listener registration
-    Registration addDragStartListener(ComponentEventListener<GridDragStartEvent<?>> listener);
-    Registration addDragEndListener(ComponentEventListener<GridDragEndEvent<?>> listener);
-    Registration addDropListener(ComponentEventListener<GridDropEvent<?>> listener);
+    Registration addDragStartListener(ComponentEventListener<GridDragStartEvent> listener);
+    Registration addDragEndListener(ComponentEventListener<GridDragEndEvent> listener);
+    Registration addDropListener(ComponentEventListener<GridDropEvent> listener);
     
     // Listener access
-    List<ComponentEventListener<GridDragStartEvent<?>>> getDragStartListeners();
-    List<ComponentEventListener<GridDragEndEvent<?>>> getDragEndListeners();
-    List<ComponentEventListener<GridDropEvent<?>>> getDropListeners();
+    List<ComponentEventListener<GridDragStartEvent>> getDragStartListeners();
+    List<ComponentEventListener<GridDragEndEvent>> getDragEndListeners();
+    List<ComponentEventListener<GridDropEvent>> getDropListeners();
     
     // Enable/disable
     void setDragEnabled(boolean enabled);
@@ -37,10 +37,10 @@ public interface IHasDragControl {
     boolean isDropEnabled();
     
     // Event notification (DEFAULT IMPLEMENTATIONS)
-    default void notifyDragStartListeners(GridDragStartEvent<?> event) { ... }
-    default void notifyDragEndListeners(GridDragEndEvent<?> event) { ... }
-    default void notifyDropListeners(GridDropEvent<?> event) { ... }
-    default void notifyEvents(ComponentEvent<?> event) { ... }
+    default void notifyDragStartListeners(GridDragStartEvent event) { ... }
+    default void notifyDragEndListeners(GridDragEndEvent event) { ... }
+    default void notifyDropListeners(GridDropEvent event) { ... }
+    default void notifyEvents(ComponentEvent event) { ... }
 }
 ```
 
@@ -86,9 +86,9 @@ Parent Component or PageService
 
 **Created custom event classes for future extensibility:**
 
-- `CDragStartEvent<T>` - Drag operation start
+- `CDragStartEvent` - Drag operation start
 - `CDragEndEvent` - Drag operation end
-- `CDropEvent<T>` - Drop operation with rich context
+- `CDropEvent` - Drop operation with rich context
 
 These classes extend `ComponentEvent<Component>` and provide:
 - Richer event data than Grid-specific events

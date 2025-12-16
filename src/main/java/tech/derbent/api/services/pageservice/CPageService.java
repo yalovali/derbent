@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
@@ -19,6 +20,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
@@ -34,12 +36,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
-	private CDragStartEvent<?> activeDragStartEvent = null;
+	private CDragStartEvent activeDragStartEvent = null;
 	// Custom components registered for method binding (outside of FormBuilder)
 	private final Map<String, Component> customComponents = new HashMap<>();
 	protected CDetailsBuilder detailsBuilder = null;
 	private EntityClass previousEntity;
 	private final IPageServiceImplementer<EntityClass> view;
+	private final Map<String, ComponentEventListener<CDragDropEvent>> dropListenerRegistry = new HashMap<>();
+	private final Map<String, ComponentEventListener<CDragStartEvent>> dragStartListenerRegistry = new HashMap<>();
+	private final Map<String, ComponentEventListener<CDragEndEvent>> dragEndListenerRegistry = new HashMap<>();
 
 	public CPageService(final IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
@@ -272,66 +277,67 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		LOGGER.debug("[BindDebug] Successfully bound method {} to component {} for action {}", methodName, componentName, action);
 	}
 
-	/** Binds a component's drag end event to a page service handler method. This method supports any component implementing IHasDragEnd interface.
-	 * Note: CDragEndEvent is passed directly to handler methods.
-	 * @param component  the component implementing IHasDragEnd
-	 * @param method     the handler method to invoke
-	 * @param methodName the name of the handler method */
-	@SuppressWarnings ({})
 	private void bindDragEnd(final IHasDragControl component, final Method method, final String methodName) {
 		Check.instanceOf(component, Component.class, "Component implementing IHasDragEnd must also extend Component");
 		final Component vaadinComponent = (Component) component;
-		component.addEventListener_dragEnd(event -> {
-			try {
-				LOGGER.debug("[DragDebug] CPageService.bindDragEnd: Invoking {} on component {}", methodName, component.getClass().getSimpleName());
-				// Pass CDragEndEvent directly to handler
-				method.invoke(this, vaadinComponent, event);
-			} catch (final Exception ex) {
-				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-			}
+		final String key = component.getClass().getName() + "#DRAG_END#" + methodName;
+		final ComponentEventListener<CDragEndEvent> listener = dragEndListenerRegistry.computeIfAbsent(key, k -> {
+			LOGGER.debug("[BindDebug] Creating drag-end listener for {}", k);
+			return event -> {
+				try {
+					LOGGER.debug("[DragDebug] Invoking {} on component {}", methodName, component.getClass().getSimpleName());
+					method.invoke(this, vaadinComponent, event);
+				} catch (final Exception ex) {
+					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
+				}
+			};
 		});
-		LOGGER.debug("Bound IHasDragEnd component drag end event to method {}", methodName);
+		component.addEventListener_dragEnd(listener);
+		LOGGER.debug("[BindDebug] Bound IHasDragEnd event to method {} (cached={})", methodName, dragEndListenerRegistry.containsKey(key));
 	}
 
-	/** Binds a component's drag start event to a page service handler method. This method supports any component implementing IHasDragStart
-	 * interface.
-	 * @param component  the component implementing IHasDragStart
-	 * @param method     the handler method to invoke
-	 * @param methodName the name of the handler method */
 	@SuppressWarnings ({})
 	private void bindDragStart(final IHasDragControl component, final Method method, final String methodName) {
 		Check.instanceOf(component, Component.class, "Component implementing IHasDragStart must also extend Component");
 		Check.notNull(component, "Component for drag start binding cannot be null");
 		Check.notNull(method, "Method for drag start binding cannot be null");
 		final Component vaadinComponent = (Component) component;
-		component.addEventListener_dragStart(event -> {
-			try {
-				// Pass CDragStartEvent as Object for generalization - handlers cast to specific type
-				method.invoke(this, vaadinComponent, event);
-			} catch (final Exception ex) {
-				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage());
-			}
+		final String key = component.getClass().getName() + "#DRAG_START#" + methodName;
+		final ComponentEventListener<CDragStartEvent> listener = dragStartListenerRegistry.computeIfAbsent(key, k -> {
+			LOGGER.debug("[BindDebug] Creating drag-start listener for {}", k);
+			return event -> {
+				try {
+					method.invoke(this, vaadinComponent, event);
+				} catch (final Exception ex) {
+					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
+				}
+			};
 		});
-		LOGGER.debug("Bound IHasDragStart component drag start event to method {}", methodName);
+		component.addEventListener_dragStart(listener);
+		LOGGER.debug("[BindDebug] Bound IHasDragStart event to method {} (cached={})", methodName, dragStartListenerRegistry.containsKey(key));
 	}
 
 	/** Binds a component's drop event to a page service handler method. Supports components implementing IHasDrop interface.
 	 * @param component  the component implementing IHasDrop
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
-	@SuppressWarnings ({})
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
-		component.addEventListener_dragDrop(event -> {
-			try {
-				LOGGER.info("[DragDebug] CPageService.bindIHasDropEvent: Drop event received, invoking {}", methodName);
-				// Pass CDropEvent as Object for generalization - handlers cast to specific type
-				method.invoke(this, component, event);
-				LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
-			} catch (final Exception ex) {
-				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
-			}
+		// Aynı component + aynı handler → aynı listener
+		final String key = component.getClass().getName() + "#" + methodName;
+		final ComponentEventListener<CDragDropEvent> listener = dropListenerRegistry.computeIfAbsent(key, k -> {
+			LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
+			return event -> {
+				try {
+					LOGGER.info("[DragDebug] Drop event received, invoking {}", methodName);
+					method.invoke(this, component, event);
+					LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
+				} catch (final Exception ex) {
+					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
+				}
+			};
 		});
-		LOGGER.debug("[BindDebug] Bound IHasDrop drop event to method {}", methodName);
+		component.addEventListener_dragDrop(listener);
+		LOGGER.debug("[BindDebug] Bound IHasDrop drop event to method {} (cached={})", methodName, dropListenerRegistry.containsKey(key));
 	}
 
 	public void bindMethods(final CPageService<?> page) {
@@ -359,7 +365,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
-	protected CDragStartEvent<?> getActiveDragStartEvent() { return activeDragStartEvent; }
+	protected CDragStartEvent getActiveDragStartEvent() { return activeDragStartEvent; }
 
 	public Map<String, Component> getAllComponents() {
 		final Map<String, Component> allComponents = new HashMap<>();
@@ -460,12 +466,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public IPageServiceImplementer<EntityClass> getView() { return view; }
 
-	protected void on_dragEnd(CDragDropEvent<?> event) {
+	protected void on_dragEnd(CDragDropEvent event) {
 		setActiveDragStartEvent(null);
 	}
 
 	//
-	protected void on_dragStart(CDragDropEvent<?> event) {
+	protected void on_dragStart(CDragDropEvent event) {
 		LOGGER.debug("Drag start event received in base CPageService.");
 	}
 
@@ -510,7 +516,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		LOGGER.debug("Registered custom component '{}' of type {}", name, component.getClass().getSimpleName());
 	}
 
-	protected void setActiveDragStartEvent(final CDragStartEvent<?> activeDragStartEvent) { this.activeDragStartEvent = activeDragStartEvent; }
+	protected void setActiveDragStartEvent(final CDragStartEvent activeDragStartEvent) { this.activeDragStartEvent = activeDragStartEvent; }
 
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"

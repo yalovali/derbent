@@ -91,8 +91,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected final IOrderedEntityService<ChildEntity> childService;
 	// Drag control state
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	protected final Class<ChildEntity> entityClass;
 	protected CGrid<ChildEntity> grid;
 	protected CHorizontalLayout layoutToolbar;
@@ -369,10 +369,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
 
 	/** Get the entity service.
 	 * @return The service */

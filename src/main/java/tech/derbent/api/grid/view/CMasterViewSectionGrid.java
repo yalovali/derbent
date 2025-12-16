@@ -29,7 +29,7 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 
 	@Override
 	public void createMasterView() {
-		Component toolbar = createGridToolbar();
+		final Component toolbar = createGridToolbar();
 		if (toolbar != null) {
 			add(toolbar);
 		}
@@ -62,14 +62,6 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	protected void onSelectionChange(final ValueChangeEvent<?> event) {
 		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
 		final EntityClass value = (EntityClass) event.getValue();
-		// reselect the old one, if new selection is null
-		// if (value == null && event.getOldValue() != null) {
-		// final EntityClass oldValue = (EntityClass) event.getOldValue();
-		// final SingleSelect<?, ?> rawSelect = grid.asSingleSelect();
-		// rawSelect.setValue(oldValue);
-		// // dont fire event
-		// return;
-		// }
 		fireEvent(new SelectionChangeEvent<>(this, value));
 	}
 

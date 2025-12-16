@@ -13,10 +13,10 @@ The binding system follows the same pattern as existing event handlers:
 
 ## CDragDropEvent Class
 
-The `CDragDropEvent<T>` class wraps drag-drop event information:
+The `CDragDropEvent` class wraps drag-drop event information:
 
 ```java
-public class CDragDropEvent<T> {
+public class CDragDropEvent {
     // Constructors
     CDragDropEvent(List<T> draggedItems, Object dragSource)  // For drag start
     CDragDropEvent(List<T> draggedItems, Object dragSource, T targetItem, 
@@ -102,7 +102,7 @@ Create handler methods following the naming pattern `on_{componentName}_{action}
 /** Handler for drag start events on sprint items grid. */
 public void on_sprintItems_dragStart(final Component component, final Object value) {
     if (value instanceof CDragDropEvent) {
-        final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+        final CDragDropEvent event = (CDragDropEvent) value;
         final List<?> draggedItems = event.getDraggedItems();
         
         LOGGER.info("Drag started with {} items", draggedItems.size());
@@ -128,7 +128,7 @@ public void on_sprintItems_dragEnd(final Component component, final Object value
 /** Handler for drop events on sprint items grid. */
 public void on_sprintItems_drop(final Component component, final Object value) {
     if (value instanceof CDragDropEvent) {
-        final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+        final CDragDropEvent event = (CDragDropEvent) value;
         final Object targetItem = event.getTargetItem();
         final GridDropLocation dropLocation = event.getDropLocation();
         
@@ -163,7 +163,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
     
     public void on_backlogItems_dragStart(final Component component, final Object value) {
         if (value instanceof CDragDropEvent) {
-            final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+            final CDragDropEvent event = (CDragDropEvent) value;
             if (!event.getDraggedItems().isEmpty()) {
                 // Track the item being dragged
                 currentlyDraggedItem = (CProjectItem<?>) event.getDraggedItem();
@@ -183,7 +183,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
     
     public void on_sprintItems_drop(final Component component, final Object value) {
         if (value instanceof CDragDropEvent && currentlyDraggedItem != null) {
-            final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+            final CDragDropEvent event = (CDragDropEvent) value;
             final CSprintItem targetItem = (CSprintItem) event.getTargetItem();
             final GridDropLocation dropLocation = event.getDropLocation();
             
@@ -208,7 +208,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
     
     public void on_sprintItems_dragStart(final Component component, final Object value) {
         if (value instanceof CDragDropEvent) {
-            final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+            final CDragDropEvent event = (CDragDropEvent) value;
             if (!event.getDraggedItems().isEmpty()) {
                 currentlyDraggedSprintItem = (CSprintItem) event.getDraggedItem();
                 LOGGER.info("Started dragging sprint item {}", 
@@ -226,7 +226,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint> {
     
     public void on_backlogItems_drop(final Component component, final Object value) {
         if (value instanceof CDragDropEvent && currentlyDraggedSprintItem != null) {
-            final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+            final CDragDropEvent event = (CDragDropEvent) value;
             final CProjectItem<?> targetItem = (CProjectItem<?>) event.getTargetItem();
             final GridDropLocation dropLocation = event.getDropLocation();
             

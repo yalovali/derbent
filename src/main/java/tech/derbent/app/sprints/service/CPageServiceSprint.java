@@ -98,15 +98,19 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		return componentBacklogItems;
 	}
 
-	private CSprint drop_getTargetSprintFromDropTarget(final CDragDropEvent<?> event) {
+	private CSprint drop_getTargetSprintFromDropTarget(final CDragDropEvent event) {
+		Check.notNull(event, "DragDropEvent cannot be null");
+		if (event.getTargetItem() == null) {
+			LOGGER.warn("Drop event target item is null, cannot determine target sprint");
+			return null;
+		}
 		if (event.getSource() instanceof CGrid<?>) {
 			// the dropped target may not be selected at all!!!
 			// final CSprint sprint = (CSprint) ((CGrid<?>) event.getSource()).getSelectedEntity();
-			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
 			if (event.getTargetItem() instanceof CSprintItem) {
 				return ((CSprintItem) event.getTargetItem()).getSprint();
 			} else {
-				LOGGER.error("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+				LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
 				return null;
 			}
 		} else if (event.getSource() instanceof CComponentGridEntity) {
@@ -114,7 +118,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			if (event.getTargetItem() instanceof CSprintItem) {
 				return ((CSprintItem) event.getTargetItem()).getSprint();
 			} else {
-				LOGGER.error("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+				LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
 				return null;
 			}
 		} else {
@@ -125,7 +129,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	/** Handles reordering a backlog item within the backlog grid.
 	 * @param event the drop event containing the dragged item, target position, and drop location */
-	private void drop_handle_backlogItem_reorder(final CDragDropEvent<?> event) {
+	private void drop_handle_backlogItem_reorder(final CDragDropEvent event) {
 		try {
 			LOGGER.info("[BacklogReorder] Internal backlog reordering (target: {}, dropLocation: {})",
 					event.getTargetItem() != null ? event.getTargetItem().getClass().getSimpleName() : "null", event.getDropLocation());
@@ -144,12 +148,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	/** Handles dropping a backlog item into a sprint widget.
 	 * @param event the drop event containing target and location */
-	private void drop_handle_backlogItem_toSprint(final CDragDropEvent<?> event) {
+	private void drop_handle_backlogItem_toSprint(final CDragDropEvent event) {
 		try {
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for backlog to sprint drop");
 			final CSprint targetSprint = drop_getTargetSprintFromDropTarget(event);
 			if (targetSprint == null) {
-				LOGGER.error("Target sprint could not be determined, aborting add to sprint");
+				LOGGER.warn("Target sprint could not be determined, aborting add to sprint");
 				return;
 			}
 			// Get dragged item from event
@@ -174,7 +178,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Handles reordering sprint items within the same sprint. */
-	private void drop_handle_sprintItem_reorder(final CDragDropEvent<?> event) {
+	private void drop_handle_sprintItem_reorder(final CDragDropEvent event) {
 		try {
 			Check.notNull(event, "DragDropEvent cannot be null");
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for sprint item reorder");
@@ -253,7 +257,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	/** Handles moving a sprint item back to the backlog (from sprint items grid to backlog).
 	 * @param event the drop event containing the dragged sprint item, target position, and drop location */
-	private void drop_handle_sprintItem_toBacklog(final CDragDropEvent<?> event) {
+	private void drop_handle_sprintItem_toBacklog(final CDragDropEvent event) {
 		Check.notNull(event, "DragDropEvent cannot be null");
 		Check.notNull(getActiveDragStartEvent(), "No active dragged items for backlog drop");
 		final CSprintItem sprintItem = (CSprintItem) getActiveDragStartEvent().getDraggedItems().get(0);
@@ -279,7 +283,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	/** Handles moving a sprint item to a different sprint (from sprint items grid to sprint widget on master grid). This method is called when a
 	 * CSprintItem is dragged from a sprint items grid and dropped onto a sprint widget in the master grid.
 	 * @param event the drop event containing target and location */
-	private void drop_handle_sprintItem_toSprint(final CDragDropEvent<?> event) {
+	private void drop_handle_sprintItem_toSprint(final CDragDropEvent event) {
 		try {
 			Check.notNull(event, "DragDropEvent cannot be null");
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for sprint item to sprint drop");
@@ -370,7 +374,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	/** Moves a sprint item back to the backlog with position-based ordering.
 	 * @param sprintItem the sprint item to move
 	 * @param event      the drop event containing target and location */
-	private void drop_moveSprintItemToBacklog(final CSprintItem sprintItem, final CDragDropEvent<?> event) {
+	private void drop_moveSprintItemToBacklog(final CSprintItem sprintItem, final CDragDropEvent event) {
 		final CProjectItem<?> item = sprintItem.getItem();
 		Check.notNull(item, "Sprint item must have an associated project item");
 		// Update sprint order if dropped at specific position
@@ -449,12 +453,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	public void on_backlogItems_dragStart(final Component component, final Object value) {
 		try {
-			LOGGER.info("function: on_backlogItems_dragStart for Component type: {}", component.getClass().getSimpleName());
+			// LOGGER.info("function: on_backlogItems_dragStart for Component type: {}", component.getClass().getSimpleName());
 			Check.instanceOf(value, CDragStartEvent.class, "Drop value must be CDragDropEvent");
-			final CDragStartEvent<?> event = (CDragStartEvent<?>) value;
+			final CDragStartEvent event = (CDragStartEvent) value;
 			final IHasDragControl sourceComponent = event.getSourceList().getFirst();
-			LOGGER.info("=== Drag Start from Backlog === (source component: {})",
-					sourceComponent != null ? sourceComponent.getClass().getSimpleName() : "null");
+			// LOGGER.info("=== Drag Start from Backlog === (source component: {})",sourceComponent != null ?
+			// sourceComponent.getClass().getSimpleName() : "null");
 			setActiveDragStartEvent(event);
 		} catch (final Exception e) {
 			LOGGER.error("Error handling drag start on backlog items", e);
@@ -466,7 +470,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		try {
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for backlog drop");
 			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
-			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			final CDragDropEvent event = (CDragDropEvent) value;
 			final Object draggedItem = getActiveDragStartEvent().getDraggedItems().get(0);
 			LOGGER.info("=== Drop on Backlog === (draggedItem type: {}, target type: {})",
 					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null",
@@ -501,12 +505,12 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	public void on_masterGrid_dragStart(final Component component, final Object value) {
 		try {
-			LOGGER.debug("function: on_masterGrid_dragStart for Component type: {}", component.getClass().getSimpleName());
+			// LOGGER.debug("function: on_masterGrid_dragStart for Component type: {}", component.getClass().getSimpleName());
 			Check.instanceOf(value, CDragStartEvent.class, "Drop value must be CDragDropEvent");
-			final CDragStartEvent<?> event = (CDragStartEvent<?>) value;
+			final CDragStartEvent event = (CDragStartEvent) value;
 			final IHasDragControl sourceComponent = event.getSourceList().getFirst();
-			LOGGER.info("=== Drag Start from Backlog === (source component: {})",
-					sourceComponent != null ? sourceComponent.getClass().getSimpleName() : "null");
+			// LOGGER.info("=== Drag Start from Backlog === (source component: {})",sourceComponent != null ?
+			// sourceComponent.getClass().getSimpleName() : "null");
 			setActiveDragStartEvent(event);
 		} catch (final Exception e) {
 			LOGGER.error("Error handling drag start on master grid", e);
@@ -519,15 +523,15 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		try {
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for master grid drop");
 			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
-			final CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+			final CDragDropEvent event = (CDragDropEvent) value;
 			// Vaadin sets the drop target as the ComponentEvent source; drag origin lives on the stored dragStart event.
 			final boolean isInternalDrag = getActiveDragStartEvent().getSourceList().contains(component);
 			final Object draggedItem = getActiveDragStartEvent().getDraggedItems().get(0);
 			final String dragSourceName = getActiveDragStartEvent().getSourceList().isEmpty() ? "unknown"
 					: getActiveDragStartEvent().getSourceList().get(0).getClass().getSimpleName();
-			LOGGER.info("=== Drop on Master Grid === (internal: {}, draggedItem type: {}, dragSource: {}, dropTarget: {})", isInternalDrag,
+			LOGGER.info("=== Drop on Master Grid === (internal: {}, draggedItem type: {}, dragSource: {}, dropTarget: {} id:{})", isInternalDrag,
 					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null", dragSourceName,
-					event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null");
+					event.getDropTarget() != null ? event.getDropTarget().getClass().getSimpleName() : "null", event.getOriginId());
 			if (draggedItem instanceof CSprintItem) {
 				if (isInternalDrag && event.getTargetItem() instanceof CSprintItem) {
 					final CSprintItem draggedSprintItem = (CSprintItem) draggedItem;
@@ -568,7 +572,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
 	}
 
-	private void refreshForEvent(CDragDropEvent<?> event) {
+	private void refreshForEvent(CDragDropEvent event) {
 		Object first = null;
 		first = event.getSourceList().get(0);
 		if (first instanceof CGrid) {
@@ -577,7 +581,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		} else if (first instanceof CComponentGridEntity) {
 			((CComponentGridEntity) first).refreshGrid();
 		}
-		final CDragStartEvent<?> startEvent = getActiveDragStartEvent();
+		final CDragStartEvent startEvent = getActiveDragStartEvent();
 		if (startEvent != null) {
 			// first and second can be same component, so check dont refresh twice
 			final Object second = startEvent.getSourceList().get(0);
@@ -648,7 +652,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	/** Updates the backlog item's sprint order based on drop position.
 	 * @param item  the project item to reorder
 	 * @param event the drop event containing target and location */
-	private void updateBacklogItemOrder(final CProjectItem<?> item, final CDragDropEvent<?> event) {
+	private void updateBacklogItemOrder(final CProjectItem<?> item, final CDragDropEvent event) {
 		Check.instanceOf(item, ISprintableItem.class, "Item must be ISprintableItem to reorder");
 		final CProjectItem<?> targetItem = (CProjectItem<?>) event.getTargetItem();
 		final GridDropLocation dropLocation = event.getDropLocation();

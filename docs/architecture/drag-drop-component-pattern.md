@@ -41,7 +41,7 @@ Components that fire drag start events.
 
 ```java
 public interface IHasDragStart<T> {
-    Registration addDragStartListener(ComponentEventListener<GridDragStartEvent<T>> listener);
+    Registration addDragStartListener(ComponentEventListener<GridDragStartEvent> listener);
 }
 ```
 
@@ -50,7 +50,7 @@ Components that fire drag end events.
 
 ```java
 public interface IHasDragEnd<T> {
-    Registration addDragEndListener(ComponentEventListener<GridDragEndEvent<T>> listener);
+    Registration addDragEndListener(ComponentEventListener<GridDragEndEvent> listener);
 }
 ```
 
@@ -144,7 +144,7 @@ public void on_masterGrid_drop(Component component, Object value);
 ```java
 public void on_componentName_dragStart(Component component, Object value) {
     if (value instanceof CDragDropEvent) {
-        CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+        CDragDropEvent event = (CDragDropEvent) value;
         // Extract dragged items
         // Track them in instance fields
         LOGGER.debug("[DragDebug] Drag started: {}", event.getDraggedItem());
@@ -154,7 +154,7 @@ public void on_componentName_dragStart(Component component, Object value) {
 public void on_componentName_drop(Component component, Object value) {
     if (!(value instanceof CDragDropEvent)) return;
     
-    CDragDropEvent<?> event = (CDragDropEvent<?>) value;
+    CDragDropEvent event = (CDragDropEvent) value;
     try {
         // Business logic: reorder, move, create, delete
         // Save changes
@@ -224,7 +224,7 @@ Helper methods should be:
  * @param event the drag-drop event
  * @return extracted sprint item, or null if extraction fails
  */
-private CSprintItem extractSprintItemFromEvent(CDragDropEvent<?> event) {
+private CSprintItem extractSprintItemFromEvent(CDragDropEvent event) {
     if (event == null || event.getDraggedItems() == null) {
         return null;
     }
