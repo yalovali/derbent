@@ -10,8 +10,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -99,10 +101,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	Class<EntityClass> clazz;
 	// Drag control state
 	private boolean dragEnabled = false;
-	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
+	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
 	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private Consumer<CGrid<EntityClass>> refreshConsumer;
 	/** Map to store widget providers for columns that create components implementing IStateOwnerComponent. Key: Column key, Value: Widget provider
@@ -526,14 +528,14 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	@Override
-	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
+	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
 
 	@Override
-	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 	// ==================== IStateOwnerComponent Implementation ====================
 
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }

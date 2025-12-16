@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +79,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private IContentOwner contentOwner;
 	protected CProject currentProject;
 	// Drag control state
-	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
-	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
 	// Track components created in grid cells for event propagation
@@ -572,13 +574,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	@Override
-	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
+	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	private Class<?> getEntityClassFromService(CAbstractService<?> service) throws Exception {
 		try {
@@ -795,6 +797,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	public void refreshGrid() {
+		LOGGER.debug("Refreshing grid data...");
 		final CEntityDB<?> selectedItem = getSelectedItem();
 		grid.refreshGrid();
 		selectEntity(selectedItem);

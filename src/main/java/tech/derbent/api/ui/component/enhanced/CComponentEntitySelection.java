@@ -138,10 +138,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private Set<EntityClass> currentSelectionSnapshot = new HashSet<>();
 	// Drag control state
 	private boolean dragEnabled = false;
-	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
+	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
 	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
+	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
 	private final List<EntityTypeConfig<?>> entityTypes;
 	private CGrid<EntityClass> grid;
 	private CComponentGridSearchToolbar gridSearchToolbar;
@@ -417,13 +417,13 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	@Override
-	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
+	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {

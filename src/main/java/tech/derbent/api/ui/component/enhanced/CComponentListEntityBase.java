@@ -83,18 +83,18 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
 	}
 
-	// Drag control state
-	private boolean dragEnabled = false;
-	private final List<ComponentEventListener<CDragEndEvent>> dragEndListeners = new ArrayList<>();
-	private final List<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new ArrayList<>();
-	private boolean dropEnabled = false;
-	private final List<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new ArrayList<>();
 	protected CButton buttonAdd;
 	protected CButton buttonAddFromList;
 	protected CButton buttonDelete;
 	protected CButton buttonMoveDown;
 	protected CButton buttonMoveUp;
 	protected final IOrderedEntityService<ChildEntity> childService;
+	// Drag control state
+	private boolean dragEnabled = false;
+	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
+	private boolean dropEnabled = false;
+	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
 	protected final Class<ChildEntity> entityClass;
 	protected CGrid<ChildEntity> grid;
 	protected CHorizontalLayout layoutToolbar;
@@ -368,13 +368,13 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	@Override
-	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
+	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners() { return dropListeners; }
 
 	/** Get the entity service.
 	 * @return The service */

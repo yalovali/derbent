@@ -1,6 +1,6 @@
 package tech.derbent.api.interfaces;
 
-import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -26,9 +26,9 @@ public interface IHasDragControl {
 		getDragStartListeners().add(listener);
 	}
 
-	public List<ComponentEventListener<CDragEndEvent>> getDragEndListeners();
-	public List<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners();
-	public List<ComponentEventListener<CDragDropEvent<?>>> getDropListeners();
+	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners();
+	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners();
+	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners();
 	boolean isDragEnabled();
 	boolean isDropEnabled();
 
@@ -84,6 +84,7 @@ public interface IHasDragControl {
 		}
 		for (final ComponentEventListener listener : getDropListeners()) {
 			try {
+				LOGGER.debug("[DragDebug] {} notifying drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
 				listener.onComponentEvent(event);
 			} catch (final Exception e) {
 				LOGGER.error("[DragDebug] Error notifying drop listener in {}: {}", getClass().getSimpleName(), e.getMessage());

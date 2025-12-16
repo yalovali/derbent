@@ -100,13 +100,25 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	private CSprint drop_getTargetSprintFromDropTarget(final CDragDropEvent<?> event) {
 		if (event.getSource() instanceof CGrid<?>) {
-			final CSprint sprint = (CSprint) ((CGrid<?>) event.getSource()).getSelectedEntity();
-			return sprint;
+			// the dropped target may not be selected at all!!!
+			// final CSprint sprint = (CSprint) ((CGrid<?>) event.getSource()).getSelectedEntity();
+			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
+			if (event.getTargetItem() instanceof CSprintItem) {
+				return ((CSprintItem) event.getTargetItem()).getSprint();
+			} else {
+				LOGGER.error("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+				return null;
+			}
 		} else if (event.getSource() instanceof CComponentGridEntity) {
-			final CSprint sprint = (CSprint) ((CComponentGridEntity) event.getSource()).getSelectedItem();
-			return sprint;
+			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
+			if (event.getTargetItem() instanceof CSprintItem) {
+				return ((CSprintItem) event.getTargetItem()).getSprint();
+			} else {
+				LOGGER.error("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+				return null;
+			}
 		} else {
-			LOGGER.warn("Cannot determine target sprint from drop event source: {}", event.getSource().getClass().getSimpleName());
+			LOGGER.error("Cannot determine target sprint from drop event source: {}", event.getSource().getClass().getSimpleName());
 			return null;
 		}
 	}
