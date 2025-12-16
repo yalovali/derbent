@@ -90,10 +90,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected CButton buttonMoveUp;
 	protected final IOrderedEntityService<ChildEntity> childService;
 	// Drag control state
-	private boolean dragEnabled = false;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private boolean dropEnabled = false;
 	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
 	protected final Class<ChildEntity> entityClass;
 	protected CGrid<ChildEntity> grid;
@@ -458,16 +456,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		// LOGGER.debug("UI components initialized for {}", entityClass.getSimpleName());
 	}
 
-	/** Checks whether drag functionality is currently enabled.
-	 * @return true if drag is enabled, false otherwise */
-	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	/** Checks whether drop functionality is currently enabled.
-	 * @return true if drop is enabled, false otherwise */
-	@Override
-	public boolean isDropEnabled() { return dropEnabled; }
-
 	/** Checks if the selection is empty.
 	 * @return true if no item is selected, false otherwise */
 	@Override
@@ -767,12 +755,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param enabled true to enable drag, false to disable */
 	@Override
 	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		if (grid != null) {
-			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
-			LOGGER.debug("[DragDebug] Drag {} for {} ({})", enabled ? "enabled" : "disabled", getClass().getSimpleName(),
-					entityClass.getSimpleName());
-		}
+		grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 	}
 
 	/** Enables or disables drop functionality for the grid.
@@ -782,10 +765,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param enabled true to enable drop, false to disable */
 	@Override
 	public void setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
-		if (grid != null) {
-			grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
-		}
+		grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
 	}
 
 	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.

@@ -689,16 +689,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
-	/** Checks whether drag functionality is currently enabled.
-	 * @return true if drag is enabled, false otherwise */
-	@Override
-	public boolean isDragEnabled() { return grid.isDragEnabled(); }
-
-	/** Checks whether drop functionality is currently enabled.
-	 * @return true if drop is enabled, false otherwise */
-	@Override
-	public boolean isDropEnabled() { return grid.isDropEnabled(); }
-
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
 
 	/** Checks if an entity matches the search text. This method now uses the entity's matchesFilter() method which provides hierarchical filtering.

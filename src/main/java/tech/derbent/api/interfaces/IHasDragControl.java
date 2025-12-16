@@ -29,8 +29,6 @@ public interface IHasDragControl {
 	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners();
 	public Set<ComponentEventListener<CDragStartEvent<?>>> getDragStartListeners();
 	public Set<ComponentEventListener<CDragDropEvent<?>>> getDropListeners();
-	boolean isDragEnabled();
-	boolean isDropEnabled();
 
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"

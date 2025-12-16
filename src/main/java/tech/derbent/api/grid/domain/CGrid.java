@@ -29,6 +29,7 @@ import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
@@ -99,11 +100,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	/** Constructor for CGrid with entity class.
 	 * @param entityClass The entity class for the grid */
 	Class<EntityClass> clazz;
-	// Drag control state
-	private boolean dragEnabled = false;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private boolean dropEnabled = false;
 	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private Consumer<CGrid<EntityClass>> refreshConsumer;
@@ -559,12 +557,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		// Calling setupChildDragDropForwarding() would create an infinite loop
 	}
 
-	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	@Override
-	public boolean isDropEnabled() { return dropEnabled; }
-
 	private ComponentEventListener<GridDropEvent<EntityClass>> on_grid_dragDrop() {
 		return event -> {
 			try {
@@ -639,19 +631,17 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 
 	@Override
 	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
 		setRowsDraggable(enabled);
 	}
 
 	@Override
 	public void setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
 		if (enabled) {
-			setDropMode(com.vaadin.flow.component.grid.dnd.GridDropMode.BETWEEN);
+			setDropMode(GridDropMode.BETWEEN);
 		} else {
 			setDropMode(null);
 		}
-		LOGGER.debug("[DragDebug] CGrid: Drop {} for grid", enabled ? "enabled" : "disabled");
+		LOGGER.debug("[DragDebug] CGrid: Drop {} for grid id:{}", enabled ? "enabled" : "disabled", getId());
 	}
 
 	public void setDynamicHeight() {

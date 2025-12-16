@@ -137,10 +137,8 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	// Drag control state
-	private boolean dragEnabled = false;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private boolean dropEnabled = false;
 	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
 	// =============== INSTANCE MEMBERS ===============
 	protected final EntityClass entity;
@@ -237,12 +235,6 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		}
 	}
 
-	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	@Override
-	public boolean isDropEnabled() { return dropEnabled; }
-
 	/** Checks if the widget is selected.
 	 * @return true if selected */
 	public boolean isSelected() { return selected; }
@@ -271,15 +263,13 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	@Override
-	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		LOGGER.debug("[DragDebug] Drag {} for widget entity {}", enabled ? "enabled" : "disabled", entity.getClass().getSimpleName());
+	public void setDragEnabled(boolean enabled) {
+		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
-		LOGGER.debug("[DragDebug] Drop {} for widget entity {}", enabled ? "enabled" : "disabled", entity.getClass().getSimpleName());
+	public void setDropEnabled(boolean enabled) {
+		// TODO Auto-generated method stub
 	}
 
 	public void setSelected(final boolean selected) {

@@ -101,8 +101,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		};
 	}
 
-	private boolean dragEnabled = false;
-
 	/** Constructor for backlog component.
 	 * @param sprint The sprint for which to display the backlog (items NOT in this sprint) */
 	public CComponentBacklog(final CSprint sprint) {
@@ -126,32 +124,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		return grid.getListDataView().getItems().toList();
 	}
 
-	/** Returns the component name for method binding.
-	 * <p>
-	 * This component uses "backlogItems" as its name for handler binding.
-	 * @return The component name "backlogItems" */
 	@Override
 	public String getComponentName() { return "backlogItems"; }
 
-	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	@Override
-	public boolean isDropEnabled() {
-		// Backlog can always receive drops from sprint items
-		return true;
-	}
-
-	/** Registers this component with the page service for automatic event binding.
-	 * <p>
-	 * This component uses "backlogItems" as its name, enabling automatic binding to page service handlers like
-	 * on_backlogItems_drop, on_backlogItems_change, etc.
-	 * <p>
-	 * Note: dragStart and dragEnd handlers are rarely needed since all drag data is carried in events.
-	 * <p>
-	 * Note: This method only registers the component. The actual method binding happens when CPageService.bind() is called, which occurs once during
-	 * page initialization.
-	 * @param pageService The page service to register with */
 	@Override
 	public void registerWithPageService(final CPageService<?> pageService) {
 		Check.notNull(pageService, "Page service cannot be null");
@@ -160,16 +135,4 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())",
 				getClass().getSimpleName(), componentName);
 	}
-
-	@Override
-	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		final var grid = getGrid();
-		if (grid != null) {
-			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
-			// LOGGER.debug("External drag from backlog {}", enabled ? "enabled" : "disabled");
-		}
-	}
-
-	// IPageServiceAutoRegistrable interface implementation
 }

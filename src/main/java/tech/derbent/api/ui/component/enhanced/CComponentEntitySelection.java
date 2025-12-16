@@ -137,10 +137,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	// Keep current selection snapshot to compute old/new values when firing events
 	private Set<EntityClass> currentSelectionSnapshot = new HashSet<>();
 	// Drag control state
-	private boolean dragEnabled = false;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent<?>>> dragStartListeners = new HashSet<>();
-	private boolean dropEnabled = false;
 	private final Set<ComponentEventListener<CDragDropEvent<?>>> dropListeners = new HashSet<>();
 	private final List<EntityTypeConfig<?>> entityTypes;
 	private CGrid<EntityClass> grid;
@@ -466,12 +464,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Override
 	public Set<EntityClass> getValue() { return new HashSet<>(selectedItems); }
 
-	@Override
-	public boolean isDragEnabled() { return dragEnabled; }
-
-	@Override
-	public boolean isDropEnabled() { return dropEnabled; }
-
 	/** Checks if the selection is empty.
 	 * @return true if no items are selected, false otherwise */
 	@Override
@@ -696,19 +688,13 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	@Override
 	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		if (grid != null) {
-			grid.setDragEnabled(enabled);
-		}
+		grid.setDragEnabled(enabled);
 		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 
 	@Override
 	public void setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
-		if (grid != null) {
-			grid.setDropEnabled(enabled);
-		}
+		grid.setDropEnabled(enabled);
 		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 
