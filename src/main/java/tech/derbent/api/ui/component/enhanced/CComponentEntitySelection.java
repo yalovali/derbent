@@ -31,6 +31,7 @@ import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -403,6 +404,26 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		return layout;
 	}
 
+	@Override
+	public void drag_checkEventBeforePass(CEvent event) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() {
+		return dragEndListeners;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
+		return dragStartListeners;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
+		return dropListeners;
+	}
+
 	/** Returns the list of already selected items.
 	 * @return List of already selected items (can be empty, never null) */
 	public List<EntityClass> getAlreadySelectedItems() {
@@ -413,15 +434,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return The AlreadySelectedMode */
 	public AlreadySelectedMode getAlreadySelectedMode() { return alreadySelectedMode; }
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
-
-	@Override
-	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
-
-	@Override
-	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
-
-	@Override
-	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
 
 	/** Gets description from entity. Entity must extend CEntityNamed. */
 	private String getEntityDescription(final EntityClass item) {

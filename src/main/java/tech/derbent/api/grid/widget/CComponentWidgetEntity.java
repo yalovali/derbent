@@ -20,6 +20,7 @@ import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
@@ -199,13 +200,24 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	@Override
-	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
+	public void drag_checkEventBeforePass(CEvent event) {
+		// TODO Auto-generated method stub
+	}
 
 	@Override
-	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() {
+		return dragEndListeners;
+	}
 
 	@Override
-	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
+		return dragStartListeners;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
+		return dropListeners;
+	}
 
 	/** Gets the entity displayed in this widget.
 	 * @return the entity */

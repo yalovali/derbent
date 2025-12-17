@@ -45,6 +45,7 @@ import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.api.screens.service.CEntityFieldService;
@@ -492,6 +493,26 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
+	@Override
+	public void drag_checkEventBeforePass(CEvent event) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() {
+		return dragEndListeners;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
+		return dragStartListeners;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
+		return dropListeners;
+	}
+
 	private Field findField(Class<?> entityClass, String fieldName) {
 		Class<?> currentClass = entityClass;
 		while (currentClass != null) {
@@ -572,15 +593,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@Override
 	public IContentOwner getContentOwner() { return contentOwner; }
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
-
-	@Override
-	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
-
-	@Override
-	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
-
-	@Override
-	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
 
 	private Class<?> getEntityClassFromService(CAbstractService<?> service) throws Exception {
 		try {

@@ -19,7 +19,7 @@ public interface IHasDragControl {
 			return;
 		}
 		LOGGER.debug("[DragDebug] {} adding drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
-		getDropListeners().add(listener);
+		drag_getDropListeners().add(listener);
 	}
 
 	default void addEventListener_dragEnd(ComponentEventListener<CDragEndEvent> listener) {
@@ -27,7 +27,7 @@ public interface IHasDragControl {
 			return;
 		}
 		// LOGGER.debug("[DragDebug] {} adding drag end listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
-		getDragEndListeners().add(listener);
+		drag_getDragEndListeners().add(listener);
 	}
 
 	default void addEventListener_dragStart(ComponentEventListener<CDragStartEvent> listener) {
@@ -35,22 +35,23 @@ public interface IHasDragControl {
 			return;
 		}
 		// LOGGER.debug("[DragDebug] {} adding drag start listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
-		getDragStartListeners().add(listener);
+		drag_getDragStartListeners().add(listener);
 	}
 
-	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners();
-	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners();
-	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners();
+	void drag_checkEventBeforePass(CEvent event);
+	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners();
+	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners();
+	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners();
 
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
 	private void notifyDragEndListeners(final CDragEndEvent event) {
-		if (getDragEndListeners().isEmpty()) {
+		if (drag_getDragEndListeners().isEmpty()) {
 			return;
 		}
 		// LOGGER.debug("[DragDebug] {} notifying {} drag end listeners", getClass().getSimpleName(), getDragEndListeners().size());
-		for (final ComponentEventListener listener : getDragEndListeners()) {
+		for (final ComponentEventListener listener : drag_getDragEndListeners()) {
 			try {
 				listener.onComponentEvent(event);
 			} catch (final Exception e) {
@@ -68,10 +69,10 @@ public interface IHasDragControl {
 			"rawtypes", "unchecked"
 	})
 	private void notifyDragStartListeners(final CDragStartEvent event) {
-		if (getDragStartListeners().isEmpty()) {
+		if (drag_getDragStartListeners().isEmpty()) {
 			return;
 		}
-		for (final ComponentEventListener listener : getDragStartListeners()) {
+		for (final ComponentEventListener listener : drag_getDragStartListeners()) {
 			try {
 				listener.onComponentEvent(event);
 			} catch (final Exception e) {
@@ -89,10 +90,10 @@ public interface IHasDragControl {
 			"rawtypes", "unchecked"
 	})
 	private void notifyDropListeners(final CDragDropEvent event) {
-		if (getDropListeners().isEmpty()) {
+		if (drag_getDropListeners().isEmpty()) {
 			return;
 		}
-		for (final ComponentEventListener listener : getDropListeners()) {
+		for (final ComponentEventListener listener : drag_getDropListeners()) {
 			try {
 				LOGGER.debug("[DragDebug] {} notifying drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
 				listener.onComponentEvent(event);
@@ -106,6 +107,7 @@ public interface IHasDragControl {
 	default void notifyEvents(final CEvent event) {
 		try {
 			event.addSource(this);
+			drag_checkEventBeforePass(event);
 			if (event instanceof CDragStartEvent) {
 				notifyDragStartListeners((CDragStartEvent) event);
 			} else if (event instanceof CDragDropEvent) {

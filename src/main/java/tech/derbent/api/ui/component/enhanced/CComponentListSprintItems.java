@@ -10,6 +10,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -117,6 +118,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	protected CSprintItem createNewEntity() {
 		Check.fail("Not used in this context - the component handles entity creation via the selection dialog");
 		return null;
+	}
+
+	@Override
+	public void drag_checkEventBeforePass(CEvent event) {
+		// TODO Auto-generated method stub
 	}
 
 	@Override

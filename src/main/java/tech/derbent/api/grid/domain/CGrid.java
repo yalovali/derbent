@@ -41,6 +41,7 @@ import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
@@ -477,6 +478,28 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return column;
 	}
 
+	@Override
+	public void drag_checkEventBeforePass(CEvent event) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() {
+		return dragEndListeners;
+	}
+	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
+
+	@Override
+	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
+		return dragStartListeners;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
+		return dropListeners;
+	}
+	// ==================== IStateOwnerComponent Implementation ====================
+
 	/** Ensures that the grid has a selected row when data is available. This method is called automatically when data changes and follows the coding
 	 * guideline that grids should always have a selected row. */
 	public void ensureSelectionWhenDataAvailable() {
@@ -525,17 +548,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return width;
 	}
 
-	@Override
-	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
-	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
-
-	@Override
-	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
-
-	@Override
-	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
-	// ==================== IStateOwnerComponent Implementation ====================
-
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
 
 	/** Initialize grid with common settings and styling. */
@@ -561,8 +573,9 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return event -> {
 			try {
 				LOGGER.debug("Handling grid drop event for grid id: {}", getId());
-				final EntityClass targetItem = event.getDropTargetItem().orElse(null);
+				final Object targetItem = event.getDropTargetItem().orElse(null);
 				final GridDropLocation dropLocation = event.getDropLocation();
+				// dropped on empty grid, cannot check who is this, i have to pass to upper components
 				// Note: Vaadin reports the drop target as the event source; we pass the true drag source separately for clarity.
 				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, targetItem, dropLocation, true);
 				notifyEvents(dropEvent);

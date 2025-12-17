@@ -5,6 +5,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CComponentWidgetSprintItem - Widget component for displaying SprintItem entities in grids.
@@ -124,4 +125,7 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 			}
 		}
 	}
+
+	@Override
+	public void drag_checkEventBeforePass(CEvent event) {}
 }

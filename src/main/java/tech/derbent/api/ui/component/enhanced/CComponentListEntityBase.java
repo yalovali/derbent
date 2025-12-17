@@ -366,13 +366,13 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	@Override
-	public Set<ComponentEventListener<CDragEndEvent>> getDragEndListeners() { return dragEndListeners; }
+	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() { return dragEndListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragStartEvent>> getDragStartListeners() { return dragStartListeners; }
+	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() { return dragStartListeners; }
 
 	@Override
-	public Set<ComponentEventListener<CDragDropEvent>> getDropListeners() { return dropListeners; }
+	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() { return dropListeners; }
 
 	/** Get the entity service.
 	 * @return The service */
