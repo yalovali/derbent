@@ -5,12 +5,16 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dnd.DropEvent;
+import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -53,8 +57,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	// Drag source support for reverse drag to backlog (manual implementation)
-	private boolean dragEnabledToBacklog = false;
+	DropTarget<CComponentListSprintItems> dropTarget;
 	// Services for loading items
 	private final CMeetingService meetingService;
 
@@ -72,7 +75,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		this.meetingService = meetingService;
 		// Enable dynamic height so grid resizes with content
 		setDynamicHeight("600px");
-		// LOGGER.debug("CComponentListSprintItems created with dynamic height enabled");
+		dropTarget = DropTarget.create(this);
+		// dropTarget.addDragEnterListener(e -> addClassName("drop-allowed"));
+		// dropTarget.addDragLeaveListener(e -> removeClassName("drop-allowed"));
+		dropTarget.addDropListener(on_component_dragDrop());
 	}
 
 	@Override
@@ -89,8 +95,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		}, "description", "Description");
 		// Add story points column
 		grid.addIntegerColumn(item -> {
-			if (item.getItem() instanceof tech.derbent.api.interfaces.ISprintableItem) {
-				final Long storyPoint = ((tech.derbent.api.interfaces.ISprintableItem) item.getItem()).getStoryPoint();
+			if (item.getItem() instanceof ISprintableItem) {
+				final Long storyPoint = ((ISprintableItem) item.getItem()).getStoryPoint();
 				return storyPoint != null ? storyPoint.intValue() : null;
 			}
 			return null;
@@ -124,7 +130,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
-		LOGGER.debug("Drag event check before pass: {} comp id:{}", event, getId());
+		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 		if (event instanceof CDragDropEvent) {
 			final CDragDropEvent dropEvent = (CDragDropEvent) event;
 			if (dropEvent.getDropLocation().equals(GridDropLocation.EMPTY) && dropEvent.getTargetItem() == null) {
@@ -262,10 +268,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		};
 	}
 
-	/** Checks if dragging to backlog is enabled.
-	 * @return true if drag to backlog is enabled */
-	public boolean isDragToBacklogEnabled() { return dragEnabledToBacklog; }
-
 	@Override
 	protected List<CSprintItem> loadItems(final CSprint master) {
 		Check.notNull(master, "Master sprint cannot be null when loading items");
@@ -320,6 +322,24 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 	// IDropTarget implementation
 
+	private ComponentEventListener<DropEvent<CComponentListSprintItems>> on_component_dragDrop() {
+		return event -> {
+			try {
+				LOGGER.debug("Handling grid drop event for grid id: {}", getId());
+				LOGGER.debug("Drop event details: Drag source id: {}, Drop target id: {}", getId().orElse("None"),
+						event.getSource().getId().orElse("None"));
+				// final Object targetItem = event.getDropTargetItem().orElse(null);
+				// final GridDropLocation dropLocation = event.getDropLocation();
+				// dropped on empty grid, cannot check who is this, i have to pass to upper components
+				// Note: Vaadin reports the drop target as the event source; we pass the true drag source separately for clarity.
+				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, null, null, true);
+				notifyEvents(dropEvent);
+			} catch (final Exception e) {
+				LOGGER.error("Error handling grid drop event", e);
+			}
+		};
+	}
+
 	@Override
 	protected void on_gridItems_doubleClicked(final CSprintItem item) {
 		// Override to prevent edit dialog from opening on double-click
@@ -336,17 +356,5 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		LOGGER.warn("Edit operation not supported for sprint items - ID: {}", entity.getId());
 		CNotificationService
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
-	}
-
-	// Drag support for reverse drag to backlog (manual, not via interface to avoid method erasure conflicts)
-	/** Enables or disables dragging sprint items back to backlog.
-	 * @param enabled true to enable dragging to backlog */
-	public void setDragToBacklogEnabled(final boolean enabled) {
-		dragEnabledToBacklog = enabled;
-		final var grid = getGrid();
-		if (grid != null) {
-			grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
-			LOGGER.debug("Drag to backlog from sprint items {}", enabled ? "enabled" : "disabled");
-		}
 	}
 }

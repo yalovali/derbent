@@ -201,7 +201,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
-		LOGGER.debug("Drag event check before pass: {} comp id:{}", event, getId());
+		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 	}
 
 	@Override

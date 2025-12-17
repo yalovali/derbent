@@ -106,7 +106,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		if (event.getSource() instanceof CGrid<?>) {
 			// the dropped target may not be selected at all!!!
 			// final CSprint sprint = (CSprint) ((CGrid<?>) event.getSource()).getSelectedEntity();
-			if (event.getTargetItem() instanceof CSprintItem) {
+			if (event.getTargetItem() instanceof CSprint) {
+				return (CSprint) event.getTargetItem();
+			} else if (event.getTargetItem() instanceof CSprintItem) {
 				return ((CSprintItem) event.getTargetItem()).getSprint();
 			} else {
 				LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
