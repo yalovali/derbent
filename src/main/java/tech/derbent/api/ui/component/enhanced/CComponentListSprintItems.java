@@ -6,10 +6,12 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
@@ -123,6 +125,13 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
 		LOGGER.debug("Drag event check before pass: {} comp id:{}", event, getId());
+		if (event instanceof CDragDropEvent) {
+			final CDragDropEvent dropEvent = (CDragDropEvent) event;
+			if (dropEvent.getDropLocation().equals(GridDropLocation.EMPTY) && dropEvent.getTargetItem() == null) {
+				// dropped into empty area - allow
+				dropEvent.setTargetItem(getCurrentEntity());
+			}
+		}
 	}
 
 	@Override

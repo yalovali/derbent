@@ -16,8 +16,8 @@ public class CDragDropEvent extends CDragBaseEvent {
 
 	private static final long serialVersionUID = 1L;
 	private final GridDropLocation dropLocation;
-	private final Object targetItem;
 	private final String originId;
+	private Object targetItem;
 
 	/** Creates a new drop event.
 	 * @param source       the component that fired the event (drop target)
@@ -50,11 +50,11 @@ public class CDragDropEvent extends CDragBaseEvent {
 		return Optional.ofNullable(targetItem);
 	}
 
+	public String getOriginId() { return originId; }
+
 	/** Gets the item at the drop location (direct access).
 	 * @return the target item, or null if dropping at the end or in an empty grid */
 	public Object getTargetItem() { return targetItem; }
 
-	public String getOriginId() {
-		return originId;
-	}
+	public void setTargetItem(Object setTargetItem) { targetItem = setTargetItem; }
 }
