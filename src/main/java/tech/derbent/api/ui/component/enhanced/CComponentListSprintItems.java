@@ -122,7 +122,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("Drag event check before pass: {} comp id:{}", event, getId());
 	}
 
 	@Override

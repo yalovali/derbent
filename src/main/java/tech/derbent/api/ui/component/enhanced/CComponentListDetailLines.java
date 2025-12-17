@@ -3,6 +3,7 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.List;
 import java.util.function.Consumer;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -74,6 +75,11 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 		// Create new line at the end
 		LOGGER.debug("Creating new line at end of list");
 		return service.newEntity(master, CEntityFieldService.THIS_CLASS, "name");
+	}
+
+	@Override
+	public void drag_checkEventBeforePass(CEvent event) {
+		LOGGER.debug("Drag event check before pass: {} comp id:{}", event, getId());
 	}
 
 	@Override

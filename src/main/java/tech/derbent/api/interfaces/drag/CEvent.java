@@ -10,6 +10,7 @@ public abstract class CEvent extends ComponentEvent<Component> {
 
 	private static final long serialVersionUID = 1L;
 	List<IHasDragControl> sourceList = new ArrayList<>();
+	private boolean valid = true;
 
 	public CEvent(Component source, boolean fromClient) {
 		super(source, fromClient);
@@ -26,4 +27,8 @@ public abstract class CEvent extends ComponentEvent<Component> {
 	}
 
 	public List<IHasDragControl> getSourceList() { return sourceList; }
+
+	public boolean isValid() { return valid; }
+
+	public void setValid(boolean valid) { this.valid = valid; }
 }

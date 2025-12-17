@@ -14,7 +14,6 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
-import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
@@ -456,7 +455,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// LOGGER.info("function: on_backlogItems_dragStart for Component type: {}", component.getClass().getSimpleName());
 			Check.instanceOf(value, CDragStartEvent.class, "Drop value must be CDragDropEvent");
 			final CDragStartEvent event = (CDragStartEvent) value;
-			final IHasDragControl sourceComponent = event.getSourceList().getFirst();
 			// LOGGER.info("=== Drag Start from Backlog === (source component: {})",sourceComponent != null ?
 			// sourceComponent.getClass().getSimpleName() : "null");
 			setActiveDragStartEvent(event);
@@ -508,7 +506,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// LOGGER.debug("function: on_masterGrid_dragStart for Component type: {}", component.getClass().getSimpleName());
 			Check.instanceOf(value, CDragStartEvent.class, "Drop value must be CDragDropEvent");
 			final CDragStartEvent event = (CDragStartEvent) value;
-			final IHasDragControl sourceComponent = event.getSourceList().getFirst();
 			// LOGGER.info("=== Drag Start from Backlog === (source component: {})",sourceComponent != null ?
 			// sourceComponent.getClass().getSimpleName() : "null");
 			setActiveDragStartEvent(event);

@@ -495,7 +495,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("Drag event check before pass: {} comp id:{}", event, getId());
 	}
 
 	@Override

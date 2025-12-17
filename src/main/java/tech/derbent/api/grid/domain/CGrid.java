@@ -480,7 +480,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("Drag event check before pass: {} comp id:{}", event, getId());
 	}
 
 	@Override
