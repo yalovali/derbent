@@ -2,6 +2,9 @@ package tech.derbent.app.sprints.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.dnd.DropEvent;
+import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.config.CSpringContext;
@@ -9,6 +12,7 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -52,15 +56,16 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	private CButton buttonToggleItems;
 	private CComponentListSprintItems componentSprintItems;
 	private CDiv containerSprintItems;
+	DropTarget<CComponentWidgetSprint> dropTarget;
 	private CLabelEntity itemCountLabel;
 	private boolean sprintItemsVisible = false;
+	// IDropTarget implementation
 
 	/** Creates a new sprint widget for the specified sprint.
 	 * @param sprint the sprint to display in the widget */
 	public CComponentWidgetSprint(final CSprint sprint) {
 		super(sprint);
-		// Note: componentSprintItems is created in createSecondLine() during super() constructor
-		// Drag-drop is configured in createSprintItemsComponent()
+		drag_initialize();
 	}
 
 	@Override
@@ -156,6 +161,30 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			LOGGER.error("Failed to create sprint items component for sprint {}", getEntity().getId(), e);
 			CNotificationService.showException("Failed to load sprint items", e);
 		}
+	}
+
+	void drag_initialize() {
+		dropTarget = DropTarget.create(this);
+		dropTarget.addDropListener(drag_on_component_drop());
+		dropTarget.setActive(true);
+		/* just a demo */
+		/* final Div dragBox = new Div(new Text("Drag me")); final DragSource<Div> ds = DragSource.create(dragBox); ds.setDragData("Hello"); final Div
+		 * dropBox = new Div("Drop here"); final DropTarget<Div> dt = DropTarget.create(dropBox); dt.setDropEffect(DropEffect.COPY);
+		 * dt.addDropListener(event -> { event.getDragData().ifPresent(data -> { System.out.println("Dropped: " + data); }); }); add(dragBox);
+		 * add(dropBox); */
+	}
+
+	private ComponentEventListener<DropEvent<CComponentWidgetSprint>> drag_on_component_drop() {
+		return event -> {
+			try {
+				LOGGER.debug("Drop event details: Drag source id: {}, Drop target id: {}", getId().orElse("None"),
+						event.getSource().getId().orElse("None"));
+				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, getEntity(), null, true);
+				notifyEvents(dropEvent);
+			} catch (final Exception e) {
+				LOGGER.error("Error handling grid drop event", e);
+			}
+		};
 	}
 
 	public CGrid<?> getGrid() { return componentSprintItems.getGrid(); }

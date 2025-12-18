@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dnd.DropEvent;
-import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -57,7 +54,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	DropTarget<CComponentListSprintItems> dropTarget;
 	// Services for loading items
 	private final CMeetingService meetingService;
 
@@ -75,10 +71,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		this.meetingService = meetingService;
 		// Enable dynamic height so grid resizes with content
 		setDynamicHeight("600px");
-		dropTarget = DropTarget.create(this);
-		// dropTarget.addDragEnterListener(e -> addClassName("drop-allowed"));
-		// dropTarget.addDragLeaveListener(e -> removeClassName("drop-allowed"));
-		dropTarget.addDropListener(on_component_dragDrop());
 	}
 
 	@Override
@@ -319,25 +311,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			LOGGER.error("Error deleting sprint item", e);
 			CNotificationService.showException("Error deleting item", e);
 		}
-	}
-	// IDropTarget implementation
-
-	private ComponentEventListener<DropEvent<CComponentListSprintItems>> on_component_dragDrop() {
-		return event -> {
-			try {
-				LOGGER.debug("Handling grid drop event for grid id: {}", getId());
-				LOGGER.debug("Drop event details: Drag source id: {}, Drop target id: {}", getId().orElse("None"),
-						event.getSource().getId().orElse("None"));
-				// final Object targetItem = event.getDropTargetItem().orElse(null);
-				// final GridDropLocation dropLocation = event.getDropLocation();
-				// dropped on empty grid, cannot check who is this, i have to pass to upper components
-				// Note: Vaadin reports the drop target as the event source; we pass the true drag source separately for clarity.
-				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, null, null, true);
-				notifyEvents(dropEvent);
-			} catch (final Exception e) {
-				LOGGER.error("Error handling grid drop event", e);
-			}
-		};
 	}
 
 	@Override

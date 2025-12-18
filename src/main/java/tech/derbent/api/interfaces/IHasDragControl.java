@@ -47,10 +47,6 @@ public interface IHasDragControl {
 			"rawtypes", "unchecked"
 	})
 	private void notifyDragEndListeners(final CDragEndEvent event) {
-		if (drag_getDragEndListeners().isEmpty()) {
-			return;
-		}
-		// LOGGER.debug("[DragDebug] {} notifying {} drag end listeners", getClass().getSimpleName(), getDragEndListeners().size());
 		for (final ComponentEventListener listener : drag_getDragEndListeners()) {
 			try {
 				listener.onComponentEvent(event);
@@ -69,9 +65,6 @@ public interface IHasDragControl {
 			"rawtypes", "unchecked"
 	})
 	private void notifyDragStartListeners(final CDragStartEvent event) {
-		if (drag_getDragStartListeners().isEmpty()) {
-			return;
-		}
 		for (final ComponentEventListener listener : drag_getDragStartListeners()) {
 			try {
 				listener.onComponentEvent(event);
@@ -90,9 +83,6 @@ public interface IHasDragControl {
 			"rawtypes", "unchecked"
 	})
 	private void notifyDropListeners(final CDragDropEvent event) {
-		if (drag_getDropListeners().isEmpty()) {
-			return;
-		}
 		for (final ComponentEventListener listener : drag_getDropListeners()) {
 			try {
 				LOGGER.debug("[DragDebug] {} notifying drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
@@ -138,18 +128,13 @@ public interface IHasDragControl {
 
 	@SuppressWarnings ({})
 	default void setupChildDragDropForwarding(final IHasDragControl child) {
-		// LOGGER.debug("Setting up drag-drop event forwarding from child {} to parent {} parent: {} child:{}",
-		// child.getClass().getSimpleName(),getClass().getSimpleName(), toString(), child.toString());
 		Check.notNull(child, "Child component cannot be null");
-		// Forward drag start events from child to parent
 		child.addEventListener_dragStart(event -> {
 			on_dragStart(event);
 		});
-		// Forward drag end events from child to parent
 		child.addEventListener_dragEnd(event -> {
 			on_dragEnd(event);
 		});
-		// Forward drop events from child to parent
 		child.addEventListener_dragDrop(event -> {
 			on_dragDrop(event);
 		});
