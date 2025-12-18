@@ -31,6 +31,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	private static ItemsProvider<CProjectItem<?>> createAlreadySelectedProvider(final CSprint sprint) {
 		return config -> {
 			try {
+				// TODO this is old way of loading sprint items, consider refactoring later
+				// now if cmeeting or cactivity has null sprintItem, it means it's not in any sprint
+				// so the rest is unselected
 				if (sprint == null || sprint.getId() == null) {
 					return new ArrayList<>();
 				}
@@ -41,7 +44,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				final String targetType = config.getEntityClass().getSimpleName();
 				for (final CSprintItem sprintItem : sprintItems) {
 					if (sprintItem.getItem() != null && targetType.equals(sprintItem.getItemType())) {
-						result.add(sprintItem.getItem());
+						result.add((CProjectItem<?>) sprintItem.getItem());
 					}
 				}
 				return result;
@@ -81,9 +84,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
 				// Load items ordered by sprintOrder for proper backlog display
 				if (config.getEntityClass() == CActivity.class) {
-					return (List<CProjectItem<?>>) (List<?>) activityService.listByProjectOrderedBySprintOrder(project);
+					return (List<CProjectItem<?>>) (List<?>) activityService.listForProjectBacklog(project);
 				} else if (config.getEntityClass() == CMeeting.class) {
-					return (List<CProjectItem<?>>) (List<?>) meetingService.listByProjectOrderedBySprintOrder(project);
+					return (List<CProjectItem<?>>) (List<?>) meetingService.listForProjectBacklog(project);
 				}
 				return new ArrayList<>();
 			} catch (final Exception e) {

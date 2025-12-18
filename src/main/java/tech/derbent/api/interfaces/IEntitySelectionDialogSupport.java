@@ -44,7 +44,7 @@ public interface IEntitySelectionDialogSupport<ItemType extends CEntityDB<?>> {
 	CComponentEntitySelection.ItemsProvider<ItemType> getItemsProvider();
 	/** Returns a consumer that handles the selection of items from the dialog.
 	 * @return Consumer that processes the list of selected items */
-	Consumer<List<ItemType>> getSelectionHandler();
+	Consumer<List<ISprintableItem>> getSelectionHandler();
 
 	/** Returns whether the dialog should support multi-select.
 	 * @return true for multi-select, false for single-select */

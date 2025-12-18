@@ -54,8 +54,8 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
-			   WHERE m.project = :project
+			   WHERE m.project = :project and sprintItem IS NULL
 			   ORDER BY m.sprintOrder ASC NULLS LAST, m.id DESC
 			""")
-	List<CMeeting> listByProjectOrderedBySprintOrder(@Param ("project") CProject project);
+	List<CMeeting> listForProjectBacklog(@Param ("project") CProject project);
 }

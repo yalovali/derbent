@@ -1,6 +1,10 @@
 package tech.derbent.api.interfaces;
 
+import java.time.LocalDate;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.base.users.domain.CUser;
 
 /** ISprintableItem - Marker interface for entities that can be included in sprints.
  * <p>
@@ -30,25 +34,18 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
  * @see ISprintItemPageService */
 public interface ISprintableItem {
 
-	/** Gets the description for this sprintable item.
-	 * @return the item description, can be null */
 	String getDescription();
-	/** Gets the unique identifier for this sprintable item.
-	 * @return the item ID */
+	String getDescriptionShort();
+	LocalDate getEndDate();
 	Long getId();
-	/** Gets the display name for this sprintable item.
-	 * @return the item name */
 	String getName();
-	/** Gets the sprint order for this item. Sprint-aware components use this field to determine display order within sprints and backlogs.
-	 * @return the sprint order, or null if not set */
+	CUser getResponsible();
+	CSprintItem getSprintItem();
 	Integer getSprintOrder();
-	/** Sets the sprint order for this item. This field is used by sprint-aware components for drag-and-drop ordering.
-	 * @param sprintOrder the new sprint order */
-	void setSprintOrder(Integer sprintOrder);
-	/** Gets the story points for this item. Story points represent the estimated effort or complexity of the item.
-	 * @return the story points, or null if not set */
+	LocalDate getStartDate();
+	CProjectItemStatus getStatus();
 	Long getStoryPoint();
-	/** Sets the story points for this item. Story points represent the estimated effort or complexity of the item.
-	 * @param storyPoint the story points value */
+	void setSprintItem(CSprintItem cSprintItem);
+	void setSprintOrder(Integer sprintOrder);
 	void setStoryPoint(Long storyPoint);
 }

@@ -88,7 +88,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		// Add story points column
 		grid.addIntegerColumn(item -> {
 			if (item.getItem() instanceof ISprintableItem) {
-				final Long storyPoint = ((ISprintableItem) item.getItem()).getStoryPoint();
+				final Long storyPoint = item.getItem().getStoryPoint();
 				return storyPoint != null ? storyPoint.intValue() : null;
 			}
 			return null;
@@ -157,7 +157,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				final String targetType = config.getEntityClass().getSimpleName();
 				for (final CSprintItem sprintItem : sprintItems) {
 					if (sprintItem.getItem() != null && targetType.equals(sprintItem.getItemType())) {
-						result.add(sprintItem.getItem());
+						result.add((CProjectItem<?>) sprintItem.getItem());
 					}
 				}
 				LOGGER.debug("Found {} already selected items of type {}", result.size(), targetType);
@@ -228,11 +228,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	public Consumer<List<CProjectItem<?>>> getSelectionHandler() {
+	public Consumer<List<ISprintableItem>> getSelectionHandler() {
 		return selectedItems -> {
 			LOGGER.debug("Selected {} items from entity selection dialog", selectedItems.size());
 			int addedCount = 0;
-			for (final CProjectItem<?> item : selectedItems) {
+			for (final ISprintableItem item : selectedItems) {
 				try {
 					// Determine item type
 					final String itemType = item.getClass().getSimpleName();

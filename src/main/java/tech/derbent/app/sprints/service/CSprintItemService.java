@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
@@ -89,9 +89,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	}
 
 	@Override
-	public Class<?> getPageServiceClass() {
-		return CPageServiceSprintItem.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceSprintItem.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
@@ -108,7 +106,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 			return;
 		}
 		try {
-			final CProjectItem<?> item = loadItemByIdAndType(sprintItem.getItemId(), sprintItem.getItemType());
+			final ISprintableItem item = loadItemByIdAndType(sprintItem.getItemId(), sprintItem.getItemType());
 			sprintItem.setItem(item);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load item for sprint item {}: {}", sprintItem.getId(), e.getMessage(), e);
@@ -119,7 +117,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	 * @param itemId   the item ID
 	 * @param itemType the item type (e.g., "CActivity", "CMeeting")
 	 * @return the project item, or null if not found */
-	private CProjectItem<?> loadItemByIdAndType(final Long itemId, final String itemType) {
+	private ISprintableItem loadItemByIdAndType(final Long itemId, final String itemType) {
 		try {
 			// Map item type to service and load the item
 			switch (itemType) {
@@ -200,7 +198,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	 * @param master the sprint
 	 * @param item   the project item to add
 	 * @return the new sprint item */
-	public CSprintItem newSprintItem(final CSprint master, final CProjectItem<?> item) {
+	public CSprintItem newSprintItem(final CSprint master, final ISprintableItem item) {
 		if ((master == null) || (item == null)) {
 			LOGGER.warn("Cannot create sprint item - master or item is null");
 			return null;

@@ -69,8 +69,8 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	/** Lists meetings by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.
 	 * @param project the project
 	 * @return list of meetings ordered by sprintOrder ASC, id DESC */
-	public java.util.List<CMeeting> listByProjectOrderedBySprintOrder(final CProject project) {
+	public java.util.List<CMeeting> listForProjectBacklog(final CProject project) {
 		tech.derbent.api.utils.Check.notNull(project, "Project cannot be null");
-		return ((IMeetingRepository) repository).listByProjectOrderedBySprintOrder(project);
+		return ((IMeetingRepository) repository).listForProjectBacklog(project);
 	}
 }

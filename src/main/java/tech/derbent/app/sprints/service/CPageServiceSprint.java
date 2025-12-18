@@ -143,7 +143,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			LOGGER.info("[BacklogReorder] Internal backlog reordering (target: {}, dropLocation: {})",
 					event.getTargetItem() != null ? event.getTargetItem().getClass().getSimpleName() : "null", event.getDropLocation());
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for backlog reorder");
-			final CProjectItem<?> projectItem = (CProjectItem<?>) getActiveDragStartEvent().getDraggedItems().get(0);
+			final ISprintableItem projectItem = (ISprintableItem) getActiveDragStartEvent().getDraggedItems().get(0);
 			Check.notNull(projectItem, "Dragged item cannot be null");
 			updateBacklogItemOrder(projectItem, event);
 			// Refresh backlog grid to show new order
@@ -171,7 +171,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				LOGGER.error("Dragged item is not a CProjectItem: {}", draggedItem != null ? draggedItem.getClass() : "null");
 				return;
 			}
-			final CProjectItem<?> itemToAdd = (CProjectItem<?>) draggedItem;
+			final ISprintableItem itemToAdd = (ISprintableItem) draggedItem;
 			final GridDropLocation dropLocation = event.getDropLocation();
 			final CSprintItem targetSprintItem = event.getTargetItem() instanceof CSprintItem ? (CSprintItem) event.getTargetItem() : null;
 			drag_insertBacklogItemIntoSprint(targetSprint, itemToAdd, dropLocation, targetSprintItem);
@@ -342,7 +342,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param itemToAdd    backlog item
 	 * @param targetObject drop target (sprint item or sprint)
 	 * @param dropLocation drop location */
-	private void drag_insertBacklogItemIntoSprint(final CSprint targetSprint, final CProjectItem<?> itemToAdd, final GridDropLocation dropLocation,
+	private void drag_insertBacklogItemIntoSprint(final CSprint targetSprint, final ISprintableItem itemToAdd, final GridDropLocation dropLocation,
 			final CSprintItem targetSprintItem) {
 		try {
 			final List<CSprintItem> existingItems = new ArrayList<>(sprintItemService.findByMasterId(targetSprint.getId()));
@@ -384,7 +384,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	 * @param sprintItem the sprint item to move
 	 * @param event      the drop event containing target and location */
 	private void drag_moveSprintItemToBacklog(final CSprintItem sprintItem, final CDragDropEvent event) {
-		final CProjectItem<?> item = sprintItem.getItem();
+		final ISprintableItem item = sprintItem.getItem();
 		Check.notNull(item, "Sprint item must have an associated project item");
 		// Update sprint order if dropped at specific position
 		updateBacklogItemOrder(item, event);
@@ -646,7 +646,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 
 	/** Saves a project item (Activity or Meeting).
 	 * @param item the project item to save */
-	private void saveProjectItem(final CProjectItem<?> item) {
+	private void saveProjectItem(final ISprintableItem item) {
 		if (item instanceof CActivity) {
 			activityService.save((CActivity) item);
 		} else if (item instanceof CMeeting) {
@@ -657,21 +657,21 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	/** Updates the backlog item's sprint order based on drop position.
 	 * @param item  the project item to reorder
 	 * @param event the drop event containing target and location */
-	private void updateBacklogItemOrder(final CProjectItem<?> item, final CDragDropEvent event) {
+	private void updateBacklogItemOrder(final ISprintableItem item, final CDragDropEvent event) {
 		Check.instanceOf(item, ISprintableItem.class, "Item must be ISprintableItem to reorder");
-		final CProjectItem<?> targetItem = (CProjectItem<?>) event.getTargetItem();
+		final ISprintableItem targetItem = (ISprintableItem) event.getTargetItem();
 		final GridDropLocation dropLocation = event.getDropLocation();
 		if (targetItem == null || dropLocation == null) {
 			final int newOrder = getMaxBacklogOrder() + 1;
 			LOGGER.info("[BacklogReorder] Dropped on empty space - assigning item {} to end of backlog (order {})", item.getId(), newOrder);
-			final ISprintableItem sprintableItem = (ISprintableItem) item;
+			final ISprintableItem sprintableItem = item;
 			sprintableItem.setSprintOrder(newOrder);
 			saveProjectItem(item);
 			return;
 		}
 		Check.instanceOf(targetItem, ISprintableItem.class, "Target item must be ISprintableItem");
-		final ISprintableItem sprintableItem = (ISprintableItem) item;
-		final ISprintableItem targetSprintableItem = (ISprintableItem) targetItem;
+		final ISprintableItem sprintableItem = item;
+		final ISprintableItem targetSprintableItem = targetItem;
 		final Integer targetOrder = targetSprintableItem.getSprintOrder();
 		// Handle null sprint order: assign to end of backlog
 		if (targetOrder == null) {

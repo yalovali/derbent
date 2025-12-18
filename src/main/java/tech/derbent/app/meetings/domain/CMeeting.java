@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
@@ -25,6 +27,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
@@ -112,6 +115,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			description = "Person responsible for organizing and leading the meeting", hidden = false, dataProviderBean = "CUserService"
 	)
 	private CUser responsible;
+	// Sprint Item relationship
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn (name = "sprintitem_id", nullable = true)
+	@AMetaData (displayName = "Sprint Item", required = false, readOnly = true, description = "Associated sprint item for this item", hidden = true)
+	private CSprintItem sprintItem = null;
 	@Column (name = "sprint_order", nullable = true)
 	@jakarta.validation.constraints.Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -198,14 +206,15 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Set<CUser> getParticipants() { return participants == null ? new HashSet<>() : new HashSet<>(participants); }
 
 	@Override
-	public Integer getProgressPercentage() { 
-		return 21;
-	}
+	public Integer getProgressPercentage() { return 21; }
 
 	public CActivity getRelatedActivity() { return relatedActivity; }
 
 	@Override
 	public CUser getResponsible() { return responsible; }
+
+	@Override
+	public CSprintItem getSprintItem() { return sprintItem; }
 
 	@Override
 	public Integer getSprintOrder() { return sprintOrder; }
@@ -216,7 +225,10 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public LocalTime getStartTime() { return startTime; }
 
 	@Override
-	public CWorkflowEntity getWorkflow() { 
+	public Long getStoryPoint() { return storyPoint; }
+
+	@Override
+	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
 	}
@@ -310,15 +322,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
 
+	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
+
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
 	public void setStartDate(final LocalDate startDate) { this.startDate = startDate; }
 
 	public void setStartTime(final LocalTime startTime) { this.startTime = startTime; }
-
-	@Override
-	public Long getStoryPoint() { return storyPoint; }
 
 	@Override
 	public void setStoryPoint(final Long storyPoint) { this.storyPoint = storyPoint; }

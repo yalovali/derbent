@@ -24,6 +24,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
@@ -149,31 +150,11 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		initializeDefaults();
 	}
 
-	/** Add an activity to this sprint.
-	 * @param activity the activity to add */
-	public void addActivity(final CActivity activity) {
-		if (activity != null) {
-			final CSprintItem sprintItem = new CSprintItem(this, activity, sprintItems.size() + 1);
-			sprintItems.add(sprintItem);
-			updateLastModified();
-		}
-	}
-
 	/** Add a project item to this sprint. This method determines the type and adds to the appropriate collection.
 	 * @param item the project item to add */
-	public void addItem(final CProjectItem<?> item) {
+	public void addItem(final ISprintableItem item) {
 		if (item != null) {
 			final CSprintItem sprintItem = new CSprintItem(this, item, sprintItems.size() + 1);
-			sprintItems.add(sprintItem);
-			updateLastModified();
-		}
-	}
-
-	/** Add a meeting to this sprint.
-	 * @param meeting the meeting to add */
-	public void addMeeting(final CMeeting meeting) {
-		if (meeting != null) {
-			final CSprintItem sprintItem = new CSprintItem(this, meeting, sprintItems.size() + 1);
 			sprintItems.add(sprintItem);
 			updateLastModified();
 		}
@@ -233,8 +214,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	/** Get all sprint items (activities and meetings combined) as a list. This is a convenience method for backward compatibility.
 	 * @return combined list of all sprint items */
-	public List<CProjectItem<?>> getItems() {
-		final List<CProjectItem<?>> allItems = new ArrayList<>();
+	public List<ISprintableItem> getItems() {
+		final List<ISprintableItem> allItems = new ArrayList<>();
 		if (sprintItems != null) {
 			for (final CSprintItem sprintItem : sprintItems) {
 				if (sprintItem.getItem() != null) {
@@ -296,7 +277,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		long total = 0L;
 		for (final CSprintItem sprintItem : sprintItems) {
 			if (sprintItem.getItem() != null && sprintItem.getItem() instanceof tech.derbent.api.interfaces.ISprintableItem) {
-				final Long itemStoryPoint = ((tech.derbent.api.interfaces.ISprintableItem) sprintItem.getItem()).getStoryPoint();
+				final Long itemStoryPoint = sprintItem.getItem().getStoryPoint();
 				if (itemStoryPoint != null) {
 					total += itemStoryPoint;
 				}
@@ -306,9 +287,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	}
 
 	@Override
-	public CWorkflowEntity getWorkflow() { 
-		return getEntityType().getWorkflow();
-	}
+	public CWorkflowEntity getWorkflow() { return getEntityType().getWorkflow(); }
 
 	@Override
 	public void initializeAllFields() {
@@ -379,12 +358,12 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@PostLoad
 	protected void postLoadEntity() throws Exception {
 		try {
-			CDataProviderResolver resolver = CSpringContext.getBean(CDataProviderResolver.class);
-			List<Field> fields = CEntityFieldService.getAllFields(this.getClass()).stream()
+			final CDataProviderResolver resolver = CSpringContext.getBean(CDataProviderResolver.class);
+			final List<Field> fields = CEntityFieldService.getAllFields(this.getClass()).stream()
 					.filter(field -> field.isAnnotationPresent(AMetaData.class) && field.getAnnotation(AMetaData.class).autoCalculate()).toList();
 			for (final Field field : fields) {
 				final AMetaData metadata = field.getAnnotation(AMetaData.class);
-				Object value = resolver.resolveMethodAnnotations(this, null, CEntityFieldService.createFieldInfo(metadata));
+				final Object value = resolver.resolveMethodAnnotations(this, null, CEntityFieldService.createFieldInfo(metadata));
 				field.setAccessible(true);
 				field.set(this, value);
 			}
@@ -405,18 +384,10 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	/** Remove a project item from this sprint. This method determines the type and removes from the appropriate collection.
 	 * @param item the project item to remove */
-	public void removeItem(final CProjectItem<?> item) {
+	public void removeItem(final ISprintableItem item) {
 		if (item != null && sprintItems != null) {
 			sprintItems.removeIf(sprintItem -> sprintItem.getItem() != null && sprintItem.getItem().equals(item));
-			updateLastModified();
-		}
-	}
-
-	/** Remove a meeting from this sprint.
-	 * @param meeting the meeting to remove */
-	public void removeMeeting(final CMeeting meeting) {
-		if (meeting != null && sprintItems != null) {
-			sprintItems.removeIf(item -> item.getItem() != null && item.getItem().equals(meeting));
+			item.setSprintItem(null);
 			updateLastModified();
 		}
 	}
@@ -467,7 +438,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public void setItemCount(final Integer itemCount) { this.itemCount = itemCount; }
 	// IHasStatusAndWorkflow implementation
 
-	public void setItems(final List<CProjectItem<?>> items) {
+	public void setItems(final List<ISprintableItem> items) {
 		if (sprintItems == null) {
 			sprintItems = new ArrayList<>();
 		} else {
@@ -475,7 +446,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		}
 		if (items != null) {
 			int order = 1;
-			for (final CProjectItem<?> item : items) {
+			for (final ISprintableItem item : items) {
 				final CSprintItem sprintItem = new CSprintItem(this, item, order++);
 				sprintItems.add(sprintItem);
 			}

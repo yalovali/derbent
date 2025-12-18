@@ -2,9 +2,10 @@ package tech.derbent.app.sprints.view;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
@@ -50,9 +51,9 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 		orderLabel.setText("#" + (order != null ? order : 0));
 		layoutLineOne.add(orderLabel);
 		// Show project item name with icon if item is loaded
-		final CProjectItem<?> projectItem = getEntity().getItem();
+		final ISprintableItem projectItem = getEntity().getItem();
 		if (projectItem != null) {
-			layoutLineOne.add(CLabelEntity.createH3Label(projectItem));
+			layoutLineOne.add(CLabelEntity.createH3Label((CEntityDB<?>) projectItem));
 		} else {
 			// Fallback: show item type and ID if item not loaded
 			final CLabelEntity itemLabel = new CLabelEntity();
@@ -66,7 +67,7 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 	 * description. */
 	@Override
 	protected void createSecondLine() {
-		final CProjectItem<?> projectItem = getEntity().getItem();
+		final ISprintableItem projectItem = getEntity().getItem();
 		// Show item type badge
 		final String itemType = getEntity().getItemType();
 		if (itemType != null) {
@@ -109,7 +110,7 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 	 * @throws Exception */
 	@Override
 	protected void createThirdLine() throws Exception {
-		final CProjectItem<?> projectItem = getEntity().getItem();
+		final ISprintableItem projectItem = getEntity().getItem();
 		if (projectItem != null) {
 			// Show status
 			if (projectItem.getStatus() != null) {

@@ -15,6 +15,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -31,6 +32,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
@@ -156,6 +158,13 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			hidden = false, maxLength = 2000
 	)
 	private String results;
+	// Sprint Item relationship
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn (name = "sprintitem_id", nullable = true)
+	@AMetaData (
+			displayName = "Sprint Item", required = false, readOnly = true, description = "Associated sprint item for this activity", hidden = true
+	)
+	private CSprintItem sprintItem = null;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -277,13 +286,19 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public String getResults() { return results; }
 
 	@Override
+	public CSprintItem getSprintItem() { return sprintItem; }
+
+	@Override
 	public Integer getSprintOrder() { return sprintOrder; }
 
 	@Override
 	public LocalDate getStartDate() { return startDate; }
 
 	@Override
-	public CWorkflowEntity getWorkflow() { 
+	public Long getStoryPoint() { return storyPoint; }
+
+	@Override
+	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
 	}
@@ -482,20 +497,13 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		updateLastModified();
 	}
 
+	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
+
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
 	public void setStartDate(final LocalDate startDate) {
 		this.startDate = startDate;
-		updateLastModified();
-	}
-
-	@Override
-	public Long getStoryPoint() { return storyPoint; }
-
-	@Override
-	public void setStoryPoint(final Long storyPoint) {
-		this.storyPoint = storyPoint;
 		updateLastModified();
 	}
 
@@ -509,6 +517,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 				progressPercentage = 100;
 			}
 		}
+		updateLastModified();
+	}
+
+	@Override
+	public void setStoryPoint(final Long storyPoint) {
+		this.storyPoint = storyPoint;
 		updateLastModified();
 	}
 }

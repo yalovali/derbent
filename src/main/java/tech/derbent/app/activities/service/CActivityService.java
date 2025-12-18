@@ -45,19 +45,13 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public Class<CActivity> getEntityClass() { return CActivity.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { 
-		return CActivityInitializerService.class;
-	}
+	public Class<?> getInitializerServiceClass() { return CActivityInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { 
-		return CPageServiceActivity.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceActivity.class; }
 
 	@Override
-	public Class<?> getServiceClass() { 
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CActivity entity) {
@@ -96,8 +90,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	/** Lists activities by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.
 	 * @param project the project
 	 * @return list of activities ordered by sprintOrder ASC, id DESC */
-	public List<CActivity> listByProjectOrderedBySprintOrder(final CProject project) {
+	public List<CActivity> listForProjectBacklog(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
-		return ((IActivityRepository) repository).listByProjectOrderedBySprintOrder(project);
+		return ((IActivityRepository) repository).listForProjectBacklog(project);
 	}
 }

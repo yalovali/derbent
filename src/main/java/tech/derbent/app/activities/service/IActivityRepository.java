@@ -42,6 +42,15 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			ORDER BY a.id DESC
 			""")
 	Page<CActivity> listByProject(@Param ("project") CProject project, Pageable pageable);
+	// find all activities of projects where the user's company owns the project
+	@Query ("""
+			SELECT a FROM #{#entityName} a
+			LEFT JOIN FETCH a.project p
+			WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
+			and sprintItem IS NULL
+			ORDER BY a.id DESC
+			""")
+	List<CActivity> listByUser(@Param ("user") CUser user);
 	/** Find all activities by project ordered by sprint order for sprint-aware components. Null sprintOrder values will appear last.
 	 * @param project the project
 	 * @return list of activities ordered by sprintOrder ASC, id DESC */
@@ -56,13 +65,5 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			WHERE a.project = :project
 			ORDER BY a.sprintOrder ASC NULLS LAST, a.id DESC
 			""")
-	List<CActivity> listByProjectOrderedBySprintOrder(@Param ("project") CProject project);
-	// find all activities of projects where the user's company owns the project
-	@Query ("""
-			SELECT a FROM #{#entityName} a
-			LEFT JOIN FETCH a.project p
-			WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
-			ORDER BY a.id DESC
-			""")
-	List<CActivity> listByUser(@Param ("user") CUser user);
+	List<CActivity> listForProjectBacklog(@Param ("project") CProject project);
 }

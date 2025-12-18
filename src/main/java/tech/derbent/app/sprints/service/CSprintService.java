@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
@@ -29,6 +29,12 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 			final CSprintTypeService sprintTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		entityTypeService = sprintTypeService;
+	}
+
+	public void addSprintItemToSprint(final CSprint sprint, final ISprintableItem item) {
+		Check.notNull(sprint, "Sprint cannot be null");
+		Check.notNull(item, "Item cannot be null");
+		sprint.addItem(item);
 	}
 
 	@Override
@@ -70,7 +76,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize sprint"));
 		// Initialize workflow-based status and type
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, (CTypeEntityService<?>) entityTypeService, projectItemStatusService);
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
 		// Date defaults: start today, end in 2 weeks (standard sprint duration)
 		entity.setStartDate(LocalDate.now(clock));
 		entity.setEndDate(LocalDate.now(clock).plusWeeks(2));
