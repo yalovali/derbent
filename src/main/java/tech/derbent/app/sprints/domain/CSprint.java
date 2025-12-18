@@ -153,11 +153,21 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	/** Add a project item to this sprint. This method determines the type and adds to the appropriate collection.
 	 * @param item the project item to add */
 	public void addItem(final ISprintableItem item) {
-		if (item != null) {
-			final CSprintItem sprintItem = new CSprintItem(this, item, sprintItems.size() + 1);
-			sprintItems.add(sprintItem);
-			updateLastModified();
+		if (item == null || item.getId() == null) {
+			return;
 		}
+		if (sprintItems != null) {
+			final String itemType = item.getClass().getSimpleName();
+			final Long itemId = item.getId();
+			final boolean alreadyPresent = sprintItems.stream()
+					.anyMatch(si -> itemId.equals(si.getItemId()) && itemType.equals(si.getItemType()));
+			if (alreadyPresent) {
+				return;
+			}
+		}
+		final CSprintItem sprintItem = new CSprintItem(this, item, sprintItems.size() + 1);
+		sprintItems.add(sprintItem);
+		updateLastModified();
 	}
 
 	/** Add a sprint item to this sprint.
@@ -385,11 +395,14 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	/** Remove a project item from this sprint. This method determines the type and removes from the appropriate collection.
 	 * @param item the project item to remove */
 	public void removeItem(final ISprintableItem item) {
-		if (item != null && sprintItems != null) {
-			sprintItems.removeIf(sprintItem -> sprintItem.getItem() != null && sprintItem.getItem().equals(item));
-			item.setSprintItem(null);
-			updateLastModified();
+		if (item == null || item.getId() == null || sprintItems == null) {
+			return;
 		}
+		final String itemType = item.getClass().getSimpleName();
+		final Long itemId = item.getId();
+		sprintItems.removeIf(sprintItem -> isSameSprintable(itemId, itemType, sprintItem));
+		item.setSprintItem(null);
+		updateLastModified();
 	}
 
 	/** Sets the activities in this sprint.
@@ -486,5 +499,9 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @param totalStoryPoints the total story points value */
 	public void setTotalStoryPoints(final Long totalStoryPoints) {
 		this.totalStoryPoints = totalStoryPoints;
+	}
+
+	private boolean isSameSprintable(final Long itemId, final String itemType, final CSprintItem sprintItem) {
+		return itemId.equals(sprintItem.getItemId()) && itemType.equals(sprintItem.getItemType());
 	}
 }

@@ -176,7 +176,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private void bindComponent(final Method method, final Component component, final String methodName, final String componentName,
 			final String action) {
-		LOGGER.debug("[BindDebug] Starting binding for method {} to component {} for action {}.", methodName, componentName, action);
+		// LOGGER.debug("[BindDebug] Starting binding for method {} to component {} for action {}.", methodName, componentName, action);
 		// check method parameters
 		final var parameters = method.getParameterTypes();
 		Check.isTrue(parameters.length == 2, "Method {" + methodName + "} has invalid number of parameters. Expected 2 (Component, Object).");

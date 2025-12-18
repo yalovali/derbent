@@ -38,6 +38,7 @@ public interface IHasDragControl {
 		drag_getDragStartListeners().add(listener);
 	}
 
+	void drag_checkEventAfterPass(CEvent event);
 	void drag_checkEventBeforePass(CEvent event);
 	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners();
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners();
@@ -105,6 +106,7 @@ public interface IHasDragControl {
 			} else if (event instanceof CDragEndEvent) {
 				notifyDragEndListeners((CDragEndEvent) event);
 			}
+			drag_checkEventAfterPass(event);
 		} catch (final Exception e) {
 			LOGGER.error("Error in notifyEvents for event: {}", event.toString(), e);
 			throw e;

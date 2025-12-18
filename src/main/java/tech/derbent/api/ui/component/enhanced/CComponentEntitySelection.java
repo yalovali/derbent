@@ -221,6 +221,16 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	private void applyFilters() {
 		try {
+			if (currentEntityType == null) {
+				LOGGER.debug("applyFilters skipped - no current entity type selected");
+				return;
+			}
+			// Always reload items from provider so the grid reflects latest DB state.
+			allItems = itemsProvider.getItems(currentEntityType);
+			Check.notNull(allItems, "Items provider returned null for entity type: " + currentEntityType.getDisplayName());
+			LOGGER.debug("Loaded {} items for entity type {}", allItems.size(), currentEntityType.getDisplayName());
+			processAlreadySelectedItems();
+			updateStatusFilterOptions();
 			Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
 			final CComponentGridSearchToolbar.FilterCriteria criteria = gridSearchToolbar.getCurrentFilters();
 			Check.notNull(criteria, "Filter criteria cannot be null");
@@ -405,6 +415,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	@Override
+	public void drag_checkEventAfterPass(CEvent event) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
 		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 	}
@@ -559,14 +574,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			updateSelectionIndicator();
 			// Configure grid columns for the new entity type
 			configureGrid(grid);
-			// Load items
-			allItems = itemsProvider.getItems(config);
-			Check.notNull(allItems, "Items provider returned null for entity type: " + config.getDisplayName());
-			LOGGER.debug("Loaded {} items for entity type {}", allItems.size(), config.getDisplayName());
-			// Handle already selected items based on mode
-			processAlreadySelectedItems();
-			// Update status filter options
-			updateStatusFilterOptions();
 			// Apply filters and refresh grid
 			applyFilters();
 		} catch (final Exception e) {

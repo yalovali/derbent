@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
@@ -16,6 +17,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -26,14 +29,16 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityTypeService entityTypeService;
+	private final CSprintItemService sprintItemService;
 	Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
 
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
 			final CActivityTypeService activityTypeService, final CProjectItemStatusService projectItemStatusService,
-			final CActivityPriorityService activityPriorityService) {
+			final CActivityPriorityService activityPriorityService, final CSprintItemService sprintItemService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		entityTypeService = activityTypeService;
 		this.activityPriorityService = activityPriorityService;
+		this.sprintItemService = sprintItemService;
 	}
 
 	@Override
@@ -85,6 +90,34 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		final CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
 		return ((IActivityRepository) repository).listByUser(currentUser);
+	}
+
+	private void detachSprintItemIfPresent(final CActivity activity) {
+		final CSprintItem sprintItem = activity.getSprintItem();
+		if (sprintItem == null || sprintItem.getId() == null) {
+			return;
+		}
+		activity.setSprintItem(null);
+		repository.saveAndFlush(activity);
+		sprintItemService.delete(sprintItem.getId());
+	}
+
+	@Override
+	@Transactional
+	public void delete(final CActivity activity) {
+		Check.notNull(activity, "Activity cannot be null");
+		Check.notNull(activity.getId(), "Activity ID cannot be null");
+		detachSprintItemIfPresent(activity);
+		super.delete(activity);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final Long id) {
+		Check.notNull(id, "Activity ID cannot be null");
+		final CActivity activity = repository.findById(id)
+				.orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Activity not found: " + id));
+		delete(activity);
 	}
 
 	/** Lists activities by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.

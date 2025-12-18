@@ -30,6 +30,7 @@ import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.view.CComponentWidgetSprint;
@@ -88,7 +89,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	public CComponentBacklog createSpritBacklogComponent() {
 		final CSprint currentSprint = getView().getCurrentEntity();
 		if (componentBacklogItems == null) {
-			componentBacklogItems = new CComponentBacklog(currentSprint);
+			final CProject project = currentSprint != null ? currentSprint.getProject() : null;
+			componentBacklogItems = new CComponentBacklog(project);
 			componentBacklogItems.setDragEnabled(true);
 			componentBacklogItems.setDropEnabled(true);
 			// Register with page service using unified auto-registration pattern
@@ -177,7 +179,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			drag_insertBacklogItemIntoSprint(targetSprint, itemToAdd, dropLocation, targetSprintItem);
 			// refresh only needed components
 			// componentBacklogItems.refreshGrid();
-			drag_refreshForEvent(event);
+			// drag_refreshForEvent(event);
 			// refreshAfterSprintChange();
 			CNotificationService.showSuccess("Item added to sprint " + targetSprint.getName());
 		} catch (final Exception e) {
@@ -256,7 +258,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				LOGGER.debug("[SprintReorder] Saved sprint item {} with new order {}", item.getId(), newOrder);
 			}
 			// refreshAfterSprintChange();
-			drag_refreshForEvent(event);
+			// drag_refreshForEvent(event);
 			CNotificationService.showSuccess("Sprint items reordered");
 		} catch (final Exception e) {
 			LOGGER.error("Error reordering sprint items", e);
@@ -281,7 +283,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			// Refresh grids with state preservation (selection, widget states)
 			// refreshAfterBacklogDrop();
-			drag_refreshForEvent(event);
+			// drag_refreshForEvent(event);
 			CNotificationService.showSuccess("Item removed from sprint");
 		} catch (final Exception e) {
 			LOGGER.error("Error moving item to backlog", e);
@@ -329,7 +331,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			// Refresh grids
 			// refreshAfterSprintChange();
-			drag_refreshForEvent(event);
+			// drag_refreshForEvent(event);
 			CNotificationService.showSuccess("Sprint item moved to " + targetSprint.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error moving sprint item to sprint", e);
@@ -393,24 +395,18 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	private void drag_refreshForEvent(CDragDropEvent event) {
-		Object first = null;
-		first = event.getSourceList().get(0);
-		if (first instanceof CGrid) {
-			// ((CGrid<?>) first).getDataProvider().refreshAll();
-			((CGrid<?>) first).refreshGrid();
-		} else if (first instanceof CComponentGridEntity) {
-			((CComponentGridEntity) first).refreshGrid();
+		if (event == null || event.getSourceList().isEmpty()) {
+			return;
 		}
+		final Object first = event.getSourceList().getLast();// get(0);
+		refreshComponent(first, null);
 		final CDragStartEvent startEvent = getActiveDragStartEvent();
-		if (startEvent != null) {
-			// first and second can be same component, so check dont refresh twice
-			final Object second = startEvent.getSourceList().get(0);
-			if (second instanceof CGrid && second != first) {
-				((CGrid<?>) second).refreshGrid();
-			} else if (second instanceof CComponentGridEntity && second != first) {
-				((CComponentGridEntity) second).refreshGrid();
-			}
+		if (startEvent != null && !startEvent.getSourceList().isEmpty()) {
+			final Object second = startEvent.getSourceList().getLast();// get(0);
+			refreshComponent(second, first);
 		}
+		// refreshComponent(componentBacklogItems, null);
+		// refreshComponent(componentItemsSelection, null);
 	}
 
 	/** Creates a widget component for displaying the given sprint entity.
@@ -596,6 +592,23 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	@Override
 	public void populateForm() {
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
+	}
+
+	private void refreshComponent(final Object candidate, final Object skipIfSame) {
+		if (candidate == null || candidate == skipIfSame) {
+			return;
+		}
+		if (candidate instanceof CGrid) {
+			((CGrid<?>) candidate).refreshGrid();
+		} else if (candidate instanceof CComponentGridEntity) {
+			((CComponentGridEntity) candidate).refreshGrid();
+		} else if (candidate instanceof CComponentBacklog) {
+			((CComponentBacklog) candidate).refreshComponent();
+		} else if (candidate instanceof CComponentListSprintItems) {
+			((CComponentListSprintItems) candidate).refreshComponent();
+		} else if (candidate instanceof CComponentWidgetSprint) {
+			((CComponentWidgetSprint) candidate).refreshComponent();
+		}
 	}
 
 	/** Reorders backlog items after inserting a new item at a specific sprint order position. All items with sprintOrder >= newOrder need to be

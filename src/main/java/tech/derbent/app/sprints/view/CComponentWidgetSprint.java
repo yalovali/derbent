@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.config.CSpringContext;
@@ -13,12 +14,14 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;
@@ -58,8 +61,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	private CDiv containerSprintItems;
 	DropTarget<CComponentWidgetSprint> dropTarget;
 	private CLabelEntity itemCountLabel;
+	private Span itemCountText;
 	private boolean sprintItemsVisible = false;
-	// IDropTarget implementation
 
 	/** Creates a new sprint widget for the specified sprint.
 	 * @param sprint the sprint to display in the widget */
@@ -97,7 +100,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		// Add count text with story points
 		final String countText = (itemCount != null ? itemCount : 0) + " item" + (itemCount != null && itemCount != 1 ? "s" : "");
 		final String storyPointsText = totalStoryPoints != null && totalStoryPoints > 0 ? " (" + totalStoryPoints + " SP)" : "";
-		label.setText(countText + storyPointsText);
+		itemCountText = new Span(countText + storyPointsText);
+		label.add(itemCountText);
 		return label;
 	}
 
@@ -163,15 +167,16 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		}
 	}
 
+	@Override
+	public void drag_checkEventAfterPass(CEvent event) {
+		super.drag_checkEventAfterPass(event);
+		refreshComponent();
+	}
+
 	void drag_initialize() {
 		dropTarget = DropTarget.create(this);
 		dropTarget.addDropListener(drag_on_component_drop());
 		dropTarget.setActive(true);
-		/* just a demo */
-		/* final Div dragBox = new Div(new Text("Drag me")); final DragSource<Div> ds = DragSource.create(dragBox); ds.setDragData("Hello"); final Div
-		 * dropBox = new Div("Drop here"); final DropTarget<Div> dt = DropTarget.create(dropBox); dt.setDropEffect(DropEffect.COPY);
-		 * dt.addDropListener(event -> { event.getDragData().ifPresent(data -> { System.out.println("Dropped: " + data); }); }); add(dragBox);
-		 * add(dropBox); */
 	}
 
 	private ComponentEventListener<DropEvent<CComponentWidgetSprint>> drag_on_component_drop() {
@@ -193,15 +198,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	protected void on_buttonToggleItems_clicked() {
 		try {
 			sprintItemsVisible = !sprintItemsVisible;
-			containerSprintItems.setVisible(sprintItemsVisible);
-			// Update button icon and tooltip
-			if (sprintItemsVisible) {
-				buttonToggleItems.setIcon(VaadinIcon.ANGLE_UP.create());
-				buttonToggleItems.setTooltipText("Hide sprint items");
-			} else {
-				buttonToggleItems.setIcon(VaadinIcon.ANGLE_DOWN.create());
-				buttonToggleItems.setTooltipText("Show sprint items");
-			}
+			syncToggleButtonState();
 		} catch (final Exception e) {
 			LOGGER.error("Error toggling sprint items visibility", e);
 			CNotificationService.showException("Error toggling sprint items", e);
@@ -212,17 +209,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	protected void on_itemCountLabel_clicked() {
 		try {
 			sprintItemsVisible = !sprintItemsVisible;
-			if (containerSprintItems != null) {
-				containerSprintItems.setVisible(sprintItemsVisible);
-				// Update button icon if visible
-				if (buttonToggleItems != null && sprintItemsVisible) {
-					buttonToggleItems.setIcon(VaadinIcon.ANGLE_UP.create());
-					buttonToggleItems.setTooltipText("Hide sprint items");
-				} else if (buttonToggleItems != null) {
-					buttonToggleItems.setIcon(VaadinIcon.ANGLE_DOWN.create());
-					buttonToggleItems.setTooltipText("Show sprint items");
-				}
-			}
+			syncToggleButtonState();
 		} catch (final Exception e) {
 			LOGGER.error("Error toggling sprint items visibility", e);
 			CNotificationService.showException("Error toggling sprint items", e);
@@ -251,21 +238,53 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	}
 	// IHasDragEnd interface implementation - propagate drag events from internal grid
 
+	/** Refresh this widget by reloading sprint items (if present) and updating the item count label. */
+	public void refreshComponent() {
+		try {
+			if (getEntity() != null && getEntity().getId() != null) {
+				final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
+				final var items = sprintItemService.findByMasterIdWithItems(getEntity().getId());
+				getEntity().setSprintItems(items);
+				if (componentSprintItems != null) {
+					componentSprintItems.setCurrentEntity(getEntity());
+					componentSprintItems.refreshGrid();
+				}
+			}
+			refreshItemCount();
+			syncToggleButtonState();
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing sprint widget", e);
+		}
+	}
+
 	/** Refresh the item count display by recreating the label with updated count. */
 	private void refreshItemCount() {
 		try {
-			if (itemCountLabel != null && layoutLineTwo != null) {
-				// Remove old label
-				layoutLineTwo.remove(itemCountLabel);
-				// Create new label with updated count
-				itemCountLabel = createItemCountLabel();
-				itemCountLabel.getStyle().set("cursor", "pointer");
-				itemCountLabel.addClickListener(e -> on_itemCountLabel_clicked());
-				// Add back to layout
-				layoutLineTwo.add(itemCountLabel);
-			}
+			Check.notNull(itemCountLabel, "Item count label must be initialized");
+			Check.notNull(itemCountText, "Item count text must be initialized");
+			final Integer itemCount = getEntity().getItemCount();
+			final Long totalStoryPoints = getEntity().getTotalStoryPoints();
+			final String countText = (itemCount != null ? itemCount : 0) + " item" + (itemCount != null && itemCount != 1 ? "s" : "");
+			final String storyPointsText = totalStoryPoints != null && totalStoryPoints > 0 ? " (" + totalStoryPoints + " SP)" : "";
+			itemCountText.setText(countText + storyPointsText);
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing item count", e);
 		}
 	}
+
+	private void syncToggleButtonState() {
+		if (containerSprintItems != null) {
+			containerSprintItems.setVisible(sprintItemsVisible);
+		}
+		if (buttonToggleItems != null) {
+			if (sprintItemsVisible) {
+				buttonToggleItems.setIcon(VaadinIcon.ANGLE_UP.create());
+				buttonToggleItems.setTooltipText("Hide sprint items");
+			} else {
+				buttonToggleItems.setIcon(VaadinIcon.ANGLE_DOWN.create());
+				buttonToggleItems.setTooltipText("Show sprint items");
+			}
+		}
+	}
+	// IDropTarget implementation
 }

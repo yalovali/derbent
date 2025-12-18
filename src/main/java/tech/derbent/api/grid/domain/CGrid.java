@@ -479,6 +479,11 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	@Override
+	public void drag_checkEventAfterPass(CEvent event) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
 		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 	}
@@ -618,7 +623,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		// TODO: disable the selection listener temporarily during refresh to avoid unwanted side effects
 		// Refresh the grid data via the refresh consumer
 		if (refreshConsumer != null) {
-			LOGGER.debug("Refreshing grid id: {} via refresh consumer", getId());
+			// LOGGER.debug("Refreshing grid id: {} via refresh consumer", getId());
 			refreshConsumer.accept(this);
 		} else {
 			LOGGER.error("Refresh consumer is not set for grid id: {}", getId());

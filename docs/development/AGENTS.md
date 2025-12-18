@@ -17,6 +17,7 @@
 - **Type safety + metadata**: never use raw types; annotate entity fields with validation constraints plus `@AMetaData` (display name, order, requirements) so Vaadin builders stay deterministic.
 - **IDs & constants**: keep `VIEW_NAME`, `TITLE`, and DOM IDs (`#custom-*`) consistent for Playwright selectors. Constants are `static final`, SCREAMING_SNAKE_CASE.
 - **Formatting**: four spaces in Java, shared Eclipse formatter + Prettier. Run `./mvnw spotless:apply` before pushing.
+- **Sprint/backlog binding**: backlog = `sprintItem == null`. Add via `CSprintItemService.save(...)` (binds `itemId/itemType` and `item.sprintItem`), remove via `CSprintItemService.delete(...)` (clears `item.sprintItem` first). Deleting a sprintable item deletes its sprint item; deleting a sprint item must not delete the sprintable item. `CComponentBacklog` only needs a project; sprint context is optional.
 
 ## 4. Stateless Service Pattern (Multi-User Safe)
 - Services are singleton-scoped, so they **must not** hold mutable user/project/company state. Only keep injected dependencies, loggers, and constants as fields. All user/company/project context is retrieved per method call via `ISessionService`.

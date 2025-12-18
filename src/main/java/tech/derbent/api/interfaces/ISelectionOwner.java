@@ -11,11 +11,11 @@ import java.util.Set;
  *
  * <pre>
  * public class CPageSprintView implements ISelectionOwner&lt;CActivity&gt; {
- * 
+ *
  * 	private CComponentBacklog backlogComponent;
  *
  * 	private void setupComponents() {
- * 		backlogComponent = new CComponentBacklog(sprint);
+ * 		backlogComponent = new CComponentBacklog(project); // project is required
  * 		backlogComponent.setSelectionOwner(this);
  * 	}
  *

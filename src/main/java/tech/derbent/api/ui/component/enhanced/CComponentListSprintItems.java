@@ -121,6 +121,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
+	public void drag_checkEventAfterPass(CEvent event) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
 		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 		if (event instanceof CDragDropEvent) {
@@ -329,5 +334,10 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		LOGGER.warn("Edit operation not supported for sprint items - ID: {}", entity.getId());
 		CNotificationService
 				.showWarning("Sprint items cannot be edited directly. Please delete this item and add a new one if you need to change it.");
+	}
+
+	/** Refresh component state and grid. */
+	public void refreshComponent() {
+		refreshGrid();
 	}
 }

@@ -7,13 +7,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.domain.CPageServiceMeeting;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -24,11 +28,14 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
 	private final CMeetingTypeService meetingTypeService;
+	private final CSprintItemService sprintItemService;
 
 	CMeetingService(final IMeetingRepository repository, final Clock clock, final ISessionService sessionService,
-			final CMeetingTypeService meetingTypeService, final CProjectItemStatusService projectItemStatusService) {
+			final CMeetingTypeService meetingTypeService, final CProjectItemStatusService projectItemStatusService,
+			final CSprintItemService sprintItemService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.meetingTypeService = meetingTypeService;
+		this.sprintItemService = sprintItemService;
 	}
 
 	@Override
@@ -70,7 +77,35 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	 * @param project the project
 	 * @return list of meetings ordered by sprintOrder ASC, id DESC */
 	public java.util.List<CMeeting> listForProjectBacklog(final CProject project) {
-		tech.derbent.api.utils.Check.notNull(project, "Project cannot be null");
+		Check.notNull(project, "Project cannot be null");
 		return ((IMeetingRepository) repository).listForProjectBacklog(project);
+	}
+
+	private void detachSprintItemIfPresent(final CMeeting meeting) {
+		final CSprintItem sprintItem = meeting.getSprintItem();
+		if (sprintItem == null || sprintItem.getId() == null) {
+			return;
+		}
+		meeting.setSprintItem(null);
+		repository.saveAndFlush(meeting);
+		sprintItemService.delete(sprintItem.getId());
+	}
+
+	@Override
+	@Transactional
+	public void delete(final CMeeting meeting) {
+		Check.notNull(meeting, "Meeting cannot be null");
+		Check.notNull(meeting.getId(), "Meeting ID cannot be null");
+		detachSprintItemIfPresent(meeting);
+		super.delete(meeting);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final Long id) {
+		Check.notNull(id, "Meeting ID cannot be null");
+		final CMeeting meeting = repository.findById(id)
+				.orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Meeting not found: " + id));
+		delete(meeting);
 	}
 }

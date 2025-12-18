@@ -839,8 +839,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
 			}
 			if (mapComponents != null) {
-				LOGGER.debug("Adding component for field '{}' to component map of type:{}", fieldInfo.getFieldName(),
-						component.getClass().getSimpleName());
+				// LOGGER.debug("Adding component for field '{}' to component map of type:{}",
+				// fieldInfo.getFieldName(),component.getClass().getSimpleName());
 				mapComponents.put(fieldInfo.getFieldName(), component);
 			}
 			return component;

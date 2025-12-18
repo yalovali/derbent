@@ -4,6 +4,8 @@
 
 This document describes the generalized drag-and-drop pattern used in Derbent for agile sprint planning. The pattern separates internal reordering from cross-component dragging using standard interfaces.
 
+> 2025-12 binding refresh: Backlog items are exactly those with `sprintItem = NULL` on the sprintable entity. Use `CSprintItemService.save(...)` to add/bind (sets `itemId/itemType` and `item.sprintItem`), and `CSprintItemService.delete(...)` to remove (clears `item.sprintItem` first, then deletes). Deleting a sprintable item must delete its `CSprintItem`; deleting a `CSprintItem` must **not** delete the sprintable item. `CComponentBacklog` only needs a project; sprint context is not required for backlog loading.
+
 ## Agile Sprint Planning Workflow
 
 ### Components

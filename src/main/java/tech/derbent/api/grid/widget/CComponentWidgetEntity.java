@@ -200,6 +200,11 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	@Override
+	public void drag_checkEventAfterPass(CEvent event) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
 		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 	}

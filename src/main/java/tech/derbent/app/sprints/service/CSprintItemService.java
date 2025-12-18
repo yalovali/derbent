@@ -4,17 +4,19 @@ import java.time.Clock;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.activities.service.IActivityRepository;
+import tech.derbent.app.meetings.domain.CMeeting;
+import tech.derbent.app.meetings.service.IMeetingRepository;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
@@ -33,13 +35,52 @@ import tech.derbent.base.session.service.ISessionService;
 public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable, IOrderedEntityService<CSprintItem> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintItemService.class);
-	@Autowired
-	private CActivityService activityService;
-	@Autowired
-	private CMeetingService meetingService;
+	private final IActivityRepository activityRepository;
+	private final IMeetingRepository meetingRepository;
 
-	public CSprintItemService(final ISprintItemRepository repository, final Clock clock, final ISessionService sessionService) {
+	public CSprintItemService(final ISprintItemRepository repository, final Clock clock, final ISessionService sessionService,
+			final IActivityRepository activityRepository, final IMeetingRepository meetingRepository) {
 		super(repository, clock, sessionService);
+		this.activityRepository = activityRepository;
+		this.meetingRepository = meetingRepository;
+	}
+
+	@Override
+	@Transactional
+	public CSprintItem save(final CSprintItem sprintItem) {
+		Check.notNull(sprintItem, "Sprint item cannot be null");
+		populateItemMetadataIfTransientPresent(sprintItem);
+		final boolean isNew = sprintItem.getId() == null;
+		final boolean hasTransientItem = sprintItem.getItem() != null;
+		final CSprintItem saved = super.save(sprintItem);
+		// Keep the denormalized link on the sprintable item in sync.
+		// We only enforce binding for new sprint items or when the caller provided the transient item (UI add flows).
+		if (isNew || hasTransientItem) {
+			bindSprintableItemToSprintItem(saved);
+		}
+		return saved;
+	}
+
+	@Override
+	@Transactional
+	public void delete(final CSprintItem sprintItem) {
+		Check.notNull(sprintItem, "Sprint item cannot be null");
+		Check.notNull(sprintItem.getId(), "Sprint item ID cannot be null");
+		try {
+			unbindSprintableItemFromSprintItem(sprintItem);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to unbind sprintable item from sprint item {}: {}", sprintItem.getId(), e.getMessage(), e);
+			throw e;
+		}
+		super.delete(sprintItem);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final Long id) {
+		Check.notNull(id, "Sprint item ID cannot be null");
+		final CSprintItem sprintItem = getById(id).orElseThrow(() -> new EntityNotFoundException("Sprint item not found with id: " + id));
+		delete(sprintItem);
 	}
 
 	/** Find all sprint items of a specific type.
@@ -122,9 +163,9 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 			// Map item type to service and load the item
 			switch (itemType) {
 			case "CActivity":
-				return activityService.getById(itemId).orElse(null);
+				return activityRepository.findById(itemId).orElse(null);
 			case "CMeeting":
-				return meetingService.getById(itemId).orElse(null);
+				return meetingRepository.findById(itemId).orElse(null);
 			default:
 				LOGGER.warn("Unknown item type: {}", itemType);
 				return null;
@@ -133,6 +174,74 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 			LOGGER.error("Failed to load item {} of type {}: {}", itemId, itemType, e.getMessage());
 			return null;
 		}
+	}
+
+	private void bindSprintableItemToSprintItem(final CSprintItem sprintItem) {
+		if (sprintItem == null || sprintItem.getId() == null) {
+			return;
+		}
+		final ISprintableItem item = resolveItemForSprintItem(sprintItem);
+		if (item == null) {
+			return;
+		}
+		final CSprintItem existing = item.getSprintItem();
+		if (existing != null && existing.getId() != null && existing.getId().equals(sprintItem.getId())) {
+			return;
+		}
+		item.setSprintItem(sprintItem);
+		saveProjectItem(item);
+	}
+
+	private void saveProjectItem(final ISprintableItem item) {
+		Check.notNull(item, "Sprintable item cannot be null");
+		if (item instanceof CActivity) {
+			activityRepository.saveAndFlush((CActivity) item);
+		} else if (item instanceof CMeeting) {
+			meetingRepository.saveAndFlush((CMeeting) item);
+		} else {
+			LOGGER.warn("Unsupported sprintable item type for save: {}", item.getClass().getSimpleName());
+		}
+	}
+
+	private void unbindSprintableItemFromSprintItem(final CSprintItem sprintItem) {
+		if (sprintItem == null || sprintItem.getId() == null) {
+			return;
+		}
+		final ISprintableItem item = resolveItemForSprintItem(sprintItem);
+		if (item == null) {
+			return;
+		}
+		final CSprintItem existing = item.getSprintItem();
+		if (existing == null || existing.getId() == null || !existing.getId().equals(sprintItem.getId())) {
+			return;
+		}
+		item.setSprintItem(null);
+		saveProjectItem(item);
+	}
+
+	private void populateItemMetadataIfTransientPresent(final CSprintItem sprintItem) {
+		if (sprintItem.getItem() == null) {
+			return;
+		}
+		Check.notNull(sprintItem.getItem().getId(), "Sprintable item must be persisted (id != null) before being added to a sprint");
+		if (sprintItem.getItemId() == null) {
+			sprintItem.setItemId(sprintItem.getItem().getId());
+		}
+		if (sprintItem.getItemType() == null) {
+			sprintItem.setItemType(sprintItem.getItem().getClass().getSimpleName());
+		}
+	}
+
+	private ISprintableItem resolveItemForSprintItem(final CSprintItem sprintItem) {
+		if (sprintItem.getItem() != null) {
+			return sprintItem.getItem();
+		}
+		if (sprintItem.getItemId() == null || sprintItem.getItemType() == null) {
+			return null;
+		}
+		final ISprintableItem loaded = loadItemByIdAndType(sprintItem.getItemId(), sprintItem.getItemType());
+		sprintItem.setItem(loaded);
+		return loaded;
 	}
 
 	/** Load items for a list of sprint items.

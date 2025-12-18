@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
@@ -16,44 +17,11 @@ import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.app.sprints.service.CSprintItemService;
 
 public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
-
-	/** Creates the already-selected provider that filters out items already in the sprint.
-	 * @param sprint the sprint to check for existing items
-	 * @return provider for already-selected items */
-	private static ItemsProvider<CProjectItem<?>> createAlreadySelectedProvider(final CSprint sprint) {
-		return config -> {
-			try {
-				// TODO this is old way of loading sprint items, consider refactoring later
-				// now if cmeeting or cactivity has null sprintItem, it means it's not in any sprint
-				// so the rest is unselected
-				if (sprint == null || sprint.getId() == null) {
-					return new ArrayList<>();
-				}
-				final CSprintItemService service = CSpringContext.getBean(CSprintItemService.class);
-				final List<CSprintItem> sprintItems = service.findByMasterIdWithItems(sprint.getId());
-				// Filter by entity type and extract the underlying items
-				final List<CProjectItem<?>> result = new ArrayList<>();
-				final String targetType = config.getEntityClass().getSimpleName();
-				for (final CSprintItem sprintItem : sprintItems) {
-					if (sprintItem.getItem() != null && targetType.equals(sprintItem.getItemType())) {
-						result.add((CProjectItem<?>) sprintItem.getItem());
-					}
-				}
-				return result;
-			} catch (final Exception e) {
-				LOGGER.error("Error loading already selected items for backlog: {}", config.getDisplayName(), e);
-				return new ArrayList<>();
-			}
-		};
-	}
 
 	/** Creates the list of entity type configurations for the backlog.
 	 * @return list of entity type configs (CActivity, CMeeting) */
@@ -68,13 +36,12 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	/** Creates the items provider that loads all project items ordered by sprint order.
-	 * @param sprint the sprint (provides access to project)
+	 * @param project the project to load backlog items for
 	 * @return provider for loading items */
 	@SuppressWarnings ("unchecked")
-	private static ItemsProvider<CProjectItem<?>> createItemsProvider(final CSprint sprint) {
+	private static ItemsProvider<CProjectItem<?>> createItemsProvider(final CProject project) {
 		return config -> {
 			try {
-				final CProject project = sprint != null ? sprint.getProject() : null;
 				if (project == null) {
 					LOGGER.warn("No project available for loading backlog items");
 					return new ArrayList<>();
@@ -105,16 +72,19 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	/** Constructor for backlog component.
-	 * @param sprint The sprint for which to display the backlog (items NOT in this sprint) */
-	public CComponentBacklog(final CSprint sprint) {
-		super(createEntityTypes(), createItemsProvider(sprint), createSelectionHandler(), false, createAlreadySelectedProvider(sprint),
-				AlreadySelectedMode.HIDE_ALREADY_SELECTED);
-		Check.notNull(sprint, "Sprint cannot be null");
+	 * @param project project to load backlog items for (required) */
+	public CComponentBacklog(final CProject project) {
+		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+		Check.notNull(project, "Project cannot be null");
 		CSpringContext.getBean(CActivityService.class);
 		CSpringContext.getBean(CMeetingService.class);
-		CSpringContext.getBean(CSprintItemService.class);
 		setDynamicHeight("600px");
-		LOGGER.debug("CComponentBacklog created for sprint: {}", sprint.getId());
+		LOGGER.debug("CComponentBacklog created for project: {}", project.getId());
+	}
+
+	public void drag_checkEventAfterPass(CEvent event) {
+		super.drag_checkEventAfterPass(event);
+		refreshComponent();
 	}
 
 	/** Gets all items currently displayed in the grid.
@@ -129,6 +99,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	@Override
 	public String getComponentName() { return "backlogItems"; }
+
+	/** Refresh the backlog component and underlying grid. */
+	public void refreshComponent() {
+		refreshGrid();
+	}
 
 	@Override
 	public void registerWithPageService(final CPageService<?> pageService) {

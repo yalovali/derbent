@@ -4,6 +4,14 @@
 
 This implementation enhances the sprint management system with drag and drop functionality, enabling users to easily move items from a backlog to sprint items by dragging them between grids.
 
+### Current binding rules (2025-12 refresh)
+- Backlog = items where `sprintItem` is **NULL** on the sprintable entity (e.g., `CActivity.sprintItem`).
+- Adding to a sprint must go through `CSprintItemService.save(...)`, which binds the sprintable item and populates `itemId/itemType`.
+- Removing from a sprint must call `CSprintItemService.delete(...)`, which first clears `item.sprintItem` and then deletes the `CSprintItem`.
+- Deleting a sprintable item (`CActivity`, `CMeeting`) clears and deletes its `CSprintItem`; deleting a `CSprintItem` does **not** delete the sprintable item.
+- UI drag/drop code should refresh both backlog and sprint lists after any add/remove to reflect these invariants.
+- `CComponentBacklog` now only requires a project (sprint is not needed) because backlog is defined globally by `sprintItem IS NULL`; hiding already-selected items is handled at the service layer.
+
 ## Changes Made
 
 ### 1. Bug Fix: CPageServiceSprint.createSpritBacklogComponent()
