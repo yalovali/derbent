@@ -6,7 +6,9 @@ This repository already contains a detailed playbook in `docs/development/AGENTS
 - **Naming is strict**: concrete classes start with `C*`, interfaces with `I*` (see `docs/architecture/coding-standards.md`).
 - **Layering**: keep `domain/ → service/ → view/` separation; avoid UI logic in services and persistence logic in views (see `docs/architecture/service-layer-patterns.md`, `docs/architecture/view-layer-patterns.md`).
 - **Singleton services are stateless**: never cache user/project/company state in service fields; always read context via `ISessionService` per call (see `docs/architecture/multi-user-singleton-advisory.md`).
-- **Drag & drop**: use the unified `IHasDragControl` forwarding/notification pattern; refresh should be explicit and deterministic (see `docs/architecture/drag-drop-component-pattern.md` and `docs/implementation/drag-drop-unified-pattern.md`).
+- **Drag & drop**: use the unified `IHasDragControl` forwarding/notification pattern; refresh should be explicit and deterministic (see `docs/architecture/drag-drop-component-pattern.md` and `docs/implementation/drag-drop-unified-pattern.md`). Prefer component-level `refreshComponent()` helpers when they exist instead of manual grid refreshes.
+- **Fail fast**: do not silently ignore nulls; use `Check.notNull`, `Check.instanceOf`, etc., and throw immediately instead of `if (...) return` patterns that hide errors.
+- **Exceptions**: let exceptions propagate up; only user-triggered handlers (e.g., `on_xxx_clicked`, drop listeners) should surface them via `CNotificationService.showException(...)`. In lower layers, log concise `LOGGER.error(e.getMessage(), e)` once and rethrow.
 
 ## Sprint/Backlog Invariants (Do Not Break)
 - **Backlog definition**: backlog items are exactly the sprintable items where `sprintItem IS NULL` (FK `sprintitem_id` on the sprintable entity).
@@ -23,4 +25,3 @@ This repository already contains a detailed playbook in `docs/development/AGENTS
 
 ## Agent Execution Notes
 - Follow user instructions about validation runs. If the user says “do not run tests”, do not run `mvn test`/`verify`; limit to code changes and static inspection unless explicitly asked.
-

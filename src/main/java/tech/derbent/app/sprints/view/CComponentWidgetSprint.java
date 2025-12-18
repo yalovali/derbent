@@ -240,36 +240,28 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 
 	/** Refresh this widget by reloading sprint items (if present) and updating the item count label. */
 	public void refreshComponent() {
-		try {
-			if (getEntity() != null && getEntity().getId() != null) {
-				final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
-				final var items = sprintItemService.findByMasterIdWithItems(getEntity().getId());
-				getEntity().setSprintItems(items);
-				if (componentSprintItems != null) {
-					componentSprintItems.setCurrentEntity(getEntity());
-					componentSprintItems.refreshGrid();
-				}
+		if (getEntity() != null && getEntity().getId() != null) {
+			final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
+			final var items = sprintItemService.findByMasterIdWithItems(getEntity().getId());
+			getEntity().setSprintItems(items);
+			if (componentSprintItems != null) {
+				componentSprintItems.setCurrentEntity(getEntity());
+				componentSprintItems.refreshGrid();
 			}
-			refreshItemCount();
-			syncToggleButtonState();
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing sprint widget", e);
 		}
+		refreshItemCount();
+		syncToggleButtonState();
 	}
 
 	/** Refresh the item count display by recreating the label with updated count. */
 	private void refreshItemCount() {
-		try {
-			Check.notNull(itemCountLabel, "Item count label must be initialized");
-			Check.notNull(itemCountText, "Item count text must be initialized");
-			final Integer itemCount = getEntity().getItemCount();
-			final Long totalStoryPoints = getEntity().getTotalStoryPoints();
-			final String countText = (itemCount != null ? itemCount : 0) + " item" + (itemCount != null && itemCount != 1 ? "s" : "");
-			final String storyPointsText = totalStoryPoints != null && totalStoryPoints > 0 ? " (" + totalStoryPoints + " SP)" : "";
-			itemCountText.setText(countText + storyPointsText);
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing item count", e);
-		}
+		Check.notNull(itemCountLabel, "Item count label must be initialized");
+		Check.notNull(itemCountText, "Item count text must be initialized");
+		final Integer itemCount = getEntity().getItemCount();
+		final Long totalStoryPoints = getEntity().getTotalStoryPoints();
+		final String countText = (itemCount != null ? itemCount : 0) + " item" + (itemCount != null && itemCount != 1 ? "s" : "");
+		final String storyPointsText = totalStoryPoints != null && totalStoryPoints > 0 ? " (" + totalStoryPoints + " SP)" : "";
+		itemCountText.setText(countText + storyPointsText);
 	}
 
 	private void syncToggleButtonState() {

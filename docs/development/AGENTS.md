@@ -18,6 +18,9 @@
 - **IDs & constants**: keep `VIEW_NAME`, `TITLE`, and DOM IDs (`#custom-*`) consistent for Playwright selectors. Constants are `static final`, SCREAMING_SNAKE_CASE.
 - **Formatting**: four spaces in Java, shared Eclipse formatter + Prettier. Run `./mvnw spotless:apply` before pushing.
 - **Sprint/backlog binding**: backlog = `sprintItem == null`. Add via `CSprintItemService.save(...)` (binds `itemId/itemType` and `item.sprintItem`), remove via `CSprintItemService.delete(...)` (clears `item.sprintItem` first). Deleting a sprintable item deletes its sprint item; deleting a sprint item must not delete the sprintable item. `CComponentBacklog` only needs a project; sprint context is optional.
+- **Drag/drop + refresh**: use `IHasDragControl` forwarding and call component-level `refreshComponent()` (backlog, sprint items, sprint widget) instead of ad-hoc grid refreshes. Keep refresh code nondestructive—update existing UI elements (labels/buttons) rather than recreating them.
+- **Fail fast**: avoid silent `if (x == null) return;` guards; prefer `Check.notNull`, `Check.instanceOf`, etc., so errors surface instead of being ignored.
+- **Exception handling**: let exceptions bubble up; only user-triggered handlers (e.g., `on_*_clicked`, drop listeners) should convert them to UI via `CNotificationService.showException(...)`. Service/controller layers should log once (concise `LOGGER.error(e.getMessage(), e)`) and rethrow.
 
 ## 4. Stateless Service Pattern (Multi-User Safe)
 - Services are singleton-scoped, so they **must not** hold mutable user/project/company state. Only keep injected dependencies, loggers, and constants as fields. All user/company/project context is retrieved per method call via `ISessionService`.

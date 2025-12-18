@@ -11,6 +11,7 @@ This implementation enhances the sprint management system with drag and drop fun
 - Deleting a sprintable item (`CActivity`, `CMeeting`) clears and deletes its `CSprintItem`; deleting a `CSprintItem` does **not** delete the sprintable item.
 - UI drag/drop code should refresh both backlog and sprint lists after any add/remove to reflect these invariants.
 - `CComponentBacklog` now only requires a project (sprint is not needed) because backlog is defined globally by `sprintItem IS NULL`; hiding already-selected items is handled at the service layer.
+- Refresh pattern: call component-level `refreshComponent()` on backlog, sprint items, and sprint widgets after drag/drop; update UI text in place (avoid tearing down/rebuilding labels or buttons).
 
 ## Changes Made
 
