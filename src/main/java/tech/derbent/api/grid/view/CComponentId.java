@@ -10,17 +10,16 @@ import tech.derbent.api.utils.CColorUtils;
 /** Compact ID renderer that follows the CLabelEntity pattern: icon + ID value, aligned and click-friendly. */
 public class CComponentId extends CLabelEntity {
 
-	private static final String GAP = "6px";
 	private static final String ICON_SIZE = "16px";
 	private static final String ID_PLACEHOLDER = "-";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentId.class);
 	private static final long serialVersionUID = 1L;
 
-	public CComponentId(final CEntityDB<?> entity) {
+	public CComponentId(final CEntityDB<?> entity) throws Exception {
 		this(entity, entity != null ? entity.getId() : null);
 	}
 
-	public CComponentId(final CEntityDB<?> entity, final Object idValue) {
+	public CComponentId(final CEntityDB<?> entity, final Object idValue) throws Exception {
 		super();
 		/* getStyle().set("gap", GAP); */
 		getStyle().set("white-space", "nowrap");
@@ -29,7 +28,7 @@ public class CComponentId extends CLabelEntity {
 		add(createIdSpan(idValue));
 	}
 
-	private void addIcon(final CEntityDB<?> entity) {
+	private void addIcon(final CEntityDB<?> entity) throws Exception {
 		if (entity == null) {
 			return;
 		}
@@ -41,6 +40,7 @@ public class CComponentId extends CLabelEntity {
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Could not resolve icon for {}: {}", entity.getClass().getSimpleName(), e.getMessage());
+			throw e;
 		}
 	}
 

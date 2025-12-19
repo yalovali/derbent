@@ -380,7 +380,7 @@ public class CDataInitializer {
 			final CComment comment2 =
 					new CComment("Agreed. Let's schedule a follow-up meeting to discuss resource allocation.", activity, commenter2, priority2);
 			commentService.save(comment2);
-			LOGGER.debug("Created sample activity and comments for decision ID: {}", decision.getId());
+			// LOGGER.debug("Created sample activity and comments for decision ID: {}", decision.getId());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating comments for decision: {}", decision.getName(), e);
 		}
@@ -419,7 +419,7 @@ public class CDataInitializer {
 			final CComment comment2 = new CComment("I'll take ownership of the first two action items. Expected completion in 2 weeks.", activity,
 					commenter2, priority2);
 			commentService.save(comment2);
-			LOGGER.debug("Created sample activity and comments for meeting ID: {}", meeting.getId());
+			// LOGGER.debug("Created sample activity and comments for meeting ID: {}", meeting.getId());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating comments for meeting: {}", meeting.getName(), e);
 		}

@@ -37,7 +37,9 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CComponentId;
+import tech.derbent.api.grid.view.CComponentStoryPoint;
 import tech.derbent.api.grid.view.CLabelEntity;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
@@ -370,14 +372,37 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
-			final Object idValue = valueProvider.apply(entity);
-			final CEntityDB<?> entityDb = entity instanceof CEntityDB ? (CEntityDB<?>) entity : null;
-			return new CComponentId(entityDb, idValue);
+			try {
+				final Object idValue = valueProvider.apply(entity);
+				final CEntityDB<?> entityDb = entity instanceof CEntityDB ? (CEntityDB<?>) entity : null;
+				return new CComponentId(entityDb, idValue);
+			} catch (final Exception e) {
+				LOGGER.error("Error creating CComponentId for entity {}: {}", entity, e.getMessage());
+				return null;
+			}
 		}).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true).setResizable(true);
 		if (key != null) {
 			column.setKey(key);
 		}
 		column.setComparator((entity1, entity2) -> compareIds(valueProvider.apply(entity1), valueProvider.apply(entity2)));
+		return styleColumnHeader(column, header);
+	}
+
+	public Column<EntityClass> addStoryPointColumn(final ValueProvider<EntityClass, ISprintableItem> itemProvider,
+			final Consumer<ISprintableItem> saveHandler, final Consumer<Exception> errorHandler, final String header, final String key) {
+		Check.notNull(itemProvider, "Item provider cannot be null");
+		Check.notNull(saveHandler, "Save handler cannot be null");
+		Check.notNull(errorHandler, "Error handler cannot be null");
+		Check.notBlank(header, "Header cannot be null or blank");
+		final Column<EntityClass> column = addComponentColumn(entity -> {
+			final ISprintableItem item = itemProvider.apply(entity);
+			Check.notNull(item, "Sprintable item cannot be null when creating story point component");
+			return new CComponentStoryPoint(item, saveHandler, errorHandler);
+		}).setWidth(WIDTH_INTEGER).setFlexGrow(0).setSortable(true).setResizable(true);
+		if (key != null) {
+			column.setKey(key);
+		}
+		column.setComparator((left, right) -> compareIds(storyPointValue(itemProvider.apply(left)), storyPointValue(itemProvider.apply(right))));
 		return styleColumnHeader(column, header);
 	}
 
@@ -502,6 +527,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 			return -1;
 		}
 		return Long.compare(leftId, rightId);
+	}
+
+	private Long storyPointValue(final ISprintableItem item) {
+		return item == null ? null : item.getStoryPoint();
 	}
 
 	@Override

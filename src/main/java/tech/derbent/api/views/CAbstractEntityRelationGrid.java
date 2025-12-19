@@ -15,30 +15,18 @@ import tech.derbent.api.utils.CAuxillaries;
 public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<RelationEntity>> extends Grid<RelationEntity> {
 
 	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	public static final String WIDTH_ID = "80px";
 	public static final String WIDTH_ENTITY_NAME = "200px";
 	public static final String WIDTH_ROLE = "150px";
 	public static final String WIDTH_PERMISSION = "150px";
 	public static final String WIDTH_STATUS = "120px";
 	public static final String WIDTH_DATE = "150px";
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Constructor for relation grid */
 	public CAbstractEntityRelationGrid(final Class<RelationEntity> relationClass) {
 		super(relationClass, false);
 		initializeGrid();
-	}
-
-	/** Initialize grid with common settings and styling */
-	private void initializeGrid() {
-		addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
-		addThemeVariants(GridVariant.LUMO_COMPACT);
-		setHeightFull();
-		setSelectionMode(SelectionMode.SINGLE);
-		com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
-				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) getSelectionModel();
-		sm.setDeselectAllowed(false);
-		CAuxillaries.setId(this);
 	}
 
 	/** Add a column for entity names with consistent styling */
@@ -48,10 +36,18 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 		return CGrid.styleColumnHeader(column, header);
 	}
 
-	/** Add a column for roles with consistent styling */
-	protected Column<RelationEntity> addRoleColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> roleProvider,
-			final String header) {
-		final var column = addColumn(roleProvider).setWidth(WIDTH_ROLE).setFlexGrow(0).setSortable(true);
+	/** Add an ID column with standard styling */
+	protected Column<RelationEntity> addIdColumn(final ValueProvider<RelationEntity, Long> idProvider, final String header) {
+		final var column = addComponentColumn(entity -> {
+			try {
+				return new CComponentId(entity, idProvider.apply(entity));
+			} catch (final Exception e) {
+				LOGGER.error("Error creating CComponentId for entity {}: {}", entity, e.getMessage());
+				e.printStackTrace();
+			}
+			return null;
+		}).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true).setResizable(true);
+		column.setComparator((left, right) -> compareIds(idProvider.apply(left), idProvider.apply(right)));
 		return CGrid.styleColumnHeader(column, header);
 	}
 
@@ -62,19 +58,17 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 		return CGrid.styleColumnHeader(column, header);
 	}
 
+	/** Add a column for roles with consistent styling */
+	protected Column<RelationEntity> addRoleColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> roleProvider,
+			final String header) {
+		final var column = addColumn(roleProvider).setWidth(WIDTH_ROLE).setFlexGrow(0).setSortable(true);
+		return CGrid.styleColumnHeader(column, header);
+	}
+
 	/** Add a column for status with consistent styling */
 	protected Column<RelationEntity> addStatusColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, String> statusProvider,
 			final String header) {
 		final var column = addColumn(statusProvider).setWidth(WIDTH_STATUS).setFlexGrow(0).setSortable(true);
-		return CGrid.styleColumnHeader(column, header);
-	}
-
-	/** Add an ID column with standard styling */
-	protected Column<RelationEntity> addIdColumn(final ValueProvider<RelationEntity, Long> idProvider, final String header) {
-		final var column =
-				addComponentColumn(entity -> new CComponentId(entity, idProvider.apply(entity))).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true)
-						.setResizable(true);
-		column.setComparator((left, right) -> compareIds(idProvider.apply(left), idProvider.apply(right)));
 		return CGrid.styleColumnHeader(column, header);
 	}
 
@@ -89,5 +83,17 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 			return -1;
 		}
 		return Long.compare(left, right);
+	}
+
+	/** Initialize grid with common settings and styling */
+	private void initializeGrid() {
+		addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+		addThemeVariants(GridVariant.LUMO_COMPACT);
+		setHeightFull();
+		setSelectionMode(SelectionMode.SINGLE);
+		final com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
+				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) getSelectionModel();
+		sm.setDeselectAllowed(false);
+		CAuxillaries.setId(this);
 	}
 }

@@ -333,11 +333,11 @@ public class CWebSessionService implements ISessionService {
 			return;
 		}
 		if (project != null && getActiveProject().orElse(null) != null && project.getId().equals(getActiveProject().orElse(null).getId())) {
-			LOGGER.debug("setActiveProject called with same project, no action taken");
+			// LOGGER.debug("setActiveProject called with same project, no action taken");
 			return;
 		}
 		session.setAttribute(ACTIVE_PROJECT_KEY, project);
-		LOGGER.info("Active project set to: {}:{}", project.getId(), project.getName());
+		// LOGGER.info("Active project set to: {}:{}", project.getId(), project.getName());
 		// Notify listeners synchronously when already in UI thread (normal case during navigation)
 		// This prevents async refresh cascades that could interfere with page initialization
 		// Only use ui.access() when called from a background thread
@@ -358,7 +358,7 @@ public class CWebSessionService implements ISessionService {
 	 * @param user    the user to set as active (must be a member of the company) */
 	@Override
 	public void setActiveUser(final CUser user) {
-		LOGGER.debug("setActiveUser called");
+		// LOGGER.debug("setActiveUser called");
 		Check.notNull(user, "User must not be null");
 		clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();

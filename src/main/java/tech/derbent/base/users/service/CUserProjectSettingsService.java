@@ -34,10 +34,10 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	/** Add user to project with specific role and permissions */
 	@Transactional
 	public CUserProjectSettings addUserToProject(final CUser user, final CProject project, final CUserProjectRole role, final String permission) {
-		LOGGER.debug("Adding user {} to project {} with role {} and permission {}", user, project, role, permission);
+		// LOGGER.debug("Adding user {} to project {} with role {} and permission {}", user, project, role, permission);
 		Check.notNull(user, "User must not be null");
 		Check.notNull(project, "Project must not be null");
-		if ((user.getId() == null) || (project.getId() == null)) {
+		if (user.getId() == null || project.getId() == null) {
 			throw new IllegalArgumentException("User and project must have valid IDs");
 		}
 		if (relationshipExists(user.getId(), project.getId())) {
@@ -122,19 +122,13 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	public Class<CUserProjectSettings> getEntityClass() { return CUserProjectSettings.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { 
-		return CUserProjectSettingsInitializerService.class;
-	}
+	public Class<?> getInitializerServiceClass() { return CUserProjectSettingsInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { 
-		return CPageServiceUserProjectSettings.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceUserProjectSettings.class; }
 
 	@Override
-	public Class<?> getServiceClass() { 
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Initialize lazy fields for a CUserProjectSettings entity within a transaction context. This method should be called when you need to access
 	 * lazy-loaded fields outside of the original Hibernate session. The repository queries already eagerly fetch common fields (user, project, role),

@@ -1,7 +1,5 @@
 package tech.derbent.app.comments.domain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +15,6 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	public static final String DEFAULT_COLOR = "#B8860B"; // X11 DarkGoldenrod - comment priority (darker)
 	public static final String DEFAULT_ICON = "vaadin:star";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriority.class);
 	public static final String ENTITY_TITLE_PLURAL = "Comment Priorities";
 	public static final String ENTITY_TITLE_SINGULAR = "Comment Priority";
 	public static final String VIEW_NAME = "Comment Priority View";
@@ -44,7 +41,7 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	public CCommentPriority(final String name, final CProject project) {
 		super(CCommentPriority.class, name, project);
-		LOGGER.debug("CCommentPriority constructor called with name: {} and project: {}", name, project);
+		// LOGGER.debug("CCommentPriority constructor called with name: {} and project: {}", name, project);
 	}
 
 	public CCommentPriority(final String name, final CProject project, final String color, final Integer sortOrder) {

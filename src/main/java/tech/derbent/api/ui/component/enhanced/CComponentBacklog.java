@@ -8,9 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
@@ -22,6 +25,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
+	private final CActivityService activityService;
+	private final CMeetingService meetingService;
 
 	/** Creates the list of entity type configurations for the backlog.
 	 * @return list of entity type configs (CActivity, CMeeting) */
@@ -76,8 +81,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	public CComponentBacklog(final CProject project) {
 		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
 		Check.notNull(project, "Project cannot be null");
-		CSpringContext.getBean(CActivityService.class);
-		CSpringContext.getBean(CMeetingService.class);
+		activityService = CSpringContext.getBean(CActivityService.class);
+		meetingService = CSpringContext.getBean(CMeetingService.class);
 		setDynamicHeight("600px");
 		LOGGER.debug("CComponentBacklog created for project: {}", project.getId());
 	}
@@ -85,6 +90,15 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	public void drag_checkEventAfterPass(CEvent event) {
 		super.drag_checkEventAfterPass(event);
 		refreshComponent();
+	}
+
+	@Override
+	public void configureGrid(final CGrid<CProjectItem<?>> grid) {
+		super.configureGrid(grid);
+		grid.addStoryPointColumn(item -> {
+			Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
+			return (ISprintableItem) item;
+		}, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
 	}
 
 	/** Gets all items currently displayed in the grid.
@@ -103,6 +117,25 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	/** Refresh the backlog component and underlying grid. */
 	public void refreshComponent() {
 		refreshGrid();
+	}
+
+	private void saveStoryPoint(final ISprintableItem item) {
+		Check.notNull(item, "Sprintable item cannot be null when saving story points");
+		Check.notNull(item.getId(), "Sprintable item must be persisted before updating story points");
+		if (item instanceof CActivity) {
+			activityService.save((CActivity) item);
+			return;
+		}
+		if (item instanceof CMeeting) {
+			meetingService.save((CMeeting) item);
+			return;
+		}
+		throw new IllegalArgumentException("Unsupported sprintable item type: " + item.getClass().getSimpleName());
+	}
+
+	private void handleStoryPointError(final Exception exception) {
+		Check.notNull(exception, "Exception cannot be null when handling story point errors");
+		CNotificationService.showException("Error saving story points", exception);
 	}
 
 	@Override

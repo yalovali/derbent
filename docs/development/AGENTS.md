@@ -34,6 +34,7 @@
 - Vaadin views keep the `@Route`, `@PageTitle`, and layout definitions in dedicated initialization methods. Each view maintains deterministic component IDs for UI automation and reuses shared components from `tech.derbent.api.ui`.
 - UI classes may keep state in instance fields (per-user instances) but must clean up listeners on detach and use `UI.access()` for async updates.
 - Follow the pattern docs in `docs/architecture/view-layer-patterns.md` for layout scaffolding, and consult `docs/development/copilot-guidelines.md` for entity/service/view scaffolds that Copilot can mirror.
+- Inline grid renderers (e.g., component columns) must remain UI-only: no persistence or notifications inside the renderer; pass save/error callbacks to the owning component or page service and handle `CNotificationService.showException(...)` in those user-triggered handlers.
 
 ## 6. Testing Expectations
 - Unit/service tests suffix with `*Test`, mock the session, and never share mutable fixtures. UI automation extends `CBaseUITest` to reuse login/navigation helpers and semantic waits (`wait_afterlogin()` etc.).

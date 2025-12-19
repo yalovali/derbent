@@ -86,14 +86,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		grid.addExpandingLongTextColumn(item -> {
 			return item.getItem().getDescriptionShort();
 		}, "description", "Description");
-		// Add story points column
-		grid.addIntegerColumn(item -> {
-			if (item.getItem() instanceof ISprintableItem) {
-				final Long storyPoint = item.getItem().getStoryPoint();
-				return storyPoint != null ? storyPoint.intValue() : null;
-			}
-			return null;
-		}, "Story Points", "storyPoint");
+		grid.addStoryPointColumn(CSprintItem::getItem, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
 		try {
 			grid.addEntityColumn(item -> {
 				return item.getItem().getStatus();
@@ -124,6 +117,25 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
 		// TODO Auto-generated method stub
+	}
+
+	private void saveStoryPoint(final ISprintableItem item) {
+		Check.notNull(item, "Sprintable item cannot be null when saving story points");
+		Check.notNull(item.getId(), "Sprintable item must be persisted before updating story points");
+		if (item instanceof CActivity) {
+			activityService.save((CActivity) item);
+			return;
+		}
+		if (item instanceof CMeeting) {
+			meetingService.save((CMeeting) item);
+			return;
+		}
+		throw new IllegalArgumentException("Unsupported sprintable item type: " + item.getClass().getSimpleName());
+	}
+
+	private void handleStoryPointError(final Exception exception) {
+		Check.notNull(exception, "Exception cannot be null when handling story point errors");
+		CNotificationService.showException("Error saving story points", exception);
 	}
 
 	@Override
