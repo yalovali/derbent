@@ -27,6 +27,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
@@ -40,7 +41,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem {
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -238,6 +239,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
+	@Override
+	public String getColor() { // TODO Auto-generated method stub
+		return DEFAULT_COLOR;
+	}
+
 	/** Gets the list of comments associated with this activity.
 	 * @return list of comments, never null */
 	public List<CComment> getComments() { return comments != null ? comments : new ArrayList<>(); }
@@ -408,6 +414,9 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		updateLastModified();
 	}
 
+	@Override
+	public void setColor(String color) {}
+
 	/** Sets the list of comments for this activity.
 	 * @param comments the list of comments */
 	public void setComments(final List<CComment> comments) {
@@ -497,6 +506,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		updateLastModified();
 	}
 
+	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
 
 	@Override

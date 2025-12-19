@@ -27,23 +27,10 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 public final class CDashboardStatCard extends Div {
 
 	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	private final H2 valueLabel;
-	private final Span titleLabel;
 	private final Icon icon;
-
-	/** Constructor for CDashboardStatCard.
-	 * @param title the title of the statistic
-	 * @param value the value to display
-	 * @param icon  the icon to display */
-	public CDashboardStatCard(final String title, final String value, final Icon icon) {
-		LOGGER.debug("Creating CDashboardStatCard with title: {}, value: {}", title, value);
-		this.icon = icon;
-		this.titleLabel = new Span(title);
-		this.valueLabel = new H2(value);
-		initializeCard();
-		createCardContent();
-	}
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Span titleLabel;
+	private final H2 valueLabel;
 
 	/** Constructor for CDashboardStatCard with long value.
 	 * @param title the title of the statistic
@@ -53,44 +40,17 @@ public final class CDashboardStatCard extends Div {
 		this(title, String.valueOf(value), icon);
 	}
 
-	/** Updates the value displayed on the card.
-	 * @param value the new value to display */
-	public void updateValue(final String value) {
-		LOGGER.debug("Updating card value to: {}", value);
-		valueLabel.setText(value);
-	}
-
-	/** Updates the value displayed on the card.
-	 * @param value the new numeric value to display */
-	public void updateValue(final long value) {
-		updateValue(String.valueOf(value));
-	}
-
-	/** Updates the title displayed on the card.
-	 * @param title the new title to display */
-	public void updateTitle(final String title) {
-		LOGGER.debug("Updating card title to: {}", title);
-		titleLabel.setText(title);
-	}
-
-	/** Initializes the card styling and properties. */
-	private void initializeCard() {
-		// Apply responsive width and height
-		setWidthFull();
-		setMinHeight("120px");
-		// Apply card styling using Lumo utility classes
-		addClassNames(Background.BASE, BorderRadius.MEDIUM, BoxShadow.SMALL, Padding.MEDIUM, Display.FLEX, AlignItems.CENTER, JustifyContent.CENTER);
-		// Add hover effect
-		getStyle().set("transition", "all 0.2s ease-in-out");
-		getStyle().set("cursor", "default");
-		getElement().addEventListener("mouseenter", e -> {
-			getStyle().set("transform", "translateY(-2px)");
-			addClassName(BoxShadow.MEDIUM);
-		});
-		getElement().addEventListener("mouseleave", e -> {
-			getStyle().set("transform", "translateY(0)");
-			removeClassName(BoxShadow.MEDIUM);
-		});
+	/** Constructor for CDashboardStatCard.
+	 * @param title the title of the statistic
+	 * @param value the value to display
+	 * @param icon  the icon to display */
+	public CDashboardStatCard(final String title, final String value, final Icon icon) {
+		// LOGGER.debug("Creating CDashboardStatCard with title: {}, value: {}", title, value);
+		this.icon = icon;
+		this.titleLabel = new Span(title);
+		this.valueLabel = new H2(value);
+		initializeCard();
+		createCardContent();
 	}
 
 	/** Creates the content layout for the card. */
@@ -115,5 +75,45 @@ public final class CDashboardStatCard extends Div {
 		mainLayout.addClassNames(AlignItems.CENTER, Gap.MEDIUM);
 		mainLayout.add(icon, textContent);
 		add(mainLayout);
+	}
+
+	/** Initializes the card styling and properties. */
+	private void initializeCard() {
+		// Apply responsive width and height
+		setWidthFull();
+		setMinHeight("120px");
+		// Apply card styling using Lumo utility classes
+		addClassNames(Background.BASE, BorderRadius.MEDIUM, BoxShadow.SMALL, Padding.MEDIUM, Display.FLEX, AlignItems.CENTER, JustifyContent.CENTER);
+		// Add hover effect
+		getStyle().set("transition", "all 0.2s ease-in-out");
+		getStyle().set("cursor", "default");
+		getElement().addEventListener("mouseenter", e -> {
+			getStyle().set("transform", "translateY(-2px)");
+			addClassName(BoxShadow.MEDIUM);
+		});
+		getElement().addEventListener("mouseleave", e -> {
+			getStyle().set("transform", "translateY(0)");
+			removeClassName(BoxShadow.MEDIUM);
+		});
+	}
+
+	/** Updates the title displayed on the card.
+	 * @param title the new title to display */
+	public void updateTitle(final String title) {
+		// LOGGER.debug("Updating card title to: {}", title);
+		titleLabel.setText(title);
+	}
+
+	/** Updates the value displayed on the card.
+	 * @param value the new numeric value to display */
+	public void updateValue(final long value) {
+		updateValue(String.valueOf(value));
+	}
+
+	/** Updates the value displayed on the card.
+	 * @param value the new value to display */
+	public void updateValue(final String value) {
+		// LOGGER.debug("Updating card value to: {}", value);
+		valueLabel.setText(value);
 	}
 }

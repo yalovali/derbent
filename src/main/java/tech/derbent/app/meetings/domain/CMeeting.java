@@ -22,6 +22,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
@@ -38,7 +39,7 @@ import tech.derbent.base.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem {
+public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -184,6 +185,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
 	@Override
+	public String getColor() { // TODO Auto-generated method stub
+		return DEFAULT_COLOR;
+	}
+
+	@Override
 	public LocalDate getEndDate() { return endDate; }
 
 	public LocalTime getEndTime() { return endTime; }
@@ -297,6 +303,9 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
 
+	@Override
+	public void setColor(String color) {}
+
 	public void setEndDate(final LocalDate endDate) { this.endDate = endDate; }
 
 	public void setEndTime(final LocalTime endTime) { this.endTime = endTime; }
@@ -322,6 +331,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
 
+	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
 
 	@Override

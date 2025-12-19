@@ -78,6 +78,8 @@ Use `@AMetaData` for automatic UI generation:
 private String name;
 ```
 
+- **Field names must be exact**: UI metadata helpers are reflection-based (`createLineFromDefaults`, `setColumnFields`, dynamic forms). Always reference the real entity field name (and ensure matching getters/setters exist). Do not use aliases/renames in initializers—mismatches fail at runtime with `NoSuchFieldException` and block data initialization.
+
 ## Naming Conventions
 
 ### Classes

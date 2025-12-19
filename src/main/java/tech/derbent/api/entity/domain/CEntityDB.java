@@ -20,7 +20,7 @@ import tech.derbent.api.domains.IEntityDBStatics;
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 	@Column (name = "active", nullable = false)
 	@AMetaData (
 			displayName = "Active", required = false, readOnly = false, description = "Whether this entity definition is active", hidden = false,
@@ -83,6 +83,11 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return fields.toArray(new Field[0]);
 	}
 
+	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
+	 * returns "id" to ensure consistent ordering by ID in descending order.
+	 * @return the field name to order by (e.g., "id", "name", "createDate") */
+	public String getDefaultOrderBy() { return "id"; }
+
 	@Nullable
 	public Long getId() { return id; }
 
@@ -100,11 +105,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	protected void initializeDefaults() {}
 
 	public boolean isNew() { return id == null; }
-
-	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
-	 * returns "id" to ensure consistent ordering by ID in descending order.
-	 * @return the field name to order by (e.g., "id", "name", "createDate") */
-	public String getDefaultOrderBy() { return "id"; }
 
 	/** Checks if this entity matches the given search value in the specified fields. This base implementation searches in 'id' and 'active' fields.
 	 * Subclasses should override to add their specific fields while calling super.matchesFilter().

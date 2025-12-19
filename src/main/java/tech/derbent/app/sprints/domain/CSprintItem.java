@@ -1,5 +1,6 @@
 package tech.derbent.app.sprints.domain;
 
+import com.vaadin.flow.component.icon.Icon;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +16,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.IOrderedEntity;
 
@@ -23,7 +25,7 @@ import tech.derbent.api.screens.service.IOrderedEntity;
 @Entity
 @Table (name = "csprint_items")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_item_id"))
-public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntity {
+public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntity, IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - sprint items
 	public static final String DEFAULT_ICON = "vaadin:list-ol";
@@ -103,7 +105,20 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 		this.itemOrder = itemOrder;
 	}
 
+	@Override
+	public String getColor() { // TODO Auto-generated method stub
+		return ((IHasIcon) getItem()).getColor();
+	}
+
 	public CComponentWidgetEntity<CSprintItem> getComponentWidget() { return componentWidget; }
+
+	@Override
+	public Icon getIcon() { return ((IHasIcon) getItem()).getIcon(); }
+
+	@Override
+	public String getIconString() { // TODO Auto-generated method stub
+		return ((IHasIcon) getItem()).getIconString();
+	}
 
 	/** Get the project item. This is a transient field that must be loaded at runtime. Use CSprintItemService.loadItem() to populate this field.
 	 * @return the project item, or null if not loaded */
@@ -123,6 +138,11 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 			return null;
 		}
 		return item.getStatus();
+	}
+
+	@Override
+	public void setColor(String color) {
+		// TODO Auto-generated method stub
 	}
 
 	/** Set the project item. This also updates itemId and itemType.

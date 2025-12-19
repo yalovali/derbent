@@ -18,7 +18,7 @@ public interface IHasDragControl {
 		if (listener == null) {
 			return;
 		}
-		LOGGER.debug("[DragDebug] {} adding drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
+		// LOGGER.debug("[DragDebug] {} adding drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
 		drag_getDropListeners().add(listener);
 	}
 

@@ -22,6 +22,7 @@
 - **Drag/drop + refresh**: use `IHasDragControl` forwarding and call component-level `refreshComponent()` (backlog, sprint items, sprint widget) instead of ad-hoc grid refreshes. Keep refresh code nondestructive—update existing UI elements (labels/buttons) rather than recreating them.
 - **Fail fast**: avoid silent `if (x == null) return;` guards; prefer `Check.notNull`, `Check.instanceOf`, etc., so errors surface instead of being ignored.
 - **Exception handling**: let exceptions bubble up; only user-triggered handlers (e.g., `on_*_clicked`, drop listeners) should convert them to UI via `CNotificationService.showException(...)`. Service/controller layers should log once (concise `LOGGER.error(e.getMessage(), e)`) and rethrow.
+- **Field-name fidelity**: Screen/grid initializers must use the exact entity field names (and matching getters/setters) when calling `createLineFromDefaults`, `setColumnFields`, etc. Reflection-based metadata will throw if names drift—no aliases.
 
 ## 4. Stateless Service Pattern (Multi-User Safe)
 - Services are singleton-scoped, so they **must not** hold mutable user/project/company state. Only keep injected dependencies, loggers, and constants as fields. All user/company/project context is retrieved per method call via `ISessionService`.

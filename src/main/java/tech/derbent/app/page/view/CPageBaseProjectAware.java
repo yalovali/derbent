@@ -125,10 +125,10 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 
 	/** Get the current binder for data binding operations (public access for PageService pattern) */
-	public CEnhancedBinder<CEntityDB<?>> getBinder() {
-		return currentBinder;
-	}
+	@Override
+	public CEnhancedBinder<CEntityDB<?>> getBinder() { return currentBinder; }
 
+	@Override
 	public Map<String, Component> getComponentMap() { return componentMap; }
 
 	@Override
@@ -153,8 +153,10 @@ public abstract class CPageBaseProjectAware extends CPageBase
 		return null;
 	}
 
+	@Override
 	public CDetailsBuilder getDetailsBuilder() { return detailsBuilder; }
 
+	@Override
 	public ISessionService getSessionService() { return sessionService; }
 
 	@Override
@@ -210,7 +212,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 			if (entity == null) {
 				LOGGER.debug("Setting current entity to null.");
 			}
-			LOGGER.debug("Setting current entity: {}", entity);
+			// LOGGER.debug("Setting current entity: {}", entity);
 			currentEntity = entity;
 		} catch (final Exception e) {
 			LOGGER.error("Error setting current entity.");

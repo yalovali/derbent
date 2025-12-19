@@ -394,21 +394,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		sprintItemService.delete(sprintItem);
 	}
 
-	private void drag_refreshForEvent(CDragDropEvent event) {
-		if (event == null || event.getSourceList().isEmpty()) {
-			return;
-		}
-		final Object first = event.getSourceList().getLast();// get(0);
-		refreshComponent(first, null);
-		final CDragStartEvent startEvent = getActiveDragStartEvent();
-		if (startEvent != null && !startEvent.getSourceList().isEmpty()) {
-			final Object second = startEvent.getSourceList().getLast();// get(0);
-			refreshComponent(second, first);
-		}
-		// refreshComponent(componentBacklogItems, null);
-		// refreshComponent(componentItemsSelection, null);
-	}
-
 	/** Creates a widget component for displaying the given sprint entity.
 	 * @param item the sprint to create a widget for
 	 * @return the CComponentWidgetSprint component */
@@ -592,23 +577,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	@Override
 	public void populateForm() {
 		LOGGER.debug("populateForm called - CComponentListSprintItems receives entity updates via IContentOwner interface");
-	}
-
-	private void refreshComponent(final Object candidate, final Object skipIfSame) {
-		if (candidate == null || candidate == skipIfSame) {
-			return;
-		}
-		if (candidate instanceof CGrid) {
-			((CGrid<?>) candidate).refreshGrid();
-		} else if (candidate instanceof CComponentGridEntity) {
-			((CComponentGridEntity) candidate).refreshGrid();
-		} else if (candidate instanceof CComponentBacklog) {
-			((CComponentBacklog) candidate).refreshComponent();
-		} else if (candidate instanceof CComponentListSprintItems) {
-			((CComponentListSprintItems) candidate).refreshComponent();
-		} else if (candidate instanceof CComponentWidgetSprint) {
-			((CComponentWidgetSprint) candidate).refreshComponent();
-		}
 	}
 
 	/** Reorders backlog items after inserting a new item at a specific sprint order position. All items with sprintOrder >= newOrder need to be

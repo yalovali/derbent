@@ -237,7 +237,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		case "dragStart" -> {
 			// Check if component implements IHasDragStart interface first
 			if (component instanceof IHasDragControl) {
-				LOGGER.debug("[DragDebug] Component {} implements IHasDragStart, binding via interface", componentName);
+				// LOGGER.debug("[DragDebug] Component {} implements IHasDragStart, binding via interface", componentName);
 				bindDragStart((IHasDragControl) component, method, methodName);
 			} else {
 				// Fail-fast: dragStart handler defined but component doesn't support it
@@ -325,7 +325,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		// Aynı component + aynı handler → aynı listener
 		final String key = component.getClass().getName() + "#" + methodName;
 		final ComponentEventListener<CDragDropEvent> listener = dropListenerRegistry.computeIfAbsent(key, k -> {
-			LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
+			// LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
 			return event -> {
 				try {
 					// LOGGER.info("[DragDebug] Drop event received, invoking {}", methodName);

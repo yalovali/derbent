@@ -105,6 +105,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
+	boolean HeaderVisible = true;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private Consumer<CGrid<EntityClass>> refreshConsumer;
 	/** Map to store widget providers for columns that create components implementing IStateOwnerComponent. Key: Column key, Value: Widget provider
@@ -488,6 +489,21 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return column;
 	}
 
+	private int compareIds(final Object left, final Object right) {
+		final Long leftId = normalizeId(left);
+		final Long rightId = normalizeId(right);
+		if (leftId == null && rightId == null) {
+			return 0;
+		}
+		if (leftId == null) {
+			return 1;
+		}
+		if (rightId == null) {
+			return -1;
+		}
+		return Long.compare(leftId, rightId);
+	}
+
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
 		// TODO Auto-generated method stub
@@ -565,6 +581,14 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
 
+	public void hideHeader() {
+		HeaderVisible = false;
+	}
+
+	private void hideHeaderByJS() {
+		setPartVisible("tHead", false);
+	}
+
 	/** Initialize grid with common settings and styling. */
 	private void initializeGrid() {
 		addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -582,6 +606,20 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		// Note: Do NOT call setupChildDragDropForwarding() here - CGrid already forwards
 		// Vaadin Grid events to IHasDragControl listeners via on_grid_dragStart(), on_grid_dragEnd(), on_grid_dragDrop()
 		// Calling setupChildDragDropForwarding() would create an infinite loop
+	}
+
+	private Long normalizeId(final Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof final Number number) {
+			return number.longValue();
+		}
+		try {
+			return Long.parseLong(value.toString());
+		} catch (final NumberFormatException ignored) {
+			return null;
+		}
 	}
 
 	private ComponentEventListener<GridDropEvent<EntityClass>> on_grid_dragDrop() {
@@ -638,6 +676,9 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		} else {
 			LOGGER.error("Refresh consumer is not set for grid id: {}", getId());
 		}
+		if (!HeaderVisible) {
+			hideHeaderByJS();
+		}
 	}
 
 	@Override
@@ -669,7 +710,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		} else {
 			setDropMode(null);
 		}
-		LOGGER.debug("[DragDebug] CGrid: Drop {} for grid id:{}", enabled ? "enabled" : "disabled", getId());
+		// LOGGER.debug("[DragDebug] CGrid: Drop {} for grid id:{}", enabled ? "enabled" : "disabled", getId());
 	}
 
 	public void setDynamicHeight() {
@@ -680,38 +721,15 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		setAllRowsVisible(true);
 	}
 
+	private void setPartVisible(String part, boolean visible) {
+		// hide or show a part of the table (tHead or tFoot)
+		getElement().executeJs("const element = this.$.table." + part + ";" + "if(element) {" + "    element.style.display = $0;" + "}",
+				visible ? "" : "none");
+	}
+
 	// set grid a refresh consumer method
 	public void setRefreshConsumer(final Consumer<CGrid<EntityClass>> refreshConsumer) {
 		Check.notNull(refreshConsumer, "Refresh consumer cannot be null");
 		this.refreshConsumer = refreshConsumer;
-	}
-
-	private int compareIds(final Object left, final Object right) {
-		final Long leftId = normalizeId(left);
-		final Long rightId = normalizeId(right);
-		if (leftId == null && rightId == null) {
-			return 0;
-		}
-		if (leftId == null) {
-			return 1;
-		}
-		if (rightId == null) {
-			return -1;
-		}
-		return Long.compare(leftId, rightId);
-	}
-
-	private Long normalizeId(final Object value) {
-		if (value == null) {
-			return null;
-		}
-		if (value instanceof Number number) {
-			return number.longValue();
-		}
-		try {
-			return Long.parseLong(value.toString());
-		} catch (final NumberFormatException ignored) {
-			return null;
-		}
 	}
 }

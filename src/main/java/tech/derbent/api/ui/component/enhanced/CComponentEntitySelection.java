@@ -279,7 +279,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 					}
 				}
 			}
-			LOGGER.debug("Applied filters - showing {} of {} items", filtered.size(), allItems.size());
+			// LOGGER.debug("Applied filters - showing {} of {} items", filtered.size(), allItems.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error applying filters", e);
 			throw new IllegalStateException("Failed to apply filters", e);

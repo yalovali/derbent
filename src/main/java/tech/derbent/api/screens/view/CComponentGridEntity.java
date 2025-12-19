@@ -964,7 +964,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@Override
 	public void setDragEnabled(final boolean enabled) {
 		grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
-		LOGGER.debug("[DragDebug] Drag {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
+		// LOGGER.debug("[DragDebug] Drag {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
 	}
 
 	/** Enables or disables drop functionality for the grid.
@@ -975,7 +975,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@Override
 	public void setDropEnabled(final boolean enabled) {
 		grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
-		LOGGER.debug("[DragDebug] Drop {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
+		// LOGGER.debug("[DragDebug] Drop {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
 	}
 	// IHasDragControl interface implementation
 

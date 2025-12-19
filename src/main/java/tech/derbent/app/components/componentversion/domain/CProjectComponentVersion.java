@@ -28,19 +28,19 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	public static final String ENTITY_TITLE_SINGULAR = "Component Version";
 	public static final String VIEW_NAME = "Component Versions View";
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "projectcomponent_id", nullable = false)
-	@AMetaData (
-			displayName = "Component", required = true, readOnly = false, description = "Parent component", hidden = false,
-			dataProviderBean = "CProjectComponentService"
-	)
-	private CProjectComponent component;
-	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Version Type", required = false, readOnly = false, description = "Type category of the version", hidden = false,
 			dataProviderBean = "CProjectComponentVersionTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProjectComponentVersionType entityType;
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "projectcomponent_id", nullable = false)
+	@AMetaData (
+			displayName = "Component", required = true, readOnly = false, description = "Parent component", hidden = false,
+			dataProviderBean = "CProjectComponentService"
+	)
+	private CProjectComponent projectComponent;
 	@Column (nullable = true, length = 50)
 	@AMetaData (displayName = "Version Number", required = false, readOnly = false, description = "Version identifier (e.g., 1.0.0)", hidden = false)
 	private String versionNumber;
@@ -55,10 +55,10 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 		initializeDefaults();
 	}
 
-	public CProjectComponent getComponent() { return component; }
-
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
+
+	public CProjectComponent getProjectComponent() { return projectComponent; }
 
 	public String getVersionNumber() { return versionNumber; }
 
@@ -73,8 +73,8 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 		if (getProject() != null) {
 			getProject().getName();
 		}
-		if (component != null) {
-			component.getName();
+		if (projectComponent != null) {
+			projectComponent.getName();
 		}
 		if (getAssignedTo() != null) {
 			getAssignedTo().getLogin();
@@ -89,15 +89,15 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 		super.initializeDefaults();
 	}
 
-	public void setComponent(final CProjectComponent component) {
-		this.component = component;
-		updateLastModified();
-	}
-
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.instanceOf(typeEntity, CProjectComponentVersionType.class, "Type entity must be an instance of CComponentVersionType");
 		entityType = (CProjectComponentVersionType) typeEntity;
+		updateLastModified();
+	}
+
+	public void setProjectComponent(final CProjectComponent component) {
+		this.projectComponent = component;
 		updateLastModified();
 	}
 

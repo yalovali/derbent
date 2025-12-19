@@ -294,7 +294,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		buttonMoveDown = create_buttonMoveDown();
 		layoutButtons.add(buttonAdd, buttonDelete, buttonMoveUp, buttonMoveDown);
 		layoutToolbar.add(layoutButtons, title);
-		LOGGER.debug("Toolbar created with CRUD buttons");
+		// LOGGER.debug("Toolbar created with CRUD buttons");
 	}
 
 	@Override

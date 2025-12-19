@@ -76,8 +76,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public void configureGrid(final CGrid<CSprintItem> grid) {
 		Check.notNull(grid, "Grid cannot be null");
+		grid.hideHeader();
 		grid.addIdColumn(CSprintItem::getId, "ID", "id");
-		grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
+		// grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
 		// Use expanding column for Name to fill remaining width
 		grid.addShortTextColumn(item -> {
 			return item.getItem().getName();
