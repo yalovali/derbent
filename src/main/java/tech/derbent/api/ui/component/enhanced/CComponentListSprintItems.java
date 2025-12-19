@@ -127,7 +127,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
-		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
+		// LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 		if (event instanceof CDragDropEvent) {
 			final CDragDropEvent dropEvent = (CDragDropEvent) event;
 			if (dropEvent.getDropLocation().equals(GridDropLocation.EMPTY) && dropEvent.getTargetItem() == null) {
@@ -268,7 +268,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	protected List<CSprintItem> loadItems(final CSprint master) {
 		Check.notNull(master, "Master sprint cannot be null when loading items");
-		LOGGER.debug("Loading sprint items for sprint: {}", master.getId() != null ? master.getId() : "null");
+		// LOGGER.debug("Loading sprint items for sprint: {}", master.getId() != null ? master.getId() : "null");
 		if (master.getId() == null) {
 			LOGGER.debug("Master sprint is new, returning empty list");
 			return List.of();

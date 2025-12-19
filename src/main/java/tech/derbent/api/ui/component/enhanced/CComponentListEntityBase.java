@@ -297,6 +297,21 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		LOGGER.debug("Toolbar created with CRUD buttons");
 	}
 
+	@Override
+	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() {
+		return dragEndListeners;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
+		return dragStartListeners;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
+		return dropListeners;
+	}
+
 	/** Fires a value change event to all registered listeners.
 	 * @param newValue   the new value
 	 * @param fromClient whether the change originated from the client */
@@ -365,15 +380,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
-	@Override
-	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() { return dragEndListeners; }
-
-	@Override
-	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() { return dragStartListeners; }
-
-	@Override
-	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() { return dropListeners; }
-
 	/** Get the entity service.
 	 * @return The service */
 	@Override
@@ -409,7 +415,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		final ChildEntity currentValue = grid.asSingleSelect().getValue();
 		final List<ChildEntity> items = loadItems(master);
 		Check.notNull(items, "Loaded items cannot be null");
-		LOGGER.debug("Refreshing grid with {} items", items.size());
+		// LOGGER.debug("Refreshing grid with {} items", items.size());
 		grid.setItems(items);
 		grid.asSingleSelect().setValue(currentValue);
 	}
@@ -630,7 +636,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param item The selected item (can be null) */
 	protected void on_gridItems_selected(final ChildEntity item) {
 		try {
-			LOGGER.debug("Selection changed to: {}", item != null ? item.getId() : "null");
+			// LOGGER.debug("Selection changed to: {}", item != null ? item.getId() : "null");
 			selectedItem = item;
 			updateButtonStates(item != null);
 			// Notify selection owner if set
@@ -735,11 +741,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@SuppressWarnings ("unchecked")
 	public void setCurrentEntity(final CEntityDB<?> entity) {
 		if (entity == null) {
-			LOGGER.debug("setCurrentEntity called with null - clearing grid");
+			// LOGGER.debug("setCurrentEntity called with null - clearing grid");
 			masterEntity = null;
 			clearGrid();
 		} else if (masterEntityClass.isInstance(entity)) {
-			LOGGER.debug("setCurrentEntity called with {} - setting master entity", entity.getClass().getSimpleName());
+			// LOGGER.debug("setCurrentEntity called with {} - setting master entity", entity.getClass().getSimpleName());
 			masterEntity = (MasterEntity) entity;
 			refreshGrid();
 		} else {

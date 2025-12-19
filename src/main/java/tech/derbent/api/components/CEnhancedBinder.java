@@ -152,14 +152,11 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	}
 
 	public void printBindingProperties() {
-		LOGGER.debug("Current bindings for bean type: {}", beanType.getSimpleName());
+		LOGGER.debug("Current bindings for bean type: {} count: {}", beanType.getSimpleName(), getBindings().size());
 		for (final Binding<EntityClass, ?> binding : getBindings()) {
-			LOGGER.debug("Binding: {}", binding.toString());
-			if (binding.getField() != null) {
-				LOGGER.debug("  Field: {}", binding.getField().toString());
-			}
+			LOGGER.debug("Binding properties: {} field: {}", binding.toString(),
+					(binding.getField() != null) ? binding.getField().toString() : "null");
 		}
-		LOGGER.debug("Total bindings count: {}", getBindings().size());
 	}
 
 	@Override

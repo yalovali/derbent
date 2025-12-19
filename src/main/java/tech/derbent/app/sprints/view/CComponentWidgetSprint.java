@@ -182,8 +182,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	private ComponentEventListener<DropEvent<CComponentWidgetSprint>> drag_on_component_drop() {
 		return event -> {
 			try {
-				LOGGER.debug("Drop event details: Drag source id: {}, Drop target id: {}", getId().orElse("None"),
-						event.getSource().getId().orElse("None"));
+				// LOGGER.debug("Drop event details: Drag source id: {}, Drop target id: {}",
+				// getId().orElse("None"),event.getSource().getId().orElse("None"));
 				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, getEntity(), null, true);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {

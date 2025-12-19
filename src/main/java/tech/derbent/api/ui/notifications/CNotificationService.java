@@ -24,18 +24,6 @@ public class CNotificationService {
 	// Standard durations in milliseconds
 	private static final int SHORT_DURATION = 2000;
 
-	/** Shows a message with expandable exception details (modal with Details toggle and OK button). The dialog displays a user-friendly message and
-	 * allows users to expand/collapse technical exception details.
-	 * @param message   The user-friendly message to display
-	 * @param exception The exception whose details can be expanded */
-	public static void showException(final String message, final Exception exception) {
-		Check.notBlank(message, "Message cannot be empty");
-		Check.notNull(exception, "Exception cannot be null");
-		LOGGER.debug("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
-		final CDialogMessageWithDetails dialog = new CDialogMessageWithDetails(message, exception);
-		dialog.open();
-	}
-
 	/** Shows a confirmation dialog (modal with Yes/No buttons)
 	 * @throws Exception */
 	public static void showConfirmationDialog(final String message, final Runnable onConfirm) throws Exception {
@@ -69,7 +57,8 @@ public class CNotificationService {
 	}
 
 	/** Shows a custom notification with specified duration and position */
-	public static void showCustom(final String message, final int durationMs, final Notification.Position position, final NotificationVariant... variants) {
+	public static void showCustom(final String message, final int durationMs, final Notification.Position position,
+			final NotificationVariant... variants) {
 		Check.notBlank(message, "Custom message cannot be empty");
 		Check.notNull(position, "Position cannot be null");
 		LOGGER.debug("Showing custom notification: {} at {} for {}ms", message, position, durationMs);
@@ -113,6 +102,18 @@ public class CNotificationService {
 		dialog.open();
 	}
 
+	/** Shows a message with expandable exception details (modal with Details toggle and OK button). The dialog displays a user-friendly message and
+	 * allows users to expand/collapse technical exception details.
+	 * @param message   The user-friendly message to display
+	 * @param exception The exception whose details can be expanded */
+	public static void showException(final String message, final Exception exception) {
+		Check.notBlank(message, "Message cannot be empty");
+		Check.notNull(exception, "Exception cannot be null");
+		LOGGER.debug("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
+		final CDialogMessageWithDetails dialog = new CDialogMessageWithDetails(message, exception);
+		dialog.open();
+	}
+
 	/** Shows an info notification toast (blue, bottom-start, medium duration) */
 	public static void showInfo(final String message) {
 		Check.notBlank(message, "Info message cannot be empty");
@@ -147,7 +148,7 @@ public class CNotificationService {
 	/** Shows a success notification toast (green, bottom-start, short duration) */
 	public static void showSuccess(final String message) {
 		Check.notBlank(message, "Success message cannot be empty");
-		LOGGER.debug("Showing success notification: {}", message);
+		// LOGGER.debug("Showing success notification: {}", message);
 		final Notification notification = Notification.show(message, SHORT_DURATION, Notification.Position.BOTTOM_START);
 		notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 	}

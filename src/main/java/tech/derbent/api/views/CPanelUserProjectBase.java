@@ -134,12 +134,12 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	}
 
 	protected void setupGrid() {
-		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getId).setAutoWidth(true), "ID");
+		grid.addColumn(CUserProjectSettings::getId, "ID", "id");
 		CGrid.styleColumnHeader(grid.addComponentColumn(settings -> CLabelEntity.createUserLabel(settings.getUser())).setAutoWidth(true), "User");
 		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getProjectName).setAutoWidth(true).setSortable(true), "Project Name");
 		CGrid.styleColumnHeader(grid.addColumn(this::getPermissionAsString).setAutoWidth(true), "Permission");
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-		GridSingleSelectionModel<CUserProjectSettings> sm = (GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();
+		final GridSingleSelectionModel<CUserProjectSettings> sm = (GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();
 		sm.setDeselectAllowed(false);
 		addToContent(grid);
 	}

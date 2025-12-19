@@ -320,9 +320,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				// Add at end of target sprint
 				final int newOrder = getNextSprintItemOrderForSprint(targetSprint);
 				draggedItem.setItemOrder(newOrder);
-				LOGGER.debug("Sprint item {} moved to sprint {} with order {}", draggedItem.getId(), targetSprint.getId(), newOrder);
+				// LOGGER.debug("Sprint item {} moved to sprint {} with order {}", draggedItem.getId(), targetSprint.getId(), newOrder);
 			} else {
-				LOGGER.debug("Sprint item {} already in sprint {}, no change needed", draggedItem.getId(), targetSprint.getId());
+				LOGGER.warn("Sprint item {} already in sprint {}, no change needed", draggedItem.getId(), targetSprint.getId());
 			}
 			// Save the updated item
 			sprintItemService.save(draggedItem);

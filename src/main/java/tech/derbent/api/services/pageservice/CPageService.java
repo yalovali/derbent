@@ -40,11 +40,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	// Custom components registered for method binding (outside of FormBuilder)
 	private final Map<String, Component> customComponents = new HashMap<>();
 	protected CDetailsBuilder detailsBuilder = null;
+	private final Map<String, ComponentEventListener<CDragEndEvent>> dragEndListenerRegistry = new HashMap<>();
+	private final Map<String, ComponentEventListener<CDragStartEvent>> dragStartListenerRegistry = new HashMap<>();
+	private final Map<String, ComponentEventListener<CDragDropEvent>> dropListenerRegistry = new HashMap<>();
 	private EntityClass previousEntity;
 	private final IPageServiceImplementer<EntityClass> view;
-	private final Map<String, ComponentEventListener<CDragDropEvent>> dropListenerRegistry = new HashMap<>();
-	private final Map<String, ComponentEventListener<CDragStartEvent>> dragStartListenerRegistry = new HashMap<>();
-	private final Map<String, ComponentEventListener<CDragEndEvent>> dragEndListenerRegistry = new HashMap<>();
 
 	public CPageService(final IPageServiceImplementer<EntityClass> view) {
 		this.view = view;
@@ -328,9 +328,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
 			return event -> {
 				try {
-					LOGGER.info("[DragDebug] Drop event received, invoking {}", methodName);
+					// LOGGER.info("[DragDebug] Drop event received, invoking {}", methodName);
 					method.invoke(this, component, event);
-					LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
+					// LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
 				} catch (final Exception ex) {
 					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
 				}

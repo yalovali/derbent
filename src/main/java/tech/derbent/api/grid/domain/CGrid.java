@@ -36,6 +36,7 @@ import com.vaadin.flow.function.ValueProvider;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
@@ -367,7 +368,16 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		return addCustomColumn(valueProvider, header, WIDTH_ID, key, 0);
+		final Column<EntityClass> column = addComponentColumn(entity -> {
+			final Object idValue = valueProvider.apply(entity);
+			final CEntityDB<?> entityDb = entity instanceof CEntityDB ? (CEntityDB<?>) entity : null;
+			return new CComponentId(entityDb, idValue);
+		}).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true).setResizable(true);
+		if (key != null) {
+			column.setKey(key);
+		}
+		column.setComparator((entity1, entity2) -> compareIds(valueProvider.apply(entity1), valueProvider.apply(entity2)));
+		return styleColumnHeader(column, header);
 	}
 
 	/** Adds an image column with circular styling for profile pictures.
@@ -485,7 +495,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
-		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
+		// LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 	}
 
 	@Override
@@ -604,7 +614,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	private ComponentEventListener<GridDragStartEvent<EntityClass>> on_grid_dragStart() {
 		return event -> {
 			try {
-				LOGGER.debug("Handling grid drop start for grid id: {}", getId());
+				// LOGGER.debug("Handling grid drop start for grid id: {}", getId());
 				final List<Object> draggedItems = new ArrayList<>(event.getDraggedItems());
 				final CDragStartEvent dragStartEvent = new CDragStartEvent(this, draggedItems, true);
 				notifyEvents(dragStartEvent);
@@ -674,5 +684,34 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public void setRefreshConsumer(final Consumer<CGrid<EntityClass>> refreshConsumer) {
 		Check.notNull(refreshConsumer, "Refresh consumer cannot be null");
 		this.refreshConsumer = refreshConsumer;
+	}
+
+	private int compareIds(final Object left, final Object right) {
+		final Long leftId = normalizeId(left);
+		final Long rightId = normalizeId(right);
+		if (leftId == null && rightId == null) {
+			return 0;
+		}
+		if (leftId == null) {
+			return 1;
+		}
+		if (rightId == null) {
+			return -1;
+		}
+		return Long.compare(leftId, rightId);
+	}
+
+	private Long normalizeId(final Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof Number number) {
+			return number.longValue();
+		}
+		try {
+			return Long.parseLong(value.toString());
+		} catch (final NumberFormatException ignored) {
+			return null;
+		}
 	}
 }

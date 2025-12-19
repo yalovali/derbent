@@ -623,6 +623,18 @@ LOGGER.info("User {} created activity {}", userId, activityId);
 LOGGER.info("User " + userId + " created activity " + activityId);
 ```
 
+**Console output format (enforced)**  
+Keep console logs ANSI-colored and clickable in the IDE using the shared Spring Boot pattern (mirrored across `application*.properties`). Do not downgrade to plain text or change the color order without team approval.
+
+```
+spring.output.ansi.enabled=ALWAYS
+logging.pattern.console=%clr(%d{${LOG_DATEFORMAT_PATTERN:HH:mm:ss.S}}){magenta} %clr(${LOG_LEVEL_PATTERN:%-5.5p}) \(%clr(%file:%line){cyan}\) %clr(%msg){red} %clr(%-40.40logger{39}){cyan}%n
+logging.exception-conversion-word=%ex{short}
+```
+
+- The magenta timestamp + padded level keep alignment; the cyan `(file:line)` makes stack frame links clickable in Eclipse; the red message + cyan logger keep hot paths readable. Keep this pattern identical in every profile unless there is a compelling reason to override it locally.
+- **Method names**: Logback can add them with `%M` (e.g., place `%clr(%M){yellow}` after `%clr(%file:%line){cyan}`), but `%M` forces caller data resolution on every log line and hurts throughput. Only enable it temporarily in a dedicated debug profile when you specifically need method names.
+
 ### Dependency Injection
 
 ```java
@@ -1471,4 +1483,3 @@ public class CPageTestAuxillary extends Main {
 ```
 
 **Reference**: See `docs/testing/comprehensive-page-testing.md` for complete guide.
-

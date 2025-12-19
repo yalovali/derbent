@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.function.ValueProvider;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.utils.CAuxillaries;
 
 /** Base grid class for entity-to-entity relationships. Provides consistent styling and behavior for relationship grids.
@@ -68,8 +70,24 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 	}
 
 	/** Add an ID column with standard styling */
-	protected Column<RelationEntity> addIdColumn(final com.vaadin.flow.function.ValueProvider<RelationEntity, Long> idProvider, final String header) {
-		final var column = addColumn(idProvider).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true);
+	protected Column<RelationEntity> addIdColumn(final ValueProvider<RelationEntity, Long> idProvider, final String header) {
+		final var column =
+				addComponentColumn(entity -> new CComponentId(entity, idProvider.apply(entity))).setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true)
+						.setResizable(true);
+		column.setComparator((left, right) -> compareIds(idProvider.apply(left), idProvider.apply(right)));
 		return CGrid.styleColumnHeader(column, header);
+	}
+
+	private int compareIds(final Long left, final Long right) {
+		if (left == null && right == null) {
+			return 0;
+		}
+		if (left == null) {
+			return 1;
+		}
+		if (right == null) {
+			return -1;
+		}
+		return Long.compare(left, right);
 	}
 }

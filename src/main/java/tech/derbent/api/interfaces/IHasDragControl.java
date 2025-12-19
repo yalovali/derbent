@@ -86,7 +86,7 @@ public interface IHasDragControl {
 	private void notifyDropListeners(final CDragDropEvent event) {
 		for (final ComponentEventListener listener : drag_getDropListeners()) {
 			try {
-				LOGGER.debug("[DragDebug] {} notifying drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
+				// LOGGER.debug("[DragDebug] {} notifying drop listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
 				listener.onComponentEvent(event);
 			} catch (final Exception e) {
 				LOGGER.error("[DragDebug] Error notifying drop listener in {}: {}", getClass().getSimpleName(), e.getMessage());
