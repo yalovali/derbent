@@ -1,5 +1,7 @@
 package tech.derbent.base.setup.view;
 
+import java.util.concurrent.CompletableFuture;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -17,8 +19,10 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.theme.CFontSizeService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.domain.CSystemSettings;
 import tech.derbent.base.setup.service.CSystemSettingsService;
@@ -202,14 +206,7 @@ public class CSystemSettingsView extends CAbstractPage {
 		try {
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
-						try {
-							final CDataInitializer init = new CDataInitializer(sessionService);
-							init.reloadForced(false);
-							CNotificationService.showSuccess("Sample data yeniden yüklendi.");
-							CNotificationService.showInfoDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-						} catch (final Exception ex) {
-							CNotificationService.showException("Hata", ex);
-						}
+						runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 					});
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
@@ -220,18 +217,33 @@ public class CSystemSettingsView extends CAbstractPage {
 		try {
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
-						try {
-							final CDataInitializer init = new CDataInitializer(sessionService);
-							init.reloadForced(true);
-							CNotificationService.showSuccess("Minimum örnek veri yeniden yüklendi.");
-							CNotificationService.showInfoDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-						} catch (final Exception ex) {
-							CNotificationService.showException("Hata", ex);
-						}
+						runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.", "Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 					});
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
+	}
+
+	private void runDatabaseReset(final boolean minimal, final String successMessage, final String infoMessage) {
+		final UI ui = getUI().orElse(null);
+		Check.notNull(ui, "UI must be available to run database reset");
+		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
+		CompletableFuture.runAsync(() -> {
+			try {
+				final CDataInitializer init = new CDataInitializer(sessionService);
+				init.reloadForced(minimal);
+				ui.access(() -> {
+					progressDialog.close();
+					CNotificationService.showSuccess(successMessage);
+					CNotificationService.showInfoDialog(infoMessage);
+				});
+			} catch (final Exception ex) {
+				ui.access(() -> {
+					progressDialog.close();
+					CNotificationService.showException("Hata", ex);
+				});
+			}
+		});
 	}
 
 	/** Saves the current system settings with validation. */

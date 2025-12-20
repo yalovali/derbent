@@ -1,10 +1,12 @@
 package tech.derbent.base.login.view;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -27,6 +29,7 @@ import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
@@ -225,18 +228,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			LOGGER.info("🔄 Showing DB Full reset confirmation dialog...");
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
-						try {
-							LOGGER.info("✅ DB Full reset confirmed - starting database initialization...");
-							final CDataInitializer init = new CDataInitializer(sessionService);
-							init.reloadForced(false);
-							LOGGER.info("🗄️ DB Full reset completed successfully");
-							CNotificationService.showSuccess("Sample data yeniden yüklendi.");
-							CNotificationService.showInfoDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-							populateForm();
-						} catch (final Exception ex) {
-							LOGGER.error("❌ DB Full reset failed", ex);
-							CNotificationService.showException("Hata", ex);
-						}
+						runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 					});
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
@@ -249,21 +241,36 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
 			CNotificationService.showConfirmationDialog(
 					"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", () -> {
-						try {
-							LOGGER.info("✅ DB Min reset confirmed - starting minimal database initialization...");
-							final CDataInitializer init = new CDataInitializer(sessionService);
-							init.reloadForced(true);
-							LOGGER.info("🗄️ DB Min reset completed successfully");
-							CNotificationService.showSuccess("Minimum örnek veri yeniden yüklendi.");
-							CNotificationService.showInfoDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-							populateForm();
-						} catch (final Exception ex) {
-							LOGGER.error("❌ DB Min reset failed", ex);
-							CNotificationService.showException("Hata", ex);
-						}
+						runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.", "Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 					});
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
+	}
+
+	private void runDatabaseReset(final boolean minimal, final String successMessage, final String infoMessage) {
+		final UI ui = getUI().orElse(null);
+		Check.notNull(ui, "UI must be available to run database reset");
+		LOGGER.info("✅ DB reset confirmed - starting database initialization...");
+		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
+		CompletableFuture.runAsync(() -> {
+			try {
+				final CDataInitializer init = new CDataInitializer(sessionService);
+				init.reloadForced(minimal);
+				LOGGER.info("🗄️ DB reset completed successfully");
+				ui.access(() -> {
+					progressDialog.close();
+					CNotificationService.showSuccess(successMessage);
+					CNotificationService.showInfoDialog(infoMessage);
+					populateForm();
+				});
+			} catch (final Exception ex) {
+				LOGGER.error("❌ DB reset failed", ex);
+				ui.access(() -> {
+					progressDialog.close();
+					CNotificationService.showException("Hata", ex);
+				});
+			}
+		});
 	}
 }
