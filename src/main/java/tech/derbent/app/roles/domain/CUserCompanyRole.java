@@ -47,6 +47,10 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 		super();
 	}
 
+	public CUserCompanyRole(String name) {
+		super(CUserCompanyRole.class, name, null);
+	}
+
 	public CUserCompanyRole(String name, CCompany company) {
 		super(CUserCompanyRole.class, name, company);
 	}

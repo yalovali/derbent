@@ -261,8 +261,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				try {
 					currentSearchText = event.getSearchText();
 					refreshGrid();
-				} catch (Exception e) {
-					
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			});
@@ -301,6 +300,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	@Override
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
+	@Override
 	public Map<String, Component> getComponentMap() { return componentMap; }
 
 	@Override
@@ -338,15 +338,26 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			// --- paging
 			final int limit = query.getLimit();
 			final int offset = query.getOffset();
-			final int page = (limit > 0) ? (offset / limit) : 0;
+			final int page = limit > 0 ? offset / limit : 0;
 			final Pageable pageable = CPageableUtils.validateAndFix(PageRequest.of(page, Math.max(limit, 1), springSort));
-			final String term = (currentSearchText == null) ? "" : currentSearchText.trim();
+			final String term = currentSearchText == null ? "" : currentSearchText.trim();
 			// *** TEK KAYNAK: her zaman search'lü metodu kullan ***
-			return entityService.list(pageable, term).stream();
+			try {
+				return entityService.list(pageable, term).stream();
+			} catch (final Exception e) {
+				e.printStackTrace();
+				return java.util.Collections.<EntityClass>emptyList().stream();
+			}
 		}, e -> {
-			final String term = (currentSearchText == null) ? "" : currentSearchText.trim();
-			final long total = entityService.list(PageRequest.of(0, 1), term).getTotalElements();
-			return (int) Math.min(total, Integer.MAX_VALUE);
+			final String term = currentSearchText == null ? "" : currentSearchText.trim();
+			long total;
+			try {
+				total = entityService.list(PageRequest.of(0, 1), term).getTotalElements();
+				return (int) Math.min(total, Integer.MAX_VALUE);
+			} catch (final Exception e1) {
+				e1.printStackTrace();
+				return 0;
+			}
 		});
 	}
 
@@ -458,7 +469,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected void onSelectionChanged(final CMasterViewSectionBase.SelectionChangeEvent<EntityClass> event) {
-		final EntityClass value = (event.getSelectedItem());
+		final EntityClass value = event.getSelectedItem();
 		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
 		setCurrentEntity(value);
 		populateForm();
@@ -485,7 +496,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
 		populateAccordionPanels(value);
 		getBinder().setBean(value);
-		if ((value == null) && (masterViewSection != null)) {
+		if (value == null && masterViewSection != null) {
 			masterViewSection.select(null);
 		}
 	}
@@ -542,7 +553,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	/** Updates the split layout orientation based on the current layout mode. */
 	private void updateLayoutOrientation() {
-		if ((layoutService != null) && (splitLayout != null)) {
+		if (layoutService != null && splitLayout != null) {
 			final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
 			// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
 			if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {
@@ -578,8 +589,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				try {
 					currentSearchText = event.getSearchText();
 					refreshGrid();
-				} catch (Exception e) {
-					
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			});

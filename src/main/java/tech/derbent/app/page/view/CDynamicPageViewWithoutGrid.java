@@ -57,7 +57,6 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		
 		return null;
 	}
 
@@ -76,7 +75,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 	/** Create the page header with title and description. */
 	private void createPageHeader() {
 		// Only create header if pageTitle is not empty
-		if ((pageEntity.getPageTitle() != null) && !pageEntity.getPageTitle().trim().isEmpty()) {
+		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 			final H1 pageTitle = new H1("x:" + pageEntity.getPageTitle());
 			pageTitle.addClassNames("page-title");
 			add(pageTitle);
@@ -90,7 +89,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 			LOGGER.debug("Initializing dynamic page view for page: {}", pageEntity != null ? pageEntity.getPageTitle() : "null");
 			Check.notNull(pageEntity, "pageEntity cannot be null");
 			// setSizeFull();
-			if ((pageEntity.getPageTitle() != null) && !pageEntity.getPageTitle().trim().isEmpty()) {
+			if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 				getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
 			}
 			createPageHeader();
@@ -104,7 +103,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		}
 	}
 
-	void locateFirstEntity() {
+	void locateFirstEntity() throws Exception {
 		Check.notNull(entityService, "Entity service is not initialized");
 		entityService.findAll().stream().findFirst().ifPresent(this::setCurrentEntity);
 	}
@@ -116,31 +115,21 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityCreated(CEntityDB newEntity) throws Exception {
-		
-	}
+	public void onEntityCreated(CEntityDB newEntity) throws Exception {}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityDeleted(CEntityDB entity) throws Exception {
-		
-	}
+	public void onEntityDeleted(CEntityDB entity) throws Exception {}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {
-		
-	}
+	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntitySaved(CEntityDB savedEntity) throws Exception {
-		
-	}
+	public void onEntitySaved(CEntityDB savedEntity) throws Exception {}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void setCurrentEntity(CEntityDB entity) {
-		
-	}
+	public void setCurrentEntity(CEntityDB entity) {}
 }

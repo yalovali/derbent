@@ -23,8 +23,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			Check.notNull(getView(), "View must not be null to bind page service.");
 			super.bind();
 		} catch (final Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(),
-					CKanbanLine.class.getSimpleName(), e.getMessage());
+			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CKanbanLine.class.getSimpleName(),
+					e.getMessage());
 			throw e;
 		}
 	}

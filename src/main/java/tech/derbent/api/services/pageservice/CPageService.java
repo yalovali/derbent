@@ -368,6 +368,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	protected CDragStartEvent getActiveDragStartEvent() { return activeDragStartEvent; }
 
 	public Map<String, Component> getAllComponents() {
+		// TODO why this always generates a new map? !!!
+		// Combine components from detailsBuilder and custom registered components//
 		final Map<String, Component> allComponents = new HashMap<>();
 		// Get components from detailsBuilder's centralized map if available
 		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {

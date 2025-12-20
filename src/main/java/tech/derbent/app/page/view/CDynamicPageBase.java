@@ -54,6 +54,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 
 	/** Clear entity details and reset state. */
 	public void clearEntityDetails() {
+		LOGGER.debug("Clearing entity details");
 		if (baseDetailsLayout != null) {
 			baseDetailsLayout.removeAll();
 		}
@@ -132,9 +133,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 		}
 	}
 
-	protected void initializePage() throws Exception {
-		
-	}
+	protected void initializePage() throws Exception {}
 
 	protected abstract void locateItemById(Long pageItemId);
 
@@ -149,6 +148,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	@SuppressWarnings ("unchecked")
 	protected void rebuildEntityDetailsById(Long detailId) throws Exception {
 		try {
+			LOGGER.debug("Rebuilding entity details for view ID: {}", detailId);
 			clearEntityDetails();
 			currentEntityViewID = detailId;
 			buildScreen(currentEntityViewID, (Class) entityClass, baseDetailsLayout);

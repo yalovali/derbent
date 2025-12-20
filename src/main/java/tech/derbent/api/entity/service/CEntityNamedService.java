@@ -24,7 +24,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 
 	@Override
 	public String checkDeleteAllowed(final EntityClass entity) {
-		String superCheck = super.checkDeleteAllowed(entity);
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}
@@ -48,9 +48,9 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 
 	public String getUniqueNameFromList(String prefix, List<EntityClass> existingEntities) {
 		//
-		int maxNumber = existingEntities.stream().map(EntityClass::getName).filter(name -> name.matches(prefix + "(\\d{2})"))
+		final int maxNumber = existingEntities.stream().map(EntityClass::getName).filter(name -> name.matches(prefix + "(\\d{2})"))
 				.mapToInt(name -> Integer.parseInt(name.replaceAll(prefix, ""))).max().orElse(0);
-		return String.format(prefix + "%02d", (maxNumber + 1));
+		return String.format(prefix + "%02d", maxNumber + 1);
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 			return true;
 		}
 		// If we're updating an existing entity, check if it's the same entity
-		if ((currentId != null) && existingEntity.get().getId().equals(currentId)) {
+		if (currentId != null && existingEntity.get().getId().equals(currentId)) {
 			return true;
 		}
 		return false;
@@ -85,6 +85,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Transactional
 	public EntityClass newEntity(final String name) throws Exception {
 		try {
+			LOGGER.debug("Creating new entity instance of {} with name: {}", getEntityClass().getName(), name);
 			if ("fail".equals(name)) {
 				throw new RuntimeException("This is for testing the error handler");
 			}
@@ -93,7 +94,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 			final Object instance = getEntityClass().getDeclaredConstructor(String.class).newInstance(name.trim());
 			Check.notNull(instance, "Failed to create instance of " + getEntityClass().getName());
 			Check.instanceOf(instance, getEntityClass(), "Created object is not instance of " + getEntityClass().getName());
-			return ((EntityClass) instance);
+			return (EntityClass) instance;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating new entity instance of {}: {}", getEntityClass().getName(), e.getMessage());
 			throw e;

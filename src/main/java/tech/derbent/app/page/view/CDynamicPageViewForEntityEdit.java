@@ -38,26 +38,17 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 		try {
 			LOGGER.debug("Entity created notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(entity, "Created entity cannot be null");
-			// Rebuild details layout for the new entity if it doesn't exist yet
-			if ((currentEntityViewName == null) || (currentEntityType == null)) {
-				LOGGER.debug("Rebuilding details for newly created entity");
-				rebuildEntityDetailsById(null);
-			}
-			// Set the current entity and populate form
-			setCurrentEntity(entity);
-			populateForm();
+			onEntitySelected(entity);
 			CNotificationService.showSuccess("New " + getEntityClass().getSimpleName() + " created. Fill in the details and click Save.");
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity created notification:" + e.getMessage());
-			throw e;
+			CNotificationService.showException("Error handling entity created notification", e);
 		}
 	}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {
-		
-	}
+	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {}
 
 	protected void onEntitySelected(CEntityDB<?> selectedEntity) throws Exception {
 		try {
@@ -69,7 +60,7 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 			} else {
 				setCurrentEntity(selectedEntity);
 				// Rebuild details if VIEW_NAME changed or not yet built
-				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
+				if (currentEntityViewName == null || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
 					// rebuildEntityDetails(selectedEntity.getClass());
 					rebuildEntityDetailsById(pageEntity.getDetailSection().getId());
 				}

@@ -27,6 +27,7 @@ import tech.derbent.base.session.service.ISessionService;
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
+
 	protected final Clock clock;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final IAbstractRepository<EntityClass> repository;
@@ -131,17 +132,22 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	@PreAuthorize ("permitAll()")
-	public List<EntityClass> findAll() {
-		// Repository's findAll(Sort) automatically applies sorting at database level
-		final Sort defaultSort = getDefaultSort();
-		return repository.findAll(defaultSort);
+	public List<EntityClass> findAll() throws Exception {
+		try {
+			// Repository's findAll(Sort) automatically applies sorting at database level
+			final Sort defaultSort = getDefaultSort();
+			return repository.findAll(defaultSort);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to find all entities: {}", e.getMessage());
+			throw e;
+		}
 	}
 
 	/** Formats a Java field name into a human-readable display name. Converts camelCase to Title Case with spaces.
 	 * @param fieldName the field name to format
 	 * @return formatted display name */
 	private String formatFieldName(final String fieldName) {
-		if ((fieldName == null) || fieldName.isEmpty()) {
+		if (fieldName == null || fieldName.isEmpty()) {
 			return fieldName;
 		}
 		// Split camelCase into words
@@ -167,17 +173,20 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	/** Gets the default Sort object based on entity's default order field. Subclasses can override to customize ordering.
-	 * @return Sort object for default ordering (descending by default) */
-	protected Sort getDefaultSort() {
+	 * @return Sort object for default ordering (descending by default)
+	 * @throws Exception */
+	protected Sort getDefaultSort() throws Exception {
 		try {
+			LOGGER.debug("Determining default sort for entity: {}", getEntityClass().getSimpleName());
 			// Get a sample entity to determine default order field
 			final EntityClass sampleEntity = newEntity();
 			final String orderField = sampleEntity.getDefaultOrderBy();
-			if ((orderField != null) && !orderField.isEmpty()) {
+			if (orderField != null && !orderField.isEmpty()) {
 				return Sort.by(Sort.Direction.DESC, orderField);
 			}
 		} catch (final Exception e) {
-			LOGGER.debug("Could not determine default ordering: {}", e.getMessage());
+			LOGGER.error("Could not determine default ordering: {}", e.getMessage());
+			throw e;
 		}
 		// Fallback to ID descending
 		return Sort.by(Sort.Direction.DESC, "id");
@@ -254,20 +263,26 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	@Transactional (readOnly = true)
-	public Page<EntityClass> list(final Pageable pageable, final String searchText) {
-		LOGGER.debug("Search text: {}", searchText);
-		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		final String term = (searchText == null) ? "" : searchText.trim();
-		// For search queries, fetch all data with default sorting from database
-		final Sort defaultSort = getDefaultSort();
-		final List<EntityClass> all = repository.findAll(defaultSort);
-		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
-		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
-		// Data is already sorted by the database query, no need for additional sorting
-		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
-		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
-		final List<EntityClass> content = filtered.subList(start, end);
-		return new PageImpl<>(content, safePage, filtered.size());
+	public Page<EntityClass> list(final Pageable pageable, final String searchText) throws Exception {
+		try {
+			LOGGER.debug("Search text: {}", searchText);
+			final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+			final String term = searchText == null ? "" : searchText.trim();
+			// For search queries, fetch all data with default sorting from database
+			final Sort defaultSort = getDefaultSort();
+			final List<EntityClass> all = repository.findAll(defaultSort);
+			final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
+			final List<EntityClass> filtered =
+					term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+			// Data is already sorted by the database query, no need for additional sorting
+			final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+			final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+			final List<EntityClass> content = filtered.subList(start, end);
+			return new PageImpl<>(content, safePage, filtered.size());
+		} catch (final Exception e) {
+			LOGGER.error("Error during listing entities with search text '{}': {}", searchText, e.getMessage());
+			throw e;
+		}
 	}
 
 	public EntityClass newEntity() throws Exception {
@@ -278,7 +293,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 				throw new IllegalStateException("Created object is not instance of T");
 			}
 			@SuppressWarnings ("unchecked")
-			final EntityClass entity = ((EntityClass) instance);
+			final EntityClass entity = (EntityClass) instance;
 			return entity;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
@@ -316,19 +331,19 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		final List<String> missingFields = new ArrayList<>();
 		// Get all fields including inherited ones
 		Class<?> currentClass = entity.getClass();
-		while ((currentClass != null) && (currentClass != Object.class)) {
+		while (currentClass != null && currentClass != Object.class) {
 			for (final Field field : currentClass.getDeclaredFields()) {
 				try {
 					// Check if field has @Column annotation with nullable=false
 					final Column columnAnnotation = field.getAnnotation(Column.class);
-					if ((columnAnnotation != null) && !columnAnnotation.nullable()) {
+					if (columnAnnotation != null && !columnAnnotation.nullable()) {
 						// Make field accessible to read its value
 						field.setAccessible(true);
 						final Object value = field.get(entity);
 						if (value == null) {
 							// Get display name from @AMetaData if available
 							final AMetaData metaData = field.getAnnotation(AMetaData.class);
-							final String displayName = (metaData != null) ? metaData.displayName() : formatFieldName(field.getName());
+							final String displayName = metaData != null ? metaData.displayName() : formatFieldName(field.getName());
 							missingFields.add(displayName);
 						}
 					}
