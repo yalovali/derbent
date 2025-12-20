@@ -41,8 +41,8 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		Check.notNull(entity, "Entity cannot be null");
 		LOGGER.debug("Initializing new Kanban line");
 		setNameOfEntity(entity, "Kanban Line");
-		if (entity.getColumns() == null) {
-			entity.setColumns(new java.util.ArrayList<>());
+		if (entity.getKanbanColumns() == null) {
+			entity.setKanbanColumns(new java.util.ArrayList<>());
 		}
 	}
 }

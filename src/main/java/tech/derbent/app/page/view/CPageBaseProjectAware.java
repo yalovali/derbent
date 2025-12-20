@@ -53,7 +53,8 @@ public abstract class CPageBaseProjectAware extends CPageBase
 		LOGGER.debug("Entering Sample Page");
 	}
 
-	protected <T extends CEntityDB<?>> void buildScreen(final Long detailId, final Class<T> entityClass, final CFlexLayout detailsLayout) {
+	protected <T extends CEntityDB<?>> void buildScreen(final Long detailId, final Class<T> entityClass, final CFlexLayout detailsLayout)
+			throws Exception {
 		try {
 			LOGGER.debug("Building screen '{}' for entity type: {}", detailId, entityClass.getSimpleName());
 			detailsLayout.removeAll();
@@ -70,10 +71,8 @@ public abstract class CPageBaseProjectAware extends CPageBase
 			}
 			detailsBuilder.buildDetails(this, screen, currentBinder, detailsLayout);
 		} catch (final Exception e) {
-			final String errorMsg = "Error building details layout for screen: " + detailId;
 			LOGGER.error("Error building details layout for screen '{}': {}", detailId, e.getMessage());
-			detailsLayout.add(new CDiv(errorMsg));
-			currentBinder = null; // Clear binder on error
+			throw e;
 		}
 	}
 

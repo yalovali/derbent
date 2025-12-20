@@ -153,6 +153,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 			currentEntityViewID = detailId;
 			buildScreen(currentEntityViewID, (Class) entityClass, baseDetailsLayout);
 			pageService.bind();
+			currentEntityViewName = (String) entityClass.getField("VIEW_NAME").get(null);
 		} catch (final Exception e) {
 			LOGGER.error("Error rebuilding entity details for view '{}': {}", detailId, e.getMessage());
 			throw e;

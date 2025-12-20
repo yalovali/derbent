@@ -56,17 +56,13 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 			if (selectedEntity == null) {
 				// No selection - clear details
 				clearEntityDetails();
-				populateForm();
 			} else {
-				setCurrentEntity(selectedEntity);
 				// Rebuild details if VIEW_NAME changed or not yet built
 				if (currentEntityViewName == null || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
-					// rebuildEntityDetails(selectedEntity.getClass());
 					rebuildEntityDetailsById(pageEntity.getDetailSection().getId());
 				}
-				// Always attempt to populate form, even if rebuild failed
-				populateForm();
 			}
+			populateForm();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error handling entity selection", e);
 		}

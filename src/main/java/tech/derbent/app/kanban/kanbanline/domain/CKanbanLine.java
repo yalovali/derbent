@@ -30,7 +30,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 			displayName = "Columns", required = false, readOnly = false, defaultValue = "", description = "Columns that belong to this Kanban line",
 			hidden = false
 	)
-	private List<CKanbanColumn> columns = new ArrayList<>();
+	private List<CKanbanColumn> kanbanColumns = new ArrayList<>();
 
 	/** Default constructor for JPA */
 	public CKanbanLine() {
@@ -43,38 +43,38 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		initializeDefaults();
 	}
 
-	public void addColumn(final CKanbanColumn column) {
+	public void addKanbanColumn(final CKanbanColumn column) {
 		Check.notNull(column, "Column cannot be null");
 		column.setKanbanLine(this);
-		columns.add(column);
+		kanbanColumns.add(column);
 		updateLastModified();
 	}
 
-	public List<CKanbanColumn> getColumns() { return columns; }
+	public List<CKanbanColumn> getKanbanColumns() { return kanbanColumns; }
 
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (columns == null) {
-			columns = new ArrayList<>();
+		if (kanbanColumns == null) {
+			kanbanColumns = new ArrayList<>();
 		}
 	}
 
-	public void removeColumn(final CKanbanColumn column) {
-		if ((column == null) || columns.isEmpty()) {
+	public void removeKanbanColumn(final CKanbanColumn column) {
+		if ((column == null) || kanbanColumns.isEmpty()) {
 			return;
 		}
-		if (columns.remove(column)) {
+		if (kanbanColumns.remove(column)) {
 			column.setKanbanLine(null);
 			updateLastModified();
 		}
 	}
 
-	public void setColumns(final List<CKanbanColumn> columns) {
+	public void setKanbanColumns(final List<CKanbanColumn> columns) {
 		Check.notNull(columns, "Columns collection cannot be null");
-		this.columns.clear();
+		this.kanbanColumns.clear();
 		for (final CKanbanColumn column : columns) {
-			addColumn(column);
+			addKanbanColumn(column);
 		}
 	}
 }
