@@ -32,7 +32,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	)
 	private List<CKanbanColumn> columns = new ArrayList<>();
 
-	/** Default constructor for JPA. */
+	/** Default constructor for JPA */
 	public CKanbanLine() {
 		super();
 		initializeDefaults();
