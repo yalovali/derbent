@@ -13,7 +13,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -32,7 +34,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "columns"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "kanbanColumns"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
@@ -67,6 +69,19 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeCompanyEntity(sampleLines, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
-				company, minimal, null);
+				company, minimal, (entity, index) -> {
+					Check.instanceOf(entity, CKanbanLine.class, "Expected Kanban line for column initialization");
+					final CKanbanLine line = (CKanbanLine) entity;
+					if (index == 0) {
+						line.addKanbanColumn(new CKanbanColumn("Backlog", line));
+						line.addKanbanColumn(new CKanbanColumn("In Progress", line));
+						line.addKanbanColumn(new CKanbanColumn("Done", line));
+					} else {
+						line.addKanbanColumn(new CKanbanColumn("To Do", line));
+						line.addKanbanColumn(new CKanbanColumn("Doing", line));
+						line.addKanbanColumn(new CKanbanColumn("Review", line));
+						line.addKanbanColumn(new CKanbanColumn("Done", line));
+					}
+				});
 	}
 }

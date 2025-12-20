@@ -42,7 +42,7 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		LOGGER.debug("Initializing new Kanban line");
 		setNameOfEntity(entity, "Kanban Line");
 		if (entity.getKanbanColumns() == null) {
-			entity.setKanbanColumns(new java.util.ArrayList<>());
+			entity.setKanbanColumns(new java.util.LinkedHashSet<>());
 		}
 	}
 }

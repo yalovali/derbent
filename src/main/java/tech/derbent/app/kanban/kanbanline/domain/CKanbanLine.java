@@ -1,14 +1,14 @@
 package tech.derbent.app.kanban.kanbanline.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderColumn;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
@@ -25,12 +25,12 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	public static final String ENTITY_TITLE_SINGULAR = "Kanban Line";
 	public static final String VIEW_NAME = "Kanban Lines View";
 	@OneToMany (mappedBy = "kanbanLine", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@OrderColumn (name = "column_order")
+	@OrderBy ("itemOrder ASC")
 	@AMetaData (
 			displayName = "Columns", required = false, readOnly = false, defaultValue = "", description = "Columns that belong to this Kanban line",
-			hidden = false
+			hidden = false, createComponentMethod = "createKanbanColumnsComponent", dataProviderBean = "view", captionVisible = false
 	)
-	private List<CKanbanColumn> kanbanColumns = new ArrayList<>();
+	private Set<CKanbanColumn> kanbanColumns = new LinkedHashSet<>();
 
 	/** Default constructor for JPA */
 	public CKanbanLine() {
@@ -45,32 +45,40 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 
 	public void addKanbanColumn(final CKanbanColumn column) {
 		Check.notNull(column, "Column cannot be null");
+		if (column.getItemOrder() == null || column.getItemOrder() <= 0) {
+			column.setItemOrder(getNextKanbanColumnOrder());
+		}
 		column.setKanbanLine(this);
 		kanbanColumns.add(column);
 		updateLastModified();
 	}
 
-	public List<CKanbanColumn> getKanbanColumns() { return kanbanColumns; }
+	public Set<CKanbanColumn> getKanbanColumns() { return kanbanColumns; }
+
+	private Integer getNextKanbanColumnOrder() {
+		if (kanbanColumns == null || kanbanColumns.isEmpty()) {
+			return 1;
+		}
+		return kanbanColumns.stream().map(CKanbanColumn::getItemOrder).filter(order -> order != null).mapToInt(Integer::intValue).max().orElse(0) + 1;
+	}
 
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 		if (kanbanColumns == null) {
-			kanbanColumns = new ArrayList<>();
+			kanbanColumns = new LinkedHashSet<>();
 		}
 	}
 
 	public void removeKanbanColumn(final CKanbanColumn column) {
-		if ((column == null) || kanbanColumns.isEmpty()) {
-			return;
-		}
+		Check.notNull(column, "Column cannot be null");
 		if (kanbanColumns.remove(column)) {
 			column.setKanbanLine(null);
 			updateLastModified();
 		}
 	}
 
-	public void setKanbanColumns(final List<CKanbanColumn> columns) {
+	public void setKanbanColumns(final Set<CKanbanColumn> columns) {
 		Check.notNull(columns, "Columns collection cannot be null");
 		this.kanbanColumns.clear();
 		for (final CKanbanColumn column : columns) {
