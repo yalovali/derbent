@@ -19,14 +19,13 @@ import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
 public class CKanbanLineInitializerService extends CInitializerServiceBase {
-
 	private static final Class<?> clazz = CKanbanLine.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanLineInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".90";
 	private static final String menuTitle = MenuTitle_SETUP + ".Kanban Lines";
 	private static final String pageDescription = "Kanban line definitions and their columns";
 	private static final String pageTitle = "Kanban Lines";
-	private static final boolean showInQuickToolbar = false;
+	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
@@ -34,7 +33,6 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "columns"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));

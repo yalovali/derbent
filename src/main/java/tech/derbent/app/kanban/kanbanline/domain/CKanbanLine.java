@@ -19,9 +19,8 @@ import tech.derbent.app.companies.domain.CCompany;
 @Table (name = "ckanbanline")
 @AttributeOverride (name = "id", column = @Column (name = "kanban_line_id"))
 public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
-
 	public static final String DEFAULT_COLOR = "#4DB6AC"; // Bold teal for Kanban headers
-	public static final String DEFAULT_ICON = "vaadin:columns";
+	public static final String DEFAULT_ICON = "vaadin:barcode";
 	public static final String ENTITY_TITLE_PLURAL = "Kanban Lines";
 	public static final String ENTITY_TITLE_SINGULAR = "Kanban Line";
 	public static final String VIEW_NAME = "Kanban Lines View";
@@ -44,6 +43,13 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		initializeDefaults();
 	}
 
+	public void addColumn(final CKanbanColumn column) {
+		Check.notNull(column, "Column cannot be null");
+		column.setKanbanLine(this);
+		columns.add(column);
+		updateLastModified();
+	}
+
 	public List<CKanbanColumn> getColumns() { return columns; }
 
 	@Override
@@ -54,21 +60,6 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		}
 	}
 
-	public void setColumns(final List<CKanbanColumn> columns) {
-		Check.notNull(columns, "Columns collection cannot be null");
-		this.columns.clear();
-		for (final CKanbanColumn column : columns) {
-			addColumn(column);
-		}
-	}
-
-	public void addColumn(final CKanbanColumn column) {
-		Check.notNull(column, "Column cannot be null");
-		column.setKanbanLine(this);
-		columns.add(column);
-		updateLastModified();
-	}
-
 	public void removeColumn(final CKanbanColumn column) {
 		if ((column == null) || columns.isEmpty()) {
 			return;
@@ -76,6 +67,14 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		if (columns.remove(column)) {
 			column.setKanbanLine(null);
 			updateLastModified();
+		}
+	}
+
+	public void setColumns(final List<CKanbanColumn> columns) {
+		Check.notNull(columns, "Columns collection cannot be null");
+		this.columns.clear();
+		for (final CKanbanColumn column : columns) {
+			addColumn(column);
 		}
 	}
 }

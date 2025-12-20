@@ -15,14 +15,13 @@ import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
-
 	static final Class<?> clazz = CCompany.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
 	private static final String menuTitle = MenuTitle_SYSTEM + ".Companies";
 	private static final String pageDescription = "Company management with contact details";
 	private static final String pageTitle = "Company Management";
-	private static final boolean showInQuickToolbar = true;
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
@@ -41,18 +40,15 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyLogoUrl"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryColor"));
 			// Business Operations
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Business Operations"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursStart"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursEnd"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTimezone"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultLanguage"));
 			// Notification Settings
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Notification Settings"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableNotifications"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notificationEmail"));
-   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

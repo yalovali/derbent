@@ -25,7 +25,6 @@ import tech.derbent.base.users.service.CUserService;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
-
 	static final Class<?> clazz = CSprint.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".3";
@@ -119,7 +118,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
 		try {
-			LOGGER.debug("Initializing sample sprints for project: {}", project.getName());
+			// LOGGER.debug("Initializing sample sprints for project: {}", project.getName());
 			// Get services
 			final CSprintService sprintService = CSpringContext.getBean(CSprintService.class);
 			final CSprintTypeService sprintTypeService = CSpringContext.getBean(CSprintTypeService.class);
@@ -152,7 +151,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 					sprint.addItem(meeting);
 				}
 				sprintService.save(sprint);
-				LOGGER.debug("Created sample sprint: {} with {} items", sprint.getName(), sprint.getItemCount());
+				// LOGGER.debug("Created sample sprint: {} with {} items", sprint.getName(), sprint.getItemCount());
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample sprints", e);

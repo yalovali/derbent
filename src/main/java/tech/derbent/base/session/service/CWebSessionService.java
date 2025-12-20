@@ -31,7 +31,6 @@ import tech.derbent.base.users.service.IUserRepository;
 @ConditionalOnWebApplication
 @Profile ("!reset-db")
 public class CWebSessionService implements ISessionService {
-
 	// private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
 	private static final String ACTIVE_ID_KEY = "activeId";
@@ -162,7 +161,7 @@ public class CWebSessionService implements ISessionService {
 		// Get current company from session
 		final CCompany currentCompany = getCurrentCompany();
 		if (currentCompany != null) {
-			LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
+			// LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 			// change this to findByUserId if you want to filter by user as well
 			return projectRepository.findByCompanyId(currentCompany.getId());
 		}
@@ -329,10 +328,10 @@ public class CWebSessionService implements ISessionService {
 		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		if (project == null && getActiveProject().orElse(null) == null) {
+		if ((project == null) && (getActiveProject().orElse(null) == null)) {
 			return;
 		}
-		if (project != null && getActiveProject().orElse(null) != null && project.getId().equals(getActiveProject().orElse(null).getId())) {
+		if ((project != null) && (getActiveProject().orElse(null) != null) && project.getId().equals(getActiveProject().orElse(null).getId())) {
 			// LOGGER.debug("setActiveProject called with same project, no action taken");
 			return;
 		}

@@ -3,11 +3,11 @@ package tech.derbent.api.interfaces;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 public interface IFieldInfoGenerator {
-
 	Logger LOGGER = LoggerFactory.getLogger(IFieldInfoGenerator.class);
 	Map<String, EntityFieldInfo> mapFieldInfos = null;
 
@@ -23,7 +23,7 @@ public interface IFieldInfoGenerator {
 	default void initFieldInfos() {
 		try {
 			for (final var field : getClassName().getDeclaredFields()) {
-				final var meta = field.getAnnotation(tech.derbent.api.annotations.AMetaData.class);
+				final var meta = field.getAnnotation(AMetaData.class);
 				if (meta != null) {
 					final EntityFieldInfo info = CEntityFieldService.createFieldInfo(meta);
 					mapFieldInfos.put(field.getName(), info);

@@ -27,7 +27,6 @@ import tech.derbent.base.session.service.ISessionService;
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
-
 	protected final Clock clock;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final IAbstractRepository<EntityClass> repository;
@@ -174,7 +173,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			// Get a sample entity to determine default order field
 			final EntityClass sampleEntity = newEntity();
 			final String orderField = sampleEntity.getDefaultOrderBy();
-			if (orderField != null && !orderField.isEmpty()) {
+			if ((orderField != null) && !orderField.isEmpty()) {
 				return Sort.by(Sort.Direction.DESC, orderField);
 			}
 		} catch (final Exception e) {
@@ -240,7 +239,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {
-		LOGGER.debug("Listing entities without filter specification");
+		// LOGGER.debug("Listing entities without filter specification");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final Page<EntityClass> entities = repository.findAll(safePage);
 		return entities;
