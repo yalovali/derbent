@@ -9,6 +9,7 @@ import tech.derbent.api.ui.dialogs.CDialogConfirmation;
 import tech.derbent.api.ui.dialogs.CDialogException;
 import tech.derbent.api.ui.dialogs.CDialogInformation;
 import tech.derbent.api.ui.dialogs.CDialogMessageWithDetails;
+import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.dialogs.CDialogWarning;
 import tech.derbent.api.utils.Check;
 
@@ -172,5 +173,14 @@ public class CNotificationService {
 		LOGGER.debug("Showing warning dialog: {}", message);
 		final CDialogWarning dialog = new CDialogWarning(message);
 		dialog.open();
+	}
+
+	public static CDialogProgress showProgressDialog(final String title, final String message) {
+		Check.notBlank(title, "Progress dialog title cannot be empty");
+		Check.notBlank(message, "Progress dialog message cannot be empty");
+		LOGGER.debug("Showing progress dialog: {}", title);
+		final CDialogProgress dialog = new CDialogProgress(title, message);
+		dialog.open();
+		return dialog;
 	}
 }
