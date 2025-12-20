@@ -2,18 +2,35 @@ package tech.derbent.app.kanban.kanbanline.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
+import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceKanbanLine.class);
 	private static final long serialVersionUID = 1L;
+	private CComponentListKanbanColumns componentKanbanColumns;
+	private CKanbanColumnService kanbanColumnService;
 
 	public CPageServiceKanbanLine(final IPageServiceImplementer<CKanbanLine> view) {
 		super(view);
+		try {
+			kanbanColumnService = CSpringContext.getBean(CKanbanColumnService.class);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to initialize CKanbanColumnService", e);
+		}
+	}
+
+	public CComponentListKanbanColumns createKanbanColumnsComponent() {
+		if (componentKanbanColumns == null) {
+			componentKanbanColumns = new CComponentListKanbanColumns(kanbanColumnService);
+			componentKanbanColumns.registerWithPageService(this);
+		}
+		return componentKanbanColumns;
 	}
 
 	@Override
