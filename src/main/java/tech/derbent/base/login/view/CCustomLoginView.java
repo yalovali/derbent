@@ -23,6 +23,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import tech.derbent.api.config.CDataInitializer;
@@ -251,12 +252,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private void runDatabaseReset(final boolean minimal, final String successMessage, final String infoMessage) {
 		final UI ui = getUI().orElse(null);
 		Check.notNull(ui, "UI must be available to run database reset");
+		final VaadinSession session = ui.getSession();
+		Check.notNull(session, "Vaadin session must not be null");
 		LOGGER.info("✅ DB reset confirmed - starting database initialization...");
 		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
 		CompletableFuture.runAsync(() -> {
 			try {
-				final CDataInitializer init = new CDataInitializer(sessionService);
-				init.reloadForced(minimal);
+				runDatabaseResetInSession(session, ui, minimal);
 				LOGGER.info("🗄️ DB reset completed successfully");
 				ui.access(() -> {
 					progressDialog.close();
@@ -272,5 +274,19 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				});
 			}
 		});
+	}
+
+	private void runDatabaseResetInSession(final VaadinSession session, final UI ui, final boolean minimal) throws Exception {
+		session.lock();
+		try {
+			VaadinSession.setCurrent(session);
+			UI.setCurrent(ui);
+			final CDataInitializer init = new CDataInitializer(sessionService);
+			init.reloadForced(minimal);
+		} finally {
+			UI.setCurrent(null);
+			VaadinSession.setCurrent(null);
+			session.unlock();
+		}
 	}
 }
