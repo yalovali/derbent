@@ -121,6 +121,22 @@ binder.writeBeanIfValid(relation);  // Automatically saves selected roles
 | Annotation | `useGridSelection = true` | `useDualListSelector = true` |
 | UI complexity | Simple | Complex |
 
+## Relation Component Selection Guide
+
+Use this matrix when choosing a component for list/set relationships so the UI matches the data model.
+
+| Relation requirement | Recommended component | Metadata trigger | Notes |
+|----------------------|-----------------------|------------------|-------|
+| Unordered multi-select | `CComponentListSelection` | `useGridSelection = true` | Best for status lists or tag-like relations. |
+| Ordered multi-select | `CComponentFieldSelection` | `useDualListSelector = true` | Preserves ordering via add/remove + up/down. |
+| Small multi-select (no ordering) | `MultiSelectComboBox` | Default for List/Set with data provider | Use when options are few and fit in a dropdown. |
+| Single selection | `ComboBox` | Default for entity fields | Prefer for 1:1 or many-to-one relationships. |
+
+### Quick Rules
+- If the relationship **requires ordering**, use `CComponentFieldSelection`.
+- If the relationship **does not require ordering** but needs easy toggling, use `CComponentListSelection`.
+- If the relationship **has few options**, a `MultiSelectComboBox` is acceptable.
+
 ## Advanced Configuration
 
 ### Custom Item Label Generator
