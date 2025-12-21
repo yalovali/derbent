@@ -7,15 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entity.domain.CEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.grid.view.CLabelEntity;
-import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.Check;
@@ -25,7 +20,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
 /** CComponentKanbanBoard - Displays a kanban line as a board with vertical columns and post-it style project items. */
-public class CComponentKanbanBoard extends CVerticalLayout implements HasValue<HasValue.ValueChangeEvent<CEntity>, CEntity> {
+public class CComponentKanbanBoard extends CVerticalLayout implements HasValue<HasValue.ValueChangeEvent<CKanbanLine>, CKanbanLine> {
 
 	private static final long serialVersionUID = 1L;
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
@@ -34,9 +29,11 @@ public class CComponentKanbanBoard extends CVerticalLayout implements HasValue<H
 	private List<CProjectItem<?>> allProjectItems;
 	private List<CProjectItem<?>> projectItems;
 	private final ISessionService sessionService;
+	private final List<HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<CKanbanLine>>> valueChangeListeners = new ArrayList<>();
+	private boolean readOnly;
+	private boolean requiredIndicatorVisible;
 
 	public CComponentKanbanBoard() {
-		Check.notNull(kanbanLine, "Kanban line cannot be null for board component");
 		sessionService = CSpringContext.getBean(ISessionService.class);
 		Check.notNull(sessionService, "Session service cannot be null for Kanban board");
 		allProjectItems = new ArrayList<>();
@@ -50,10 +47,10 @@ public class CComponentKanbanBoard extends CVerticalLayout implements HasValue<H
 		setPadding(true);
 		setSpacing(true);
 		add(filterToolbar, layoutColumns);
-		applyFilters();
 	}
 
 	private void applyFilters() {
+		Check.notNull(kanbanLine, "Kanban line must be set before applying filters");
 		final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
 		final List<CProjectItem<?>> filtered = new ArrayList<>();
 		for (final CProjectItem<?> item : allProjectItems) {
@@ -70,47 +67,6 @@ public class CComponentKanbanBoard extends CVerticalLayout implements HasValue<H
 		}
 		projectItems = filtered;
 		refreshComponent();
-	}
-
-	private CHorizontalLayout buildColumnHeader(final CKanbanColumn column) {
-		final CHorizontalLayout headerLayout = new CHorizontalLayout();
-		headerLayout.setWidthFull();
-		headerLayout.setSpacing(true);
-		final CH3 title = new CH3(column.getName());
-		title.getStyle().set("margin", "0");
-		headerLayout.add(title);
-		if (column.getDefaultColumn()) {
-			final Span defaultBadge = new Span("Default");
-			defaultBadge.getStyle().set("background-color", "#E3F2FD").set("color", "#0D47A1").set("padding", "2px 6px").set("border-radius", "6px")
-					.set("font-size", "10px").set("font-weight", "600");
-			headerLayout.add(defaultBadge);
-		}
-		return headerLayout;
-	}
-
-	private Component buildColumnLayout(final CKanbanColumn column, final List<CProjectItem<?>> items) {
-		final CVerticalLayout columnLayout = new CVerticalLayout();
-		columnLayout.setPadding(true);
-		columnLayout.setSpacing(true);
-		columnLayout.setWidth("280px");
-		columnLayout.getStyle().set("background-color", "#F5F5F5").set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
-		columnLayout.add(buildColumnHeader(column));
-		if (column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
-			final String statuses = column.getIncludedStatuses().stream().filter(Objects::nonNull).map(status -> status.getName())
-					.filter(name -> name != null && !name.isBlank()).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", "));
-			if (!statuses.isBlank()) {
-				final CLabelEntity statusesLabel = new CLabelEntity();
-				statusesLabel.setText(statuses);
-				statusesLabel.getStyle().set("font-size", "11px").set("color", "#666");
-				columnLayout.add(statusesLabel);
-			}
-		}
-		if (items != null) {
-			for (final CProjectItem<?> item : items) {
-				columnLayout.add(new CComponentPostit(item));
-			}
-		}
-		return columnLayout;
 	}
 
 	private Map<Long, CKanbanColumn> buildStatusToColumnMap(final List<CKanbanColumn> columns) {
@@ -182,7 +138,7 @@ public class CComponentKanbanBoard extends CVerticalLayout implements HasValue<H
 			}
 		}
 		for (final CKanbanColumn column : columns) {
-			layoutColumns.add(buildColumnLayout(column, itemsByColumn.get(column)));
+			layoutColumns.add(new CComponentKanbanColumn(column, itemsByColumn.get(column)));
 		}
 	}
 
@@ -204,9 +160,67 @@ public class CComponentKanbanBoard extends CVerticalLayout implements HasValue<H
 	}
 
 	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
+		Check.notNull(kanbanLine, "Kanban line must be set before setting project items");
 		Check.notNull(projectItems, "Project items cannot be null for kanban board");
 		allProjectItems = new ArrayList<>(projectItems);
 		filterToolbar.setAvailableItems(allProjectItems);
 		applyFilters();
+	}
+
+	@Override
+	public Registration addValueChangeListener(final HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<CKanbanLine>> listener) {
+		Check.notNull(listener, "ValueChangeListener cannot be null");
+		valueChangeListeners.add(listener);
+		return () -> valueChangeListeners.remove(listener);
+	}
+
+	@Override
+	public CKanbanLine getValue() { return kanbanLine; }
+
+	@Override
+	public boolean isEmpty() { return kanbanLine == null; }
+
+	@Override
+	public boolean isReadOnly() { return readOnly; }
+
+	@Override
+	public boolean isRequiredIndicatorVisible() { return requiredIndicatorVisible; }
+
+	@Override
+	public void setReadOnly(final boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
+	@Override
+	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
+		this.requiredIndicatorVisible = requiredIndicatorVisible;
+	}
+
+	@Override
+	public void setValue(final CKanbanLine value) {
+		Check.notNull(value, "Kanban line cannot be null");
+		final CKanbanLine oldValue = kanbanLine;
+		setKanbanLine(value);
+		if (!Objects.equals(oldValue, value)) {
+			final HasValue.ValueChangeEvent<CKanbanLine> event = new HasValue.ValueChangeEvent<CKanbanLine>() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public HasValue<?, CKanbanLine> getHasValue() { return CComponentKanbanBoard.this; }
+
+				@Override
+				public CKanbanLine getOldValue() { return oldValue; }
+
+				@Override
+				public CKanbanLine getValue() { return value; }
+
+				@Override
+				public boolean isFromClient() { return false; }
+			};
+			for (final HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<CKanbanLine>> listener : valueChangeListeners) {
+				listener.valueChanged(event);
+			}
+		}
 	}
 }

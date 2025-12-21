@@ -41,9 +41,12 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	}
 
 	public CComponentKanbanBoard createKanbanBoardComponent() {
+		final CKanbanLine currentLine = getView().getCurrentEntity();
+		Check.notNull(currentLine, "Kanban line must be available to create board component");
 		if (componentKanbanBoard == null) {
 			componentKanbanBoard = new CComponentKanbanBoard();
 		}
+		componentKanbanBoard.setValue(currentLine);
 		return componentKanbanBoard;
 	}
 
