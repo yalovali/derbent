@@ -21,6 +21,7 @@ import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
 public class CKanbanLineInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CKanbanLine.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanLineInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".90";
@@ -52,12 +53,36 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
+	private static CDetailSection createKanbanView(final CProject project) throws Exception {
+		try {
+			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+			detailSection.addScreenLine(CDetailLinesService.createSection("Kanban Board"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "kanbanBoard"));
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "kanbanColumns"));
+			return detailSection;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating Kanban line view.");
+			throw e;
+		}
+	}
+
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+		final CDetailSection kanbanDetailSection = createKanbanView(project);
+		final CGridEntity kanbanGrid = createGridEntity(project);
+		kanbanDetailSection.setName("Kanban Board Section");
+		kanbanGrid.setName("Kanban Board Grid");
+		kanbanGrid.setAttributeNone(true);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, kanbanDetailSection, kanbanGrid,
+				menuTitle + " (Kanban Board View)", pageTitle + " (Kanban Board View)", pageDescription + " (Kanban Board View)", true,
+				menuOrder + ".1");
 	}
 
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {

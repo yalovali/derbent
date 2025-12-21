@@ -3,6 +3,7 @@ package tech.derbent.api.ui.notifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import tech.derbent.api.ui.dialogs.CDialogConfirmation;
@@ -111,6 +112,7 @@ public class CNotificationService {
 		Check.notBlank(message, "Message cannot be empty");
 		Check.notNull(exception, "Exception cannot be null");
 		LOGGER.debug("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
+		closeOpenProgressDialogs();
 		final CDialogMessageWithDetails dialog = new CDialogMessageWithDetails(message, exception);
 		dialog.open();
 	}
@@ -182,5 +184,14 @@ public class CNotificationService {
 		final CDialogProgress dialog = new CDialogProgress(title, message);
 		dialog.open();
 		return dialog;
+	}
+
+	private static void closeOpenProgressDialogs() {
+		final UI ui = UI.getCurrent();
+		if (ui == null) {
+			return;
+		}
+		ui.getChildren().filter(component -> component instanceof CDialogProgress)
+				.forEach(component -> ((CDialogProgress) component).close());
 	}
 }
