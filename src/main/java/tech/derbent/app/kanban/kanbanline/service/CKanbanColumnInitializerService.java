@@ -31,11 +31,9 @@ public class CKanbanColumnInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, ENTITY_CLASS, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "itemOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "kanbanLine"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "defaultColumn"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "includedStatuses"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Status"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "lastModifiedDate"));
@@ -49,7 +47,7 @@ public class CKanbanColumnInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "itemOrder", "name", "description", "kanbanLine", "active"));
+		grid.setColumnFields(List.of("id", "name", "kanbanLine", "defaultColumn", "includedStatuses"));
 		return grid;
 	}
 

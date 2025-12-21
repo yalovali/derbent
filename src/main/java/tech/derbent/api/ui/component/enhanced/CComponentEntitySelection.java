@@ -143,7 +143,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	private final List<EntityTypeConfig<?>> entityTypes;
 	private CGrid<EntityClass> grid;
-	private CComponentGridSearchToolbar gridSearchToolbar;
+	private CComponentFilterToolbar gridSearchToolbar;
 	private final ItemsProvider<EntityClass> itemsProvider;
 	private Span labelSelectedCount;
 	private final boolean multiSelect;
@@ -384,9 +384,9 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		LOGGER.debug("Grid created for entity selection component");
 	}
 
-	/** Factory method for search toolbar layout using CComponentGridSearchToolbar. */
-	protected CComponentGridSearchToolbar create_gridSearchToolbar() {
-		final CComponentGridSearchToolbar toolbar = new CComponentGridSearchToolbar();
+	/** Factory method for search toolbar layout using CComponentFilterToolbar. */
+	protected CComponentFilterToolbar create_gridSearchToolbar() {
+		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar();
 		// Add filter change listener to trigger grid filtering
 		toolbar.addFilterChangeListener(criteria -> applyFilters());
 		return toolbar;

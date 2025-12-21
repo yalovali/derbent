@@ -1,7 +1,12 @@
 package tech.derbent.app.kanban.kanbanline.service;
 
 import java.time.Clock;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -71,7 +76,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		Check.notNull(childItem, "Kanban column cannot be null");
 		final CKanbanLine master = childItem.getKanbanLine();
 		Check.notNull(master, "Kanban line cannot be null for column");
-		final List<CKanbanColumn> items = findByMaster(master);
+		final List<CKanbanColumn> items = normalizeItemOrder(master);
 		for (int i = 0; i < items.size(); i++) {
 			if (items.get(i).getId().equals(childItem.getId()) && (i < (items.size() - 1))) {
 				final CKanbanColumn nextColumn = items.get(i + 1);
@@ -92,7 +97,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		Check.notNull(childItem, "Kanban column cannot be null");
 		final CKanbanLine master = childItem.getKanbanLine();
 		Check.notNull(master, "Kanban line cannot be null for column");
-		final List<CKanbanColumn> items = findByMaster(master);
+		final List<CKanbanColumn> items = normalizeItemOrder(master);
 		for (int i = 0; i < items.size(); i++) {
 			if (items.get(i).getId().equals(childItem.getId()) && (i > 0)) {
 				final CKanbanColumn previousColumn = items.get(i - 1);
@@ -114,7 +119,9 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		if (entity.getItemOrder() == null || entity.getItemOrder() <= 0) {
 			entity.setItemOrder(getNextItemOrder(entity.getKanbanLine()));
 		}
-		return super.save(entity);
+		final CKanbanColumn saved = super.save(entity);
+		applyStatusAndDefaultConstraints(saved);
+		return saved;
 	}
 
 	@Override
@@ -126,5 +133,67 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 			entity.getKanbanLine().removeKanbanColumn(entity);
 		}
 		super.delete(entity);
+	}
+
+	private void applyStatusAndDefaultConstraints(final CKanbanColumn saved) {
+		Check.notNull(saved, "Kanban column cannot be null when applying constraints");
+		Check.notNull(saved.getId(), "Kanban column must be saved before enforcing constraints");
+		final CKanbanLine line = saved.getKanbanLine();
+		Check.notNull(line, "Kanban line cannot be null when enforcing constraints");
+		final List<CKanbanColumn> columns = findByMaster(line);
+		final Set<Long> includedStatusIds = saved.getIncludedStatuses() == null ? Set.of()
+				: saved.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null).map(status -> status.getId())
+						.collect(Collectors.toCollection(HashSet::new));
+		final boolean isDefaultColumn = saved.getDefaultColumn();
+		for (final CKanbanColumn column : columns) {
+			if (column.getId().equals(saved.getId())) {
+				continue;
+			}
+			boolean changed = false;
+			if (isDefaultColumn && column.getDefaultColumn()) {
+				column.setDefaultColumn(false);
+				changed = true;
+			}
+			if (!includedStatusIds.isEmpty() && column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
+				final List<Long> remainingStatusIds = column.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null)
+						.map(status -> status.getId()).filter(id -> !includedStatusIds.contains(id)).collect(Collectors.toList());
+				if (remainingStatusIds.size() != column.getIncludedStatuses().size()) {
+					final List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> remainingStatuses = column.getIncludedStatuses().stream()
+							.filter(status -> status != null && status.getId() != null && remainingStatusIds.contains(status.getId()))
+							.collect(Collectors.toList());
+					column.setIncludedStatuses(remainingStatuses);
+					changed = true;
+				}
+			}
+			if (changed) {
+				repository.save(column);
+			}
+		}
+	}
+
+	private List<CKanbanColumn> normalizeItemOrder(final CKanbanLine master) {
+		Check.notNull(master, "Kanban line cannot be null when normalizing order");
+		final List<CKanbanColumn> items = new ArrayList<>(findByMaster(master));
+		items.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
+		boolean needsUpdate = false;
+		int expectedOrder = 1;
+		for (final CKanbanColumn item : items) {
+			if (item.getItemOrder() == null || item.getItemOrder() <= 0 || !item.getItemOrder().equals(expectedOrder)) {
+				needsUpdate = true;
+				break;
+			}
+			expectedOrder++;
+		}
+		if (needsUpdate) {
+			expectedOrder = 1;
+			for (final CKanbanColumn item : items) {
+				if (item.getItemOrder() == null || item.getItemOrder() <= 0 || !item.getItemOrder().equals(expectedOrder)) {
+					item.setItemOrder(expectedOrder);
+					repository.save(item);
+				}
+				expectedOrder++;
+			}
+		}
+		return items;
 	}
 }
