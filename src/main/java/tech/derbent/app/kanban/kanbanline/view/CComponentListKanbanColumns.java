@@ -32,7 +32,17 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		grid.addIntegerColumn(CKanbanColumn::getItemOrder, "Order", "itemOrder");
 		grid.addShortTextColumn(CKanbanColumn::getName, "Name", "name");
 		grid.addShortTextColumn(CKanbanColumn::getDescription, "Description", "description");
+		grid.addShortTextColumn(this::formatIncludedStatuses, "Included Statuses", "includedStatuses");
 		grid.addBooleanColumn(CKanbanColumn::getActive, "Status", "Active", "Inactive");
+	}
+
+	private String formatIncludedStatuses(final CKanbanColumn column) {
+		Check.notNull(column, "Kanban column cannot be null");
+		if (column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
+			return "-";
+		}
+		return column.getIncludedStatuses().stream().map(status -> status.getName()).filter(name -> name != null && !name.isBlank())
+				.sorted(String::compareToIgnoreCase).reduce((first, second) -> first + ", " + second).orElse("-");
 	}
 
 	@Override

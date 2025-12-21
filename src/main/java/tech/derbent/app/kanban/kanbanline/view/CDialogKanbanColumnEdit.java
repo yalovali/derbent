@@ -56,8 +56,8 @@ public class CDialogKanbanColumnEdit extends CDialogDBEdit<CKanbanColumn> {
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
-		setWidth("500px");
-		setHeight("450px");
+		setWidth("650px");
+		setHeight("550px");
 		setResizable(true);
 		createFormFields();
 	}

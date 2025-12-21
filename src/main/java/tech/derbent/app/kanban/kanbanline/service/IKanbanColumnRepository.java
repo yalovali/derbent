@@ -14,7 +14,8 @@ public interface IKanbanColumnRepository extends IAbstractRepository<CKanbanColu
 	/** Find all columns for a kanban line, ordered by itemOrder.
 	 * @param master the kanban line
 	 * @return list of columns ordered by itemOrder ascending */
-	@Query ("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.kanbanLine WHERE e.kanbanLine = :master ORDER BY e.itemOrder ASC")
+	@Query ("SELECT DISTINCT e FROM #{#entityName} e LEFT JOIN FETCH e.kanbanLine LEFT JOIN FETCH e.includedStatuses "
+			+ "WHERE e.kanbanLine = :master ORDER BY e.itemOrder ASC")
 	List<CKanbanColumn> findByMaster(@Param ("master") CKanbanLine master);
 
 	/** Get the next item order number for new columns in a kanban line.
