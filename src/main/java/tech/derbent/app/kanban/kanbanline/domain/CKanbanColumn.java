@@ -2,18 +2,13 @@ package tech.derbent.app.kanban.kanbanline.domain;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.screens.service.IOrderedEntity;
 
 @Entity
@@ -40,17 +35,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	)
 	private CKanbanLine kanbanLine;
 
-	@ManyToMany (fetch = FetchType.EAGER)
-	@JoinTable (
-			name = "ckanbancolumn_statuses", joinColumns = @JoinColumn (name = "kanban_column_id"),
-			inverseJoinColumns = @JoinColumn (name = "cprojectitemstatus_id")
-	)
-	@AMetaData (
-			displayName = "Statuses", required = false, readOnly = false, description = "Company statuses included in this column", hidden = false,
-			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService", useGridSelection = true
-	)
-	private List<CProjectItemStatus> statuses = new ArrayList<>();
-
 	/** Default constructor for JPA. */
 	public CKanbanColumn() {
 		super();
@@ -66,8 +50,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 
 	public CKanbanLine getKanbanLine() { return kanbanLine; }
 
-	public List<CProjectItemStatus> getStatuses() { return statuses; }
-
 	@Override
 	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
@@ -77,9 +59,5 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 			return;
 		}
 		this.kanbanLine = kanbanLine;
-	}
-
-	public void setStatuses(final List<CProjectItemStatus> statuses) {
-		this.statuses = statuses != null ? statuses : new ArrayList<>();
 	}
 }
