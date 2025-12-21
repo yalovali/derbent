@@ -7,10 +7,12 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.enhanced.CComponentListEntityBase;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanColumnService;
+import tech.derbent.app.kanban.kanbanline.service.CKanbanLineService;
 
 /** CComponentListKanbanColumns - Component for managing CKanbanColumn entities within a CKanbanLine. Provides CRUD and ordering controls for
  * kanban column definitions. */
@@ -18,10 +20,13 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListKanbanColumns.class);
 	private static final long serialVersionUID = 1L;
+	private final CKanbanLineService kanbanLineService;
 
-	public CComponentListKanbanColumns(final CKanbanColumnService kanbanColumnService) {
+	public CComponentListKanbanColumns(final CKanbanLineService kanbanLineService, final CKanbanColumnService kanbanColumnService) {
 		super("Kanban Columns", CKanbanLine.class, CKanbanColumn.class, kanbanColumnService);
+		Check.notNull(kanbanLineService, "KanbanLineService cannot be null");
 		Check.notNull(kanbanColumnService, "KanbanColumnService cannot be null");
+		this.kanbanLineService = kanbanLineService;
 		setDynamicHeight("400px");
 	}
 
@@ -51,6 +56,27 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 	@Override
 	public void drag_checkEventBeforePass(final CEvent event) {
 		// No-op for kanban column list (no special drag behavior).
+	}
+
+	@Override
+	protected void on_buttonDelete_clicked() {
+		Check.notNull(getSelectedItem(), "No item selected for deletion");
+		Check.notNull(getSelectedItem().getId(), "Cannot delete unsaved item");
+		Check.notNull(getMasterEntity(), "Kanban line must be selected before deleting columns");
+		try {
+			CNotificationService.showConfirmationDialog("Delete selected Kanban column?", () -> {
+				try {
+					kanbanLineService.deleteKanbanColumn(getMasterEntity(), getSelectedItem());
+					refreshGrid();
+					grid.asSingleSelect().clear();
+					CNotificationService.showDeleteSuccess();
+				} catch (final Exception e) {
+					CNotificationService.showException("Error deleting Kanban column", e);
+				}
+			});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error opening delete confirmation", e);
+		}
 	}
 
 	@Override

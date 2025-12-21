@@ -30,13 +30,15 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	private final CSprintItemService sprintItemService;
 
 	public CSprintService(final ISprintRepository repository, final Clock clock, final ISessionService sessionService,
-			final CSprintTypeService sprintTypeService, final CProjectItemStatusService projectItemStatusService, final CSprintItemService sprintItemService) {
+			final CSprintTypeService sprintTypeService, final CProjectItemStatusService projectItemStatusService,
+			final CSprintItemService sprintItemService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		entityTypeService = sprintTypeService;
 		this.sprintItemService = sprintItemService;
 	}
 
 	public void addSprintItemToSprint(final CSprint sprint, final ISprintableItem item) {
+		LOGGER.debug("Adding item {} to sprint {}", item, sprint);
 		Check.notNull(sprint, "Sprint cannot be null");
 		Check.notNull(item, "Item cannot be null");
 		// For unsaved sprints, fall back to in-memory wiring; persistence happens when the sprint is saved.
@@ -65,6 +67,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	@Transactional
 	public void delete(final CSprint sprint) {
+		LOGGER.debug("Deleting sprint {}", sprint);
 		Check.notNull(sprint, "Sprint cannot be null");
 		Check.notNull(sprint.getId(), "Sprint ID cannot be null");
 		// Ensure sprint items are detached from their underlying items before the sprint (and its sprint items) are deleted.
@@ -84,6 +87,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	@Transactional
 	public void delete(final Long id) {
+		LOGGER.debug("Deleting sprint by ID {}", id);
 		Check.notNull(id, "Sprint ID cannot be null");
 		final CSprint sprint = getById(id).orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Sprint not found with id: " + id));
 		delete(sprint);

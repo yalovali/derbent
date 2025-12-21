@@ -1067,6 +1067,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					((IContentOwner) component).setCurrentEntity(entity);
 				} catch (final Exception e) {
 					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
+					throw e;
 				}
 			}
 		});

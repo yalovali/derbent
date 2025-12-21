@@ -15,14 +15,16 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceKanbanLine.class);
 	private CComponentListKanbanColumns componentKanbanColumns;
 	private CKanbanColumnService kanbanColumnService;
+	private CKanbanLineService kanbanLineService;
 	private CComponentKanbanBoard componentKanbanBoard;
 
 	public CPageServiceKanbanLine(final IPageServiceImplementer<CKanbanLine> view) {
 		super(view);
 		try {
 			kanbanColumnService = CSpringContext.getBean(CKanbanColumnService.class);
+			kanbanLineService = CSpringContext.getBean(CKanbanLineService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize CKanbanColumnService", e);
+			LOGGER.error("Failed to initialize Kanban services", e);
 		}
 	}
 
@@ -54,7 +56,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	public CComponentListKanbanColumns createKanbanColumnsComponent() {
 		LOGGER.debug("Creating Kanban columns component for Kanban line page service.");
 		if (componentKanbanColumns == null) {
-			componentKanbanColumns = new CComponentListKanbanColumns(kanbanColumnService);
+			componentKanbanColumns = new CComponentListKanbanColumns(kanbanLineService, kanbanColumnService);
 			componentKanbanColumns.registerWithPageService(this);
 		}
 		return componentKanbanColumns;

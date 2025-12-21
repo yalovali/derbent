@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -18,7 +16,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
-import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
@@ -26,22 +24,18 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
 /** CComponentKanbanBoard - Displays a kanban line as a board with vertical columns and post-it style project items. */
-public class CComponentKanbanBoard extends CVerticalLayout
-		implements HasValue<HasValue.ValueChangeEvent<CKanbanLine>, CKanbanLine>, IContentOwner {
+public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implements IContentOwner {
 
+	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanBoard.class);
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanBoard.class);
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
 	private final CHorizontalLayout layoutColumns;
-	private CKanbanLine kanbanLine;
 	private List<CProjectItem<?>> allProjectItems;
 	private List<CProjectItem<?>> projectItems;
 	private final ISessionService sessionService;
-	private final List<HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<CKanbanLine>>> valueChangeListeners = new ArrayList<>();
-	private boolean readOnly;
-	private boolean requiredIndicatorVisible;
 
 	public CComponentKanbanBoard() {
+		LOGGER.debug("Initializing Kanban board component");
 		sessionService = CSpringContext.getBean(ISessionService.class);
 		Check.notNull(sessionService, "Session service cannot be null for Kanban board");
 		allProjectItems = new ArrayList<>();
@@ -57,20 +51,10 @@ public class CComponentKanbanBoard extends CVerticalLayout
 		add(filterToolbar, layoutColumns);
 	}
 
-	@Override
-	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		return null;
-	}
-
-	@Override
-	public Registration addValueChangeListener(final HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<CKanbanLine>> listener) {
-		Check.notNull(listener, "ValueChangeListener cannot be null");
-		valueChangeListeners.add(listener);
-		return () -> valueChangeListeners.remove(listener);
-	}
-
 	private void applyFilters() {
-		Check.notNull(kanbanLine, "Kanban line must be set before applying filters");
+		LOGGER.debug("Applying filters to Kanban board component");
+		final CKanbanLine currentLine = getValue();
+		Check.notNull(currentLine, "Kanban line must be set before applying filters");
 		final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
 		final List<CProjectItem<?>> filtered = new ArrayList<>();
 		for (final CProjectItem<?> item : allProjectItems) {
@@ -102,17 +86,21 @@ public class CComponentKanbanBoard extends CVerticalLayout
 	}
 
 	@Override
-	public CKanbanLine getValue() { return kanbanLine; }
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		LOGGER.debug("Creating new entity instance is not supported for Kanban board component");
+		return null;
+	}
 
 	@Override
-	public CEntityDB<?> getCurrentEntity() { return kanbanLine; }
+	public CEntityDB<?> getCurrentEntity() { return getValue(); }
 
 	@Override
 	public String getCurrentEntityIdString() {
-		if (kanbanLine == null || kanbanLine.getId() == null) {
+		final CKanbanLine currentLine = getValue();
+		if (currentLine == null || currentLine.getId() == null) {
 			return null;
 		}
-		return kanbanLine.getId().toString();
+		return currentLine.getId().toString();
 	}
 
 	@Override
@@ -124,20 +112,6 @@ public class CComponentKanbanBoard extends CVerticalLayout
 			itemsByColumn.put(column, new ArrayList<>());
 		}
 		return itemsByColumn;
-	}
-
-	@Override
-	public boolean isEmpty() { return kanbanLine == null; }
-
-	@Override
-	public boolean isReadOnly() { return readOnly; }
-
-	@Override
-	public boolean isRequiredIndicatorVisible() { return requiredIndicatorVisible; }
-
-	@Override
-	public void populateForm() {
-		setValue(kanbanLine);
 	}
 
 	private boolean matchesResponsibleFilter(final CProjectItem<?> item, final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria) {
@@ -171,15 +145,29 @@ public class CComponentKanbanBoard extends CVerticalLayout
 		return entityClass.isAssignableFrom(item.getClass());
 	}
 
+	@Override
+	protected void onValueChanged(final CKanbanLine oldValue, final CKanbanLine newValue, final boolean fromClient) {
+		LOGGER.debug("Kanban board value changed from {} to {}", oldValue, newValue);
+		refreshComponent();
+	}
+
+	@Override
+	public void populateForm() {
+		LOGGER.debug("Populating Kanban board component");
+		refreshComponent();
+	}
+
 	public void refreshComponent() {
+		LOGGER.debug("Refreshing Kanban board component");
 		layoutColumns.removeAll();
-		if (kanbanLine == null) {
+		final CKanbanLine currentLine = getValue();
+		if (currentLine == null) {
 			// TODO create an empty loading div
 			final CDiv div = new CDiv("Loading columns ...");
 			layoutColumns.add(div);
 			return;
 		}
-		final List<CKanbanColumn> columns = new ArrayList<>(kanbanLine.getKanbanColumns());
+		final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
 		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
 		final Map<CKanbanColumn, List<CProjectItem<?>>> itemsByColumn = initializeColumnMap(columns);
 		final CKanbanColumn defaultColumn = columns.stream().filter(CKanbanColumn::getDefaultColumn).findFirst().orElse(null);
@@ -209,59 +197,23 @@ public class CComponentKanbanBoard extends CVerticalLayout
 		return defaultColumn;
 	}
 
+	@Override
+	public void setCurrentEntity(final CEntityDB<?> entity) {
+		LOGGER.debug("Setting current entity for Kanban board component");
+		if (entity == null) {
+			setValue(null);
+			return;
+		}
+		Check.instanceOf(entity, CKanbanLine.class, "Kanban board expects CKanbanLine as current entity");
+		setValue((CKanbanLine) entity);
+	}
+
 	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
-		Check.notNull(kanbanLine, "Kanban line must be set before setting project items");
+		LOGGER.debug("Setting project items for Kanban board component");
+		Check.notNull(getValue(), "Kanban line must be set before setting project items");
 		Check.notNull(projectItems, "Project items cannot be null for kanban board");
 		allProjectItems = new ArrayList<>(projectItems);
 		filterToolbar.setAvailableItems(allProjectItems);
 		applyFilters();
-	}
-
-	@Override
-	public void setReadOnly(final boolean readOnly) { this.readOnly = readOnly; }
-
-	@Override
-	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) { this.requiredIndicatorVisible = requiredIndicatorVisible; }
-
-	@Override
-	public void setCurrentEntity(final CEntityDB<?> entity) {
-		if (entity == null) {
-			kanbanLine = null;
-			return;
-		}
-		Check.instanceOf(entity, CKanbanLine.class, "Kanban board expects CKanbanLine as current entity");
-		kanbanLine = (CKanbanLine) entity;
-	}
-
-	@Override
-	public void setValue(final CKanbanLine value) {
-		LOGGER.debug("Setting Kanban line value: {}", value != null ? value.getName() : "null");
-		final CKanbanLine oldValue = kanbanLine;
-		kanbanLine = value;
-		refreshComponent();
-		if (value == null) {
-			return;
-		}
-		if (!Objects.equals(oldValue, value)) {
-			final HasValue.ValueChangeEvent<CKanbanLine> event = new HasValue.ValueChangeEvent<CKanbanLine>() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public HasValue<?, CKanbanLine> getHasValue() { return CComponentKanbanBoard.this; }
-
-				@Override
-				public CKanbanLine getOldValue() { return oldValue; }
-
-				@Override
-				public CKanbanLine getValue() { return value; }
-
-				@Override
-				public boolean isFromClient() { return false; }
-			};
-			for (final HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<CKanbanLine>> listener : valueChangeListeners) {
-				listener.valueChanged(event);
-			}
-		}
 	}
 }

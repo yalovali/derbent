@@ -45,25 +45,26 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		this.meetingRepository = meetingRepository;
 	}
 
-	@Override
-	@Transactional
-	public CSprintItem save(final CSprintItem sprintItem) {
-		Check.notNull(sprintItem, "Sprint item cannot be null");
-		populateItemMetadataIfTransientPresent(sprintItem);
-		final boolean isNew = sprintItem.getId() == null;
-		final boolean hasTransientItem = sprintItem.getItem() != null;
-		final CSprintItem saved = super.save(sprintItem);
-		// Keep the denormalized link on the sprintable item in sync.
-		// We only enforce binding for new sprint items or when the caller provided the transient item (UI add flows).
-		if (isNew || hasTransientItem) {
-			bindSprintableItemToSprintItem(saved);
+	private void bindSprintableItemToSprintItem(final CSprintItem sprintItem) {
+		if (sprintItem == null || sprintItem.getId() == null) {
+			return;
 		}
-		return saved;
+		final ISprintableItem item = resolveItemForSprintItem(sprintItem);
+		if (item == null) {
+			return;
+		}
+		final CSprintItem existing = item.getSprintItem();
+		if (existing != null && existing.getId() != null && existing.getId().equals(sprintItem.getId())) {
+			return;
+		}
+		item.setSprintItem(sprintItem);
+		saveProjectItem(item);
 	}
 
 	@Override
 	@Transactional
 	public void delete(final CSprintItem sprintItem) {
+		LOGGER.debug("Deleting sprint item: {}", sprintItem);
 		Check.notNull(sprintItem, "Sprint item cannot be null");
 		Check.notNull(sprintItem.getId(), "Sprint item ID cannot be null");
 		try {
@@ -142,7 +143,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	/** Load the project item for a sprint item based on itemId and itemType. This method dynamically loads the item at runtime.
 	 * @param sprintItem the sprint item to load the item for */
 	public void loadItem(final CSprintItem sprintItem) {
-		if ((sprintItem == null) || (sprintItem.getItemId() == null) || (sprintItem.getItemType() == null)) {
+		if (sprintItem == null || sprintItem.getItemId() == null || sprintItem.getItemType() == null) {
 			LOGGER.warn("Cannot load item - sprint item, itemId, or itemType is null");
 			return;
 		}
@@ -176,47 +177,82 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		}
 	}
 
-	private void bindSprintableItemToSprintItem(final CSprintItem sprintItem) {
-		if (sprintItem == null || sprintItem.getId() == null) {
+	/** Load items for a list of sprint items.
+	 * @param sprintItems the list of sprint items */
+	public void loadItems(final List<CSprintItem> sprintItems) {
+		if (sprintItems == null || sprintItems.isEmpty()) {
 			return;
 		}
-		final ISprintableItem item = resolveItemForSprintItem(sprintItem);
-		if (item == null) {
-			return;
-		}
-		final CSprintItem existing = item.getSprintItem();
-		if (existing != null && existing.getId() != null && existing.getId().equals(sprintItem.getId())) {
-			return;
-		}
-		item.setSprintItem(sprintItem);
-		saveProjectItem(item);
-	}
-
-	private void saveProjectItem(final ISprintableItem item) {
-		Check.notNull(item, "Sprintable item cannot be null");
-		if (item instanceof CActivity) {
-			activityRepository.saveAndFlush((CActivity) item);
-		} else if (item instanceof CMeeting) {
-			meetingRepository.saveAndFlush((CMeeting) item);
-		} else {
-			LOGGER.warn("Unsupported sprintable item type for save: {}", item.getClass().getSimpleName());
+		for (final CSprintItem sprintItem : sprintItems) {
+			loadItem(sprintItem);
 		}
 	}
 
-	private void unbindSprintableItemFromSprintItem(final CSprintItem sprintItem) {
-		if (sprintItem == null || sprintItem.getId() == null) {
+	/** Move a sprint item down in the order (increase order number).
+	 * @param childItem the sprint item to move down */
+	@Override
+	public void moveItemDown(final CSprintItem childItem) {
+		LOGGER.debug("Moving sprint item down: {}", childItem);
+		if (childItem == null) {
+			LOGGER.warn("Cannot move down - sprint item or sprint is null");
 			return;
 		}
-		final ISprintableItem item = resolveItemForSprintItem(sprintItem);
-		if (item == null) {
+		final List<CSprintItem> items = findByMaster(childItem.getSprint());
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(childItem.getId()) && i < items.size() - 1) {
+				// Swap orders with next item
+				final CSprintItem nextItem = items.get(i + 1);
+				final Integer currentOrder = childItem.getItemOrder();
+				final Integer nextOrder = nextItem.getItemOrder();
+				childItem.setItemOrder(nextOrder);
+				nextItem.setItemOrder(currentOrder);
+				save(childItem);
+				save(nextItem);
+				break;
+			}
+		}
+	}
+
+	/** Move a sprint item up in the order (decrease order number).
+	 * @param childItem the sprint item to move up */
+	@Override
+	public void moveItemUp(final CSprintItem childItem) {
+		LOGGER.debug("Moving sprint item up: {}", childItem);
+		if (childItem == null) {
+			LOGGER.warn("Cannot move up - sprint item is null");
 			return;
 		}
-		final CSprintItem existing = item.getSprintItem();
-		if (existing == null || existing.getId() == null || !existing.getId().equals(sprintItem.getId())) {
-			return;
+		final List<CSprintItem> items = findByMaster(childItem.getSprint());
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(childItem.getId()) && i > 0) {
+				// Swap orders with previous item
+				final CSprintItem previousItem = items.get(i - 1);
+				final Integer currentOrder = childItem.getItemOrder();
+				final Integer previousOrder = previousItem.getItemOrder();
+				childItem.setItemOrder(previousOrder);
+				previousItem.setItemOrder(currentOrder);
+				save(childItem);
+				save(previousItem);
+				break;
+			}
 		}
-		item.setSprintItem(null);
-		saveProjectItem(item);
+	}
+
+	/** Create a new sprint item for the given sprint (master).
+	 * @param master the sprint
+	 * @param item   the project item to add
+	 * @return the new sprint item */
+	public CSprintItem newSprintItem(final CSprint master, final ISprintableItem item) {
+		LOGGER.debug("Creating new sprint item for master {} and item {}", master, item);
+		if (master == null || item == null) {
+			LOGGER.warn("Cannot create sprint item - master or item is null");
+			return null;
+		}
+		final List<CSprintItem> existingItems = findByMasterId(master.getId());
+		final int nextOrder = existingItems.size() + 1;
+		final CSprintItem sprintItem = new CSprintItem(master, item, nextOrder);
+		LOGGER.debug("Created new sprint item for master {} with order {}", master.getId(), nextOrder);
+		return sprintItem;
 	}
 
 	private void populateItemMetadataIfTransientPresent(final CSprintItem sprintItem) {
@@ -244,78 +280,48 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		return loaded;
 	}
 
-	/** Load items for a list of sprint items.
-	 * @param sprintItems the list of sprint items */
-	public void loadItems(final List<CSprintItem> sprintItems) {
-		if ((sprintItems == null) || sprintItems.isEmpty()) {
-			return;
-		}
-		for (final CSprintItem sprintItem : sprintItems) {
-			loadItem(sprintItem);
-		}
-	}
-
-	/** Move a sprint item down in the order (increase order number).
-	 * @param childItem the sprint item to move down */
 	@Override
-	public void moveItemDown(final CSprintItem childItem) {
-		if ((childItem == null)) {
-			LOGGER.warn("Cannot move down - sprint item or sprint is null");
-			return;
+	@Transactional
+	public CSprintItem save(final CSprintItem sprintItem) {
+		LOGGER.debug("Saving sprint item: {}", sprintItem);
+		Check.notNull(sprintItem, "Sprint item cannot be null");
+		populateItemMetadataIfTransientPresent(sprintItem);
+		final boolean isNew = sprintItem.getId() == null;
+		final boolean hasTransientItem = sprintItem.getItem() != null;
+		final CSprintItem saved = super.save(sprintItem);
+		// Keep the denormalized link on the sprintable item in sync.
+		// We only enforce binding for new sprint items or when the caller provided the transient item (UI add flows).
+		if (isNew || hasTransientItem) {
+			bindSprintableItemToSprintItem(saved);
 		}
-		final List<CSprintItem> items = findByMaster(childItem.getSprint());
-		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getId().equals(childItem.getId()) && (i < (items.size() - 1))) {
-				// Swap orders with next item
-				final CSprintItem nextItem = items.get(i + 1);
-				final Integer currentOrder = childItem.getItemOrder();
-				final Integer nextOrder = nextItem.getItemOrder();
-				childItem.setItemOrder(nextOrder);
-				nextItem.setItemOrder(currentOrder);
-				save(childItem);
-				save(nextItem);
-				break;
-			}
+		return saved;
+	}
+
+	private void saveProjectItem(final ISprintableItem item) {
+		LOGGER.debug("Saving sprintable item: {}", item);
+		Check.notNull(item, "Sprintable item cannot be null");
+		if (item instanceof CActivity) {
+			activityRepository.saveAndFlush((CActivity) item);
+		} else if (item instanceof CMeeting) {
+			meetingRepository.saveAndFlush((CMeeting) item);
+		} else {
+			LOGGER.warn("Unsupported sprintable item type for save: {}", item.getClass().getSimpleName());
 		}
 	}
 
-	/** Move a sprint item up in the order (decrease order number).
-	 * @param childItem the sprint item to move up */
-	@Override
-	public void moveItemUp(final CSprintItem childItem) {
-		if (childItem == null) {
-			LOGGER.warn("Cannot move up - sprint item is null");
+	private void unbindSprintableItemFromSprintItem(final CSprintItem sprintItem) {
+		if (sprintItem == null || sprintItem.getId() == null) {
 			return;
 		}
-		final List<CSprintItem> items = findByMaster(childItem.getSprint());
-		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getId().equals(childItem.getId()) && (i > 0)) {
-				// Swap orders with previous item
-				final CSprintItem previousItem = items.get(i - 1);
-				final Integer currentOrder = childItem.getItemOrder();
-				final Integer previousOrder = previousItem.getItemOrder();
-				childItem.setItemOrder(previousOrder);
-				previousItem.setItemOrder(currentOrder);
-				save(childItem);
-				save(previousItem);
-				break;
-			}
+		final ISprintableItem item = resolveItemForSprintItem(sprintItem);
+		if (item == null) {
+			return;
 		}
-	}
-
-	/** Create a new sprint item for the given sprint (master).
-	 * @param master the sprint
-	 * @param item   the project item to add
-	 * @return the new sprint item */
-	public CSprintItem newSprintItem(final CSprint master, final ISprintableItem item) {
-		if ((master == null) || (item == null)) {
-			LOGGER.warn("Cannot create sprint item - master or item is null");
-			return null;
+		final CSprintItem existing = item.getSprintItem();
+		if (existing == null || existing.getId() == null || !existing.getId().equals(sprintItem.getId())) {
+			return;
 		}
-		final List<CSprintItem> existingItems = findByMasterId(master.getId());
-		final int nextOrder = existingItems.size() + 1;
-		final CSprintItem sprintItem = new CSprintItem(master, item, nextOrder);
-		LOGGER.debug("Created new sprint item for master {} with order {}", master.getId(), nextOrder);
-		return sprintItem;
+		item.setSprintItem(null);
+		saveProjectItem(item);
 	}
 }

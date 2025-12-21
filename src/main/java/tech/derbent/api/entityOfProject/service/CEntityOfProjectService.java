@@ -168,11 +168,11 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		LOGGER.debug("Listing entities for project:'{}' with search text: '{}'", project != null ? project.getName() : "<null>", searchText);
 		Check.notNull(project, "Project cannot be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		final String term = (searchText == null) ? "" : searchText.trim();
+		final String term = searchText == null ? "" : searchText.trim();
 		// Repository query includes ORDER BY clause, no need for manual sorting
 		final List<EntityClass> all = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
-		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+		final List<EntityClass> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
 		// Data is already sorted by repository query
 		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
 		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
@@ -196,13 +196,14 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	@Transactional
 	public EntityClass newEntity(final String name, final CProject project) {
+		LOGGER.debug("Creating new entity with name '{}' in project '{}'", name, project != null ? project.getName() : "<null>");
 		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
 			final Object instance = getEntityClass().getDeclaredConstructor(String.class, CProject.class).newInstance(name, project);
 			Check.instanceOf(instance, getEntityClass(), "Created object is not instance of EntityClass");
 			@SuppressWarnings ("unchecked")
-			final EntityClass entity = ((EntityClass) instance);
+			final EntityClass entity = (EntityClass) instance;
 			return entity;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
@@ -213,6 +214,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
 		try {
+			LOGGER.debug("save(entity={}) - Saving entity", entity.getId());
 			Check.notNull(entity, "Entity cannot be null");
 			Check.notNull(entity.getProject(), "Entity's project cannot be null");
 			final String trimmedName = entity.getName().trim();
@@ -220,7 +222,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 			final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
 					.findByNameAndProject(trimmedName, entity.getProject()).filter(existingStatus -> {
 						// Exclude self if updating
-						return (entity.getId() == null) || !existingStatus.getId().equals(entity.getId());
+						return entity.getId() == null || !existingStatus.getId().equals(entity.getId());
 					});
 			if (existing.isPresent()) {
 				LOGGER.error("save(entity={}) - Entity with name '{}' already exists in project {}", entity.getId(), trimmedName,

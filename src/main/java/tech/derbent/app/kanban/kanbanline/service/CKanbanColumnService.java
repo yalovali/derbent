@@ -26,9 +26,12 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		implements IEntityRegistrable, IOrderedEntityService<CKanbanColumn> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanColumnService.class);
+	private final CKanbanLineService kanbanLineService;
 
-	public CKanbanColumnService(final IKanbanColumnRepository repository, final Clock clock, final ISessionService sessionService) {
+	public CKanbanColumnService(final IKanbanColumnRepository repository, final Clock clock, final ISessionService sessionService,
+			final CKanbanLineService kanbanLineService) {
 		super(repository, clock, sessionService);
+		this.kanbanLineService = kanbanLineService;
 	}
 
 	@Override
@@ -116,6 +119,8 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 	@Transactional
 	public CKanbanColumn save(final CKanbanColumn entity) {
 		Check.notNull(entity, "Kanban column cannot be null");
+		Check.notNull(entity.getKanbanLine(), "Kanban line cannot be null for column save");
+		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID cannot be null for column save");
 		if (entity.getItemOrder() == null || entity.getItemOrder() <= 0) {
 			entity.setItemOrder(getNextItemOrder(entity.getKanbanLine()));
 		}
@@ -129,10 +134,17 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 	public void delete(final CKanbanColumn entity) {
 		Check.notNull(entity, "Kanban column cannot be null");
 		LOGGER.debug("Deleting kanban column: {}", entity.getId());
-		if (entity.getKanbanLine() != null) {
-			entity.getKanbanLine().removeKanbanColumn(entity);
-		}
-		super.delete(entity);
+		final CKanbanLine line = resolveLineForDelete(entity);
+		kanbanLineService.deleteKanbanColumn(line, entity);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final Long id) {
+		Check.notNull(id, "Entity ID cannot be null");
+		final CKanbanColumn entity = getTypedRepository().findByIdWithLine(id).orElse(null);
+		Check.notNull(entity, "Kanban column not found for delete");
+		delete(entity);
 	}
 
 	private void applyStatusAndDefaultConstraints(final CKanbanColumn saved) {
@@ -195,5 +207,13 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 			}
 		}
 		return items;
+	}
+
+	private CKanbanLine resolveLineForDelete(final CKanbanColumn entity) {
+		Check.notNull(entity.getKanbanLine(), "Kanban line reference missing for column delete");
+		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID missing for column delete");
+		final CKanbanLine line = kanbanLineService.getById(entity.getKanbanLine().getId()).orElse(null);
+		Check.notNull(line, "Kanban line could not be loaded for column delete");
+		return line;
 	}
 }

@@ -1,6 +1,7 @@
 package tech.derbent.app.kanban.kanbanline.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entity.service.IAbstractRepository;
@@ -23,4 +24,7 @@ public interface IKanbanColumnRepository extends IAbstractRepository<CKanbanColu
 	 * @return the next available order number */
 	@Query ("SELECT COALESCE(MAX(e.itemOrder), 0) + 1 FROM #{#entityName} e WHERE e.kanbanLine = :master")
 	Integer getNextItemOrder(@Param ("master") CKanbanLine master);
+
+	@Query ("SELECT DISTINCT e FROM #{#entityName} e LEFT JOIN FETCH e.kanbanLine LEFT JOIN FETCH e.includedStatuses WHERE e.id = :id")
+	Optional<CKanbanColumn> findByIdWithLine(@Param ("id") Long id);
 }
