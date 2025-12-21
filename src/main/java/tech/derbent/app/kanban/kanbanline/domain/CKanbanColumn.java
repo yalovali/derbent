@@ -54,19 +54,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	)
 	private List<CProjectItemStatus> includedStatuses = new ArrayList<>();
 
-	@ManyToMany (fetch = FetchType.EAGER)
-	@JoinTable (
-			name = "ckanbancolumn_excluded_status",
-			joinColumns = @JoinColumn (name = "kanban_column_id"),
-			inverseJoinColumns = @JoinColumn (name = "status_id")
-	)
-	@AMetaData (
-			displayName = "Excluded Statuses", required = false, readOnly = false,
-			description = "Statuses that should be excluded from this kanban column", hidden = false, setBackgroundFromColor = true, useIcon = true,
-			dataProviderBean = "CProjectItemStatusService", useGridSelection = true
-	)
-	private List<CProjectItemStatus> excludedStatuses = new ArrayList<>();
-
 	/** Default constructor for JPA. */
 	public CKanbanColumn() {
 		super();
@@ -84,7 +71,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 
 	public List<CProjectItemStatus> getIncludedStatuses() { return includedStatuses; }
 
-	public List<CProjectItemStatus> getExcludedStatuses() { return excludedStatuses; }
 
 	@Override
 	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
@@ -94,10 +80,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 		this.includedStatuses = new ArrayList<>(includedStatuses);
 	}
 
-	public void setExcludedStatuses(final List<CProjectItemStatus> excludedStatuses) {
-		Check.notNull(excludedStatuses, "Excluded statuses cannot be null");
-		this.excludedStatuses = new ArrayList<>(excludedStatuses);
-	}
 
 	public void setKanbanLine(final CKanbanLine kanbanLine) {
 		if (kanbanLine == null) {

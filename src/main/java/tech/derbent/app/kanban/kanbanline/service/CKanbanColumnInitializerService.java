@@ -34,7 +34,6 @@ public class CKanbanColumnInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "itemOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "kanbanLine"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "includedStatuses"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "excludedStatuses"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
