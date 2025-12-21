@@ -29,10 +29,16 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	public static final String VIEW_NAME = "Kanban Columns View";
 	@Column (name = "item_order", nullable = false)
 	@AMetaData (
-			displayName = "Order", required = false, readOnly = true, defaultValue = "1", description = "Sort order for kanban columns",
+			displayName = "Order", required = false, readOnly = false, defaultValue = "1", description = "Sort order for kanban columns",
 			hidden = false
 	)
 	private Integer itemOrder = 1;
+	@Column (name = "default_column", nullable = false)
+	@AMetaData (
+			displayName = "Default Column", required = false, readOnly = false, defaultValue = "false",
+			description = "When enabled, this column handles items without explicit status mapping", hidden = false
+	)
+	private boolean defaultColumn = false;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "kanban_line_id", nullable = false)
 	@AMetaData (
@@ -63,6 +69,8 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 
 	public List<CProjectItemStatus> getIncludedStatuses() { return includedStatuses; }
 
+	public boolean getDefaultColumn() { return defaultColumn; }
+
 	@Override
 	public Integer getItemOrder() { return itemOrder; }
 
@@ -72,6 +80,8 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 		Check.notNull(includedStatuses, "Included statuses cannot be null");
 		this.includedStatuses = new ArrayList<>(includedStatuses);
 	}
+
+	public void setDefaultColumn(final boolean defaultColumn) { this.defaultColumn = defaultColumn; }
 
 	@Override
 	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }

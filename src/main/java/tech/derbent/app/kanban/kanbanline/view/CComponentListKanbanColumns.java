@@ -29,11 +29,9 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 	public void configureGrid(final CGrid<CKanbanColumn> grid) {
 		Check.notNull(grid, "Grid cannot be null");
 		grid.addIdColumn(CKanbanColumn::getId, "ID", "id");
-		grid.addIntegerColumn(CKanbanColumn::getItemOrder, "Order", "itemOrder");
 		grid.addShortTextColumn(CKanbanColumn::getName, "Name", "name");
-		grid.addShortTextColumn(CKanbanColumn::getDescription, "Description", "description");
 		grid.addShortTextColumn(this::formatIncludedStatuses, "Included Statuses", "includedStatuses");
-		grid.addBooleanColumn(CKanbanColumn::getActive, "Status", "Active", "Inactive");
+		grid.addBooleanColumn(CKanbanColumn::getDefaultColumn, "Default", "Yes", "No");
 	}
 
 	private String formatIncludedStatuses(final CKanbanColumn column) {
