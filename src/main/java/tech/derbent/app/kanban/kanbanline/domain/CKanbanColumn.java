@@ -26,25 +26,22 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	public static final String DEFAULT_ICON = "vaadin:columns";
 	public static final String ENTITY_TITLE_PLURAL = "Kanban Columns";
 	public static final String ENTITY_TITLE_SINGULAR = "Kanban Column";
-
+	public static final String VIEW_NAME = "Kanban Columns View";
 	@Column (name = "item_order", nullable = false)
 	@AMetaData (
 			displayName = "Order", required = false, readOnly = true, defaultValue = "1", description = "Sort order for kanban columns",
 			hidden = false
 	)
 	private Integer itemOrder = 1;
-
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "kanban_line_id", nullable = false)
 	@AMetaData (
 			displayName = "Kanban Line", required = true, readOnly = true, description = "Parent Kanban line that owns this column", hidden = true
 	)
 	private CKanbanLine kanbanLine;
-
 	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (
-			name = "ckanbancolumn_included_status",
-			joinColumns = @JoinColumn (name = "kanban_column_id"),
+			name = "ckanbancolumn_included_status", joinColumns = @JoinColumn (name = "kanban_column_id"),
 			inverseJoinColumns = @JoinColumn (name = "status_id")
 	)
 	@AMetaData (
@@ -64,22 +61,20 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 		setKanbanLine(kanbanLine);
 	}
 
+	public List<CProjectItemStatus> getIncludedStatuses() { return includedStatuses; }
+
 	@Override
 	public Integer getItemOrder() { return itemOrder; }
 
 	public CKanbanLine getKanbanLine() { return kanbanLine; }
-
-	public List<CProjectItemStatus> getIncludedStatuses() { return includedStatuses; }
-
-
-	@Override
-	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
 	public void setIncludedStatuses(final List<CProjectItemStatus> includedStatuses) {
 		Check.notNull(includedStatuses, "Included statuses cannot be null");
 		this.includedStatuses = new ArrayList<>(includedStatuses);
 	}
 
+	@Override
+	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
 	public void setKanbanLine(final CKanbanLine kanbanLine) {
 		if (kanbanLine == null) {
