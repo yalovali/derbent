@@ -30,7 +30,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 	public Class<CKanbanColumn> getEntityClass() { return CKanbanColumn.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return null; }
+	public Class<?> getInitializerServiceClass() { return CKanbanColumnInitializerService.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return null; }

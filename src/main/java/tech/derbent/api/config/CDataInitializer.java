@@ -62,6 +62,7 @@ import tech.derbent.app.deliverables.deliverable.service.CDeliverableService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
+import tech.derbent.app.kanban.kanbanline.service.CKanbanColumnInitializerService;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineInitializerService;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineService;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -1099,6 +1100,7 @@ public class CDataInitializer {
 					CRiskInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CKanbanColumnInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {
 						break;
 					}
