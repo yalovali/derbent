@@ -19,6 +19,7 @@ import tech.derbent.app.companies.domain.CCompany;
 @Table (name = "ckanbanline")
 @AttributeOverride (name = "id", column = @Column (name = "kanban_line_id"))
 public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
+
 	public static final String DEFAULT_COLOR = "#4DB6AC"; // Bold teal for Kanban headers
 	public static final String DEFAULT_ICON = "vaadin:barcode";
 	public static final String ENTITY_TITLE_PLURAL = "Kanban Lines";
@@ -31,6 +32,11 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 			hidden = false, createComponentMethod = "createKanbanColumnsComponent", dataProviderBean = "view", captionVisible = false
 	)
 	private Set<CKanbanColumn> kanbanColumns = new LinkedHashSet<>();
+	@AMetaData (
+			displayName = "Kanban Board", required = true, readOnly = false, description = "Kanban Board", hidden = false,
+			createComponentMethod = "createKanbanBoardComponent", dataProviderBean = "page", captionVisible = false
+	)
+	private final Boolean kanbanBoard = Boolean.TRUE;
 
 	/** Default constructor for JPA */
 	public CKanbanLine() {
@@ -80,7 +86,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 
 	public void setKanbanColumns(final Set<CKanbanColumn> columns) {
 		Check.notNull(columns, "Columns collection cannot be null");
-		this.kanbanColumns.clear();
+		kanbanColumns.clear();
 		for (final CKanbanColumn column : columns) {
 			addKanbanColumn(column);
 		}

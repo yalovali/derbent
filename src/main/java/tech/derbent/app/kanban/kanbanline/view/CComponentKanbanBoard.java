@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.ui.component.basic.CH3;
@@ -23,10 +25,9 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
 /** CComponentKanbanBoard - Displays a kanban line as a board with vertical columns and post-it style project items. */
-public class CComponentKanbanBoard extends CVerticalLayout {
+public class CComponentKanbanBoard extends CVerticalLayout implements HasValue<HasValue.ValueChangeEvent<CEntity>, CEntity> {
 
 	private static final long serialVersionUID = 1L;
-
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
 	private final CHorizontalLayout layoutColumns;
 	private CKanbanLine kanbanLine;
@@ -34,11 +35,10 @@ public class CComponentKanbanBoard extends CVerticalLayout {
 	private List<CProjectItem<?>> projectItems;
 	private final ISessionService sessionService;
 
-	public CComponentKanbanBoard(final CKanbanLine kanbanLine) {
+	public CComponentKanbanBoard() {
 		Check.notNull(kanbanLine, "Kanban line cannot be null for board component");
 		sessionService = CSpringContext.getBean(ISessionService.class);
 		Check.notNull(sessionService, "Session service cannot be null for Kanban board");
-		this.kanbanLine = kanbanLine;
 		allProjectItems = new ArrayList<>();
 		projectItems = new ArrayList<>();
 		layoutColumns = new CHorizontalLayout();
@@ -53,39 +53,23 @@ public class CComponentKanbanBoard extends CVerticalLayout {
 		applyFilters();
 	}
 
-	public void refreshComponent() {
-		Check.notNull(kanbanLine, "Kanban line cannot be null when refreshing board");
-		layoutColumns.removeAll();
-		final List<CKanbanColumn> columns = new ArrayList<>(kanbanLine.getKanbanColumns());
-		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
-		final Map<CKanbanColumn, List<CProjectItem<?>>> itemsByColumn = initializeColumnMap(columns);
-		final CKanbanColumn defaultColumn = columns.stream().filter(CKanbanColumn::getDefaultColumn).findFirst().orElse(null);
-		final Map<Long, CKanbanColumn> statusToColumn = buildStatusToColumnMap(columns);
-		for (final CProjectItem<?> item : projectItems) {
+	private void applyFilters() {
+		final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
+		final List<CProjectItem<?>> filtered = new ArrayList<>();
+		for (final CProjectItem<?> item : allProjectItems) {
 			if (item == null) {
 				continue;
 			}
-			final CKanbanColumn targetColumn = resolveTargetColumn(item, statusToColumn, defaultColumn);
-			if (targetColumn != null) {
-				itemsByColumn.get(targetColumn).add(item);
+			if (!matchesTypeFilter(item, criteria.getEntityType())) {
+				continue;
 			}
+			if (!matchesResponsibleFilter(item, criteria)) {
+				continue;
+			}
+			filtered.add(item);
 		}
-		for (final CKanbanColumn column : columns) {
-			layoutColumns.add(buildColumnLayout(column, itemsByColumn.get(column)));
-		}
-	}
-
-	public void setKanbanLine(final CKanbanLine kanbanLine) {
-		Check.notNull(kanbanLine, "Kanban line cannot be null");
-		this.kanbanLine = kanbanLine;
+		projectItems = filtered;
 		refreshComponent();
-	}
-
-	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
-		Check.notNull(projectItems, "Project items cannot be null for kanban board");
-		allProjectItems = new ArrayList<>(projectItems);
-		filterToolbar.setAvailableItems(allProjectItems);
-		applyFilters();
 	}
 
 	private CHorizontalLayout buildColumnHeader(final CKanbanColumn column) {
@@ -97,8 +81,8 @@ public class CComponentKanbanBoard extends CVerticalLayout {
 		headerLayout.add(title);
 		if (column.getDefaultColumn()) {
 			final Span defaultBadge = new Span("Default");
-			defaultBadge.getStyle().set("background-color", "#E3F2FD").set("color", "#0D47A1").set("padding", "2px 6px").set("border-radius",
-					"6px").set("font-size", "10px").set("font-weight", "600");
+			defaultBadge.getStyle().set("background-color", "#E3F2FD").set("color", "#0D47A1").set("padding", "2px 6px").set("border-radius", "6px")
+					.set("font-size", "10px").set("font-weight", "600");
 			headerLayout.add(defaultBadge);
 		}
 		return headerLayout;
@@ -109,8 +93,7 @@ public class CComponentKanbanBoard extends CVerticalLayout {
 		columnLayout.setPadding(true);
 		columnLayout.setSpacing(true);
 		columnLayout.setWidth("280px");
-		columnLayout.getStyle().set("background-color", "#F5F5F5").set("border-radius", "10px").set("box-shadow",
-				"0 1px 3px rgba(0, 0, 0, 0.1)");
+		columnLayout.getStyle().set("background-color", "#F5F5F5").set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
 		columnLayout.add(buildColumnHeader(column));
 		if (column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
 			final String statuses = column.getIncludedStatuses().stream().filter(Objects::nonNull).map(status -> status.getName())
@@ -150,36 +133,6 @@ public class CComponentKanbanBoard extends CVerticalLayout {
 		return itemsByColumn;
 	}
 
-	private CKanbanColumn resolveTargetColumn(final CProjectItem<?> item, final Map<Long, CKanbanColumn> statusToColumn,
-			final CKanbanColumn defaultColumn) {
-		if (item.getStatus() != null && item.getStatus().getId() != null) {
-			final CKanbanColumn matched = statusToColumn.get(item.getStatus().getId());
-			if (matched != null) {
-				return matched;
-			}
-		}
-		return defaultColumn;
-	}
-
-	private void applyFilters() {
-		final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
-		final List<CProjectItem<?>> filtered = new ArrayList<>();
-		for (final CProjectItem<?> item : allProjectItems) {
-			if (item == null) {
-				continue;
-			}
-			if (!matchesTypeFilter(item, criteria.getEntityType())) {
-				continue;
-			}
-			if (!matchesResponsibleFilter(item, criteria)) {
-				continue;
-			}
-			filtered.add(item);
-		}
-		projectItems = filtered;
-		refreshComponent();
-	}
-
 	private boolean matchesResponsibleFilter(final CProjectItem<?> item, final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria) {
 		final CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode mode = criteria.getResponsibleMode();
 		if (mode == null || mode == CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode.ALL) {
@@ -209,5 +162,51 @@ public class CComponentKanbanBoard extends CVerticalLayout {
 			return true;
 		}
 		return entityClass.isAssignableFrom(item.getClass());
+	}
+
+	public void refreshComponent() {
+		Check.notNull(kanbanLine, "Kanban line cannot be null when refreshing board");
+		layoutColumns.removeAll();
+		final List<CKanbanColumn> columns = new ArrayList<>(kanbanLine.getKanbanColumns());
+		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
+		final Map<CKanbanColumn, List<CProjectItem<?>>> itemsByColumn = initializeColumnMap(columns);
+		final CKanbanColumn defaultColumn = columns.stream().filter(CKanbanColumn::getDefaultColumn).findFirst().orElse(null);
+		final Map<Long, CKanbanColumn> statusToColumn = buildStatusToColumnMap(columns);
+		for (final CProjectItem<?> item : projectItems) {
+			if (item == null) {
+				continue;
+			}
+			final CKanbanColumn targetColumn = resolveTargetColumn(item, statusToColumn, defaultColumn);
+			if (targetColumn != null) {
+				itemsByColumn.get(targetColumn).add(item);
+			}
+		}
+		for (final CKanbanColumn column : columns) {
+			layoutColumns.add(buildColumnLayout(column, itemsByColumn.get(column)));
+		}
+	}
+
+	private CKanbanColumn resolveTargetColumn(final CProjectItem<?> item, final Map<Long, CKanbanColumn> statusToColumn,
+			final CKanbanColumn defaultColumn) {
+		if (item.getStatus() != null && item.getStatus().getId() != null) {
+			final CKanbanColumn matched = statusToColumn.get(item.getStatus().getId());
+			if (matched != null) {
+				return matched;
+			}
+		}
+		return defaultColumn;
+	}
+
+	public void setKanbanLine(final CKanbanLine kanbanLine) {
+		Check.notNull(kanbanLine, "Kanban line cannot be null");
+		this.kanbanLine = kanbanLine;
+		refreshComponent();
+	}
+
+	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
+		Check.notNull(projectItems, "Project items cannot be null for kanban board");
+		allProjectItems = new ArrayList<>(projectItems);
+		filterToolbar.setAvailableItems(allProjectItems);
+		applyFilters();
 	}
 }

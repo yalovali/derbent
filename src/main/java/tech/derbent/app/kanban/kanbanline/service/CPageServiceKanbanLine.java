@@ -7,6 +7,7 @@ import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
+import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanBoard;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
@@ -15,6 +16,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	private static final long serialVersionUID = 1L;
 	private CComponentListKanbanColumns componentKanbanColumns;
 	private CKanbanColumnService kanbanColumnService;
+	private CComponentKanbanBoard componentKanbanBoard;
 
 	public CPageServiceKanbanLine(final IPageServiceImplementer<CKanbanLine> view) {
 		super(view);
@@ -23,14 +25,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CKanbanColumnService", e);
 		}
-	}
-
-	public CComponentListKanbanColumns createKanbanColumnsComponent() {
-		if (componentKanbanColumns == null) {
-			componentKanbanColumns = new CComponentListKanbanColumns(kanbanColumnService);
-			componentKanbanColumns.registerWithPageService(this);
-		}
-		return componentKanbanColumns;
 	}
 
 	@Override
@@ -44,5 +38,20 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					e.getMessage());
 			throw e;
 		}
+	}
+
+	public CComponentKanbanBoard createKanbanBoardComponent() {
+		if (componentKanbanBoard == null) {
+			componentKanbanBoard = new CComponentKanbanBoard();
+		}
+		return componentKanbanBoard;
+	}
+
+	public CComponentListKanbanColumns createKanbanColumnsComponent() {
+		if (componentKanbanColumns == null) {
+			componentKanbanColumns = new CComponentListKanbanColumns(kanbanColumnService);
+			componentKanbanColumns.registerWithPageService(this);
+		}
+		return componentKanbanColumns;
 	}
 }
