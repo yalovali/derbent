@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.utils.Check;
@@ -29,12 +30,13 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	@OrderBy ("itemOrder ASC")
 	@AMetaData (
 			displayName = "Columns", required = false, readOnly = false, defaultValue = "", description = "Columns that belong to this Kanban line",
-			hidden = false, createComponentMethod = "createKanbanColumnsComponent", dataProviderBean = "view", captionVisible = false
+			hidden = false, createComponentMethod = "createKanbanColumnsComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private Set<CKanbanColumn> kanbanColumns = new LinkedHashSet<>();
+	@Transient
 	@AMetaData (
 			displayName = "Kanban Board", required = true, readOnly = false, description = "Kanban Board", hidden = false,
-			createComponentMethod = "createKanbanBoardComponent", dataProviderBean = "page", captionVisible = false
+			createComponentMethod = "createKanbanBoardComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private final Boolean kanbanBoard = Boolean.TRUE;
 

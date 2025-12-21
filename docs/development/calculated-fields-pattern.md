@@ -258,7 +258,7 @@ private Long totalStoryPoints;
 @Transient
 @AMetaData(
     displayName = "Component Widget",
-    dataProviderBean = "view",
+    dataProviderBean = "pageservice",
     dataProviderMethod = "getComponentWidget"
     // autoCalculate not set (defaults to false) ❌ Not auto-calculated
 )
@@ -284,7 +284,7 @@ For view-specific calculated fields, you can also use page services:
 @Transient
 @AMetaData(
     displayName = "Available Statuses",
-    dataProviderBean = "view",  // Special keyword for page service
+    dataProviderBean = "pageservice",  // Special keyword for page service
     dataProviderMethod = "getAvailableStatusesForProjectItem"
 )
 private List<CProjectItemStatus> availableStatuses;
@@ -344,7 +344,7 @@ The `@PostLoad` pattern leverages existing infrastructure classes:
 
 ### CDataProviderResolver
 - **Location**: `tech.derbent.api.annotations.CDataProviderResolver`
-- **Purpose**: Resolves service beans by name, handles special keywords like "view", "session", "context"
+- **Purpose**: Resolves service beans by name, handles special keywords like "pageservice", "session", "context"
 - **Key Method**: `resolveBean(String beanName, IContentOwner contentOwner)`
 - **Usage in @PostLoad**: Finds the service bean specified in `dataProviderBean` attribute
 

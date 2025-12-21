@@ -46,7 +46,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	// Centralized component map - stores all components from all panels
 	private final Map<String, Component> componentMap;
-	CFormBuilder<?> formBuilder = null;
+	private CFormBuilder<?> formBuilder = null;
 	private HasComponents formLayout = null;
 	private final Map<String, CPanelDetails> mapSectionPanels;
 	private final ISessionService sessionService;
@@ -76,7 +76,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		if (!persistenceUtil.isLoaded(screen, "screenLines")) {
 			screen = screenService.findByIdWithScreenLines(screen.getId());
 		}
-		if ((screen.getScreenLines() == null) || screen.getScreenLines().isEmpty()) {
+		if (screen.getScreenLines() == null || screen.getScreenLines().isEmpty()) {
 			LOGGER.warn("No lines found for screen: {}", screen.getName());
 			return new FormLayout(); // Return an empty layout if no lines are present
 		}
@@ -121,11 +121,11 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		return formLayout;
 	}
 
-	public CFormBuilder<?> getFormBuilder() { return formBuilder; }
-
 	/** Gets the centralized component map that contains all components from all panels.
 	 * @return the component map */
 	public Map<String, Component> getComponentMap() { return componentMap; }
+
+	public CFormBuilder<?> getFormBuilder() { return formBuilder; }
 
 	public CPanelDetails getSectionPanel(final String sectionName) {
 		Check.notNull(sectionName, "Section name cannot be null");

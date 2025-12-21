@@ -95,7 +95,8 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 			createPageHeader();
 			createDetailsSection();
 			createPageFooter();
-			rebuildEntityDetailsById(null);
+			Check.notNull(pageEntity.getDetailSection(), "pageEntity detail section cannot be null");
+			rebuildEntityDetailsById(pageEntity.getDetailSection().getId());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing dynamic page view for page '{}': {}", pageEntity != null ? pageEntity.getPageTitle() : "null",
 					e.getMessage());
@@ -131,5 +132,12 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void setCurrentEntity(CEntityDB entity) {}
+	public void setCurrentEntity(CEntityDB entity) {
+		LOGGER.debug("Setting current entity in dynamic page view without grid: {}", entity != null ? entity.getId() : "null");
+		try {
+			super.setCurrentEntity(entity);
+		} catch (final Exception e) {
+			throw e;
+		}
+	}
 }

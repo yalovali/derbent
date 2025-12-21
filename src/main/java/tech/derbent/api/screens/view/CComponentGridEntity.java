@@ -156,7 +156,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * <li>The method receives the current grid item and returns a widget component</li>
 	 * <li>If the widget implements IHasDragStart/IHasDragEnd, registers it with the page service for event binding</li>
 	 * </ol>
-	 * Example annotation: dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
+	 * Example annotation: dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
 	 * </p>
 	 * @param fieldInfo   the field metadata containing dataProviderBean and dataProviderMethod
 	 * @param displayName the column display name
@@ -828,12 +828,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	/** Resolves the widget provider bean based on the beanName.
-	 * @param beanName the bean name ("view" for CPageService, or a Spring bean name)
+	 * @param beanName the bean name ("pageservice" for CPageService, or a Spring bean name)
 	 * @return the resolved bean, or null if not found */
 	private Object resolveWidgetProviderBean(String beanName) {
 		try {
-			if ("view".equals(beanName)) {
-				// For "view" bean, get the CPageService from the IPageServiceImplementer
+			if ("pageservice".equals(beanName)) {
+				// For "pageservice" bean, get the CPageService from the IPageServiceImplementer
 				if (contentOwner instanceof final IPageServiceImplementer<?> pageServiceImplementer) {
 					return pageServiceImplementer.getPageService();
 				} else {

@@ -34,7 +34,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	public static final String VIEW_NAME = "Sprint Items View";
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
+			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprintItem> componentWidget = null;
 	// Transient field - loaded dynamically at runtime from itemId and itemType

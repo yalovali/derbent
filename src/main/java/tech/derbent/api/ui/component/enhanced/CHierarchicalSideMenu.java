@@ -74,7 +74,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				} else {
 					iconColor = CColorUtils.getStaticIconColorCode(clazz.getName());
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warn("Check route information for icon retrieval. Probably missing Class path or function.");
 				throw e;
 			}
@@ -85,7 +85,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, Gap.MEDIUM, MENU_ITEM_CLASS);
 			itemLayout.setWidthFull();
 			// Check if this item represents the current page
-			final boolean isCurrentPage = (path != null) && !path.trim().isEmpty() && (currentRoute != null) && currentRoute.equals(path.trim());
+			final boolean isCurrentPage = path != null && !path.trim().isEmpty() && currentRoute != null && currentRoute.equals(path.trim());
 			// Add icon with consistent sizing and colorful styling
 			Icon icon = CColorUtils.setIconClassSize(CColorUtils.createStyledIcon(iconName, iconColor), IconSize.MEDIUM);
 			if (icon == null) {
@@ -133,17 +133,17 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		public Double getOrder() { return order; }
 
 		private void handleItemClick(final ClickEvent<HorizontalLayout> event) {
-			if (isNavigation && (targetLevelKey != null)) {
+			if (isNavigation && targetLevelKey != null) {
 				// Navigate to sub-level
 				showLevel(targetLevelKey);
-			} else if ((path != null) && !path.trim().isEmpty()) {
+			} else if (path != null && !path.trim().isEmpty()) {
 				// Navigate to actual page
 				LOGGER.debug("Navigating to path: {}", path);
 				if (path.startsWith("dynamic.")) {
 					// Remove "dynamic." prefix and navigate
-					String dynamicPath = path.substring("dynamic.".length());
+					final String dynamicPath = path.substring("dynamic.".length());
 					// give rest of path as a parameter to dynamicview page
-					String dynamicViewPath = "cdynamicpagerouter/page:" + dynamicPath;
+					final String dynamicViewPath = "cdynamicpagerouter/page:" + dynamicPath;
 					UI.getCurrent().navigate(dynamicViewPath);
 					return;
 				} else {
@@ -162,8 +162,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		private final CMenuLevel parent;
 
 		public CMenuLevel(final String levelKey, final String displayName, final CMenuLevel parent) {
-			LOGGER.debug("Creating menu level: {} (parent: {})", levelKey, parent != null ? parent.getLevelKey() : "none" + " with display name: {}",
-					displayName);
+			// LOGGER.debug("Creating menu level: {} (parent: {})", levelKey, parent != null ? parent.getLevelKey() : "none" + " with display name:
+			// {}", displayName);
 			this.levelKey = levelKey;
 			this.displayName = displayName;
 			this.parent = parent;
@@ -175,7 +175,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final CMenuItem item = new CMenuItem(clazz, name, iconName, path, null, false, order);
 			items.add(item);
 			// Also add to flat list for search (only non-navigation items with paths)
-			if ((path != null) && !path.isBlank()) {
+			if (path != null && !path.isBlank()) {
 				allMenuItems.add(item);
 			}
 			return item;
@@ -291,7 +291,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		Check.notNull(pageMenuService, "Page menu service must not be null");
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
-		List<MenuEntry> allMenuEntries = new ArrayList<>();
+		final List<MenuEntry> allMenuEntries = new ArrayList<>();
 		allMenuEntries.addAll(MenuConfiguration.getMenuEntries());
 		allMenuEntries.addAll(pageMenuService.getDynamicMenuEntries());
 		// Process all menu entries (both static and dynamic)
@@ -343,11 +343,11 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		itemLayout.add(itemText);
 		// Add click listener to navigate
 		itemLayout.addClickListener(e -> {
-			if ((item.path != null) && !item.path.isBlank()) {
+			if (item.path != null && !item.path.isBlank()) {
 				LOGGER.debug("Search result clicked - navigating to path: {}", item.path);
 				if (item.path.startsWith("dynamic.")) {
-					String dynamicPath = item.path.substring("dynamic.".length());
-					String dynamicViewPath = "cdynamicpagerouter/page:" + dynamicPath;
+					final String dynamicPath = item.path.substring("dynamic.".length());
+					final String dynamicViewPath = "cdynamicpagerouter/page:" + dynamicPath;
 					UI.getCurrent().navigate(dynamicViewPath);
 				} else {
 					UI.getCurrent().navigate(item.path);
@@ -396,26 +396,26 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @return The color code from CPageEntity, or default color if not found */
 	private String getDynamicPageIconColor(final String path) {
 		try {
-			if ((path == null) || !path.startsWith("dynamic.")) {
+			if (path == null || !path.startsWith("dynamic.")) {
 				return CColorUtils.getStaticIconColorCode(CDynamicPageRouter.class.getName());
 			}
 			// Extract page ID from path
-			String pageIdStr = path.substring("dynamic.".length());
-			Long pageId = Long.parseLong(pageIdStr);
+			final String pageIdStr = path.substring("dynamic.".length());
+			final Long pageId = Long.parseLong(pageIdStr);
 			// Get the page entity and its color
-			CPageEntity pageEntity = pageMenuService.getPageEntityById(pageId);
+			final CPageEntity pageEntity = pageMenuService.getPageEntityById(pageId);
 			if (pageEntity != null) {
 				return pageEntity.getColor();
 			} else {
 				return CPageEntity.DEFAULT_COLOR;
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("Failed to get dynamic page icon color for path {}: {}", path, e.getMessage());
 		}
 		// Fallback to default dynamic page color
 		try {
 			return CColorUtils.getStaticIconColorCode(CDynamicPageRouter.class.getName());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("Failed to get fallback icon color: {}", e.getMessage());
 			return "#102bff"; // Hard-coded fallback
 		}
@@ -425,7 +425,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @param event The click event */
 	private void handleBackButtonClick(final ClickEvent<com.vaadin.flow.component.button.Button> event) {
 		LOGGER.debug("Back button clicked from level: {}", currentLevel != null ? currentLevel.getLevelKey() : "unknown");
-		if ((currentLevel != null) && (currentLevel.getParent() != null)) {
+		if (currentLevel != null && currentLevel.getParent() != null) {
 			showLevel(currentLevel.getParent().getLevelKey());
 		}
 	}
@@ -441,13 +441,13 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @param path The path to check
 	 * @return true if this is a dynamic page path */
 	private boolean isDynamicPagePath(final String path) {
-		return (path != null) && path.startsWith("dynamic.");
+		return path != null && path.startsWith("dynamic.");
 	}
 
 	/** Handles search field value changes.
 	 * @param value The new search value */
 	private void on_textFieldSearch_valueChanged(final String value) {
-		if ((value == null) || value.trim().isEmpty()) {
+		if (value == null || value.trim().isEmpty()) {
 			// Clear search - show current level
 			showLevel(currentLevel != null ? currentLevel.getLevelKey() : "root");
 		} else {
@@ -463,7 +463,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @param levelCount Number of hierarchy levels
 	 * @return Array of order values for each level */
 	private Double[] parseHierarchicalOrder(Double order, int levelCount) {
-		Double[] orderComponents = new Double[levelCount];
+		final Double[] orderComponents = new Double[levelCount];
 		if (order == null) {
 			// Use default order for all levels
 			for (int i = 0; i < levelCount; i++) {
@@ -472,8 +472,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			return orderComponents;
 		}
 		// Extract integer part (parent order) and fractional part (child orders)
-		int integerPart = (int) Math.floor(order);
-		double fractionalPart = order - integerPart;
+		final int integerPart = (int) Math.floor(order);
+		final double fractionalPart = order - integerPart;
 		if (levelCount == 1) {
 			// Single level - use the full order
 			orderComponents[0] = order;
@@ -486,10 +486,10 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			// Three or more levels - distribute the fractional part
 			// For order 4.123: parent=4, child1=1, child2=2, child3=3
 			orderComponents[0] = (double) integerPart;
-			String fractionalStr = String.format("%.10f", fractionalPart).substring(2); // Remove "0."
+			final String fractionalStr = String.format("%.10f", fractionalPart).substring(2); // Remove "0."
 			for (int i = 1; i < levelCount; i++) {
-				if ((i - 1) < fractionalStr.length()) {
-					char digit = fractionalStr.charAt(i - 1);
+				if (i - 1 < fractionalStr.length()) {
+					final char digit = fractionalStr.charAt(i - 1);
 					orderComponents[i] = (double) Character.getNumericValue(digit);
 				} else {
 					orderComponents[i] = 999.0; // Default for missing components
@@ -508,7 +508,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final String path = menuEntry.path();
 		final String iconName = menuEntry.icon();
 		final Double entryOrder = menuEntry.order();
-		boolean isDynamic = title.startsWith("dynamic/");
+		final boolean isDynamic = title.startsWith("dynamic/");
 		if (isDynamic) {
 			title = title.replace("dynamic/", "");
 		}
@@ -518,10 +518,10 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final int levelCount = Math.min(titleParts.length, MAX_MENU_LEVELS);
 		// Parse hierarchical order components if order contains dots (e.g., "4.1" means parent order 4, child order 1)
 		// Otherwise, use the same order for all levels
-		Double[] orderComponents = parseHierarchicalOrder(entryOrder, levelCount);
+		final Double[] orderComponents = parseHierarchicalOrder(entryOrder, levelCount);
 		// Ensure all parent levels exist
 		String currentLevelKey = "root";
-		for (int i = 0; i < (levelCount - 1); i++) {
+		for (int i = 0; i < levelCount - 1; i++) {
 			final String levelName = titleParts[i].trim();
 			final String childLevelKey = currentLevelKey + "." + levelName;
 			if (!menuLevels.containsKey(childLevelKey)) {
@@ -538,7 +538,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final String itemName = titleParts[levelCount - 1].trim();
 			final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
 			if (targetLevel != null) {
-				CMenuItem menuItem = targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
+				final CMenuItem menuItem = targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
 				pageTestAuxillaryService.addRoute(itemName, menuItem.iconName, menuItem.iconColor, path);
 			}
 		}

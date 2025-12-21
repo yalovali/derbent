@@ -82,7 +82,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	private LocalDate completionDate;
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
+			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
 	)
 	private final CComponentWidgetEntity<CActivity> componentWidget = null;
 	@Column (nullable = true)

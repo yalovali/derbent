@@ -13,7 +13,6 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceKanbanLine.class);
-	private static final long serialVersionUID = 1L;
 	private CComponentListKanbanColumns componentKanbanColumns;
 	private CKanbanColumnService kanbanColumnService;
 	private CComponentKanbanBoard componentKanbanBoard;
@@ -42,15 +41,18 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 
 	public CComponentKanbanBoard createKanbanBoardComponent() {
 		final CKanbanLine currentLine = getView().getCurrentEntity();
-		Check.notNull(currentLine, "Kanban line must be available to create board component");
+		// it is null when ui is created
+		// Check.notNull(currentLine, "Kanban line must be available to create board component");
 		if (componentKanbanBoard == null) {
 			componentKanbanBoard = new CComponentKanbanBoard();
 		}
+		// this is always null here, no problem
 		componentKanbanBoard.setValue(currentLine);
 		return componentKanbanBoard;
 	}
 
 	public CComponentListKanbanColumns createKanbanColumnsComponent() {
+		LOGGER.debug("Creating Kanban columns component for Kanban line page service.");
 		if (componentKanbanColumns == null) {
 			componentKanbanColumns = new CComponentListKanbanColumns(kanbanColumnService);
 			componentKanbanColumns.registerWithPageService(this);

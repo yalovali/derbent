@@ -2,10 +2,12 @@ package tech.derbent.api.grid.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.base.users.domain.CUser;
 
 /** Compact ID renderer that follows the CLabelEntity pattern: icon + ID value, aligned and click-friendly. */
 public class CComponentId extends CLabelEntity {
@@ -33,6 +35,11 @@ public class CComponentId extends CLabelEntity {
 			return;
 		}
 		try {
+			if (entity instanceof CUser) {
+				final Avatar avatar = createUserAvatar((CUser) entity, ICON_SIZE);
+				add(avatar);
+				return;
+			}
 			final Icon icon = CColorUtils.getIconForEntity(entity);
 			if (icon != null) {
 				icon.getStyle().set("width", ICON_SIZE).set("height", ICON_SIZE).set("flex-shrink", "0");

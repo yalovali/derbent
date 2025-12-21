@@ -1028,7 +1028,7 @@ public abstract class CBaseUITest {
 
 	/** Builds a screenshot name in the format view-scenario-success|failure using deterministic components. */
 	protected String buildViewScreenshotName(final Class<?> viewClass, final String scenario, final boolean success) {
-		final String identifier = sanitizeForFileName(resolveViewIdentifier(viewClass), "view");
+		final String identifier = sanitizeForFileName(resolveViewIdentifier(viewClass), "pageservice");
 		final String scenarioPart = sanitizeForFileName(Optional.ofNullable(scenario).orElse("scenario"), "scenario");
 		final String status = success ? SCREENSHOT_SUCCESS_SUFFIX : SCREENSHOT_FAILURE_SUFFIX;
 		return String.join("-", identifier, scenarioPart, status);

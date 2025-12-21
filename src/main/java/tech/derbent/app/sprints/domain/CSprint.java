@@ -49,7 +49,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@Transient
 	@AMetaData (
 			displayName = "Item Detail", required = false, readOnly = false, description = "Item fields", hidden = false,
-			createComponentMethod = "createSpritBacklogComponent", dataProviderBean = "view", captionVisible = false
+			createComponentMethod = "createSpritBacklogComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private final List<CSprintItem> backlogItems = new ArrayList<>();
 	@Column (nullable = true, length = 7)
@@ -62,7 +62,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@Transient
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "view", dataProviderMethod = "getComponentWidget"
+			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprint> componentWidget = null;
 	// Sprint Basic Information
@@ -95,7 +95,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@Transient
 	@AMetaData (
 			displayName = "Backlog Items", required = false, readOnly = false, description = "Items (activities, meetings, etc.", hidden = false,
-			createComponentMethod = "createItemDetailsComponent", dataProviderBean = "view", captionVisible = false
+			createComponentMethod = "createItemDetailsComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private final int itemDetails = 0;
 	// Sprint Items - Ordered collection of activities and meetings included in this sprint
@@ -106,7 +106,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@AMetaData (
 			displayName = "Sprint Items", required = false, readOnly = false,
 			description = "Items (activities, meetings, etc.) included in this sprint", hidden = false,
-			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "view", captionVisible = false
+			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private List<CSprintItem> sprintItems = new ArrayList<>();
 	@Column (nullable = true)

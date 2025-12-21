@@ -33,7 +33,7 @@ public final class CDataProviderResolver {
 			bean = contentOwner;
 		} else if ("session".equals(beanName)) {
 			bean = CSpringContext.getBean(CSessionService.class);
-		} else if ("view".equals(beanName)) {
+		} else if ("pageservice".equals(beanName)) {
 			Check.instanceOf(contentOwner, IPageServiceImplementer.class,
 					"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
 			bean = ((IPageServiceImplementer) contentOwner).getPageService();

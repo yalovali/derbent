@@ -658,7 +658,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	@Override
 	public void populateForm() {
-		LOGGER.debug("populateForm called - refreshing sprint items grid");
+		LOGGER.debug("Populating form - refreshing grid if master entity is set");
 		if (getMasterEntity() != null && getMasterEntity().getId() != null) {
 			refreshGrid();
 		} else {

@@ -51,6 +51,7 @@ import tech.derbent.base.users.domain.CUser;
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
  * components. It extends Composite to allow for easy composition of the toolbar's content. */
 public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>> extends Composite<Header> implements IProjectListChangeListener {
+
 	private static final long serialVersionUID = 1L;
 
 	/* just used to create a group of components with nice styling. Not related to a toolbar */
@@ -190,25 +191,25 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 			// Get icon for the page
 			Icon icon;
 			try {
-				if ((page.getIconString() != null) && page.getIconString().startsWith("vaadin:")) {
+				if (page.getIconString() != null && page.getIconString().startsWith("vaadin:")) {
 					icon = CColorUtils.createStyledIcon(page.getIconString());
 				} else {
 					icon = CColorUtils.createStyledIcon("vaadin:file-text-o"); // Default fallback
 				}
 				icon.setSize("32px");
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warn("Could not parse icon '{}' for page '{}', using default", page.getIconString(), page.getPageTitle());
 				icon = CColorUtils.createStyledIcon("vaadin:file-text-o");
 			}
 			// Generate a color for the button based on page ID (for consistency)
-			String[] colors = {
+			final String[] colors = {
 					"#2196F3", "#4CAF50", "#FF9800", "#9C27B0", "#607D8B", "#E91E63", "#795548", "#009688"
 			};
-			String color = colors[Math.abs(page.getId().hashCode()) % colors.length];
+			final String color = colors[Math.abs(page.getId().hashCode()) % colors.length];
 			// Create the route for the dynamic page
-			String route = page.getRoute(); // This returns "cdynamicpagerouter." + getId()
+			final String route = page.getRoute(); // This returns "cdynamicpagerouter." + getId()
 			return createColorfulIconButton(icon, page.getPageTitle(), color, route);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating dynamic page button for page '{}': {}", page.getPageTitle(), e.getMessage());
 			throw new RuntimeException(e);
 		}
@@ -250,15 +251,15 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		// Handle click - navigate to last visited page
 		lastVisitedButton.addClickListener(e -> {
 			try {
-				String lastVisitedRoute = getLastVisitedRoute();
-				if ((lastVisitedRoute != null) && !lastVisitedRoute.trim().isEmpty()) {
+				final String lastVisitedRoute = getLastVisitedRoute();
+				if (lastVisitedRoute != null && !lastVisitedRoute.trim().isEmpty()) {
 					LOGGER.info("Last visited button clicked, navigating to: {}", lastVisitedRoute);
 					UI.getCurrent().navigate(lastVisitedRoute);
 				} else {
 					LOGGER.info("No last visited route found, navigating to home");
 					UI.getCurrent().navigate("home");
 				}
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("Error navigating to last visited page: {}", ex.getMessage());
 				UI.getCurrent().navigate("home");
 			}
@@ -292,7 +293,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 					ui.get().push();
 					LOGGER.debug("UI push successful after layout toggle");
 				} catch (final IllegalStateException ex) {
-					if ((ex.getMessage() != null) && ex.getMessage().contains("Push not enabled")) {
+					if (ex.getMessage() != null && ex.getMessage().contains("Push not enabled")) {
 						LOGGER.debug("Push not enabled, layout change will be reflected on next user interaction");
 					} else {
 						LOGGER.warn("Error during UI push in toolbar: {}", ex.getMessage());
@@ -338,22 +339,22 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 	 * @return the quick access toolbar
 	 * @throws Exception */
 	private Div createQuickAccessToolbar() throws Exception {
-		List<CButton> buttons = new ArrayList<>();
+		final List<CButton> buttons = new ArrayList<>();
 		// Add last visited button first
 		buttons.add(createLastVisitedButton());
 		// Add static buttons (these will be deprecated in favor of dynamic pages)
 		buttons.add(createNavigateButtonForView(CProjectGanntView.class));
 		buttons.add(createNavigateButtonForView(CDetailSectionView.class));
 		// Add dynamic page buttons if pageMenuIntegrationService is available
-		if ((pageMenuIntegrationService != null) && pageMenuIntegrationService.isReady()) {
+		if (pageMenuIntegrationService != null && pageMenuIntegrationService.isReady()) {
 			try {
-				List<CPageEntity> quickToolbarPages = pageMenuIntegrationService.getQuickToolbarPages();
-				for (CPageEntity page : quickToolbarPages) {
-					CButton pageButton = createDynamicPageButton(page);
+				final List<CPageEntity> quickToolbarPages = pageMenuIntegrationService.getQuickToolbarPages();
+				for (final CPageEntity page : quickToolbarPages) {
+					final CButton pageButton = createDynamicPageButton(page);
 					buttons.add(pageButton);
-					LOGGER.debug("Added dynamic page button for: {}", page.getPageTitle());
+					// LOGGER.debug("Added dynamic page button for: {}", page.getPageTitle());
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warn("Could not load dynamic quick toolbar pages: {}", e.getMessage());
 			}
 		} else {
@@ -372,7 +373,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		// Create layout toggle button
 		createLayoutToggleButton();
 		// Add components to right side if they are available
-		if ((userAvatar != null) && (usernameSpan != null)) {
+		if (userAvatar != null && usernameSpan != null) {
 			rightSide.add(userAvatar, usernameSpan);
 		}
 		if (layoutToggleButton != null) {
@@ -405,8 +406,8 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		final var activeUser = sessionService.getActiveUser();
 		if (activeUser.isPresent()) {
 			final CUser user = activeUser.get();
-			final String username = (user.getName() != null) && !user.getName().trim().isEmpty() ? user.getName() : user.getLogin();
-			if ((username != null) && !username.trim().isEmpty()) {
+			final String username = user.getName() != null && !user.getName().trim().isEmpty() ? user.getName() : user.getLogin();
+			if (username != null && !username.trim().isEmpty()) {
 				createUserComponents(username);
 				return;
 			}
@@ -428,7 +429,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 			if (systemSettingsService != null) {
 				return systemSettingsService.getLastVisitedView();
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("Error getting last visited route: {}", e.getMessage());
 		}
 		return "home"; // Default fallback
@@ -470,7 +471,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 			projectComboBox.setItems(projects);
 			// If no project is selected but projects are available, select the first
 			// one
-			if ((projectComboBox.getValue() == null) && !projects.isEmpty()) {
+			if (projectComboBox.getValue() == null && !projects.isEmpty()) {
 				projectComboBox.setValue(projects.get(0));
 			}
 		} catch (final Exception e) {
@@ -484,12 +485,12 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		String displayTitle = title;
 		try {
 			if (sessionService != null) {
-				var company = sessionService.getCurrentCompany();
+				final var company = sessionService.getCurrentCompany();
 				if (company != null) {
 					displayTitle = title + " - " + company.getName();
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.debug("Could not get company name for title: {}", e.getMessage());
 		}
 		pageTitle.setText(displayTitle);

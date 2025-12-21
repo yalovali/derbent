@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -203,15 +204,7 @@ public class CLabelEntity extends Div {
 			label.getStyle().set("color", "#666").set("font-style", "italic");
 			return label;
 		}
-		try {
-			final Icon icon = CColorUtils.getIconForEntity(user);
-			if (icon != null) {
-				CColorUtils.styleIcon(icon);
-				label.add(icon);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not create icon for user: {}", e.getMessage());
-		}
+		label.add(createUserAvatar(user));
 		String displayName = user.getName();
 		if (user.getLastname() != null && !user.getLastname().isEmpty()) {
 			displayName += " " + user.getLastname();
@@ -308,7 +301,9 @@ public class CLabelEntity extends Div {
 				getStyle().set("color", CColorUtils.getContrastTextColor(color));
 				getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
 			}
-			if (entity instanceof IHasIcon && showIconColor) {
+			if (entity instanceof CUser && showIconColor) {
+				add(createUserAvatar((CUser) entity));
+			} else if (entity instanceof IHasIcon && showIconColor) {
 				final Icon icon = CColorUtils.getIconForEntity(entity);
 				CColorUtils.styleIcon(icon);
 				final String color = getColorForEntity(entity);
@@ -322,5 +317,17 @@ public class CLabelEntity extends Div {
 			LOGGER.error("Error setting value for CLabelEntity: {}", e.getMessage());
 			throw e;
 		}
+	}
+
+	protected static Avatar createUserAvatar(final CUser user) {
+		return createUserAvatar(user, "24px");
+	}
+
+	protected static Avatar createUserAvatar(final CUser user, final String size) {
+		final Avatar avatar = user.getAvatar();
+		avatar.setWidth(size);
+		avatar.setHeight(size);
+		avatar.getStyle().set("flex-shrink", "0");
+		return avatar;
 	}
 }
