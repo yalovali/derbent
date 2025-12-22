@@ -25,6 +25,10 @@ public interface IKanbanColumnRepository extends IAbstractRepository<CKanbanColu
 	@Query ("SELECT COALESCE(MAX(e.itemOrder), 0) + 1 FROM #{#entityName} e WHERE e.kanbanLine = :master")
 	Integer getNextItemOrder(@Param ("master") CKanbanLine master);
 
+	@Query ("SELECT DISTINCT e FROM #{#entityName} e LEFT JOIN FETCH e.kanbanLine LEFT JOIN FETCH e.includedStatuses "
+			+ "WHERE e.kanbanLine = :master AND LOWER(e.name) = LOWER(:name)")
+	Optional<CKanbanColumn> findByMasterAndNameIgnoreCase(@Param ("master") CKanbanLine master, @Param ("name") String name);
+
 	@Query ("SELECT DISTINCT e FROM #{#entityName} e LEFT JOIN FETCH e.kanbanLine LEFT JOIN FETCH e.includedStatuses WHERE e.id = :id")
 	Optional<CKanbanColumn> findByIdWithLine(@Param ("id") Long id);
 }
