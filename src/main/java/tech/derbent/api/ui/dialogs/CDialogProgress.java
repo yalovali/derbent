@@ -20,6 +20,7 @@ public final class CDialogProgress extends CDialog {
 		Check.notBlank(message, "Progress dialog message cannot be blank");
 		this.title = title;
 		this.message = message;
+		setId("custom-progress-dialog");
 		try {
 			setupDialog();
 			setCloseOnEsc(false);

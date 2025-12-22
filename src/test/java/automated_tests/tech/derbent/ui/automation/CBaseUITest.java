@@ -51,6 +51,14 @@ public abstract class CBaseUITest {
 	protected static final String SCREENSHOT_FAILURE_SUFFIX = "failure";
 	private static final String FIELD_ID_PREFIX = "field";
 	private static final String FORCE_SAMPLE_RELOAD_PROPERTY = "playwright.forceSampleReload";
+	private static final String LOGIN_BUTTON_ID = "cbutton-login";
+	private static final String RESET_DB_FULL_BUTTON_ID = "cbutton-db-full";
+	private static final String RESET_DB_MIN_BUTTON_ID = "cbutton-db-min";
+	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
+	private static final String INFO_OK_BUTTON_ID = "cbutton-ok";
+	private static final String EXCEPTION_DIALOG_ID = "custom-exception-dialog";
+	private static final String EXCEPTION_DETAILS_DIALOG_ID = "custom-exception-details-dialog";
+	private static final String PROGRESS_DIALOG_ID = "custom-progress-dialog";
 	private static final AtomicBoolean SAMPLE_DATA_INITIALIZED = new AtomicBoolean(false);
 	private static final Object SAMPLE_DATA_LOCK = new Object();
 	
@@ -63,6 +71,7 @@ public abstract class CBaseUITest {
 	/** All view classes */
 	private Browser browser;
 	private BrowserContext context;
+	private boolean consoleListenerRegistered = false;
 	/** Kanban view classes */
 	protected Class<?>[] kanbanViewClasses = {};
 	/** Array of main view classes for testing */
@@ -346,14 +355,10 @@ public abstract class CBaseUITest {
 				throw new AssertionError("Password input field not found on login page");
 			}
 			clickLoginButton();
-			
-			// FAIL-FAST CHECK: After login button click
+
+			failFastIfLoginErrorVisible("After Login Button Click");
 			performFailFastCheck("After Login Button Click");
-			
-			wait_afterlogin();
-			
-			// FAIL-FAST CHECK: After login wait  
-			performFailFastCheck("After Login Wait");
+			waitForLoginSuccess();
 			
 			LOGGER.info("✅ Login successful - application shell detected");
 			takeScreenshot("post-login", false);
@@ -387,6 +392,36 @@ public abstract class CBaseUITest {
 			LOGGER.warn("⚠️ Unable to determine current URL before ensuring login view: {}", e.getMessage());
 		}
 		wait_loginscreen();
+	}
+
+	private void failFastIfLoginErrorVisible(final String controlPoint) {
+		final Locator errorLabel = page.locator("#custom-error-message");
+		if (errorLabel.count() == 0) {
+			return;
+		}
+		try {
+			if (errorLabel.first().isVisible()) {
+				final String text = errorLabel.first().textContent();
+				if ((text != null) && !text.trim().isEmpty()) {
+					throw new AssertionError("Login failed at " + controlPoint + ": " + text.trim());
+				}
+			}
+		} catch (PlaywrightException e) {
+			throw new AssertionError("Failed to evaluate login error label at " + controlPoint + ": " + e.getMessage(), e);
+		}
+	}
+
+	private void waitForLoginSuccess() {
+		final int maxAttempts = 30; // 15 seconds max wait
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			failFastIfLoginErrorVisible("Login Wait");
+			if (page.locator("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout").count() > 0) {
+				return;
+			}
+			performFailFastCheck("Login Wait");
+			wait_500();
+		}
+		throw new AssertionError("Login did not complete within expected time");
 	}
 
 	/** Ensures a company is selected in the login form so multi-tenant logins succeed. */
@@ -451,19 +486,10 @@ public abstract class CBaseUITest {
 
 	/** Clicks the login button using tolerant selector logic. */
 	protected void clickLoginButton() {
-		final String[] selectors = {
-				"vaadin-button:has-text('Login')", "button:has-text('Login')", "vaadin-button[theme~='primary']", "vaadin-button"
-		};
-		for (String selector : selectors) {
-			final Locator loginButton = page.locator(selector);
-			if (loginButton.count() > 0) {
-				loginButton.first().click();
-				wait_500();
-				LOGGER.info("▶️ Clicked login button using selector {}", selector);
-				return;
-			}
-		}
-		throw new AssertionError("Login button not found on login page");
+		final Locator loginButton = locatorById(LOGIN_BUTTON_ID);
+		loginButton.first().click();
+		wait_500();
+		LOGGER.info("▶️ Clicked login button using id #{}", LOGIN_BUTTON_ID);
 	}
 
 	/** Triggers the sample data initialization flow via the login screen button if present. */
@@ -486,20 +512,16 @@ public abstract class CBaseUITest {
 				}
 				try {
 					wait_loginscreen();
-					final Locator minimalButton = page.locator(
-							"vaadin-button:has-text('DB Min'), button:has-text('DB Min'), vaadin-button[id*='db-min'], button[id*='db-min'], vaadin-button[title*='Minimum'], button[title*='Minimum']");
-					final Locator fullButton = page.locator(
-							"vaadin-button:has-text('DB Full'), button:has-text('DB Full'), vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), vaadin-button[id*='reset'], button[id*='reset']");
+					final Locator fullButton = page.locator("#" + RESET_DB_FULL_BUTTON_ID);
+					final Locator minimalButton = page.locator("#" + RESET_DB_MIN_BUTTON_ID);
 					final Locator targetButton = fullButton.count() > 0 ? fullButton.first()
 							: (minimalButton.count() > 0 ? minimalButton.first() : null);
 					if (targetButton == null) {
-						LOGGER.info("ℹ️ 'Reset Database' button not present on login view; assuming sample data is available");
-						SAMPLE_DATA_INITIALIZED.compareAndSet(false, true);
-						return;
+						throw new AssertionError("Database reset button not found on login page");
 					}
-					String buttonType = fullButton.count() > 0 ? "DB Full" : "DB Min";
+					final String buttonType = fullButton.count() > 0 ? "DB Full" : "DB Min";
 					LOGGER.info("📥 Loading sample data via login screen button ({})", buttonType);
-					Locator button = targetButton;
+					final Locator button = targetButton;
 					
 					try {
 						String buttonText = button.textContent();
@@ -533,6 +555,8 @@ public abstract class CBaseUITest {
 					
 					// FAIL-FAST CHECK: After confirmation dialog
 					performFailFastCheck("After Confirmation Dialog");
+
+					waitForProgressDialogToComplete();
 					
 					closeInformationDialogIfPresent();
 					
@@ -555,6 +579,7 @@ public abstract class CBaseUITest {
 				if (forceReload) {
 					SAMPLE_DATA_INITIALIZED.set(false);
 				}
+				throw new AssertionError("Sample data initialization failed: " + e.getMessage(), e);
 			}
 		}
 	}
@@ -565,82 +590,16 @@ public abstract class CBaseUITest {
 		LOGGER.info("🔍 Looking for confirmation dialog to reset database...");
 		
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			performFailFastCheck("Confirmation Dialog Wait");
 			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
 			if (overlay.count() > 0) {
 				LOGGER.info("📋 Confirmation dialog detected (attempt {}/{})", attempt + 1, maxAttempts);
-				
-				// Method 1: Try keyboard navigation (Tab to Yes + Enter)
-				try {
-					LOGGER.info("🎯 Trying keyboard navigation method...");
-					page.keyboard().press("Tab"); // Move to Yes button
-					wait_500();
-					page.keyboard().press("Enter"); // Press Enter to click Yes
-					LOGGER.info("✅ Confirmation button activated via keyboard (Tab + Enter)");
-					
-					// Wait for dialog to close
-					waitForOverlayToClose("vaadin-dialog-overlay[opened]");
-					LOGGER.info("✅ Sample data reload confirmed - dialog closed via keyboard");
-					return;
-				} catch (Exception keyboardError) {
-					LOGGER.warn("⚠️ Keyboard method failed: {}", keyboardError.getMessage());
-				}
-				
-				// Method 2: Try direct button selector without overlay
-				try {
-					LOGGER.info("🎯 Trying direct button selector method...");
-					final Locator directButton = page.locator("vaadin-button:has-text('Yes')");
-					if (directButton.count() > 0) {
-						directButton.first().click(new Locator.ClickOptions().setForce(true));
-						LOGGER.info("✅ Confirmation button clicked via direct selector");
-						
-						waitForOverlayToClose("vaadin-dialog-overlay[opened]");
-						LOGGER.info("✅ Sample data reload confirmed - dialog closed via direct click");
-						return;
-					}
-				} catch (Exception directClickError) {
-					LOGGER.warn("⚠️ Direct button click failed: {}", directClickError.getMessage());
-				}
-				
-				// Method 3: Try JavaScript click on button inside overlay
-				try {
-					LOGGER.info("🎯 Trying JavaScript method...");
-					final Locator confirmButton = overlay.locator("vaadin-button:has-text('Yes')");
-					if (confirmButton.count() > 0) {
-						String buttonText = confirmButton.first().textContent();
-						LOGGER.info("🖱️ Found confirmation button: '{}', clicking with JavaScript", buttonText);
-						
-						// Use JavaScript to directly trigger the click event
-						page.evaluate("arguments[0].click()", confirmButton.first());
-						LOGGER.info("✅ Confirmation button clicked via JavaScript");
-						
-						waitForOverlayToClose("vaadin-dialog-overlay[opened]");
-						LOGGER.info("✅ Sample data reload confirmed - dialog closed via JavaScript");
-						return;
-					}
-				} catch (Exception jsError) {
-					LOGGER.error("❌ JavaScript click failed: {}", jsError.getMessage());
-				}
-				
-				// FAIL-FAST: If all methods failed, throw exception immediately
-				LOGGER.error("❌ CRITICAL: All confirmation dialog interaction methods failed!");
-				try {
-					Locator allButtons = overlay.locator("vaadin-button, button");
-					int buttonCount = allButtons.count();
-					LOGGER.error("🔍 Debug info - Found {} buttons in dialog:", buttonCount);
-					for (int i = 0; i < buttonCount; i++) {
-						try {
-							String text = allButtons.nth(i).textContent();
-							LOGGER.error("  - Button {}: '{}'", i + 1, text);
-						} catch (Exception e) {
-							LOGGER.error("  - Button {}: Unable to read text", i + 1);
-						}
-					}
-				} catch (Exception debugError) {
-					LOGGER.error("❌ Failed to debug buttons: {}", debugError.getMessage());
-				}
-				
-				// FAIL-FAST: Throw exception to stop test execution immediately
-				throw new RuntimeException("FAIL-FAST: Cannot interact with confirmation dialog. All methods (keyboard, direct click, JavaScript) failed. Test cannot continue without database reset.");
+				final Locator confirmButton = locatorById(CONFIRM_YES_BUTTON_ID);
+				LOGGER.info("🖱️ Clicking confirmation dialog button #{}", CONFIRM_YES_BUTTON_ID);
+				confirmButton.first().click();
+				waitForOverlayToClose("vaadin-dialog-overlay[opened]");
+				LOGGER.info("✅ Sample data reload confirmed - dialog closed");
+				return;
 			} else {
 				LOGGER.debug("🔍 No confirmation dialog found (attempt {}/{})", attempt + 1, maxAttempts);
 			}
@@ -657,6 +616,7 @@ public abstract class CBaseUITest {
 		LOGGER.info("🔍 Looking for information dialog after database reset...");
 		
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			performFailFastCheck("Information Dialog Wait");
 			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
 			if (overlay.count() == 0) {
 				LOGGER.debug("🔍 No information dialog found (attempt {}/{})", attempt + 1, maxAttempts);
@@ -665,53 +625,66 @@ public abstract class CBaseUITest {
 			}
 			
 			LOGGER.info("📋 Information dialog detected (attempt {}/{})", attempt + 1, maxAttempts);
-			final Locator okButton = overlay.locator(
-				"vaadin-button:has-text('OK'), " +
-				"vaadin-button:has-text('Tamam'), " +
-				"vaadin-button:has-text('Close'), " +
-				"button:has-text('OK'), " +
-				"button:has-text('Close')"
-			);
+			final Locator okButton = locatorById(INFO_OK_BUTTON_ID);
+			LOGGER.info("🖱️ Clicking information dialog button #{}", INFO_OK_BUTTON_ID);
+			okButton.first().click();
+			LOGGER.info("✅ Information dialog OK button clicked");
 			
-			if (okButton.count() > 0) {
-				String buttonText = okButton.first().textContent();
-				LOGGER.info("🖱️ Clicking information dialog OK button: '{}'", buttonText);
-				okButton.first().click();
-				LOGGER.info("✅ Information dialog OK button clicked");
-				
-				waitForOverlayToClose("vaadin-dialog-overlay[opened]");
-				LOGGER.info("✅ Information dialog dismissed after sample data reload");
-				return;
-			} else {
-				LOGGER.warn("⚠️ Information dialog found but no OK button detected");
-				// Log available buttons for debugging
-				Locator allButtons = overlay.locator("vaadin-button, button");
-				int buttonCount = allButtons.count();
-				LOGGER.info("🔍 Found {} buttons in information dialog:", buttonCount);
-				for (int i = 0; i < buttonCount; i++) {
-					try {
-						String text = allButtons.nth(i).textContent();
-						LOGGER.info("  - Button {}: '{}'", i + 1, text);
-					} catch (Exception e) {
-						LOGGER.warn("  - Button {}: Unable to read text", i + 1);
-					}
-				}
-			}
-			wait_500();
+			waitForOverlayToClose("vaadin-dialog-overlay[opened]");
+			LOGGER.info("✅ Information dialog dismissed after sample data reload");
+			return;
 		}
 		LOGGER.warn("⚠️ Information dialog did not present an OK button to dismiss after {} attempts ({} seconds)", maxAttempts, maxAttempts * 0.5);
+		throw new AssertionError("Information dialog did not appear after database reset");
 	}
 
 	/** Waits for the specified Vaadin overlay selector to disappear. */
 	private void waitForOverlayToClose(String overlaySelector) {
 		final int maxAttempts = 10; // 5 seconds max wait
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			performFailFastCheck("Overlay Close Wait");
 			if (page.locator(overlaySelector).count() == 0) {
 				return;
 			}
 			wait_500();
 		}
 		LOGGER.warn("⚠️ Overlay {} still present after waiting {} seconds", overlaySelector, maxAttempts * 0.5);
+	}
+
+	private void waitForProgressDialogToComplete() {
+		final int openAttempts = 20; // 10 seconds to appear
+		LOGGER.info("⏳ Waiting for progress dialog to appear");
+		boolean opened = false;
+		for (int attempt = 0; attempt < openAttempts; attempt++) {
+			performFailFastCheck("Progress Dialog Open Wait");
+			if (page.locator("#" + PROGRESS_DIALOG_ID + "[opened]").count() > 0) {
+				opened = true;
+				break;
+			}
+			if (page.locator("#" + INFO_OK_BUTTON_ID).count() > 0) {
+				LOGGER.info("✅ Information dialog detected without progress dialog");
+				return;
+			}
+			wait_500();
+		}
+		if (!opened) {
+			throw new AssertionError("Progress or information dialog did not appear after database reset");
+		}
+		LOGGER.info("⏳ Progress dialog detected - waiting for completion");
+		final int closeAttempts = 120; // 60 seconds max wait
+		for (int attempt = 0; attempt < closeAttempts; attempt++) {
+			performFailFastCheck("Progress Dialog Close Wait");
+			if (page.locator("#" + INFO_OK_BUTTON_ID).count() > 0) {
+				LOGGER.info("✅ Information dialog detected after progress dialog");
+				return;
+			}
+			if (page.locator("#" + PROGRESS_DIALOG_ID + "[opened]").count() == 0) {
+				LOGGER.info("✅ Progress dialog closed");
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Progress dialog did not close after database reset");
 	}
 
 	/** Visits all menu items silently to ensure dynamic entries are initialized. */
@@ -975,6 +948,11 @@ public abstract class CBaseUITest {
 			}
 			context = browser.newContext(contextOptions);
 			page = context.newPage();
+			consoleListenerRegistered = false;
+			synchronized (EXCEPTION_LOCK) {
+				DETECTED_EXCEPTIONS.clear();
+			}
+			registerConsoleListener();
 			page.navigate("http://localhost:" + port + "/login");
 			LOGGER.info("✅ Test environment setup complete - navigated to http://localhost:{}/login", port);
 		} catch (Exception e) {
@@ -1513,7 +1491,7 @@ public abstract class CBaseUITest {
 	/** Waits for login screen to be ready */
 	protected void wait_loginscreen() {
 		try {
-			page.waitForSelector("#custom-username-input, #custom-password-input, vaadin-button:has-text('Login')",
+			page.waitForSelector("#custom-username-input, #custom-password-input, #" + LOGIN_BUTTON_ID,
 					new Page.WaitForSelectorOptions().setTimeout(15000));
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Login screen not detected: {}", e.getMessage());
@@ -2031,16 +2009,7 @@ public abstract class CBaseUITest {
 	 */
 	protected void checkForExceptionsAndFailFast(String controlPoint) {
 		try {
-			// Set up log listener to capture console errors
-			page.onConsoleMessage(msg -> {
-				String text = msg.text();
-				if (text != null && (text.contains("ERROR") || text.contains("Exception") || 
-					text.contains("CRITICAL") || text.contains("FATAL"))) {
-					synchronized (EXCEPTION_LOCK) {
-						DETECTED_EXCEPTIONS.add(controlPoint + ": " + text);
-					}
-				}
-			});
+			registerConsoleListener();
 			
 			// Check if any exceptions were detected
 			synchronized (EXCEPTION_LOCK) {
@@ -2069,6 +2038,21 @@ public abstract class CBaseUITest {
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Exception checking failed at {}: {}", controlPoint, e.getMessage());
 		}
+	}
+
+	private void registerConsoleListener() {
+		if ((page == null) || consoleListenerRegistered) {
+			return;
+		}
+		page.onConsoleMessage(msg -> {
+			String text = msg.text();
+			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL") || text.contains("FATAL"))) {
+				synchronized (EXCEPTION_LOCK) {
+					DETECTED_EXCEPTIONS.add(text);
+				}
+			}
+		});
+		consoleListenerRegistered = true;
 	}
 	
 	/**
@@ -2103,7 +2087,18 @@ public abstract class CBaseUITest {
 	 * Comprehensive exception check - combines log scanning and browser console checks
 	 */
 	protected void performFailFastCheck(String controlPoint) {
+		failFastIfExceptionDialogVisible(controlPoint);
 		checkForExceptionsAndFailFast(controlPoint);
 		checkBrowserConsoleForErrors(controlPoint);
+	}
+
+	private void failFastIfExceptionDialogVisible(final String controlPoint) {
+		if (!isBrowserAvailable()) {
+			return;
+		}
+		final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID + "[opened], #" + EXCEPTION_DETAILS_DIALOG_ID + "[opened]");
+		if (exceptionDialog.count() > 0) {
+			throw new AssertionError("Exception dialog detected at " + controlPoint + "; failing fast.");
+		}
 	}
 }

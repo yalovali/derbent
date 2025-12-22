@@ -34,6 +34,7 @@ public final class CDialogMessageWithDetails extends CDialog {
 		Check.notNull(exception, "Exception cannot be null");
 		this.message = message;
 		this.exception = exception;
+		setId("custom-exception-details-dialog");
 		LOGGER.debug("CMessageWithDetailsDialog created with message: {} and exception: {}", message, exception.getClass().getSimpleName());
 		try {
 			setupDialog();

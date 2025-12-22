@@ -14,6 +14,7 @@ public final class CDialogException extends CDialogInfoBase {
 	public CDialogException(final Exception exception) {
 		super("Error", exception.getMessage() != null ? exception.getMessage() : "An unexpected error occurred",
 				VaadinIcon.EXCLAMATION_CIRCLE.create());
+		setId("custom-exception-dialog");
 		LOGGER.debug("CExceptionDialog created for exception: {}", exception.getClass().getSimpleName());
 	}
 }
