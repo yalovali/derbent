@@ -196,7 +196,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	@Transactional
 	public EntityClass newEntity(final String name, final CProject project) {
-		LOGGER.debug("Creating new entity with name '{}' in project '{}'", name, project != null ? project.getName() : "<null>");
+		// LOGGER.debug("Creating new entity with name '{}' in project '{}'", name, project != null ? project.getName() : "<null>");
 		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
@@ -214,7 +214,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
 		try {
-			LOGGER.debug("save(entity={}) - Saving entity", entity.getId());
+			// LOGGER.debug("save(entity={}) - Saving entity", entity.getId());
 			Check.notNull(entity, "Entity cannot be null");
 			Check.notNull(entity.getProject(), "Entity's project cannot be null");
 			final String trimmedName = entity.getName().trim();

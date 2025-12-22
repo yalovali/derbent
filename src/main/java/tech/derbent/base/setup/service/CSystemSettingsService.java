@@ -66,6 +66,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 
 	/** Gets the default login view setting.
 	 * @return the default view to navigate to after login */
+	@Transactional (readOnly = false)
 	public String getDefaultLoginView() {
 		final CSystemSettings settings = getOrCreateSystemSettings();
 		return settings.getDefaultLoginView() != null ? settings.getDefaultLoginView() : "home";
@@ -73,6 +74,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 
 	/** Gets the font size scale setting.
 	 * @return the font size scale ("small", "medium", or "large") */
+	@Transactional (readOnly = false)
 	public String getFontSizeScale() {
 		final CSystemSettings settings = getOrCreateSystemSettings();
 		final String scale = settings.getFontSizeScale();
@@ -117,6 +119,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 
 	/** Gets the last visited view setting.
 	 * @return the last visited view route */
+	@Transactional (readOnly = false)
 	public String getLastVisitedView() {
 		try {
 			final CSystemSettings settings = getOrCreateSystemSettings();
@@ -184,6 +187,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 
 	/** Gets the auto-login enabled setting.
 	 * @return true if auto-login is enabled, false otherwise */
+	@Transactional (readOnly = false)
 	public boolean isAutoLoginEnabled() {
 		final CSystemSettings settings = getOrCreateSystemSettings();
 		return settings.getAutoLoginEnabled() != null ? settings.getAutoLoginEnabled() : false;

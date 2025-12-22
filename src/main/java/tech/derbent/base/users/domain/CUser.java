@@ -166,31 +166,41 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 	}
 
-	/** Creates an icon from image data using proper SVG wrapping.
-	 * This method embeds images in SVG which is then directly rendered in the DOM.
-	 * 
+	/** Creates an icon from image data using proper SVG wrapping. This method embeds images in SVG which is then directly rendered in the DOM.
 	 * @param imageData Binary image data (PNG/JPEG)
 	 * @return Icon component with properly rendered image
 	 * @throws IllegalArgumentException if image data is null or empty */
 	private Icon createIconFromImageData(final byte[] imageData) {
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
-
 		// Encode image data as base64 data URL
 		final String base64Image = Base64.getEncoder().encodeToString(imageData);
 		final String mimeType = detectMimeType(imageData);
 		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
-
 		// Create an SVG that contains the image
 		final String svgContent = String.format(
-			"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\">" +
-			"<image href=\"%s\" width=\"%d\" height=\"%d\" " +
-			"style=\"border-radius: 2px;\"/></svg>",
-			ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE,
-			dataUrl, ICON_SIZE, ICON_SIZE
-		);
-
+				"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\">"
+						+ "<image href=\"%s\" width=\"%d\" height=\"%d\" " + "style=\"border-radius: 2px;\"/></svg>",
+				ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE, dataUrl, ICON_SIZE, ICON_SIZE);
 		return createSvgIcon(svgContent);
+	}
+
+	private String createSvgDataUrl(final String svgContent) {
+		Check.notBlank(svgContent, "SVG content cannot be null or blank");
+		final String encodedSvg = URLEncoder.encode(svgContent, StandardCharsets.UTF_8);
+		return "data:image/svg+xml;charset=utf-8," + encodedSvg;
+	}
+
+	/** Creates a custom Icon component that can render SVG content.
+	 * @param svgContent The SVG markup to render
+	 * @return Icon component that will properly render the SVG */
+	private Icon createSvgIcon(final String svgContent) {
+		Check.notBlank(svgContent, "SVG content cannot be null or blank");
+		final String svgDataUrl = createSvgDataUrl(svgContent);
+		final Icon icon = new Icon();
+		icon.getElement().setAttribute("icon", svgDataUrl);
+		icon.setSize(ICON_SIZE + "px");
+		return CColorUtils.styleIcon(icon);
 	}
 
 	/** Detects MIME type from image data signature.
@@ -220,10 +230,37 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
 
-	@Override
-	public Class<?> getClassName() { 
-		return CUser.class;
+	/** Creates an Avatar component for this user with proper initials and color. This is the PROPER way to display user avatars in Vaadin. Avatar
+	 * component has built-in support for initials, colors, and profile pictures.
+	 * @return Avatar component configured for this user */
+	public Avatar getAvatar() {
+		final Avatar avatar = new Avatar();
+		// Set user's name for the avatar (use toString() for display name)
+		final String displayName = toString();
+		avatar.setName(displayName);
+		// Set initials
+		final String initials = getInitials();
+		avatar.setAbbreviation(initials);
+		// Set color based on name hash for consistency
+		final int colorIndex = Math.abs(displayName.hashCode() % 7); // Vaadin supports 7 color variants
+		avatar.setColorIndex(colorIndex);
+		// Set profile picture if available
+		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
+			try {
+				final String base64Image = Base64.getEncoder().encodeToString(profilePictureThumbnail);
+				final String mimeType = detectMimeType(profilePictureThumbnail);
+				final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
+				avatar.setImage(dataUrl);
+			} catch (final Exception e) {
+				LOGGER.error("Failed to set avatar image", e);
+				// Avatar will fall back to showing initials
+			}
+		}
+		return avatar;
 	}
+
+	@Override
+	public Class<?> getClassName() { return CUser.class; }
 
 	@Override
 	public String getColor() { return color != null ? color : DEFAULT_COLOR; }
@@ -238,7 +275,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
 			return createIconFromImageData(profilePictureThumbnail);
 		}
-		
 		// Generate SVG avatar with initials when no profile picture is available
 		// This is more efficient and produces better quality than PNG avatars
 		try {
@@ -249,61 +285,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
 			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
 		}
-	}
-
-	/** Creates a custom Icon component that can render SVG content.
-	 * 
-	 * @param svgContent The SVG markup to render
-	 * @return Icon component that will properly render the SVG */
-	private Icon createSvgIcon(final String svgContent) {
-		Check.notBlank(svgContent, "SVG content cannot be null or blank");
-		final String svgDataUrl = createSvgDataUrl(svgContent);
-		final Icon icon = new Icon();
-		icon.getElement().setAttribute("icon", svgDataUrl);
-		icon.setSize(ICON_SIZE + "px");
-		return CColorUtils.styleIcon(icon);
-	}
-
-	private String createSvgDataUrl(final String svgContent) {
-		Check.notBlank(svgContent, "SVG content cannot be null or blank");
-		final String encodedSvg = URLEncoder.encode(svgContent, StandardCharsets.UTF_8);
-		return "data:image/svg+xml;charset=utf-8," + encodedSvg;
-	}
-
-	/** Creates an Avatar component for this user with proper initials and color.
-	 * This is the PROPER way to display user avatars in Vaadin.
-	 * Avatar component has built-in support for initials, colors, and profile pictures.
-	 * 
-	 * @return Avatar component configured for this user */
-	public Avatar getAvatar() {
-		final Avatar avatar = new Avatar();
-		
-		// Set user's name for the avatar (use toString() for display name)
-		final String displayName = toString();
-		avatar.setName(displayName);
-		
-		// Set initials
-		final String initials = getInitials();
-		avatar.setAbbreviation(initials);
-		
-		// Set color based on name hash for consistency
-		final int colorIndex = Math.abs(displayName.hashCode() % 7); // Vaadin supports 7 color variants
-		avatar.setColorIndex(colorIndex);
-		
-		// Set profile picture if available
-		if (profilePictureThumbnail != null && profilePictureThumbnail.length > 0) {
-			try {
-				final String base64Image = Base64.getEncoder().encodeToString(profilePictureThumbnail);
-				final String mimeType = detectMimeType(profilePictureThumbnail);
-				final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
-				avatar.setImage(dataUrl);
-			} catch (final Exception e) {
-				LOGGER.error("Failed to set avatar image", e);
-				// Avatar will fall back to showing initials
-			}
-		}
-		
-		return avatar;
 	}
 
 	@Override
@@ -321,7 +302,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public String getInitials() {
 		String initials = "";
 		// Get initials from first name
-		if ((getName() != null) && !getName().trim().isEmpty()) {
+		if (getName() != null && !getName().trim().isEmpty()) {
 			final String[] nameParts = getName().trim().split("\\s+");
 			for (final String part : nameParts) {
 				if (!part.isEmpty()) {
@@ -333,11 +314,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			}
 		}
 		// Add last name initial if we have less than 2 initials
-		if ((lastname != null) && !lastname.trim().isEmpty() && (initials.length() < 2)) {
+		if (lastname != null && !lastname.trim().isEmpty() && initials.length() < 2) {
 			initials += lastname.substring(0, 1).toUpperCase();
 		}
 		// Fall back to username if no name is available
-		if (initials.isEmpty() && (login != null) && !login.trim().isEmpty()) {
+		if (initials.isEmpty() && login != null && !login.trim().isEmpty()) {
 			initials = login.substring(0, Math.min(2, login.length())).toUpperCase();
 		}
 		// Final fallback
@@ -413,7 +394,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
@@ -421,28 +402,27 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check string fields
-		if (fieldNames.remove("login") && (getLogin() != null) && getLogin().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("login") && getLogin() != null && getLogin().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("email") && (getEmail() != null) && getEmail().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("email") && getEmail() != null && getEmail().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("lastname") && (getLastname() != null) && getLastname().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("lastname") && getLastname() != null && getLastname().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("phone") && (getPhone() != null) && getPhone().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("phone") && getPhone() != null && getPhone().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("color") && (getColor() != null) && getColor().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("color") && getColor() != null && getColor().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		// Check entity fields
-		if (fieldNames.remove("companyRole") && (getCompanyRole() != null)
-				&& getCompanyRole().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("companyRole") && getCompanyRole() != null && getCompanyRole().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		// Check boolean field
-		if (fieldNames.remove("attributeDisplaySectionsAsTabs") && (getAttributeDisplaySectionsAsTabs() != null)
+		if (fieldNames.remove("attributeDisplaySectionsAsTabs") && getAttributeDisplaySectionsAsTabs() != null
 				&& getAttributeDisplaySectionsAsTabs().toString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
@@ -497,8 +477,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		if (profilePictureData != null && profilePictureData.length > 0) {
 			try {
 				profilePictureThumbnail = CImageUtils.resizeImage(profilePictureData, ICON_SIZE, ICON_SIZE);
-				LOGGER.debug("Generated thumbnail for user profile picture: {} bytes -> {} bytes", profilePictureData.length,
-						profilePictureThumbnail.length);
+				// LOGGER.debug("Generated thumbnail for user profile picture: {} bytes -> {} bytes",
+				// profilePictureData.length,profilePictureThumbnail.length);
 			} catch (final Exception e) {
 				LOGGER.error("Failed to generate thumbnail for user profile picture", e);
 				// If thumbnail generation fails, clear it so we fall back to default icon

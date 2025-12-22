@@ -42,7 +42,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	public CAbstractService(final IAbstractRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
-		LOGGER.debug("Initializing service for entity: {}", getEntityClass() != null ? getEntityClass().getSimpleName() : "Unknown");
+		// LOGGER.debug("Initializing service for entity: {}", getEntityClass() != null ? getEntityClass().getSimpleName() : "Unknown");
 		this.clock = clock;
 		this.repository = repository;
 		this.sessionService = sessionService;

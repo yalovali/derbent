@@ -157,6 +157,7 @@ import tech.derbent.base.users.service.CUserService;
  * @author Derbent Team
  * @version 2.0 - Refactored for better organization and maintainability */
 public class CDataInitializer {
+
 	private static final String COMPANY_OF_DANISMANLIK = "Of Stratejik Danışmanlık";
 	// Company Names
 	private static final String COMPANY_OF_TEKNOLOJI = "Of Teknoloji Çözümleri";
@@ -367,7 +368,7 @@ public class CDataInitializer {
 			activity.setEntityType(activityType);
 			activity.setAssignedTo(user);
 			// Set initial status from workflow
-			if ((activityType != null) && (activityType.getWorkflow() != null)) {
+			if (activityType != null && activityType.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity);
 				if (!initialStatuses.isEmpty()) {
 					activity.setStatus(initialStatuses.get(0));
@@ -404,7 +405,7 @@ public class CDataInitializer {
 			activity.setEntityType(activityType);
 			activity.setAssignedTo(user);
 			// Set initial status from workflow
-			if ((activityType != null) && (activityType.getWorkflow() != null)) {
+			if (activityType != null && activityType.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity);
 				if (!initialStatuses.isEmpty()) {
 					activity.setStatus(initialStatuses.get(0));
@@ -450,7 +451,7 @@ public class CDataInitializer {
 		user.setProfilePictureData(profilePictureBytes);
 		user.setAttributeDisplaySectionsAsTabs(true);
 		userService.save(user);
-		LOGGER.info("Created user {} for company {} with profile picture {}", username, company.getName(), profilePictureFile);
+		// LOGGER.info("Created user {} for company {} with profile picture {}", username, company.getName(), profilePictureFile);
 	}
 
 	/** Creates technology startup company. */
@@ -501,7 +502,7 @@ public class CDataInitializer {
 			activity1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
 			activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 150)));
 			// Set initial status from workflow
-			if ((type1 != null) && (type1.getWorkflow() != null)) {
+			if (type1 != null && type1.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity1);
 				if (!initialStatuses.isEmpty()) {
 					activity1.setStatus(initialStatuses.get(0));
@@ -522,7 +523,7 @@ public class CDataInitializer {
 			// Set parent relationship
 			activity2.setParent(activity1);
 			// Set initial status from workflow
-			if ((type2 != null) && (type2.getWorkflow() != null)) {
+			if (type2 != null && type2.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity2);
 				if (!initialStatuses.isEmpty()) {
 					activity2.setStatus(initialStatuses.get(0));
@@ -546,7 +547,7 @@ public class CDataInitializer {
 			// Set parent relationship
 			activity3.setParent(activity1);
 			// Set initial status from workflow
-			if ((type3 != null) && (type3.getWorkflow() != null)) {
+			if (type3 != null && type3.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity3);
 				if (!initialStatuses.isEmpty()) {
 					activity3.setStatus(initialStatuses.get(0));
@@ -650,7 +651,7 @@ public class CDataInitializer {
 			final CMeeting meeting1 = new CMeeting("Q1 Planning Session", project, type1);
 			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
 			// Set initial status from workflow
-			if ((type1 != null) && (type1.getWorkflow() != null)) {
+			if (type1 != null && type1.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting1);
 				if (!initialStatuses.isEmpty()) {
 					meeting1.setStatus(initialStatuses.get(0));
@@ -674,7 +675,7 @@ public class CDataInitializer {
 			final CMeeting meeting2 = new CMeeting("Technical Architecture Review", project, type2);
 			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
 			// Set initial status from workflow
-			if ((type2 != null) && (type2.getWorkflow() != null)) {
+			if (type2 != null && type2.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting2);
 				if (!initialStatuses.isEmpty()) {
 					meeting2.setStatus(initialStatuses.get(0));
@@ -697,7 +698,7 @@ public class CDataInitializer {
 			final CMeeting meeting3 = new CMeeting("Q1 Planning Follow-up", project, type3);
 			meeting3.setDescription("Follow-up meeting to review action items from Q1 Planning Session");
 			// Set initial status from workflow
-			if ((type3 != null) && (type3.getWorkflow() != null)) {
+			if (type3 != null && type3.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting3);
 				if (!initialStatuses.isEmpty()) {
 					meeting3.setStatus(initialStatuses.get(0));
@@ -731,7 +732,7 @@ public class CDataInitializer {
 			expense1.setDescription("Monthly cloud infrastructure hosting costs");
 			expense1.setEntityType(type1);
 			expense1.setAssignedTo(user1);
-			if ((type1 != null) && (type1.getWorkflow() != null)) {
+			if (type1 != null && type1.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(expense1);
 				if (!initialStatuses.isEmpty()) {
 					expense1.setStatus(initialStatuses.get(0));
@@ -747,7 +748,7 @@ public class CDataInitializer {
 			expense2.setDescription("Contracted external development services");
 			expense2.setEntityType(type2);
 			expense2.setAssignedTo(user2);
-			if ((type2 != null) && (type2.getWorkflow() != null)) {
+			if (type2 != null && type2.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(expense2);
 				if (!initialStatuses.isEmpty()) {
 					expense2.setStatus(initialStatuses.get(0));
@@ -771,7 +772,7 @@ public class CDataInitializer {
 			income1.setDescription("Revenue from software license sales");
 			income1.setEntityType(type1);
 			income1.setAssignedTo(user1);
-			if ((type1 != null) && (type1.getWorkflow() != null)) {
+			if (type1 != null && type1.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(income1);
 				if (!initialStatuses.isEmpty()) {
 					income1.setStatus(initialStatuses.get(0));
@@ -787,7 +788,7 @@ public class CDataInitializer {
 			income2.setDescription("Annual support and maintenance contracts");
 			income2.setEntityType(type2);
 			income2.setAssignedTo(user2);
-			if ((type2 != null) && (type2.getWorkflow() != null)) {
+			if (type2 != null && type2.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(income2);
 				if (!initialStatuses.isEmpty()) {
 					income2.setStatus(initialStatuses.get(0));
@@ -833,7 +834,7 @@ public class CDataInitializer {
 			ticket1.setDescription("Users unable to login with correct credentials");
 			ticket1.setEntityType(type1);
 			ticket1.setAssignedTo(user1);
-			if ((type1 != null) && (type1.getWorkflow() != null)) {
+			if (type1 != null && type1.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(ticket1);
 				if (!initialStatuses.isEmpty()) {
 					ticket1.setStatus(initialStatuses.get(0));
@@ -849,7 +850,7 @@ public class CDataInitializer {
 			ticket2.setDescription("Allow users to customize their dashboard layout");
 			ticket2.setEntityType(type2);
 			ticket2.setAssignedTo(user2);
-			if ((type2 != null) && (type2.getWorkflow() != null)) {
+			if (type2 != null && type2.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(ticket2);
 				if (!initialStatuses.isEmpty()) {
 					ticket2.setStatus(initialStatuses.get(0));
