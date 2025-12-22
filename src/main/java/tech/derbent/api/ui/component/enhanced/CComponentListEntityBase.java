@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
@@ -444,6 +445,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			refreshGrid();
 			grid.asSingleSelect().clear();
 			CNotificationService.showSaveSuccess();
+		} catch (final CValidationException validationException) {
+			LOGGER.warn("Validation error saving entity", validationException);
+			CNotificationService.showValidationException(validationException);
 		} catch (final Exception e) {
 			LOGGER.error("Error saving entity", e);
 			CNotificationService.showException("Error saving item", e);

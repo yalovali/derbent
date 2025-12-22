@@ -1,6 +1,7 @@
 package tech.derbent.api.ui.dialogs;
 
 import java.util.function.Consumer;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -51,6 +52,9 @@ public abstract class CDialogDBEdit<EntityClass> extends CDialog {
 			}
 			close();
 			CNotificationService.showSuccess(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
+		} catch (final CValidationException validationException) {
+			LOGGER.warn("Validation error during dialog save", validationException);
+			CNotificationService.showValidationException(validationException);
 		} catch (final Exception e) {
 			CNotificationService.showError("Error: " + e.getMessage());
 		}

@@ -12,6 +12,7 @@ import tech.derbent.api.ui.dialogs.CDialogInformation;
 import tech.derbent.api.ui.dialogs.CDialogMessageWithDetails;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.dialogs.CDialogWarning;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.utils.Check;
 
 /** CNotificationService - Centralized service for all notifications and user messages. Provides consistent styling, positioning, and behavior for: -
@@ -159,6 +160,13 @@ public class CNotificationService {
 	/** Shows warning for validation errors */
 	public static void showValidationWarning(final String fieldName) {
 		showWarning("Please check the " + fieldName + " field and try again.");
+	}
+
+	/** Shows a warning notification for validation exceptions. */
+	public static void showValidationException(final CValidationException exception) {
+		Check.notNull(exception, "Validation exception cannot be null");
+		final String message = exception.getMessage() != null ? exception.getMessage() : "Validation failed. Please check your input.";
+		showWarning(message);
 	}
 
 	/** Shows a warning notification toast (orange, top-center, medium duration) */
