@@ -121,15 +121,18 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		Check.notNull(entity, "Kanban column cannot be null");
 		Check.notNull(entity.getKanbanLine(), "Kanban line cannot be null for column save");
 		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID cannot be null for column save");
+		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
 		final CKanbanLine line = resolveLineForSave(entity);
+		validateUniqueName(line, entity);
 		if (entity.getItemOrder() == null || entity.getItemOrder() <= 0) {
 			entity.setItemOrder(getNextItemOrder(line));
 		}
 		if (entity.getId() == null) {
 			line.addKanbanColumn(entity);
 			kanbanLineService.save(line);
-			applyStatusAndDefaultConstraints(entity);
-			return entity;
+			final CKanbanColumn saved = reloadByName(line, entity.getName());
+			applyStatusAndDefaultConstraints(saved);
+			return saved;
 		}
 		entity.setKanbanLine(line);
 		final CKanbanColumn saved = super.save(entity);
@@ -189,6 +192,23 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 				repository.save(column);
 			}
 		}
+	}
+
+	private CKanbanColumn reloadByName(final CKanbanLine line, final String name) {
+		final CKanbanColumn saved = getTypedRepository().findByMasterAndNameIgnoreCase(line, name).orElse(null);
+		Check.notNull(saved, "Saved kanban column could not be reloaded");
+		return saved;
+	}
+
+	private void validateUniqueName(final CKanbanLine line, final CKanbanColumn entity) {
+		final CKanbanColumn existing = getTypedRepository().findByMasterAndNameIgnoreCase(line, entity.getName()).orElse(null);
+		if (existing == null) {
+			return;
+		}
+		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
+			return;
+		}
+		Check.isTrue(false, "Kanban column name must be unique within the kanban line");
 	}
 
 	private List<CKanbanColumn> normalizeItemOrder(final CKanbanLine master) {
