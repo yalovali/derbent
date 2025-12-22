@@ -18,12 +18,13 @@ import tech.derbent.api.utils.Check;
  * <li>Call {@link #updateValueFromClient(Object)} when UI interactions change the value.</li>
  * </ul>
  * </p>
- * @param <ValueT> bound value type */
-public abstract class CComponentBase<ValueT> extends CVerticalLayout implements HasValueAndElement<HasValue.ValueChangeEvent<ValueT>, ValueT> {
+ * @param <EntityClass> bound value type */
+public abstract class CComponentBase<EntityClass> extends CVerticalLayout
+		implements HasValueAndElement<HasValue.ValueChangeEvent<EntityClass>, EntityClass> {
 
 	private static final long serialVersionUID = 1L;
-	private final List<ValueChangeListener<? super ValueChangeEvent<ValueT>>> valueChangeListeners = new ArrayList<>();
-	private ValueT value;
+	private final List<ValueChangeListener<? super ValueChangeEvent<EntityClass>>> valueChangeListeners = new ArrayList<>();
+	private EntityClass value;
 	private boolean readOnly;
 	private boolean requiredIndicatorVisible;
 
@@ -36,7 +37,7 @@ public abstract class CComponentBase<ValueT> extends CVerticalLayout implements 
 	}
 
 	@Override
-	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<ValueT>> listener) {
+	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<EntityClass>> listener) {
 		Check.notNull(listener, "ValueChangeListener cannot be null");
 		valueChangeListeners.add(listener);
 		return () -> valueChangeListeners.remove(listener);
@@ -47,33 +48,33 @@ public abstract class CComponentBase<ValueT> extends CVerticalLayout implements 
 		setValue(null);
 	}
 
-	private void fireValueChangeEvent(final ValueT oldValue, final ValueT newValue, final boolean fromClient) {
+	private void fireValueChangeEvent(final EntityClass oldValue, final EntityClass newValue, final boolean fromClient) {
 		if (valueChangeListeners.isEmpty()) {
 			return;
 		}
-		final ValueChangeEvent<ValueT> event = new ValueChangeEvent<ValueT>() {
+		final ValueChangeEvent<EntityClass> event = new ValueChangeEvent<EntityClass>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public HasValue<?, ValueT> getHasValue() { return CComponentBase.this; }
+			public HasValue<?, EntityClass> getHasValue() { return CComponentBase.this; }
 
 			@Override
-			public ValueT getOldValue() { return oldValue; }
+			public EntityClass getOldValue() { return oldValue; }
 
 			@Override
-			public ValueT getValue() { return newValue; }
+			public EntityClass getValue() { return newValue; }
 
 			@Override
 			public boolean isFromClient() { return fromClient; }
 		};
-		for (final ValueChangeListener<? super ValueChangeEvent<ValueT>> listener : valueChangeListeners) {
+		for (final ValueChangeListener<? super ValueChangeEvent<EntityClass>> listener : valueChangeListeners) {
 			listener.valueChanged(event);
 		}
 	}
 
 	@Override
-	public ValueT getValue() { return value; }
+	public EntityClass getValue() { return value; }
 
 	@Override
 	public boolean isEmpty() { return isValueEmpty(value); }
@@ -84,7 +85,7 @@ public abstract class CComponentBase<ValueT> extends CVerticalLayout implements 
 	@Override
 	public boolean isRequiredIndicatorVisible() { return requiredIndicatorVisible; }
 
-	protected boolean isValueEmpty(final ValueT value) {
+	protected boolean isValueEmpty(final EntityClass value) {
 		return value == null;
 	}
 
@@ -92,7 +93,7 @@ public abstract class CComponentBase<ValueT> extends CVerticalLayout implements 
 
 	protected void onRequiredIndicatorVisibleChanged(final boolean requiredIndicatorVisible) {}
 
-	protected void onValueChanged(final ValueT oldValue, final ValueT newValue, final boolean fromClient) {}
+	protected void onValueChanged(final EntityClass oldValue, final EntityClass newValue, final boolean fromClient) {}
 
 	@Override
 	public void setReadOnly(final boolean readOnly) {
@@ -107,12 +108,12 @@ public abstract class CComponentBase<ValueT> extends CVerticalLayout implements 
 	}
 
 	@Override
-	public void setValue(final ValueT value) {
+	public void setValue(final EntityClass value) {
 		updateValue(value, false);
 	}
 
-	private void updateValue(final ValueT value, final boolean fromClient) {
-		final ValueT oldValue = this.value;
+	private void updateValue(final EntityClass value, final boolean fromClient) {
+		final EntityClass oldValue = this.value;
 		this.value = value;
 		onValueChanged(oldValue, value, fromClient);
 		if (!Objects.equals(oldValue, value)) {
@@ -120,7 +121,7 @@ public abstract class CComponentBase<ValueT> extends CVerticalLayout implements 
 		}
 	}
 
-	protected final void updateValueFromClient(final ValueT value) {
+	protected final void updateValueFromClient(final EntityClass value) {
 		updateValue(value, true);
 	}
 }
