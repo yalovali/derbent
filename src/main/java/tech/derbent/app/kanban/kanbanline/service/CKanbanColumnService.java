@@ -121,9 +121,17 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		Check.notNull(entity, "Kanban column cannot be null");
 		Check.notNull(entity.getKanbanLine(), "Kanban line cannot be null for column save");
 		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID cannot be null for column save");
+		final CKanbanLine line = resolveLineForSave(entity);
 		if (entity.getItemOrder() == null || entity.getItemOrder() <= 0) {
-			entity.setItemOrder(getNextItemOrder(entity.getKanbanLine()));
+			entity.setItemOrder(getNextItemOrder(line));
 		}
+		if (entity.getId() == null) {
+			line.addKanbanColumn(entity);
+			kanbanLineService.save(line);
+			applyStatusAndDefaultConstraints(entity);
+			return entity;
+		}
+		entity.setKanbanLine(line);
 		final CKanbanColumn saved = super.save(entity);
 		applyStatusAndDefaultConstraints(saved);
 		return saved;
@@ -214,6 +222,14 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID missing for column delete");
 		final CKanbanLine line = kanbanLineService.getById(entity.getKanbanLine().getId()).orElse(null);
 		Check.notNull(line, "Kanban line could not be loaded for column delete");
+		return line;
+	}
+
+	private CKanbanLine resolveLineForSave(final CKanbanColumn entity) {
+		Check.notNull(entity.getKanbanLine(), "Kanban line reference missing for column save");
+		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID missing for column save");
+		final CKanbanLine line = kanbanLineService.getById(entity.getKanbanLine().getId()).orElse(null);
+		Check.notNull(line, "Kanban line could not be loaded for column save");
 		return line;
 	}
 }
