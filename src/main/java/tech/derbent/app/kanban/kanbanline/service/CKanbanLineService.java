@@ -10,8 +10,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.base.session.service.ISessionService;
@@ -48,6 +50,24 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		if (entity.getKanbanColumns() == null) {
 			entity.setKanbanColumns(new java.util.LinkedHashSet<>());
 		}
+	}
+
+	@Override
+	protected void validateEntity(final CKanbanLine entity) {
+		super.validateEntity(entity);
+		Check.notBlank(entity.getName(), "Kanban line name cannot be blank");
+		final CCompany company =
+				entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
+		Check.notNull(company, "Company cannot be null for kanban line validation");
+		final String trimmedName = entity.getName().trim();
+		final CKanbanLine existing = findByNameAndCompany(trimmedName, company).orElse(null);
+		if (existing == null) {
+			return;
+		}
+		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
+			return;
+		}
+		throw new CValidationException("Kanban line name must be unique within the company");
 	}
 
 	@Transactional

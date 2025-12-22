@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
@@ -123,7 +124,8 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID cannot be null for column save");
 		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
 		final CKanbanLine line = resolveLineForSave(entity);
-		validateUniqueName(line, entity);
+		entity.setKanbanLine(line);
+		validateEntity(entity);
 		if (entity.getItemOrder() == null || entity.getItemOrder() <= 0) {
 			entity.setItemOrder(getNextItemOrder(line));
 		}
@@ -134,7 +136,6 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 			applyStatusAndDefaultConstraints(saved);
 			return saved;
 		}
-		entity.setKanbanLine(line);
 		final CKanbanColumn saved = super.save(entity);
 		applyStatusAndDefaultConstraints(saved);
 		return saved;
@@ -200,15 +201,22 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		return saved;
 	}
 
-	private void validateUniqueName(final CKanbanLine line, final CKanbanColumn entity) {
-		final CKanbanColumn existing = getTypedRepository().findByMasterAndNameIgnoreCase(line, entity.getName()).orElse(null);
+	@Override
+	protected void validateEntity(final CKanbanColumn entity) {
+		super.validateEntity(entity);
+		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
+		final CKanbanLine line = entity.getKanbanLine();
+		Check.notNull(line, "Kanban line cannot be null for column validation");
+		Check.notNull(line.getId(), "Kanban line ID cannot be null for column validation");
+		final String trimmedName = entity.getName().trim();
+		final CKanbanColumn existing = getTypedRepository().findByMasterAndNameIgnoreCase(line, trimmedName).orElse(null);
 		if (existing == null) {
 			return;
 		}
 		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
 			return;
 		}
-		Check.isTrue(false, "Kanban column name must be unique within the kanban line");
+		throw new CValidationException("Kanban column name must be unique within the kanban line");
 	}
 
 	private List<CKanbanColumn> normalizeItemOrder(final CKanbanLine master) {

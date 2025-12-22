@@ -1,5 +1,5 @@
 package tech.derbent.api.exceptions;
-public class CException extends Exception {
+public class CException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

@@ -80,6 +80,16 @@ private String name;
 
 - **Field names must be exact**: UI metadata helpers are reflection-based (`createLineFromDefaults`, `setColumnFields`, dynamic forms). Always reference the real entity field name (and ensure matching getters/setters exist). Do not use aliases/renames in initializers—mismatches fail at runtime with `NoSuchFieldException` and block data initialization.
 
+### 4. **Validation Flow (Service → UI)**
+
+- **Service validation belongs in `validateEntity(...)`**: Each service must override `validateEntity` to enforce business rules (e.g., uniqueness, required relations). The method should throw `CValidationException` when a rule is violated.
+- **Scope-aware uniqueness**: Uniqueness must be scoped correctly:
+  - per **company** in `CEntityOfCompanyService` subclasses,
+  - per **project** in `CEntityOfProjectService` subclasses,
+  - per **parent entity** (e.g., child items under a master record).
+  Always differentiate new vs. existing entities by comparing IDs.
+- **UI handling**: User-triggered actions (`on_*_clicked`, dialog saves, toolbar saves) must catch `CValidationException` and show a user-facing notification (use `CNotificationService.showValidationException(...)`). Do not swallow validation errors; surface them clearly to the user.
+
 ## Naming Conventions
 
 ### Classes

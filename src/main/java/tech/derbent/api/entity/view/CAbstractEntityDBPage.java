@@ -29,6 +29,7 @@ import tech.derbent.api.entity.domain.CEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CMasterViewSectionBase;
 import tech.derbent.api.grid.view.CMasterViewSectionGrid;
@@ -171,6 +172,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				LOGGER.error("Optimistic locking failure during save", exception);
 				CNotificationService.showOptimisticLockingError();
 				throw new RuntimeException("Optimistic locking failure during save", exception);
+			} catch (final CValidationException validationException) {
+				LOGGER.error("Validation error during save", validationException);
+				CNotificationService.showValidationException(validationException);
+				throw new RuntimeException("Validation error during save", validationException);
 			} catch (final ValidationException validationException) {
 				LOGGER.error("Validation error during save", validationException);
 				CNotificationService.showWarning("Failed to save the data. Please check that all required fields are filled and values are valid.");
