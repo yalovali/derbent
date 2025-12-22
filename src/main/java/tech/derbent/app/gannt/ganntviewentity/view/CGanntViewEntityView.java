@@ -70,8 +70,8 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 	}
 
 	@Override
-	public void setCurrentEntity(CEntityDB<?> entity) {
-		super.setCurrentEntity(entity);
+	public void setValue(CEntityDB<?> entity) {
+		super.setValue(entity);
 	}
 
 	@Override

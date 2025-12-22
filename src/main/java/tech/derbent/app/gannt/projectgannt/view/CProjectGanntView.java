@@ -38,7 +38,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService, activityService, meetingService, pageEntityService);
 		final CGanntViewEntity viewEntity =
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
-		setCurrentEntity(viewEntity);
+		setValue(viewEntity);
 		pageService = new CPageServiceProjectGannt(this, activityService, meetingService);
 		// createDetailsLayout();
 	}
@@ -81,7 +81,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	}
 
 	@Override
-	public void setCurrentEntity(CEntityDB<?> entity) {
-		super.setCurrentEntity(entity);
+	public void setValue(CEntityDB<?> entity) {
+		super.setValue(entity);
 	}
 }

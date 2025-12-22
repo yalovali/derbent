@@ -47,7 +47,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	 * @param entitySaver      Function to save the entity */
 	protected void createStandardDataAccessors(final Supplier<List<RelationalClass>> settingsSupplier, final Runnable entitySaver) {
 		final Supplier<List<RelationalClass>> getterFunction = () -> {
-			final MasterClass entity = getCurrentEntity();
+			final MasterClass entity = getValue();
 			if (entity == null) {
 				LOGGER.debug("No current entity available, returning empty list");
 				return List.of();
@@ -66,7 +66,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 		};
 		final Runnable saveEntityFunction = () -> {
 			try {
-				final MasterClass entity = getCurrentEntity();
+				final MasterClass entity = getValue();
 				Check.notNull(entity, "Current entity cannot be null when saving");
 				entitySaver.run();
 			} catch (final Exception e) {

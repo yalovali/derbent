@@ -32,7 +32,7 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 	}
 
 	public List<CProjectItemStatus> getAvailableStatuses() {
-		final CWorkflowEntity workflow = getCurrentEntity();
+		final CWorkflowEntity workflow = getValue();
 		LOGGER.debug("Getting available statuses for workflow: {}", workflow != null ? workflow.getName() : "null");
 		if (workflow == null) {
 			LOGGER.warn("Current workflow is null, returning empty status list");
@@ -46,7 +46,7 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 	protected void openAddDialog() throws Exception {
 		try {
 			new CDialogWorkflowStatusRelation(this, (CWorkflowEntityService) entityService, statusService, workflowStatusRelationService, null,
-					getCurrentEntity(), this::onSettingsSaved).open();
+					getValue(), this::onSettingsSaved).open();
 		} catch (Exception e) {
 			CNotificationService.showWarning("Failed to open add dialog: " + e.getMessage());
 			throw e;
@@ -57,7 +57,7 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 	protected void openEditDialog() throws Exception {
 		try {
 			new CDialogWorkflowStatusRelation(this, (CWorkflowEntityService) entityService, statusService, workflowStatusRelationService,
-					getSelectedRelation(), getCurrentEntity(), this::onSettingsSaved).open();
+					getSelectedRelation(), getValue(), this::onSettingsSaved).open();
 		} catch (Exception e) {
 			CNotificationService.showWarning("Failed to open edit dialog: " + e.getMessage());
 			throw e;
@@ -66,7 +66,7 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 
 	@Override
 	protected void setupDataAccessors() {
-		createStandardDataAccessors(() -> workflowStatusRelationService.findByWorkflow(getCurrentEntity()),
-				() -> entityService.save(getCurrentEntity()));
+		createStandardDataAccessors(() -> workflowStatusRelationService.findByWorkflow(getValue()),
+				() -> entityService.save(getValue()));
 	}
 }

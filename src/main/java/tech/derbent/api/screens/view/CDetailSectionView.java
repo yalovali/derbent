@@ -93,16 +93,16 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	}
 
 	@Override
-	public void setCurrentEntity(final CEntityDB<?> entity) {
-		super.setCurrentEntity(entity);
+	public void setValue(final CEntityDB<?> entity) {
+		super.setValue(entity);
 	}
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		addAccordionPanel(new CPanelDetailSectionBasicInfo(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
-		addAccordionPanel(new CPanelDetailLines(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService, screenLinesService,
+		addAccordionPanel(new CPanelDetailSectionBasicInfo(this, getValue(), getBinder(), (CDetailSectionService) entityService));
+		addAccordionPanel(new CPanelDetailLines(this, getValue(), getBinder(), (CDetailSectionService) entityService, screenLinesService,
 				entityFieldService, viewsService));
 		addAccordionPanel(
-				new CPanelDetailSectionPreview(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService, sessionService));
+				new CPanelDetailSectionPreview(this, getValue(), getBinder(), (CDetailSectionService) entityService, sessionService));
 	}
 }

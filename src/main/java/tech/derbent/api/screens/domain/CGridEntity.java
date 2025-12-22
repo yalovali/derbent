@@ -75,7 +75,7 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	@AMetaData (
 			displayName = "Column Fields", required = false, readOnly = false, description = "List of fields with order", hidden = false,
 			maxLength = 100, useDualListSelector = true, dataProviderBean = "CGridEntityService", dataProviderMethod = "getFieldNames",
-			dataProviderParamBean = "context", dataProviderParamMethod = "getCurrentEntity"
+			dataProviderParamBean = "context", dataProviderParamMethod = "getValue"
 	)
 	private List<String> columnFields;
 	@Column (name = "data_service_bean_name", nullable = false, length = 100)

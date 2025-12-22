@@ -23,7 +23,7 @@ public interface IPageServiceImplementer<EntityClass extends CEntityDB<EntityCla
 
 	Map<String, Component> getComponentMap();
 	@Override
-	EntityClass getCurrentEntity();
+	EntityClass getValue();
 	CDetailsBuilder getDetailsBuilder();
 	Class<?> getEntityClass();
 	@Override
@@ -33,7 +33,7 @@ public interface IPageServiceImplementer<EntityClass extends CEntityDB<EntityCla
 
 	@Override
 	default void onEntityRefreshed(final EntityClass entity) throws Exception {
-		setCurrentEntity(entity);
+		setValue(entity);
 		populateForm();
 	}
 

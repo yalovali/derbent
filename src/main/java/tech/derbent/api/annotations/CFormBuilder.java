@@ -1039,7 +1039,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		getComponentMap().values().forEach(component -> {
 			if (component instanceof IContentOwner) {
 				try {
-					((IContentOwner) component).setCurrentEntity(entity);
+					((IContentOwner) component).setValue(entity);
 					((IContentOwner) component).populateForm();
 				} catch (final Exception e) {
 					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
@@ -1060,11 +1060,11 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
-	public void setCurrentEntity(final CEntityDB<?> entity) {
+	public void setValue(final CEntityDB<?> entity) {
 		getComponentMap().values().forEach(component -> {
 			if (component instanceof IContentOwner) {
 				try {
-					((IContentOwner) component).setCurrentEntity(entity);
+					((IContentOwner) component).setValue(entity);
 				} catch (final Exception e) {
 					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
 					throw e;

@@ -88,7 +88,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public EntityClass actionCreate() {
 		try {
 			final EntityClass newEntity = createNewEntity();
-			setCurrentEntity(newEntity);
+			setValue(newEntity);
 			populateForm();
 			return newEntity;
 		} catch (final Exception e) {
@@ -100,7 +100,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	public void actionDelete() {
 		try {
-			final EntityClass current = getCurrentEntity();
+			final EntityClass current = getValue();
 			if (current == null) {
 				CNotificationService.showWarning("Please select an item to delete.");
 				return;
@@ -129,11 +129,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	public void actionRefresh() {
 		try {
-			final EntityClass current = getCurrentEntity();
+			final EntityClass current = getValue();
 			if (current != null && current.getId() != null) {
 				final EntityClass reloaded = entityService.getById(current.getId()).orElse(null);
 				if (reloaded != null) {
-					setCurrentEntity(reloaded);
+					setValue(reloaded);
 					populateForm();
 				}
 			}
@@ -146,7 +146,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public void actionSave() {
 		{
 			try {
-				final EntityClass entity = getCurrentEntity();
+				final EntityClass entity = getValue();
 				LOGGER.debug("Save action invoked, current entity: {}", entity != null ? entity.getId() : "null");
 				if (entity == null) {
 					LOGGER.warn("No current entity for save operation");
@@ -163,7 +163,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				final EntityClass savedEntity = entityService.save(entity);
 				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 				// Update current entity with saved version (includes generated ID)
-				setCurrentEntity(savedEntity);
+				setValue(savedEntity);
 				populateForm();
 				// Show success notification
 				CNotificationService.showSaveSuccess();
@@ -312,12 +312,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public CCrudToolbar getCrudToolbar() { return crudToolbar; }
 
 	@Override
-	public EntityClass getCurrentEntity() { return currentEntity; }
+	public EntityClass getValue() { return currentEntity; }
 
 	@Override
 	public String getCurrentEntityIdString() {
 		LOGGER.debug("Getting current entity ID string for entity class: {}", entityClass.getSimpleName());
-		final EntityClass entity = getCurrentEntity();
+		final EntityClass entity = getValue();
 		return entity != null ? entity.getId().toString() : null;
 	}
 
@@ -418,7 +418,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected boolean onBeforeSaveEvent() {
 		if (!entityService.onBeforeSaveEvent(currentEntity)) {
-			LOGGER.warn("onBeforeSaveEvent failed for entity: {} in {}", getCurrentEntity(), this.getClass().getSimpleName());
+			LOGGER.warn("onBeforeSaveEvent failed for entity: {} in {}", getValue(), this.getClass().getSimpleName());
 			return false;
 		}
 		return true;
@@ -442,7 +442,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public void onEntityCreated(final EntityClass entity) {
 		LOGGER.debug("Entity created, populating form");
 		final EntityClass newEntity = entity;
-		setCurrentEntity(newEntity);
+		setValue(newEntity);
 		populateForm();
 	}
 
@@ -460,7 +460,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		refreshGrid();
 		// Update current entity with saved version
 		final EntityClass savedEntity = entity;
-		setCurrentEntity(savedEntity);
+		setValue(savedEntity);
 		populateForm();
 		// Show success notification
 		CNotificationService.showSaveSuccess();
@@ -476,10 +476,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected void onSelectionChanged(final CMasterViewSectionBase.SelectionChangeEvent<EntityClass> event) {
 		final EntityClass value = event.getSelectedItem();
 		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
-		setCurrentEntity(value);
+		setValue(value);
 		populateForm();
 		// Update CRUD toolbar with current entity
-		crudToolbar.setCurrentEntity(value);
+		crudToolbar.setValue(value);
 		if (value == null) {
 			sessionService.setActiveId(entityClass.getClass().getSimpleName(), null);
 		} else {
@@ -497,7 +497,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	@Override
 	public void populateForm() {
-		final EntityClass value = getCurrentEntity();
+		final EntityClass value = getValue();
 		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
 		populateAccordionPanels(value);
 		getBinder().setBean(value);
@@ -523,7 +523,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	@SuppressWarnings ("unchecked")
 	@Override
-	public void setCurrentEntity(final CEntityDB<?> currentEntity) {
+	public void setValue(final CEntityDB<?> currentEntity) {
 		LOGGER.debug("Setting current entity: {}", currentEntity);
 		this.currentEntity = (EntityClass) currentEntity;
 	}

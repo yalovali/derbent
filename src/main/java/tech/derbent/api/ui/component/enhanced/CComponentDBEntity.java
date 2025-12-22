@@ -55,12 +55,12 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	public IContentOwner getContentOwner() { return contentOwner; }
 
 	@Override
-	public EntityClass getCurrentEntity() { return currentEntity; }
+	public EntityClass getValue() { return currentEntity; }
 
 	@Override
 	public String getCurrentEntityIdString() {
 		LOGGER.debug("Getting current entity ID string for entity class: {}", entityClass.getSimpleName());
-		final EntityClass entity = getCurrentEntity();
+		final EntityClass entity = getValue();
 		return entity != null ? entity.getId().toString() : null;
 	}
 
@@ -103,10 +103,10 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 			LOGGER.debug("Populating form for entity class: {}", entityClass.getSimpleName());
 			Check.isTrue(isPanelInitialized, "Panel must be initialized before populating form");
 			// Use current entity from content owner if available, otherwise use our own
-			EntityClass entityToUse = getCurrentEntity();
+			EntityClass entityToUse = getValue();
 			if (entityToUse == null && contentOwner != null) {
 				// Try to get entity from parent content owner
-				Object parentEntity = contentOwner.getCurrentEntity();
+				Object parentEntity = contentOwner.getValue();
 				if (parentEntity != null && entityClass.isInstance(parentEntity)) {
 					entityToUse = entityClass.cast(parentEntity);
 				}
@@ -132,7 +132,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected void saveFormData() throws Exception {
 		try {
-			EntityClass entity = getCurrentEntity();
+			EntityClass entity = getValue();
 			Check.notNull(entity, "Current entity cannot be null when saving form data");
 			Check.notNull(binder, "Binder cannot be null when saving form data");
 			binder.writeBean(entity);
@@ -149,7 +149,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	@SuppressWarnings ("unchecked")
 	@Override
-	public void setCurrentEntity(CEntityDB<?> entity) { 
+	public void setValue(CEntityDB<?> entity) { 
 		currentEntity = (EntityClass) entity; 
 	}
 

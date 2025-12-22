@@ -40,8 +40,8 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		// Simply add the list component to the panel content
 		addToContent(listComponent);
 		// Populate with current entity if available
-		if (getCurrentEntity() != null) {
-			listComponent.setCurrentEntity(getCurrentEntity());
+		if (getValue() != null) {
+			listComponent.setValue(getValue());
 		}
 		LOGGER.debug("Screen lines layout created with CComponentListDetailLines");
 	}
@@ -55,7 +55,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		super.populateForm(entity);
 		Check.notNull(listComponent, "List component cannot be null");
 		LOGGER.debug("Populating form with entity: {}", entity != null ? entity.getId() : "null");
-		listComponent.setCurrentEntity(entity);
+		listComponent.setValue(entity);
 	}
 
 	@Override

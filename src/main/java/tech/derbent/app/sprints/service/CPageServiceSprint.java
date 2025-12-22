@@ -87,7 +87,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	/** Creates and configures the backlog items component for displaying items not in the sprint.
 	 * @return configured CComponentBacklog component */
 	public CComponentBacklog createSpritBacklogComponent() {
-		final CSprint currentSprint = getView().getCurrentEntity();
+		final CSprint currentSprint = getView().getValue();
 		if (componentBacklogItems == null) {
 			final CProject project = currentSprint != null ? currentSprint.getProject() : null;
 			componentBacklogItems = new CComponentBacklog(project);

@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -67,8 +69,8 @@ import tech.derbent.api.utils.Check;
  * @param <MasterEntity> The master/parent entity type
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
-		extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>,
-		HasValue<HasValue.ValueChangeEvent<ChildEntity>, ChildEntity>, IPageServiceAutoRegistrable, IHasDragControl {
+	extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>, IPageServiceAutoRegistrable,
+		IHasDragControl {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -107,7 +109,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	// Owner interfaces for notifying parent components
 	private ISelectionOwner<ChildEntity> selectionOwner;
 	protected boolean useDynamicHeight = false;
-	// HasValue interface fields
+	// Selection change listeners
 	private final List<ValueChangeListener<? super ValueChangeEvent<ChildEntity>>> valueChangeListeners = new ArrayList<>();
 
 	/** Constructor for the entity list component.
@@ -186,10 +188,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		refreshListeners.add(listener);
 	}
 
-	/** Registers a value change listener. Implements HasValue.addValueChangeListener().
+	/** Registers a value change listener for selection changes.
 	 * @param listener The value change listener to register
 	 * @return Registration object to remove the listener */
-	@Override
 	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener) {
 		Check.notNull(listener, "ValueChangeListener cannot be null");
 		valueChangeListeners.add(listener);
@@ -197,11 +198,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return () -> valueChangeListeners.remove(listener);
 	}
 
-	/** Clears the selection. Equivalent to calling setValue(null). */
-	@Override
+	/** Clears the selection. Equivalent to calling setSelectedItem(null). */
 	public void clear() {
 		LOGGER.debug("Clearing selection");
-		setValue(null);
+		setSelectedItem(null);
 	}
 
 	/** Clear the grid. Implements IGridComponent.clearGrid() */
@@ -327,7 +327,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				public HasValue<?, ChildEntity> getHasValue() { return CComponentListEntityBase.this; }
+				public HasValue<?, ChildEntity> getHasValue() { return null; }
 
 				@Override
 				public ChildEntity getOldValue() { return oldValue; }
@@ -368,10 +368,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return withoutPrefix.substring(0, 1).toLowerCase() + withoutPrefix.substring(1);
 	}
 
-	/** Returns the current sprint entity.
-	 * @return The current sprint being edited */
+	/** Returns the current master entity.
+	 * @return The current master entity being edited */
 	@Override
-	public CEntityDB<?> getCurrentEntity() { return getMasterEntity(); }
+	public CEntityDB<?> getValue() { return getMasterEntity(); }
 
 	/** Returns the current sprint ID as a string.
 	 * @return The ID string or null if no sprint is set */
@@ -405,11 +405,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @return The selected item, or null if none selected */
 	public ChildEntity getSelectedItem() { return selectedItem; }
 
-	/** Gets the current value of this component (the selected item).
-	 * @return The currently selected item (can be null) */
-	@Override
-	public ChildEntity getValue() { return selectedItem; }
-
 	public void grid_refresh_consumer() {
 		final MasterEntity master = getMasterEntity();
 		Check.notNull(master, "Master entity cannot be null when refreshing grid");
@@ -420,7 +415,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		grid.setItems(items);
 		grid.asSingleSelect().setValue(currentValue);
 	}
-	// HasValue interface implementation
+	// Selection handling
 
 	/** Handle edit operation for selected item.
 	 * @param item The item to edit */
@@ -468,17 +463,14 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	/** Checks if the selection is empty.
 	 * @return true if no item is selected, false otherwise */
-	@Override
 	public boolean isEmpty() { return selectedItem == null; }
 
 	/** Checks if the component is read-only.
 	 * @return true if read-only, false otherwise */
-	@Override
 	public boolean isReadOnly() { return readOnly; }
 
 	/** Checks if the required indicator is visible.
 	 * @return false (required indicator not currently implemented) */
-	@Override
 	public boolean isRequiredIndicatorVisible() { return false; }
 
 	/** Load items for the given master entity. Subclasses must implement this to define how items are loaded.
@@ -645,7 +637,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			updateButtonStates(item != null);
 			// Notify selection owner if set
 			notifySelectionOwner();
-			// Fire value change event for HasValue interface
+			// Fire selection change event
 			fireValueChangeEvent(item, true);
 		} catch (final Exception ex) {
 			LOGGER.error("Error processing selection change", ex);
@@ -743,17 +735,17 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param entity The entity to set (expected to be of type MasterEntity) */
 	@Override
 	@SuppressWarnings ("unchecked")
-	public void setCurrentEntity(final CEntityDB<?> entity) {
+	public void setValue(final CEntityDB<?> entity) {
 		if (entity == null) {
-			// LOGGER.debug("setCurrentEntity called with null - clearing grid");
+			// LOGGER.debug("setValue called with null - clearing grid");
 			masterEntity = null;
 			clearGrid();
 		} else if (masterEntityClass.isInstance(entity)) {
-			// LOGGER.debug("setCurrentEntity called with {} - setting master entity", entity.getClass().getSimpleName());
+			// LOGGER.debug("setValue called with {} - setting master entity", entity.getClass().getSimpleName());
 			masterEntity = (MasterEntity) entity;
 			refreshGrid();
 		} else {
-			LOGGER.warn("setCurrentEntity called with unexpected entity type: {} (expected {}) - ignoring", entity.getClass().getSimpleName(),
+			LOGGER.warn("setValue called with unexpected entity type: {} (expected {}) - ignoring", entity.getClass().getSimpleName(),
 					masterEntityClass.getSimpleName());
 		}
 	}
@@ -803,7 +795,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	/** Sets the read-only state of this component. When read-only, users cannot change the selection.
 	 * @param readOnly true to make read-only, false to make editable */
-	@Override
 	public void setReadOnly(final boolean readOnly) {
 		this.readOnly = readOnly;
 		// Update button states
@@ -828,7 +819,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	/** Sets whether the required indicator should be visible.
 	 * @param requiredIndicatorVisible true to show required indicator, false to hide */
-	@Override
 	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
 		// Note: CComponentListEntityBase doesn't currently support required indicator
 		// This could be implemented by adding a visual indicator to the component
@@ -838,7 +828,12 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Set the currently selected item.
 	 * @param item The item to select */
 	public void setSelectedItem(final ChildEntity item) {
+		LOGGER.debug("Setting selection programmatically: {}", item != null ? item.getId() : "null");
 		grid.asSingleSelect().setValue(item);
+		selectedItem = item;
+		updateButtonStates(item != null);
+		// Fire selection change event (not from client)
+		fireValueChangeEvent(item, false);
 	}
 
 	/** Sets the selection owner to be notified of selection changes.
@@ -847,18 +842,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		selectionOwner = owner;
 	}
 	// IHasDragStart interface implementation
-
-	/** Sets the value of this component (the selected item). This will update the selection and fire value change events.
-	 * @param value The item to select (can be null to clear selection) */
-	@Override
-	public void setValue(final ChildEntity value) {
-		LOGGER.debug("Setting value programmatically: {}", value != null ? value.getId() : "null");
-		grid.asSingleSelect().setValue(value);
-		selectedItem = value;
-		updateButtonStates(value != null);
-		// Fire value change event (not from client)
-		fireValueChangeEvent(value, false);
-	}
 	// IHasDragEnd interface implementation
 
 	/** Update the enabled state of action buttons based on selection.

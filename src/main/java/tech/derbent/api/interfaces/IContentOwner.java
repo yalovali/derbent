@@ -7,7 +7,7 @@ import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 public interface IContentOwner {
 
 	public CEntityDB<?> createNewEntityInstance() throws Exception;
-	CEntityDB<?> getCurrentEntity();
+	CEntityDB<?> getValue();
 	String getCurrentEntityIdString();
 	public CAbstractService<?> getEntityService();
 
@@ -19,5 +19,5 @@ public interface IContentOwner {
 		// Default: no grid to refresh
 	}
 
-	void setCurrentEntity(CEntityDB<?> entity);
+	void setValue(CEntityDB<?> entity);
 }

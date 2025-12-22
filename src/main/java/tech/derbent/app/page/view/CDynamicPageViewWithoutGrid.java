@@ -27,7 +27,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());
 		initializePage();
 		if (entity != null) {
-			setCurrentEntity(entity);
+			setValue(entity);
 		} else {
 			locateFirstEntity();
 		}
@@ -106,7 +106,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
 	void locateFirstEntity() throws Exception {
 		Check.notNull(entityService, "Entity service is not initialized");
-		entityService.findAll().stream().findFirst().ifPresent(this::setCurrentEntity);
+		entityService.findAll().stream().findFirst().ifPresent(this::setValue);
 	}
 
 	@Override
@@ -132,10 +132,10 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void setCurrentEntity(CEntityDB entity) {
+	public void setValue(CEntityDB entity) {
 		LOGGER.debug("Setting current entity in dynamic page view without grid: {}", entity != null ? entity.getId() : "null");
 		try {
-			super.setCurrentEntity(entity);
+			super.setValue(entity);
 		} catch (final Exception e) {
 			throw e;
 		}

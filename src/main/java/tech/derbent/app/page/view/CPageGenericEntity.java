@@ -81,8 +81,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	public void actionRefresh() {
 		try {
-			if ((getCurrentEntity() != null) && (((CEntityDB<?>) getCurrentEntity()).getId() != null)) {
-				EntityClass reloaded = entityService.getById(((CEntityDB<?>) getCurrentEntity()).getId()).orElse(null);
+			if ((getValue() != null) && (((CEntityDB<?>) getValue()).getId() != null)) {
+				EntityClass reloaded = entityService.getById(((CEntityDB<?>) getValue()).getId()).orElse(null);
 				if (reloaded != null) {
 					populateEntityDetails(reloaded);
 				}
@@ -94,14 +94,14 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	public void actionSave() {
 		// try {
-		// if (getCurrentEntity() == null) {
+		// if (getValue() == null) {
 		// LOGGER.warn("No entity to save");
 		// return;
 		// }
 		// // Write form data to entity
-		// typedBinder.writeBean(getCurrentEntity());
+		// typedBinder.writeBean(getValue());
 		// // Save entity
-		// final EntityClass savedEntity = entityService.save(getCurrentEntity());
+		// final EntityClass savedEntity = entityService.save(getValue());
 		// LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
 		// // Notify listeners and refresh
 		// onEntitySaved(savedEntity);
@@ -137,7 +137,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	@SuppressWarnings ({})
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		CCrudToolbar toolbar = new CCrudToolbar();
-		toolbar.setCurrentEntity(typedEntity);
+		toolbar.setValue(typedEntity);
 		configureCrudToolbar(toolbar);
 		return toolbar;
 	}
@@ -324,7 +324,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	private void reloadEntityValues(EntityClass typedEntity) {
 		try {
 			// Update the toolbar's current entity
-			crudToolbar.setCurrentEntity(typedEntity);
+			crudToolbar.setValue(typedEntity);
 			// Update the binder with new entity values
 			CEnhancedBinder<EntityClass> typedBinder = (CEnhancedBinder<EntityClass>) (CEnhancedBinder<?>) currentBinder;
 			typedBinder.setBean(typedEntity);

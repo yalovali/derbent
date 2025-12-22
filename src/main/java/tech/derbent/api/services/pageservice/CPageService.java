@@ -63,7 +63,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public void actionCreate() throws Exception {
 		try {
-			setPreviousEntity(getCurrentEntity());
+			setPreviousEntity(getValue());
 			final EntityClass newEntity = getEntityService().newEntity();
 			getEntityService().initializeNewEntity(newEntity);
 			getView().onEntityCreated(newEntity);
@@ -75,7 +75,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public void actionDelete() throws Exception {
 		try {
-			final EntityClass entity = getCurrentEntity();
+			final EntityClass entity = getValue();
 			if (entity == null || entity.getId() == null) {
 				CNotificationService.showWarning("Please select an item to delete.");
 				return;
@@ -99,7 +99,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	@SuppressWarnings ("unchecked")
 	public void actionRefresh() throws Exception {
 		try {
-			final EntityClass entity = getCurrentEntity();
+			final EntityClass entity = getValue();
 			LOGGER.debug("Refresh action triggered for entity: {}", entity != null ? entity.getId() : "null");
 			// Check if current entity is a new unsaved entity (no ID)
 			if (entity != null && entity.getId() == null) {
@@ -107,7 +107,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 				if (previousEntity != null) {
 					final CEntityDB<?> reloaded = getEntityService().getById(previousEntity.getId()).orElse(null);
 					if (reloaded != null) {
-						setCurrentEntity((EntityClass) reloaded);
+						setValue((EntityClass) reloaded);
 						getView().onEntityRefreshed((EntityClass) reloaded);
 					} else {
 						// previous entity no longer exists, clear selection
@@ -139,7 +139,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	public void actionSave() throws Exception {
 		try {
-			final EntityClass entity = getCurrentEntity();
+			final EntityClass entity = getValue();
 			LOGGER.debug("Save action triggered for entity: {}", entity != null ? entity.getId() : "null");
 			if (entity == null) {
 				LOGGER.warn("No current entity for save operation");
@@ -151,7 +151,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 			}
 			final EntityClass savedEntity = getEntityService().save(entity);
 			LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
-			setCurrentEntity(savedEntity);
+			setValue(savedEntity);
 			getView().onEntitySaved(savedEntity);
 			getView().populateForm();
 			CNotificationService.showSaveSuccess();
@@ -439,7 +439,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		return ((HasValue) component).getValue();
 	}
 
-	protected EntityClass getCurrentEntity() { return getView().getCurrentEntity(); }
+	protected EntityClass getValue() { return getView().getValue(); }
 
 	public CProject getCurrentProject() { return getSessionService().getActiveProject().orElse(null); }
 
@@ -536,8 +536,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
-	public void setCurrentEntity(final EntityClass entity) {
-		getView().setCurrentEntity(entity);
+	public void setValue(final EntityClass entity) {
+		getView().setValue(entity);
 	}
 
 	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }

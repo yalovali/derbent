@@ -33,7 +33,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	}
 
 	public List<CUser> getAvailableUsers() {
-		final CProject project = getCurrentEntity();
+		final CProject project = getValue();
 		LOGGER.debug("Getting available users for project: {}", project != null ? project.getName() : "null");
 		if (project == null) {
 			LOGGER.warn("Current project is null, returning empty user list");
@@ -45,7 +45,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	@Override
 	protected void openAddDialog() throws Exception {
 		try {
-			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, null, getCurrentEntity(),
+			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, null, getValue(),
 					this::onSettingsSaved).open();
 		} catch (Exception e) {
 			CNotificationService.showWarning("Failed to open add dialog: " + e.getMessage());
@@ -57,7 +57,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	protected void openEditDialog() throws Exception {
 		try {
 			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, getSelectedSetting(),
-					getCurrentEntity(), this::onSettingsSaved).open();
+					getValue(), this::onSettingsSaved).open();
 		} catch (Exception e) {
 			CNotificationService.showWarning("Failed to open edit dialog: " + e.getMessage());
 			throw e;
@@ -66,6 +66,6 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 
 	@Override
 	protected void setupDataAccessors() {
-		createStandardDataAccessors(() -> userProjectSettingsService.findByProject(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
+		createStandardDataAccessors(() -> userProjectSettingsService.findByProject(getValue()), () -> entityService.save(getValue()));
 	}
 }

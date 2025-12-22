@@ -92,9 +92,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	}
 
 	@Override
-	public CEntityDB<?> getCurrentEntity() { return getValue(); }
-
-	@Override
 	public String getCurrentEntityIdString() {
 		final CKanbanLine currentLine = getValue();
 		if (currentLine == null || currentLine.getId() == null) {
@@ -198,7 +195,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	}
 
 	@Override
-	public void setCurrentEntity(final CEntityDB<?> entity) {
+	public void setValue(final CEntityDB<?> entity) {
 		LOGGER.debug("Setting current entity for Kanban board component");
 		if (entity == null) {
 			setValue(null);

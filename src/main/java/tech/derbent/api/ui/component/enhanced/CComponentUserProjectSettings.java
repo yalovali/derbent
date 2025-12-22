@@ -34,13 +34,13 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 
 	public List<CProject> getAvailableProjects() {
 		// called from annotation
-		return projectService.getAvailableProjectsForUser(getCurrentEntity().getId());
+		return projectService.getAvailableProjectsForUser(getValue().getId());
 	}
 
 	@Override
 	protected void openAddDialog() throws Exception {
 		try {
-			new CDialogUserProjectSettings(this, (CUserService) entityService, projectService, userProjectSettingsService, null, getCurrentEntity(),
+			new CDialogUserProjectSettings(this, (CUserService) entityService, projectService, userProjectSettingsService, null, getValue(),
 					this::onSettingsSaved).open();
 		} catch (Exception e) {
 			CNotificationService.showWarning("Failed to open add dialog: " + e.getMessage());
@@ -52,7 +52,7 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 	protected void openEditDialog() throws Exception {
 		try {
 			new CDialogUserProjectSettings(this, (CUserService) entityService, projectService, userProjectSettingsService, getSelectedSetting(),
-					getCurrentEntity(), this::onSettingsSaved).open();
+					getValue(), this::onSettingsSaved).open();
 		} catch (Exception e) {
 			CNotificationService.showWarning("Failed to open edit dialog: " + e.getMessage());
 			throw e;
@@ -61,6 +61,6 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 
 	@Override
 	protected void setupDataAccessors() {
-		createStandardDataAccessors(() -> userProjectSettingsService.findByUser(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
+		createStandardDataAccessors(() -> userProjectSettingsService.findByUser(getValue()), () -> entityService.save(getValue()));
 	}
 }

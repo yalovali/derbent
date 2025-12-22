@@ -252,16 +252,16 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 
 	/** Reloads entity values into existing components without rebuilding the UI */
 	@Override
-	public void setCurrentEntity(final CEntityDB<?> entity) {
+	public void setValue(final CEntityDB<?> entity) {
 		LOGGER.debug("Setting current entity in dynamic page view with sections: {}", entity);
 		try {
-			super.setCurrentEntity(entity);
+			super.setValue(entity);
 			if (entity == null) {
 				if (crudToolbar != null) {
-					crudToolbar.setCurrentEntity(null);
+					crudToolbar.setValue(null);
 				}
 			} else if (crudToolbar != null) {
-				crudToolbar.setCurrentEntity(entity);
+				crudToolbar.setValue(entity);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error setting current entity in toolbar:" + e.getMessage());

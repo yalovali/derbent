@@ -64,11 +64,11 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
 		LOGGER.debug("Project change notification received in panel {}: {}", getClass().getSimpleName(),
 				newProject != null ? newProject.getName() : "null");
 		// If no entity is currently selected, clear the panel content
-		if (getCurrentEntity() == null) {
+		if (getValue() == null) {
 			LOGGER.debug("No entity selected, clearing panel content for project change");
 			refreshPanelForProjectChange(newProject);
 		} else // Entity is selected - check if it belongs to the new project
-		if (shouldRefreshForProject(getCurrentEntity(), newProject)) {
+		if (shouldRefreshForProject(getValue(), newProject)) {
 			LOGGER.debug("Entity project context changed, refreshing panel content");
 			refreshPanelForProjectChange(newProject);
 		}
@@ -83,7 +83,7 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
 			// Clear existing content
 			removeAllFromContent();
 			// Recreate content if entity is available
-			if (getCurrentEntity() != null) {
+			if (getValue() != null) {
 				createPanelContent();
 			}
 		} catch (final Exception e) {

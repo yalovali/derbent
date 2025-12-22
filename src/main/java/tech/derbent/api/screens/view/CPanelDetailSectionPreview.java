@@ -48,7 +48,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 		final CButton previewButton = new CButton("Preview", null, null);
 		getBaseLayout().add(previewButton);
 		previewButton.addClickListener(e -> {
-			populateForm(getCurrentEntity());
+			populateForm(getValue());
 		});
 		divPreview = new CDiv();
 		getBaseLayout().add(divPreview);

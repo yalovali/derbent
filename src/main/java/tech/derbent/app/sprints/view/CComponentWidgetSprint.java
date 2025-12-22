@@ -139,7 +139,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			// Configure for widget mode with dynamic height (max 400px)
 			componentSprintItems.setDynamicHeight("400px");
 			// Set the current entity (sprint)
-			componentSprintItems.setCurrentEntity(getEntity());
+			componentSprintItems.setValue(getEntity());
 			// Use the general refresh listener pattern instead of the old setOnItemChangeListener
 			componentSprintItems.addRefreshListener(item -> refreshItemCount());
 			// Enable drag-drop on the grid for external drag-drop operations
@@ -245,7 +245,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			final var items = sprintItemService.findByMasterIdWithItems(getEntity().getId());
 			getEntity().setSprintItems(items);
 			if (componentSprintItems != null) {
-				componentSprintItems.setCurrentEntity(getEntity());
+				componentSprintItems.setValue(getEntity());
 				componentSprintItems.refreshGrid();
 			}
 		}

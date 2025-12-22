@@ -45,12 +45,12 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	@SuppressWarnings ("unchecked")
 	@Override
-	public EntityClass getCurrentEntity() { return (EntityClass) parentContent.getCurrentEntity(); }
+	public EntityClass getValue() { return (EntityClass) parentContent.getValue(); }
 
 	@Override
 	public String getCurrentEntityIdString() {
 		LOGGER.debug("Getting current entity ID string for accordion: {}", getAccordionTitle());
-		return getCurrentEntity() != null ? getCurrentEntity().getId().toString() : null;
+		return getValue() != null ? getValue().getId().toString() : null;
 	}
 
 	public List<String> getEntityFields() { return EntityFields; }
@@ -97,10 +97,10 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	public void saveEventHandler() {}
 
 	@Override
-	public void setCurrentEntity(CEntityDB<?> entity) {
+	public void setValue(CEntityDB<?> entity) {
 		// Delegate to parent content owner
 		if (parentContent != null) {
-			parentContent.setCurrentEntity(entity);
+			parentContent.setValue(entity);
 		}
 	}
 

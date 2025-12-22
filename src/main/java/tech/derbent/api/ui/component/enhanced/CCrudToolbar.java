@@ -139,7 +139,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	// Expose buttons if the caller needs direct access
 	public CButton getCreateButton() { return createButton; }
 
-	public Object getCurrentEntity() { return currentEntity; }
+	public Object getValue() { return currentEntity; }
 
 	public CButton getDeleteButton() { return deleteButton; }
 
@@ -190,7 +190,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	}
 
 	// Allow the page to inform toolbar about the currently selected entity so the toolbar can update its UI state
-	public void setCurrentEntity(final Object entity) {
+	public void setValue(final Object entity) {
 		// LOGGER.debug("Setting current entity in toolbar: {}", entity);
 		currentEntity = entity;
 		updateButtonStates();

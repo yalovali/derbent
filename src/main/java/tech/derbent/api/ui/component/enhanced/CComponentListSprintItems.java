@@ -145,7 +145,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			final CDragDropEvent dropEvent = (CDragDropEvent) event;
 			if (dropEvent.getDropLocation().equals(GridDropLocation.EMPTY) && dropEvent.getTargetItem() == null) {
 				// dropped into empty area - allow
-				dropEvent.setTargetItem(getCurrentEntity());
+				dropEvent.setTargetItem(getValue());
 			}
 		}
 	}

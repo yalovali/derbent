@@ -153,7 +153,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		// Check if selected item is CGanttItem (DTO wrapper)
 		if (value != null) {
 			Check.instanceOf(value, CGanntItem.class, "Selected item is not a CGanttItem");
-			setCurrentEntity(value);
+			setValue(value);
 			populateForm();
 			return;
 		} else {
@@ -165,7 +165,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	@Override
 	public void populateForm() {
 		try {
-			LOGGER.debug("Populating form for entity: {}", getCurrentEntity() != null ? getCurrentEntity().getName() : "null");
+			LOGGER.debug("Populating form for entity: {}", getValue() != null ? getValue().getName() : "null");
 			// Implementation to populate the form with current entity details
 			updateDetailsComponent();
 		} catch (Exception e) {
@@ -202,8 +202,8 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	protected void updateDetailsComponent() throws Exception {
 		LOGGER.debug("Updating details component for Gantt view");
 		CProjectItem<?> ganntEntity = null;
-		if (getCurrentEntity() != null) {
-			ganntEntity = ((CGanntItem) getCurrentEntity()).getGanntItem(activityService, meetingService);
+		if (getValue() != null) {
+			ganntEntity = ((CGanntItem) getValue()).getGanntItem(activityService, meetingService);
 		}
 		locateGanntEntityInDynamicPage(ganntEntity);
 	}

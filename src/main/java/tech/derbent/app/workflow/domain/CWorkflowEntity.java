@@ -42,7 +42,7 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	@AMetaData (
 			displayName = "Status Transitions", required = false, readOnly = false, description = "Status transitions for this workflow",
 			hidden = false, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent",
-			dataProviderParamBean = "context", dataProviderParamMethod = "getCurrentEntity"
+			dataProviderParamBean = "context", dataProviderParamMethod = "getValue"
 	)
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
 

@@ -168,8 +168,8 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	}
 
 	@Override
-	public void setCurrentEntity(final CEntityDB<?> entity) {
-		super.setCurrentEntity(entity);
+	public void setValue(final CEntityDB<?> entity) {
+		super.setValue(entity);
 		if (entity == null) {
 			currentEntityType = null;
 		} else {

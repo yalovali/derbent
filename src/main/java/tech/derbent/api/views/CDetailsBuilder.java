@@ -147,8 +147,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		CDetailsBuilder.applicationContext = context;
 	}
 
-	public void setCurrentEntity(final CEntityDB<?> entity) {
+	public void setValue(final CEntityDB<?> entity) {
 		Check.notNull(getFormBuilder(), "Form builder cannot be null, first initialize it");
-		getFormBuilder().setCurrentEntity(entity);
+		getFormBuilder().setValue(entity);
 	}
 }

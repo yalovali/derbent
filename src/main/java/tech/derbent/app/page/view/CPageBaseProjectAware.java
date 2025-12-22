@@ -137,7 +137,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	protected CEnhancedBinder<CEntityDB<?>> getCurrentBinder() { return currentBinder; }
 
 	@Override
-	public CEntityDB<?> getCurrentEntity() { return currentEntity; }
+	public CEntityDB<?> getValue() { return currentEntity; }
 
 	@Override
 	public String getCurrentEntityIdString() {
@@ -183,11 +183,11 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	@Override
 	public void populateForm() throws Exception {
 		try {
-			detailsBuilder.setCurrentEntity(currentEntity);
+			detailsBuilder.setValue(currentEntity);
 			// Default implementation - populate current binder if available
-			if (currentBinder != null && getCurrentEntity() != null) {
-				LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
-				currentBinder.setBean(getCurrentEntity());
+			if (currentBinder != null && getValue() != null) {
+				LOGGER.debug("Populating form for entity: {}", getValue());
+				currentBinder.setBean(getValue());
 			} else if (currentBinder != null) {
 				LOGGER.debug("Clearing form - no current entity");
 				currentBinder.setBean(null);
@@ -206,7 +206,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	public void setContentOwner(final IContentOwner owner) { parentContent = owner; }
 
 	@Override
-	public void setCurrentEntity(final CEntityDB<?> entity) {
+	public void setValue(final CEntityDB<?> entity) {
 		try {
 			if (entity == null) {
 				LOGGER.debug("Setting current entity to null.");

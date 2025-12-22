@@ -52,7 +52,7 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 
 	protected void onEntitySelected(CEntityDB<?> selectedEntity) throws Exception {
 		try {
-			setCurrentEntity(selectedEntity);
+			setValue(selectedEntity);
 			if (selectedEntity == null) {
 				// No selection - clear details
 				clearEntityDetails();

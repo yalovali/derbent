@@ -17,7 +17,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 
 	default void actionChangeStatus(final CProjectItemStatus newStatus) {
 		try {
-			final EntityClass entity = getView().getCurrentEntity();
+			final EntityClass entity = getView().getValue();
 			if (entity == null) {
 				LOGGER.warn("No current entity for status change operation");
 				CNotificationService.showWarning("No entity selected for status change");
@@ -52,7 +52,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 			((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
 			LOGGER.info("Status set from '{}' to '{}' for entity (not saved yet)", oldStatusName, newStatus.getName());
 			// Update the current entity reference (no save - user must click Save button)
-			setCurrentEntity(entity);
+			setValue(entity);
 			// Refresh the form to show the updated status value
 			getView().populateForm();
 			CNotificationService.showInfo(String.format("Status set to '%s' (click Save to persist)", newStatus.getName()));
@@ -65,7 +65,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 
 	default List<CProjectItemStatus> getAvailableStatusesForProjectItem() {
 		LOGGER.debug("Retrieving available statuses for current entity");
-		final EntityClass entity = getView().getCurrentEntity();
+		final EntityClass entity = getView().getValue();
 		if (entity == null) {
 			LOGGER.warn("No current entity for retrieving available statuses");
 			return List.of();
@@ -77,5 +77,5 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 	CAbstractService<EntityClass> getEntityService();
 	CProjectItemStatusService getProjectItemStatusService();
 	IPageServiceImplementer<EntityClass> getView();
-	void setCurrentEntity(final EntityClass entity);
+	void setValue(final EntityClass entity);
 }

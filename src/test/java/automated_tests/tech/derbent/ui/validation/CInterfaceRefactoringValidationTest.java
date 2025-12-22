@@ -55,10 +55,10 @@ public class CInterfaceRefactoringValidationTest {
 	void testIContentOwnerMethodsAccessible() {
 		try {
 			// Verify IContentOwner methods exist and are accessible
-			IContentOwner.class.getMethod("getCurrentEntity");
+			IContentOwner.class.getMethod("getValue");
 			IContentOwner.class.getMethod("getEntityService");
 			IContentOwner.class.getMethod("populateForm");
-			IContentOwner.class.getMethod("setCurrentEntity", CEntityDB.class);
+			IContentOwner.class.getMethod("setValue", CEntityDB.class);
 			IContentOwner.class.getMethod("createNewEntityInstance");
 			IContentOwner.class.getMethod("refreshGrid");
 		} catch (NoSuchMethodException e) {
@@ -78,7 +78,7 @@ public class CInterfaceRefactoringValidationTest {
 	void testIPageServiceImplementerMethodsAccessible() {
 		try {
 			// Verify IPageServiceImplementer methods exist and are accessible
-			IPageServiceImplementer.class.getMethod("getCurrentEntity");
+			IPageServiceImplementer.class.getMethod("getValue");
 			IPageServiceImplementer.class.getMethod("getEntityService");
 			IPageServiceImplementer.class.getMethod("getBinder");
 			IPageServiceImplementer.class.getMethod("getEntityClass");
@@ -95,9 +95,9 @@ public class CInterfaceRefactoringValidationTest {
 		// Verify that methods are not redeclared in IPageServiceImplementer
 		// if they're inherited from IContentOwner (except for overrides with narrower types)
 		try {
-			// getCurrentEntity is overridden in IPageServiceImplementer with covariant return type
-			var contentOwnerMethod = IContentOwner.class.getMethod("getCurrentEntity");
-			var pageServiceMethod = IPageServiceImplementer.class.getMethod("getCurrentEntity");
+			// getValue is overridden in IPageServiceImplementer with covariant return type
+			var contentOwnerMethod = IContentOwner.class.getMethod("getValue");
+			var pageServiceMethod = IPageServiceImplementer.class.getMethod("getValue");
 			// Both should exist but IPageServiceImplementer should override with specific type
 			assertNotNull(contentOwnerMethod);
 			assertNotNull(pageServiceMethod);
@@ -150,15 +150,15 @@ public class CInterfaceRefactoringValidationTest {
 	}
 
 	@Test
-	@DisplayName ("setCurrentEntity method uses correct signature")
-	void testSetCurrentEntitySignature() {
+	@DisplayName ("setValue method uses correct signature")
+	void testSetValueSignature() {
 		try {
-			// Verify setCurrentEntity accepts CEntityDB<?>
-			var method = IContentOwner.class.getMethod("setCurrentEntity", CEntityDB.class);
-			assertNotNull(method, "setCurrentEntity method should exist");
-			assertEquals(void.class, method.getReturnType(), "setCurrentEntity should return void");
+			// Verify setValue accepts CEntityDB<?>
+			var method = IContentOwner.class.getMethod("setValue", CEntityDB.class);
+			assertNotNull(method, "setValue method should exist");
+			assertEquals(void.class, method.getReturnType(), "setValue should return void");
 		} catch (NoSuchMethodException e) {
-			fail("setCurrentEntity(CEntityDB<?>) method should exist: " + e.getMessage());
+			fail("setValue(CEntityDB<?>) method should exist: " + e.getMessage());
 		}
 	}
 }
