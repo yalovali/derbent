@@ -33,7 +33,7 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 	public CDetailSection findByEntityTypeAndProject(final String entityType, final CProject project) {
 		Check.notBlank(entityType, "Entity type must not be blank");
 		Check.notNull(project, "Project must not be null");
-		if ((project == null) || (entityType == null) || entityType.isBlank()) {
+		if ((entityType == null) || entityType.isBlank()) {
 			return null;
 		}
 		return ((IDetailSectionRepository) repository).findByEntityTypeAndProject(project, entityType).orElse(null);
@@ -49,7 +49,7 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 	public CDetailSection findByNameAndProject(final CProject project, final String name) {
 		Check.notNull(project, "Project must not be null");
 		Check.notBlank(name, "Name must not be blank");
-		if ((project == null) || (name == null) || name.isBlank()) {
+		if ((name == null) || name.isBlank()) {
 			return null;
 		}
 		return ((IDetailSectionRepository) repository).findByNameAndProject(project, name).orElse(null);

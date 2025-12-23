@@ -1,11 +1,14 @@
 package tech.derbent.api.ui.dialogs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 /** CExceptionDialog - Dialog for displaying error messages and exceptions to users. Layer: View (MVC) Used when an error occurs that the user should
  * be informed about. */
 public final class CDialogException extends CDialogInfoBase {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogException.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Convenience constructor for displaying exception information.

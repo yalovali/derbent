@@ -36,6 +36,7 @@ import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.ui.component.enhanced.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.enhanced.CViewToolbar;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
@@ -48,7 +49,6 @@ import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.base.users.view.CDialogUserProfile;
-import tech.derbent.api.ui.notifications.CNotificationService;
 
 /** The main layout is a top-level placeholder for other views. It provides a side navigation menu and a user menu. */
 // vaadin applayout is used to create a layout with a side navigation menu it consists of
@@ -63,6 +63,69 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
 
 	private static final long serialVersionUID = 1L;
+
+	@SuppressWarnings ("unused")
+	private static Div createAppMarker() {
+		final var slidingHeader = new Div();
+		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM, Gap.SMALL);
+		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
+		// Original header content (logo and app name) - version removed
+		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CUBES.create(), IconSize.LARGE);
+		icon.getStyle().set("color", "var(--lumo-primary-color)");
+		slidingHeader.add(icon);
+		final var appName = new Span("Derbent");
+		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
+		appName.getStyle().set("white-space", "nowrap"); // Prevent text wrapping
+		slidingHeader.add(appName);
+		return slidingHeader;
+	}
+
+	/** Sets up avatar with user initials when no profile picture is available.
+	 * @param avatar The avatar component to configure
+	 * @param user   The user whose initials to display */
+	private static void setupAvatarInitials(final Avatar avatar, final CUser user) {
+		if (user == null) {
+			return;
+		}
+		String initials = "";
+		// Get initials from first name
+		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
+			final String[] nameParts = user.getName().trim().split("\\s+");
+			for (final String part : nameParts) {
+				if (!part.isEmpty()) {
+					initials += part.substring(0, 1).toUpperCase();
+					if (initials.length() >= 2) {
+						break; // Limit to 2 initials
+					}
+				}
+			}
+		}
+		// Add last name initial if we have less than 2 initials
+		if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty() && (initials.length() < 2)) {
+			initials += user.getLastname().substring(0, 1).toUpperCase();
+		}
+		// Fall back to username if no name is available
+		if (initials.isEmpty() && (user.getLogin() != null) && !user.getLogin().trim().isEmpty()) {
+			initials = user.getLogin().substring(0, 1).toUpperCase();
+		}
+		// Final fallback
+		if (initials.isEmpty()) {
+			initials = "U";
+		}
+		avatar.setAbbreviation(initials);
+		// Set tooltip with full name
+		String displayName = "";
+		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
+			displayName = user.getName();
+			if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty()) {
+				displayName += " " + user.getLastname();
+			}
+		} else {
+			displayName = user.getLogin();
+		}
+		avatar.getElement().setAttribute("title", displayName);
+	}
+
 	private final AuthenticationContext authenticationContext;
 	private final User currentUser;
 	private final CLayoutService layoutService;
@@ -113,11 +176,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		// Update the view title in the toolbar after navigation
 		String pageTitle = null;
 		// Check if the current content implements IPageTitleProvider (for dynamic pages)
-		Component content = getContent();
+		final Component content = getContent();
 		if (content instanceof IPageTitleProvider) {
 			pageTitle = ((IPageTitleProvider) content).getPageTitle();
 			// LOGGER.debug("Using page title from IPageTitleProvider: {}", pageTitle);
-		} else if (pageTitle == null || pageTitle.trim().isEmpty()) {
+		} else {
 			// Fall back to MenuConfiguration if no custom title is provided
 			pageTitle = MenuConfiguration.getPageHeader(content).orElse("Main Layout");
 			// LOGGER.debug("Using page title from MenuConfiguration: {}", pageTitle);
@@ -125,20 +188,21 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
 	}
 
-	@SuppressWarnings ("unused")
-	private Div createAppMarker() {
-		final var slidingHeader = new Div();
-		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM, Gap.SMALL);
-		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
-		// Original header content (logo and app name) - version removed
-		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CUBES.create(), IconSize.LARGE);
-		icon.getStyle().set("color", "var(--lumo-primary-color)");
-		slidingHeader.add(icon);
-		final var appName = new Span("Derbent");
-		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-		appName.getStyle().set("white-space", "nowrap"); // Prevent text wrapping
-		slidingHeader.add(appName);
-		return slidingHeader;
+	/** Applies the font size scale from system settings. */
+	private void applyFontSizeFromSettings() {
+		try {
+			// Get font size scale from system settings
+			final String fontSizeScale = systemSettingsService.getFontSizeScale();
+			LOGGER.info("Applying font size scale from settings: {}", fontSizeScale);
+			// Apply font size scale to UI
+			CFontSizeService.applyFontSizeScale(fontSizeScale);
+			// Store in session for persistence
+			CFontSizeService.storeFontSizeScale(fontSizeScale);
+		} catch (final Exception e) {
+			LOGGER.error("Error applying font size from settings, using default", e);
+			// Fall back to medium if error occurs
+			CFontSizeService.applyFontSizeScale("medium");
+		}
 	}
 
 	private Div createHeader() {
@@ -291,83 +355,20 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		setupAvatarInitials(avatar, user);
 	}
 
-	/** Applies the font size scale from system settings. */
-	private void applyFontSizeFromSettings() {
-		try {
-			// Get font size scale from system settings
-			final String fontSizeScale = systemSettingsService.getFontSizeScale();
-			LOGGER.info("Applying font size scale from settings: {}", fontSizeScale);
-			// Apply font size scale to UI
-			CFontSizeService.applyFontSizeScale(fontSizeScale);
-			// Store in session for persistence
-			CFontSizeService.storeFontSizeScale(fontSizeScale);
-		} catch (final Exception e) {
-			LOGGER.error("Error applying font size from settings, using default", e);
-			// Fall back to medium if error occurs
-			CFontSizeService.applyFontSizeScale("medium");
-		}
-	}
-
 	private void setSessionUserFromContext() {
 		LOGGER.info("Setting session user from authentication context");
 		Check.notNull(currentUser, "No authenticated user found in security context");
 		Check.notNull(currentUser.getUsername(), "Authenticated user must have a username");
 		Check.notNull(sessionService, "Session service cannot be null");
-		String loginname = currentUser.getUsername();
+		final String loginname = currentUser.getUsername();
 		Check.notNull(loginname, "Authenticated user login name cannot be null");
 		Check.isTrue(loginname.contains("@"), "Login name must contain '@' with format 'login@companyID'");
 		// split loginname at @
-		String login = loginname.split("@")[0];
-		String companyIDStr = loginname.split("@")[1];
-		Long companyID = Long.parseLong(companyIDStr);
-		CUser user = userService.findByLogin(login, companyID);
+		final String login = loginname.split("@")[0];
+		final String companyIDStr = loginname.split("@")[1];
+		final Long companyID = Long.parseLong(companyIDStr);
+		final CUser user = userService.findByLogin(login, companyID);
 		Check.notNull(user, "No user found for login: " + login + " and company ID: " + companyID);
 		sessionService.setActiveUser(user);
-	}
-
-	/** Sets up avatar with user initials when no profile picture is available.
-	 * @param avatar The avatar component to configure
-	 * @param user   The user whose initials to display */
-	private void setupAvatarInitials(final Avatar avatar, final CUser user) {
-		if (user == null) {
-			return;
-		}
-		String initials = "";
-		// Get initials from first name
-		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
-			final String[] nameParts = user.getName().trim().split("\\s+");
-			for (final String part : nameParts) {
-				if (!part.isEmpty()) {
-					initials += part.substring(0, 1).toUpperCase();
-					if (initials.length() >= 2) {
-						break; // Limit to 2 initials
-					}
-				}
-			}
-		}
-		// Add last name initial if we have less than 2 initials
-		if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty() && (initials.length() < 2)) {
-			initials += user.getLastname().substring(0, 1).toUpperCase();
-		}
-		// Fall back to username if no name is available
-		if (initials.isEmpty() && (user.getLogin() != null) && !user.getLogin().trim().isEmpty()) {
-			initials = user.getLogin().substring(0, 1).toUpperCase();
-		}
-		// Final fallback
-		if (initials.isEmpty()) {
-			initials = "U";
-		}
-		avatar.setAbbreviation(initials);
-		// Set tooltip with full name
-		String displayName = "";
-		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
-			displayName = user.getName();
-			if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty()) {
-				displayName += " " + user.getLastname();
-			}
-		} else {
-			displayName = user.getLogin();
-		}
-		avatar.getElement().setAttribute("title", displayName);
 	}
 }

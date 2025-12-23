@@ -415,7 +415,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	@Override
-	public void setColor(String color) {}
+	public void setColor(String color) { /*****/ }
 
 	/** Sets the list of comments for this activity.
 	 * @param comments the list of comments */

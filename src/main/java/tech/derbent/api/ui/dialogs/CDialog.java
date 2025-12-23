@@ -17,7 +17,7 @@ public abstract class CDialog extends Dialog {
 	private static final long serialVersionUID = 1L;
 	protected final HorizontalLayout buttonLayout = new HorizontalLayout();
 	private CH3 formTitle;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected VerticalLayout mainLayout;
 
 	/** Constructor for CDialog. Initializes the dialog with a default layout. */

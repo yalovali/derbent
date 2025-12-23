@@ -32,6 +32,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		binder.readBean(null);
 	}
 
+	@Deprecated
 	protected IComboBoxDataProvider createComboBoxDataProvider() {
 		return null;
 	}
@@ -42,10 +43,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
-
-	@SuppressWarnings ("unchecked")
-	@Override
-	public EntityClass getValue() { return (EntityClass) parentContent.getValue(); }
 
 	@Override
 	public String getCurrentEntityIdString() {
@@ -65,6 +62,10 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		// Subclasses can override to provide specific context values
 		return null;
 	}
+
+	@SuppressWarnings ("unchecked")
+	@Override
+	public EntityClass getValue() { return (EntityClass) parentContent.getValue(); }
 
 	protected void initPanel() throws Exception {
 		updatePanelEntityFields();
@@ -94,7 +95,10 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	// used if there is a specific save logic for the entity
-	public void saveEventHandler() {}
+	public void saveEventHandler() { /*****/
+	}
+
+	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }
 
 	@Override
 	public void setValue(CEntityDB<?> entity) {
@@ -103,8 +107,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 			parentContent.setValue(entity);
 		}
 	}
-
-	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }
 
 	protected abstract void updatePanelEntityFields();
 }

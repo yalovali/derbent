@@ -3,6 +3,7 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.List;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectService;
 import tech.derbent.app.projects.view.CDialogProjectUserSettings;
@@ -10,7 +11,6 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 import tech.derbent.base.users.service.CUserService;
-import tech.derbent.api.ui.notifications.CNotificationService;
 
 /** Component for managing users within a project (Project->User direction). This component displays all users assigned to a specific project and
  * allows: - Adding new user assignments - Editing existing user roles/permissions - Removing user assignments The component automatically updates
@@ -21,14 +21,13 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	private final CUserService userService;
 
 	public CComponentProjectUserSettings(final CProjectService entityService, ISessionService sessionService) throws Exception {
-		super("User Settings", CProject.class, entityService, sessionService);
+		super(CProject.class, entityService, sessionService);
 		userService = CSpringContext.getBean(CUserService.class);
 		initComponent();
 	}
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		
 		return null;
 	}
 
@@ -47,7 +46,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 		try {
 			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, null, getValue(),
 					this::onSettingsSaved).open();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showWarning("Failed to open add dialog: " + e.getMessage());
 			throw e;
 		}
@@ -58,7 +57,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 		try {
 			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, getSelectedSetting(),
 					getValue(), this::onSettingsSaved).open();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showWarning("Failed to open edit dialog: " + e.getMessage());
 			throw e;
 		}

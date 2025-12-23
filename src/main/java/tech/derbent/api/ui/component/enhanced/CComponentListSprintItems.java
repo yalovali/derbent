@@ -119,25 +119,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		// TODO Auto-generated method stub
 	}
 
-	private void saveStoryPoint(final ISprintableItem item) {
-		Check.notNull(item, "Sprintable item cannot be null when saving story points");
-		Check.notNull(item.getId(), "Sprintable item must be persisted before updating story points");
-		if (item instanceof CActivity) {
-			activityService.save((CActivity) item);
-			return;
-		}
-		if (item instanceof CMeeting) {
-			meetingService.save((CMeeting) item);
-			return;
-		}
-		throw new IllegalArgumentException("Unsupported sprintable item type: " + item.getClass().getSimpleName());
-	}
-
-	private void handleStoryPointError(final Exception exception) {
-		Check.notNull(exception, "Exception cannot be null when handling story point errors");
-		CNotificationService.showException("Error saving story points", exception);
-	}
-
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
 		// LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
@@ -145,7 +126,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			final CDragDropEvent dropEvent = (CDragDropEvent) event;
 			if (dropEvent.getDropLocation().equals(GridDropLocation.EMPTY) && dropEvent.getTargetItem() == null) {
 				// dropped into empty area - allow
-				dropEvent.setTargetItem(getValue());
+				dropEvent.setTargetItem(getChildValue());
 			}
 		}
 	}
@@ -278,6 +259,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		};
 	}
 
+	private void handleStoryPointError(final Exception exception) {
+		Check.notNull(exception, "Exception cannot be null when handling story point errors");
+		CNotificationService.showException("Error saving story points", exception);
+	}
+
 	@Override
 	protected List<CSprintItem> loadItems(final CSprint master) {
 		Check.notNull(master, "Master sprint cannot be null when loading items");
@@ -352,5 +338,19 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	/** Refresh component state and grid. */
 	public void refreshComponent() {
 		refreshGrid();
+	}
+
+	private void saveStoryPoint(final ISprintableItem item) {
+		Check.notNull(item, "Sprintable item cannot be null when saving story points");
+		Check.notNull(item.getId(), "Sprintable item must be persisted before updating story points");
+		if (item instanceof CActivity) {
+			activityService.save((CActivity) item);
+			return;
+		}
+		if (item instanceof CMeeting) {
+			meetingService.save((CMeeting) item);
+			return;
+		}
+		throw new IllegalArgumentException("Unsupported sprintable item type: " + item.getClass().getSimpleName());
 	}
 }

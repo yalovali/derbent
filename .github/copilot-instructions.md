@@ -504,7 +504,7 @@ NEVER put complex logic in lambda expressions. ALWAYS delegate to named event ha
 // ❌ WRONG - Complex lambda (hard to read, hard to override)
 buttonAdd.addClickListener(e -> {
     try {
-        Check.notNull(entity, "Entity cannot be null");
+        Objects.requireNonNull(entity, "Entity cannot be null");
         final CEntity newEntity = createNewEntity();
         service.save(newEntity);
         refreshGrid();
@@ -520,7 +520,7 @@ buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
 
 protected void on_buttonAdd_clicked() {
     try {
-        Check.notNull(entity, "Entity cannot be null");
+        Objects.requireNonNull(entity, "Entity cannot be null");
         final CEntity newEntity = createNewEntity();
         service.save(newEntity);
         refreshGrid();
@@ -645,7 +645,7 @@ private String name;
 #### Use Check Utility for Fail-Fast Validation
 ```java
 // ✅ CORRECT - Use Check utility
-Check.notNull(entity, "Entity cannot be null");
+Objects.requireNonNull(entity, "Entity cannot be null");
 Check.notBlank(name, "Name cannot be blank");
 Check.notEmpty(list, "List cannot be empty");
 Check.isTrue(value > 0, "Value must be positive");
@@ -673,7 +673,7 @@ if (entity == null) {
 ```java
 // ✅ CORRECT - Exposing developer error immediately
 private String getEntityName(EntityClass item) {
-    Check.notNull(item, "Item cannot be null");
+    Objects.requireNonNull(item, "Item cannot be null");
     Check.instanceOf(item, CEntityNamed.class, "Item must be of type CEntityNamed");
     return ((CEntityNamed<?>) item).getName();
 }
@@ -786,9 +786,9 @@ public class CActivityService extends CAbstractService<CActivity> {
     }
     
     private CCompany getCurrentCompany() {
-        Check.notNull(sessionService, "Session service required");
+        Objects.requireNonNull(sessionService, "Session service required");
         CCompany company = sessionService.getCurrentCompany();
-        Check.notNull(company, "No active company");
+        Objects.requireNonNull(company, "No active company");
         return company;
     }
 }
@@ -899,7 +899,7 @@ Always use service `moveItemUp()`/`moveItemDown()` methods for reordering:
 protected void on_buttonMoveUp_clicked() {
     try {
         T selectedItem = grid.asSingleSelect().getValue();
-        Check.notNull(selectedItem, "No item selected");
+        Objects.requireNonNull(selectedItem, "No item selected");
         service.moveItemUp(selectedItem);
         refreshGrid();
     } catch (Exception ex) {

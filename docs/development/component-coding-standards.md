@@ -47,8 +47,8 @@ Never use `showError()` when you have an exception. Always use `showException()`
 
 ## 2. Null Checking
 
-### Rule: Replace Redundant Null Checks with Check.notNull
-Remove `if (x != null) { ... }` patterns with no else clause. Use `Check.notNull()` instead to throw exceptions immediately.
+### Rule: Replace Redundant Null Checks with Objects.requireNonNull
+Remove `if (x != null) { ... }` patterns with no else clause. Use `Objects.requireNonNull()` instead to throw exceptions immediately.
 
 **❌ INCORRECT:**
 ```java
@@ -63,7 +63,7 @@ public void process(Entity entity) {
 **✅ CORRECT:**
 ```java
 public void process(Entity entity) {
-    Check.notNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
     entity.doSomething();
 }
 ```
@@ -119,7 +119,7 @@ When creating list-based CRUD components:
 1. **Extend CComponentListEntityBase** for generic functionality
 2. **Implement all abstract methods** required by the base class
 3. **Use proper service injection** in constructor
-4. **Validate constructor parameters** with Check.notNull
+4. **Validate constructor parameters** with Objects.requireNonNull
 5. **Configure grid columns** in configureGrid method
 6. **Handle exceptions** in all user-facing methods
 
@@ -132,19 +132,19 @@ public class CComponentListMyEntity extends CComponentListEntityBase<CMyEntity, 
     
     public CComponentListMyEntity(final CMyEntityService myEntityService) {
         super("My Entities", CMyEntity.class, myEntityService);
-        Check.notNull(myEntityService, "MyEntityService cannot be null");
+        Objects.requireNonNull(myEntityService, "MyEntityService cannot be null");
         this.myEntityService = myEntityService;
     }
     
     @Override
     protected void configureGrid(final CGrid<CMyEntity> grid) {
-        Check.notNull(grid, "Grid cannot be null");
+        Objects.requireNonNull(grid, "Grid cannot be null");
         // Add columns...
     }
     
     @Override
     protected CMyEntity createNewEntity() {
-        Check.notNull(currentParent, "Parent cannot be null when creating entity");
+        Objects.requireNonNull(currentParent, "Parent cannot be null when creating entity");
         // Create and return entity...
     }
     
@@ -225,9 +225,9 @@ All service methods should validate parameters with Check utilities at the begin
 **✅ CORRECT:**
 ```java
 public void processEntity(Entity entity, Parent parent) {
-    Check.notNull(entity, "Entity cannot be null");
-    Check.notNull(parent, "Parent cannot be null");
-    Check.notNull(parent.getId(), "Parent must be saved before processing");
+    Objects.requireNonNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(parent, "Parent cannot be null");
+    Objects.requireNonNull(parent.getId(), "Parent must be saved before processing");
     
     // Process entity...
 }
@@ -268,7 +268,7 @@ For each new component or feature:
 
 - [ ] All button click handlers wrapped in try-catch
 - [ ] All exceptions shown to user with `showException()`
-- [ ] Redundant `if (x != null)` replaced with `Check.notNull()`
+- [ ] Redundant `if (x != null)` replaced with `Objects.requireNonNull()`
 - [ ] Entity fields have `@NotNull` and other validation annotations
 - [ ] Constructor parameters validated with Check utilities
 - [ ] All service methods validate their parameters
@@ -387,7 +387,7 @@ Never put complex logic directly in lambda event listeners. Instead, delegate to
 ```java
 buttonAdd.addClickListener(e -> {
     try {
-        Check.notNull(entity, "Entity cannot be null");
+        Objects.requireNonNull(entity, "Entity cannot be null");
         final CEntity newEntity = createNewEntity();
         service.save(newEntity);
         refreshGrid();
@@ -406,7 +406,7 @@ buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
 // Separate method that can be easily overridden
 protected void on_buttonAdd_clicked() {
     try {
-        Check.notNull(entity, "Entity cannot be null");
+        Objects.requireNonNull(entity, "Entity cannot be null");
         final CEntity newEntity = createNewEntity();
         service.save(newEntity);
         refreshGrid();

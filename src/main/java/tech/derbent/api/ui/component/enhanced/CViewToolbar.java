@@ -198,7 +198,8 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 				}
 				icon.setSize("32px");
 			} catch (final Exception e) {
-				LOGGER.warn("Could not parse icon '{}' for page '{}', using default", page.getIconString(), page.getPageTitle());
+				LOGGER.warn("Could not parse icon '{}' for page '{}', using default {}: {}", page.getIconString(), page.getPageTitle(),
+						e.getMessage());
 				icon = CColorUtils.createStyledIcon("vaadin:file-text-o");
 			}
 			// Generate a color for the button based on page ID (for consistency)

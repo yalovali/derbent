@@ -23,13 +23,12 @@ import tech.derbent.base.session.service.ISessionService;
 public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implements IPageServiceImplementer {
 
 	private static final long serialVersionUID = 1L;
-	private Map<String, Component> componentMap = new HashMap<String, Component>();
+	private final Map<String, Component> componentMap = new HashMap<String, Component>();
 	CDiv divPreview;
 	private final ISessionService sessionService;
 
-	public CPanelDetailSectionPreview(final IContentOwner parentContent, final CDetailSection currentEntity,
-			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService,
-			final ISessionService sessionService) throws Exception {
+	public CPanelDetailSectionPreview(final IContentOwner parentContent, final CEnhancedBinder<CDetailSection> beanValidationBinder,
+			final CDetailSectionService entityService, final ISessionService sessionService) throws Exception {
 		super("Preview", parentContent, beanValidationBinder, entityService);
 		this.sessionService = sessionService;
 		initPanel();
@@ -37,7 +36,6 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		
 		return null;
 	}
 
@@ -55,45 +53,34 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 	}
 
 	@Override
-	public Map<String, Component> getComponentMap() { 
-		return componentMap;
-	}
+	public Map<String, Component> getComponentMap() { return componentMap; }
 
 	@Override
-	public CDetailsBuilder getDetailsBuilder() { 
-		return null;
-	}
+	public CDetailsBuilder getDetailsBuilder() { return null; }
 
 	@Override
-	public Class getEntityClass() { 
-		return entityClass;
-	}
+	public Class getEntityClass() { return entityClass; }
 
 	@Override
-	public CPageService getPageService() { 
+	public CPageService getPageService() {
 		Check.instanceOf(parentContent, IPageServiceImplementer.class,
 				"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
 		return ((IPageServiceImplementer) parentContent).getPageService();
 	}
 
 	@Override
-	public ISessionService getSessionService() { 
-		return sessionService;
+	public ISessionService getSessionService() { return sessionService; }
+
+	@Override
+	public void onEntityCreated(CEntityDB newEntity) throws Exception {/***/
 	}
 
 	@Override
-	public void onEntityCreated(CEntityDB newEntity) throws Exception {
-		
+	public void onEntityDeleted(CEntityDB entity) throws Exception {/***/
 	}
 
 	@Override
-	public void onEntityDeleted(CEntityDB entity) throws Exception {
-		
-	}
-
-	@Override
-	public void onEntitySaved(CEntityDB savedEntity) throws Exception {
-		
+	public void onEntitySaved(CEntityDB savedEntity) throws Exception {/***/
 	}
 
 	@Override
@@ -133,14 +120,12 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 				objectBinder.readBean(item);
 			}
 		} catch (final Exception e) {
-			
 			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void selectFirstInGrid() {
-		
+	public void selectFirstInGrid() { /*****/
 	}
 
 	@Override

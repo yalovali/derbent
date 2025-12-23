@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,8 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CEntityNamedService<EntityClass> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityOfProjectService.class);
 
 	public CEntityOfProjectService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {

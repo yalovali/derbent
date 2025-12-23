@@ -18,6 +18,7 @@ import tech.derbent.base.session.service.ISessionService;
  * true */
 @PermitAll
 public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicSingleEntityPageView.class);
 	private static final long serialVersionUID = 1L;
 
@@ -26,20 +27,18 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 		super(pageEntity, sessionService, detailSectionService);
 		try {
 			initializePage();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showException("Failed to initialize dynamic page view with sections for: " + pageEntity.getPageTitle(), e);
 		}
 	}
 
 	@Override
 	protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
-		
 		return null;
 	}
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		
 		return null;
 	}
 
@@ -56,7 +55,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 			add(crudToolbar);
 			add(detailsScroller);
 			loadAndDisplaySingleEntity();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to create single entity layout for page: {}", getPageEntity().getPageTitle(), e);
 			throw e;
 		}
@@ -76,11 +75,11 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 	/** Loads the single entity from the data source and displays it. Shows warning if more than 1 item is returned and displays the first item. */
 	private void loadAndDisplaySingleEntity() {
 		try {
-			List<? extends CEntityDB<?>> entities = entityService.findAll();
+			final List<? extends CEntityDB<?>> entities = entityService.findAll();
 			Check.notEmpty(entities, "No entities found for single entity page.");
-			CEntityDB<?> entity = entities.get(0);
+			final CEntityDB<?> entity = entities.get(0);
 			onEntitySelected(entity);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
 		}
 	}

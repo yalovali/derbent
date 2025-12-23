@@ -63,9 +63,8 @@ public class CAuxillaries {
 			final Method method = clazz.getMethod(methodName);
 			if (Modifier.isStatic(method.getModifiers())) {
 				return method;
-			} else {
-				throw new IllegalArgumentException("Method " + methodName + " in class " + clazz.getName() + " is not statric");
 			}
+			throw new IllegalArgumentException("Method " + methodName + " in class " + clazz.getName() + " is not statric");
 		} catch (final Exception e) {
 			LOGGER.error("Error getting method " + methodName + " from class " + clazz.getName(), e);
 			throw e;
@@ -109,7 +108,7 @@ public class CAuxillaries {
 			method.setAccessible(true);
 			return method;
 		} catch (final NoSuchMethodException e) {
-			LOGGER.warn("Method not found: {}.{}", clazz.getSimpleName(), methodName);
+			LOGGER.warn("Method not found: {} {} {}", clazz.getSimpleName(), methodName, e.getMessage());
 			return null;
 		}
 	}

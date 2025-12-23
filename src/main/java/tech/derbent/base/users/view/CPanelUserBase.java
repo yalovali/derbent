@@ -31,6 +31,7 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 		this.companyService = companyService;
 	}
 
+	@Deprecated
 	@Override
 	protected IComboBoxDataProvider createComboBoxDataProvider() {
 		final CFormBuilder.IComboBoxDataProvider dataProvider = new CFormBuilder.IComboBoxDataProvider() {

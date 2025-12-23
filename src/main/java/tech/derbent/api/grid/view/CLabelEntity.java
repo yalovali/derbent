@@ -194,6 +194,18 @@ public class CLabelEntity extends Div {
 		return label;
 	}
 
+	protected static Avatar createUserAvatar(final CUser user) {
+		return createUserAvatar(user, "24px");
+	}
+
+	protected static Avatar createUserAvatar(final CUser user, final String size) {
+		final Avatar avatar = user.getAvatar();
+		avatar.setWidth(size);
+		avatar.setHeight(size);
+		avatar.getStyle().set("flex-shrink", "0");
+		return avatar;
+	}
+
 	/** Creates a user label with icon and full name.
 	 * @param user the user to display (can be null)
 	 * @return a CLabelEntity with user display */
@@ -225,9 +237,8 @@ public class CLabelEntity extends Div {
 			// Check IHasIcon interface first
 			if (entity instanceof IHasColor) {
 				return ((IHasColor) entity).getColor();
-			} else {
-				return "";
 			}
+			return "";
 		} catch (final Exception e) {
 			LOGGER.debug("Could not get color for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
 			return null;
@@ -317,17 +328,5 @@ public class CLabelEntity extends Div {
 			LOGGER.error("Error setting value for CLabelEntity: {}", e.getMessage());
 			throw e;
 		}
-	}
-
-	protected static Avatar createUserAvatar(final CUser user) {
-		return createUserAvatar(user, "24px");
-	}
-
-	protected static Avatar createUserAvatar(final CUser user, final String size) {
-		final Avatar avatar = user.getAvatar();
-		avatar.setWidth(size);
-		avatar.setHeight(size);
-		avatar.getStyle().set("flex-shrink", "0");
-		return avatar;
 	}
 }

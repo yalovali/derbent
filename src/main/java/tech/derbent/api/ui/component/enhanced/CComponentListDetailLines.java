@@ -1,5 +1,7 @@
 package tech.derbent.api.ui.component.enhanced;
 
+import tech.derbent.api.utils.Check;
+
 import java.util.List;
 import java.util.function.Consumer;
 import tech.derbent.api.grid.domain.CGrid;
@@ -10,7 +12,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.view.CDialogDetailLinesEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.Check;
 
 /** CComponentListDetailLines - Component for managing CDetailLines in a CDetailSection. Provides full CRUD functionality for screen field definitions
  * with ordering.

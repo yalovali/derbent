@@ -133,7 +133,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 		}
 	}
 
-	protected void initializePage() throws Exception {}
+	protected void initializePage() throws Exception {/**/}
 
 	protected abstract void locateItemById(Long pageItemId);
 

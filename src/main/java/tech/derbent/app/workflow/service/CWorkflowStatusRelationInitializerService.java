@@ -65,5 +65,5 @@ public final class CWorkflowStatusRelationInitializerService extends CInitialize
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	private CWorkflowStatusRelationInitializerService() {}
+	private CWorkflowStatusRelationInitializerService() { /*****/ }
 }

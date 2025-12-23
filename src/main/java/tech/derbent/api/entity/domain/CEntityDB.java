@@ -20,7 +20,7 @@ import tech.derbent.api.domains.IEntityDBStatics;
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics {
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 	@Column (name = "active", nullable = false)
 	@AMetaData (
 			displayName = "Active", required = false, readOnly = false, description = "Whether this entity definition is active", hidden = false,
@@ -61,8 +61,8 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		if (!thisClass.equals(otherClass)) {
 			return false;
 		}
-		final Long id = getId();
-		return (id != null) && id.equals(other.getId());
+		final Long id1 = getId();
+		return (id1 != null) && id1.equals(other.getId());
 	}
 
 	public Boolean getActive() { return active; }
@@ -93,16 +93,18 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 
 	@Override
 	public int hashCode() {
-		final Long id = getId();
-		if (id != null) {
-			return id.hashCode();
+		final Long id1 = getId();
+		if (id1 != null) {
+			return id1.hashCode();
 		}
 		return ProxyUtils.getUserClass(getClass()).hashCode();
 	}
 
-	public void initializeAllFields() {}
+	public void initializeAllFields() { /*****/
+	}
 
-	protected void initializeDefaults() {}
+	protected void initializeDefaults() { /*****/
+	}
 
 	public boolean isNew() { return id == null; }
 

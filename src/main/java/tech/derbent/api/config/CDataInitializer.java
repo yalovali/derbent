@@ -182,6 +182,7 @@ public class CDataInitializer {
 	private final CGanntViewEntityService ganntViewEntityService;
 	private final CGridEntityService gridEntityService;
 	private final JdbcTemplate jdbcTemplate;
+	private final CKanbanLineService kanbanLineService;
 	private final CMeetingService meetingService;
 	private final CMeetingTypeService meetingTypeService;
 	private final COrderTypeService orderTypeService;
@@ -203,7 +204,6 @@ public class CDataInitializer {
 	private final CUserService userService;
 	private final CWorkflowEntityService workflowEntityService;
 	private final CWorkflowStatusRelationService workflowStatusRelationService;
-	private final CKanbanLineService kanbanLineService;
 
 	public CDataInitializer(final ISessionService sessionService) {
 		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
@@ -283,9 +283,8 @@ public class CDataInitializer {
 					jdbcTemplate.execute(sql);
 					LOGGER.info("All public tables truncated (PostgreSQL).");
 					return; // İş bitti
-				} else {
-					LOGGER.warn("No user tables found to truncate in public schema.");
 				}
+				LOGGER.warn("No user tables found to truncate in public schema.");
 			} catch (final Exception pgEx) {
 				LOGGER.warn("PostgreSQL truncate path failed or DB is not PostgreSQL. Falling back to JPA deletes. Cause: {}", pgEx.getMessage());
 			}
@@ -869,7 +868,7 @@ public class CDataInitializer {
 	private void initializeSampleUserProjectSettings(final CProject project, final boolean minimal) {
 		try {
 			for (final CUser user : userService.findAll()) {
-				userProjectSettingsService.addUserToProject(user, project, userProjectRoleService.getRandom(project), "write");
+				userProjectSettingsService.addUserToProject(user, project, "write");
 				if (minimal) {
 					return;
 				}

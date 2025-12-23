@@ -1,13 +1,13 @@
 package tech.derbent.api.ui.component.enhanced;
 
-import com.vaadin.flow.component.Component;
 import tech.derbent.api.utils.Check;
 
-/**
- * CComponentFilterToolbar - Common filtering toolbar base class.
+import com.vaadin.flow.component.Component;
+
+/** CComponentFilterToolbar - Common filtering toolbar base class.
  * <p>
- * Extends {@link CComponentGridSearchToolbar} so filtering base components can reuse a shared toolbar while
- * allowing custom filter controls to be appended for specialized use cases.
+ * Extends {@link CComponentGridSearchToolbar} so filtering base components can reuse a shared toolbar while allowing custom filter controls to be
+ * appended for specialized use cases.
  * </p>
  */
 public class CComponentFilterToolbar extends CComponentGridSearchToolbar {

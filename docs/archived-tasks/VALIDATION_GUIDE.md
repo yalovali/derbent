@@ -114,7 +114,7 @@ public void importData(File file) throws CExceptionNotify {
 ```java
 @Override
 public String checkSaveAllowed(final EntityClass entity) {
-    Check.notNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
     
     // Validates all @Column(nullable=false) fields automatically
     final String nullableFieldsError = validateNullableFields(entity);

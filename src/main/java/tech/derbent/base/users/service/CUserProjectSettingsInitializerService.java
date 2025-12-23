@@ -65,5 +65,5 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	private CUserProjectSettingsInitializerService() {}
+	private CUserProjectSettingsInitializerService() { /*****/ }
 }

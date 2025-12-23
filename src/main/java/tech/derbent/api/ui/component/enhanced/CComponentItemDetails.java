@@ -1,5 +1,7 @@
 package tech.derbent.api.ui.component.enhanced;
 
+import tech.derbent.api.utils.Check;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,6 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.page.view.CDynamicPageRouter;

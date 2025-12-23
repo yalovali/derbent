@@ -5,5 +5,5 @@ import tech.derbent.app.comments.domain.CCommentPriority;
 
 /** CCommentPriorityRepository - Repository interface for CCommentPriority entities. Layer: Service (MVC) - Repository interface Provides data access
  * methods for comment priority entities. */
-public interface ICommentPriorityRepository extends IEntityOfProjectRepository<CCommentPriority> {
+public interface ICommentPriorityRepository extends IEntityOfProjectRepository<CCommentPriority> {/**/
 }

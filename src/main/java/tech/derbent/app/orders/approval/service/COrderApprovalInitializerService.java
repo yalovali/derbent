@@ -72,5 +72,5 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
                                 pageDescription, showInQuickToolbar, menuOrder);
         }
 
-	private COrderApprovalInitializerService() {}
+	private COrderApprovalInitializerService() { /*****/ }
 }

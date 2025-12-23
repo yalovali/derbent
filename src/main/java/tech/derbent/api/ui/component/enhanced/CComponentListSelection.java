@@ -102,7 +102,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			LOGGER.debug("Clearing all selected items");
 			selectedItems.clear();
 			refreshGrid();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to clear selected items:" + e.getMessage());
 			throw e;
 		}
@@ -158,12 +158,12 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	/** Fires a value change event to listeners. */
 	private void fireValueChangeEvent() {
 		LOGGER.debug("Firing value change event - old value size: {}, new value size: {}", currentValue.size(), selectedItems.size());
-		List<DetailEntity> oldValue = currentValue;
-		List<DetailEntity> newValue = getValue();
+		final List<DetailEntity> oldValue = currentValue;
+		final List<DetailEntity> newValue = getValue();
 		currentValue = new ArrayList<>(newValue);
 		if (!oldValue.equals(newValue)) {
 			LOGGER.info("Value changed from {} to {} selected items - notifying {} listeners", oldValue.size(), newValue.size(), listeners.size());
-			ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
+			final ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
 
 				private static final long serialVersionUID = 1L;
 
@@ -259,17 +259,17 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			sourceItems.addAll(items);
 			sourceItems.sort((a, b) -> {
 				try {
-					String labelA = a.toString();
-					String labelB = b.toString();
+					final String labelA = a.toString();
+					final String labelB = b.toString();
 					return labelA.compareToIgnoreCase(labelB);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
 					return 0; // Treat as equal on error
 				}
 			});
 			grid.setItems(sourceItems);
 			refreshGrid();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to set source items: {}", e.getMessage(), e);
 			throw e;
 		}
@@ -282,7 +282,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		grid.addItemClickListener(event -> {
 			try {
 				if (!readOnly) {
-					DetailEntity item = event.getItem();
+					final DetailEntity item = event.getItem();
 					if (selectedItems.contains(item)) {
 						selectedItems.remove(item);
 						LOGGER.debug("Deselected item: {}", item);
@@ -292,7 +292,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 					}
 					refreshGrid();
 				}
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("Error handling click on grid item", ex);
 			}
 		});
@@ -315,7 +315,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 				LOGGER.debug("Selected items loaded from binder: {}", selectedItems.stream().map(Object::toString).collect(Collectors.joining(", ")));
 			}
 			refreshGrid();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to set value in CComponentListSelection: {}", e.getMessage(), e);
 		}
 	}

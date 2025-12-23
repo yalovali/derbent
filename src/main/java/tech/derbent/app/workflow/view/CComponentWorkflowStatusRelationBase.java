@@ -29,9 +29,9 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 	protected final CProjectItemStatusService statusService;
 	protected final CWorkflowStatusRelationService workflowStatusRelationService;
 
-	public CComponentWorkflowStatusRelationBase(final String title, final Class<MasterClass> entityClass,
-			final CAbstractService<MasterClass> entityService, ISessionService sessionService) {
-		super(title, entityClass, CWorkflowStatusRelation.class, entityService,
+	public CComponentWorkflowStatusRelationBase(final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
+			ISessionService sessionService) {
+		super(entityClass, CWorkflowStatusRelation.class, entityService,
 				CSpringContext.<CWorkflowStatusRelationService>getBean(CWorkflowStatusRelationService.class), sessionService);
 		workflowStatusRelationService = CSpringContext.<CWorkflowStatusRelationService>getBean(CWorkflowStatusRelationService.class);
 		statusService = CSpringContext.<CProjectItemStatusService>getBean(CProjectItemStatusService.class);
@@ -76,7 +76,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			default:
 				return "";
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to get display text for type {}: {}", type, e.getMessage());
 			return "";
 		}
@@ -125,7 +125,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 				CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 					try {
 						return new CLabelEntity(relation.getWorkflowEntity());
-					} catch (Exception e) {
+					} catch (@SuppressWarnings ("unused") final Exception e) {
 						LOGGER.error("Failed to create workflow component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflowentity"));
 					}
@@ -134,7 +134,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					return new CLabelEntity(relation.getFromStatus());
-				} catch (Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					LOGGER.error("Failed to create from status component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "fromStatus"));
 				}
@@ -142,7 +142,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					return new CLabelEntity(relation.getToStatus());
-				} catch (Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					LOGGER.error("Failed to create to status component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "toStatus"));
 				}
@@ -150,7 +150,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					if (relation.getRoles() != null && !relation.getRoles().isEmpty()) {
-						com.vaadin.flow.component.orderedlayout.HorizontalLayout rolesLayout =
+						final com.vaadin.flow.component.orderedlayout.HorizontalLayout rolesLayout =
 								new com.vaadin.flow.component.orderedlayout.HorizontalLayout();
 						rolesLayout.setSpacing(true);
 						for (int i = 0; i < relation.getRoles().size(); i++) {
@@ -160,18 +160,17 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 							}
 						}
 						return rolesLayout;
-					} else {
-						com.vaadin.flow.component.html.Span span = new com.vaadin.flow.component.html.Span("All Roles");
-						span.getStyle().set("font-style", "italic");
-						span.getStyle().set("color", "#666");
-						return span;
 					}
-				} catch (Exception e) {
+					final com.vaadin.flow.component.html.Span span = new com.vaadin.flow.component.html.Span("All Roles");
+					span.getStyle().set("font-style", "italic");
+					span.getStyle().set("color", "#666");
+					return span;
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					LOGGER.error("Failed to create roles component.");
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "roles"));
 				}
 			}).setAutoWidth(true).setSortable(true), "Roles");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to setup grid.");
 			throw e;
 		}

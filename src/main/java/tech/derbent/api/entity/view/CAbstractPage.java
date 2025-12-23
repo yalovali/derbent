@@ -22,10 +22,11 @@ public abstract class CAbstractPage extends Main implements BeforeEnterObserver,
 				LumoUtility.Width.FULL);
 		initPage();
 		setupToolbar();
-	};
+	}
 
 	/** Initializes the page with necessary components and layout. */
-	protected void initPage() {}
+	protected void initPage() { /*****/
+	}
 
 	/** Sets up the toolbar for the page. */
 	protected abstract void setupToolbar();

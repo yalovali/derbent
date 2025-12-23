@@ -29,7 +29,7 @@ import tech.derbent.base.session.service.ISessionService;
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
 
 	protected final Clock clock;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final IAbstractRepository<EntityClass> repository;
 	protected @Nullable ISessionService sessionService;
 
@@ -300,6 +300,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
+	@SuppressWarnings ("unused")
 	public boolean onBeforeSaveEvent(final EntityClass entity) {
 		return true;
 	}
@@ -357,9 +358,8 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		if (!missingFields.isEmpty()) {
 			if (missingFields.size() == 1) {
 				return String.format("Required field '%s' cannot be empty.", missingFields.get(0));
-			} else {
-				return String.format("Required fields cannot be empty: %s", String.join(", ", missingFields));
 			}
+			return String.format("Required fields cannot be empty: %s", String.join(", ", missingFields));
 		}
 		return null;
 	}

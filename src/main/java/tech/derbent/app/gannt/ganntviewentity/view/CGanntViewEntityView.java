@@ -1,5 +1,7 @@
 package tech.derbent.app.gannt.ganntviewentity.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -24,6 +26,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
 	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - gantt chart view
 	public static final String DEFAULT_ICON = "vaadin:chart-timeline";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CGanntViewEntityView.class);
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Gannt View Entity Settings View";
 	private final String ENTITY_ID_FIELD = "screen_id";
@@ -45,36 +48,26 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		
 		return null;
 	}
 
 	@Override
-	protected String getEntityRouteIdField() { 
-		return null;
-	}
+	public CDetailsBuilder getDetailsBuilder() { return null; }
 
 	@Override
-	public CPageService<CGanntViewEntity> getPageService() { 
-		return null;
-	}
+	protected String getEntityRouteIdField() { return null; }
 
 	@Override
-	public ISessionService getSessionService() { 
-		return null;
-	}
+	public CPageService<CGanntViewEntity> getPageService() { return null; }
 
 	@Override
-	public void selectFirstInGrid() {
-		
-	}
+	public ISessionService getSessionService() { return null; }
+
+	@Override
+	public void selectFirstInGrid() {/**/}
 
 	@Override
 	public void setValue(CEntityDB<?> entity) {
 		super.setValue(entity);
 	}
-
-	@Override
-	public CDetailsBuilder getDetailsBuilder() { 
-	return null; }
 }

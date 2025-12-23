@@ -77,6 +77,111 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridEntity.class);
 	private static final long serialVersionUID = 1L;
+
+	/** Creates an error cell to display when widget creation fails. */
+	private static Component createErrorCell(String message) {
+		final CLabelEntity labelEntity = new CLabelEntity();
+		labelEntity.setText(message);
+		labelEntity.getStyle().set("color", "#666");
+		labelEntity.getStyle().set("font-style", "italic");
+		return labelEntity;
+	}
+
+	private static Field findField(Class<?> entityClass, String fieldName) {
+		Class<?> currentClass = entityClass;
+		while (currentClass != null) {
+			try {
+				return currentClass.getDeclaredField(fieldName);
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+		return null;
+	}
+
+	/** Finds the widget provider method on the bean class.
+	 * @param beanClass  the bean class
+	 * @param methodName the method name to find
+	 * @param entityType the entity type for method parameter matching
+	 * @return the Method object, or null if not found */
+	private static Method findWidgetProviderMethod(Class<?> beanClass, String methodName, Class<?> entityType) {
+		try {
+			// Define parameter types to try in order of preference
+			final Class<?>[] parameterTypeCandidates = {
+					entityType, // Exact entity type
+					CEntityDB.class, // Base entity type
+					Object.class // Generic object type
+			};
+			// Try each parameter type candidate
+			for (final Class<?> paramType : parameterTypeCandidates) {
+				try {
+					return beanClass.getMethod(methodName, paramType);
+				} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+					// Continue to next candidate
+				}
+			}
+			// Fallback: search through all methods for a compatible one
+			for (final Method method : beanClass.getMethods()) {
+				if (method.getName().equals(methodName) && method.getParameterCount() == 1) {
+					final Class<?> paramType = method.getParameterTypes()[0];
+					if (paramType.isAssignableFrom(entityType)) {
+						return method;
+					}
+				}
+			}
+			return null;
+		} catch (final Exception e) {
+			LOGGER.error("Error finding widget provider method {}: {}", methodName, e.getMessage());
+			return null;
+		}
+	}
+
+	private static Class<?> getEntityClassFromService(CAbstractService<?> service) throws Exception {
+		try {
+			Class<?> serviceClass = service.getClass();
+			if (serviceClass.getName().contains("$$SpringCGLIB$$")) {
+				serviceClass = serviceClass.getSuperclass();
+			}
+			final Method getEntityClassMethod = serviceClass.getDeclaredMethod("getEntityClass");
+			getEntityClassMethod.setAccessible(true);
+			return (Class<?>) getEntityClassMethod.invoke(service);
+		} catch (final Exception e) {
+			LOGGER.error("Could not get entity class from service: {}", e.getMessage());
+			throw e;
+		}
+	}
+
+	/** Checks if an entity matches the search text. This method now uses the entity's matchesFilter() method which provides hierarchical filtering.
+	 * If the entity is a CEntityDB (which all domain entities extend), it uses the built-in filtering. Otherwise, falls back to simple string
+	 * comparison.
+	 * @param entity     the entity to check
+	 * @param searchText the text to search for
+	 * @return true if the entity matches the search text
+	 * @throws Exception if there's an error during matching */
+	private static boolean matchesSearchText(Object entity, String searchText) throws Exception {
+		if (entity == null || searchText == null || searchText.isEmpty()) {
+			return true;
+		}
+		try {
+			// Use the new matchesFilter method if the entity is a CEntityDB
+			if (entity instanceof CEntityDB) {
+				final CEntityDB<?> entityDB = (CEntityDB<?>) entity;
+				// Search in all common fields: id, name, description
+				// This will automatically delegate through the hierarchy
+				// Use mutable list for matchesFilter (it calls remove() internally)
+				return entityDB.matchesFilter(searchText, new ArrayList<>(List.of("id", "name", "description")));
+			}
+			// Fallback for non-CEntityDB entities (shouldn't happen in normal usage)
+			LOGGER.warn("Entity {} is not a CEntityDB instance, using fallback search", entity.getClass().getSimpleName());
+			return entity.toString().toLowerCase().contains(searchText.toLowerCase());
+		} catch (final Exception e) {
+			LOGGER.error("Error checking search match for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
+			throw e;
+		}
+	}
+
+	// Drag-drop event notification methods now provided by IHasDragControl interface default methods
+	// notifyDragStartListeners(), notifyDragEndListeners(), notifyDropListeners() are inherited
 	private IContentOwner contentOwner;
 	protected CProject currentProject;
 	// Drag control state
@@ -140,9 +245,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			grid.setItems(filteredEntities);
 			LOGGER.debug("Applied search filter '{}' - {} results out of {} total", searchText, filteredEntities.size(), allEntities.size());
 		} catch (final Exception e) {
-			LOGGER.error("Error applying search filter.");
-			// Fallback to refresh data on error
-			refreshGrid();
+			LOGGER.error("Error applying search filter. {}", e.getMessage());
+			throw e;
 		}
 	}
 
@@ -379,7 +483,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 							try {
 								final String textColor = CColorUtils.getContrastTextColor(colorValue);
 								labelEntity.getStyle().set("color", textColor);
-							} catch (final Exception e) {
+							} catch (@SuppressWarnings ("unused") final Exception e) {
 								// Fallback to simple contrast logic
 								labelEntity.getStyle().set("color", isColorLight(colorValue) ? "#000000" : "#ffffff");
 							}
@@ -460,15 +564,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
-	/** Creates an error cell to display when widget creation fails. */
-	private Component createErrorCell(String message) {
-		final CLabelEntity labelEntity = new CLabelEntity();
-		labelEntity.setText(message);
-		labelEntity.getStyle().set("color", "#666");
-		labelEntity.getStyle().set("font-style", "italic");
-		return labelEntity;
-	}
-
 	public void createGridColumns() throws Exception {
 		try {
 			// clear existing columns
@@ -518,55 +613,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return dropListeners;
 	}
 
-	private Field findField(Class<?> entityClass, String fieldName) {
-		Class<?> currentClass = entityClass;
-		while (currentClass != null) {
-			try {
-				return currentClass.getDeclaredField(fieldName);
-			} catch (final NoSuchFieldException e) {
-				currentClass = currentClass.getSuperclass();
-			}
-		}
-		return null;
-	}
-
-	/** Finds the widget provider method on the bean class.
-	 * @param beanClass  the bean class
-	 * @param methodName the method name to find
-	 * @param entityType the entity type for method parameter matching
-	 * @return the Method object, or null if not found */
-	private Method findWidgetProviderMethod(Class<?> beanClass, String methodName, Class<?> entityType) {
-		try {
-			// Define parameter types to try in order of preference
-			final Class<?>[] parameterTypeCandidates = {
-					entityType, // Exact entity type
-					CEntityDB.class, // Base entity type
-					Object.class // Generic object type
-			};
-			// Try each parameter type candidate
-			for (final Class<?> paramType : parameterTypeCandidates) {
-				try {
-					return beanClass.getMethod(methodName, paramType);
-				} catch (final NoSuchMethodException e) {
-					// Continue to next candidate
-				}
-			}
-			// Fallback: search through all methods for a compatible one
-			for (final Method method : beanClass.getMethods()) {
-				if (method.getName().equals(methodName) && method.getParameterCount() == 1) {
-					final Class<?> paramType = method.getParameterTypes()[0];
-					if (paramType.isAssignableFrom(entityType)) {
-						return method;
-					}
-				}
-			}
-			return null;
-		} catch (final Exception e) {
-			LOGGER.error("Error finding widget provider method {}: {}", methodName, e.getMessage());
-			return null;
-		}
-	}
-
 	/** Generates a unique component name for a widget component.
 	 * @param component the component to generate a name for
 	 * @param entity    the entity associated with the component
@@ -598,21 +644,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@Override
 	public IContentOwner getContentOwner() { return contentOwner; }
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
-
-	private Class<?> getEntityClassFromService(CAbstractService<?> service) throws Exception {
-		try {
-			Class<?> serviceClass = service.getClass();
-			if (serviceClass.getName().contains("$$SpringCGLIB$$")) {
-				serviceClass = serviceClass.getSuperclass();
-			}
-			final Method getEntityClassMethod = serviceClass.getDeclaredMethod("getEntityClass");
-			getEntityClassMethod.setAccessible(true);
-			return (Class<?>) getEntityClassMethod.invoke(service);
-		} catch (final Exception e) {
-			LOGGER.error("Could not get entity class from service: {}", e.getMessage());
-			throw e;
-		}
-	}
 
 	private Class<?> getEntityClassFromService(String serviceBeanName) throws Exception {
 		try {
@@ -701,43 +732,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Calculate brightness (0-255)
 			final double brightness = r * 0.299 + g * 0.587 + b * 0.114;
 			return brightness > 127; // Threshold for light vs dark
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			return true; // Default to light on error
 		}
 	}
 
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
-
-	/** Checks if an entity matches the search text. This method now uses the entity's matchesFilter() method which provides hierarchical filtering.
-	 * If the entity is a CEntityDB (which all domain entities extend), it uses the built-in filtering. Otherwise, falls back to simple string
-	 * comparison.
-	 * @param entity     the entity to check
-	 * @param searchText the text to search for
-	 * @return true if the entity matches the search text
-	 * @throws Exception if there's an error during matching */
-	private boolean matchesSearchText(Object entity, String searchText) throws Exception {
-		if (entity == null || searchText == null || searchText.isEmpty()) {
-			return true;
-		}
-		try {
-			// Use the new matchesFilter method if the entity is a CEntityDB
-			if (entity instanceof CEntityDB) {
-				final CEntityDB<?> entityDB = (CEntityDB<?>) entity;
-				// Search in all common fields: id, name, description
-				// This will automatically delegate through the hierarchy
-				// Use mutable list for matchesFilter (it calls remove() internally)
-				return entityDB.matchesFilter(searchText, new ArrayList<>(List.of("id", "name", "description")));
-			}
-			// Fallback for non-CEntityDB entities (shouldn't happen in normal usage)
-			LOGGER.warn("Entity {} is not a CEntityDB instance, using fallback search", entity.getClass().getSimpleName());
-			return entity.toString().toLowerCase().contains(searchText.toLowerCase());
-		} catch (final Exception e) {
-			LOGGER.error("Error checking search match for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
-			throw e;
-		}
-	}
-	// Drag-drop event notification methods now provided by IHasDragControl interface default methods
-	// notifyDragStartListeners(), notifyDragEndListeners(), notifyDropListeners() are inherited
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
@@ -836,10 +836,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				// For "pageservice" bean, get the CPageService from the IPageServiceImplementer
 				if (contentOwner instanceof final IPageServiceImplementer<?> pageServiceImplementer) {
 					return pageServiceImplementer.getPageService();
-				} else {
-					LOGGER.warn("contentOwner is not IPageServiceImplementer - cannot use 'view' as dataProviderBean");
-					return null;
 				}
+				LOGGER.warn("contentOwner is not IPageServiceImplementer - cannot use 'view' as dataProviderBean");
+				return null;
 			} else if ("context".equals(beanName)) {
 				// For "context" bean, return the content owner itself
 				return contentOwner;

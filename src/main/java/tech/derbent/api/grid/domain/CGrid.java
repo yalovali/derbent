@@ -39,8 +39,8 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CComponentStoryPoint;
 import tech.derbent.api.grid.view.CLabelEntity;
-import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.IHasDragControl;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
@@ -77,9 +77,40 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 			final Method m = ref.getClass().getMethod("getName");
 			final Object v = m.invoke(ref);
 			return v == null ? "" : v.toString();
-		} catch (final ReflectiveOperationException ignore) {
+		} catch (@SuppressWarnings ("unused") final ReflectiveOperationException ignore) {
 			return String.valueOf(ref);
 		}
+	}
+
+	private static String getColumnWidth(Field field, final AMetaData meta) {
+		String width;
+		switch (field.getType().getSimpleName()) {
+		case "Integer":
+		case "int":
+			width = WIDTH_INTEGER;
+			break;
+		case "BigDecimal":
+			width = WIDTH_DECIMAL;
+			break;
+		case "LocalDate":
+		case "LocalDateTime":
+			width = WIDTH_DATE;
+			break;
+		case "Boolean":
+		case "boolean":
+			width = WIDTH_BOOLEAN;
+			break;
+		case "String":
+			if (meta != null && meta.maxLength() > CEntityConstants.MAX_LENGTH_NAME) {
+				width = WIDTH_LONG_TEXT;
+			} else {
+				width = WIDTH_SHORT_TEXT;
+			}
+			break;
+		default:
+			width = WIDTH_SHORT_TEXT;
+		}
+		return width;
 	}
 
 	public static <T> void setupGrid(final Grid<T> grid) {
@@ -300,7 +331,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key,
-			final Class<?> returnType) throws Exception {
+			@SuppressWarnings ("unused") final Class<?> returnType) throws Exception {
 		try {
 			Check.notNull(valueProvider, "Value provider cannot be null");
 			Check.notBlank(header, "Header cannot be null or blank");
@@ -388,24 +419,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return styleColumnHeader(column, header);
 	}
 
-	public Column<EntityClass> addStoryPointColumn(final ValueProvider<EntityClass, ISprintableItem> itemProvider,
-			final Consumer<ISprintableItem> saveHandler, final Consumer<Exception> errorHandler, final String header, final String key) {
-		Check.notNull(itemProvider, "Item provider cannot be null");
-		Check.notNull(saveHandler, "Save handler cannot be null");
-		Check.notNull(errorHandler, "Error handler cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
-		final Column<EntityClass> column = addComponentColumn(entity -> {
-			final ISprintableItem item = itemProvider.apply(entity);
-			Check.notNull(item, "Sprintable item cannot be null when creating story point component");
-			return new CComponentStoryPoint(item, saveHandler, errorHandler);
-		}).setWidth(WIDTH_INTEGER).setFlexGrow(0).setSortable(true).setResizable(true);
-		if (key != null) {
-			column.setKey(key);
-		}
-		column.setComparator((left, right) -> compareIds(storyPointValue(itemProvider.apply(left)), storyPointValue(itemProvider.apply(right))));
-		return styleColumnHeader(column, header);
-	}
-
 	/** Adds an image column with circular styling for profile pictures.
 	 * @param imageDataProvider Provider that returns byte array of image data
 	 * @param header            Column header text
@@ -455,6 +468,24 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
+	}
+
+	public Column<EntityClass> addStoryPointColumn(final ValueProvider<EntityClass, ISprintableItem> itemProvider,
+			final Consumer<ISprintableItem> saveHandler, final Consumer<Exception> errorHandler, final String header, final String key) {
+		Check.notNull(itemProvider, "Item provider cannot be null");
+		Check.notNull(saveHandler, "Save handler cannot be null");
+		Check.notNull(errorHandler, "Error handler cannot be null");
+		Check.notBlank(header, "Header cannot be null or blank");
+		final Column<EntityClass> column = addComponentColumn(entity -> {
+			final ISprintableItem item = itemProvider.apply(entity);
+			Check.notNull(item, "Sprintable item cannot be null when creating story point component");
+			return new CComponentStoryPoint(item, saveHandler, errorHandler);
+		}).setWidth(WIDTH_INTEGER).setFlexGrow(0).setSortable(true).setResizable(true);
+		if (key != null) {
+			column.setKey(key);
+		}
+		column.setComparator((left, right) -> compareIds(storyPointValue(itemProvider.apply(left)), storyPointValue(itemProvider.apply(right))));
+		return styleColumnHeader(column, header);
 	}
 
 	public Column<EntityClass> addTimeColumn(final ValueProvider<EntityClass, LocalDateTime> valueProvider, final String header, final String key) {
@@ -529,10 +560,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return Long.compare(leftId, rightId);
 	}
 
-	private Long storyPointValue(final ISprintableItem item) {
-		return item == null ? null : item.getStoryPoint();
-	}
-
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
 		// TODO Auto-generated method stub
@@ -577,37 +604,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		}
 	}
 
-	private String getColumnWidth(Field field, final AMetaData meta) {
-		String width;
-		switch (field.getType().getSimpleName()) {
-		case "Integer":
-		case "int":
-			width = WIDTH_INTEGER;
-			break;
-		case "BigDecimal":
-			width = WIDTH_DECIMAL;
-			break;
-		case "LocalDate":
-		case "LocalDateTime":
-			width = WIDTH_DATE;
-			break;
-		case "Boolean":
-		case "boolean":
-			width = WIDTH_BOOLEAN;
-			break;
-		case "String":
-			if (meta != null && meta.maxLength() > CEntityConstants.MAX_LENGTH_NAME) {
-				width = WIDTH_LONG_TEXT;
-			} else {
-				width = WIDTH_SHORT_TEXT;
-			}
-			break;
-		default:
-			width = WIDTH_SHORT_TEXT;
-		}
-		return width;
-	}
-
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
 
 	public void hideHeader() {
@@ -646,7 +642,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		}
 		try {
 			return Long.parseLong(value.toString());
-		} catch (final NumberFormatException ignored) {
+		} catch (final NumberFormatException e) {
+			LOGGER.error("Error normalizing ID: {}", e.getMessage());
 			return null;
 		}
 	}
@@ -716,7 +713,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 			LOGGER.debug("Cannot select null entity, skipping.");
 			return;
 		}
-		LOGGER.debug("Selecting entity: {}", entity != null ? entity.toString() : "null");
+		LOGGER.debug("Selecting entity: {}", entity.toString());
 		if (entity == getSelectedItems().stream().findFirst().orElse(null)) {
 			// LOGGER.debug("Entity is already selected, skipping.");
 			return;
@@ -760,5 +757,9 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public void setRefreshConsumer(final Consumer<CGrid<EntityClass>> refreshConsumer) {
 		Check.notNull(refreshConsumer, "Refresh consumer cannot be null");
 		this.refreshConsumer = refreshConsumer;
+	}
+
+	private Long storyPointValue(final ISprintableItem item) {
+		return item == null ? null : item.getStoryPoint();
 	}
 }

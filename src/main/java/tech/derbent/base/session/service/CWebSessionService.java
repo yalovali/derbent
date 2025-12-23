@@ -31,6 +31,7 @@ import tech.derbent.base.users.service.IUserRepository;
 @ConditionalOnWebApplication
 @Profile ("!reset-db")
 public class CWebSessionService implements ISessionService {
+
 	// private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
 	private static final String ACTIVE_ID_KEY = "activeId";
@@ -39,11 +40,17 @@ public class CWebSessionService implements ISessionService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private static final String PROJECT_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectChangeListeners";
 	private static final String PROJECT_LIST_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectListChangeListeners";
+
+	@SuppressWarnings ("unchecked")
+	private static Set<String> getActiveIdAttributesIfPresent(final VaadinSession session) {
+		return (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
+	}
+
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
 
-	public CWebSessionService(final AuthenticationContext authenticationContext, final IUserRepository userRepository,
-			final IProjectRepository projectRepository) {
+	public CWebSessionService(@SuppressWarnings ("unused") final AuthenticationContext authenticationContext,
+			@SuppressWarnings ("unused") final IUserRepository userRepository, final IProjectRepository projectRepository) {
 		this.projectRepository = projectRepository;
 	}
 
@@ -125,11 +132,6 @@ public class CWebSessionService implements ISessionService {
 			return (Long) session.getAttribute(ACTIVE_ID_KEY + "_" + entityType);
 		}
 		return null;
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<String> getActiveIdAttributesIfPresent(final VaadinSession session) {
-		return (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
 	}
 
 	/** Gets the currently active project from the session. If no project is set, returns the first available project. */

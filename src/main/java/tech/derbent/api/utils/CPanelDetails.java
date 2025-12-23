@@ -43,7 +43,8 @@ public class CPanelDetails extends CDiv {
 	}
 
 	// Override this method to customize the panel content creation
-	protected void createPanelContent() {}
+	protected void createPanelContent() { /*****/
+	}
 
 	public VerticalLayout getBaseLayout() { return getFormContainerComponent().getBaseLayout(); }
 
@@ -51,8 +52,8 @@ public class CPanelDetails extends CDiv {
 
 	public String getName() { return name; }
 
-	public void processLine(final IContentOwner contentOwner, final int counter, final CDetailSection screen, final CDetailLines line,
-			final CFormBuilder<?> formBuilder, final Map<String, Component> centralComponentMap) throws Exception {
+	public void processLine(final IContentOwner contentOwner, final CDetailSection screen, final CDetailLines line, final CFormBuilder<?> formBuilder,
+			final Map<String, Component> centralComponentMap) throws Exception {
 		try {
 			formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, getBaseLayout(), centralComponentMap, horizontalLayoutMap);
 		} catch (final Exception e) {

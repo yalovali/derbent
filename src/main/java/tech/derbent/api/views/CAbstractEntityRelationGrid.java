@@ -15,12 +15,12 @@ import tech.derbent.api.utils.CAuxillaries;
 public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<RelationEntity>> extends Grid<RelationEntity> {
 
 	private static final long serialVersionUID = 1L;
-	public static final String WIDTH_ID = "80px";
-	public static final String WIDTH_ENTITY_NAME = "200px";
-	public static final String WIDTH_ROLE = "150px";
-	public static final String WIDTH_PERMISSION = "150px";
-	public static final String WIDTH_STATUS = "120px";
 	public static final String WIDTH_DATE = "150px";
+	public static final String WIDTH_ENTITY_NAME = "200px";
+	public static final String WIDTH_ID = "80px";
+	public static final String WIDTH_PERMISSION = "150px";
+	public static final String WIDTH_ROLE = "150px";
+	public static final String WIDTH_STATUS = "120px";
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Constructor for relation grid */
@@ -72,6 +72,7 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 		return CGrid.styleColumnHeader(column, header);
 	}
 
+	@SuppressWarnings ("static-method")
 	private int compareIds(final Long left, final Long right) {
 		if (left == null && right == null) {
 			return 0;

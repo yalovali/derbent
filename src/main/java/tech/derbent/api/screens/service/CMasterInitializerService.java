@@ -1,12 +1,13 @@
 package tech.derbent.api.screens.service;
 
+import tech.derbent.api.utils.Check;
+
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CMasterSection;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
@@ -30,11 +31,9 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createSection("Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionDBName"));
-			
 			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

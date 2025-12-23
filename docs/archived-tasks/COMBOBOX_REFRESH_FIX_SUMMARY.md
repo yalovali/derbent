@@ -55,7 +55,7 @@ object.equals(item)           // Succeeds: IDs match via CEntityDB.equals()
 **Before:**
 ```java
 protected void populateForm() {
-    Check.notNull(binder, "Binder must be initialized before populating the form");
+    Objects.requireNonNull(binder, "Binder must be initialized before populating the form");
     binder.readBean(getEntity());
     // Refresh ComboBox values to ensure they display correctly
     // refreshComboBoxValues(); // Manual workaround
@@ -65,7 +65,7 @@ protected void populateForm() {
 **After:**
 ```java
 protected void populateForm() {
-    Check.notNull(binder, "Binder must be initialized before populating the form");
+    Objects.requireNonNull(binder, "Binder must be initialized before populating the form");
     // Initialize lazy-loaded entity fields before reading into binder
     // This ensures ComboBoxes can properly match entity values with their items
     if (getEntity() != null) {

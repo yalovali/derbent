@@ -27,9 +27,9 @@ public class CComment extends CEventEntity<CComment> {
 
 	public static final String DEFAULT_COLOR = "#B8860B"; // X11 DarkGoldenrod - discussion (darker)
 	public static final String DEFAULT_ICON = "vaadin:comment";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
 	public static final String ENTITY_TITLE_PLURAL = "Comments";
 	public static final String ENTITY_TITLE_SINGULAR = "Comment";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
 	public static final String VIEW_NAME = "Comments View";
 	// Activity this comment belongs to
 	@ManyToOne (fetch = FetchType.LAZY)

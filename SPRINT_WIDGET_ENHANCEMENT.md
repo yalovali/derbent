@@ -172,7 +172,7 @@ Implement a centralized notification bus:
 - ✅ Naming conventions: `create_xxx()` for factory methods
 - ✅ Uses CNotificationService for user notifications
 - ✅ Proper logging with SLF4J
-- ✅ Null safety with Check.notNull()
+- ✅ Null safety with Objects.requireNonNull()
 - ✅ JavaDoc documentation on public methods
 
 ### Design Patterns Used

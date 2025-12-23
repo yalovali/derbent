@@ -30,5 +30,5 @@ super(CProductVersionType.class, name, project);
 }
 
 @Override
-public void initializeAllFields() {}
+public void initializeAllFields() { /*****/ }
 }

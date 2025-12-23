@@ -22,7 +22,7 @@ public class CRouteDiscoveryService {
 		private final String route;
 		private final String title;
 
-		public RouteInfo(String route, String title, String displayName, Class<?> viewClass, Icon icon, String iconColor) {
+		public RouteInfo(String route, String title, String displayName, Icon icon, String iconColor) {
 			this.route = route;
 			this.title = title;
 			this.displayName = displayName;
@@ -32,9 +32,9 @@ public class CRouteDiscoveryService {
 
 		public String getDisplayName() { return displayName; }
 
-		public Icon getIconString() { return icon; }
-
 		public String getIconColor() { return iconColor; }
+
+		public Icon getIconString() { return icon; }
 
 		public String getRoute() { return route; }
 
@@ -49,15 +49,15 @@ public class CRouteDiscoveryService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRouteDiscoveryService.class);
 
 	/** Adds common routes that might not extend CAbstractNamedEntityPage */
-	private void addCommonRoutes(List<RouteInfo> routes) {
+	private static void addCommonRoutes(List<RouteInfo> routes) {
 		// Add home/dashboard route if not already present
 		if (routes.stream().noneMatch(r -> "home".equals(r.getRoute()) || "".equals(r.getRoute()))) {
-			routes.add(new RouteInfo("home", "Home", "Home / Dashboard", null, null, null));
+			routes.add(new RouteInfo("home", "Home", "Home / Dashboard", null, null));
 		}
 	}
 
 	/** Adds hardcoded routes as a fallback - these match the original hardcoded list */
-	private void addHardcodedRoutes(List<RouteInfo> routes) {
+	private static void addHardcodedRoutes(List<RouteInfo> routes) {
 		addRouteIfNotExists(routes, "cprojectsview", "Projects", "Projects");
 		addRouteIfNotExists(routes, "cactivitiesview", "Activities", "Activities");
 		addRouteIfNotExists(routes, "cmeetingsview", "Meetings", "Meetings");
@@ -77,16 +77,16 @@ public class CRouteDiscoveryService {
 	}
 
 	/** Helper method to add a route if it doesn't already exist */
-	private void addRouteIfNotExists(List<RouteInfo> routes, String route, String title, String displayName) {
+	private static void addRouteIfNotExists(List<RouteInfo> routes, String route, String title, String displayName) {
 		if (routes.stream().noneMatch(r -> r.getRoute().equals(route))) {
-			routes.add(new RouteInfo(route, title, displayName, null, null, null));
+			routes.add(new RouteInfo(route, title, displayName, null, null));
 		}
 	}
 
 	/** Discovers all available routes by scanning for view classes with @Route annotations
 	 * @return List of RouteInfo objects containing route metadata */
 	public List<RouteInfo> discoverAllRoutes() {
-		List<RouteInfo> routes = new ArrayList<>();
+		final List<RouteInfo> routes = new ArrayList<>();
 		try {
 			// Add manual routes first (these are common routes that might not have view classes)
 			addCommonRoutes(routes);
@@ -96,7 +96,7 @@ public class CRouteDiscoveryService {
 			routes.sort((r1, r2) -> r1.getDisplayName().compareToIgnoreCase(r2.getDisplayName()));
 			LOGGER.info("Discovered {} routes", routes.size());
 			return routes;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error discovering routes", e);
 			return getDefaultRoutes();
 		}
@@ -109,7 +109,7 @@ public class CRouteDiscoveryService {
 
 	/** Gets default routes as fallback */
 	private List<RouteInfo> getDefaultRoutes() {
-		List<RouteInfo> routes = new ArrayList<>();
+		final List<RouteInfo> routes = new ArrayList<>();
 		addCommonRoutes(routes);
 		addHardcodedRoutes(routes);
 		return routes;

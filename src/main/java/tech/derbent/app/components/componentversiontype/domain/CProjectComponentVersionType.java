@@ -30,5 +30,5 @@ public class CProjectComponentVersionType extends CTypeEntity<CProjectComponentV
 	}
 
 	@Override
-	public void initializeAllFields() {}
+	public void initializeAllFields() { /*****/ }
 }

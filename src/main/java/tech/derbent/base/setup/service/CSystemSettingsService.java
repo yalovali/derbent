@@ -32,6 +32,17 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 		super(repository, clock, sessionService);
 	}
 
+	/** Checks dependencies before allowing system settings deletion. Note: System settings should not be deleted, but this method provides
+	 * protection.
+	 * @param systemSettings the system settings entity to check
+	 * @return error message preventing deletion */
+	@Override
+	public String checkDeleteAllowed(final CSystemSettings systemSettings) {
+		return super.checkDeleteAllowed(systemSettings);
+		// System settings should not be deleted - it's a singleton
+		// Uncomment to prevent deletion: return "System settings cannot be deleted. It is a required system configuration.";
+	}
+
 	/** Creates default system settings. This method is called during initial system setup.
 	 * @return the created CSystemSettings */
 	@Transactional
@@ -72,6 +83,9 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 		return settings.getDefaultLoginView() != null ? settings.getDefaultLoginView() : "home";
 	}
 
+	@Override
+	public Class<CSystemSettings> getEntityClass() { return CSystemSettings.class; }
+
 	/** Gets the font size scale setting.
 	 * @return the font size scale ("small", "medium", or "large") */
 	@Transactional (readOnly = false)
@@ -86,36 +100,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 	}
 
 	@Override
-	public Class<CSystemSettings> getEntityClass() { return CSystemSettings.class; }
-
-	@Override
 	public Class<?> getInitializerServiceClass() { return CSystemSettingsInitializerService.class; }
-
-	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceSystemSettings.class; }
-
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
-
-	/** Checks dependencies before allowing system settings deletion. Note: System settings should not be deleted, but this method provides
-	 * protection.
-	 * @param systemSettings the system settings entity to check
-	 * @return error message preventing deletion */
-	@Override
-	public String checkDeleteAllowed(final CSystemSettings systemSettings) {
-		return super.checkDeleteAllowed(systemSettings);
-		// System settings should not be deleted - it's a singleton
-		// Uncomment to prevent deletion: return "System settings cannot be deleted. It is a required system configuration.";
-	}
-
-	/** Initializes a new system settings entity with default values.
-	 * @param entity the newly created system settings to initialize */
-	@Override
-	public void initializeNewEntity(final CSystemSettings entity) {
-		super.initializeNewEntity(entity);
-		// System settings initialization is handled by the domain class constructor
-		// Additional entity-specific initialization can be added here if needed
-	}
 
 	/** Gets the last visited view setting.
 	 * @return the last visited view route */
@@ -160,10 +145,15 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 		final Optional<CSystemSettings> existingSettings = ((ISystemSettingsRepository) repository).findSystemSettings();
 		if (existingSettings.isPresent()) {
 			return existingSettings.get();
-		} else {
-			return createDefaultSystemSettings();
 		}
+		return createDefaultSystemSettings();
 	}
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceSystemSettings.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Gets the session timeout in minutes.
 	 * @return the session timeout value, or default value if not found */
@@ -183,6 +173,15 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 			LOGGER.error("Error retrieving system settings", e);
 			throw e;
 		}
+	}
+
+	/** Initializes a new system settings entity with default values.
+	 * @param entity the newly created system settings to initialize */
+	@Override
+	public void initializeNewEntity(final CSystemSettings entity) {
+		super.initializeNewEntity(entity);
+		// System settings initialization is handled by the domain class constructor
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	/** Gets the auto-login enabled setting.

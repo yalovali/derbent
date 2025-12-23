@@ -28,7 +28,7 @@ Enhanced the `checkSaveAllowed` method to provide generic validation for non-nul
 
 ```java
 public String checkSaveAllowed(final EntityClass entity) {
-    Check.notNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
     // Validate non-nullable fields using reflection
     final String nullableFieldsError = validateNullableFields(entity);
     if (nullableFieldsError != null) {

@@ -58,7 +58,7 @@ public class CComponentGridEntity extends CDiv
     
     @Override
     public void registerWithOwner() {
-        Check.notNull(dragDropOwner, "Owner must be set before registration");
+        Objects.requireNonNull(dragDropOwner, "Owner must be set before registration");
         LOGGER.debug("[DragDebug] Registering with owner {}", 
             dragDropOwner.getClass().getSimpleName());
         // Registration logic here
@@ -88,7 +88,7 @@ When `registerWithOwner()` is called, the component automatically binds its even
 ```java
 @Override
 public void registerWithOwner() {
-    Check.notNull(dragDropOwner, "Owner must be set before registration");
+    Objects.requireNonNull(dragDropOwner, "Owner must be set before registration");
     
     // The owner's existing event binding mechanism (e.g., CPageService.bindMethods())
     // will automatically bind this component's events to handler methods like:
@@ -190,7 +190,7 @@ public class CComponentGridEntity extends CDiv
     
     @Override
     public void registerWithOwner() {
-        Check.notNull(dragDropOwner, "Owner must be set before registration");
+        Objects.requireNonNull(dragDropOwner, "Owner must be set before registration");
         
         // Component's events are already available via IHasDragStart/IHasDragEnd/IHasDrop
         // The owner's binding mechanism (e.g., CPageService.bindMethods()) will
@@ -237,7 +237,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass>
     
     @Override
     public void registerWithOwner() {
-        Check.notNull(dragDropOwner, "Owner must be set before registration");
+        Objects.requireNonNull(dragDropOwner, "Owner must be set before registration");
         // Grid's built-in addDragStartListener/addDragEndListener/addDropListener
         // are already available for the owner to bind to
     }
@@ -282,7 +282,7 @@ component.registerWithOwner(); // No owner set!
 ```java
 @Override
 public void registerWithOwner() {
-    Check.notNull(dragDropOwner, "Owner must be set before registration");
+    Objects.requireNonNull(dragDropOwner, "Owner must be set before registration");
     
     // Register this component's events
     // ...

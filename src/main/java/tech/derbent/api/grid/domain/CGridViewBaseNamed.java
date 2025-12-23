@@ -18,8 +18,7 @@ public abstract class CGridViewBaseNamed<EntityClass extends CEntityNamed<Entity
 	}
 
 	@Override
-	protected void createDetailsComponent() throws Exception {
-		
+	protected void createDetailsComponent() throws Exception { /***/
 	}
 
 	@Override

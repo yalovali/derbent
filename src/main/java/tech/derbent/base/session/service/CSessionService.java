@@ -158,5 +158,5 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public void setLayoutService(final CLayoutService layoutService) {}
+	public void setLayoutService(final CLayoutService layoutService) { /*****/ }
 }

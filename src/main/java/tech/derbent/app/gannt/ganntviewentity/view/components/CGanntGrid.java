@@ -1,5 +1,7 @@
 package tech.derbent.app.gannt.ganntviewentity.view.components;
 
+import tech.derbent.api.utils.Check;
+
 import java.time.LocalDate;
 import java.util.List;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -8,7 +10,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CDiv;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.ganntitem.domain.CGanntItem;
 import tech.derbent.app.gannt.ganntviewentity.view.datasource.CGanntDataProvider;

@@ -1,5 +1,7 @@
 package tech.derbent.api.ui.dialogs;
 
+import tech.derbent.api.utils.Check;
+
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,7 +16,6 @@ import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.api.utils.Check;
 
 /** Abstract base class for relationship dialogs. This class provides common functionality for dialogs that manage relationships between two entity
  * types. It handles the common patterns of: - Entity selection via ComboBox - Role and permission management - Form validation with proper error
@@ -223,5 +224,5 @@ public abstract class CDialogDBRelation<RelationshipClass extends CEntityDB<Rela
 	}
 
 	@Override
-	protected void validateForm() {}
+	protected void validateForm() { /*****/ }
 }

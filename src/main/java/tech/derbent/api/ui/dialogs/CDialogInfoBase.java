@@ -1,16 +1,20 @@
 package tech.derbent.api.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.utils.Check;
 
 public abstract class CDialogInfoBase extends CDialog {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogInfoBase.class);
 	private static final long serialVersionUID = 1L;
+	private final Icon icon;
 	private final String message;
 	private final String title;
-	private final Icon icon;
 
 	/** @param title The dialog title
 	 * @param message The message to display to the user
@@ -31,7 +35,7 @@ public abstract class CDialogInfoBase extends CDialog {
 		try {
 			setupDialog();// call setupDialog() to initialize the dialog
 		} catch (final Exception e) {
-			LOGGER.error("Error setting up dialog.");
+			LOGGER.error("Error setting up dialog. {}", e.getMessage());
 		}
 	}
 

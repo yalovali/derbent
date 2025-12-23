@@ -25,7 +25,7 @@ public class CExceptionNotify extends Exception {
 ```java
 // Added automatic nullable field validation
 public String checkSaveAllowed(final EntityClass entity) {
-    Check.notNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
     final String nullableFieldsError = validateNullableFields(entity);
     if (nullableFieldsError != null) {
         return nullableFieldsError;

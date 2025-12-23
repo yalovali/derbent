@@ -23,10 +23,10 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 		implements HasValueAndElement<HasValue.ValueChangeEvent<EntityClass>, EntityClass> {
 
 	private static final long serialVersionUID = 1L;
-	private final List<ValueChangeListener<? super ValueChangeEvent<EntityClass>>> valueChangeListeners = new ArrayList<>();
-	private EntityClass value;
 	private boolean readOnly;
 	private boolean requiredIndicatorVisible;
+	private EntityClass value;
+	private final List<ValueChangeListener<? super ValueChangeEvent<EntityClass>>> valueChangeListeners = new ArrayList<>();
 
 	protected CComponentBase() {
 		super();
@@ -85,15 +85,19 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 	@Override
 	public boolean isRequiredIndicatorVisible() { return requiredIndicatorVisible; }
 
-	protected boolean isValueEmpty(final EntityClass value) {
-		return value == null;
+	protected boolean isValueEmpty(final EntityClass check) {
+		return check == null;
 	}
 
-	protected void onReadOnlyChanged(final boolean readOnly) {}
+	protected void onReadOnlyChanged(@SuppressWarnings ("unused") final boolean readOnly) { /*****/
+	}
 
-	protected void onRequiredIndicatorVisibleChanged(final boolean requiredIndicatorVisible) {}
+	protected void onRequiredIndicatorVisibleChanged(@SuppressWarnings ("unused") final boolean requiredIndicatorVisible) { /*****/
+	}
 
-	protected void onValueChanged(final EntityClass oldValue, final EntityClass newValue, final boolean fromClient) {}
+	protected void onValueChanged(@SuppressWarnings ("unused") final EntityClass oldValue, @SuppressWarnings ("unused") final EntityClass newValue,
+			@SuppressWarnings ("unused") final boolean fromClient) { /*****/
+	}
 
 	@Override
 	public void setReadOnly(final boolean readOnly) {

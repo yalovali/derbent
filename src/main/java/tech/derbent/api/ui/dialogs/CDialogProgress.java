@@ -1,5 +1,7 @@
 package tech.derbent.api.ui.dialogs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -10,6 +12,7 @@ import tech.derbent.api.utils.Check;
  * user should wait until completion. */
 public final class CDialogProgress extends CDialog {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogProgress.class);
 	private static final long serialVersionUID = 1L;
 	private final String message;
 	private final String title;

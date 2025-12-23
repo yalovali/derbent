@@ -411,7 +411,7 @@ public class CEntityView extends CAbstractPage {
 #### Use Check Utility
 ```java
 // ✅ CORRECT - Use Check utility
-Check.notNull(entity, "Entity cannot be null");
+Objects.requireNonNull(entity, "Entity cannot be null");
 Check.notBlank(name, "Name cannot be blank");
 Check.notEmpty(list, "List cannot be empty");
 Check.isTrue(value > 0, "Value must be positive");
@@ -449,7 +449,7 @@ private String getName(Object entity) {
 
 // ❌ INCORRECT - Hiding developer errors with safe returns
 private String getName(Object entity) {
-    Check.notNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
     if (entity instanceof CEntityNamed) {
         return ((CEntityNamed<?>) entity).getName();
     }
@@ -458,14 +458,14 @@ private String getName(Object entity) {
 
 // ✅ CORRECT - Fail fast on developer errors using Check.instanceOf
 private String getName(Object entity) {
-    Check.notNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
     Check.instanceOf(entity, CEntityNamed.class, "Item must be of type CEntityNamed to access name");
     return ((CEntityNamed<?>) entity).getName();
 }
 
 // ✅ CORRECT - Use type-safe interfaces with Check.instanceOf
 private Object getStatus(Object entity) {
-    Check.notNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
     Check.instanceOf(entity, IHasStatusAndWorkflow.class, "Item must implement IHasStatusAndWorkflow to access status");
     return ((IHasStatusAndWorkflow) entity).getStatus();
 }
@@ -497,7 +497,7 @@ private String getEntityName(EntityClass item) {
 
 // ✅ CORRECT - Exposing developer error immediately
 private String getEntityName(EntityClass item) {
-    Check.notNull(item, "Item cannot be null");
+    Objects.requireNonNull(item, "Item cannot be null");
     Check.instanceOf(item, CEntityNamed.class, "Item must be of type CEntityNamed");
     return ((CEntityNamed<?>) item).getName();
 }
@@ -680,7 +680,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 // Keep methods focused and single-purpose
 // ✅ GOOD
 public void completeActivity(CActivity activity) {
-    Check.notNull(activity, "Activity cannot be null");
+    Objects.requireNonNull(activity, "Activity cannot be null");
     activity.setStatus(getCompletedStatus());
     activity.setActualEndDate(LocalDate.now());
     save(activity);
@@ -721,7 +721,7 @@ public void process(CActivity activity, CUser user) { }
  */
 @Transactional
 public void completeActivity(CActivity activity) {
-    Check.notNull(activity, "Activity cannot be null");
+    Objects.requireNonNull(activity, "Activity cannot be null");
     
     if (activity.isCompleted()) {
         throw new IllegalArgumentException("Activity is already completed");
@@ -938,8 +938,8 @@ Always validate user input:
 public CActivity createActivity(String name, CProject project) {
     // Validate inputs
     Check.notBlank(name, "Name cannot be blank");
-    Check.notNull(project, "Project cannot be null");
-    Check.notNull(project.getId(), "Project must be persisted");
+    Objects.requireNonNull(project, "Project cannot be null");
+    Objects.requireNonNull(project.getId(), "Project must be persisted");
     
     // Validate length
     if (name.length() > CEntityConstants.MAX_LENGTH_NAME) {
@@ -1168,14 +1168,14 @@ public class CSprintItemService extends CAbstractService<CSprintItem>
     
     /** Find by master entity. */
     public List<CSprintItem> findByMaster(CSprint master) {
-        Check.notNull(master, "Master cannot be null");
+        Objects.requireNonNull(master, "Master cannot be null");
         if (master.getId() == null) return List.of();
         return getTypedRepository().findByMaster(master);
     }
     
     /** Find by master ID. */
     public List<CSprintItem> findByMasterId(Long masterId) {
-        Check.notNull(masterId, "Master ID cannot be null");
+        Objects.requireNonNull(masterId, "Master ID cannot be null");
         return getTypedRepository().findByMasterId(masterId);
     }
     
@@ -1298,9 +1298,9 @@ public class CActivityService extends CAbstractService<CActivity> {
     }
     
     private CCompany getCurrentCompany() {
-        Check.notNull(sessionService, "Session service required");
+        Objects.requireNonNull(sessionService, "Session service required");
         CCompany company = sessionService.getCurrentCompany();
-        Check.notNull(company, "No active company");
+        Objects.requireNonNull(company, "No active company");
         return company;
     }
 }

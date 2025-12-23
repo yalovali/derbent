@@ -11,7 +11,6 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.components.component.service.CProjectComponentService;
 import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.app.components.componentversiontype.service.CProjectComponentVersionTypeService;
 import tech.derbent.app.projects.domain.CProject;
@@ -20,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:file-o", title = "Settings.ComponentVersions")
+@Menu (icon = "vaadin:file-o", title = "Settings.ComponentVersions")
 @PermitAll
 public class CProjectComponentVersionService extends CProjectItemService<CProjectComponentVersion> implements IEntityRegistrable {
 
@@ -28,8 +27,7 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 	private final CProjectComponentVersionTypeService componentversionTypeService;
 
 	CProjectComponentVersionService(final IProjectComponentVersionRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProjectComponentVersionTypeService componentversionTypeService, final CProjectComponentService cComponentService,
-			final CProjectItemStatusService projectItemStatusService) {
+			final CProjectComponentVersionTypeService componentversionTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.componentversionTypeService = componentversionTypeService;
 	}

@@ -1,5 +1,7 @@
 package tech.derbent.app.sprints.view;
 
+import tech.derbent.api.utils.Check;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -21,7 +23,6 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.sprints.domain.CSprint;

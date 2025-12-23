@@ -19,9 +19,20 @@ public class CLayoutService {
 		HORIZONTAL, VERTICAL
 	}
 
-	private static final String LAYOUT_MODE_KEY = "layoutMode";
 	private static final String LAYOUT_LISTENERS_KEY = CLayoutService.class.getName() + ".layoutChangeListeners";
+	private static final String LAYOUT_MODE_KEY = "layoutMode";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLayoutService.class);
+
+	/** Gets the current layout mode from the session. Defaults to VERTICAL if not set. */
+	public static LayoutMode getCurrentLayoutMode() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			return LayoutMode.VERTICAL; // Default to vertical
+		}
+		final LayoutMode mode = (LayoutMode) session.getAttribute(LAYOUT_MODE_KEY);
+		final LayoutMode result = mode != null ? mode : LayoutMode.VERTICAL;
+		return result;
+	}
 
 	/** Registers a component to receive notifications when the layout mode changes. */
 	public void addLayoutChangeListener(final ILayoutChangeListener listener) {
@@ -38,15 +49,23 @@ public class CLayoutService {
 		getOrCreateLayoutListeners(session).clear();
 	}
 
-	/** Gets the current layout mode from the session. Defaults to VERTICAL if not set. */
-	public LayoutMode getCurrentLayoutMode() {
+	private Set<ILayoutChangeListener> getCurrentLayoutListeners() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
-			return LayoutMode.VERTICAL; // Default to vertical
+			LOGGER.debug("No active VaadinSession; returning empty layout listener set");
+			return Collections.emptySet();
 		}
-		final LayoutMode mode = (LayoutMode) session.getAttribute(LAYOUT_MODE_KEY);
-		final LayoutMode result = mode != null ? mode : LayoutMode.VERTICAL;
-		return result;
+		return getOrCreateLayoutListeners(session);
+	}
+
+	@SuppressWarnings ("unchecked")
+	private Set<ILayoutChangeListener> getOrCreateLayoutListeners(final VaadinSession session) {
+		Set<ILayoutChangeListener> listeners = (Set<ILayoutChangeListener>) session.getAttribute(LAYOUT_LISTENERS_KEY);
+		if (listeners == null) {
+			listeners = ConcurrentHashMap.newKeySet();
+			session.setAttribute(LAYOUT_LISTENERS_KEY, listeners);
+		}
+		return listeners;
 	}
 
 	/** Notifies all registered layout change listeners about a layout mode change. */
@@ -128,24 +147,5 @@ public class CLayoutService {
 		final LayoutMode newMode = currentMode == LayoutMode.HORIZONTAL ? LayoutMode.VERTICAL : LayoutMode.HORIZONTAL;
 		LOGGER.info("Toggling from {} to {}", currentMode, newMode);
 		setLayoutMode(newMode);
-	}
-
-	private Set<ILayoutChangeListener> getCurrentLayoutListeners() {
-		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			LOGGER.debug("No active VaadinSession; returning empty layout listener set");
-			return Collections.emptySet();
-		}
-		return getOrCreateLayoutListeners(session);
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<ILayoutChangeListener> getOrCreateLayoutListeners(final VaadinSession session) {
-		Set<ILayoutChangeListener> listeners = (Set<ILayoutChangeListener>) session.getAttribute(LAYOUT_LISTENERS_KEY);
-		if (listeners == null) {
-			listeners = ConcurrentHashMap.newKeySet();
-			session.setAttribute(LAYOUT_LISTENERS_KEY, listeners);
-		}
-		return listeners;
 	}
 }

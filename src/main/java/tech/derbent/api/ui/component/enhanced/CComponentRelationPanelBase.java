@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.enhanced;
-import tech.derbent.api.ui.notifications.CNotificationService;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -13,6 +12,7 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -22,6 +22,7 @@ import tech.derbent.base.session.service.ISessionService;
  * @param <RelationalClass> The relationship entity type (e.g., CUserProjectSettings, CUserCompanySetting) */
 public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CComponentRelationBase<MasterClass, RelationalClass> {
+
 	private static final long serialVersionUID = 1L;
 	private CButton addButton;
 	private CButton deleteButton;
@@ -30,10 +31,10 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CAbstractEntityRelationService<RelationalClass> relationService;
 
-	public CComponentRelationPanelBase(final String title, final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
+	public CComponentRelationPanelBase(final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
 			final CAbstractService<MasterClass> entityService, final CAbstractEntityRelationService<RelationalClass> relationService,
 			final ISessionService sessionService) {
-		super(title, entityClass, relationalClass, sessionService);
+		super(entityClass, relationalClass, sessionService);
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
 		Check.notNull(relationService, "Relation service cannot be null - relational component requires a valid relation service");
 		this.relationService = relationService;
@@ -59,7 +60,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				// happens outside the Hibernate session context.
 				LOGGER.debug("Retrieved {} settings for entity: {}", relations.size(), entity.getName());
 				return relations;
-			} catch (final Exception e) {
+			} catch (@SuppressWarnings ("unused") final Exception e) {
 				LOGGER.error("Error retrieving settings for entity.");
 				return List.of();
 			}
@@ -97,20 +98,19 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					CNotificationService.showWarning("Failed to delete relation: " + e.getMessage());
 				}
 			});
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.error("Failed to show delete confirmation.");
 			CNotificationService.showWarning("Failed to delete relation");
 		}
 	}
 
-	@Override
-	public CAbstractService<MasterClass> getEntityService() { return entityService; }
-
 	/** Get delete confirmation message - subclasses can override. */
 	protected abstract String getDeleteConfirmationMessage(RelationalClass selected);
-
 	/** Gets display text for various field types - subclasses must implement. */
 	protected abstract String getDisplayText(RelationalClass settings, String fieldType);
+
+	@Override
+	public CAbstractService<MasterClass> getEntityService() { return entityService; }
 
 	@Override
 	public void initPanel() throws Exception {
@@ -126,9 +126,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	/** Abstract methods that subclasses must implement */
 	protected abstract void onSettingsSaved(RelationalClass settings);
-
 	protected abstract void openAddDialog() throws Exception;
-
 	protected abstract void openEditDialog() throws Exception;
 
 	/** Sets up the action buttons (Add, Edit, Delete) with common behavior. */

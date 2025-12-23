@@ -1,9 +1,10 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
+import tech.derbent.api.utils.Check;
+
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
-import tech.derbent.api.utils.Check;
 
 /** CComponentPostit - A compact post-it style widget for displaying project items inside kanban columns. */
 public class CComponentPostit extends CComponentWidgetEntity<CProjectItem<?>> {
@@ -13,8 +14,8 @@ public class CComponentPostit extends CComponentWidgetEntity<CProjectItem<?>> {
 	public CComponentPostit(final CProjectItem<?> item) {
 		super(item);
 		Check.notNull(item, "Project item cannot be null for postit");
-		getStyle().set("background-color", "#FFFDE7").set("border-radius", "8px").set("padding", "10px").set("box-shadow",
-				"0 1px 3px rgba(0, 0, 0, 0.12)").set("width", "100%");
+		getStyle().set("background-color", "#FFFDE7").set("border-radius", "8px").set("padding", "10px")
+				.set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.12)").set("width", "100%");
 	}
 
 	@Override

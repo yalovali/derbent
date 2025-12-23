@@ -22,7 +22,7 @@ All code changes have been verified for:
 - **Structure**: Method signatures and class definitions are correct
 - **Imports**: All required imports are present
 - **Conventions**: Follows project coding standards
-- **Null Safety**: Proper null checks with `Check.notNull()`
+- **Null Safety**: Proper null checks with `Objects.requireNonNull()`
 - **Documentation**: JavaDoc comments on public methods
 
 ### ✅ Code Changes: COMPLETE

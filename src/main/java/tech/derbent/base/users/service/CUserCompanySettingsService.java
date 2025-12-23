@@ -3,6 +3,8 @@ package tech.derbent.base.users.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import tech.derbent.base.users.domain.CUserCompanySetting;
 @Transactional (readOnly = true)
 public class CUserCompanySettingsService extends CAbstractEntityRelationService<CUserCompanySetting> implements IEntityRegistrable {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingsService.class);
 	private final IUserCompanySettingsRepository repository;
 
 	@Autowired
@@ -124,7 +127,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Transactional (readOnly = true)
 	public Optional<CUserCompanySetting> findSingleByUserId(final Long userId) {
 		Check.notNull(userId, "User ID cannot be null");
-		List<CUserCompanySetting> settings = repository.findSingleByUserId(userId);
+		final List<CUserCompanySetting> settings = repository.findSingleByUserId(userId);
 		return settings.isEmpty() ? Optional.empty() : Optional.of(settings.get(0));
 	}
 
@@ -132,19 +135,13 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	public Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { 
-		return CUserCompanySettingInitializerService.class;
-	}
+	public Class<?> getInitializerServiceClass() { return CUserCompanySettingInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { 
-		return CPageServiceUserCompanySetting.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceUserCompanySetting.class; }
 
 	@Override
-	public Class<?> getServiceClass() { 
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CUserCompanySetting entity) {

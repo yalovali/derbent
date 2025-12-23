@@ -1,6 +1,7 @@
 package tech.derbent.api.ui.component.enhanced;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
@@ -28,9 +29,9 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	protected final CProjectService projectService;
 	protected final CUserProjectSettingsService userProjectSettingsService;
 
-	public CComponentUserProjectRelationBase(final String title, final Class<MasterClass> entityClass,
-			final CAbstractService<MasterClass> entityService, ISessionService sessionService) {
-		super(title, entityClass, CUserProjectSettings.class, entityService,
+	public CComponentUserProjectRelationBase(final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
+			ISessionService sessionService) {
+		super(entityClass, CUserProjectSettings.class, entityService,
 				CSpringContext.<CUserProjectSettingsService>getBean(CUserProjectSettingsService.class), sessionService);
 		userProjectSettingsService = CSpringContext.<CUserProjectSettingsService>getBean(CUserProjectSettingsService.class);
 		projectService = CSpringContext.<CProjectService>getBean(CProjectService.class);
@@ -68,7 +69,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 			default:
 				return "";
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to get display text for type {}: {}", type, e.getMessage());
 			return "";
 		}
@@ -85,8 +86,9 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 		try {
 			Check.notNull(settings, "Settings cannot be null when saving");
 			LOGGER.debug("Saving user project settings: {}", settings);
-			final CUserProjectSettings savedSettings = settings.getId() == null ? userProjectSettingsService.addUserToProject(settings.getUser(),
-					settings.getProject(), settings.getRole(), settings.getPermission()) : userProjectSettingsService.save(settings);
+			final CUserProjectSettings savedSettings = settings.getId() == null
+					? userProjectSettingsService.addUserToProject(settings.getUser(), settings.getProject(), settings.getPermission())
+					: userProjectSettingsService.save(settings);
 			LOGGER.info("Successfully saved user project settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {
@@ -114,25 +116,25 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 				CGrid.styleColumnHeader(grid.addComponentColumn(settings -> {
 					try {
 						return new CLabelEntity(settings.getProject());
-					} catch (Exception e) {
-						LOGGER.error("Failed to create project component.");
-						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "project"));
+					} catch (final Exception e) {
+						LOGGER.error("Failed to create project component. {}", e.getMessage());
+						return new Span(getDisplayText(settings, "project"));
 					}
 				}).setAutoWidth(true).setSortable(true), "Project");
 			} else {
 				CGrid.styleColumnHeader(grid.addComponentColumn(settings -> {
 					try {
 						return CLabelEntity.createUserLabel(settings.getUser());
-					} catch (Exception e) {
-						LOGGER.error("Failed to create user component.");
-						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
+					} catch (final Exception e) {
+						LOGGER.error("Failed to create user component. {}", e.getMessage());
+						return new Span(getDisplayText(settings, "user"));
 					}
 				}).setAutoWidth(true).setSortable(true), "User");
 			}
 			CGrid.styleColumnHeader(grid.addColumn(settings -> getDisplayText(settings, "role")).setAutoWidth(true).setSortable(true), "Role");
 			CGrid.styleColumnHeader(grid.addColumn(settings -> getDisplayText(settings, "permission")).setAutoWidth(true).setSortable(true),
 					"Permissions");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to setup grid.");
 			throw e;
 		}

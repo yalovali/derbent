@@ -16,6 +16,11 @@ public class CEntityRegistry {
 	private static final Map<String, String> defaultIconsByName = new ConcurrentHashMap<>();
 	// changed key type from Class<?> to String to match usages (simple name -> class)
 	private static final Map<String, Class<?>> entityClasses = new ConcurrentHashMap<>();
+	private static final Map<String, Class<?>> entityClassesByPluralTitle = new ConcurrentHashMap<>();
+	private static final Map<String, Class<?>> entityClassesBySingularTitle = new ConcurrentHashMap<>();
+	private static final Map<Class<?>, String> entityTitlesPlural = new ConcurrentHashMap<>();
+	// Entity title mappings
+	private static final Map<Class<?>, String> entityTitlesSingular = new ConcurrentHashMap<>();
 	private static volatile boolean initialized = false;
 	private static final Map<Class<?>, Class<?>> initializerServices = new ConcurrentHashMap<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityRegistry.class);
@@ -24,11 +29,6 @@ public class CEntityRegistry {
 	private static final Map<String, Class<?>> serviceClasses = new ConcurrentHashMap<>();
 	private static final Map<Class<?>, Class<?>> serviceClassesByEntity = new ConcurrentHashMap<>();
 	private static final Map<String, Class<?>> serviceClassesByName = new ConcurrentHashMap<>();
-	// Entity title mappings
-	private static final Map<Class<?>, String> entityTitlesSingular = new ConcurrentHashMap<>();
-	private static final Map<Class<?>, String> entityTitlesPlural = new ConcurrentHashMap<>();
-	private static final Map<String, Class<?>> entityClassesBySingularTitle = new ConcurrentHashMap<>();
-	private static final Map<String, Class<?>> entityClassesByPluralTitle = new ConcurrentHashMap<>();
 
 	/** Clears all registrations (primarily for testing). */
 	public static void clear() {

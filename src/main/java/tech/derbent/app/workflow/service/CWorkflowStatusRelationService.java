@@ -3,6 +3,8 @@ package tech.derbent.app.workflow.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Transactional (readOnly = true)
 public class CWorkflowStatusRelationService extends CAbstractEntityRelationService<CWorkflowStatusRelation> implements IEntityRegistrable {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowStatusRelationService.class);
 	private final IWorkflowStatusRelationRepository repository;
 
 	@Autowired
@@ -59,13 +62,13 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	@Override
 	public String checkSaveAllowed(final CWorkflowStatusRelation entity) {
-		String result = super.checkSaveAllowed(entity);
+		final String result = super.checkSaveAllowed(entity);
 		if (result != null) {
 			return result;
 		}
 		// Additional checks can be added here if needed
 		if (entity.getFromStatus() == entity.getToStatus()) {
-			String string =
+			final String string =
 					"From status and To status cannot be the same. " + entity.getFromStatus().getName() + " -> " + entity.getToStatus().getName();
 			return string;
 		}
@@ -153,19 +156,13 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	public Class<CWorkflowStatusRelation> getEntityClass() { return CWorkflowStatusRelation.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { 
-		return CWorkflowStatusRelationInitializerService.class;
-	}
+	public Class<?> getInitializerServiceClass() { return CWorkflowStatusRelationInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { 
-		return CPageServiceWorkflowStatusRelation.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceWorkflowStatusRelation.class; }
 
 	@Override
-	public Class<?> getServiceClass() { 
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Initialize lazy fields for a CWorkflowStatusRelation entity within a transaction context. This method should be called when you need to access
 	 * lazy-loaded fields outside of the original Hibernate session. The repository queries already eagerly fetch common fields (workflow, statuses,

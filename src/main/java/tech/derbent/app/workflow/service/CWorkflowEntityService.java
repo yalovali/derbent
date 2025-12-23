@@ -48,7 +48,7 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		}
 	}
 
-	public Component createWorkflowStatusRelationsComponent(final CWorkflowEntity workflowEntity) {
+	public Component createWorkflowStatusRelationsComponent() {
 		try {
 			final CComponentWorkflowStatusRelations component = new CComponentWorkflowStatusRelations(this, sessionService);
 			return component;

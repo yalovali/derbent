@@ -2,6 +2,8 @@ package tech.derbent.api.ui.dialogs;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -17,6 +19,7 @@ import tech.derbent.api.utils.Check;
  * details for troubleshooting. */
 public final class CDialogMessageWithDetails extends CDialog {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogMessageWithDetails.class);
 	private static final long serialVersionUID = 1L;
 	private TextArea detailsArea;
 	private Button detailsButton;

@@ -39,7 +39,7 @@ CGridViewBaseGannt -> CGanttItem: getGanntItem(activityService, meetingService)
 activate CGanttItem
 
 CGanttItem -> CGanttItem: getEntity() returns CProjectItem<?>
-CGanttItem -> CGanttItem: Check.notNull(selectedItem)
+CGanttItem -> CGanttItem: Objects.requireNonNull(selectedItem)
 
 alt Entity is CActivity
     CGanttItem -> CGanttItem: service = activityService
@@ -65,7 +65,7 @@ else Unsupported Type
     CGanttItem -> CGanttItem: Check.fail("Unsupported entity type")
 end
 
-CGanttItem -> CGanttItem: Check.notNull(entity)
+CGanttItem -> CGanttItem: Objects.requireNonNull(entity)
 CGanttItem --> CGridViewBaseGannt: CProjectItem<?> (fresh from DB)
 deactivate CGanttItem
 

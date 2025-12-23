@@ -35,6 +35,27 @@ public final class CDashboardView extends CAbstractPage {
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Dashboard View";
+
+	/** Creates a detail row for a single project showing its metrics.
+	 * @param projectName   the name of the project
+	 * @param userCount     the number of users in the project
+	 * @param activityCount the number of activities in the project
+	 * @return the horizontal layout for the project row */
+	private static HorizontalLayout createProjectDetailRow(final String projectName, final long userCount, final long activityCount) {
+		final CDashboardStatCard projectCard = new CDashboardStatCard(projectName, "Project", VaadinIcon.FOLDER_O.create());
+		final CDashboardStatCard usersCard = new CDashboardStatCard("Users", userCount, VaadinIcon.USER.create());
+		final CDashboardStatCard activitiesCard = new CDashboardStatCard("Activities", activityCount, VaadinIcon.CLIPBOARD_CHECK.create());
+		final HorizontalLayout projectRow = new HorizontalLayout();
+		projectRow.addClassNames(Gap.MEDIUM, Margin.Bottom.SMALL);
+		projectRow.setWidthFull();
+		projectRow.setSpacing(true);
+		projectRow.add(projectCard, usersCard, activitiesCard);
+		projectRow.setFlexGrow(2, projectCard); // Give project name more space
+		projectRow.setFlexGrow(1, usersCard);
+		projectRow.setFlexGrow(1, activitiesCard);
+		return projectRow;
+	}
+
 	private final CActivityService activityService;
 	private VerticalLayout projectDetailsLayout;
 	private final CProjectService projectService;
@@ -59,26 +80,6 @@ public final class CDashboardView extends CAbstractPage {
 	public void beforeEnter(final BeforeEnterEvent event) {
 		LOGGER.debug("BeforeEnter event for CDashboardView");
 		// No specific navigation logic needed for the dashboard
-	}
-
-	/** Creates a detail row for a single project showing its metrics.
-	 * @param projectName   the name of the project
-	 * @param userCount     the number of users in the project
-	 * @param activityCount the number of activities in the project
-	 * @return the horizontal layout for the project row */
-	private HorizontalLayout createProjectDetailRow(final String projectName, final long userCount, final long activityCount) {
-		final CDashboardStatCard projectCard = new CDashboardStatCard(projectName, "Project", VaadinIcon.FOLDER_O.create());
-		final CDashboardStatCard usersCard = new CDashboardStatCard("Users", userCount, VaadinIcon.USER.create());
-		final CDashboardStatCard activitiesCard = new CDashboardStatCard("Activities", activityCount, VaadinIcon.CLIPBOARD_CHECK.create());
-		final HorizontalLayout projectRow = new HorizontalLayout();
-		projectRow.addClassNames(Gap.MEDIUM, Margin.Bottom.SMALL);
-		projectRow.setWidthFull();
-		projectRow.setSpacing(true);
-		projectRow.add(projectCard, usersCard, activitiesCard);
-		projectRow.setFlexGrow(2, projectCard); // Give project name more space
-		projectRow.setFlexGrow(1, usersCard);
-		projectRow.setFlexGrow(1, activitiesCard);
-		return projectRow;
 	}
 
 	/** Creates the project details section showing per-project statistics. */
@@ -116,9 +117,7 @@ public final class CDashboardView extends CAbstractPage {
 	}
 
 	@Override
-	public String getPageTitle() { 
-		return "Dashboard";
-	}
+	public String getPageTitle() { return "Dashboard"; }
 
 	@Override
 	protected void initPage() {

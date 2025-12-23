@@ -38,7 +38,6 @@ import tech.derbent.base.session.service.ISessionService;
  * <p>
  * The demo uses CActivity entities as an example, with the CActivityWidget providing activity-specific rendering.
  * </p>
- *
  * @author Derbent Framework
  * @since 1.0
  * @see CComponentWidgetEntity
@@ -96,17 +95,12 @@ public class CWidgetGridDemo extends Main {
 		});
 		section.add(grid);
 		// Instructions
-		final Paragraph instructions = new Paragraph(
-				"The widget displays all relevant activity information in a compact, visual format. " + "Use the action buttons to edit or delete activities. "
-						+ "Selection is indicated by the colored left border and background highlight.");
+		final Paragraph instructions = new Paragraph("The widget displays all relevant activity information in a compact, visual format. "
+				+ "Use the action buttons to edit or delete activities. "
+				+ "Selection is indicated by the colored left border and background highlight.");
 		instructions.getStyle().set("font-style", "italic").set("color", "#666").set("margin-top", "10px");
 		section.add(instructions);
 		return section;
-	}
-
-	@Override
-	public String toString() {
-		return "CWidgetGridDemo{VIEW_NAME='" + VIEW_NAME + "'}";
 	}
 
 	/** Loads activity data into the grid. */
@@ -165,6 +159,7 @@ public class CWidgetGridDemo extends Main {
 		case CUSTOM -> {
 			LOGGER.info("Custom action '{}' triggered for activity: {}", event.getCustomAction(), activity.getName());
 		}
+		default -> throw new IllegalArgumentException("Unexpected value: " + event.getActionType());
 		}
 	}
 
@@ -195,5 +190,10 @@ public class CWidgetGridDemo extends Main {
 			LOGGER.error("Error initializing CWidgetGridDemo", e);
 			CNotificationService.showException("Error initializing demo page", e);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "CWidgetGridDemo{VIEW_NAME='" + VIEW_NAME + "'}";
 	}
 }

@@ -150,7 +150,7 @@ All 20 critical coding patterns now documented:
 3. ✅ on_xxx_clicked event handlers
 4. ✅ create_xxx factory methods
 5. ✅ CNotificationService
-6. ✅ Check.notNull
+6. ✅ Objects.requireNonNull
 7. ✅ Check.instanceOf
 8. ✅ @AMetaData
 9. ✅ CEntityRegistry

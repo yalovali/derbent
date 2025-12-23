@@ -11,15 +11,14 @@ public class CPanelDetailSectionBasicInfo extends CPanelDetailSectionBase {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelDetailSectionBasicInfo(IContentOwner parentContent, final CDetailSection currentEntity,
-			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService) throws Exception {
+	public CPanelDetailSectionBasicInfo(IContentOwner parentContent, final CEnhancedBinder<CDetailSection> beanValidationBinder,
+			final CDetailSectionService entityService) throws Exception {
 		super("Basic Information", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		
 		return null;
 	}
 

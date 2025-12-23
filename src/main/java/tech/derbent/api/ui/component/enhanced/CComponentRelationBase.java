@@ -21,9 +21,9 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 	protected Runnable saveEntity;
 	protected ISessionService sessionService;
 
-	public CComponentRelationBase(final String title, final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
+	public CComponentRelationBase(final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
 			ISessionService sessionService) {
-		super(title, entityClass);
+		super(entityClass);
 		this.relationalClass = relationalClass;
 		this.sessionService = sessionService;
 		grid = new CGrid<>(relationalClass);

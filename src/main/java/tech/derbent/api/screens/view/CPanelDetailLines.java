@@ -7,8 +7,6 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.ui.component.enhanced.CComponentListDetailLines;
 import tech.derbent.api.utils.Check;
 
@@ -17,10 +15,8 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	private static final long serialVersionUID = 1L;
 	private final CComponentListDetailLines listComponent;
 
-	public CPanelDetailLines(final IContentOwner parentContent, final CDetailSection currentEntity,
-			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService,
-			final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService)
-			throws Exception {
+	public CPanelDetailLines(final IContentOwner parentContent, final CEnhancedBinder<CDetailSection> beanValidationBinder,
+			final CDetailSectionService entityService, final CDetailLinesService screenLinesService) throws Exception {
 		super("Screen Lines", parentContent, beanValidationBinder, entityService);
 		Check.notNull(screenLinesService, "Detail lines service cannot be null");
 		LOGGER.debug("Creating CPanelDetailLines with CComponentListDetailLines");

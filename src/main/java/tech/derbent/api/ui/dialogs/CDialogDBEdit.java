@@ -1,6 +1,8 @@
 package tech.derbent.api.ui.dialogs;
 
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -10,6 +12,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
  * Child classes must implement form population and validation. */
 public abstract class CDialogDBEdit<EntityClass> extends CDialog {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogDBEdit.class);
 	private static final long serialVersionUID = 1L;
 	private CVerticalLayout dialogLayout;
 	private final EntityClass entity;
@@ -66,7 +69,7 @@ public abstract class CDialogDBEdit<EntityClass> extends CDialog {
 		final CButton saveButton = CButton.createSaveButton("Save", e -> {
 			try {
 				save();
-			} catch (Exception e1) {
+			} catch (final Exception e1) {
 				CNotificationService.showException("Error saving entity", e1);
 			}
 		});

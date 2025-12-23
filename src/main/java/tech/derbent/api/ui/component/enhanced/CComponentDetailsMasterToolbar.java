@@ -15,8 +15,28 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentDetailsMasterToolbar.class);
 	private static final long serialVersionUID = 1L;
+
+	/** Extracts entity type from service bean name */
+	private static String extractEntityTypeFromService(final String serviceBeanName) {
+		Check.notNull(serviceBeanName, "Service bean name is null");
+		Check.isTrue(serviceBeanName.endsWith("Service"), "Service bean name does not end with 'Service'");
+		// Convert activityService -> CActivity or CActivityService -> CActivity
+		final String baseName = serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
+		// If it's already in the format "CActivity", return as is
+		if (baseName.startsWith("C") && (baseName.length() > 1) && Character.isUpperCase(baseName.charAt(1))) {
+			return baseName;
+		}
+		// Convert from camelCase bean name to proper class name
+		// activityService -> CActivity, meetingService -> CMeeting, etc.
+		if (baseName.length() > 0) {
+			return "C" + Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
+		}
+		return null;
+	}
+
 	private CButton btnEditGrid;
 	private final CComponentGridEntity grid;
 	private final CGridEntityService gridEntityService;
@@ -31,7 +51,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			addClassName("crud-toolbar");
 			setWidthFull(); // Make toolbar take full width
 			createToolbarButtons();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error initializing toolbar {}", e.getMessage());
 			throw e;
 		}
@@ -51,7 +71,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), e1 -> {
 				try {
 					handleEditGridEntity();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			});
@@ -62,24 +82,6 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			LOGGER.error("Error creating toolbar buttons {}", e.getMessage());
 			throw e;
 		}
-	}
-
-	/** Extracts entity type from service bean name */
-	private String extractEntityTypeFromService(final String serviceBeanName) {
-		Check.notNull(serviceBeanName, "Service bean name is null");
-		Check.isTrue(serviceBeanName.endsWith("Service"), "Service bean name does not end with 'Service'");
-		// Convert activityService -> CActivity or CActivityService -> CActivity
-		final String baseName = serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
-		// If it's already in the format "CActivity", return as is
-		if (baseName.startsWith("C") && (baseName.length() > 1) && Character.isUpperCase(baseName.charAt(1))) {
-			return baseName;
-		}
-		// Convert from camelCase bean name to proper class name
-		// activityService -> CActivity, meetingService -> CMeeting, etc.
-		if (baseName.length() > 0) {
-			return "C" + Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
-		}
-		return null;
 	}
 
 	/** Gets the current grid entity being displayed */
@@ -106,7 +108,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 					grid.createGridColumns();
 					grid.refreshGrid();
 					CNotificationService.showSuccess("Grid columns updated successfully");
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					CNotificationService.showException("Error saving grid columns", e);
 				}
 			});

@@ -304,7 +304,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
 
 	@Override
-	public void setColor(String color) {}
+	public void setColor(String color) { /*****/ }
 
 	public void setEndDate(final LocalDate endDate) { this.endDate = endDate; }
 

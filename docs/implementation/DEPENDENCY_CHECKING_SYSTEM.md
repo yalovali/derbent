@@ -30,8 +30,8 @@ The Dependency Checking System provides automatic validation before entity delet
 ```java
 @Override
 public String checkDependencies(final EntityClass entity) {
-    Check.notNull(entity, "Entity cannot be null");
-    Check.notNull(entity.getId(), "Entity ID cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity.getId(), "Entity ID cannot be null");
     
     try {
         // Check if entity is marked as non-deletable
@@ -119,8 +119,8 @@ public MyService(IMyRepository repository, Clock clock,
 ```java
 @Override
 public String checkDependencies(final MyEntity entity) {
-    Check.notNull(entity, "Entity cannot be null");
-    Check.notNull(entity.getId(), "Entity ID cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity.getId(), "Entity ID cannot be null");
     
     try {
         // Implement your specific rules

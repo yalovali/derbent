@@ -86,6 +86,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
 	}
 
+	/** Checks if the required indicator is visible.
+	 * @return false (required indicator not currently implemented) */
+	public static boolean isRequiredIndicatorVisible() { return false; }
+
 	protected CButton buttonAdd;
 	protected CButton buttonAddFromList;
 	protected CButton buttonDelete;
@@ -352,6 +356,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @return The add from list button, or null if not created */
 	public CButton getButtonAddFromList() { return buttonAddFromList; }
 
+	/** Returns the current selected child entity.
+	 * @return The current child selection */
+	public ChildEntity getChildValue() { return selectedItem; }
+
 	/** Returns the default component name based on the entity class.
 	 * <p>
 	 * Default implementation converts entity class simple name to camelCase (e.g., "CSprintItem" becomes "sprintItem"). Subclasses should override to
@@ -468,10 +476,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Checks if the component is read-only.
 	 * @return true if read-only, false otherwise */
 	public boolean isReadOnly() { return readOnly; }
-
-	/** Checks if the required indicator is visible.
-	 * @return false (required indicator not currently implemented) */
-	public boolean isRequiredIndicatorVisible() { return false; }
 
 	/** Load items for the given master entity. Subclasses must implement this to define how items are loaded.
 	 * @param master The master/parent entity
@@ -693,6 +697,12 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			refreshListeners.remove(listener);
 			LOGGER.debug("Removed refresh listener from {}", entityClass.getSimpleName());
 		}
+	}
+
+	/** Sets the selected child entity.
+	 * @param item The item to select */
+	public void setChildValue(final ChildEntity item) {
+		setSelectedItem(item);
 	}
 
 	/** Enables or disables drag-and-drop functionality for the grid.

@@ -3,6 +3,8 @@ package tech.derbent.api.entityOfCompany.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,8 @@ import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompany<EntityClass>> extends CEntityNamedService<EntityClass> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityOfCompanyService.class);
 
 	public CEntityOfCompanyService(final IEntityOfCompanyRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {

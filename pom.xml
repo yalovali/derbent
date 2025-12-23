@@ -172,6 +172,18 @@
 				</configuration>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<release>21</release>
+					<showWarnings>true</showWarnings>
+					<compilerArgs>
+						<arg>-Xlint:all</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+
 			<!-- ✅ VAADIN PLUGIN → REFLECTIONS OVERRIDE ZORUNLU -->
 			<plugin>
 				<groupId>com.vaadin</groupId>
@@ -206,7 +218,6 @@
 					<failOnError>false</failOnError>
 					<failOnWarnings>false</failOnWarnings>
 					<outputDirectory>${project.build.directory}/javadoc</outputDirectory>
-					<reportOutputDirectory>${project.build.directory}/javadoc</reportOutputDirectory>
 					<linksource>true</linksource>
 					<detectLinks>true</detectLinks>
 					<links>

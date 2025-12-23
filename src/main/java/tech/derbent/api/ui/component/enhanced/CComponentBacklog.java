@@ -25,8 +25,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
-	private final CActivityService activityService;
-	private final CMeetingService meetingService;
 
 	/** Creates the list of entity type configurations for the backlog.
 	 * @return list of entity type configs (CActivity, CMeeting) */
@@ -76,6 +74,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		};
 	}
 
+	private final CActivityService activityService;
+	private final CMeetingService meetingService;
+
 	/** Constructor for backlog component.
 	 * @param project project to load backlog items for (required) */
 	public CComponentBacklog(final CProject project) {
@@ -87,11 +88,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		LOGGER.debug("CComponentBacklog created for project: {}", project.getId());
 	}
 
-	public void drag_checkEventAfterPass(CEvent event) {
-		super.drag_checkEventAfterPass(event);
-		refreshComponent();
-	}
-
 	@Override
 	public void configureGrid(final CGrid<CProjectItem<?>> grid) {
 		super.configureGrid(grid);
@@ -99,6 +95,12 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
 			return (ISprintableItem) item;
 		}, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
+	}
+
+	@Override
+	public void drag_checkEventAfterPass(CEvent event) {
+		super.drag_checkEventAfterPass(event);
+		refreshComponent();
 	}
 
 	/** Gets all items currently displayed in the grid.
@@ -114,9 +116,23 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	@Override
 	public String getComponentName() { return "backlogItems"; }
 
+	private void handleStoryPointError(final Exception exception) {
+		Check.notNull(exception, "Exception cannot be null when handling story point errors");
+		CNotificationService.showException("Error saving story points", exception);
+	}
+
 	/** Refresh the backlog component and underlying grid. */
 	public void refreshComponent() {
 		refreshGrid();
+	}
+
+	@Override
+	public void registerWithPageService(final CPageService<?> pageService) {
+		Check.notNull(pageService, "Page service cannot be null");
+		final String componentName = getComponentName();
+		pageService.registerComponent(componentName, this);
+		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())",
+				getClass().getSimpleName(), componentName);
 	}
 
 	private void saveStoryPoint(final ISprintableItem item) {
@@ -131,19 +147,5 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			return;
 		}
 		throw new IllegalArgumentException("Unsupported sprintable item type: " + item.getClass().getSimpleName());
-	}
-
-	private void handleStoryPointError(final Exception exception) {
-		Check.notNull(exception, "Exception cannot be null when handling story point errors");
-		CNotificationService.showException("Error saving story points", exception);
-	}
-
-	@Override
-	public void registerWithPageService(final CPageService<?> pageService) {
-		Check.notNull(pageService, "Page service cannot be null");
-		final String componentName = getComponentName();
-		pageService.registerComponent(componentName, this);
-		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())",
-				getClass().getSimpleName(), componentName);
 	}
 }

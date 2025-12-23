@@ -24,8 +24,7 @@ import tech.derbent.base.users.domain.CUser;
 @Transactional (readOnly = true)
 public class CCommentService extends CAbstractService<CComment> implements IEntityRegistrable {
 
-	public CCommentService(final ICommentRepository repository, final CCommentPriorityService commentPriorityService, final Clock clock,
-			final ISessionService sessionService) {
+	public CCommentService(final ICommentRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

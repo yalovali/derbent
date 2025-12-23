@@ -276,16 +276,16 @@ public class CGoodContextService extends CAbstractService<CEntity> {
     public List<CEntity> findAll() {
         // ✅ GOOD: Get context from session
         CCompany currentCompany = getCurrentCompany();
-        Check.notNull(currentCompany, "No active company in session");
+        Objects.requireNonNull(currentCompany, "No active company in session");
         
         // ✅ GOOD: Filter by company to ensure data isolation
         return repository.findByCompany_Id(currentCompany.getId());
     }
     
     private CCompany getCurrentCompany() {
-        Check.notNull(sessionService, "Session service required");
+        Objects.requireNonNull(sessionService, "Session service required");
         CCompany company = sessionService.getCurrentCompany();
-        Check.notNull(company, "No active company");
+        Objects.requireNonNull(company, "No active company");
         return company;
     }
 }

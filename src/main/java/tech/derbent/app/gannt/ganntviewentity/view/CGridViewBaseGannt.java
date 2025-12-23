@@ -30,7 +30,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CGridViewBaseGannt.class);
 	private static final long serialVersionUID = 1L;
 	protected final CActivityService activityService;
-	private CDynamicPageRouter currentEntityPageRouter;
+	private final CDynamicPageRouter currentEntityPageRouter;
 	protected CEnhancedBinder<CProjectItem<?>> entityBinder;
 	protected final CMeetingService meetingService;
 	protected final CPageEntityService pageEntityService;
@@ -42,7 +42,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		this.activityService = activityService;
 		this.meetingService = meetingService;
 		this.pageEntityService = pageEntityService;
-		CDetailSectionService detailSectionService = CSpringContext.getBean(CDetailSectionService.class);
+		final CDetailSectionService detailSectionService = CSpringContext.getBean(CDetailSectionService.class);
 		// CGridEntityService gridEntityService = CSpringContext.getBean(CGridEntityService.class);
 		this.currentEntityPageRouter = new CDynamicPageRouter(pageEntityService, sessionService, detailSectionService, null);
 		getBaseDetailsLayout().add(currentEntityPageRouter);
@@ -82,14 +82,14 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 				return;
 			}
 			LOGGER.debug("Creating dynamic page for Gantt entity: {}", ganntEntity.getName());
-			CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
+			final CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
 			final Field viewNameField = ganntEntity.getClass().getField("VIEW_NAME");
 			final String entityViewName = (String) viewNameField.get(null);
 			final CPageEntity page = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null)).orElseThrow();
 			Check.notNull(page, "Screen service cannot be null");
 			//
 			currentEntityPageRouter.loadSpecificPage(page.getId(), ganntEntity.getId(), true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showException("Error creating dynamic page for entity", e);
 		}
 	}
@@ -131,10 +131,9 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 			if (matchingItem.isPresent()) {
 				LOGGER.debug("Found matching CGanttItem for entity: {}", actualEntity.getName());
 				return matchingItem.get();
-			} else {
-				LOGGER.debug("No matching CGanttItem found for entity ID {} type {}", entityId, entityTypeName);
-				return null;
 			}
+			LOGGER.debug("No matching CGanttItem found for entity ID {} type {}", entityId, entityTypeName);
+			return null;
 		} catch (final Exception e) {
 			LOGGER.error("Error locating Gantt item for entity: {}", e.getMessage(), e);
 			return null;
@@ -142,7 +141,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	}
 
 	@Override
-	public void onEntitySaved(final EntityClass entity) throws Exception {}
+	public void onEntitySaved(final EntityClass entity) throws Exception {/**/}
 
 	/** Override to handle CGanttItem selection - it's a DTO wrapper, not the actual entity. Selection is logged but no form editing occurs since
 	 * CGanttItem is read-only. */
@@ -156,10 +155,9 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 			setValue(value);
 			populateForm();
 			return;
-		} else {
-			// Standard entity selection handling for non-DTO items
-			super.onSelectionChanged(event);
 		}
+		// Standard entity selection handling for non-DTO items
+		super.onSelectionChanged(event);
 	}
 
 	@Override
@@ -168,7 +166,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 			LOGGER.debug("Populating form for entity: {}", getValue() != null ? getValue().getName() : "null");
 			// Implementation to populate the form with current entity details
 			updateDetailsComponent();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showException("Error populating form", e);
 		}
 	}

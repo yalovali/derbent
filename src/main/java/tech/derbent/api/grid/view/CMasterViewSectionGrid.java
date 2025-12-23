@@ -23,6 +23,7 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		createMasterView();
 	}
 
+	@SuppressWarnings ("static-method")
 	protected Component createGridToolbar() {
 		return null;
 	}

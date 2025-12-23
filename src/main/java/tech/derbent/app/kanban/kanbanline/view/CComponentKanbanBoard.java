@@ -2,11 +2,7 @@ package tech.derbent.app.kanban.kanbanline.view;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
@@ -28,9 +24,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanBoard.class);
 	private static final long serialVersionUID = 1L;
+	private List<CProjectItem<?>> allProjectItems;
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
 	private final CHorizontalLayout layoutColumns;
-	private List<CProjectItem<?>> allProjectItems;
 	private List<CProjectItem<?>> projectItems;
 	private final ISessionService sessionService;
 
@@ -73,18 +69,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		refreshComponent();
 	}
 
-	private Map<Long, CKanbanColumn> buildStatusToColumnMap(final List<CKanbanColumn> columns) {
-		final Map<Long, CKanbanColumn> statusToColumn = new HashMap<>();
-		for (final CKanbanColumn column : columns) {
-			if (column.getIncludedStatuses() == null) {
-				continue;
-			}
-			column.getIncludedStatuses().stream().filter(Objects::nonNull).filter(status -> status.getId() != null)
-					.forEach(status -> statusToColumn.putIfAbsent(status.getId(), column));
-		}
-		return statusToColumn;
-	}
-
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
 		LOGGER.debug("Creating new entity instance is not supported for Kanban board component");
@@ -102,14 +86,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 
 	@Override
 	public CAbstractService<?> getEntityService() { return null; }
-
-	private Map<CKanbanColumn, List<CProjectItem<?>>> initializeColumnMap(final List<CKanbanColumn> columns) {
-		final Map<CKanbanColumn, List<CProjectItem<?>>> itemsByColumn = new LinkedHashMap<>();
-		for (final CKanbanColumn column : columns) {
-			itemsByColumn.put(column, new ArrayList<>());
-		}
-		return itemsByColumn;
-	}
 
 	private boolean matchesResponsibleFilter(final CProjectItem<?> item, final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria) {
 		final CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode mode = criteria.getResponsibleMode();
@@ -166,32 +142,21 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		}
 		final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
 		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
-		final Map<CKanbanColumn, List<CProjectItem<?>>> itemsByColumn = initializeColumnMap(columns);
-		final CKanbanColumn defaultColumn = columns.stream().filter(CKanbanColumn::getDefaultColumn).findFirst().orElse(null);
-		final Map<Long, CKanbanColumn> statusToColumn = buildStatusToColumnMap(columns);
-		for (final CProjectItem<?> item : projectItems) {
-			if (item == null) {
-				continue;
-			}
-			final CKanbanColumn targetColumn = resolveTargetColumn(item, statusToColumn, defaultColumn);
-			if (targetColumn != null) {
-				itemsByColumn.get(targetColumn).add(item);
-			}
-		}
 		for (final CKanbanColumn column : columns) {
-			layoutColumns.add(new CComponentKanbanColumn(column, itemsByColumn.get(column)));
+			final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
+			columnComponent.setValue(column);
+			columnComponent.setItems(projectItems);
+			layoutColumns.add(columnComponent);
 		}
 	}
 
-	private CKanbanColumn resolveTargetColumn(final CProjectItem<?> item, final Map<Long, CKanbanColumn> statusToColumn,
-			final CKanbanColumn defaultColumn) {
-		if (item.getStatus() != null && item.getStatus().getId() != null) {
-			final CKanbanColumn matched = statusToColumn.get(item.getStatus().getId());
-			if (matched != null) {
-				return matched;
-			}
-		}
-		return defaultColumn;
+	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
+		LOGGER.debug("Setting project items for Kanban board component");
+		Check.notNull(getValue(), "Kanban line must be set before setting project items");
+		Check.notNull(projectItems, "Project items cannot be null for kanban board");
+		allProjectItems = new ArrayList<>(projectItems);
+		filterToolbar.setAvailableItems(allProjectItems);
+		applyFilters();
 	}
 
 	@Override
@@ -203,14 +168,5 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		}
 		Check.instanceOf(entity, CKanbanLine.class, "Kanban board expects CKanbanLine as current entity");
 		setValue((CKanbanLine) entity);
-	}
-
-	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
-		LOGGER.debug("Setting project items for Kanban board component");
-		Check.notNull(getValue(), "Kanban line must be set before setting project items");
-		Check.notNull(projectItems, "Project items cannot be null for kanban board");
-		allProjectItems = new ArrayList<>(projectItems);
-		filterToolbar.setAvailableItems(allProjectItems);
-		applyFilters();
 	}
 }

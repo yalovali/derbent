@@ -48,6 +48,19 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
 	private static final long serialVersionUID = 1L;
+
+	private static HorizontalLayout createHorizontalField(final String labelText, final Component field) {
+		final HorizontalLayout layout = new HorizontalLayout();
+		layout.setWidthFull();
+		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+		final Paragraph label = new Paragraph(labelText);
+		label.addClassNames(LumoUtility.FontWeight.MEDIUM);
+		label.setWidth("120px");
+		field.getElement().getStyle().set("flex", "1");
+		layout.add(label, field);
+		return layout;
+	}
+
 	// private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_UPDATE_COLOR));
 	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
 	private final CCompanyService companyService;
@@ -80,18 +93,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
-	private HorizontalLayout createHorizontalField(final String labelText, final Component field) {
-		final HorizontalLayout layout = new HorizontalLayout();
-		layout.setWidthFull();
-		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-		final Paragraph label = new Paragraph(labelText);
-		label.addClassNames(LumoUtility.FontWeight.MEDIUM);
-		label.setWidth("120px");
-		field.getElement().getStyle().set("flex", "1");
-		layout.add(label, field);
-		return layout;
-	}
-
 	private void handleLogin() {
 		try {
 			String username = usernameField.getValue();
@@ -103,7 +104,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			Check.notBlank(username, "Please enter both username and password");
 			Check.notBlank(password, "Please enter both username and password");
 			// Get selected view for redirect
-			String redirectView = "home";
+			final String redirectView = "home";
 			// Create form and submit to Spring Security endpoint with redirect parameter
 			getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
 					+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
@@ -118,17 +119,86 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
+	/** Handle reset database button click. */
+	private void on_buttonResetDb_clicked() {
+		try {
+			LOGGER.info("🔄 Showing DB Full reset confirmation dialog...");
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> {
+						runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+					});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
+	}
+
+	/** Handle reset database minimal button click. */
+	private void on_buttonResetDbMinimal_clicked() {
+		try {
+			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> {
+						runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.",
+								"Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+					});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
+	}
+
+	@SuppressWarnings ("unused")
 	private void populateForm() {
 		try {
-			List<CCompany> activeCompanies = companyService.findActiveCompanies();
+			final List<CCompany> activeCompanies = companyService.findActiveCompanies();
 			companyField.setItems(activeCompanies);
 			// Auto-select first company as default
 			if (!activeCompanies.isEmpty()) {
 				companyField.setValue(activeCompanies.get(0));
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error loading companies.");
 			showError("Error loading companies. Please contact administrator.");
+		}
+	}
+
+	private void runDatabaseReset(final boolean minimal, final String successMessage, final String infoMessage) {
+		final UI ui = getUI().orElse(null);
+		Check.notNull(ui, "UI must be available to run database reset");
+		final VaadinSession session = ui.getSession();
+		Check.notNull(session, "Vaadin session must not be null");
+		LOGGER.info("✅ DB reset confirmed - starting database initialization...");
+		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
+		CompletableFuture.runAsync(() -> {
+			try {
+				runDatabaseResetInSession(session, ui, minimal);
+				LOGGER.info("🗄️ DB reset completed successfully");
+				ui.access(() -> {
+					progressDialog.close();
+					CNotificationService.showSuccess(successMessage);
+					CNotificationService.showInfoDialog(infoMessage);
+					populateForm();
+				});
+			} catch (final Exception ex) {
+				LOGGER.error("❌ DB reset failed", ex);
+				ui.access(() -> {
+					progressDialog.close();
+					CNotificationService.showException("Hata", ex);
+				});
+			}
+		});
+	}
+
+	private void runDatabaseResetInSession(final VaadinSession session, final UI ui, final boolean minimal) throws Exception {
+		session.lock();
+		try {
+			VaadinSession.setCurrent(session);
+			UI.setCurrent(ui);
+			final CDataInitializer init = new CDataInitializer(sessionService);
+			init.reloadForced(minimal);
+		} finally {
+			UI.setCurrent(null);
+			VaadinSession.setCurrent(null);
+			session.unlock();
 		}
 	}
 
@@ -221,72 +291,5 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private void showError(final String message) {
 		errorMessage.setText(message);
-	}
-
-	/** Handle reset database button click. */
-	private void on_buttonResetDb_clicked() {
-		try {
-			LOGGER.info("🔄 Showing DB Full reset confirmation dialog...");
-			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", () -> {
-						runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-					});
-		} catch (final Exception e) {
-			CNotificationService.showException("Error showing confirmation dialog", e);
-		}
-	}
-
-	/** Handle reset database minimal button click. */
-	private void on_buttonResetDbMinimal_clicked() {
-		try {
-			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
-			CNotificationService.showConfirmationDialog(
-					"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", () -> {
-						runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.", "Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-					});
-		} catch (final Exception e) {
-			CNotificationService.showException("Error showing confirmation dialog", e);
-		}
-	}
-
-	private void runDatabaseReset(final boolean minimal, final String successMessage, final String infoMessage) {
-		final UI ui = getUI().orElse(null);
-		Check.notNull(ui, "UI must be available to run database reset");
-		final VaadinSession session = ui.getSession();
-		Check.notNull(session, "Vaadin session must not be null");
-		LOGGER.info("✅ DB reset confirmed - starting database initialization...");
-		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
-		CompletableFuture.runAsync(() -> {
-			try {
-				runDatabaseResetInSession(session, ui, minimal);
-				LOGGER.info("🗄️ DB reset completed successfully");
-				ui.access(() -> {
-					progressDialog.close();
-					CNotificationService.showSuccess(successMessage);
-					CNotificationService.showInfoDialog(infoMessage);
-					populateForm();
-				});
-			} catch (final Exception ex) {
-				LOGGER.error("❌ DB reset failed", ex);
-				ui.access(() -> {
-					progressDialog.close();
-					CNotificationService.showException("Hata", ex);
-				});
-			}
-		});
-	}
-
-	private void runDatabaseResetInSession(final VaadinSession session, final UI ui, final boolean minimal) throws Exception {
-		session.lock();
-		try {
-			VaadinSession.setCurrent(session);
-			UI.setCurrent(ui);
-			final CDataInitializer init = new CDataInitializer(sessionService);
-			init.reloadForced(minimal);
-		} finally {
-			UI.setCurrent(null);
-			VaadinSession.setCurrent(null);
-			session.unlock();
-		}
 	}
 }

@@ -154,7 +154,7 @@ access a property on the entity to trigger initialization.
 ### Original Fix (CDBRelationDialog)
 ```java
 protected void populateForm() {
-    Check.notNull(binder, "Binder must be initialized before populating the form");
+    Objects.requireNonNull(binder, "Binder must be initialized before populating the form");
     if (getEntity() != null) {
         getEntity().initializeAllFields(); // Ensures fields are initialized
     }

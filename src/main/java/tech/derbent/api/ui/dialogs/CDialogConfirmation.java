@@ -1,6 +1,8 @@
 package tech.derbent.api.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.ui.component.basic.CButton;
 
@@ -8,6 +10,7 @@ import tech.derbent.api.ui.component.basic.CButton;
  * confirmation like deletions. */
 public final class CDialogConfirmation extends CDialogInfoBase {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogConfirmation.class);
 	private static final long serialVersionUID = 1L;
 	private final Runnable onConfirm;
 

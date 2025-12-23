@@ -18,8 +18,7 @@ import tech.derbent.base.users.domain.CUser;
 @Transactional (readOnly = true)
 public class COrderApprovalService extends CEntityNamedService<COrderApproval> implements IEntityRegistrable {
 
-	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final ISessionService sessionService,
-			final CApprovalStatusService approvalStatusService) {
+	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

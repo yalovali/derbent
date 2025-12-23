@@ -34,7 +34,8 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 		public String getLabel() { return label; }
 	}
 
-	public record CGanttTimelineRange(LocalDate startDate, LocalDate endDate) {}
+	public record CGanttTimelineRange(LocalDate startDate, LocalDate endDate) { /*****/
+	}
 
 	@FunctionalInterface
 	public interface IGanttTimelineChangeListener {
@@ -50,6 +51,15 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 
 	private static final long MIN_DURATION_DAYS = 7;
 	private static final long serialVersionUID = 1L;
+
+	private static CButton createControlButton(final String iconName, final String tooltip, final Runnable action) {
+		final CButton button = new CButton("", CColorUtils.createStyledIcon(iconName));
+		button.addClickListener(event -> action.run());
+		button.getElement().setProperty("title", tooltip);
+		button.addClassName("gantt-timeline-control-button");
+		return button;
+	}
+
 	private final IGanttTimelineChangeListener changeListener;
 	private final CHorizontalLayout controlBar = new CHorizontalLayout();
 	private CTimelineScale currentScale = CTimelineScale.AUTO;
@@ -121,14 +131,6 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 		timelineWrapper.addClassName("gantt-timeline-wrapper");
 		timelineWrapper.getStyle().set("position", "relative");
 		timelineWrapper.setWidth(totalWidth + "px");
-	}
-
-	private CButton createControlButton(final String iconName, final String tooltip, final Runnable action) {
-		final CButton button = new CButton("", CColorUtils.createStyledIcon(iconName));
-		button.addClickListener(event -> action.run());
-		button.getElement().setProperty("title", tooltip);
-		button.addClassName("gantt-timeline-control-button");
-		return button;
 	}
 
 	private Div createMarker(final CHorizontalLayout container, final String text, final int width) {
@@ -233,8 +235,8 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 		newDuration = Math.min(maxDuration, newDuration);
 		final LocalDate center = startDate.plusDays(currentDuration / 2);
 		final long halfWindow = newDuration / 2;
-		LocalDate newStart = center.minusDays(halfWindow);
-		LocalDate newEnd = newStart.plusDays(newDuration - 1);
+		final LocalDate newStart = center.minusDays(halfWindow);
+		final LocalDate newEnd = newStart.plusDays(newDuration - 1);
 		on_actioAapplyRange(newStart, newEnd, true);
 	}
 

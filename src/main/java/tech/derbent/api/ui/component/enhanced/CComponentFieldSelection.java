@@ -132,10 +132,9 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 						LOGGER.error("Failed to create CEntityLabel for entity: {}", item, e);
 						throw new IllegalStateException("Failed to render entity with color: " + item, e);
 					}
-				} else {
-					final String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
-					return new Span(text);
 				}
+				final String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
+				return new Span(text);
 			} catch (final Exception e) {
 				LOGGER.error("Error rendering item in field selection: {}", item, e);
 				final String fallbackText = item != null ? item.toString() : "Error";
@@ -362,26 +361,23 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			Check.notNull(items, "Source items list cannot be null");
 			LOGGER.info("Setting {} source items for selection component", items.size());
 			sourceItems.clear();
-			
 			// Filter out null items before adding
-			final List<DetailEntity> validItems = items.stream()
-				.filter(Objects::nonNull)
-				.collect(java.util.stream.Collectors.toList());
-			
+			final List<DetailEntity> validItems = items.stream().filter(Objects::nonNull).collect(java.util.stream.Collectors.toList());
 			sourceItems.addAll(validItems);
-			
 			// Safe sorting with null checks
 			sourceItems.sort((a, b) -> {
 				try {
-					if (a == null && b == null) return 0;
-					if (a == null) return 1;
-					if (b == null) return -1;
-					
-					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : 
-						(a.toString() != null ? a.toString() : "");
-					final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : 
-						(b.toString() != null ? b.toString() : "");
-					
+					if (a == null && b == null) {
+						return 0;
+					}
+					if (a == null) {
+						return 1;
+					}
+					if (b == null) {
+						return -1;
+					}
+					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : (a.toString() != null ? a.toString() : "");
+					final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : (b.toString() != null ? b.toString() : "");
 					return labelA.compareToIgnoreCase(labelB);
 				} catch (final Exception e) {
 					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
@@ -484,7 +480,6 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.info("Binder triggered setValue on CComponentFieldSelection - reading {} selected items from entity field",
 					value != null ? value.size() : 0);
 			selectedItems.clear();
-			
 			// Only update source items if dataProviderResolver is available
 			if ((dataProviderResolver != null) && (fieldInfo != null)) {
 				try {
@@ -494,18 +489,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 					// Continue with the setValue operation even if source items update fails
 				}
 			}
-			
 			if (value != null) {
 				// Filter out null items and preserve the order from the entity's list field
-				final List<DetailEntity> validItems = value.stream()
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList());
-				
+				final List<DetailEntity> validItems = value.stream().filter(Objects::nonNull).collect(Collectors.toList());
 				selectedItems.addAll(validItems);
 				LOGGER.debug("Selected items loaded from binder: {}",
-						validItems.stream()
-							.map(item -> item != null ? item.toString() : "null")
-							.collect(Collectors.joining(", ")));
+						validItems.stream().map(item -> item != null ? item.toString() : "null").collect(Collectors.joining(", ")));
 			}
 			populateForm();
 		} catch (final Exception e) {

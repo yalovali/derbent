@@ -29,7 +29,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Budget Type", required = false, readOnly = false, description = "Type category of the budget", hidden = false, 
+			displayName = "Budget Type", required = false, readOnly = false, description = "Type category of the budget", hidden = false,
 			dataProviderBean = "CBudgetTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CBudgetType entityType;

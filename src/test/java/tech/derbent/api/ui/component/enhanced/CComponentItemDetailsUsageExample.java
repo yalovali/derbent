@@ -51,7 +51,7 @@ public class CComponentItemDetailsUsageExample {
 	}
 
 	/** Example 3: Using with binders (standard Vaadin pattern) */
-	public void example3_binderIntegration() throws Exception {}
+	public void example3_binderIntegration() throws Exception {/**/}
 
 	/** Example 4: Read-only mode */
 	public void example4_readOnlyMode() throws Exception {
@@ -94,7 +94,7 @@ public class CComponentItemDetailsUsageExample {
 	}
 
 	/** Example 7: Integration with grids - display selected grid item details */
-	public void example7_gridIntegration() throws Exception {}
+	public void example7_gridIntegration() throws Exception {/**/}
 
 	/** Example 8: Error handling */
 	public void example8_errorHandling() throws Exception {

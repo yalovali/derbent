@@ -40,6 +40,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		closePanel();
 	}
 
+	@Override
 	protected String createDeleteConfirmationMessage(final CUserProjectSettings selected) {
 		final String projectName = selected.getProject().getName();
 		return String.format("Are you sure you want to delete the project setting for '%s'? This action cannot be undone.", projectName);

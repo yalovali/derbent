@@ -40,16 +40,16 @@ public abstract class CComponentListEntityBase<MasterEntity, ChildEntity>
     @Override
     public Registration addDragStartListener(
             ComponentEventListener<GridDragStartEvent<ChildEntity>> listener) {
-        Check.notNull(listener, "Drag start listener cannot be null");
-        Check.notNull(grid, "Grid must be initialized before adding drag start listener");
+        Objects.requireNonNull(listener, "Drag start listener cannot be null");
+        Objects.requireNonNull(grid, "Grid must be initialized before adding drag start listener");
         return grid.addDragStartListener(listener);
     }
     
     @Override
     public Registration addDragEndListener(
             ComponentEventListener<GridDragEndEvent<ChildEntity>> listener) {
-        Check.notNull(listener, "Drag end listener cannot be null");
-        Check.notNull(grid, "Grid must be initialized before adding drag end listener");
+        Objects.requireNonNull(listener, "Drag end listener cannot be null");
+        Objects.requireNonNull(grid, "Grid must be initialized before adding drag end listener");
         return grid.addDragEndListener(listener);
     }
 }
@@ -68,7 +68,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
     @Override
     public Registration addDragStartListener(
             ComponentEventListener<GridDragStartEvent<CSprintItem>> listener) {
-        Check.notNull(listener, "Drag start listener cannot be null");
+        Objects.requireNonNull(listener, "Drag start listener cannot be null");
         if (componentSprintItems == null) {
             LOGGER.warn("componentSprintItems not initialized, cannot add drag start listener");
             return () -> {}; // Return empty registration
@@ -80,7 +80,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
     @Override
     public Registration addDragEndListener(
             ComponentEventListener<GridDragEndEvent<CSprintItem>> listener) {
-        Check.notNull(listener, "Drag end listener cannot be null");
+        Objects.requireNonNull(listener, "Drag end listener cannot be null");
         if (componentSprintItems == null) {
             LOGGER.warn("componentSprintItems not initialized, cannot add drag end listener");
             return () -> {}; // Return empty registration

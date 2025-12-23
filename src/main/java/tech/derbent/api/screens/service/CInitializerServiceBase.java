@@ -62,7 +62,8 @@ public abstract class CInitializerServiceBase {
 		}
 	}
 
-	protected static CDetailSection createBaseScreenEntity(final CProject project, final Class<?> clazz, final String baseViewName, final int dummy) {
+	protected static CDetailSection createBaseScreenEntity(final CProject project, final Class<?> clazz, final String baseViewName,
+			@SuppressWarnings ("unused") final int dummy) {
 		final CDetailSection scr = new CDetailSection();
 		scr.setProject(project);
 		scr.setEntityType(clazz.getSimpleName());
@@ -107,7 +108,7 @@ public abstract class CInitializerServiceBase {
 		while (clazz != null) {
 			try {
 				return clazz.getDeclaredField(fieldName);
-			} catch (final NoSuchFieldException e) {
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 				clazz = clazz.getSuperclass();
 			}
 		}
@@ -157,7 +158,7 @@ public abstract class CInitializerServiceBase {
 				// if item has color field, set random color
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				} catch (final NoSuchMethodException ignore) {
+				} catch (@SuppressWarnings ("unused") final NoSuchMethodException ignore) {
 					// no color setter present
 				}
 				if (item instanceof IHasStatusAndWorkflow) {
@@ -208,7 +209,7 @@ public abstract class CInitializerServiceBase {
 				// if item has color field, set random color
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				} catch (final NoSuchMethodException ignore) {
+				} catch (@SuppressWarnings ("unused") final NoSuchMethodException ignore) {
 					// no color setter present
 				}
 				if (item instanceof IHasStatusAndWorkflow) {

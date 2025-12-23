@@ -1,5 +1,7 @@
 package tech.derbent.app.components.component.service;
 
+import tech.derbent.api.utils.Check;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
@@ -7,16 +9,15 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.components.component.domain.CProjectComponent;
 
 public class CPageServiceProjectComponent extends CPageServiceDynamicPage<CProjectComponent>
 		implements IPageServiceHasStatusAndWorkflow<CProjectComponent> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceProjectComponent.class);
-	Long serialVersionUID = 1L;
 	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;
+	Long serialVersionUID = 1L;
 
 	public CPageServiceProjectComponent(IPageServiceImplementer<CProjectComponent> view) {
 		super(view);

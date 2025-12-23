@@ -1,5 +1,7 @@
 package tech.derbent.api.screens.service;
 
+import tech.derbent.api.utils.Check;
+
 import java.lang.reflect.Field;
 import java.time.Clock;
 import java.util.List;
@@ -12,7 +14,6 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CDetailLinesService - Service class for managing detail lines. Provides business logic for detail line operations within a detail section.
@@ -48,7 +49,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			line.setMaxLength(fieldInfo.getMaxLength());
 			line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
 			return line;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating line from defaults for field: {} in class {}: {}", fieldName, entityClass.getSimpleName(), e.getMessage());
 			throw new NoSuchFieldException(
 					"Error creating line from defaults for field: " + fieldName + " in class " + entityClass.getSimpleName() + ". " + e.getMessage());
@@ -64,7 +65,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			Check.notNull(line, "Line not created for property: " + propertyName + " in class " + field.getType().getSimpleName());
 			line.setRelationFieldName(fieldName);
 			return line;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating line from defaults for property: {} in class {}: {}", propertyName, entityClass.getSimpleName(),
 					e.getMessage());
 			throw new NoSuchFieldException("Error creating line from defaults for property: " + propertyName + " in class "
@@ -79,7 +80,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			line.setEntityProperty(CEntityFieldService.SECTION_START);
 			line.setSectionName(sectionName);
 			return line;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating section line for section: {}: {}", sectionName, e.getMessage());
 			throw new RuntimeException("Error creating section line for section: " + sectionName + ". " + e.getMessage());
 		}
@@ -93,7 +94,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			// line.setSectionName(sectionName);
 			line.setSectionAsTab(true);
 			return line;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating section line for section: {}: {}", sectionName, e.getMessage());
 			throw new RuntimeException("Error creating section line for section: " + sectionName + ". " + e.getMessage());
 		}

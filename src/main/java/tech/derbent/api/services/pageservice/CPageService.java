@@ -36,6 +36,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
+
+	//
+	protected static void on_dragStart(@SuppressWarnings ("unused") CDragDropEvent event) {
+		LOGGER.debug("Drag start event received in base CPageService.");
+	}
+
 	private CDragStartEvent activeDragStartEvent = null;
 	// Custom components registered for method binding (outside of FormBuilder)
 	private final Map<String, Component> customComponents = new HashMap<>();
@@ -57,6 +63,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	 * method to implement workflow-aware status validation.
 	 * @param newStatus the new status selected by the user
 	 * @throws Exception if the status change fails */
+	@SuppressWarnings ("static-method")
 	public void actionChangeStatus(final CProjectItemStatus newStatus) {
 		LOGGER.debug("Base actionChangeStatus called - entity type does not support workflow status changes");
 	}
@@ -439,8 +446,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		return ((HasValue) component).getValue();
 	}
 
-	protected EntityClass getValue() { return getView().getValue(); }
-
 	public CProject getCurrentProject() { return getSessionService().getActiveProject().orElse(null); }
 
 	protected DatePicker getDatePicker(final String fieldName) {
@@ -466,15 +471,12 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		return getComponent(fieldName, TextField.class);
 	}
 
+	protected EntityClass getValue() { return getView().getValue(); }
+
 	public IPageServiceImplementer<EntityClass> getView() { return view; }
 
-	protected void on_dragEnd(CDragDropEvent event) {
+	protected void on_dragEnd(@SuppressWarnings ("unused") CDragDropEvent event) {
 		setActiveDragStartEvent(null);
-	}
-
-	//
-	protected void on_dragStart(CDragDropEvent event) {
-		LOGGER.debug("Drag start event received in base CPageService.");
 	}
 
 	/** Update the save button state based on validation results. This method is called automatically when the name field changes. */
@@ -494,7 +496,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
-	public void populateForm() {}
+	public void populateForm() { /*****/
+	}
 
 	/** Registers a custom component for method binding. This allows components that are not part of the entity form to be bound to handler methods
 	 * using the on_{componentName}_{action} pattern.
@@ -536,11 +539,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 		}
 	}
 
+	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }
+
 	public void setValue(final EntityClass entity) {
 		getView().setValue(entity);
 	}
-
-	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }
 
 	/** Removes a previously registered custom component.
 	 * @param name the name of the component to unregister */

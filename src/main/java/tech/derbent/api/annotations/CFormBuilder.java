@@ -420,6 +420,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for custom component creation");
 			Check.notNull(fieldInfo.getCreateComponentMethod(), "CreateComponentMethod for custom component creation");
+			Check.notNull(binder, "Binder for custom component creation");
 			// Object bean = dataProviderResolver.resolveBean(fieldInfo.getDataProviderBean(), contentOwner);
 			// use first method only
 			final String methodName = fieldInfo.getCreateComponentMethod();
@@ -491,18 +492,17 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			radioGroup.setItemLabelGenerator(Enum::name);
 			safeBindComponent(binder, radioGroup, fieldInfo.getFieldName(), "RadioButtonGroup");
 			return radioGroup;
-		} else {
-			final ComboBox<Enum> comboBox = new ComboBox<>();
-			// Set ID for better test automation
-			CAuxillaries.setId(comboBox);
-			// Following coding guidelines: All selective ComboBoxes must be selection
-			// only (user must not be able to type arbitrary text)
-			comboBox.setAllowCustomValue(false);
-			comboBox.setItems(enumConstants);
-			comboBox.setItemLabelGenerator(Enum::name);
-			safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox(Enum)");
-			return comboBox;
 		}
+		final ComboBox<Enum> comboBox = new ComboBox<>();
+		// Set ID for better test automation
+		CAuxillaries.setId(comboBox);
+		// Following coding guidelines: All selective ComboBoxes must be selection
+		// only (user must not be able to type arbitrary text)
+		comboBox.setAllowCustomValue(false);
+		comboBox.setItems(enumConstants);
+		comboBox.setItemLabelGenerator(Enum::name);
+		safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox(Enum)");
+		return comboBox;
 	}
 
 	private static CHorizontalLayout createFieldLayout(final EntityFieldInfo fieldInfo, final Component component) {
@@ -589,7 +589,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				final VaadinIcon vaadinIcon = VaadinIcon.valueOf(cleanIconName.toUpperCase().replace("-", "_"));
 				final Icon icon = CColorUtils.styleIcon(vaadinIcon.create());
 				layout.add(icon);
-			} catch (final Exception e) {
+			} catch (@SuppressWarnings ("unused") final Exception e) {
 				// If icon cannot be created, show a placeholder
 				final Span placeholder = new Span("?");
 				placeholder.getStyle().set("width", "16px").set("text-align", "center");
@@ -980,16 +980,16 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	public Component addFieldLine(final IContentOwner contentOwner, final String screenClassType, final CDetailLines line,
-			final VerticalLayout layout, final Map<String, Component> componentMap2, final Map<String, CHorizontalLayout> horizontalLayoutMap2)
-			throws Exception {
+			final VerticalLayout layout, final Map<String, Component> componentMap2,
+			@SuppressWarnings ("unused") final Map<String, CHorizontalLayout> horizontalLayoutMap2) throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
 		// Use the provided componentMap2 instead of getComponentMap() to support centralized component maps
 		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap2);
 	}
 
-	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
+	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> ebinder, final List<String> entityFields)
 			throws Exception {
-		return CFormBuilder.buildForm(entityClass, binder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout);
+		return CFormBuilder.buildForm(entityClass, ebinder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout);
 	}
 
 	/** Gets the internal binder for this form builder.

@@ -17,16 +17,16 @@ public class CViewsService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CViewsService.class);
 
-	public List<String> getAvailableBaseTypes() {
+	public static List<String> getAvailableBaseTypes() {
 		LOGGER.debug("Retrieving available base types for views");
 		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser", "CGanttItem", "CCompanySettings");
 	}
 
-	public List<String> getAvailableBeans() {
+	public static List<String> getAvailableBeans() {
 		// These are the service class names corresponding to the entity types
 		LOGGER.debug("Retrieving available service beans for views");
 		// get beans from application context
-		List<String> serviceBeans = new ArrayList<>();
+		final List<String> serviceBeans = new ArrayList<>();
 		try {
 			if (ApplicationContextProvider.getApplicationContext() == null) {
 				LOGGER.warn("ApplicationContext is not available, returning empty list");
@@ -38,8 +38,9 @@ public class CViewsService {
 					serviceBeans.add(beanName);
 				}
 			}
-		} catch (Exception e) {
-			LOGGER.error("Error retrieving service beans.");
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving service beans. {}", e.getMessage());
+			throw e;
 		}
 		// Return the list of service beans
 		return serviceBeans;
@@ -50,7 +51,7 @@ public class CViewsService {
 	 * relationships.
 	 * @param baseEntityType the base entity type (e.g., "CActivity")
 	 * @return list of entity line class types including direct and related entities */
-	public List<String> getAvailableEntityLineTypes(final String baseEntityType) {
+	public static List<String> getAvailableEntityLineTypes(final String baseEntityType) {
 		LOGGER.debug("Retrieving available entity line types for base type: {}", baseEntityType);
 		final List<String> entityLineTypes = new ArrayList<>();
 		// Add the base entity itself
@@ -96,7 +97,7 @@ public class CViewsService {
 	/** Helper method to get the entity class from a service using reflection.
 	 * @param service the service instance
 	 * @return the entity class or null if not found */
-	private Class<?> getEntityClassFromService(final CAbstractService<?> service) {
+	private static Class<?> getEntityClassFromService(final CAbstractService<?> service) {
 		try {
 			// Handle CGLIB proxies by getting the superclass if needed
 			Class<?> serviceClass = service.getClass();
@@ -105,10 +106,10 @@ public class CViewsService {
 				serviceClass = serviceClass.getSuperclass();
 			}
 			// Try to call the getEntityClass() method using reflection
-			Method getEntityClassMethod = serviceClass.getDeclaredMethod("getEntityClass");
+			final Method getEntityClassMethod = serviceClass.getDeclaredMethod("getEntityClass");
 			getEntityClassMethod.setAccessible(true);
 			return (Class<?>) getEntityClassMethod.invoke(service);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.debug("Could not get entity class from service using getEntityClass() method: {}", e.getMessage());
 			return null;
 		}
@@ -118,7 +119,7 @@ public class CViewsService {
 	 * "CProject".
 	 * @param entityLineType the entity line type (e.g., "Project of Activity")
 	 * @return the actual entity class name (e.g., "CProject") */
-	public String getEntityClassNameForLineType(final String entityLineType) {
+	public static String getEntityClassNameForLineType(final String entityLineType) {
 		LOGGER.debug("Getting entity class name for line type: {}", entityLineType);
 		// Direct entity types
 		if (entityLineType.equals("CActivity") || entityLineType.equals("CMeeting") || entityLineType.equals("CRisk")
@@ -157,7 +158,7 @@ public class CViewsService {
 	 * entity class.
 	 * @param serviceBeanName the name of the service bean (e.g., "CActivityService")
 	 * @return list of field names from the corresponding entity class */
-	public List<String> getEntityFieldsForService(final String serviceBeanName) {
+	public static List<String> getEntityFieldsForService(final String serviceBeanName) {
 		LOGGER.debug("Getting entity fields for service bean: {}", serviceBeanName);
 		try {
 			// Check for null or empty service name
@@ -165,18 +166,18 @@ public class CViewsService {
 			// Check if ApplicationContext is available
 			Check.notNull(ApplicationContextProvider.getApplicationContext(), "ApplicationContext is not available");
 			// Get the service bean from Spring application context
-			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
+			final Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
 			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
 			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean is not an instance of CAbstractService: " + serviceBeanName);
 			// Cast to CAbstractService and get the entity class
-			CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
+			final CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
 			Check.notNull(abstractService, "Abstract service instance is null for bean: " + serviceBeanName);
-			Class<?> entityClass = getEntityClassFromService(abstractService);
+			final Class<?> entityClass = getEntityClassFromService(abstractService);
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			// Get all declared fields from the entity class
-			List<String> fieldNames = new ArrayList<>();
-			Field[] fields = entityClass.getDeclaredFields();
-			for (Field field : fields) {
+			final List<String> fieldNames = new ArrayList<>();
+			final Field[] fields = entityClass.getDeclaredFields();
+			for (final Field field : fields) {
 				// Skip static fields and logger fields
 				if (Modifier.isStatic(field.getModifiers()) || "LOGGER".equals(field.getName()) || field.getName().startsWith("$")) {
 					continue;
@@ -185,7 +186,7 @@ public class CViewsService {
 			}
 			LOGGER.debug("Found {} fields for entity class {}", fieldNames.size(), entityClass.getSimpleName());
 			return fieldNames;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error getting entity fields for service {}: {}", serviceBeanName, e.getMessage());
 			return List.of();
 		}

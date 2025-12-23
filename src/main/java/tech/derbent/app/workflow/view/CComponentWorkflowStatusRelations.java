@@ -5,11 +5,11 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.api.ui.notifications.CNotificationService;
 
 /** Component for managing status transitions within a workflow (Workflow->Status direction). This component displays all status transitions defined
  * for a specific workflow and allows: - Adding new transitions - Editing existing transitions - Removing transitions The component automatically
@@ -20,14 +20,13 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 	private final CProjectItemStatusService statusService;
 
 	public CComponentWorkflowStatusRelations(final CWorkflowEntityService entityService, ISessionService sessionService) throws Exception {
-		super("Status Transitions", CWorkflowEntity.class, entityService, sessionService);
+		super(CWorkflowEntity.class, entityService, sessionService);
 		statusService = CSpringContext.<CProjectItemStatusService>getBean(CProjectItemStatusService.class);
 		initComponent();
 	}
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		
 		return null;
 	}
 
@@ -47,7 +46,7 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 		try {
 			new CDialogWorkflowStatusRelation(this, (CWorkflowEntityService) entityService, statusService, workflowStatusRelationService, null,
 					getValue(), this::onSettingsSaved).open();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showWarning("Failed to open add dialog: " + e.getMessage());
 			throw e;
 		}
@@ -58,7 +57,7 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 		try {
 			new CDialogWorkflowStatusRelation(this, (CWorkflowEntityService) entityService, statusService, workflowStatusRelationService,
 					getSelectedRelation(), getValue(), this::onSettingsSaved).open();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			CNotificationService.showWarning("Failed to open edit dialog: " + e.getMessage());
 			throw e;
 		}
@@ -66,7 +65,6 @@ public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusR
 
 	@Override
 	protected void setupDataAccessors() {
-		createStandardDataAccessors(() -> workflowStatusRelationService.findByWorkflow(getValue()),
-				() -> entityService.save(getValue()));
+		createStandardDataAccessors(() -> workflowStatusRelationService.findByWorkflow(getValue()), () -> entityService.save(getValue()));
 	}
 }

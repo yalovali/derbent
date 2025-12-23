@@ -28,7 +28,6 @@ import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectService;
 import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.domain.CUserProjectSettings;
 import tech.derbent.base.users.service.CUserService;
 
 /** CDashboardView - Dashboard view showing system summary statistics. Layer: View (MVC) Displays total projects, users per project, and activities
@@ -108,8 +107,8 @@ public final class CDashboardView extends CAbstractPage {
 						throw new IllegalStateException("User service returned null list");
 					}
 					final long userCount = allUsers.stream().filter(user -> (user != null) && (user.getProjectSettings() != null))
-							.flatMap(user -> user.getProjectSettings().stream()).filter(settings -> settings instanceof CUserProjectSettings)
-							.map(settings -> settings).filter(settings -> settings.getProject() != null)
+							.flatMap(user -> user.getProjectSettings().stream()).map(settings -> settings)
+							.filter(settings -> settings.getProject() != null)
 							.filter(settings -> settings.getProject().getId().equals(project.getId())).count();
 					LOGGER.debug("Project {} has {} users", project.getName(), userCount);
 					return userCount;
@@ -183,48 +182,42 @@ public final class CDashboardView extends CAbstractPage {
 		title.addClassNames(LumoUtility.Margin.Bottom.MEDIUM);
 		breakdown.add(title);
 		final VerticalLayout projectList = new VerticalLayout();
-		if (projectList != null) {
-			projectList.setSpacing(true);
-			projectList.setWidthFull();
-			for (final CProject project : projects) {
-				if (project != null) {
-					final Div projectCard = createProjectBreakdownCard(project, usersByProject, activitiesByProject);
-					if (projectCard != null) {
-						projectList.add(projectCard);
-					}
+		projectList.setSpacing(true);
+		projectList.setWidthFull();
+		for (final CProject project : projects) {
+			if (project != null) {
+				final Div projectCard = createProjectBreakdownCard(project, usersByProject, activitiesByProject);
+				if (projectCard != null) {
+					projectList.add(projectCard);
 				}
 			}
-			breakdown.add(projectList);
 		}
+		breakdown.add(projectList);
 		return breakdown;
 	}
 
 	/** Creates a fallback error card when dialog creation fails.
 	 * @param message The error message to display */
+	@SuppressWarnings ("unused")
 	private final void createFallbackErrorCard(final String message) {
 		LOGGER.debug("createFallbackErrorCard called with message: {}", message);
 		try {
 			final Div card = createCard();
-			if (card != null) {
-				card.addClassNames(LumoUtility.Background.ERROR_10);
-				final Icon icon = VaadinIcon.WARNING.create();
-				if (icon != null) {
-					icon.addClassNames(LumoUtility.IconSize.LARGE, LumoUtility.TextColor.ERROR);
-				}
-				final String displayMessage = message != null ? message : "An error occurred";
-				final Span errorMessage = new Span(displayMessage);
-				if (errorMessage != null) {
-					errorMessage.addClassNames(LumoUtility.TextColor.ERROR);
-				}
-				final VerticalLayout content = new VerticalLayout(icon, errorMessage);
-				if (content != null) {
-					content.setAlignItems(FlexComponent.Alignment.CENTER);
-					card.add(content);
-				}
-				add(card);
+			card.addClassNames(LumoUtility.Background.ERROR_10);
+			final Icon icon = VaadinIcon.WARNING.create();
+			if (icon != null) {
+				icon.addClassNames(LumoUtility.IconSize.LARGE, LumoUtility.TextColor.ERROR);
 			}
+			final String displayMessage = message != null ? message : "An error occurred";
+			final Span errorMessage = new Span(displayMessage);
+			errorMessage.addClassNames(LumoUtility.TextColor.ERROR);
+			final VerticalLayout content = new VerticalLayout(icon, errorMessage);
+			content.setAlignItems(FlexComponent.Alignment.CENTER);
+			card.add(content);
+			add(card);
 		} catch (final Exception e) {
-			LOGGER.error("Error creating fallback error card.");
+			LOGGER.error("Error creating fallback error card. {}", e.getMessage());
+			throw e;
 		}
 	}
 
@@ -246,27 +239,23 @@ public final class CDashboardView extends CAbstractPage {
 					LumoUtility.BorderColor.CONTRAST_10);
 			card.setWidthFull();
 			final HorizontalLayout content = new HorizontalLayout();
-			if (content != null) {
-				content.setWidthFull();
-				content.setAlignItems(FlexComponent.Alignment.CENTER);
-				content.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-				// Project name
-				final String projectName = project.getName() != null ? project.getName() : "Unknown Project";
-				final Span projectNameSpan = new Span(projectName);
-				if (projectNameSpan != null) {
-					projectNameSpan.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
-				}
-				// Stats
-				final HorizontalLayout stats = createProjectStats(project, usersByProject, activitiesByProject);
-				if ((projectNameSpan != null) && (stats != null)) {
-					content.add(projectNameSpan, stats);
-				}
-				card.add(content);
+			content.setWidthFull();
+			content.setAlignItems(FlexComponent.Alignment.CENTER);
+			content.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+			// Project name
+			final String projectName = project.getName() != null ? project.getName() : "Unknown Project";
+			final Span projectNameSpan = new Span(projectName);
+			projectNameSpan.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
+			// Stats
+			final HorizontalLayout stats = createProjectStats(project, usersByProject, activitiesByProject);
+			if (stats != null) {
+				content.add(projectNameSpan, stats);
 			}
+			card.add(content);
 			return card;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating project breakdown card.");
-			return null;
+			LOGGER.error("Error creating project breakdown card. {}", e.getMessage());
+			throw e;
 		}
 	}
 
@@ -286,23 +275,17 @@ public final class CDashboardView extends CAbstractPage {
 				icon.addClassNames(LumoUtility.IconSize.LARGE, LumoUtility.TextColor.PRIMARY);
 			}
 			final Span count = new Span(String.valueOf(totalProjects));
-			if (count != null) {
-				count.addClassNames(LumoUtility.FontSize.XXXLARGE, LumoUtility.FontWeight.BOLD);
-			}
+			count.addClassNames(LumoUtility.FontSize.XXXLARGE, LumoUtility.FontWeight.BOLD);
 			final Span label = new Span("Total Projects");
-			if (label != null) {
-				label.addClassNames(LumoUtility.TextColor.SECONDARY);
-			}
+			label.addClassNames(LumoUtility.TextColor.SECONDARY);
 			final VerticalLayout content = new VerticalLayout(icon, count, label);
-			if (content != null) {
-				content.setAlignItems(FlexComponent.Alignment.CENTER);
-				content.setSpacing(false);
-				card.add(content);
-			}
+			content.setAlignItems(FlexComponent.Alignment.CENTER);
+			content.setSpacing(false);
+			card.add(content);
 			return card;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating projects card.");
-			return null;
+			LOGGER.error("Error creating projects card. {}", e.getMessage());
+			throw e;
 		}
 	}
 
@@ -326,21 +309,17 @@ public final class CDashboardView extends CAbstractPage {
 			if (projectName != null) {
 				final long userCount = usersByProject.getOrDefault(projectName, 0L);
 				final Span users = new Span(userCount + " users");
-				if (users != null) {
-					users.addClassNames(LumoUtility.TextColor.SECONDARY);
-					stats.add(users);
-				}
+				users.addClassNames(LumoUtility.TextColor.SECONDARY);
+				stats.add(users);
 				final long activityCount = activitiesByProject.getOrDefault(projectName, 0L);
 				final Span activities = new Span(activityCount + " activities");
-				if (activities != null) {
-					activities.addClassNames(LumoUtility.TextColor.SECONDARY);
-					stats.add(activities);
-				}
+				activities.addClassNames(LumoUtility.TextColor.SECONDARY);
+				stats.add(activities);
 			}
 			return stats;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating project stats.");
-			return null;
+			LOGGER.error("Error creating project stats.{}", e.getMessage());
+			throw e;
 		}
 	}
 
@@ -350,13 +329,11 @@ public final class CDashboardView extends CAbstractPage {
 		LOGGER.debug("createStatsContainer called");
 		try {
 			final HorizontalLayout statsContainer = new HorizontalLayout();
-			if (statsContainer != null) {
-				statsContainer.setSpacing(true);
-				statsContainer.setWidthFull();
-				statsContainer.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.STRETCH);
-				return statsContainer;
-			}
-		} catch (final Exception e) {
+			statsContainer.setSpacing(true);
+			statsContainer.setWidthFull();
+			statsContainer.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.STRETCH);
+			return statsContainer;
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.error("Error creating stats container.");
 		}
 		return null;
@@ -383,30 +360,22 @@ public final class CDashboardView extends CAbstractPage {
 			}
 			final long totalUsers = usersByProject.values().stream().mapToLong(Long::longValue).sum();
 			final Span count = new Span(String.valueOf(totalUsers));
-			if (count != null) {
-				count.addClassNames(LumoUtility.FontSize.XXXLARGE, LumoUtility.FontWeight.BOLD);
-			}
+			count.addClassNames(LumoUtility.FontSize.XXXLARGE, LumoUtility.FontWeight.BOLD);
 			final Span label = new Span("Total Users");
-			if (label != null) {
-				label.addClassNames(LumoUtility.TextColor.SECONDARY);
-			}
+			label.addClassNames(LumoUtility.TextColor.SECONDARY);
 			final VerticalLayout content = new VerticalLayout(icon, count, label);
-			if (content != null) {
-				content.setAlignItems(FlexComponent.Alignment.CENTER);
-				content.setSpacing(false);
-				card.add(content);
-			}
+			content.setAlignItems(FlexComponent.Alignment.CENTER);
+			content.setSpacing(false);
+			card.add(content);
 			return card;
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.error("Error creating users card.");
 			return null;
 		}
 	}
 
 	@Override
-	public String getPageTitle() { 
-		return "Home";
-	}
+	public String getPageTitle() { return "Home"; }
 
 	/** Handles errors by displaying them to the user using CExceptionDialog.
 	 * @param message   User-friendly error message
@@ -416,14 +385,11 @@ public final class CDashboardView extends CAbstractPage {
 		try {
 			if ((message != null) && (exception != null)) {
 				final CDialogException dialog = new CDialogException(exception);
-				if (dialog != null) {
-					dialog.open();
-				}
+				dialog.open();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error creating exception dialog.");
-			// Fallback: create a simple error card
-			createFallbackErrorCard(message);
+			LOGGER.error("Error creating exception dialog. {}", e.getMessage());
+			throw e;
 		}
 	}
 
@@ -436,16 +402,12 @@ public final class CDashboardView extends CAbstractPage {
 			addClassName("cdashboard-view");
 			// Add title
 			final H1 title = new H1("System Dashboard");
-			if (title != null) {
-				title.addClassNames(LumoUtility.Margin.Bottom.LARGE);
-				add(title);
-			}
+			title.addClassNames(LumoUtility.Margin.Bottom.LARGE);
+			add(title);
 			// Add subtitle
 			final Paragraph subtitle = new Paragraph("Overview of projects, users, and activities");
-			if (subtitle != null) {
-				subtitle.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.Margin.Bottom.XLARGE);
-				add(subtitle);
-			}
+			subtitle.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.Margin.Bottom.XLARGE);
+			add(subtitle);
 			// Load dashboard data
 			loadDashboardData();
 			LOGGER.info("initPage completed successfully");

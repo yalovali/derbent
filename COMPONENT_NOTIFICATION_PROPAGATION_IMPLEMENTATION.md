@@ -75,7 +75,7 @@ In `CComponentGridEntity.createColumnForComponentWidgetEntity()`:
 ```java
 public void registerComponent(final String name, final Component component) {
     Check.notBlank(name, "Component name cannot be blank");
-    Check.notNull(component, "Component cannot be null");
+    Objects.requireNonNull(component, "Component cannot be null");
     customComponents.put(name, component);
     LOGGER.debug("Registered custom component '{}' of type {}", name, component.getClass().getSimpleName());
 }
@@ -131,7 +131,7 @@ private final List<ComponentEventListener<GridDragEndEvent<CEntityDB<?>>>> dragE
 @Override
 public Registration addDragStartListener(
         final ComponentEventListener<GridDragStartEvent<CEntityDB<?>>> listener) {
-    Check.notNull(listener, "Drag start listener cannot be null");
+    Objects.requireNonNull(listener, "Drag start listener cannot be null");
     dragStartListeners.add(listener);
     LOGGER.debug("[DragDebug] Added drag start listener, total: {}", dragStartListeners.size());
     return () -> dragStartListeners.remove(listener);
@@ -142,7 +142,7 @@ public Registration addDragStartListener(
 @Override
 public Registration addDragEndListener(
         final ComponentEventListener<GridDragEndEvent<CEntityDB<?>>> listener) {
-    Check.notNull(listener, "Drag end listener cannot be null");
+    Objects.requireNonNull(listener, "Drag end listener cannot be null");
     dragEndListeners.add(listener);
     LOGGER.debug("[DragDebug] Added drag end listener, total: {}", dragEndListeners.size());
     return () -> dragEndListeners.remove(listener);

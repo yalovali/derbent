@@ -8,21 +8,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.screens.domain.CGridEntity.FieldSelection;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.enhanced.CComponentFieldSelection;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
+import tech.derbent.api.utils.Check;
 
 /** Dialog for selecting and ordering grid column fields. Uses CComponentFieldSelection with FormBuilder patterns for the selection interface. */
 public class CDialogFieldSelection extends CDialogDBEdit<List<FieldSelection>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogFieldSelection.class);
 	private static final long serialVersionUID = 1L;
-	private List<String> currentSelections;
-	private String entityType;
 	private CComponentFieldSelection<Object, EntityFieldInfo> componentFieldSelection;
+	private final List<String> currentSelections;
+	private final String entityType;
 
 	/** Creates a new field selection dialog.
 	 * @param entityType          The entity type to show fields for
@@ -43,14 +43,11 @@ public class CDialogFieldSelection extends CDialogDBEdit<List<FieldSelection>> {
 		componentFieldSelection = new CComponentFieldSelection<>(null, null, null, "Available Fields", "Selected Fields");
 		// Set item label generator for EntityFieldInfo
 		componentFieldSelection.setItemLabelGenerator(item -> {
-			if (item instanceof EntityFieldInfo) {
-				EntityFieldInfo fieldInfo = (EntityFieldInfo) item;
-				return fieldInfo.getDisplayName() + " (" + fieldInfo.getFieldName() + ")";
-			}
-			return item != null ? item.toString() : "N/A";
+			final EntityFieldInfo fieldInfo = item;
+			return fieldInfo.getDisplayName() + " (" + fieldInfo.getFieldName() + ")";
 		});
 		// Get all available fields for the entity type
-		List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
+		final List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
 		Check.notNull(allFields, "Failed to get entity fields for type: " + entityType);
 		LOGGER.debug("Loaded {} fields for entity type '{}'", allFields.size(), entityType);
 		// Set source items directly
@@ -63,8 +60,8 @@ public class CDialogFieldSelection extends CDialogDBEdit<List<FieldSelection>> {
 
 	@Override
 	public List<FieldSelection> getEntity() {
-		List<EntityFieldInfo> selectedFields = componentFieldSelection.getValue();
-		List<FieldSelection> result = new ArrayList<>();
+		final List<EntityFieldInfo> selectedFields = componentFieldSelection.getValue();
+		final List<FieldSelection> result = new ArrayList<>();
 		for (int i = 0; i < selectedFields.size(); i++) {
 			result.add(new FieldSelection(selectedFields.get(i), i));
 		}
@@ -84,9 +81,9 @@ public class CDialogFieldSelection extends CDialogDBEdit<List<FieldSelection>> {
 	protected void populateForm() {
 		if (currentSelections != null && !currentSelections.isEmpty()) {
 			// Get all available fields
-			List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
+			final List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
 			// Filter to get selected fields in order
-			List<EntityFieldInfo> selectedFields = currentSelections.stream()
+			final List<EntityFieldInfo> selectedFields = currentSelections.stream()
 					.map(fieldName -> allFields.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null))
 					.filter(f -> f != null).collect(Collectors.toList());
 			LOGGER.debug("Populating form with {} selected fields", selectedFields.size());

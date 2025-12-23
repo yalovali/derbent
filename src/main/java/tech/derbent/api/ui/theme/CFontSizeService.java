@@ -31,6 +31,13 @@ public class CFontSizeService {
 		// LOGGER.info("Applied font size scale: {}", scale);
 	}
 
+	/** Returns the list of available font size scales for use in UI components. This method is used as a data provider for the font size scale
+	 * combobox.
+	 * @return List of available font size scale values */
+	public static List<String> getAvailableFontSizeScales() {
+		return List.of("small", "medium", "large");
+	}
+
 	/** Gets CSS variable overrides for the specified font size scale.
 	 * @param scale the font size scale ("small", "medium", or "large")
 	 * @return CSS variable declarations as a string */
@@ -71,12 +78,5 @@ public class CFontSizeService {
 		if (session != null) {
 			session.setAttribute("fontSizeScale", scale);
 		}
-	}
-
-	/** Returns the list of available font size scales for use in UI components. This method is used as a data provider for the font size scale
-	 * combobox.
-	 * @return List of available font size scale values */
-	public List<String> getAvailableFontSizeScales() {
-		return List.of("small", "medium", "large");
 	}
 }

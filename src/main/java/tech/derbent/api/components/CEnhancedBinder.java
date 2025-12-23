@@ -218,8 +218,8 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 					} else {
 						fieldObj = f;
 					}
-				} catch (final Exception ignored) {
-					// safe fallback
+				} catch (final Exception e) {
+					LOGGER.debug("Could not access field '{}' for ID/name resolution: {}", fieldStatus.getField(), e.getMessage());
 				}
 				if (fieldObj instanceof Component) {
 					final Component comp = (Component) fieldObj;
@@ -230,7 +230,8 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 							final Object value = ((HasValue<?, ?>) comp).getValue();
 							extra += ", value=" + String.valueOf(value);
 						} catch (final Exception ignored) {
-							// ignore value retrieval issues
+							LOGGER.debug("Could not access value for field '{}' in bean '{}': {}", fieldIdOrName, beanType.getSimpleName(),
+									ignored.getMessage());
 						}
 					}
 					extra += ")";
@@ -310,7 +311,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 					incompleteBindingsField = Binder.class.getDeclaredField(fieldName);
 					// LOGGER.debug("Found incomplete bindings field: {}", fieldName);
 					break;
-				} catch (final NoSuchFieldException e) {
+				} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 					LOGGER.debug("Field '{}' not found, trying next", fieldName);
 				}
 			}

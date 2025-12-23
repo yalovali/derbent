@@ -216,12 +216,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		masterViewSection.selectLastOrFirst(lastEntity.orElse(null));
 	}
 
-	protected void createButtonLayout(final Div layout) {
-		LOGGER.debug("createButtonLayout called - default save/delete/cancel buttons are now in details tab");
-		// Default implementation does nothing - buttons are in the tab Subclasses can
-		// override this for additional custom buttons in the main content area
-	}
-
 	@PostConstruct
 	private final void createDetails() throws Exception {
 		createDetailsViewTab();
@@ -312,9 +306,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public CCrudToolbar getCrudToolbar() { return crudToolbar; }
 
 	@Override
-	public EntityClass getValue() { return currentEntity; }
-
-	@Override
 	public String getCurrentEntityIdString() {
 		LOGGER.debug("Getting current entity ID string for entity class: {}", entityClass.getSimpleName());
 		final EntityClass entity = getValue();
@@ -374,6 +365,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public CSearchToolbar getSearchToolbar() {
 		return searchToolbar;
 	}
+
+	@Override
+	public EntityClass getValue() { return currentEntity; }
 
 	@Override
 	public CWorkflowStatusRelationService getWorkflowStatusRelationService() { return workflowStatusRelationService; }
@@ -521,13 +515,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 	}
 
-	@SuppressWarnings ("unchecked")
-	@Override
-	public void setValue(final CEntityDB<?> currentEntity) {
-		LOGGER.debug("Setting current entity: {}", currentEntity);
-		this.currentEntity = (EntityClass) currentEntity;
-	}
-
 	@Override
 	public void setId(final String id) {
 		throw new UnsupportedOperationException("Use initPageId instead to set page ID for testing purposes");
@@ -541,7 +528,15 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@Override
-	protected void setupToolbar() {}
+	protected void setupToolbar() { /*****/
+	}
+
+	@SuppressWarnings ("unchecked")
+	@Override
+	public void setValue(final CEntityDB<?> currentEntity) {
+		LOGGER.debug("Setting current entity: {}", currentEntity);
+		this.currentEntity = (EntityClass) currentEntity;
+	}
 
 	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
 	protected void showErrorNotification(final String message) {

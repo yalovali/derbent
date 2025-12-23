@@ -1,5 +1,7 @@
 package tech.derbent.app.page.view;
 
+import tech.derbent.api.utils.Check;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,6 @@ import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.ui.view.MainLayout;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
@@ -57,7 +58,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	public void beforeEnter(BeforeEnterEvent event) {
 		try {
 			loadSpecificPage(pageEntityId, pageItemId, false);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error loading dynamic page for entity ID {}: {}", pageEntityId, e.getMessage());
 			e.printStackTrace();
 		}
@@ -104,7 +105,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			}
 			removeAll();
 			add(page);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to create dynamic page view for: {}", currentPageEntity.getPageTitle(), e);
 			throw e;
 		}
@@ -122,5 +123,5 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	}
 
 	@Override
-	protected void setupToolbar() {}
+	protected void setupToolbar() { /*****/ }
 }

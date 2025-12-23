@@ -175,6 +175,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
 	/** Sets up a value change listener to update the prefix component with the selected item's icon and applies styling to show the color. This
 	 * ensures the selected value also displays with color and icon, not just the dropdown items. */
+	@SuppressWarnings ("unused")
 	private void setupSelectedValueDisplay() {
 		addValueChangeListener(event -> {
 			Icon icon;

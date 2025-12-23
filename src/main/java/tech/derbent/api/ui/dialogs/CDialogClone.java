@@ -5,17 +5,14 @@ import java.util.function.Consumer;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.utils.CColorUtils;
 
 public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CDialogDBEdit<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static List<String> getAvailableTypes() {
-		
-		return List.of("Type1", "Type2", "Type3");
-	}
+	public static List<String> getAvailableTypes() { return List.of("Type1", "Type2", "Type3"); }
 
 	public CDialogClone(final EntityClass entity, final Consumer<EntityClass> onSave) throws Exception {
 		super(entity, onSave, true);
@@ -23,7 +20,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	}
 
 	@Override
-	public String getDialogTitleString() { 
+	public String getDialogTitleString() {
 		final String title = "Clone " + getEntity().toString();
 		return title;
 	}
@@ -32,13 +29,10 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	protected Icon getFormIcon() throws Exception { return CColorUtils.getIconForEntity(getEntity()); }
 
 	@Override
-	protected String getFormTitleString() { 
-		return "Clone";
-	}
+	protected String getFormTitleString() { return "Clone"; }
 
 	@Override
-	protected void populateForm() {
-		
+	protected void populateForm() {/**/
 	}
 
 	@Override
@@ -61,7 +55,6 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	}
 
 	@Override
-	protected void validateForm() {
-		
+	protected void validateForm() {/***/
 	}
 }

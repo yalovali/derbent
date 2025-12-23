@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -25,6 +27,8 @@ import tech.derbent.api.utils.Check;
 
 /** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
 public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogDetailLinesEdit.class);
 	private static final long serialVersionUID = 1L;
 	private final CEnhancedBinder<CDetailLines> binder;
 	private ComboBox<String> cmbFieldClass;
@@ -36,11 +40,11 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 	private final CFormBuilder<CDetailLines> formEntity;
 	private final CFormBuilder<CDetailLines> formSection;
 	private final CDetailSection screen;
-	private Tab tabEntity;
-	private Span tabEntitySpan;
-	private Tab tabSection;
-	private Span tabSectionSpan;
-	private CTabSheet tabsOfDialog;
+	private final Tab tabEntity;
+	private final Span tabEntitySpan;
+	private final Tab tabSection;
+	private final Span tabSectionSpan;
+	private final CTabSheet tabsOfDialog;
 
 	public CDialogDetailLinesEdit(final CDetailLines entity, final Consumer<CDetailLines> onSave, final boolean isNew, final CDetailSection screen)
 			throws Exception {

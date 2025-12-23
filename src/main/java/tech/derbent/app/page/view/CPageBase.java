@@ -12,12 +12,10 @@ public abstract class CPageBase extends CAbstractPage {
 	}
 
 	@Override
-	public void beforeEnter(BeforeEnterEvent event) {
-		
+	public void beforeEnter(BeforeEnterEvent event) {/**/
 	}
 
 	@Override
-	protected void setupToolbar() {
-		
+	protected void setupToolbar() {/**/
 	}
 }

@@ -37,7 +37,7 @@ All components that use CGrid must implement the `configureGrid()` method from t
  */
 @Override
 public void configureGrid(final CGrid<EntityType> grid) {
-    Check.notNull(grid, "Grid cannot be null");
+    Objects.requireNonNull(grid, "Grid cannot be null");
     LOGGER.debug("Configuring grid columns for {}", entityClass.getSimpleName());
     
     // Column configuration goes here
@@ -48,7 +48,7 @@ public void configureGrid(final CGrid<EntityType> grid) {
 - Method name must be `configureGrid`
 - Must be `public` (interface requirement)
 - Must have `@Override` annotation
-- Must validate the grid parameter with `Check.notNull()`
+- Must validate the grid parameter with `Objects.requireNonNull()`
 - Should log debug information about configuration
 - Use `final` modifier for parameters
 
@@ -180,7 +180,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
     
     @Override
     public void configureGrid(final CGrid<CSprintItem> grid) {
-        Check.notNull(grid, "Grid cannot be null");
+        Objects.requireNonNull(grid, "Grid cannot be null");
         LOGGER.debug("Configuring grid columns for CSprintItem");
         
         // Use CGrid helper methods for consistent column creation
@@ -217,7 +217,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
     
     @Override
     public void configureGrid(final CGrid<EntityClass> grid) {
-        Check.notNull(grid, "Grid cannot be null");
+        Objects.requireNonNull(grid, "Grid cannot be null");
         
         // Clear existing columns
         grid.getColumns().forEach(grid::removeColumn);
@@ -342,7 +342,7 @@ protected void configureGrid(CGrid<Entity> grid) {
 ```java
 // CORRECT
 protected void configureGrid(final CGrid<Entity> grid) {
-    Check.notNull(grid, "Grid cannot be null");
+    Objects.requireNonNull(grid, "Grid cannot be null");
     LOGGER.debug("Configuring grid...");
     grid.addIdColumn(...);
 }

@@ -74,7 +74,7 @@ public CAbstractService(
     this.clock = clock;
     this.repository = repository;
     this.sessionService = null;
-    Check.notNull(repository, "repository cannot be null");
+    Objects.requireNonNull(repository, "repository cannot be null");
 }
 
 // With session service (for project-aware entities)
@@ -85,7 +85,7 @@ public CAbstractService(
     this.clock = clock;
     this.repository = repository;
     this.sessionService = sessionService;
-    Check.notNull(repository, "repository cannot be null");
+    Objects.requireNonNull(repository, "repository cannot be null");
 }
 ```
 
@@ -106,7 +106,7 @@ public EntityClass createEntity() {
 
 @Transactional
 public EntityClass save(final EntityClass entity) {
-    Check.notNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
     LOGGER.debug("Saving entity: {}", entity.getClass().getSimpleName());
     return repository.save(entity);
 }
@@ -116,7 +116,7 @@ public EntityClass save(final EntityClass entity) {
 ```java
 @Transactional(readOnly = true)
 public Optional<EntityClass> findById(final Long id) {
-    Check.notNull(id, "ID cannot be null");
+    Objects.requireNonNull(id, "ID cannot be null");
     return repository.findById(id);
 }
 
@@ -135,8 +135,8 @@ public Page<EntityClass> findAll(final Pageable pageable) {
 ```java
 @Transactional
 public EntityClass update(final EntityClass entity) {
-    Check.notNull(entity, "Entity cannot be null");
-    Check.notNull(entity.getId(), "Entity ID cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity.getId(), "Entity ID cannot be null");
     return repository.save(entity);
 }
 ```
@@ -145,15 +145,15 @@ public EntityClass update(final EntityClass entity) {
 ```java
 @Transactional
 public void delete(final EntityClass entity) {
-    Check.notNull(entity, "Entity cannot be null");
-    Check.notNull(entity.getId(), "Entity ID cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity.getId(), "Entity ID cannot be null");
     LOGGER.debug("Deleting entity: {}", entity.getClass().getSimpleName());
     repository.deleteById(entity.getId());
 }
 
 @Transactional
 public void delete(final Long id) {
-    Check.notNull(id, "Entity ID cannot be null");
+    Objects.requireNonNull(id, "Entity ID cannot be null");
     LOGGER.debug("Deleting entity with ID: {}", id);
     repository.deleteById(id);
 }
@@ -165,8 +165,8 @@ Services implement dependency checking to prevent deletion of entities in use:
 
 ```java
 public String checkDeleteAllowed(final EntityClass entity) {
-    Check.notNull(entity, "Entity cannot be null");
-    Check.notNull(entity.getId(), "Entity ID cannot be null");
+    Objects.requireNonNull(entity, "Entity cannot be null");
+    Objects.requireNonNull(entity.getId(), "Entity ID cannot be null");
     return null; // Return null if delete is allowed, error message otherwise
 }
 ```
@@ -268,14 +268,14 @@ public EntityClass save(final EntityClass entity) {
 ```java
 @Transactional(readOnly = true)
 public List<EntityClass> listByProject(final CProject project) {
-    Check.notNull(project, "Project cannot be null");
+    Objects.requireNonNull(project, "Project cannot be null");
     return ((IEntityOfProjectRepository<EntityClass>) repository)
         .listByProject(project);
 }
 
 @Transactional(readOnly = true)
 public long countByProject(final CProject project) {
-    Check.notNull(project, "Project cannot be null");
+    Objects.requireNonNull(project, "Project cannot be null");
     return ((IEntityOfProjectRepository<EntityClass>) repository)
         .countByProject(project);
 }
@@ -285,7 +285,7 @@ public Optional<EntityClass> findByNameAndProject(
     final String name,
     final CProject project) {
     
-    Check.notNull(project, "Project cannot be null");
+    Objects.requireNonNull(project, "Project cannot be null");
     Check.notBlank(name, "Entity name cannot be null or empty");
     return ((IEntityOfProjectRepository<EntityClass>) repository)
         .findByNameAndProject(name, project);
@@ -384,8 +384,8 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
         final CActivity activity,
         final CProjectItemStatus newStatus) {
         
-        Check.notNull(activity, "Activity cannot be null");
-        Check.notNull(newStatus, "Status cannot be null");
+        Objects.requireNonNull(activity, "Activity cannot be null");
+        Objects.requireNonNull(newStatus, "Status cannot be null");
         
         activity.setStatus(newStatus);
         activity.updateLastModified();
@@ -576,7 +576,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
     // ✅ GOOD - Business logic
     @Transactional
     public void completeActivity(CActivity activity) {
-        Check.notNull(activity, "Activity cannot be null");
+        Objects.requireNonNull(activity, "Activity cannot be null");
         
         CProjectItemStatus completedStatus = statusService
             .findCompletedStatus(activity.getProject());
@@ -611,8 +611,8 @@ Validate inputs using Check utility:
 @Transactional
 public CActivity createActivity(String name, CProject project) {
     Check.notBlank(name, "Activity name cannot be blank");
-    Check.notNull(project, "Project cannot be null");
-    Check.notNull(project.getId(), "Project must be persisted");
+    Objects.requireNonNull(project, "Project cannot be null");
+    Objects.requireNonNull(project.getId(), "Project must be persisted");
     
     // Check for duplicates
     Optional<CActivity> existing = findByNameAndProject(name, project);
@@ -810,14 +810,14 @@ public class CActivityService extends CAbstractService<CActivity> {
     }
     
     private CCompany getCurrentCompany() {
-        Check.notNull(sessionService, "Session service required");
+        Objects.requireNonNull(sessionService, "Session service required");
         CCompany company = sessionService.getCurrentCompany();
-        Check.notNull(company, "No active company in session");
+        Objects.requireNonNull(company, "No active company in session");
         return company;
     }
     
     private CProject getCurrentProject() {
-        Check.notNull(sessionService, "Session service required");
+        Objects.requireNonNull(sessionService, "Session service required");
         CProject project = sessionService.getActiveProject()
             .orElseThrow(() -> new IllegalStateException("No active project"));
         return project;

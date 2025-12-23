@@ -69,6 +69,7 @@ public class Application implements AppShellConfigurator {
 	 * </p>
 	 * @param jdbcTemplate the JDBC template for database operations
 	 * @return ApplicationRunner that handles data initialization */
+	@SuppressWarnings ("static-method")
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
 		return e -> {

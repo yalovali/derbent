@@ -35,7 +35,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	public static ApplicationContext getApplicationContext() { return applicationContext; }
 
-	private static Component processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CUser user) {
+	private static Component processLine(final CDetailLines line, final CUser user) {
 		Check.notNull(line, "Line cannot be null");
 		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
 			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
@@ -85,7 +85,6 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		formBuilder = new CFormBuilder<>(null, screenClass, binder, componentMap);
 		//
 		CPanelDetails currentSection = null;
-		final int counter = 0;
 		final CUser user = sessionService.getActiveUser().orElseThrow();
 		// screen.getScreenLines().size(); // Ensure lines are loaded
 		if (user.getAttributeDisplaySectionsAsTabs()) {
@@ -102,10 +101,10 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				currentSection = null;
 			}
 			if (currentSection != null) {
-				currentSection.processLine(contentOwner, counter, screen, line, getFormBuilder(), componentMap);
+				currentSection.processLine(contentOwner, screen, line, getFormBuilder(), componentMap);
 				continue;
 			}
-			final Component component = processLine(counter, screen, line, user);
+			final Component component = processLine(line, user);
 			if (component instanceof CPanelDetails) {
 				if (user.getAttributeDisplaySectionsAsTabs()) {
 					tabsOfForm.add(line.getSectionName(), component);

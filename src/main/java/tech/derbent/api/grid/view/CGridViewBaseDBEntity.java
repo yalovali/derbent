@@ -16,7 +16,7 @@ public abstract class CGridViewBaseDBEntity<EntityClass extends CEntityDB<Entity
 
 	@Override
 	protected void createDetailsComponent() throws Exception {
-		
+		/**/
 	}
 
 	@Override

@@ -5,5 +5,5 @@ import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.gannt.ganntviewentity.domain.CGanntViewEntity;
 
 @Repository
-public interface IGanntViewEntityRepository extends IEntityOfProjectRepository<CGanntViewEntity> {
+public interface IGanntViewEntityRepository extends IEntityOfProjectRepository<CGanntViewEntity> {/**/
 }

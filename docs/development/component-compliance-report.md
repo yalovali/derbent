@@ -108,9 +108,9 @@ All exceptions properly caught and displayed:
 ### ✅ 12. Null Checking (COMPLIANT)
 Check utilities used appropriately:
 ```java
-Check.notNull(entity, "Entity cannot be null");
+Objects.requireNonNull(entity, "Entity cannot be null");
 Check.notBlank(title, "Title cannot be blank");
-Check.notNull(entityService, "Entity service cannot be null");
+Objects.requireNonNull(entityService, "Entity service cannot be null");
 ```
 
 ### ✅ 13. Constants for Magic Strings (COMPLIANT)
@@ -125,8 +125,8 @@ All constructor parameters validated:
 ```java
 protected CComponentListEntityBase(final String title, final Class<T> entityClass, final CAbstractService<T> entityService) {
     Check.notBlank(title, "Title cannot be blank");
-    Check.notNull(entityClass, "Entity class cannot be null");
-    Check.notNull(entityService, "Entity service cannot be null");
+    Objects.requireNonNull(entityClass, "Entity class cannot be null");
+    Objects.requireNonNull(entityService, "Entity service cannot be null");
     // ...
 }
 ```

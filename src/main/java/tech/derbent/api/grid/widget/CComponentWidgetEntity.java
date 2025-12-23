@@ -192,11 +192,14 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		addActionButton(VaadinIcon.EYE, "View Details", "VIEW");
 	}
 
-	protected void createFirstLine() throws Exception {}
+	protected void createFirstLine() throws Exception { /***/
+	}
 
-	protected void createSecondLine() throws Exception {}
+	protected void createSecondLine() throws Exception {/***/
+	}
 
-	protected void createThirdLine() throws Exception {}
+	protected void createThirdLine() throws Exception {/***/
+	}
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
 	@Override

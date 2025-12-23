@@ -25,7 +25,14 @@ import tech.derbent.api.utils.Check;
  * @param <RelationEntity> The relationship entity type (e.g., CUserProjectSettings) */
 public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityDB<ParentEntity>, RelationEntity extends CEntityDB<RelationEntity>>
 		extends CAccordionDBEntity<ParentEntity> {
+
 	private static final long serialVersionUID = 1L;
+
+	/** Helper method to create a simple text span */
+	protected static Span createTextSpan(final String text) {
+		return new Span(text != null ? text : "");
+	}
+
 	protected Supplier<List<RelationEntity>> getRelations;
 	protected final Grid<RelationEntity> grid = new Grid<>(getRelationEntityClass(), false);
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -33,7 +40,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 	protected Consumer<List<RelationEntity>> setRelations;
 
 	/** Constructor for the relation panel */
-	public CAbstractEntityRelationPanel(final String title, final IContentOwner parentContent, final ParentEntity currentEntity,
+	public CAbstractEntityRelationPanel(final String title, final IContentOwner parentContent,
 			final CEnhancedBinder<ParentEntity> beanValidationBinder, final Class<ParentEntity> entityClass,
 			final CAbstractService<ParentEntity> entityService) {
 		super(title, parentContent, beanValidationBinder, entityClass, entityService);
@@ -45,11 +52,6 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 
 	/** Abstract method to create delete confirmation message */
 	protected abstract String createDeleteConfirmationMessage(final RelationEntity selected);
-
-	/** Helper method to create a simple text span */
-	protected Span createTextSpan(final String text) {
-		return new Span(text != null ? text : "");
-	}
 
 	/** Deletes the selected relationship
 	 * @throws Exception
@@ -83,17 +85,15 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 	/** Initialize grid with common settings */
 	private void initializeGrid() {
 		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
+		final com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
 				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) grid.getSelectionModel();
 		sm.setDeselectAllowed(false);
 	}
 
 	/** Abstract method to open the add dialog */
 	protected abstract void on_actionOpenAddDialog();
-
 	/** Abstract method to open the edit dialog */
 	protected abstract void on_actionOpenEditDialog();
-
 	/** Abstract method to handle relation save events */
 	protected abstract void onRelationSaved(final RelationEntity relation);
 

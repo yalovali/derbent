@@ -159,8 +159,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		if (sprintItems != null) {
 			final String itemType = item.getClass().getSimpleName();
 			final Long itemId = item.getId();
-			final boolean alreadyPresent = sprintItems.stream()
-					.anyMatch(si -> itemId.equals(si.getItemId()) && itemType.equals(si.getItemType()));
+			final boolean alreadyPresent = sprintItems.stream().anyMatch(si -> itemId.equals(si.getItemId()) && itemType.equals(si.getItemType()));
 			if (alreadyPresent) {
 				return;
 			}
@@ -286,7 +285,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		}
 		long total = 0L;
 		for (final CSprintItem sprintItem : sprintItems) {
-			if (sprintItem.getItem() != null && sprintItem.getItem() instanceof tech.derbent.api.interfaces.ISprintableItem) {
+			if (sprintItem.getItem() != null) {
 				final Long itemStoryPoint = sprintItem.getItem().getStoryPoint();
 				if (itemStoryPoint != null) {
 					total += itemStoryPoint;
@@ -359,6 +358,10 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			return false;
 		}
 		return LocalDate.now().isAfter(endDate);
+	}
+
+	private boolean isSameSprintable(final Long itemId, final String itemType, final CSprintItem sprintItem) {
+		return itemId.equals(sprintItem.getItemId()) && itemType.equals(sprintItem.getItemType());
 	}
 
 	/** JPA lifecycle callback: Populates transient calculated fields after entity is loaded from database. This method automatically discovers fields
@@ -499,9 +502,5 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @param totalStoryPoints the total story points value */
 	public void setTotalStoryPoints(final Long totalStoryPoints) {
 		this.totalStoryPoints = totalStoryPoints;
-	}
-
-	private boolean isSameSprintable(final Long itemId, final String itemType, final CSprintItem sprintItem) {
-		return itemId.equals(sprintItem.getItemId()) && itemType.equals(sprintItem.getItemType());
 	}
 }

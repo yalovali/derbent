@@ -70,5 +70,5 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	private CUserCompanySettingInitializerService() {}
+	private CUserCompanySettingInitializerService() { /*****/ }
 }

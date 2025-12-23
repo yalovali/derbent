@@ -26,6 +26,12 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	public static final String ENTITY_TITLE_PLURAL = "Kanban Lines";
 	public static final String ENTITY_TITLE_SINGULAR = "Kanban Line";
 	public static final String VIEW_NAME = "Kanban Lines View";
+	@Transient
+	@AMetaData (
+			displayName = "Kanban Board", required = true, readOnly = false, description = "Kanban Board", hidden = false,
+			createComponentMethod = "createKanbanBoardComponent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final Boolean kanbanBoard = Boolean.TRUE;
 	@OneToMany (mappedBy = "kanbanLine", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@OrderBy ("itemOrder ASC")
 	@AMetaData (
@@ -33,12 +39,6 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 			hidden = false, createComponentMethod = "createKanbanColumnsComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private Set<CKanbanColumn> kanbanColumns = new LinkedHashSet<>();
-	@Transient
-	@AMetaData (
-			displayName = "Kanban Board", required = true, readOnly = false, description = "Kanban Board", hidden = false,
-			createComponentMethod = "createKanbanBoardComponent", dataProviderBean = "pageservice", captionVisible = false
-	)
-	private final Boolean kanbanBoard = Boolean.TRUE;
 
 	/** Default constructor for JPA */
 	public CKanbanLine() {

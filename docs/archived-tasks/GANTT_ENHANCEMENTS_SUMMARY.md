@@ -151,7 +151,7 @@ ls -lh target/screenshots/
 ## Code Quality
 
 All changes follow the project's coding standards:
-- ✅ Proper null checks with `Check.notNull()`
+- ✅ Proper null checks with `Objects.requireNonNull()`
 - ✅ JavaDoc comments for public methods
 - ✅ Consistent naming conventions
 - ✅ Minimal changes to existing code

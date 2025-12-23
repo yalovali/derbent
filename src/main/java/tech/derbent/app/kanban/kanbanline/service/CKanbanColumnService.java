@@ -23,8 +23,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
-		implements IEntityRegistrable, IOrderedEntityService<CKanbanColumn> {
+public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implements IEntityRegistrable, IOrderedEntityService<CKanbanColumn> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanColumnService.class);
 	private final CKanbanLineService kanbanLineService;
@@ -35,17 +34,59 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		this.kanbanLineService = kanbanLineService;
 	}
 
-	@Override
-	public Class<CKanbanColumn> getEntityClass() { return CKanbanColumn.class; }
+	private void applyStatusAndDefaultConstraints(final CKanbanColumn saved) {
+		Check.notNull(saved, "Kanban column cannot be null when applying constraints");
+		Check.notNull(saved.getId(), "Kanban column must be saved before enforcing constraints");
+		final CKanbanLine line = saved.getKanbanLine();
+		Check.notNull(line, "Kanban line cannot be null when enforcing constraints");
+		final List<CKanbanColumn> columns = findByMaster(line);
+		final Set<Long> includedStatusIds = saved.getIncludedStatuses() == null ? Set.of()
+				: saved.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null).map(status -> status.getId())
+						.collect(Collectors.toCollection(HashSet::new));
+		final boolean isDefaultColumn = saved.getDefaultColumn();
+		for (final CKanbanColumn column : columns) {
+			if (column.getId().equals(saved.getId())) {
+				continue;
+			}
+			boolean changed = false;
+			if (isDefaultColumn && column.getDefaultColumn()) {
+				column.setDefaultColumn(false);
+				changed = true;
+			}
+			if (!includedStatusIds.isEmpty() && column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
+				final List<Long> remainingStatusIds = column.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null)
+						.map(status -> status.getId()).filter(id -> !includedStatusIds.contains(id)).collect(Collectors.toList());
+				if (remainingStatusIds.size() != column.getIncludedStatuses().size()) {
+					final List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> remainingStatuses = column.getIncludedStatuses().stream()
+							.filter(status -> status != null && status.getId() != null && remainingStatusIds.contains(status.getId()))
+							.collect(Collectors.toList());
+					column.setIncludedStatuses(remainingStatuses);
+					changed = true;
+				}
+			}
+			if (changed) {
+				repository.save(column);
+			}
+		}
+	}
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return CKanbanColumnInitializerService.class; }
+	@Transactional
+	public void delete(final CKanbanColumn entity) {
+		Check.notNull(entity, "Kanban column cannot be null");
+		LOGGER.debug("Deleting kanban column: {}", entity.getId());
+		final CKanbanLine line = resolveLineForDelete(entity);
+		kanbanLineService.deleteKanbanColumn(line, entity);
+	}
 
 	@Override
-	public Class<?> getPageServiceClass() { return null; }
-
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
+	@Transactional
+	public void delete(final Long id) {
+		Check.notNull(id, "Entity ID cannot be null");
+		final CKanbanColumn entity = getTypedRepository().findByIdWithLine(id).orElse(null);
+		Check.notNull(entity, "Kanban column not found for delete");
+		delete(entity);
+	}
 
 	public List<CKanbanColumn> findByMaster(final CKanbanLine master) {
 		Check.notNull(master, "Master kanban line cannot be null");
@@ -55,6 +96,12 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		return getTypedRepository().findByMaster(master);
 	}
 
+	@Override
+	public Class<CKanbanColumn> getEntityClass() { return CKanbanColumn.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CKanbanColumnInitializerService.class; }
+
 	public Integer getNextItemOrder(final CKanbanLine master) {
 		Check.notNull(master, "Master kanban line cannot be null");
 		if (master.getId() == null) {
@@ -62,6 +109,12 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		}
 		return getTypedRepository().getNextItemOrder(master);
 	}
+
+	@Override
+	public Class<?> getPageServiceClass() { return null; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	private IKanbanColumnRepository getTypedRepository() { return (IKanbanColumnRepository) repository; }
 
@@ -116,109 +169,6 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		}
 	}
 
-	@Override
-	@Transactional
-	public CKanbanColumn save(final CKanbanColumn entity) {
-		Check.notNull(entity, "Kanban column cannot be null");
-		Check.notNull(entity.getKanbanLine(), "Kanban line cannot be null for column save");
-		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID cannot be null for column save");
-		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
-		final CKanbanLine line = resolveLineForSave(entity);
-		entity.setKanbanLine(line);
-		validateEntity(entity);
-		if (entity.getItemOrder() == null || entity.getItemOrder() <= 0) {
-			entity.setItemOrder(getNextItemOrder(line));
-		}
-		if (entity.getId() == null) {
-			line.addKanbanColumn(entity);
-			kanbanLineService.save(line);
-			final CKanbanColumn saved = reloadByName(line, entity.getName());
-			applyStatusAndDefaultConstraints(saved);
-			return saved;
-		}
-		final CKanbanColumn saved = super.save(entity);
-		applyStatusAndDefaultConstraints(saved);
-		return saved;
-	}
-
-	@Override
-	@Transactional
-	public void delete(final CKanbanColumn entity) {
-		Check.notNull(entity, "Kanban column cannot be null");
-		LOGGER.debug("Deleting kanban column: {}", entity.getId());
-		final CKanbanLine line = resolveLineForDelete(entity);
-		kanbanLineService.deleteKanbanColumn(line, entity);
-	}
-
-	@Override
-	@Transactional
-	public void delete(final Long id) {
-		Check.notNull(id, "Entity ID cannot be null");
-		final CKanbanColumn entity = getTypedRepository().findByIdWithLine(id).orElse(null);
-		Check.notNull(entity, "Kanban column not found for delete");
-		delete(entity);
-	}
-
-	private void applyStatusAndDefaultConstraints(final CKanbanColumn saved) {
-		Check.notNull(saved, "Kanban column cannot be null when applying constraints");
-		Check.notNull(saved.getId(), "Kanban column must be saved before enforcing constraints");
-		final CKanbanLine line = saved.getKanbanLine();
-		Check.notNull(line, "Kanban line cannot be null when enforcing constraints");
-		final List<CKanbanColumn> columns = findByMaster(line);
-		final Set<Long> includedStatusIds = saved.getIncludedStatuses() == null ? Set.of()
-				: saved.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null).map(status -> status.getId())
-						.collect(Collectors.toCollection(HashSet::new));
-		final boolean isDefaultColumn = saved.getDefaultColumn();
-		for (final CKanbanColumn column : columns) {
-			if (column.getId().equals(saved.getId())) {
-				continue;
-			}
-			boolean changed = false;
-			if (isDefaultColumn && column.getDefaultColumn()) {
-				column.setDefaultColumn(false);
-				changed = true;
-			}
-			if (!includedStatusIds.isEmpty() && column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
-				final List<Long> remainingStatusIds = column.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null)
-						.map(status -> status.getId()).filter(id -> !includedStatusIds.contains(id)).collect(Collectors.toList());
-				if (remainingStatusIds.size() != column.getIncludedStatuses().size()) {
-					final List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> remainingStatuses = column.getIncludedStatuses().stream()
-							.filter(status -> status != null && status.getId() != null && remainingStatusIds.contains(status.getId()))
-							.collect(Collectors.toList());
-					column.setIncludedStatuses(remainingStatuses);
-					changed = true;
-				}
-			}
-			if (changed) {
-				repository.save(column);
-			}
-		}
-	}
-
-	private CKanbanColumn reloadByName(final CKanbanLine line, final String name) {
-		final CKanbanColumn saved = getTypedRepository().findByMasterAndNameIgnoreCase(line, name).orElse(null);
-		Check.notNull(saved, "Saved kanban column could not be reloaded");
-		return saved;
-	}
-
-	@Override
-	protected void validateEntity(final CKanbanColumn entity) {
-		super.validateEntity(entity);
-		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
-		final CKanbanLine line = entity.getKanbanLine();
-		Check.notNull(line, "Kanban line cannot be null for column validation");
-		Check.notNull(line.getId(), "Kanban line ID cannot be null for column validation");
-		final String trimmedName = entity.getName().trim();
-		final CKanbanColumn existing = getTypedRepository().findByMasterAndNameIgnoreCase(line, trimmedName).orElse(null);
-		if (existing == null) {
-			return;
-		}
-		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
-			return;
-		}
-		throw new CValidationException("Kanban column name must be unique within the kanban line");
-	}
-
 	private List<CKanbanColumn> normalizeItemOrder(final CKanbanLine master) {
 		Check.notNull(master, "Kanban line cannot be null when normalizing order");
 		final List<CKanbanColumn> items = new ArrayList<>(findByMaster(master));
@@ -245,6 +195,12 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		return items;
 	}
 
+	private CKanbanColumn reloadByName(final CKanbanLine line, final String name) {
+		final CKanbanColumn saved = getTypedRepository().findByMasterAndNameIgnoreCase(line, name).orElse(null);
+		Check.notNull(saved, "Saved kanban column could not be reloaded");
+		return saved;
+	}
+
 	private CKanbanLine resolveLineForDelete(final CKanbanColumn entity) {
 		Check.notNull(entity.getKanbanLine(), "Kanban line reference missing for column delete");
 		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID missing for column delete");
@@ -259,5 +215,48 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn>
 		final CKanbanLine line = kanbanLineService.getById(entity.getKanbanLine().getId()).orElse(null);
 		Check.notNull(line, "Kanban line could not be loaded for column save");
 		return line;
+	}
+
+	@Override
+	@Transactional
+	public CKanbanColumn save(final CKanbanColumn entity) {
+		Check.notNull(entity, "Kanban column cannot be null");
+		Check.notNull(entity.getKanbanLine(), "Kanban line cannot be null for column save");
+		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID cannot be null for column save");
+		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
+		final CKanbanLine line = resolveLineForSave(entity);
+		entity.setKanbanLine(line);
+		validateEntity(entity);
+		if (entity.getItemOrder() == null || entity.getItemOrder() <= 0) {
+			entity.setItemOrder(getNextItemOrder(line));
+		}
+		if (entity.getId() == null) {
+			line.addKanbanColumn(entity);
+			kanbanLineService.save(line);
+			final CKanbanColumn saved = reloadByName(line, entity.getName());
+			applyStatusAndDefaultConstraints(saved);
+			return saved;
+		}
+		final CKanbanColumn saved = super.save(entity);
+		applyStatusAndDefaultConstraints(saved);
+		return saved;
+	}
+
+	@Override
+	protected void validateEntity(final CKanbanColumn entity) {
+		super.validateEntity(entity);
+		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
+		final CKanbanLine line = entity.getKanbanLine();
+		Check.notNull(line, "Kanban line cannot be null for column validation");
+		Check.notNull(line.getId(), "Kanban line ID cannot be null for column validation");
+		final String trimmedName = entity.getName().trim();
+		final CKanbanColumn existing = getTypedRepository().findByMasterAndNameIgnoreCase(line, trimmedName).orElse(null);
+		if (existing == null) {
+			return;
+		}
+		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
+			return;
+		}
+		throw new CValidationException("Kanban column name must be unique within the kanban line");
 	}
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -34,6 +36,7 @@ import tech.derbent.api.utils.Check;
  * @param <EntityClass> The entity type being selected */
 public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CDialog {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogEntitySelection.class);
 	private static final long serialVersionUID = 1L;
 	private final AlreadySelectedMode alreadySelectedMode;
 	private final ItemsProvider<EntityClass> alreadySelectedProvider;
@@ -190,8 +193,8 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		// Create the entity selection component with all configuration
 		componentEntitySelection = new CComponentEntitySelection<EntityClass>(componentEntityTypes, componentItemsProvider,
 				this::on_componentEntitySelection_selectionChanged, multiSelect, componentAlreadySelectedProvider, componentMode);
-        // Also register as a HasSelection listener so creators can observe selection set changes
-        componentEntitySelection.addValueChangeListener(event -> on_componentEntitySelection_selectionChanged(event.getValue()));
+		// Also register as a HasSelection listener so creators can observe selection set changes
+		componentEntitySelection.addValueChangeListener(event -> on_componentEntitySelection_selectionChanged(event.getValue()));
 		// Add component to main layout
 		mainLayout.add(componentEntitySelection);
 		mainLayout.setFlexGrow(1, componentEntitySelection);

@@ -1,5 +1,7 @@
 package tech.derbent.api.annotations;
 
+import tech.derbent.api.utils.Check;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.router.Route;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.utils.Check;
 
 /** CSpringAuxillaries - Utility class for Spring and Hibernate operations. Layer: Utility (MVC) Provides helper methods for handling lazy loading,
  * reflection, and other common operations. */

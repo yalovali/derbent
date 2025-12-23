@@ -34,7 +34,7 @@ public CCrudToolbar(
 ```java
 // Minimal constructor - just binder required
 public CCrudToolbar(final CEnhancedBinder<?> binder) {
-    Check.notNull(binder, "Binder cannot be null");
+    Objects.requireNonNull(binder, "Binder cannot be null");
     this.binder = binder;
     // ... initialization
     createToolbarButtons(); // Buttons created but disabled
@@ -297,7 +297,7 @@ toolbar.reconfigureForEntityType(CMeeting.class, meetingService);
 
 ### Type Safety
 - Proper use of @SuppressWarnings for known safe casts
-- Runtime checks with Check.notNull and Check.instanceOf
+- Runtime checks with Objects.requireNonNull and Check.instanceOf
 - Clear error messages when configuration is missing
 
 ### Performance

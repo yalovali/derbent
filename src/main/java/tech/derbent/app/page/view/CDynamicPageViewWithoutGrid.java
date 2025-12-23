@@ -116,19 +116,19 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityCreated(CEntityDB newEntity) throws Exception {}
+	public void onEntityCreated(CEntityDB newEntity) throws Exception {/**/}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityDeleted(CEntityDB entity) throws Exception {}
+	public void onEntityDeleted(CEntityDB entity) throws Exception {/**/}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {}
+	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {/**/}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntitySaved(CEntityDB savedEntity) throws Exception {}
+	public void onEntitySaved(CEntityDB savedEntity) throws Exception {/**/}
 
 	@SuppressWarnings ("rawtypes")
 	@Override

@@ -56,7 +56,7 @@ This method ensures proper rendering with comprehensive styling:
 
 ```java
 private Icon createIconFromImageData(final byte[] imageData) {
-    Check.notNull(imageData, "Image data cannot be null");
+    Objects.requireNonNull(imageData, "Image data cannot be null");
     Check.isTrue(imageData.length > 0, "Image data cannot be empty");
     
     // Create an Icon with a clean DOM structure

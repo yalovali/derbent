@@ -1,5 +1,7 @@
 package tech.derbent.api.interfaces;
 
+import tech.derbent.api.utils.Check;
+
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +10,6 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
-import tech.derbent.api.utils.Check;
 
 public interface IHasDragControl {
 

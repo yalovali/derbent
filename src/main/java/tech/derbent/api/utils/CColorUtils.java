@@ -107,6 +107,19 @@ public final class CColorUtils {
 		return icon;
 	}
 
+	/** Creates a user avatar with profile picture if available */
+	protected static Avatar createUserAvatar(final CUser user) {
+		final Avatar avatar = new Avatar();
+		Check.notNull(user, "User cannot be null when creating avatar");
+		avatar.setName(user.getName() + " " + (user.getLastname() != null ? user.getLastname() : ""));
+		if ((user.getProfilePictureData() != null) && (user.getProfilePictureData().length > 0)) {
+			// TODO: Convert byte array to StreamResource for avatar For now, just use
+			// initials
+		}
+		avatar.setAbbreviation(getInitials(user));
+		return avatar;
+	}
+
 	public static void debugStyleOfComponent(final Component component) {
 		if (component == null) {
 			LOGGER.debug("Component is null, cannot debug style");
@@ -148,7 +161,7 @@ public final class CColorUtils {
 			final Object colorValue = getColorMethod.invoke(entity);
 			if (colorValue instanceof String) {
 				final String color = (String) colorValue;
-				if ((color != null) && !color.isEmpty()) {
+				if (!color.isEmpty()) {
 					return color;
 				}
 			}
@@ -238,9 +251,8 @@ public final class CColorUtils {
 		// Check if entity implements IHasIcon and use instance method
 		if (entity instanceof IHasIcon) {
 			return styleIcon(((IHasIcon) entity).getIcon());
-		} else {
-			iconString = getStaticIconFilename(entity.getClass().getName());
 		}
+		iconString = getStaticIconFilename(entity.getClass().getName());
 		return getIconFromString(iconString);
 	}
 
@@ -257,6 +269,19 @@ public final class CColorUtils {
 	public static Icon getIconFromString(final String iconString) {
 		final Icon icon = new Icon(iconString);
 		return styleIcon(icon);
+	}
+
+	/** Gets user initials for avatar */
+	private static String getInitials(final CUser user) {
+		Check.notNull(user, "User cannot be null when generating initials");
+		final StringBuilder initials = new StringBuilder();
+		if ((user.getName() != null) && !user.getName().isEmpty()) {
+			initials.append(user.getName().charAt(0));
+		}
+		if ((user.getLastname() != null) && !user.getLastname().isEmpty()) {
+			initials.append(user.getLastname().charAt(0));
+		}
+		return initials.length() > 0 ? initials.toString().toUpperCase() : "?";
 	}
 
 	public static String getRandomColor(final boolean dark) {
@@ -511,31 +536,5 @@ public final class CColorUtils {
 	/** Private constructor to prevent instantiation. */
 	private CColorUtils() {
 		// Utility class - no instantiation
-	}
-
-	/** Creates a user avatar with profile picture if available */
-	protected Avatar createUserAvatar(final CUser user) {
-		final Avatar avatar = new Avatar();
-		Check.notNull(user, "User cannot be null when creating avatar");
-		avatar.setName(user.getName() + " " + (user.getLastname() != null ? user.getLastname() : ""));
-		if ((user.getProfilePictureData() != null) && (user.getProfilePictureData().length > 0)) {
-			// TODO: Convert byte array to StreamResource for avatar For now, just use
-			// initials
-		}
-		avatar.setAbbreviation(getInitials(user));
-		return avatar;
-	}
-
-	/** Gets user initials for avatar */
-	private String getInitials(final CUser user) {
-		Check.notNull(user, "User cannot be null when generating initials");
-		final StringBuilder initials = new StringBuilder();
-		if ((user.getName() != null) && !user.getName().isEmpty()) {
-			initials.append(user.getName().charAt(0));
-		}
-		if ((user.getLastname() != null) && !user.getLastname().isEmpty()) {
-			initials.append(user.getLastname().charAt(0));
-		}
-		return initials.length() > 0 ? initials.toString().toUpperCase() : "?";
 	}
 }

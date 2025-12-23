@@ -2,6 +2,8 @@ package tech.derbent.base.users.view;
 
 import java.io.IOException;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Image;
@@ -28,6 +30,7 @@ import tech.derbent.base.users.domain.CUser;
  * display name - Change password - Upload/delete profile picture */
 public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogUserProfile.class);
 	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
 	private static final long serialVersionUID = 1L;
 	private final Binder<CUser> binder = new Binder<>(CUser.class);
@@ -211,9 +214,6 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 	/** Handles profile picture upload using modern Vaadin Upload API. */
 	private void handleProfilePictureUpload(final UploadMetadata metadata, final byte[] data) throws IOException {
 		LOGGER.info("Handling profile picture upload: {} ({} bytes)", metadata.fileName(), data.length);
-		if ((metadata == null) || (data == null) || (data.length == 0)) {
-			throw new IOException("Invalid upload data");
-		}
 		final String fileName = metadata.fileName();
 		if ((fileName == null) || fileName.trim().isEmpty()) {
 			throw new IOException("Invalid file name");

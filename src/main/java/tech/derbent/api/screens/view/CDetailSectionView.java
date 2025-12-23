@@ -13,8 +13,6 @@ import tech.derbent.api.grid.view.CGridViewBaseProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.base.session.service.ISessionService;
@@ -24,26 +22,23 @@ import tech.derbent.base.session.service.ISessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Setup.UI.Detail Sections")
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
+
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - sections (darker)
 	public static final String DEFAULT_ICON = "vaadin:clipboard";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Detail Section View";
 	private final String ENTITY_ID_FIELD = "screen_id";
-	private final CEntityFieldService entityFieldService;
 	private final CPageService<CDetailSection> pageService;
 	private final CDetailLinesService screenLinesService;
-	private final CViewsService viewsService;
 
 	public CDetailSectionView(final CDetailSectionService entityService, final ISessionService sessionService,
-			final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService,
-			final CDetailSectionService screenService) throws Exception {
+			final CDetailLinesService screenLinesService, final CDetailSectionService screenService) throws Exception {
 		super(CDetailSection.class, entityService, sessionService, screenService);
 		this.screenLinesService = screenLinesService;
-		this.entityFieldService = entityFieldService;
-		this.viewsService = viewsService;
 		pageService = new CPageServiceEntityDB<CDetailSection>(this);
 	}
 
+	@SuppressWarnings ("unused")
 	@Override
 	public void createGridForEntity(final CGrid<CDetailSection> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
@@ -65,31 +60,24 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		
 		return null;
 	}
 
 	@Override
-	public CDetailsBuilder getDetailsBuilder() { 
-		return null;
-	}
+	public CDetailsBuilder getDetailsBuilder() { return null; }
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	public CPageService<CDetailSection> getPageService() { 
-		return pageService;
-	}
+	public CPageService<CDetailSection> getPageService() { return pageService; }
 
 	@Override
-	public ISessionService getSessionService() { 
-		return null;
-	}
+	public ISessionService getSessionService() { return null; }
 
 	@Override
 	public void selectFirstInGrid() {
-		
+		/***/
 	}
 
 	@Override
@@ -99,10 +87,8 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		addAccordionPanel(new CPanelDetailSectionBasicInfo(this, getValue(), getBinder(), (CDetailSectionService) entityService));
-		addAccordionPanel(new CPanelDetailLines(this, getValue(), getBinder(), (CDetailSectionService) entityService, screenLinesService,
-				entityFieldService, viewsService));
-		addAccordionPanel(
-				new CPanelDetailSectionPreview(this, getValue(), getBinder(), (CDetailSectionService) entityService, sessionService));
+		addAccordionPanel(new CPanelDetailSectionBasicInfo(this, getBinder(), (CDetailSectionService) entityService));
+		addAccordionPanel(new CPanelDetailLines(this, getBinder(), (CDetailSectionService) entityService, screenLinesService));
+		addAccordionPanel(new CPanelDetailSectionPreview(this, getBinder(), (CDetailSectionService) entityService, sessionService));
 	}
 }

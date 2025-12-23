@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,8 +13,6 @@ import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.projects.service.IProjectRepository;
-import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
@@ -22,18 +22,18 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 @Transactional (readOnly = true)
 public class CUserProjectSettingsService extends CAbstractEntityRelationService<CUserProjectSettings> implements IEntityRegistrable {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectSettingsService.class);
 	private final IUserProjectSettingsRepository repository;
 
 	@Autowired
-	public CUserProjectSettingsService(final IUserProjectSettingsRepository repository, final Clock clock, final ISessionService sessionService,
-			final IUserRepository userRepository, final IProjectRepository projectRepository) {
+	public CUserProjectSettingsService(final IUserProjectSettingsRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		this.repository = repository;
 	}
 
 	/** Add user to project with specific role and permissions */
 	@Transactional
-	public CUserProjectSettings addUserToProject(final CUser user, final CProject project, final CUserProjectRole role, final String permission) {
+	public CUserProjectSettings addUserToProject(final CUser user, final CProject project, final String permission) {
 		// LOGGER.debug("Adding user {} to project {} with role {} and permission {}", user, project, role, permission);
 		Check.notNull(user, "User must not be null");
 		Check.notNull(project, "Project must not be null");

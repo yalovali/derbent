@@ -380,7 +380,7 @@ public class CEntityFieldService {
 		while ((type != null) && (type != Object.class)) {
 			try {
 				return type.getDeclaredField(fieldName);
-			} catch (final NoSuchFieldException e) {
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 				type = type.getSuperclass(); // bir üst sınıfa bak
 			}
 		}
@@ -519,13 +519,12 @@ public class CEntityFieldService {
 				|| (type == Float.class) || (type == LocalDate.class) || (type == LocalDateTime.class) || (type == Date.class)
 				|| (type == Boolean.class)) {
 			return false;
-		} else {
-			if (type.getSimpleName().startsWith("E")) {
-				// enum
-				return false;
-			}
-			return true;
 		}
+		if (type.getSimpleName().startsWith("E")) {
+			// enum
+			return false;
+		}
+		return true;
 	}
 
 	/** Prints detailed field information for debugging purposes.

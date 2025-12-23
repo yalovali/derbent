@@ -1,10 +1,11 @@
 package tech.derbent.app.assets.assettype.service;
 
+import tech.derbent.api.utils.Check;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.assets.assettype.domain.CAssetType;
 
 public class CPageServiceAssetType extends CPageServiceDynamicPage<CAssetType> {
@@ -22,7 +23,7 @@ public class CPageServiceAssetType extends CPageServiceDynamicPage<CAssetType> {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CAssetType.class.getSimpleName());
 			Check.notNull(getView(), "View must not be null to bind page service.");
 			super.bind();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CAssetType.class.getSimpleName(),
 					e.getMessage());
 			throw e;

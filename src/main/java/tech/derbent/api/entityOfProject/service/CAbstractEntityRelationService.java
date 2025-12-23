@@ -3,6 +3,8 @@ package tech.derbent.api.entityOfProject.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -13,6 +15,8 @@ import tech.derbent.base.session.service.ISessionService;
 /** Abstract service class for managing entity-to-entity relationships. Provides common operations for relationship entities.
  * @param <RelationEntity> The relationship entity type */
 public abstract class CAbstractEntityRelationService<RelationEntity extends CEntityDB<RelationEntity>> extends CAbstractService<RelationEntity> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAbstractEntityRelationService.class);
 
 	public CAbstractEntityRelationService(final IAbstractRepository<RelationEntity> repository, final Clock clock,
 			final ISessionService sessionService) {

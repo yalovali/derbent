@@ -167,7 +167,7 @@ public class CPageService[Entity] extends CPageServiceDynamicPage<C[Entity]> {
             LOGGER.debug("Binding {} to dynamic page for entity {}.", 
                 this.getClass().getSimpleName(), 
                 C[Entity].class.getSimpleName());
-            Check.notNull(view, "View must not be null to bind page service.");
+            Objects.requireNonNull(view, "View must not be null to bind page service.");
             super.bind();
             // Custom logic can be added here
         } catch (Exception e) {

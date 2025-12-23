@@ -223,7 +223,7 @@ public class CWorkflowTransition {
 
 ### Service Registration
 - Registered in CDataInitializer constructor: `workflowEntityService = CSpringContext.getBean(...)`
-- Null check added: `Check.notNull(workflowEntityService, "WorkflowEntityService bean not found")`
+- Null check added: `Objects.requireNonNull(workflowEntityService, "WorkflowEntityService bean not found")`
 
 ### Menu Integration
 - Menu Path: Projects → Workflows

@@ -46,7 +46,7 @@ protected void populateForm() {
 @Override
 protected void validateForm() {
     // 1. Check entity is not null
-    Check.notNull(getEntity(), "Workflow status relation cannot be null");
+    Objects.requireNonNull(getEntity(), "Workflow status relation cannot be null");
     
     // 2. Validate fromStatus is set
     if (getEntity().getFromStatus() == null) {

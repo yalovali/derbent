@@ -3,6 +3,8 @@ package tech.derbent.api.entity.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.utils.Check;
@@ -11,6 +13,8 @@ import tech.derbent.base.session.service.ISessionService;
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
 public abstract class CEntityNamedService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamedService.class);
 
 	/** Constructor without session service. Use this constructor when session service will be injected via setter method to avoid circular
 	 * dependencies. */

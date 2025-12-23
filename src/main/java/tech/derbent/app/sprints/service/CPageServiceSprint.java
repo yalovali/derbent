@@ -120,18 +120,16 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
 			if (event.getTargetItem() instanceof CSprintItem) {
 				return ((CSprintItem) event.getTargetItem()).getSprint();
-			} else {
-				LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
-				return null;
 			}
+			LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+			return null;
 		} else if (event.getSource() instanceof CComponentWidgetSprint) {
 			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
 			if (event.getTargetItem() instanceof CSprint) {
 				return (CSprint) event.getTargetItem();
-			} else {
-				LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
-				return null;
 			}
+			LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+			return null;
 		} else {
 			LOGGER.error("Cannot determine target sprint from drop event source: {}", event.getSource().getClass().getSimpleName());
 			return null;
@@ -442,7 +440,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
-	public void on_backlogItems_change(final Component component, final Object value) {
+	public void on_backlogItems_change(@SuppressWarnings ("unused") final Component component, final Object value) {
 		LOGGER.info("function: on_backlog_clicked for Component type");
 		if (componentItemDetails == null) {
 			return;
@@ -462,7 +460,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		componentItemDetails.setValue(item);
 	}
 
-	public void on_backlogItems_dragStart(final Component component, final Object value) {
+	public void on_backlogItems_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
 		try {
 			// LOGGER.info("function: on_backlogItems_dragStart for Component type: {}", component.getClass().getSimpleName());
 			Check.instanceOf(value, CDragStartEvent.class, "Drop value must be CDragDropEvent");
@@ -476,7 +474,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	public void on_backlogItems_drop(final Component component, final Object value) {
+	public void on_backlogItems_drop(@SuppressWarnings ("unused") final Component component, final Object value) {
 		try {
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for backlog drop");
 			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
@@ -513,7 +511,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
 
-	public void on_masterGrid_dragStart(final Component component, final Object value) {
+	public void on_masterGrid_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
 		try {
 			// LOGGER.debug("function: on_masterGrid_dragStart for Component type: {}", component.getClass().getSimpleName());
 			Check.instanceOf(value, CDragStartEvent.class, "Drop value must be CDragDropEvent");

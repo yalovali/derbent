@@ -1,5 +1,6 @@
 package tech.derbent.api.entity.view;
 
+import tech.derbent.api.utils.Check;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -8,14 +9,13 @@ import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
 		implements ILayoutChangeListener {
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(CAbstractNamedEntityPage.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAbstractNamedEntityPage.class);
 	private static final long serialVersionUID = 1L;
 	protected final CDetailsBuilder detailsBuilder;
 	protected final CDetailSectionService screenService;

@@ -29,8 +29,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityTypeService entityTypeService;
-	private final CSprintItemService sprintItemService;
 	Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
+	private final CSprintItemService sprintItemService;
 
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
 			final CActivityTypeService activityTypeService, final CProjectItemStatusService projectItemStatusService,
@@ -44,6 +44,34 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Override
 	public String checkDeleteAllowed(final CActivity activity) {
 		return super.checkDeleteAllowed(activity);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final CActivity activity) {
+		Check.notNull(activity, "Activity cannot be null");
+		Check.notNull(activity.getId(), "Activity ID cannot be null");
+		detachSprintItemIfPresent(activity);
+		super.delete(activity);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final Long id) {
+		Check.notNull(id, "Activity ID cannot be null");
+		final CActivity activity =
+				repository.findById(id).orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Activity not found: " + id));
+		delete(activity);
+	}
+
+	private void detachSprintItemIfPresent(final CActivity activity) {
+		final CSprintItem sprintItem = activity.getSprintItem();
+		if (sprintItem == null || sprintItem.getId() == null) {
+			return;
+		}
+		activity.setSprintItem(null);
+		repository.saveAndFlush(activity);
+		sprintItemService.delete(sprintItem.getId());
 	}
 
 	@Override
@@ -90,34 +118,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		final CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
 		return ((IActivityRepository) repository).listByUser(currentUser);
-	}
-
-	private void detachSprintItemIfPresent(final CActivity activity) {
-		final CSprintItem sprintItem = activity.getSprintItem();
-		if (sprintItem == null || sprintItem.getId() == null) {
-			return;
-		}
-		activity.setSprintItem(null);
-		repository.saveAndFlush(activity);
-		sprintItemService.delete(sprintItem.getId());
-	}
-
-	@Override
-	@Transactional
-	public void delete(final CActivity activity) {
-		Check.notNull(activity, "Activity cannot be null");
-		Check.notNull(activity.getId(), "Activity ID cannot be null");
-		detachSprintItemIfPresent(activity);
-		super.delete(activity);
-	}
-
-	@Override
-	@Transactional
-	public void delete(final Long id) {
-		Check.notNull(id, "Activity ID cannot be null");
-		final CActivity activity = repository.findById(id)
-				.orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Activity not found: " + id));
-		delete(activity);
 	}
 
 	/** Lists activities by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.

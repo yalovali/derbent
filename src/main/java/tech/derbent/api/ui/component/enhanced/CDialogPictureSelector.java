@@ -24,7 +24,9 @@ import tech.derbent.api.utils.CImageUtils;
 
 /** Dialog that contains the full picture selector functionality. Used when CPictureSelector is in icon mode and user clicks on the icon. */
 public class CDialogPictureSelector extends Dialog {
+
 	public interface ValueChangeListener {
+
 		void valueChanged(byte[] newValue);
 	}
 
@@ -38,7 +40,7 @@ public class CDialogPictureSelector extends Dialog {
 	private final EntityFieldInfo fieldInfo;
 	private Image imagePreview;
 	private Upload imageUpload;
-	private byte[] originalValue;
+	private final byte[] originalValue;
 	private boolean readOnly = false;
 	private CButton saveButton;
 	private final List<ValueChangeListener> valueChangeListeners = new ArrayList<>();
@@ -64,14 +66,14 @@ public class CDialogPictureSelector extends Dialog {
 
 	private void createComponents() {
 		// Dialog title
-		CH3 title = new CH3("Picture Selector");
+		final CH3 title = new CH3("Picture Selector");
 		title.getStyle().set("margin", "0 0 20px 0");
 		// Create image preview component
 		imagePreview = new Image();
 		CAuxillaries.setId(imagePreview);
 		// Set dimensions from fieldInfo or use defaults
-		String width = fieldInfo.getWidth().isEmpty() ? "150px" : fieldInfo.getWidth();
-		String height = "150px";
+		final String width = fieldInfo.getWidth().isEmpty() ? "150px" : fieldInfo.getWidth();
+		final String height = "150px";
 		imagePreview.setWidth(width);
 		imagePreview.setHeight(height);
 		imagePreview.getStyle().set("border-radius", "8px");
@@ -94,21 +96,21 @@ public class CDialogPictureSelector extends Dialog {
 		deleteButton.setVisible(!readOnly);
 	}
 
-	private void handleCancel(final ClickEvent<Button> event) {
+	private void handleCancel(@SuppressWarnings ("unused") final ClickEvent<Button> event) {
 		// Restore original value
 		currentValue = originalValue != null ? originalValue.clone() : null;
 		close();
 	}
 
-	private void handleDelete(final ClickEvent<Button> event) {
+	private void handleDelete(@SuppressWarnings ("unused") final ClickEvent<Button> event) {
 		currentValue = null;
 		updateImagePreview();
 		CNotificationService.showSuccess("Image deleted");
 	}
 
-	private void handleSave(final ClickEvent<Button> event) {
+	private void handleSave(@SuppressWarnings ("unused") final ClickEvent<Button> event) {
 		// Notify listeners of the value change
-		for (ValueChangeListener listener : valueChangeListeners) {
+		for (final ValueChangeListener listener : valueChangeListeners) {
 			listener.valueChanged(currentValue);
 		}
 		close();
@@ -141,18 +143,18 @@ public class CDialogPictureSelector extends Dialog {
 	}
 
 	private void setupLayout() {
-		VerticalLayout layout = new VerticalLayout();
+		final VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(true);
 		layout.setPadding(true);
 		layout.setAlignItems(VerticalLayout.Alignment.CENTER);
-		CH3 title = new CH3("Picture Selector");
+		final CH3 title = new CH3("Picture Selector");
 		title.getStyle().set("margin", "0 0 20px 0");
 		layout.add(title, imagePreview);
 		if (!readOnly) {
 			layout.add(imageUpload, deleteButton);
 		}
 		// Button layout
-		HorizontalLayout buttonLayout = new HorizontalLayout();
+		final HorizontalLayout buttonLayout = new HorizontalLayout();
 		buttonLayout.setSpacing(true);
 		buttonLayout.add(cancelButton, saveButton);
 		layout.add(buttonLayout);

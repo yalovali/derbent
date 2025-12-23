@@ -12,6 +12,10 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CMasterSectionService extends CEntityOfProjectService<CMasterSection> {
 
+	public static List<String> getAvailableTypes() {
+		return List.of("Grid Chart", "Gannt", "None"); // Replace with actual types
+	}
+
 	public CMasterSectionService(final IMasterSectionRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -19,10 +23,6 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 	@Override
 	public String checkDeleteAllowed(final CMasterSection entity) {
 		return super.checkDeleteAllowed(entity);
-	}
-
-	public List<String> getAvailableTypes() {
-		return List.of("Grid Chart", "Gannt", "None"); // Replace with actual types
 	}
 
 	@Override

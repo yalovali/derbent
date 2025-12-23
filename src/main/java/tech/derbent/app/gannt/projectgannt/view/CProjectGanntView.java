@@ -30,7 +30,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "GanntEntity View";
 	private final String ENTITY_ID_FIELD = "ganntview_id";
-	private CPageServiceProjectGannt pageService;
+	private final CPageServiceProjectGannt pageService;
 
 	protected CProjectGanntView(final CGanntViewEntityService entityService, final ISessionService sessionService,
 			final CDetailSectionService screenService, final CActivityService activityService, final CMeetingService meetingService,
@@ -39,7 +39,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 		final CGanntViewEntity viewEntity =
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
 		setValue(viewEntity);
-		pageService = new CPageServiceProjectGannt(this, activityService, meetingService);
+		pageService = new CPageServiceProjectGannt(this);
 		// createDetailsLayout();
 	}
 
@@ -53,31 +53,23 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	@Override
 	public CEntityDB<?> createNewEntityInstance() {
-		
 		return null;
 	}
 
 	@Override
-	public CDetailsBuilder getDetailsBuilder() { 
-		return null;
-	}
+	public CDetailsBuilder getDetailsBuilder() { return null; }
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	public CPageService<CGanntViewEntity> getPageService() { 
-		return pageService;
-	}
+	public CPageService<CGanntViewEntity> getPageService() { return pageService; }
 
 	@Override
-	public ISessionService getSessionService() { 
-		return null;
-	}
+	public ISessionService getSessionService() { return null; }
 
 	@Override
-	public void selectFirstInGrid() {
-		
+	public void selectFirstInGrid() {/**/
 	}
 
 	@Override

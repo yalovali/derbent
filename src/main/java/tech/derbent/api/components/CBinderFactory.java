@@ -31,10 +31,9 @@ public class CBinderFactory {
 		if (useEnhancedBinderByDefault) {
 			LOGGER.debug("Creating enhanced binder for bean type: {}", beanType.getSimpleName());
 			return new CEnhancedBinder<>(beanType);
-		} else {
-			LOGGER.debug("Creating standard binder for bean type: {}", beanType.getSimpleName());
-			return new CEnhancedBinder<>(beanType);
 		}
+		LOGGER.debug("Creating standard binder for bean type: {}", beanType.getSimpleName());
+		return new CEnhancedBinder<>(beanType);
 	}
 
 	/** Creates an enhanced binder with detailed error logging.
@@ -59,7 +58,7 @@ public class CBinderFactory {
 	 * @param binder the binder to check
 	 * @return true if the binder is an enhanced binder */
 	public static boolean isEnhancedBinder(final CEnhancedBinder<?> binder) {
-		return binder instanceof CEnhancedBinder;
+		return binder != null;
 	}
 
 	/** Checks if enhanced binders are used by default.

@@ -23,7 +23,7 @@ A generic component that can work with any type of data, with special support fo
 - Add/Remove buttons with icons and tooltips for moving items between lists
 - Up/Down buttons with icons and tooltips for ordering selected items
 - **Color-aware rendering for CEntityNamed entities** (automatically displays colors and icons)
-- **Parameter validation** - All public methods validate inputs with Check.notNull/notBlank
+- **Parameter validation** - All public methods validate inputs with Objects.requireNonNull/notBlank
 - **Exception handling** - Proper error handling with logging and meaningful exceptions
 - Implements `HasValue` and `HasValueAndElement` for Vaadin binder integration
 - Customizable item label generators for non-entity types
@@ -33,8 +33,8 @@ A generic component that can work with any type of data, with special support fo
 
 The component includes comprehensive validation:
 - Title parameters are validated with `Check.notBlank`
-- Listener parameters are validated with `Check.notNull`
-- ListBox parameters are validated with `Check.notNull`
+- Listener parameters are validated with `Objects.requireNonNull`
+- ListBox parameters are validated with `Objects.requireNonNull`
 - All exceptions are logged with SLF4J Logger
 - Meaningful error messages for all validation failures
 

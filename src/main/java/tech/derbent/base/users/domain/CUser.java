@@ -53,6 +53,43 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUser.class);
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
+
+	private static String createSvgDataUrl(final String svgContent) {
+		Check.notBlank(svgContent, "SVG content cannot be null or blank");
+		final String encodedSvg = URLEncoder.encode(svgContent, StandardCharsets.UTF_8);
+		return "data:image/svg+xml;charset=utf-8," + encodedSvg;
+	}
+
+	/** Creates a custom Icon component that can render SVG content.
+	 * @param svgContent The SVG markup to render
+	 * @return Icon component that will properly render the SVG */
+	private static Icon createSvgIcon(final String svgContent) {
+		Check.notBlank(svgContent, "SVG content cannot be null or blank");
+		final String svgDataUrl = createSvgDataUrl(svgContent);
+		final Icon icon = new Icon();
+		icon.getElement().setAttribute("icon", svgDataUrl);
+		icon.setSize(ICON_SIZE + "px");
+		return CColorUtils.styleIcon(icon);
+	}
+
+	/** Detects MIME type from image data signature.
+	 * @param imageData Binary image data
+	 * @return MIME type string (e.g., "image/png", "image/jpeg") */
+	private static String detectMimeType(final byte[] imageData) {
+		if (imageData.length < 4) {
+			return "image/png"; // Default fallback
+		}
+		// Check for PNG signature (89 50 4E 47)
+		if ((imageData[0] & 0xFF) == 0x89 && (imageData[1] & 0xFF) == 0x50 && (imageData[2] & 0xFF) == 0x4E && (imageData[3] & 0xFF) == 0x47) {
+			return "image/png";
+		}
+		// Check for JPEG signature (FF D8)
+		if ((imageData[0] & 0xFF) == 0xFF && (imageData[1] & 0xFF) == 0xD8) {
+			return "image/jpeg";
+		}
+		return "image/png"; // Default fallback
+	}
+
 	@OneToMany (fetch = FetchType.LAZY)
 	@OrderColumn (name = "item_index")
 	@AMetaData (
@@ -183,42 +220,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 						+ "<image href=\"%s\" width=\"%d\" height=\"%d\" " + "style=\"border-radius: 2px;\"/></svg>",
 				ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE, dataUrl, ICON_SIZE, ICON_SIZE);
 		return createSvgIcon(svgContent);
-	}
-
-	private String createSvgDataUrl(final String svgContent) {
-		Check.notBlank(svgContent, "SVG content cannot be null or blank");
-		final String encodedSvg = URLEncoder.encode(svgContent, StandardCharsets.UTF_8);
-		return "data:image/svg+xml;charset=utf-8," + encodedSvg;
-	}
-
-	/** Creates a custom Icon component that can render SVG content.
-	 * @param svgContent The SVG markup to render
-	 * @return Icon component that will properly render the SVG */
-	private Icon createSvgIcon(final String svgContent) {
-		Check.notBlank(svgContent, "SVG content cannot be null or blank");
-		final String svgDataUrl = createSvgDataUrl(svgContent);
-		final Icon icon = new Icon();
-		icon.getElement().setAttribute("icon", svgDataUrl);
-		icon.setSize(ICON_SIZE + "px");
-		return CColorUtils.styleIcon(icon);
-	}
-
-	/** Detects MIME type from image data signature.
-	 * @param imageData Binary image data
-	 * @return MIME type string (e.g., "image/png", "image/jpeg") */
-	private String detectMimeType(final byte[] imageData) {
-		if (imageData.length < 4) {
-			return "image/png"; // Default fallback
-		}
-		// Check for PNG signature (89 50 4E 47)
-		if ((imageData[0] & 0xFF) == 0x89 && (imageData[1] & 0xFF) == 0x50 && (imageData[2] & 0xFF) == 0x4E && (imageData[3] & 0xFF) == 0x47) {
-			return "image/png";
-		}
-		// Check for JPEG signature (FF D8)
-		if ((imageData[0] & 0xFF) == 0xFF && (imageData[1] & 0xFF) == 0xD8) {
-			return "image/jpeg";
-		}
-		return "image/png"; // Default fallback
 	}
 
 	@Override

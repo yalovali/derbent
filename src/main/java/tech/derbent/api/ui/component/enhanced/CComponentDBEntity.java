@@ -17,6 +17,9 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		implements IContentOwner, IHasContentOwner {
 
 	private static final long serialVersionUID = 1L;
+
+	public static boolean isPanelVisible() { return true; }
+
 	private final CEnhancedBinder<EntityClass> binder;
 	protected IContentOwner contentOwner = null;
 	private EntityClass currentEntity;
@@ -27,7 +30,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	@SuppressWarnings ("unchecked")
-	public CComponentDBEntity(final String title, final Class<EntityClass> entityClass) {
+	public CComponentDBEntity(final Class<EntityClass> entityClass) {
 		super(false, true, false); // no padding, with spacing, no margin
 		this.entityClass = entityClass;
 		Check.notNull(entityClass, "Entity class cannot be null");
@@ -39,7 +42,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		try {
 			Check.notNull(binder, "Binder cannot be null when clearing form");
 			binder.readBean(null);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to clear form.");
 			throw e;
 		}
@@ -53,9 +56,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	@Override
 	public IContentOwner getContentOwner() { return contentOwner; }
-
-	@Override
-	public EntityClass getValue() { return currentEntity; }
 
 	@Override
 	public String getCurrentEntityIdString() {
@@ -75,6 +75,9 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected String getPanelTitle() { return entityClass.getSimpleName() + " Settings"; }
 
+	@Override
+	public EntityClass getValue() { return currentEntity; }
+
 	protected final void initComponent() throws Exception {
 		Check.isTrue(!isPanelInitialized, "Panel is already initialized");
 		addClassName("c-component-db-entity");
@@ -86,8 +89,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	protected abstract void initPanel() throws Exception;
-
-	public boolean isPanelVisible() { return true; }
 
 	protected void onPanelOpened() {
 		LOGGER.debug("Component panel opened for entity class: {}", entityClass.getSimpleName());
@@ -106,7 +107,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 			EntityClass entityToUse = getValue();
 			if (entityToUse == null && contentOwner != null) {
 				// Try to get entity from parent content owner
-				Object parentEntity = contentOwner.getValue();
+				final Object parentEntity = contentOwner.getValue();
 				if (parentEntity != null && entityClass.isInstance(parentEntity)) {
 					entityToUse = entityClass.cast(parentEntity);
 				}
@@ -124,7 +125,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 					binder.setBean(null);
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to populate form for entity {}: {}", entityClass.getSimpleName(), e.getMessage());
 			throw e;
 		}
@@ -132,13 +133,13 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected void saveFormData() throws Exception {
 		try {
-			EntityClass entity = getValue();
+			final EntityClass entity = getValue();
 			Check.notNull(entity, "Current entity cannot be null when saving form data");
 			Check.notNull(binder, "Binder cannot be null when saving form data");
 			binder.writeBean(entity);
 			entityService.save(entity);
 			LOGGER.debug("Form data saved for entity: {}", entity);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to save form data for entity {}: {}", entityClass.getSimpleName(), e.getMessage());
 			throw e;
 		}
@@ -147,23 +148,21 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	@Override
 	public void setContentOwner(IContentOwner parentContent) { contentOwner = parentContent; }
 
-	@SuppressWarnings ("unchecked")
-	@Override
-	public void setValue(CEntityDB<?> entity) { 
-		currentEntity = (EntityClass) entity; 
-	}
-
 	protected void setEntityFields(final List<String> fields) {
 		Check.notNull(fields, "Entity fields list cannot be null");
 		EntityFields = fields;
 	}
+
+	@SuppressWarnings ("unchecked")
+	@Override
+	public void setValue(CEntityDB<?> entity) { currentEntity = (EntityClass) entity; }
 
 	protected abstract void updatePanelEntityFields();
 
 	public boolean validateForm() {
 		try {
 			return binder != null && binder.validate().isOk();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to validate form for entity {}: {}", entityClass.getSimpleName(), e.getMessage());
 			return false;
 		}

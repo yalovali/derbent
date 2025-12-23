@@ -17,6 +17,12 @@ public class CComponentId extends CLabelEntity {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentId.class);
 	private static final long serialVersionUID = 1L;
 
+	private static Span createIdSpan(final Object idValue) {
+		final Span idSpan = new Span(idValue != null ? String.valueOf(idValue) : ID_PLACEHOLDER);
+		idSpan.getStyle().set("font-variant-numeric", "tabular-nums");
+		return idSpan;
+	}
+
 	public CComponentId(final CEntityDB<?> entity) throws Exception {
 		this(entity, entity != null ? entity.getId() : null);
 	}
@@ -49,11 +55,5 @@ public class CComponentId extends CLabelEntity {
 			LOGGER.error("Could not resolve icon for {}: {}", entity.getClass().getSimpleName(), e.getMessage());
 			throw e;
 		}
-	}
-
-	private Span createIdSpan(final Object idValue) {
-		final Span idSpan = new Span(idValue != null ? String.valueOf(idValue) : ID_PLACEHOLDER);
-		idSpan.getStyle().set("font-variant-numeric", "tabular-nums");
-		return idSpan;
 	}
 }

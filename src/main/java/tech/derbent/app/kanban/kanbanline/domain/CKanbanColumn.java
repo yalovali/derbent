@@ -1,5 +1,7 @@
 package tech.derbent.app.kanban.kanbanline.domain;
 
+import tech.derbent.api.utils.Check;
+
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.AttributeOverride;
@@ -15,7 +17,6 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.screens.service.IOrderedEntity;
-import tech.derbent.api.utils.Check;
 
 @Entity
 @Table (name = "ckanbancolumn")
@@ -27,24 +28,12 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	public static final String ENTITY_TITLE_PLURAL = "Kanban Columns";
 	public static final String ENTITY_TITLE_SINGULAR = "Kanban Column";
 	public static final String VIEW_NAME = "Kanban Columns View";
-	@Column (name = "item_order", nullable = false)
-	@AMetaData (
-			displayName = "Order", required = false, readOnly = false, defaultValue = "1", description = "Sort order for kanban columns",
-			hidden = false
-	)
-	private Integer itemOrder = 1;
 	@Column (name = "default_column", nullable = false)
 	@AMetaData (
 			displayName = "Default Column", required = false, readOnly = false, defaultValue = "false",
 			description = "When enabled, this column handles items without explicit status mapping", hidden = false
 	)
 	private boolean defaultColumn = false;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "kanban_line_id", nullable = false)
-	@AMetaData (
-			displayName = "Kanban Line", required = true, readOnly = true, description = "Parent Kanban line that owns this column", hidden = true
-	)
-	private CKanbanLine kanbanLine;
 	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (
 			name = "ckanbancolumn_included_status", joinColumns = @JoinColumn (name = "kanban_column_id"),
@@ -56,6 +45,18 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CProjectItemStatusService", useGridSelection = true
 	)
 	private List<CProjectItemStatus> includedStatuses = new ArrayList<>();
+	@Column (name = "item_order", nullable = false)
+	@AMetaData (
+			displayName = "Order", required = false, readOnly = false, defaultValue = "1", description = "Sort order for kanban columns",
+			hidden = false
+	)
+	private Integer itemOrder = 1;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "kanban_line_id", nullable = false)
+	@AMetaData (
+			displayName = "Kanban Line", required = true, readOnly = true, description = "Parent Kanban line that owns this column", hidden = true
+	)
+	private CKanbanLine kanbanLine;
 
 	/** Default constructor for JPA. */
 	public CKanbanColumn() {
@@ -67,21 +68,21 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 		setKanbanLine(kanbanLine);
 	}
 
-	public List<CProjectItemStatus> getIncludedStatuses() { return includedStatuses; }
-
 	public boolean getDefaultColumn() { return defaultColumn; }
+
+	public List<CProjectItemStatus> getIncludedStatuses() { return includedStatuses; }
 
 	@Override
 	public Integer getItemOrder() { return itemOrder; }
 
 	public CKanbanLine getKanbanLine() { return kanbanLine; }
 
+	public void setDefaultColumn(final boolean defaultColumn) { this.defaultColumn = defaultColumn; }
+
 	public void setIncludedStatuses(final List<CProjectItemStatus> includedStatuses) {
 		Check.notNull(includedStatuses, "Included statuses cannot be null");
 		this.includedStatuses = new ArrayList<>(includedStatuses);
 	}
-
-	public void setDefaultColumn(final boolean defaultColumn) { this.defaultColumn = defaultColumn; }
 
 	@Override
 	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }

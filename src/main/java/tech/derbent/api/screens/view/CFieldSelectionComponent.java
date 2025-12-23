@@ -52,11 +52,11 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 
 	/** Fires a value change event to listeners. */
 	private void fireValueChangeEvent() {
-		List<String> oldValue = new ArrayList<>(currentValue);
-		List<String> newValue = getValue();
+		final List<String> oldValue = new ArrayList<>(currentValue);
+		final List<String> newValue = getValue();
 		currentValue = new ArrayList<>(newValue);
 		if (!oldValue.equals(newValue)) {
-			ValueChangeEvent<List<String>> event = new ValueChangeEvent<List<String>>() {
+			final ValueChangeEvent<List<String>> event = new ValueChangeEvent<List<String>>() {
 
 				private static final long serialVersionUID = 1L;
 
@@ -102,9 +102,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	public boolean isRequiredIndicatorVisible() { return false; }
 
 	/** Called when the underlying dual list selector selection changes. Updates the FieldSelection list. */
-	private void onSelectionChanged(Set<EntityFieldInfo> selectedFields) {
+	private void onSelectionChanged(@SuppressWarnings ("unused") Set<EntityFieldInfo> selectedFields) {
 		// Rebuild selections list from current order
-		List<EntityFieldInfo> orderedFields = dualListSelector.getSelectedItems();
+		final List<EntityFieldInfo> orderedFields = dualListSelector.getSelectedItems();
 		selections.clear();
 		for (int i = 0; i < orderedFields.size(); i++) {
 			selections.add(new FieldSelection(orderedFields.get(i), i + 1));
@@ -118,7 +118,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		if (entityType == null) {
 			return;
 		}
-		List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
+		final List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
 		dualListSelector.setItems(allFields);
 	}
 
@@ -131,18 +131,18 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 			return;
 		}
 		// Parse the string and build FieldSelection list
-		List<FieldSelection> tempSelections = new ArrayList<>();
+		final List<FieldSelection> tempSelections = new ArrayList<>();
 		int order = 0;
-		for (String fieldName : currentSelections) {
+		for (final String fieldName : currentSelections) {
 			try {
 				// Find field info from all available fields
-				List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType != null ? entityType : getCurrentEntityType());
-				EntityFieldInfo fieldInfo = allFields.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null);
+				final List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType != null ? entityType : getCurrentEntityType());
+				final EntityFieldInfo fieldInfo = allFields.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null);
 				if (fieldInfo != null) {
 					tempSelections.add(new FieldSelection(fieldInfo, order));
 				}
 				order++;
-			} catch (NumberFormatException e) {
+			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
 				// Skip invalid entries
 			}
 		}
@@ -150,7 +150,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		tempSelections.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
 		selections.addAll(tempSelections);
 		// Update the underlying dual list selector
-		List<EntityFieldInfo> selectedFieldInfos = tempSelections.stream().map(FieldSelection::getFieldInfo).collect(Collectors.toList());
+		final List<EntityFieldInfo> selectedFieldInfos = tempSelections.stream().map(FieldSelection::getFieldInfo).collect(Collectors.toList());
 		dualListSelector.setSelectedItems(selectedFieldInfos);
 	}
 

@@ -2,6 +2,8 @@ package tech.derbent.app.projects.service;
 
 import java.time.Clock;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CProjectService extends CEntityNamedService<CProject> implements IEntityRegistrable {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
 
 	public CProjectService(final IProjectRepository repository, final Clock clock, final ISessionService sessionService,
@@ -40,9 +43,9 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 
 	public Component createProjectUserSettingsComponent() {
 		try {
-			CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, sessionService);
+			final CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, sessionService);
 			return component;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to create project user settings component.");
 			// Fallback to simple div with error message
 			final Div errorDiv = new Div();
@@ -71,7 +74,7 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 	public Page<CProject> findAll(Pageable pageable) {
 		Check.notNull(repository, "Repository must not be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		CCompany company = getCurrentCompany();
+		final CCompany company = getCurrentCompany();
 		return ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
 	}
 
@@ -99,7 +102,7 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 
 	CCompany getCurrentCompany() {
 		Check.notNull(sessionService, "Session service must not be null");
-		CCompany currentCompany = sessionService.getCurrentCompany();
+		final CCompany currentCompany = sessionService.getCurrentCompany();
 		Check.notNull(currentCompany, "Current company must not be null");
 		return currentCompany;
 	}
@@ -135,7 +138,7 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 	@Transactional (readOnly = true)
 	public Page<CProject> list(final Pageable pageable) {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		CCompany company = getCurrentCompany();
+		final CCompany company = getCurrentCompany();
 		final Page<CProject> entities = ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
 		return entities;
 	}
@@ -146,9 +149,9 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 		LOGGER.debug("Listing entities with filter specification");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		// Apply company filter to the specification
-		CCompany company = getCurrentCompany();
-		Specification<CProject> companySpec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
-		Specification<CProject> combinedSpec = filter != null ? companySpec.and(filter) : companySpec;
+		final CCompany company = getCurrentCompany();
+		final Specification<CProject> companySpec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
+		final Specification<CProject> combinedSpec = filter != null ? companySpec.and(filter) : companySpec;
 		final Page<CProject> page = repository.findAll(combinedSpec, safePage);
 		return page;
 	}
@@ -158,7 +161,7 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 	public CProject save(final CProject entity) {
 		// Ensure company is set for new entities
 		if (entity.getCompany() == null) {
-			CCompany company = getCurrentCompany();
+			final CCompany company = getCurrentCompany();
 			entity.setCompany(company);
 		}
 		final boolean isNew = entity.getId() == null;

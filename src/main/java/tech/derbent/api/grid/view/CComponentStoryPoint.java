@@ -13,8 +13,8 @@ import tech.derbent.app.sprints.domain.CSprintItem;
 /** Compact story point renderer with inline edit-on-click behavior. Delegates persistence and notifications to owning components via callbacks. */
 public class CComponentStoryPoint extends CLabelEntity {
 
-	private static final String EDITOR_WIDTH = "60px";
 	private static final String CELL_HEIGHT = "24px";
+	private static final String EDITOR_WIDTH = "60px";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentStoryPoint.class);
 	private static final long serialVersionUID = 1L;
 
@@ -24,11 +24,29 @@ public class CComponentStoryPoint extends CLabelEntity {
 		return sprintItem.getItem();
 	}
 
+	private static String formatValue(final Long value) {
+		return value == null ? "0" : String.valueOf(value);
+	}
+
+	private static Long parseStoryPoint(final String rawValue) {
+		final String cleaned = rawValue == null ? "" : rawValue.trim();
+		if (cleaned.isEmpty()) {
+			return 0L;
+		}
+		try {
+			final long value = Long.parseLong(cleaned);
+			Check.isTrue(value >= 0, "Story points must be zero or positive");
+			return value;
+		} catch (final NumberFormatException e) {
+			throw new IllegalArgumentException("Story points must be a whole number", e);
+		}
+	}
+
+	private final CTextField editor;
 	private final Consumer<Exception> errorHandler;
 	private final ISprintableItem item;
 	private final Consumer<ISprintableItem> saveHandler;
 	private final Span valueSpan;
-	private final CTextField editor;
 
 	public CComponentStoryPoint(final CSprintItem sprintItem, final Consumer<ISprintableItem> saveHandler, final Consumer<Exception> errorHandler) {
 		this(extractSprintableItem(sprintItem), saveHandler, errorHandler);
@@ -90,9 +108,8 @@ public class CComponentStoryPoint extends CLabelEntity {
 		field.setHeight(CELL_HEIGHT);
 		field.getStyle().set("padding", "0").set("margin", "0").set("min-height", CELL_HEIGHT).set("line-height", CELL_HEIGHT)
 				.set("box-sizing", "border-box").set("text-align", "right")
-				.set("background",
-						"linear-gradient(90deg, rgba(0,0,0,0) 0%, var(--lumo-contrast-5pct, rgba(0,0,0,0.05)) 40%, "
-								+ "var(--lumo-contrast-5pct, rgba(0,0,0,0.05)) 60%, rgba(0,0,0,0) 100%)")
+				.set("background", "linear-gradient(90deg, rgba(0,0,0,0) 0%, var(--lumo-contrast-5pct, rgba(0,0,0,0.05)) 40%, "
+						+ "var(--lumo-contrast-5pct, rgba(0,0,0,0.05)) 60%, rgba(0,0,0,0) 100%)")
 				.set("background-color", "transparent");
 		field.setVisible(false);
 		field.addKeyDownListener(Key.ENTER, event -> commitEdit());
@@ -104,24 +121,6 @@ public class CComponentStoryPoint extends CLabelEntity {
 	private String currentEditorValue() {
 		final Long value = item.getStoryPoint();
 		return value == null ? "" : value.toString();
-	}
-
-	private String formatValue(final Long value) {
-		return value == null ? "0" : String.valueOf(value);
-	}
-
-	private Long parseStoryPoint(final String rawValue) {
-		final String cleaned = rawValue == null ? "" : rawValue.trim();
-		if (cleaned.isEmpty()) {
-			return 0L;
-		}
-		try {
-			final long value = Long.parseLong(cleaned);
-			Check.isTrue(value >= 0, "Story points must be zero or positive");
-			return value;
-		} catch (final NumberFormatException e) {
-			throw new IllegalArgumentException("Story points must be a whole number", e);
-		}
 	}
 
 	private void startEdit() {

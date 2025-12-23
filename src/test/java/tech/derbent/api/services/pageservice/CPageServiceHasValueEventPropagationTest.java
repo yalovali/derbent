@@ -53,10 +53,10 @@ class CPageServiceHasValueEventPropagationTest {
 
 		@Override
 		public void setValue(String value) {
-			String oldValue = this.value;
+			final String oldValue = this.value;
 			this.value = value;
 			// Notify listeners
-			for (HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<String>> listener : listeners) {
+			for (final HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<String>> listener : listeners) {
 				listener.valueChanged(new ValueChangeEvent<String>() {
 
 					/**
@@ -88,6 +88,7 @@ class CPageServiceHasValueEventPropagationTest {
 	}
 
 	/** Test that components implementing HasValue can be recognized. Verifies that the component properly implements the interface. */
+	@SuppressWarnings ("cast")
 	@Test
 	void testComponentImplementsHasValue() {
 		assertTrue(testComponent instanceof HasValue, "TestHasValueComponent should implement HasValue");
@@ -104,8 +105,8 @@ class CPageServiceHasValueEventPropagationTest {
 	/** Test that listener registration can be removed. Verifies that the Registration.remove() functionality works correctly. */
 	@Test
 	void testListenerRemoval() {
-		Registration reg1 = testComponent.addValueChangeListener(event -> {});
-		Registration reg2 = testComponent.addValueChangeListener(event -> {});
+		final Registration reg1 = testComponent.addValueChangeListener(event -> {/**/});
+		final Registration reg2 = testComponent.addValueChangeListener(event -> {/**/});
 		assertEquals(2, testComponent.getListenerCount(), "Two listeners should be registered");
 		reg1.remove();
 		assertEquals(1, testComponent.getListenerCount(), "One listener should remain after removal");
@@ -116,9 +117,9 @@ class CPageServiceHasValueEventPropagationTest {
 	/** Test that multiple value change listeners can be added. Verifies that the component supports multiple listeners. */
 	@Test
 	void testMultipleValueChangeListeners() {
-		testComponent.addValueChangeListener(event -> {});
-		testComponent.addValueChangeListener(event -> {});
-		testComponent.addValueChangeListener(event -> {});
+		testComponent.addValueChangeListener(event -> {/**/});
+		testComponent.addValueChangeListener(event -> {/**/});
+		testComponent.addValueChangeListener(event -> {/**/});
 		assertEquals(3, testComponent.getListenerCount(), "Three value change listeners should be registered");
 	}
 

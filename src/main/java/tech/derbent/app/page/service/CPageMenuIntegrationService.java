@@ -48,7 +48,7 @@ public class CPageMenuIntegrationService {
 		// Parse menu order - keep the full hierarchical order value
 		// For example, "4.1" becomes 4.1, which CHierarchicalSideMenu will parse
 		// to extract parent order (4) and child order (1)
-		Double order = parseMenuOrderToDouble(page.getMenuOrder());
+		final Double order = parseMenuOrderToDouble(page.getMenuOrder());
 		// Create the menu entry with enhanced metadata
 		return new MenuEntry("dynamic." + page.getId(), menuTitle, order, icon, CDynamicPageRouter.class);
 	}
@@ -57,21 +57,21 @@ public class CPageMenuIntegrationService {
 	public List<MenuEntry> getDynamicMenuEntries() {
 		try {
 			Check.notNull(sessionService, "Session service cannot be null");
-			CProject activeProject = sessionService.getActiveProject()
+			final CProject activeProject = sessionService.getActiveProject()
 					.orElseThrow(() -> new IllegalStateException("No active project found for dynamic menu entries"));
-			List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
-			List<MenuEntry> menuEntries = new ArrayList<>();
-			for (CPageEntity page : pages) {
+			final List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
+			final List<MenuEntry> menuEntries = new ArrayList<>();
+			for (final CPageEntity page : pages) {
 				try {
-					MenuEntry entry = createMenuEntryFromPage(page);
+					final MenuEntry entry = createMenuEntryFromPage(page);
 					menuEntries.add(entry);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Failed to create menu entry for page: {}", page.getPageTitle(), e);
 					throw new RuntimeException("Failed to create menu entry for page: " + page.getPageTitle(), e);
 				}
 			}
 			return menuEntries;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error retrieving dynamic menu entries: {}", e.getMessage());
 			throw e;
 		}
@@ -84,34 +84,34 @@ public class CPageMenuIntegrationService {
 
 	/** Get page hierarchy structure for building nested menus. */
 	public List<CPageEntity> getPageHierarchyForCurrentProject() {
-		CProject activeProject =
+		final CProject activeProject =
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for page hierarchy"));
 		return pageEntityService.getPageHierarchyForProject(activeProject);
 	}
 
 	/** Get pages that should be shown in the quick access toolbar for the current project. */
 	public List<CPageEntity> getQuickToolbarPages() {
-		CProject activeProject =
+		final CProject activeProject =
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for quick toolbar pages"));
-		List<CPageEntity> allPages = pageEntityService.listQuickAccess(activeProject);
+		final List<CPageEntity> allPages = pageEntityService.listQuickAccess(activeProject);
 		return allPages;
 	}
 
 	/** Get root pages (no parent) for the current project. */
 	public List<CPageEntity> getRootPagesForCurrentProject() {
-		CProject activeProject =
+		final CProject activeProject =
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for root pages"));
 		return pageEntityService.findRootPagesByProject(activeProject);
 	}
 
 	/** Get status information for debugging. */
 	public String getStatusInfo() {
-		Optional<CProject> activeProjectOpt = sessionService.getActiveProject();
+		final Optional<CProject> activeProjectOpt = sessionService.getActiveProject();
 		if (activeProjectOpt.isEmpty()) {
 			return "No active project";
 		}
-		CProject activeProject = activeProjectOpt.get();
-		List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
+		final CProject activeProject = activeProjectOpt.get();
+		final List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
 		return String.format("Project: %s, Pages: %d", activeProject.getName(), pages.size());
 	}
 
@@ -134,8 +134,8 @@ public class CPageMenuIntegrationService {
 		try {
 			// Try to parse as a simple Double first
 			return Double.parseDouble(menuOrderStr.trim());
-		} catch (NumberFormatException e) {
-			LOGGER.warn("Invalid menu order format: '{}'. Using default order {}.", menuOrderStr, DEFAULT_ORDER);
+		} catch (final NumberFormatException e) {
+			LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER, e.getMessage());
 			return DEFAULT_ORDER;
 		}
 	}

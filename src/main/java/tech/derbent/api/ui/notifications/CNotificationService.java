@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.ui.dialogs.CDialogConfirmation;
 import tech.derbent.api.ui.dialogs.CDialogException;
 import tech.derbent.api.ui.dialogs.CDialogInformation;
 import tech.derbent.api.ui.dialogs.CDialogMessageWithDetails;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.dialogs.CDialogWarning;
-import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.utils.Check;
 
 /** CNotificationService - Centralized service for all notifications and user messages. Provides consistent styling, positioning, and behavior for: -
@@ -26,6 +26,14 @@ public class CNotificationService {
 	private static final int MEDIUM_DURATION = 5000;
 	// Standard durations in milliseconds
 	private static final int SHORT_DURATION = 2000;
+
+	private static void closeOpenProgressDialogs() {
+		final UI ui = UI.getCurrent();
+		if (ui == null) {
+			return;
+		}
+		ui.getChildren().filter(component -> component instanceof CDialogProgress).forEach(component -> ((CDialogProgress) component).close());
+	}
 
 	/** Shows a confirmation dialog (modal with Yes/No buttons)
 	 * @throws Exception */
@@ -139,6 +147,15 @@ public class CNotificationService {
 		showError("Error updating the data. Somebody else has updated the record while you were making changes.");
 	}
 
+	public static CDialogProgress showProgressDialog(final String title, final String message) {
+		Check.notBlank(title, "Progress dialog title cannot be empty");
+		Check.notBlank(message, "Progress dialog message cannot be empty");
+		LOGGER.debug("Showing progress dialog: {}", title);
+		final CDialogProgress dialog = new CDialogProgress(title, message);
+		dialog.open();
+		return dialog;
+	}
+
 	/** Shows error message for save operations */
 	public static void showSaveError() {
 		showError("An error occurred while saving. Please try again.");
@@ -157,16 +174,16 @@ public class CNotificationService {
 		notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 	}
 
-	/** Shows warning for validation errors */
-	public static void showValidationWarning(final String fieldName) {
-		showWarning("Please check the " + fieldName + " field and try again.");
-	}
-
 	/** Shows a warning notification for validation exceptions. */
 	public static void showValidationException(final CValidationException exception) {
 		Check.notNull(exception, "Validation exception cannot be null");
 		final String message = exception.getMessage() != null ? exception.getMessage() : "Validation failed. Please check your input.";
 		showWarning(message);
+	}
+
+	/** Shows warning for validation errors */
+	public static void showValidationWarning(final String fieldName) {
+		showWarning("Please check the " + fieldName + " field and try again.");
 	}
 
 	/** Shows a warning notification toast (orange, top-center, medium duration) */
@@ -183,23 +200,5 @@ public class CNotificationService {
 		LOGGER.debug("Showing warning dialog: {}", message);
 		final CDialogWarning dialog = new CDialogWarning(message);
 		dialog.open();
-	}
-
-	public static CDialogProgress showProgressDialog(final String title, final String message) {
-		Check.notBlank(title, "Progress dialog title cannot be empty");
-		Check.notBlank(message, "Progress dialog message cannot be empty");
-		LOGGER.debug("Showing progress dialog: {}", title);
-		final CDialogProgress dialog = new CDialogProgress(title, message);
-		dialog.open();
-		return dialog;
-	}
-
-	private static void closeOpenProgressDialogs() {
-		final UI ui = UI.getCurrent();
-		if (ui == null) {
-			return;
-		}
-		ui.getChildren().filter(component -> component instanceof CDialogProgress)
-				.forEach(component -> ((CDialogProgress) component).close());
 	}
 }

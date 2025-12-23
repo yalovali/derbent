@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.ui.component.IFormContainerComponent;
+import tech.derbent.base.users.domain.CUserProjectSettings;
 
 /** CAccordion - Enhanced base class for accordion components. Layer: View (MVC) Provides common accordion functionality with standardized styling and
  * behavior. */
@@ -45,10 +46,16 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 		close();
 	}
 
+	protected String createDeleteConfirmationMessage(@SuppressWarnings ("unused") CUserProjectSettings selected) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/** Gets the title of this accordion.
 	 * @return the accordion title */
 	public String getAccordionTitle() { return accordionTitle; }
 
+	@Override
 	public VerticalLayout getBaseLayout() { return baseLayout; }
 
 	/** Convenience method to open this accordion panel (index 0). */

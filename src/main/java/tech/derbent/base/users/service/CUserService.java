@@ -201,9 +201,8 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		if (!users.isEmpty()) {
 			final int randomIndex = (int) (Math.random() * users.size());
 			return users.get(randomIndex);
-		} else {
-			LOGGER.warn("No users found for company: {}", company.getName());
 		}
+		LOGGER.warn("No users found for company: {}", company.getName());
 		return null;
 	}
 
@@ -297,7 +296,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			Long company_id;
 			try {
 				company_id = Long.parseLong(parts[1]);
-			} catch (final NumberFormatException e) {
+			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
 				LOGGER.warn("Invalid company ID in username: {}", parts[1]);
 				throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
 			}

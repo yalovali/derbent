@@ -44,7 +44,7 @@ public CFormBuilder(final IContentOwner contentOwner,
                     final Class<?> entityClass, 
                     final CEnhancedBinder<EntityClass> binder,
                     final Map<String, Component> externalComponentMap) throws Exception {
-    Check.notNull(externalComponentMap, "External component map cannot be null");
+    Objects.requireNonNull(externalComponentMap, "External component map cannot be null");
     componentMap = externalComponentMap;  // Use external map instead of creating new one
     // ... rest of initialization
 }

@@ -113,7 +113,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	}
 
 	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
-	protected void configureCrudToolbar(final CCrudToolbar toolbar) {
+	protected void configureCrudToolbar(@SuppressWarnings ("unused") final CCrudToolbar toolbar) {
 		// Default implementation does nothing - subclasses can override to add specific configuration
 	}
 
@@ -137,19 +137,12 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	protected CEnhancedBinder<CEntityDB<?>> getCurrentBinder() { return currentBinder; }
 
 	@Override
-	public CEntityDB<?> getValue() { return currentEntity; }
-
-	@Override
 	public String getCurrentEntityIdString() {
 		LOGGER.debug("Getting current entity ID string for page.");
 		if (currentEntity == null) {
 			return null;
 		}
-		if (currentEntity instanceof CEntityDB<?>) {
-			final CEntityDB<?> entity = currentEntity;
-			return entity.getId().toString();
-		}
-		return null;
+		return currentEntity.getId().toString();
 	}
 
 	@Override
@@ -157,6 +150,9 @@ public abstract class CPageBaseProjectAware extends CPageBase
 
 	@Override
 	public ISessionService getSessionService() { return sessionService; }
+
+	@Override
+	public CEntityDB<?> getValue() { return currentEntity; }
 
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
@@ -206,6 +202,11 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	public void setContentOwner(final IContentOwner owner) { parentContent = owner; }
 
 	@Override
+	protected void setupToolbar() {
+		LOGGER.debug("Setting up toolbar in Sample Page");
+	}
+
+	@Override
 	public void setValue(final CEntityDB<?> entity) {
 		try {
 			if (entity == null) {
@@ -217,10 +218,5 @@ public abstract class CPageBaseProjectAware extends CPageBase
 			LOGGER.error("Error setting current entity.");
 			throw e;
 		}
-	}
-
-	@Override
-	protected void setupToolbar() {
-		LOGGER.debug("Setting up toolbar in Sample Page");
 	}
 }
