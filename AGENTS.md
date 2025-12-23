@@ -5,6 +5,38 @@
 - Frontend/Vaadin assets live in `src/main/frontend`; configuration, seeds, and metadata live in `src/main/resources`; UI automation sits in `src/test/java/automated_tests/tech/derbent/ui/automation`.
 - Documentation is organized by subject (`docs/architecture`, `docs/development`, `docs/implementation`, `docs/testing`). Most coding rules referenced here come from `docs/architecture/coding-standards.md`, `docs/architecture/multi-user-singleton-advisory.md`, and `docs/development/copilot-guidelines.md`.
 
+DO NOT:
+- Introduce new frameworks or libraries
+- Change public APIs unless explicitly requested
+- Modify unrelated files
+- Remove existing functionality
+- Bypass existing abstractions or base classes
+Architecture rules:
+- Follow existing Derbent package structure if possible
+- Use existing base classes and interfaces if possible
+- Do not create parallel abstractions if possible
+- Reuse CGrid, CPageService, CEntityFormBuilder, etc.
+- UI logic stays in Vaadin components / pages if possible
+- Business logic stays out of UI components
+Build rules:
+- Project must compile with Maven
+- Do not add new Maven dependencies
+- No test framework changes
+- If code is untestable, explain why
+- Dont run playwright tests unless i told you to do
+Before coding:
+- Read existing implementations of similar features
+- Identify patterns already used in the codebase
+- Follow the closest existing example
+Output requirements:
+- Only change files strictly required
+- Explain changes file by file
+- If something is unclear, make a reasonable assumption and document it
+- Do not leave TODOs
+- If you are unsure about any architectural decision, choose the most conservative option and explain your reasoning.
+- update existing documentation if necassary for pattern updates or explainations is required
+- read coding rules of the project
+
 ## 2. Core Commands
 - `./mvnw spring-boot:run -Dspring.profiles.active=h2` starts the local app with the in-memory H2 profile.
 - `./mvnw clean verify` compiles, runs Spotless/Prettier, executes tests, and builds Vaadin assets; use it (or at least `./mvnw spotless:apply`) before review.

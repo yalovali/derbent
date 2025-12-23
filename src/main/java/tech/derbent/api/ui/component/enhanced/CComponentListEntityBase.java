@@ -69,8 +69,8 @@ import tech.derbent.api.utils.Check;
  * @param <MasterEntity> The master/parent entity type
  * @param <ChildEntity>  The child entity type extending CEntityDB and IOrderedEntity */
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
-	extends VerticalLayout implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>, IPageServiceAutoRegistrable,
-		IHasDragControl {
+		extends VerticalLayout
+		implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>, IPageServiceAutoRegistrable, IHasDragControl {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
@@ -368,11 +368,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return withoutPrefix.substring(0, 1).toLowerCase() + withoutPrefix.substring(1);
 	}
 
-	/** Returns the current master entity.
-	 * @return The current master entity being edited */
-	@Override
-	public CEntityDB<?> getValue() { return getMasterEntity(); }
-
 	/** Returns the current sprint ID as a string.
 	 * @return The ID string or null if no sprint is set */
 	@Override
@@ -404,6 +399,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	/** Get the currently selected item.
 	 * @return The selected item, or null if none selected */
 	public ChildEntity getSelectedItem() { return selectedItem; }
+
+	/** Returns the current master entity.
+	 * @return The current master entity being edited */
+	@Override
+	public CEntityDB<?> getValue() { return getMasterEntity(); }
 
 	public void grid_refresh_consumer() {
 		final MasterEntity master = getMasterEntity();
@@ -695,61 +695,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 	}
 
-	/** Reorders an item by moving it multiple positions using the service's move methods. This method performs multiple move operations to achieve
-	 * the desired position change, ensuring consistency with the service's move logic.
-	 * @param item         the item to move
-	 * @param currentIndex the current position index (0-based)
-	 * @param targetIndex  the target position index (0-based)
-	 * @param allItems     list of all items in current order
-	 * @return the number of moves performed */
-	protected int reorderItemByMoving(final ChildEntity item, final int currentIndex, final int targetIndex, final List<ChildEntity> allItems) {
-		Check.notNull(item, "Item cannot be null");
-		Check.notNull(item.getId(), "Item must be saved before reordering");
-		if (currentIndex == targetIndex) {
-			LOGGER.debug("Item already at target position");
-			return 0;
-		}
-		int moves = 0;
-		if (currentIndex < targetIndex) {
-			// Moving down: call moveItemDown multiple times
-			final int movesToMake = targetIndex - currentIndex;
-			LOGGER.debug("Moving item down {} positions (from {} to {})", movesToMake, currentIndex, targetIndex);
-			for (int i = 0; i < movesToMake; i++) {
-				moveItemDown(item);
-				moves++;
-			}
-		} else {
-			// Moving up: call moveItemUp multiple times
-			final int movesToMake = currentIndex - targetIndex;
-			LOGGER.debug("Moving item up {} positions (from {} to {})", movesToMake, currentIndex, targetIndex);
-			for (int i = 0; i < movesToMake; i++) {
-				moveItemUp(item);
-				moves++;
-			}
-		}
-		LOGGER.debug("Reordered item using {} service move operations", moves);
-		return moves;
-	}
-
-	/** Sets the current master entity for this component. Called by CFormBuilder when the binder's entity changes.
-	 * @param entity The entity to set (expected to be of type MasterEntity) */
-	@Override
-	@SuppressWarnings ("unchecked")
-	public void setValue(final CEntityDB<?> entity) {
-		if (entity == null) {
-			// LOGGER.debug("setValue called with null - clearing grid");
-			masterEntity = null;
-			clearGrid();
-		} else if (masterEntityClass.isInstance(entity)) {
-			// LOGGER.debug("setValue called with {} - setting master entity", entity.getClass().getSimpleName());
-			masterEntity = (MasterEntity) entity;
-			refreshGrid();
-		} else {
-			LOGGER.warn("setValue called with unexpected entity type: {} (expected {}) - ignoring", entity.getClass().getSimpleName(),
-					masterEntityClass.getSimpleName());
-		}
-	}
-
 	/** Enables or disables drag-and-drop functionality for the grid.
 	 * <p>
 	 * When enabled, rows in the grid can be dragged. When disabled, drag operations are blocked but the grid can still receive drop events if drop is
@@ -782,17 +727,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		grid.setDynamicHeight();
 	}
 
-	/** Set the master entity directly.
-	 * @param master The master entity to set */
-	protected void setMasterEntity(final MasterEntity master) {
-		masterEntity = master;
-		if (master == null) {
-			clearGrid();
-		} else if (master.getId() != null) {
-			refreshGrid();
-		}
-	}
-
 	/** Sets the read-only state of this component. When read-only, users cannot change the selection.
 	 * @param readOnly true to make read-only, false to make editable */
 	public void setReadOnly(final boolean readOnly) {
@@ -815,15 +749,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		}
 		grid.setEnabled(!readOnly);
 	}
-	// IPageServiceAutoRegistrable interface implementation
-
-	/** Sets whether the required indicator should be visible.
-	 * @param requiredIndicatorVisible true to show required indicator, false to hide */
-	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
-		// Note: CComponentListEntityBase doesn't currently support required indicator
-		// This could be implemented by adding a visual indicator to the component
-		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
-	}
 
 	/** Set the currently selected item.
 	 * @param item The item to select */
@@ -836,13 +761,24 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		fireValueChangeEvent(item, false);
 	}
 
-	/** Sets the selection owner to be notified of selection changes.
-	 * @param owner the selection owner (can be null) */
-	public void setSelectionOwner(final ISelectionOwner<ChildEntity> owner) {
-		selectionOwner = owner;
+	/** Sets the current master entity for this component. Called by CFormBuilder when the binder's entity changes.
+	 * @param entity The entity to set (expected to be of type MasterEntity) */
+	@Override
+	@SuppressWarnings ("unchecked")
+	public void setValue(final CEntityDB<?> entity) {
+		if (entity == null) {
+			// LOGGER.debug("setValue called with null - clearing grid");
+			masterEntity = null;
+			clearGrid();
+		} else if (masterEntityClass.isInstance(entity)) {
+			// LOGGER.debug("setValue called with {} - setting master entity", entity.getClass().getSimpleName());
+			masterEntity = (MasterEntity) entity;
+			refreshGrid();
+		} else {
+			LOGGER.warn("setValue called with unexpected entity type: {} (expected {}) - ignoring", entity.getClass().getSimpleName(),
+					masterEntityClass.getSimpleName());
+		}
 	}
-	// IHasDragStart interface implementation
-	// IHasDragEnd interface implementation
 
 	/** Update the enabled state of action buttons based on selection.
 	 * @param hasSelection True if an item is selected */
