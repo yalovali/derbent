@@ -1,12 +1,12 @@
 package tech.derbent.api.config;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /** Vaadin configuration to prevent Atmosphere JSR356AsyncSupport initialization issues and handle frontend resource extraction. This configuration
  * sets system properties that prevent Atmosphere from attempting to initialize problematic WebSocket support and eliminates "Websocket protocol not
@@ -17,7 +17,7 @@ public class VaadinConfig {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VaadinConfig.class);
 
 	@PostConstruct
-	public void configureAtmosphere() {
+	public static void configureAtmosphere() {
 		LOGGER.info("Configuring Atmosphere system properties to prevent WebSocket initialization issues...");
 		// Disable Atmosphere's JSR356 WebSocket support to prevent initialization errors
 		System.setProperty("org.atmosphere.container.JSR356AsyncSupport.force", "false");
@@ -47,19 +47,19 @@ public class VaadinConfig {
 	 * StoredObject components which may have issues with path handling during resource extraction. Note: This method is designed for development
 	 * environments where the source directory exists. In production (JAR deployments), Vaadin handles resources differently and this method will
 	 * silently skip directory creation. */
-	private void ensureFrontendDirectories() {
+	private static void ensureFrontendDirectories() {
 		try {
 			// Get the project base directory - only works in development when running from source
-			String userDir = System.getProperty("user.dir");
-			Path frontendPath = Paths.get(userDir, "src", "main", "frontend");
+			final String userDir = System.getProperty("user.dir");
+			final Path frontendPath = Paths.get(userDir, "src", "main", "frontend");
 			// Only proceed if we're running from source (development mode)
-			Path srcPath = Paths.get(userDir, "src");
+			final Path srcPath = Paths.get(userDir, "src");
 			if (!Files.exists(srcPath)) {
 				LOGGER.debug("Not running from source directory, skipping frontend directory creation");
 				return;
 			}
-			Path generatedPath = frontendPath.resolve("generated");
-			Path jarResourcesPath = generatedPath.resolve("jar-resources");
+			final Path generatedPath = frontendPath.resolve("generated");
+			final Path jarResourcesPath = generatedPath.resolve("jar-resources");
 			// Create directories if they don't exist
 			if (!Files.exists(frontendPath)) {
 				Files.createDirectories(frontendPath);
@@ -74,7 +74,7 @@ public class VaadinConfig {
 				LOGGER.info("Created jar-resources directory: {}", jarResourcesPath);
 			}
 			LOGGER.debug("Frontend directory structure verified at: {}", frontendPath);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("Could not create frontend directories (this is not critical): {}", e.getMessage());
 		}
 	}

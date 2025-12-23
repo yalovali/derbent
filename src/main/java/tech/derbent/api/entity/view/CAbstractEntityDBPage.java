@@ -54,6 +54,17 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		implements ILayoutChangeListener, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
+
+	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
+	protected static void showErrorNotification(final String message) {
+		CNotificationService.showError(message);
+	}
+
+	/** Shows a success notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
+	protected static void showNotification(final String message) {
+		CNotificationService.showSuccess(message);
+	}
+
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	private CFlexLayout baseDetailsLayout;
 	private final CEnhancedBinder<EntityClass> binder;
@@ -404,7 +415,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		super.onAttach(attachEvent);
 		// Register for layout change notifications if service is available
 		if (layoutService != null) {
-			layoutService.addLayoutChangeListener(this);
+			CLayoutService.addLayoutChangeListener(this);
 			// Update layout based on current mode
 			updateLayoutOrientation();
 		}
@@ -427,7 +438,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		super.onDetach(detachEvent);
 		// Unregister from layout change notifications
 		if (layoutService != null) {
-			layoutService.removeLayoutChangeListener(this);
+			CLayoutService.removeLayoutChangeListener(this);
 		}
 	}
 
@@ -538,23 +549,13 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.currentEntity = (EntityClass) currentEntity;
 	}
 
-	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
-	protected void showErrorNotification(final String message) {
-		CNotificationService.showError(message);
-	}
-
-	/** Shows a success notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
-	protected void showNotification(final String message) {
-		CNotificationService.showSuccess(message);
-	}
-
 	protected abstract void updateDetailsComponent()
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, Exception;
 
 	/** Updates the split layout orientation based on the current layout mode. */
 	private void updateLayoutOrientation() {
 		if (layoutService != null && splitLayout != null) {
-			final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
+			final CLayoutService.LayoutMode currentMode = CLayoutService.getCurrentLayoutMode();
 			// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
 			if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {
 				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);

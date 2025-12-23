@@ -12,6 +12,7 @@ import com.vaadin.flow.shared.Registration;
  * initialization and is better suited for integration tests (e.g., Playwright tests). */
 class CComponentListEntityBaseHasValueTest {
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testChildClassesInheritHasValue() {
 		// When: checking if child classes inherit HasValue
@@ -23,6 +24,7 @@ class CComponentListEntityBaseHasValueTest {
 				"CComponentListDetailLines should implement/inherit HasValue interface");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasAddValueChangeListenerMethod() throws Exception {
 		// When: checking for addValueChangeListener() method
@@ -32,6 +34,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertTrue(Registration.class.isAssignableFrom(addListenerMethod.getReturnType()), "addValueChangeListener() should return Registration");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasClearMethod() throws Exception {
 		// When: checking for clear() method
@@ -40,6 +43,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertNotNull(clearMethod, "clear() method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasGetValueMethod() throws Exception {
 		// When: checking for getValue() method
@@ -48,6 +52,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertNotNull(getValueMethod, "getValue() method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasIsEmptyMethod() throws Exception {
 		// When: checking for isEmpty() method
@@ -57,6 +62,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertTrue(isEmptyMethod.getReturnType().equals(boolean.class), "isEmpty() should return boolean");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasIsReadOnlyMethod() throws Exception {
 		// When: checking for isReadOnly() method
@@ -66,6 +72,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertTrue(isReadOnlyMethod.getReturnType().equals(boolean.class), "isReadOnly() should return boolean");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasIsRequiredIndicatorVisibleMethod() throws Exception {
 		// When: checking for isRequiredIndicatorVisible() method
@@ -75,6 +82,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertTrue(method.getReturnType().equals(boolean.class), "isRequiredIndicatorVisible() should return boolean");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasSetReadOnlyMethod() throws Exception {
 		// When: checking for setReadOnly(boolean) method
@@ -83,6 +91,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertNotNull(setReadOnlyMethod, "setReadOnly(boolean) method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasSetRequiredIndicatorVisibleMethod() throws Exception {
 		// When: checking for setRequiredIndicatorVisible(boolean) method
@@ -91,6 +100,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertNotNull(method, "setRequiredIndicatorVisible(boolean) method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasSetValueMethod() throws Exception {
 		// When: checking for setValue(Object) method with generic parameter
@@ -106,6 +116,7 @@ class CComponentListEntityBaseHasValueTest {
 		assertTrue(hasSetValueMethod, "setValue() method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testImplementsHasValueInterface() {
 		// When: checking if CComponentListEntityBase implements HasValue

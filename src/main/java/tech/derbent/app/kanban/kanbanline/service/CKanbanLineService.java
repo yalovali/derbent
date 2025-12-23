@@ -25,8 +25,45 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanLineService.class);
 
+	private static void normalizeKanbanColumnOrder(final CKanbanLine line) {
+		Check.notNull(line, "Kanban line cannot be null when normalizing column order");
+		Check.notNull(line.getKanbanColumns(), "Kanban columns cannot be null when normalizing order");
+		final List<CKanbanColumn> columns = new ArrayList<>(line.getKanbanColumns());
+		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
+		int expectedOrder = 1;
+		for (final CKanbanColumn column : columns) {
+			if (column.getItemOrder() == null || column.getItemOrder() <= 0 || !column.getItemOrder().equals(expectedOrder)) {
+				column.setItemOrder(expectedOrder);
+			}
+			expectedOrder++;
+		}
+	}
+
+	private static CKanbanColumn resolveColumnForDelete(final CKanbanLine line, final CKanbanColumn column) {
+		if (line.getKanbanColumns().contains(column)) {
+			return column;
+		}
+		final CKanbanColumn resolved =
+				line.getKanbanColumns().stream().filter(item -> item.getId() != null && item.getId().equals(column.getId())).findFirst().orElse(null);
+		Check.notNull(resolved, "Kanban column not found on kanban line for delete");
+		return resolved;
+	}
+
 	public CKanbanLineService(final IKanbanLineRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Transactional
+	public void deleteKanbanColumn(final CKanbanLine line, final CKanbanColumn column) {
+		Check.notNull(line, "Kanban line cannot be null for column delete");
+		Check.notNull(column, "Kanban column cannot be null for delete");
+		Check.notNull(line.getId(), "Kanban line ID cannot be null for column delete");
+		Check.notNull(column.getId(), "Kanban column ID cannot be null for delete");
+		Check.notNull(line.getKanbanColumns(), "Kanban columns cannot be null for delete");
+		final CKanbanColumn target = resolveColumnForDelete(line, column);
+		line.removeKanbanColumn(target);
+		normalizeKanbanColumnOrder(line);
+		save(line);
 	}
 
 	@Override
@@ -56,8 +93,7 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 	protected void validateEntity(final CKanbanLine entity) {
 		super.validateEntity(entity);
 		Check.notBlank(entity.getName(), "Kanban line name cannot be blank");
-		final CCompany company =
-				entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
+		final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
 		Check.notNull(company, "Company cannot be null for kanban line validation");
 		final String trimmedName = entity.getName().trim();
 		final CKanbanLine existing = findByNameAndCompany(trimmedName, company).orElse(null);
@@ -68,42 +104,5 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 			return;
 		}
 		throw new CValidationException("Kanban line name must be unique within the company");
-	}
-
-	@Transactional
-	public void deleteKanbanColumn(final CKanbanLine line, final CKanbanColumn column) {
-		Check.notNull(line, "Kanban line cannot be null for column delete");
-		Check.notNull(column, "Kanban column cannot be null for delete");
-		Check.notNull(line.getId(), "Kanban line ID cannot be null for column delete");
-		Check.notNull(column.getId(), "Kanban column ID cannot be null for delete");
-		Check.notNull(line.getKanbanColumns(), "Kanban columns cannot be null for delete");
-		final CKanbanColumn target = resolveColumnForDelete(line, column);
-		line.removeKanbanColumn(target);
-		normalizeKanbanColumnOrder(line);
-		save(line);
-	}
-
-	private void normalizeKanbanColumnOrder(final CKanbanLine line) {
-		Check.notNull(line, "Kanban line cannot be null when normalizing column order");
-		Check.notNull(line.getKanbanColumns(), "Kanban columns cannot be null when normalizing order");
-		final List<CKanbanColumn> columns = new ArrayList<>(line.getKanbanColumns());
-		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
-		int expectedOrder = 1;
-		for (final CKanbanColumn column : columns) {
-			if (column.getItemOrder() == null || column.getItemOrder() <= 0 || !column.getItemOrder().equals(expectedOrder)) {
-				column.setItemOrder(expectedOrder);
-			}
-			expectedOrder++;
-		}
-	}
-
-	private CKanbanColumn resolveColumnForDelete(final CKanbanLine line, final CKanbanColumn column) {
-		if (line.getKanbanColumns().contains(column)) {
-			return column;
-		}
-		final CKanbanColumn resolved = line.getKanbanColumns().stream()
-				.filter(item -> item.getId() != null && item.getId().equals(column.getId())).findFirst().orElse(null);
-		Check.notNull(resolved, "Kanban column not found on kanban line for delete");
-		return resolved;
 	}
 }

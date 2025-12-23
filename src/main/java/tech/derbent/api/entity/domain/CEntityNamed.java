@@ -79,7 +79,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	public String getDescription() { return description; }
 
 	public String getDescriptionShort() {
-		if ((description == null) || description.isBlank()) {
+		if (description == null || description.isBlank()) {
 			return "No description";
 		}
 		if (description.length() <= 75) {
@@ -88,6 +88,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		return description.substring(0, 75) + "...";
 	}
 
+	@SuppressWarnings ("static-method")
 	public Map<String, EntityFieldInfo> getFieldsInfo() { // TODO Auto-generated method
 															// stub
 		return null;
@@ -114,12 +115,12 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		// Ensure fieldNames is mutable for the entire traversal chain
 		java.util.Collection<String> mutableFieldNames = fieldNames;
-		if ((fieldNames == null) || fieldNames.isEmpty()) {
+		if (fieldNames == null || fieldNames.isEmpty()) {
 			// Default to searching in "name" field when no fields specified
 			mutableFieldNames = new java.util.ArrayList<>();
 			mutableFieldNames.add("name");

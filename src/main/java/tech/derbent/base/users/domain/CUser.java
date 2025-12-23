@@ -54,6 +54,25 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
 
+	/** Creates an icon from image data using proper SVG wrapping. This method embeds images in SVG which is then directly rendered in the DOM.
+	 * @param imageData Binary image data (PNG/JPEG)
+	 * @return Icon component with properly rendered image
+	 * @throws IllegalArgumentException if image data is null or empty */
+	private static Icon createIconFromImageData(final byte[] imageData) {
+		Check.notNull(imageData, "Image data cannot be null");
+		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
+		// Encode image data as base64 data URL
+		final String base64Image = Base64.getEncoder().encodeToString(imageData);
+		final String mimeType = detectMimeType(imageData);
+		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
+		// Create an SVG that contains the image
+		final String svgContent = String.format(
+				"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\">"
+						+ "<image href=\"%s\" width=\"%d\" height=\"%d\" " + "style=\"border-radius: 2px;\"/></svg>",
+				ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE, dataUrl, ICON_SIZE, ICON_SIZE);
+		return createSvgIcon(svgContent);
+	}
+
 	private static String createSvgDataUrl(final String svgContent) {
 		Check.notBlank(svgContent, "SVG content cannot be null or blank");
 		final String encodedSvg = URLEncoder.encode(svgContent, StandardCharsets.UTF_8);
@@ -201,25 +220,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			this.projectSettings.add(projectSettings);
 			projectSettings.setUser(this);
 		}
-	}
-
-	/** Creates an icon from image data using proper SVG wrapping. This method embeds images in SVG which is then directly rendered in the DOM.
-	 * @param imageData Binary image data (PNG/JPEG)
-	 * @return Icon component with properly rendered image
-	 * @throws IllegalArgumentException if image data is null or empty */
-	private Icon createIconFromImageData(final byte[] imageData) {
-		Check.notNull(imageData, "Image data cannot be null");
-		Check.isTrue(imageData.length > 0, "Image data cannot be empty");
-		// Encode image data as base64 data URL
-		final String base64Image = Base64.getEncoder().encodeToString(imageData);
-		final String mimeType = detectMimeType(imageData);
-		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
-		// Create an SVG that contains the image
-		final String svgContent = String.format(
-				"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\">"
-						+ "<image href=\"%s\" width=\"%d\" height=\"%d\" " + "style=\"border-radius: 2px;\"/></svg>",
-				ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE, dataUrl, ICON_SIZE, ICON_SIZE);
-		return createSvgIcon(svgContent);
 	}
 
 	@Override

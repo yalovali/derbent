@@ -81,13 +81,13 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	public void actionRefresh() {
 		try {
-			if ((getValue() != null) && (((CEntityDB<?>) getValue()).getId() != null)) {
-				EntityClass reloaded = entityService.getById(((CEntityDB<?>) getValue()).getId()).orElse(null);
+			if (getValue() != null && ((CEntityDB<?>) getValue()).getId() != null) {
+				final EntityClass reloaded = entityService.getById(((CEntityDB<?>) getValue()).getId()).orElse(null);
 				if (reloaded != null) {
 					populateEntityDetails(reloaded);
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error refreshing entity: {}", e.getMessage());
 		}
 	}
@@ -112,8 +112,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Checks if existing components can be reused for the given entity view */
 	private boolean canReuseExistingComponents(String entityViewName, Class<?> entityType) {
-		return (currentEntityViewName != null) && (currentEntityType != null) && currentEntityViewName.equals(entityViewName)
-				&& currentEntityType.equals(entityType) && (currentBinder != null) && (crudToolbar != null);
+		return currentEntityViewName != null && currentEntityType != null && currentEntityViewName.equals(entityViewName)
+				&& currentEntityType.equals(entityType) && currentBinder != null && crudToolbar != null;
 	}
 
 	/** Clears entity details and resets state */
@@ -136,7 +136,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	 * @return a configured CCrudToolbar instance */
 	@SuppressWarnings ({})
 	protected CCrudToolbar createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
-		CCrudToolbar toolbar = new CCrudToolbar();
+		final CCrudToolbar toolbar = new CCrudToolbar();
 		toolbar.setValue(typedEntity);
 		configureCrudToolbar(toolbar);
 		return toolbar;
@@ -156,7 +156,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected void createMasterSection() {
 		// Create and configure grid
-		CGridEntity gridEntity = gridEntityService.findByNameAndProject(viewName,
+		final CGridEntity gridEntity = gridEntityService.findByNameAndProject(viewName,
 				getSessionService().getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")))
 				.orElse(null);
 		grid = new CComponentGridEntity(gridEntity, getSessionService());
@@ -166,11 +166,11 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		grid.addSelectionChangeListener(event -> {
 			try {
 				onEntitySelected(event);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error("Error handling entity selection", e);
 			}
 		});
-		CVerticalLayout gridLayout = new CVerticalLayout();
+		final CVerticalLayout gridLayout = new CVerticalLayout();
 		gridLayout.add(new CComponentDetailsMasterToolbar(grid, gridEntityService));
 		gridLayout.add(grid);
 		// Add grid to the primary (left) section
@@ -204,7 +204,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	public String getIconFilename() {
 		try {
 			return CAuxillaries.invokeStaticMethodOfStr(this.getClass(), "getStaticIconFilename");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error getting icon filename for {}: {}", this.getClass().getSimpleName(), e.getMessage());
 			return "vaadin:question"; // Default icon
 		}
@@ -243,7 +243,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			// Try to re-select the saved entity in the grid
 			grid.selectEntity(entity);
 			LOGGER.debug("Re-selected saved entity in grid: {}", entity.getId());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error re-selecting entity after save: {}", e.getMessage());
 			throw e;
 		}
@@ -252,7 +252,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	/** Handles entity selection events from the grid */
 	private void onEntitySelected(CComponentGridEntity.SelectionChangeEvent event) throws Exception {
 		LOGGER.debug("Entity selected event received");
-		CEntityDB<?> selectedEntity = event.getSelectedItem();
+		final CEntityDB<?> selectedEntity = event.getSelectedItem();
 		populateEntityDetails(selectedEntity);
 	}
 
@@ -270,11 +270,11 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			clearEntityDetails();
 			return;
 		}
-		Field viewNameField = entity.getClass().getField("VIEW_NAME");
-		String entityViewName = (String) viewNameField.get(null);
+		final Field viewNameField = entity.getClass().getField("VIEW_NAME");
+		final String entityViewName = (String) viewNameField.get(null);
 		Check.isTrue(entityClass.isAssignableFrom(entity.getClass()),
 				"Selected entity type " + entity.getClass().getSimpleName() + " does not match expected type " + entityClass.getSimpleName());
-		EntityClass typedEntity = (EntityClass) entity;
+		final EntityClass typedEntity = (EntityClass) entity;
 		// Performance optimization: check if we can reuse existing components
 		if (canReuseExistingComponents(entityViewName, entity.getClass())) {
 			LOGGER.debug("Reusing existing components for entity type: {} view: {}", entity.getClass().getSimpleName(), entityViewName);
@@ -290,11 +290,11 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	private void rebuildEntityDetails(EntityClass typedEntity, String entityViewName) throws Exception {
 		// Clear existing state
 		clearEntityDetails();
-		CEnhancedBinder<EntityClass> typedBinder = new CEnhancedBinder<>(entityClass);
+		final CEnhancedBinder<EntityClass> typedBinder = new CEnhancedBinder<>(entityClass);
 		crudToolbar = createCrudToolbar(typedBinder, typedEntity);
 		getBaseDetailsLayout().add(crudToolbar);
 		// Update the current binder to be the properly typed one
-		CEnhancedBinder<CEntityDB<?>> genericBinder = (CEnhancedBinder<CEntityDB<?>>) (CEnhancedBinder<?>) typedBinder;
+		final CEnhancedBinder<CEntityDB<?>> genericBinder = (CEnhancedBinder<CEntityDB<?>>) (CEnhancedBinder<?>) typedBinder;
 		currentBinder = genericBinder;
 		currentEntityViewName = entityViewName;
 		currentEntityType = typedEntity.getClass();
@@ -309,11 +309,11 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		Check.notNull(grid, "Grid component is not initialized");
 		try {
 			// Use reflection to call the private refreshGridData method
-			java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
+			final java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
 			refreshMethod.setAccessible(true);
 			refreshMethod.invoke(grid);
 			LOGGER.debug("Grid refreshed successfully");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error refreshing grid: {}", e.getMessage());
 			throw e;
 		}
@@ -326,15 +326,15 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			// Update the toolbar's current entity
 			crudToolbar.setValue(typedEntity);
 			// Update the binder with new entity values
-			CEnhancedBinder<EntityClass> typedBinder = (CEnhancedBinder<EntityClass>) (CEnhancedBinder<?>) currentBinder;
+			final CEnhancedBinder<EntityClass> typedBinder = (CEnhancedBinder<EntityClass>) (CEnhancedBinder<?>) currentBinder;
 			typedBinder.setBean(typedEntity);
 			LOGGER.debug("Successfully reloaded entity values for: {}", typedEntity.getClass().getSimpleName());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error reloading entity values, falling back to rebuild: {}", e.getMessage());
 			// If reloading fails, fall back to rebuilding
 			try {
 				rebuildEntityDetails(typedEntity, currentEntityViewName);
-			} catch (Exception rebuildException) {
+			} catch (final Exception rebuildException) {
 				LOGGER.error("Error rebuilding entity details: {}", rebuildException.getMessage());
 				clearEntityDetails();
 			}
@@ -346,7 +346,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	public void setLayoutService(final CLayoutService layoutService) {
 		Check.notNull(layoutService, "Layout service cannot be null");
 		this.layoutService = layoutService;
-		layoutService.addLayoutChangeListener(this);
+		CLayoutService.addLayoutChangeListener(this);
 		updateLayoutOrientation();
 	}
 
@@ -361,7 +361,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			splitLayout.setSplitterPosition(30.0); // Default: 30% for grid, 70% for details (same as vertical mode)
 			return;
 		}
-		final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
+		final CLayoutService.LayoutMode currentMode = CLayoutService.getCurrentLayoutMode();
 		// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
 		if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {
 			splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);

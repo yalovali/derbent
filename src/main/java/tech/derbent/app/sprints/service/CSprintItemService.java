@@ -35,6 +35,20 @@ import tech.derbent.base.session.service.ISessionService;
 public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable, IOrderedEntityService<CSprintItem> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintItemService.class);
+
+	private static void populateItemMetadataIfTransientPresent(final CSprintItem sprintItem) {
+		if (sprintItem.getItem() == null) {
+			return;
+		}
+		Check.notNull(sprintItem.getItem().getId(), "Sprintable item must be persisted (id != null) before being added to a sprint");
+		if (sprintItem.getItemId() == null) {
+			sprintItem.setItemId(sprintItem.getItem().getId());
+		}
+		if (sprintItem.getItemType() == null) {
+			sprintItem.setItemType(sprintItem.getItem().getClass().getSimpleName());
+		}
+	}
+
 	private final IActivityRepository activityRepository;
 	private final IMeetingRepository meetingRepository;
 
@@ -253,19 +267,6 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		final CSprintItem sprintItem = new CSprintItem(master, item, nextOrder);
 		LOGGER.debug("Created new sprint item for master {} with order {}", master.getId(), nextOrder);
 		return sprintItem;
-	}
-
-	private void populateItemMetadataIfTransientPresent(final CSprintItem sprintItem) {
-		if (sprintItem.getItem() == null) {
-			return;
-		}
-		Check.notNull(sprintItem.getItem().getId(), "Sprintable item must be persisted (id != null) before being added to a sprint");
-		if (sprintItem.getItemId() == null) {
-			sprintItem.setItemId(sprintItem.getItem().getId());
-		}
-		if (sprintItem.getItemType() == null) {
-			sprintItem.setItemType(sprintItem.getItem().getClass().getSimpleName());
-		}
 	}
 
 	private ISprintableItem resolveItemForSprintItem(final CSprintItem sprintItem) {

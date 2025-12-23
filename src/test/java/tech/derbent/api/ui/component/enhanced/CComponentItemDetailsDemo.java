@@ -6,12 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CComponentItemDetailsDemo - Demonstration page showing CComponentItemDetails in action.
@@ -31,8 +29,7 @@ public class CComponentItemDetailsDemo extends VerticalLayout {
 	private final ISessionService sessionService;
 
 	@Autowired
-	public CComponentItemDetailsDemo(final ISessionService sessionService, final CPageEntityService pageEntityService,
-			final CDetailSectionService detailSectionService, final CActivityService activityService) throws Exception {
+	public CComponentItemDetailsDemo(final ISessionService sessionService, final CActivityService activityService) throws Exception {
 		this.sessionService = sessionService;
 		this.activityService = activityService;
 		setupComponent();

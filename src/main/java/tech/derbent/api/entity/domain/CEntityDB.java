@@ -21,6 +21,23 @@ import tech.derbent.api.domains.IEntityDBStatics;
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
+
+	/** Helper method to get all fields including inherited fields.
+	 * @param clazz the class to get fields from
+	 * @return array of all fields */
+	private static Field[] getAllFields(final Class<?> clazz) {
+		final List<Field> fields = new ArrayList<>();
+		Class<?> currentClass = clazz;
+		while (currentClass != null) {
+			final Field[] declaredFields = currentClass.getDeclaredFields();
+			for (final Field field : declaredFields) {
+				fields.add(field);
+			}
+			currentClass = currentClass.getSuperclass();
+		}
+		return fields.toArray(new Field[0]);
+	}
+
 	@Column (name = "active", nullable = false)
 	@AMetaData (
 			displayName = "Active", required = false, readOnly = false, description = "Whether this entity definition is active", hidden = false,
@@ -62,30 +79,15 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			return false;
 		}
 		final Long id1 = getId();
-		return (id1 != null) && id1.equals(other.getId());
+		return id1 != null && id1.equals(other.getId());
 	}
 
 	public Boolean getActive() { return active; }
 
-	/** Helper method to get all fields including inherited fields.
-	 * @param clazz the class to get fields from
-	 * @return array of all fields */
-	private Field[] getAllFields(final Class<?> clazz) {
-		final List<Field> fields = new ArrayList<>();
-		Class<?> currentClass = clazz;
-		while (currentClass != null) {
-			final Field[] declaredFields = currentClass.getDeclaredFields();
-			for (final Field field : declaredFields) {
-				fields.add(field);
-			}
-			currentClass = currentClass.getSuperclass();
-		}
-		return fields.toArray(new Field[0]);
-	}
-
 	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
 	 * returns "id" to ensure consistent ordering by ID in descending order.
 	 * @return the field name to order by (e.g., "id", "name", "createDate") */
+	@SuppressWarnings ("static-method")
 	public String getDefaultOrderBy() { return "id"; }
 
 	@Nullable
@@ -114,7 +116,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "id" field. Supported field names: "id", "active"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
@@ -153,12 +155,12 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			// Look for common soft delete fields
 			for (final Field field : fields) {
 				final String fieldName = field.getName().toLowerCase();
-				if ("deleted".equals(fieldName) && (field.getType() == Boolean.class)) {
+				if ("deleted".equals(fieldName) && field.getType() == Boolean.class) {
 					field.setAccessible(true);
 					field.set(this, Boolean.TRUE);
 					LOGGER.debug("Performed soft delete using 'deleted' field for: {}", this.getClass().getSimpleName());
 					return true;
-				} else if ("active".equals(fieldName) && (field.getType() == Boolean.class)) {
+				} else if ("active".equals(fieldName) && field.getType() == Boolean.class) {
 					field.setAccessible(true);
 					field.set(this, Boolean.FALSE);
 					LOGGER.debug("Performed soft delete using 'active' field for: {}", this.getClass().getSimpleName());

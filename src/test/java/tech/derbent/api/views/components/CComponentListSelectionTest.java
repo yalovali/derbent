@@ -13,40 +13,10 @@ import tech.derbent.api.ui.component.enhanced.CComponentListSelection;
 public class CComponentListSelectionTest {
 
 	@Test
-	public void testBinderIntegration_SimulateEntitySwitch() {
-		// This test simulates how the binder behaves when switching between entities
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
-		// Setup: Set source items (this would typically be done once by FormBuilder)
-		List<String> allItems = Arrays.asList("Role 1", "Role 2", "Role 3", "Role 4", "Role 5");
-		component.setSourceItems(allItems);
-		// Simulate binder.setBean(entity1) - entity1 has roles [Role 1, Role 3]
-		component.setValue(Arrays.asList("Role 1", "Role 3"));
-		assertEquals(2, component.getValue().size());
-		assertTrue(component.getValue().contains("Role 1"));
-		assertTrue(component.getValue().contains("Role 3"));
-		// Simulate binder.setBean(entity2) - entity2 has roles [Role 2, Role 4, Role 5]
-		component.setValue(Arrays.asList("Role 2", "Role 4", "Role 5"));
-		assertEquals(3, component.getValue().size());
-		assertTrue(component.getValue().contains("Role 2"));
-		assertTrue(component.getValue().contains("Role 4"));
-		assertTrue(component.getValue().contains("Role 5"));
-		assertFalse(component.getValue().contains("Role 1"));
-		assertFalse(component.getValue().contains("Role 3"));
-		// Simulate binder.setBean(entity3) - entity3 has no roles
-		component.setValue(Arrays.asList());
-		assertEquals(0, component.getValue().size());
-		assertTrue(component.isEmpty());
-		// Simulate binder.setBean(entity4) - entity4 has all roles
-		component.setValue(allItems);
-		assertEquals(5, component.getValue().size());
-		assertEquals(allItems.size(), component.getValue().size());
-	}
-
-	@Test
-	public void testBinderIntegration_ValueChangeListener() {
+	public static void testBinderIntegration_ValueChangeListener() {
 		// Test that value change listeners are notified when binder triggers setValue
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
-		List<String> allItems = Arrays.asList("Item 1", "Item 2", "Item 3");
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		final List<String> allItems = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setSourceItems(allItems);
 		// Track value changes
 		final int[] changeCount = {
@@ -76,10 +46,42 @@ public class CComponentListSelectionTest {
 		assertEquals(2, changeCount[0], "Should still have two value changes (no change)");
 	}
 
+	@SuppressWarnings ("static-method")
+	@Test
+	public void testBinderIntegration_SimulateEntitySwitch() {
+		// This test simulates how the binder behaves when switching between entities
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		// Setup: Set source items (this would typically be done once by FormBuilder)
+		final List<String> allItems = Arrays.asList("Role 1", "Role 2", "Role 3", "Role 4", "Role 5");
+		component.setSourceItems(allItems);
+		// Simulate binder.setBean(entity1) - entity1 has roles [Role 1, Role 3]
+		component.setValue(Arrays.asList("Role 1", "Role 3"));
+		assertEquals(2, component.getValue().size());
+		assertTrue(component.getValue().contains("Role 1"));
+		assertTrue(component.getValue().contains("Role 3"));
+		// Simulate binder.setBean(entity2) - entity2 has roles [Role 2, Role 4, Role 5]
+		component.setValue(Arrays.asList("Role 2", "Role 4", "Role 5"));
+		assertEquals(3, component.getValue().size());
+		assertTrue(component.getValue().contains("Role 2"));
+		assertTrue(component.getValue().contains("Role 4"));
+		assertTrue(component.getValue().contains("Role 5"));
+		assertFalse(component.getValue().contains("Role 1"));
+		assertFalse(component.getValue().contains("Role 3"));
+		// Simulate binder.setBean(entity3) - entity3 has no roles
+		component.setValue(Arrays.asList());
+		assertEquals(0, component.getValue().size());
+		assertTrue(component.isEmpty());
+		// Simulate binder.setBean(entity4) - entity4 has all roles
+		component.setValue(allItems);
+		assertEquals(5, component.getValue().size());
+		assertEquals(allItems.size(), component.getValue().size());
+	}
+
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testClear() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
-		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		final List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setSourceItems(items);
 		component.setValue(Arrays.asList("Item 1", "Item 2"));
 		assertFalse(component.isEmpty());
@@ -88,25 +90,27 @@ public class CComponentListSelectionTest {
 		assertEquals(0, component.getValue().size());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testComponentInitialization() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		assertNotNull(component);
 		assertTrue(component.isEmpty());
 		assertNotNull(component.getValue());
 		assertTrue(component.getValue().isEmpty());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testListSeparation() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
-		List<String> allItems = Arrays.asList("Item 1", "Item 2", "Item 3", "Item 4", "Item 5");
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		final List<String> allItems = Arrays.asList("Item 1", "Item 2", "Item 3", "Item 4", "Item 5");
 		component.setSourceItems(allItems);
 		// Select some items
-		List<String> selected = Arrays.asList("Item 2", "Item 4");
+		final List<String> selected = Arrays.asList("Item 2", "Item 4");
 		component.setValue(selected);
 		// Verify selected items
-		List<String> selectedResult = component.getValue();
+		final List<String> selectedResult = component.getValue();
 		assertEquals(2, selectedResult.size());
 		assertTrue(selectedResult.contains("Item 2"));
 		assertTrue(selectedResult.contains("Item 4"));
@@ -114,9 +118,10 @@ public class CComponentListSelectionTest {
 		assertFalse(component.isEmpty());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testReadOnlyMode() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
 		assertFalse(component.isReadOnly());
 		component.setReadOnly(true);
 		assertTrue(component.isReadOnly());
@@ -124,37 +129,40 @@ public class CComponentListSelectionTest {
 		assertFalse(component.isReadOnly());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testSetSourceItems() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
-		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		final List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setSourceItems(items);
 		// Initially no items should be selected
 		assertTrue(component.isEmpty());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testSetValue() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
-		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3", "Item 4");
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		final List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3", "Item 4");
 		component.setSourceItems(items);
 		// Select items
-		List<String> selectedItems = Arrays.asList("Item 3", "Item 1", "Item 4");
+		final List<String> selectedItems = Arrays.asList("Item 3", "Item 1", "Item 4");
 		component.setValue(selectedItems);
 		// Verify size
 		assertEquals(3, component.getValue().size());
 		// Verify all items are selected
-		List<String> result = component.getValue();
+		final List<String> result = component.getValue();
 		assertTrue(result.contains("Item 3"));
 		assertTrue(result.contains("Item 1"));
 		assertTrue(result.contains("Item 4"));
 		assertFalse(component.isEmpty());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testValueChangeWithNullHandling() {
-		CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
-		List<String> items = Arrays.asList("Item 1", "Item 2");
+		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
+		final List<String> items = Arrays.asList("Item 1", "Item 2");
 		component.setSourceItems(items);
 		// Set null value should be handled gracefully
 		component.setValue(null);

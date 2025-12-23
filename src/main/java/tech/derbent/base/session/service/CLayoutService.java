@@ -23,6 +23,30 @@ public class CLayoutService {
 	private static final String LAYOUT_MODE_KEY = "layoutMode";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLayoutService.class);
 
+	/** Registers a component to receive notifications when the layout mode changes. */
+	public static void addLayoutChangeListener(final ILayoutChangeListener listener) {
+		final VaadinSession session = VaadinSession.getCurrent();
+		Check.notNull(listener, "Listener cannot be null");
+		Check.notNull(session, "VaadinSession must not be null");
+		getOrCreateLayoutListeners(session).add(listener);
+	}
+
+	/** Clears all layout change listeners (typically called on session clear). */
+	public static void clearLayoutChangeListeners() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		Check.notNull(session, "VaadinSession must not be null");
+		getOrCreateLayoutListeners(session).clear();
+	}
+
+	private static Set<ILayoutChangeListener> getCurrentLayoutListeners() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.debug("No active VaadinSession; returning empty layout listener set");
+			return Collections.emptySet();
+		}
+		return getOrCreateLayoutListeners(session);
+	}
+
 	/** Gets the current layout mode from the session. Defaults to VERTICAL if not set. */
 	public static LayoutMode getCurrentLayoutMode() {
 		final VaadinSession session = VaadinSession.getCurrent();
@@ -34,32 +58,8 @@ public class CLayoutService {
 		return result;
 	}
 
-	/** Registers a component to receive notifications when the layout mode changes. */
-	public void addLayoutChangeListener(final ILayoutChangeListener listener) {
-		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(listener, "Listener cannot be null");
-		Check.notNull(session, "VaadinSession must not be null");
-		getOrCreateLayoutListeners(session).add(listener);
-	}
-
-	/** Clears all layout change listeners (typically called on session clear). */
-	public void clearLayoutChangeListeners() {
-		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "VaadinSession must not be null");
-		getOrCreateLayoutListeners(session).clear();
-	}
-
-	private Set<ILayoutChangeListener> getCurrentLayoutListeners() {
-		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			LOGGER.debug("No active VaadinSession; returning empty layout listener set");
-			return Collections.emptySet();
-		}
-		return getOrCreateLayoutListeners(session);
-	}
-
 	@SuppressWarnings ("unchecked")
-	private Set<ILayoutChangeListener> getOrCreateLayoutListeners(final VaadinSession session) {
+	private static Set<ILayoutChangeListener> getOrCreateLayoutListeners(final VaadinSession session) {
 		Set<ILayoutChangeListener> listeners = (Set<ILayoutChangeListener>) session.getAttribute(LAYOUT_LISTENERS_KEY);
 		if (listeners == null) {
 			listeners = ConcurrentHashMap.newKeySet();
@@ -69,7 +69,7 @@ public class CLayoutService {
 	}
 
 	/** Notifies all registered layout change listeners about a layout mode change. */
-	private void notifyLayoutChangeListeners(final LayoutMode newMode) {
+	private static void notifyLayoutChangeListeners(final LayoutMode newMode) {
 		final Set<ILayoutChangeListener> listeners = getCurrentLayoutListeners();
 		LOGGER.debug("Notifying {} layout change listeners of layout change to {}", listeners.size(), newMode);
 		if (newMode == null) {
@@ -121,7 +121,7 @@ public class CLayoutService {
 	}
 
 	/** Unregisters a component from receiving layout change notifications. */
-	public void removeLayoutChangeListener(final ILayoutChangeListener listener) {
+	public static void removeLayoutChangeListener(final ILayoutChangeListener listener) {
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(listener, "Listener must not be null");
 		Check.notNull(session, "VaadinSession must not be null");
@@ -129,7 +129,7 @@ public class CLayoutService {
 	}
 
 	/** Sets the layout mode and notifies all registered listeners. */
-	public void setLayoutMode(final LayoutMode layoutMode) {
+	public static void setLayoutMode(final LayoutMode layoutMode) {
 		if (layoutMode == null) {
 			LOGGER.warn("Cannot set layout mode - layoutMode is null");
 			return;
@@ -141,7 +141,7 @@ public class CLayoutService {
 	}
 
 	/** Toggles between horizontal and vertical layout modes. */
-	public void toggleLayoutMode() {
+	public static void toggleLayoutMode() {
 		LOGGER.debug("Toggling layout mode");
 		final LayoutMode currentMode = getCurrentLayoutMode();
 		final LayoutMode newMode = currentMode == LayoutMode.HORIZONTAL ? LayoutMode.VERTICAL : LayoutMode.HORIZONTAL;

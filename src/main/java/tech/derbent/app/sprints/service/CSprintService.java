@@ -26,6 +26,21 @@ import tech.derbent.base.session.service.ISessionService;
 public class CSprintService extends CProjectItemService<CSprint> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintService.class);
+
+	/** Data provider callback: Calculates the total number of items in a sprint. Called automatically by @PostLoad after entity is loaded from
+	 * database.
+	 * @param sprint the sprint entity to calculate item count for
+	 * @return total number of sprint items */
+	public static Integer getItemCount(final CSprint sprint) {
+		Check.notNull(sprint, "Sprint cannot be null in getItemCount");
+		return sprint.getItemCount(); // Delegates to entity method
+	}
+
+	public static Long getTotalStoryPoints(final CSprint sprint) {
+		Check.notNull(sprint, "Sprint cannot be null in getTotalStoryPoints");
+		return sprint.getTotalStoryPoints(); // Delegates to entity method
+	}
+
 	private final CSprintTypeService entityTypeService;
 	private final CSprintItemService sprintItemService;
 
@@ -99,25 +114,11 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	public Class<?> getInitializerServiceClass() { return CSprintInitializerService.class; }
 
-	/** Data provider callback: Calculates the total number of items in a sprint. Called automatically by @PostLoad after entity is loaded from
-	 * database.
-	 * @param sprint the sprint entity to calculate item count for
-	 * @return total number of sprint items */
-	public Integer getItemCount(final CSprint sprint) {
-		Check.notNull(sprint, "Sprint cannot be null in getItemCount");
-		return sprint.getItemCount(); // Delegates to entity method
-	}
-
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceSprint.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
-
-	public Long getTotalStoryPoints(final CSprint sprint) {
-		Check.notNull(sprint, "Sprint cannot be null in getTotalStoryPoints");
-		return sprint.getTotalStoryPoints(); // Delegates to entity method
-	}
 
 	@Override
 	public void initializeNewEntity(final CSprint entity) {

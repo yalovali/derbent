@@ -46,6 +46,36 @@ public class CWebSessionService implements ISessionService {
 		return (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
 	}
 
+	@SuppressWarnings ("unchecked")
+	private static Set<IProjectChangeListener> getOrCreateProjectChangeListeners(final VaadinSession session) {
+		Set<IProjectChangeListener> listeners = (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
+		if (listeners == null) {
+			listeners = ConcurrentHashMap.newKeySet();
+			session.setAttribute(PROJECT_CHANGE_LISTENERS_KEY, listeners);
+		}
+		return listeners;
+	}
+
+	@SuppressWarnings ("unchecked")
+	private static Set<IProjectListChangeListener> getOrCreateProjectListChangeListeners(final VaadinSession session) {
+		Set<IProjectListChangeListener> listeners = (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
+		if (listeners == null) {
+			listeners = ConcurrentHashMap.newKeySet();
+			session.setAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY, listeners);
+		}
+		return listeners;
+	}
+
+	@SuppressWarnings ("unchecked")
+	private static Set<IProjectChangeListener> getProjectChangeListenersIfPresent(final VaadinSession session) {
+		return (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
+	}
+
+	@SuppressWarnings ("unchecked")
+	private static Set<IProjectListChangeListener> getProjectListChangeListenersIfPresent(final VaadinSession session) {
+		return (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
+	}
+
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
 
@@ -110,7 +140,7 @@ public class CWebSessionService implements ISessionService {
 			LOGGER.debug("clearSession called without active VaadinSession");
 		}
 		if (layoutService != null) {
-			layoutService.clearLayoutChangeListeners();
+			CLayoutService.clearLayoutChangeListeners();
 		}
 	}
 
@@ -176,6 +206,7 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
 
+	@SuppressWarnings ("static-method")
 	private Set<IProjectChangeListener> getCurrentProjectChangeListeners() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -186,6 +217,7 @@ public class CWebSessionService implements ISessionService {
 		return listeners != null ? listeners : Collections.emptySet();
 	}
 
+	@SuppressWarnings ("static-method")
 	private Set<IProjectListChangeListener> getCurrentProjectListChangeListeners() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -196,7 +228,9 @@ public class CWebSessionService implements ISessionService {
 		return listeners != null ? listeners : Collections.emptySet();
 	}
 
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ({
+			"unchecked", "static-method"
+	})
 	private Set<String> getOrCreateActiveIdAttributes(final VaadinSession session) {
 		Set<String> attributes = (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
 		if (attributes == null) {
@@ -204,36 +238,6 @@ public class CWebSessionService implements ISessionService {
 			session.setAttribute(ACTIVE_ID_ATTRIBUTES_KEY, attributes);
 		}
 		return attributes;
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<IProjectChangeListener> getOrCreateProjectChangeListeners(final VaadinSession session) {
-		Set<IProjectChangeListener> listeners = (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
-		if (listeners == null) {
-			listeners = ConcurrentHashMap.newKeySet();
-			session.setAttribute(PROJECT_CHANGE_LISTENERS_KEY, listeners);
-		}
-		return listeners;
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<IProjectListChangeListener> getOrCreateProjectListChangeListeners(final VaadinSession session) {
-		Set<IProjectListChangeListener> listeners = (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
-		if (listeners == null) {
-			listeners = ConcurrentHashMap.newKeySet();
-			session.setAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY, listeners);
-		}
-		return listeners;
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<IProjectChangeListener> getProjectChangeListenersIfPresent(final VaadinSession session) {
-		return (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<IProjectListChangeListener> getProjectListChangeListenersIfPresent(final VaadinSession session) {
-		return (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
 	}
 
 	/** Event listener for project list changes. This method is called when projects are created, updated, or deleted to notify all registered
@@ -330,10 +334,10 @@ public class CWebSessionService implements ISessionService {
 		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		if ((project == null) && (getActiveProject().orElse(null) == null)) {
+		if (project == null && getActiveProject().orElse(null) == null) {
 			return;
 		}
-		if ((project != null) && (getActiveProject().orElse(null) != null) && project.getId().equals(getActiveProject().orElse(null).getId())) {
+		if (project != null && getActiveProject().orElse(null) != null && project.getId().equals(getActiveProject().orElse(null).getId())) {
 			// LOGGER.debug("setActiveProject called with same project, no action taken");
 			return;
 		}

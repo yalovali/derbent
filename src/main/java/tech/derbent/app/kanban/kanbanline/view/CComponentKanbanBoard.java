@@ -24,6 +24,21 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanBoard.class);
 	private static final long serialVersionUID = 1L;
+
+	private static boolean matchesResponsibleUser(final CProjectItem<?> item, final CUser targetUser) {
+		if (item.getResponsible() == null || item.getResponsible().getId() == null || targetUser.getId() == null) {
+			return false;
+		}
+		return item.getResponsible().getId().equals(targetUser.getId());
+	}
+
+	private static boolean matchesTypeFilter(final CProjectItem<?> item, final Class<?> entityClass) {
+		if (entityClass == null) {
+			return true;
+		}
+		return entityClass.isAssignableFrom(item.getClass());
+	}
+
 	private List<CProjectItem<?>> allProjectItems;
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
 	private final CHorizontalLayout layoutColumns;
@@ -104,20 +119,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		return true;
 	}
 
-	private boolean matchesResponsibleUser(final CProjectItem<?> item, final CUser targetUser) {
-		if (item.getResponsible() == null || item.getResponsible().getId() == null || targetUser.getId() == null) {
-			return false;
-		}
-		return item.getResponsible().getId().equals(targetUser.getId());
-	}
-
-	private boolean matchesTypeFilter(final CProjectItem<?> item, final Class<?> entityClass) {
-		if (entityClass == null) {
-			return true;
-		}
-		return entityClass.isAssignableFrom(item.getClass());
-	}
-
 	@Override
 	protected void onValueChanged(final CKanbanLine oldValue, final CKanbanLine newValue, final boolean fromClient) {
 		LOGGER.debug("Kanban board value changed from {} to {}", oldValue, newValue);
@@ -167,6 +168,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 			return;
 		}
 		Check.instanceOf(entity, CKanbanLine.class, "Kanban board expects CKanbanLine as current entity");
+		if (entity.equals(getValue())) {
+			LOGGER.debug("New entity is the same as current value; no action taken");
+			return;
+		}
 		setValue((CKanbanLine) entity);
 	}
 }

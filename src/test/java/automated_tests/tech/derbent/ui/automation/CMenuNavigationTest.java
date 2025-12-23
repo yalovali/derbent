@@ -40,6 +40,11 @@ public class CMenuNavigationTest extends CBaseUITest {
 		}
 	}
 
+	/** Make filename-safe name from menu label */
+	private static String makeSafeName(String label) {
+		return label.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "").substring(0, Math.min(label.length(), 50));
+	}
+
 	private int screenshotCounter = 1;
 	private final Set<String> visitedPages = new HashSet<>();
 
@@ -132,11 +137,6 @@ public class CMenuNavigationTest extends CBaseUITest {
 		} catch (final Exception e) {
 			LOGGER.warn("{}⚠️ Failed to go back: {}", indent, e.getMessage());
 		}
-	}
-
-	/** Make filename-safe name from menu label */
-	private String makeSafeName(String label) {
-		return label.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "").substring(0, Math.min(label.length(), 50));
 	}
 
 	@Test

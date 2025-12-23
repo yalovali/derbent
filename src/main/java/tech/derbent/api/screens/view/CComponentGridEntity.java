@@ -151,6 +151,45 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
+	private static Class<?> getEntityClassFromService(String serviceBeanName) throws Exception {
+		try {
+			final CAbstractService<?> abstractService = CSpringContext.<CAbstractService<?>>getBean(serviceBeanName);
+			return getEntityClassFromService(abstractService);
+		} catch (final Exception e) {
+			LOGGER.error("Error getting entity class from service {}: {}", serviceBeanName, e.getMessage());
+			throw e;
+		}
+	}
+
+	/** Helper method to determine if a color is light or dark for text contrast
+	 * @param color hex color string (e.g., "#FF0000")
+	 * @return true if the color is light, false if dark */
+	private static boolean isColorLight(String color) {
+		if (color == null || color.trim().isEmpty()) {
+			return true; // Default to light
+		}
+		try {
+			// Remove # if present
+			String hex = color.startsWith("#") ? color.substring(1) : color;
+			if (hex.length() == 3) {
+				// Convert 3-digit hex to 6-digit
+				hex = "" + hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
+			}
+			if (hex.length() != 6) {
+				return true; // Invalid format, default to light
+			}
+			// Calculate brightness using standard formula
+			final int r = Integer.parseInt(hex.substring(0, 2), 16);
+			final int g = Integer.parseInt(hex.substring(2, 4), 16);
+			final int b = Integer.parseInt(hex.substring(4, 6), 16);
+			// Calculate brightness (0-255)
+			final double brightness = r * 0.299 + g * 0.587 + b * 0.114;
+			return brightness > 127; // Threshold for light vs dark
+		} catch (@SuppressWarnings ("unused") final Exception e) {
+			return true; // Default to light on error
+		}
+	}
+
 	/** Checks if an entity matches the search text. This method now uses the entity's matchesFilter() method which provides hierarchical filtering.
 	 * If the entity is a CEntityDB (which all domain entities extend), it uses the built-in filtering. Otherwise, falls back to simple string
 	 * comparison.
@@ -178,6 +217,26 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error checking search match for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
 			throw e;
 		}
+	}
+
+	private static List<FieldConfig> parseSelectedFields(List<String> list, Class<?> entityClass) {
+		final List<FieldConfig> fieldConfigs = new ArrayList<>();
+		Check.notNull(entityClass, "Entity class is null for parsing selected fields");
+		Check.notNull(list, "Selected fields string is null");
+		if (list.isEmpty()) {
+			return fieldConfigs;
+		}
+		int order = 0;
+		for (final String fieldName : list) {
+			final Field field = findField(entityClass, fieldName);
+			Check.notNull(field, "Field not found in entity class: " + fieldName);
+			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
+			fieldConfigs.add(new FieldConfig(fieldInfo, order, field));
+			order++;
+		}
+		// Sort by order
+		fieldConfigs.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
+		return fieldConfigs;
 	}
 
 	// Drag-drop event notification methods now provided by IHasDragControl interface default methods
@@ -645,16 +704,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public IContentOwner getContentOwner() { return contentOwner; }
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
-	private Class<?> getEntityClassFromService(String serviceBeanName) throws Exception {
-		try {
-			final CAbstractService<?> abstractService = CSpringContext.<CAbstractService<?>>getBean(serviceBeanName);
-			return getEntityClassFromService(abstractService);
-		} catch (final Exception e) {
-			LOGGER.error("Error getting entity class from service {}: {}", serviceBeanName, e.getMessage());
-			throw e;
-		}
-	}
-
 	public CGridEntity getGridEntity() { return gridEntity; }
 
 	/** Gets the currently selected item from the grid */
@@ -708,35 +757,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
-	/** Helper method to determine if a color is light or dark for text contrast
-	 * @param color hex color string (e.g., "#FF0000")
-	 * @return true if the color is light, false if dark */
-	private boolean isColorLight(String color) {
-		if (color == null || color.trim().isEmpty()) {
-			return true; // Default to light
-		}
-		try {
-			// Remove # if present
-			String hex = color.startsWith("#") ? color.substring(1) : color;
-			if (hex.length() == 3) {
-				// Convert 3-digit hex to 6-digit
-				hex = "" + hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
-			}
-			if (hex.length() != 6) {
-				return true; // Invalid format, default to light
-			}
-			// Calculate brightness using standard formula
-			final int r = Integer.parseInt(hex.substring(0, 2), 16);
-			final int g = Integer.parseInt(hex.substring(2, 4), 16);
-			final int b = Integer.parseInt(hex.substring(4, 6), 16);
-			// Calculate brightness (0-255)
-			final double brightness = r * 0.299 + g * 0.587 + b * 0.114;
-			return brightness > 127; // Threshold for light vs dark
-		} catch (@SuppressWarnings ("unused") final Exception e) {
-			return true; // Default to light on error
-		}
-	}
-
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
 
 	@Override
@@ -776,26 +796,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 		final CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
 		fireEvent(new SelectionChangeEvent(this, selectedEntity));
-	}
-
-	private List<FieldConfig> parseSelectedFields(List<String> list, Class<?> entityClass) {
-		final List<FieldConfig> fieldConfigs = new ArrayList<>();
-		Check.notNull(entityClass, "Entity class is null for parsing selected fields");
-		Check.notNull(list, "Selected fields string is null");
-		if (list.isEmpty()) {
-			return fieldConfigs;
-		}
-		int order = 0;
-		for (final String fieldName : list) {
-			final Field field = findField(entityClass, fieldName);
-			Check.notNull(field, "Field not found in entity class: " + fieldName);
-			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
-			fieldConfigs.add(new FieldConfig(fieldInfo, order, field));
-			order++;
-		}
-		// Sort by order
-		fieldConfigs.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
-		return fieldConfigs;
 	}
 
 	@Override

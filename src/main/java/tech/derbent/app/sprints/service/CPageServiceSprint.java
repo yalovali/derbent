@@ -40,6 +40,44 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		implements IPageServiceHasStatusAndWorkflow<CSprint>, IComponentWidgetEntityProvider<CSprint> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
+
+	private static CSprint drag_getTargetSprintFromDropTarget(final CDragDropEvent event) {
+		Check.notNull(event, "DragDropEvent cannot be null");
+		if (event.getTargetItem() == null) {
+			LOGGER.warn("Drop event target item is null, cannot determine target sprint");
+			return null;
+		}
+		if (event.getSource() instanceof CGrid<?>) {
+			// the dropped target may not be selected at all!!!
+			// final CSprint sprint = (CSprint) ((CGrid<?>) event.getSource()).getSelectedEntity();
+			if (event.getTargetItem() instanceof CSprint) {
+				return (CSprint) event.getTargetItem();
+			} else if (event.getTargetItem() instanceof CSprintItem) {
+				return ((CSprintItem) event.getTargetItem()).getSprint();
+			} else {
+				LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+				return null;
+			}
+		} else if (event.getSource() instanceof CComponentGridEntity) {
+			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
+			if (event.getTargetItem() instanceof CSprintItem) {
+				return ((CSprintItem) event.getTargetItem()).getSprint();
+			}
+			LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+			return null;
+		} else if (event.getSource() instanceof CComponentWidgetSprint) {
+			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
+			if (event.getTargetItem() instanceof CSprint) {
+				return (CSprint) event.getTargetItem();
+			}
+			LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
+			return null;
+		} else {
+			LOGGER.error("Cannot determine target sprint from drop event source: {}", event.getSource().getClass().getSimpleName());
+			return null;
+		}
+	}
+
 	private CActivityService activityService;
 	private CComponentBacklog componentBacklogItems;
 	private CComponentItemDetails componentItemDetails;
@@ -97,43 +135,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentBacklogItems.registerWithPageService(this);
 		}
 		return componentBacklogItems;
-	}
-
-	private CSprint drag_getTargetSprintFromDropTarget(final CDragDropEvent event) {
-		Check.notNull(event, "DragDropEvent cannot be null");
-		if (event.getTargetItem() == null) {
-			LOGGER.warn("Drop event target item is null, cannot determine target sprint");
-			return null;
-		}
-		if (event.getSource() instanceof CGrid<?>) {
-			// the dropped target may not be selected at all!!!
-			// final CSprint sprint = (CSprint) ((CGrid<?>) event.getSource()).getSelectedEntity();
-			if (event.getTargetItem() instanceof CSprint) {
-				return (CSprint) event.getTargetItem();
-			} else if (event.getTargetItem() instanceof CSprintItem) {
-				return ((CSprintItem) event.getTargetItem()).getSprint();
-			} else {
-				LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
-				return null;
-			}
-		} else if (event.getSource() instanceof CComponentGridEntity) {
-			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
-			if (event.getTargetItem() instanceof CSprintItem) {
-				return ((CSprintItem) event.getTargetItem()).getSprint();
-			}
-			LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
-			return null;
-		} else if (event.getSource() instanceof CComponentWidgetSprint) {
-			Check.notNull(event.getTargetItem(), "Drop event target item cannot be null for sprint drop");
-			if (event.getTargetItem() instanceof CSprint) {
-				return (CSprint) event.getTargetItem();
-			}
-			LOGGER.warn("Drop event target item is not a CSprint: {}", event.getTargetItem().getClass().getSimpleName());
-			return null;
-		} else {
-			LOGGER.error("Cannot determine target sprint from drop event source: {}", event.getSource().getClass().getSimpleName());
-			return null;
-		}
 	}
 
 	/** Handles reordering a backlog item within the backlog grid.

@@ -61,7 +61,7 @@ public class OwnerInterfacesUsageExample {
 	}
 
 	@Test
-	public void demonstrateClickNotifierUsage() {
+	public static void demonstrateClickNotifierUsage() {
 		// ClickNotifier is already provided by Vaadin for all container components
 		// CDiv, CVerticalLayout, CHorizontalLayout, etc. inherit it from their base classes
 		System.out.println("ClickNotifier Usage (already available):");
@@ -72,7 +72,7 @@ public class OwnerInterfacesUsageExample {
 	}
 
 	@Test
-	public void demonstrateOwnerInterfaceUsage() {
+	public static void demonstrateOwnerInterfaceUsage() {
 		// This test demonstrates the usage pattern but won't execute actual UI operations
 		// In a real scenario, you would:
 		// 1. Create a parent component/view that implements one or more owner interfaces

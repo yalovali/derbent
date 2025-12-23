@@ -25,6 +25,63 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsService.class);
 
+	/** Validates business rules for system settings.
+	 * @param settings the settings to validate
+	 * @throws IllegalArgumentException if validation fails */
+	private static void validateSystemSettingsBusinessRules(final CSystemSettings settings) {
+		if (settings.getSessionTimeoutMinutes() != null && (settings.getSessionTimeoutMinutes() < 5 || settings.getSessionTimeoutMinutes() > 1440)) {
+			throw new IllegalArgumentException("Session timeout must be between 5 and 1440 minutes");
+		}
+		// Validate login attempts
+		if (settings.getMaxLoginAttempts() != null && (settings.getMaxLoginAttempts() < 1 || settings.getMaxLoginAttempts() > 10)) {
+			throw new IllegalArgumentException("Max login attempts must be between 1 and 10");
+		}
+		// Validate lockout duration
+		if (settings.getAccountLockoutDurationMinutes() != null
+				&& (settings.getAccountLockoutDurationMinutes() < 1 || settings.getAccountLockoutDurationMinutes() > 1440)) {
+			throw new IllegalArgumentException("Account lockout duration must be between 1 and 1440 minutes");
+		}
+		// Validate file upload size
+		if (settings.getMaxFileUploadSizeMb() != null && settings.getMaxFileUploadSizeMb().doubleValue() <= 0) {
+			throw new IllegalArgumentException("Max file upload size must be positive");
+		}
+		// Validate SMTP port
+		if (settings.getSmtpPort() != null && (settings.getSmtpPort() < 1 || settings.getSmtpPort() > 65535)) {
+			throw new IllegalArgumentException("SMTP port must be between 1 and 65535");
+		}
+		// Validate connection pool size
+		if (settings.getDatabaseConnectionPoolSize() != null
+				&& (settings.getDatabaseConnectionPoolSize() < 1 || settings.getDatabaseConnectionPoolSize() > 100)) {
+			throw new IllegalArgumentException("Database connection pool size must be between 1 and 100");
+		}
+		// Validate cache TTL
+		if (settings.getCacheTtlMinutes() != null && (settings.getCacheTtlMinutes() < 1 || settings.getCacheTtlMinutes() > 1440)) {
+			throw new IllegalArgumentException("Cache TTL must be between 1 and 1440 minutes");
+		}
+		// Validate backup retention
+		if (settings.getBackupRetentionDays() != null && (settings.getBackupRetentionDays() < 1 || settings.getBackupRetentionDays() > 365)) {
+			throw new IllegalArgumentException("Backup retention must be between 1 and 365 days");
+		}
+		// Validate password expiry
+		if (settings.getPasswordExpiryDays() != null && (settings.getPasswordExpiryDays() < 1 || settings.getPasswordExpiryDays() > 365)) {
+			throw new IllegalArgumentException("Password expiry must be between 1 and 365 days");
+		}
+		// Validate email format
+		if (settings.getSupportEmail() != null && !settings.getSupportEmail().trim().isEmpty()) {
+			final String email = settings.getSupportEmail().trim();
+			if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+				throw new IllegalArgumentException("Support email must be a valid email address");
+			}
+		}
+		if (settings.getSystemEmailFrom() != null && !settings.getSystemEmailFrom().trim().isEmpty()) {
+			final String email = settings.getSystemEmailFrom().trim();
+			if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+				throw new IllegalArgumentException("System email from must be a valid email address");
+			}
+		}
+		LOGGER.debug("System settings validation passed successfully");
+	}
+
 	/** Constructor for CSystemSettingsService.
 	 * @param repository the CSystemSettingsRepository instance
 	 * @param clock      the Clock instance for time-related operations */
@@ -134,7 +191,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 	 * @return the max login attempts, or default value if not found */
 	public int getMaxLoginAttempts() {
 		final Integer result = ((CSystemSettings) repository).getMaxLoginAttempts();
-		final int maxAttempts = (result != null) ? result : 3; // Default to 3
+		final int maxAttempts = result != null ? result : 3; // Default to 3
 		return maxAttempts;// attemptsret
 	}
 
@@ -223,7 +280,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 	public CSystemSettings setMaintenanceMode(final boolean enabled, final String message) {
 		final CSystemSettings settings = getOrCreateSystemSettings();
 		settings.setMaintenanceModeEnabled(enabled);
-		if ((message != null) && !message.trim().isEmpty()) {
+		if (message != null && !message.trim().isEmpty()) {
 			settings.setMaintenanceMessage(message.trim());
 		}
 		final CSystemSettings updatedSettings = updateSystemSettings(settings);
@@ -238,7 +295,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 	public CSystemSettings updateAutoLoginSettings(final boolean autoLoginEnabled, final String defaultView) {
 		final CSystemSettings settings = getOrCreateSystemSettings();
 		settings.setAutoLoginEnabled(autoLoginEnabled);
-		if ((defaultView != null) && !defaultView.trim().isEmpty()) {
+		if (defaultView != null && !defaultView.trim().isEmpty()) {
 			settings.setDefaultLoginView(defaultView.trim());
 		}
 		return updateSystemSettings(settings);
@@ -250,7 +307,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 	@Transactional
 	public CSystemSettings updateLastVisitedView(final String lastVisitedView) {
 		final CSystemSettings settings = getOrCreateSystemSettings();
-		if ((lastVisitedView != null) && !lastVisitedView.trim().isEmpty()) {
+		if (lastVisitedView != null && !lastVisitedView.trim().isEmpty()) {
 			settings.setLastVisitedView(lastVisitedView.trim());
 		}
 		return updateSystemSettings(settings);
@@ -278,63 +335,5 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 			LOGGER.error("Failed to update system settings", e);
 			throw e;
 		}
-	}
-
-	/** Validates business rules for system settings.
-	 * @param settings the settings to validate
-	 * @throws IllegalArgumentException if validation fails */
-	private void validateSystemSettingsBusinessRules(final CSystemSettings settings) {
-		if ((settings.getSessionTimeoutMinutes() != null)
-				&& ((settings.getSessionTimeoutMinutes() < 5) || (settings.getSessionTimeoutMinutes() > 1440))) {
-			throw new IllegalArgumentException("Session timeout must be between 5 and 1440 minutes");
-		}
-		// Validate login attempts
-		if ((settings.getMaxLoginAttempts() != null) && ((settings.getMaxLoginAttempts() < 1) || (settings.getMaxLoginAttempts() > 10))) {
-			throw new IllegalArgumentException("Max login attempts must be between 1 and 10");
-		}
-		// Validate lockout duration
-		if ((settings.getAccountLockoutDurationMinutes() != null)
-				&& ((settings.getAccountLockoutDurationMinutes() < 1) || (settings.getAccountLockoutDurationMinutes() > 1440))) {
-			throw new IllegalArgumentException("Account lockout duration must be between 1 and 1440 minutes");
-		}
-		// Validate file upload size
-		if ((settings.getMaxFileUploadSizeMb() != null) && (settings.getMaxFileUploadSizeMb().doubleValue() <= 0)) {
-			throw new IllegalArgumentException("Max file upload size must be positive");
-		}
-		// Validate SMTP port
-		if ((settings.getSmtpPort() != null) && ((settings.getSmtpPort() < 1) || (settings.getSmtpPort() > 65535))) {
-			throw new IllegalArgumentException("SMTP port must be between 1 and 65535");
-		}
-		// Validate connection pool size
-		if ((settings.getDatabaseConnectionPoolSize() != null)
-				&& ((settings.getDatabaseConnectionPoolSize() < 1) || (settings.getDatabaseConnectionPoolSize() > 100))) {
-			throw new IllegalArgumentException("Database connection pool size must be between 1 and 100");
-		}
-		// Validate cache TTL
-		if ((settings.getCacheTtlMinutes() != null) && ((settings.getCacheTtlMinutes() < 1) || (settings.getCacheTtlMinutes() > 1440))) {
-			throw new IllegalArgumentException("Cache TTL must be between 1 and 1440 minutes");
-		}
-		// Validate backup retention
-		if ((settings.getBackupRetentionDays() != null) && ((settings.getBackupRetentionDays() < 1) || (settings.getBackupRetentionDays() > 365))) {
-			throw new IllegalArgumentException("Backup retention must be between 1 and 365 days");
-		}
-		// Validate password expiry
-		if ((settings.getPasswordExpiryDays() != null) && ((settings.getPasswordExpiryDays() < 1) || (settings.getPasswordExpiryDays() > 365))) {
-			throw new IllegalArgumentException("Password expiry must be between 1 and 365 days");
-		}
-		// Validate email format
-		if ((settings.getSupportEmail() != null) && !settings.getSupportEmail().trim().isEmpty()) {
-			final String email = settings.getSupportEmail().trim();
-			if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-				throw new IllegalArgumentException("Support email must be a valid email address");
-			}
-		}
-		if ((settings.getSystemEmailFrom() != null) && !settings.getSystemEmailFrom().trim().isEmpty()) {
-			final String email = settings.getSystemEmailFrom().trim();
-			if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-				throw new IllegalArgumentException("System email from must be a valid email address");
-			}
-		}
-		LOGGER.debug("System settings validation passed successfully");
 	}
 }

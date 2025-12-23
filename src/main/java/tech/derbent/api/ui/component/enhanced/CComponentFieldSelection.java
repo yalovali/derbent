@@ -25,6 +25,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.Check;
 
+@SuppressWarnings ("unused")
 public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHorizontalLayout
 		implements HasValue<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>>,
 		HasValueAndElement<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>> {
@@ -253,7 +254,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		final DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		if (selected != null) {
 			final int index = selectedItems.indexOf(selected);
-			if (index < (selectedItems.size() - 1)) {
+			if (index < selectedItems.size() - 1) {
 				selectedItems.remove(index);
 				selectedItems.add(index + 1, selected);
 				populateForm();
@@ -324,7 +325,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		selectedItems.remove(selected);
 		populateForm();
 		selectedGrid.asSingleSelect().setValue(selectionIndex < selectedItems.size() ? selectedItems.get(selectionIndex)
-				: (selectedItems.isEmpty() ? null : selectedItems.get(selectedItems.size() - 1)));
+				: selectedItems.isEmpty() ? null : selectedItems.get(selectedItems.size() - 1));
 	}
 
 	public void setItemLabelGenerator(final ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
@@ -376,8 +377,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 					if (b == null) {
 						return -1;
 					}
-					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : (a.toString() != null ? a.toString() : "");
-					final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : (b.toString() != null ? b.toString() : "");
+					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : a.toString() != null ? a.toString() : "";
+					final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : b.toString() != null ? b.toString() : "";
 					return labelA.compareToIgnoreCase(labelB);
 				} catch (final Exception e) {
 					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
@@ -398,7 +399,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			try {
 				LOGGER.debug("Handling double-click on available grid");
 				final DetailEntity item = event.getItem();
-				if ((item != null) && !readOnly) {
+				if (item != null && !readOnly) {
 					availableGrid.asSingleSelect().setValue(item);
 					addSelectedItem();
 				}
@@ -411,7 +412,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			try {
 				LOGGER.debug("Handling double-click on selected grid");
 				final DetailEntity item = event.getItem();
-				if ((item != null) && !readOnly) {
+				if (item != null && !readOnly) {
 					selectedGrid.asSingleSelect().setValue(item);
 					removeSelectedItem();
 				}
@@ -427,12 +428,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		// Enable/disable buttons based on selection - Use asSingleSelect() for consistent behavior
 		availableGrid.asSingleSelect().addValueChangeListener(e -> {
 			LOGGER.debug("Available grid selection changed");
-			final boolean hasSelection = (e.getValue() != null) && !readOnly;
+			final boolean hasSelection = e.getValue() != null && !readOnly;
 			addButton.setEnabled(hasSelection);
 		});
 		selectedGrid.asSingleSelect().addValueChangeListener(e -> {
 			LOGGER.debug("Selected grid selection changed");
-			final boolean hasSelection = (e.getValue() != null) && !readOnly;
+			final boolean hasSelection = e.getValue() != null && !readOnly;
 			removeButton.setEnabled(hasSelection);
 			upButton.setEnabled(hasSelection);
 			downButton.setEnabled(hasSelection);
@@ -481,7 +482,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 					value != null ? value.size() : 0);
 			selectedItems.clear();
 			// Only update source items if dataProviderResolver is available
-			if ((dataProviderResolver != null) && (fieldInfo != null)) {
+			if (dataProviderResolver != null && fieldInfo != null) {
 				try {
 					updateSourceItems();
 				} catch (final Exception e) {

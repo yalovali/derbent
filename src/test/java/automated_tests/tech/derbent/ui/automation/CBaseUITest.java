@@ -66,6 +66,31 @@ public abstract class CBaseUITest {
 		System.setProperty("spring.devtools.livereload.port", "35729");
 	}
 
+	/** Generate possible dynamic page routes for an entity type.
+	 * @param entityName The entity name (e.g., "CUser", "CCompany")
+	 * @return Array of possible routes to try */
+	protected static String[] generateDynamicPageRoutes(String entityName) {
+		final String baseName = entityName.startsWith("C") ? entityName.substring(1) : entityName;
+		final List<String> routes = new ArrayList<>(Arrays.asList(baseName.toLowerCase() + "s", // users, companies
+				baseName.toLowerCase(), // user, company
+				entityName.toLowerCase() + "s", // cusers, ccompanies
+				entityName.toLowerCase(), // cuser, ccompany
+				baseName.toLowerCase() + "-directory", // user-directory, project-directory
+				"page/" + baseName.toLowerCase(), // page/user, page/company
+				"entity/" + baseName.toLowerCase(), // entity/user, entity/company
+				"view/" + baseName.toLowerCase(), // view/user, view/company
+				"dynamic/" + baseName.toLowerCase() // dynamic/user, dynamic/company
+		));
+		if ("cuser".equalsIgnoreCase(entityName) || "user".equalsIgnoreCase(baseName)) {
+			routes.add("team-directory");
+		}
+		if ("cproject".equalsIgnoreCase(entityName) || "project".equalsIgnoreCase(baseName)) {
+			routes.add("project-overview");
+			routes.add("resource-library");
+		}
+		return routes.toArray(new String[0]);
+	}
+
 	/** Generate search terms for a given entity type.
 	 * @param entityType The entity type (e.g., "CUser")
 	 * @return Array of possible search terms */
@@ -80,6 +105,64 @@ public abstract class CBaseUITest {
 				entityType, // CUser, CActivity, CProject
 				entityType.toLowerCase() // cuser, cactivity, cproject
 		};
+	}
+
+	/** Attempts to resolve the fully-qualified entity class for a given entity type string. */
+	protected static Optional<Class<?>> resolveEntityClass(String entityType) {
+		final String baseName = entityType.startsWith("C") ? entityType.substring(1) : entityType;
+		final String pluralSegment = baseName.toLowerCase() + "s";
+		final String singularSegment = baseName.toLowerCase();
+		final String[] candidateClasses = {
+				"tech.derbent." + pluralSegment + ".domain." + entityType, "tech.derbent." + singularSegment + ".domain." + entityType,
+				"tech.derbent.app." + pluralSegment + ".domain." + entityType, "tech.derbent.app." + singularSegment + ".domain." + entityType,
+				"tech.derbent.base." + pluralSegment + ".domain." + entityType, "tech.derbent.base." + singularSegment + ".domain." + entityType,
+				"tech.derbent.api.domain." + entityType
+		};
+		for (final String fqcn : candidateClasses) {
+			try {
+				final Class<?> clazz = Class.forName(fqcn);
+				LOGGER.debug("🔍 Resolved entity type {} to class {}", entityType, fqcn);
+				return Optional.of(clazz);
+			} catch (@SuppressWarnings ("unused") final ClassNotFoundException ignored) { /*****/
+			}
+		}
+		LOGGER.debug("⚠️ Unable to resolve entity class for {}", entityType);
+		return Optional.empty();
+	}
+
+	private static String resolveViewIdentifier(final Class<?> viewClass) {
+		if (viewClass == null) {
+			return "unknown-view";
+		}
+		try {
+			final Field viewNameField = viewClass.getDeclaredField("VIEW_NAME");
+			if (Modifier.isStatic(viewNameField.getModifiers()) && viewNameField.getType() == String.class) {
+				viewNameField.setAccessible(true);
+				final Object value = viewNameField.get(null);
+				if (value instanceof final String viewName && !viewName.isBlank()) {
+					return viewName;
+				}
+			}
+		} catch (final NoSuchFieldException missingField) {
+			LOGGER.debug("VIEW_NAME not declared on {}: {}", viewClass.getSimpleName(), missingField.getMessage());
+		} catch (final Exception reflectionError) {
+			LOGGER.debug("Failed to read VIEW_NAME for {}: {}", viewClass.getSimpleName(), reflectionError.getMessage());
+		}
+		final Route route = viewClass.getAnnotation(Route.class);
+		if (route != null && route.value() != null && !route.value().isBlank()) {
+			return route.value();
+		}
+		return viewClass.getSimpleName();
+	}
+
+	private static String sanitizeForIdentifier(final String value, final String fallback) {
+		final String safeFallback = fallback == null || fallback.isBlank() ? "autogen" : fallback;
+		if (value == null || value.isBlank()) {
+			return safeFallback;
+		}
+		final String sanitized = value.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
+				.replaceAll("(^-|-$)", "").toLowerCase();
+		return sanitized.isBlank() ? safeFallback : sanitized;
 	}
 
 	/** Admin view classes */
@@ -378,7 +461,7 @@ public abstract class CBaseUITest {
 		try {
 			if (errorLabel.first().isVisible()) {
 				final String text = errorLabel.first().textContent();
-				if ((text != null) && !text.trim().isEmpty()) {
+				if (text != null && !text.trim().isEmpty()) {
 					throw new AssertionError("Login failed at " + controlPoint + ": " + text.trim());
 				}
 			}
@@ -483,31 +566,6 @@ public abstract class CBaseUITest {
 		return false;
 	}
 
-	/** Generate possible dynamic page routes for an entity type.
-	 * @param entityName The entity name (e.g., "CUser", "CCompany")
-	 * @return Array of possible routes to try */
-	protected String[] generateDynamicPageRoutes(String entityName) {
-		final String baseName = entityName.startsWith("C") ? entityName.substring(1) : entityName;
-		final List<String> routes = new ArrayList<>(Arrays.asList(baseName.toLowerCase() + "s", // users, companies
-				baseName.toLowerCase(), // user, company
-				entityName.toLowerCase() + "s", // cusers, ccompanies
-				entityName.toLowerCase(), // cuser, ccompany
-				baseName.toLowerCase() + "-directory", // user-directory, project-directory
-				"page/" + baseName.toLowerCase(), // page/user, page/company
-				"entity/" + baseName.toLowerCase(), // entity/user, entity/company
-				"view/" + baseName.toLowerCase(), // view/user, view/company
-				"dynamic/" + baseName.toLowerCase() // dynamic/user, dynamic/company
-		));
-		if ("cuser".equalsIgnoreCase(entityName) || "user".equalsIgnoreCase(baseName)) {
-			routes.add("team-directory");
-		}
-		if ("cproject".equalsIgnoreCase(entityName) || "project".equalsIgnoreCase(baseName)) {
-			routes.add("project-overview");
-			routes.add("resource-library");
-		}
-		return routes.toArray(new String[0]);
-	}
-
 	/** Gets the count of rows in the first grid */
 	protected int getGridRowCount() {
 		final Locator grid = page.locator("vaadin-grid").first();
@@ -550,7 +608,7 @@ public abstract class CBaseUITest {
 				wait_loginscreen();
 				final Locator fullButton = page.locator("#" + RESET_DB_FULL_BUTTON_ID);
 				final Locator minimalButton = page.locator("#" + RESET_DB_MIN_BUTTON_ID);
-				final Locator targetButton = fullButton.count() > 0 ? fullButton.first() : (minimalButton.count() > 0 ? minimalButton.first() : null);
+				final Locator targetButton = fullButton.count() > 0 ? fullButton.first() : minimalButton.count() > 0 ? minimalButton.first() : null;
 				if (targetButton == null) {
 					throw new AssertionError("Database reset button not found on login page");
 				}
@@ -610,7 +668,7 @@ public abstract class CBaseUITest {
 	}
 
 	/** Checks if browser is available */
-	protected boolean isBrowserAvailable() { return (page != null) && !page.isClosed(); }
+	protected boolean isBrowserAvailable() { return page != null && !page.isClosed(); }
 
 	/** Check if a dynamic page has loaded successfully.
 	 * @return true if the page appears to be a loaded dynamic page */
@@ -707,7 +765,7 @@ public abstract class CBaseUITest {
 				boolean companyPresent = false;
 				if (companyCombo.count() > 0) {
 					final Object raw = companyCombo.evaluate("combo => combo.value ?? null");
-					companyPresent = (raw != null && !raw.toString().isBlank());
+					companyPresent = raw != null && !raw.toString().isBlank();
 				}
 				if (!companyPresent) {
 					LOGGER.info("🏢 Company combobox is empty - initializing sample data as required");
@@ -741,7 +799,7 @@ public abstract class CBaseUITest {
 		} catch (final PlaywrightException e) {
 			LOGGER.warn("⚠️ Login attempt failed for {}: {}", username, e.getMessage());
 			takeScreenshot("login-attempt-error", false);
-			if ((page != null) && page.isClosed()) {
+			if (page != null && page.isClosed()) {
 				LOGGER.warn("⚠️ Browser page closed during login attempt");
 			}
 		} catch (final Exception e) {
@@ -1094,7 +1152,7 @@ public abstract class CBaseUITest {
 	}
 
 	private void registerConsoleListener() {
-		if ((page == null) || consoleListenerRegistered) {
+		if (page == null || consoleListenerRegistered) {
 			return;
 		}
 		page.onConsoleMessage(msg -> {
@@ -1108,72 +1166,16 @@ public abstract class CBaseUITest {
 		consoleListenerRegistered = true;
 	}
 
-	/** Attempts to resolve the fully-qualified entity class for a given entity type string. */
-	protected Optional<Class<?>> resolveEntityClass(String entityType) {
-		final String baseName = entityType.startsWith("C") ? entityType.substring(1) : entityType;
-		final String pluralSegment = baseName.toLowerCase() + "s";
-		final String singularSegment = baseName.toLowerCase();
-		final String[] candidateClasses = {
-				"tech.derbent." + pluralSegment + ".domain." + entityType, "tech.derbent." + singularSegment + ".domain." + entityType,
-				"tech.derbent.app." + pluralSegment + ".domain." + entityType, "tech.derbent.app." + singularSegment + ".domain." + entityType,
-				"tech.derbent.base." + pluralSegment + ".domain." + entityType, "tech.derbent.base." + singularSegment + ".domain." + entityType,
-				"tech.derbent.api.domain." + entityType
-		};
-		for (final String fqcn : candidateClasses) {
-			try {
-				final Class<?> clazz = Class.forName(fqcn);
-				LOGGER.debug("🔍 Resolved entity type {} to class {}", entityType, fqcn);
-				return Optional.of(clazz);
-			} catch (@SuppressWarnings ("unused") final ClassNotFoundException ignored) { /*****/
-			}
-		}
-		LOGGER.debug("⚠️ Unable to resolve entity class for {}", entityType);
-		return Optional.empty();
-	}
-
-	private String resolveViewIdentifier(final Class<?> viewClass) {
-		if (viewClass == null) {
-			return "unknown-view";
-		}
-		try {
-			final Field viewNameField = viewClass.getDeclaredField("VIEW_NAME");
-			if (Modifier.isStatic(viewNameField.getModifiers()) && viewNameField.getType() == String.class) {
-				viewNameField.setAccessible(true);
-				final Object value = viewNameField.get(null);
-				if (value instanceof final String viewName && !viewName.isBlank()) {
-					return viewName;
-				}
-			}
-		} catch (final NoSuchFieldException missingField) {
-			LOGGER.debug("VIEW_NAME not declared on {}: {}", viewClass.getSimpleName(), missingField.getMessage());
-		} catch (final Exception reflectionError) {
-			LOGGER.debug("Failed to read VIEW_NAME for {}: {}", viewClass.getSimpleName(), reflectionError.getMessage());
-		}
-		final Route route = viewClass.getAnnotation(Route.class);
-		if ((route != null) && (route.value() != null) && !route.value().isBlank()) {
-			return route.value();
-		}
-		return viewClass.getSimpleName();
-	}
-
 	/** Sanitizes raw text into a lower-case, hyphenated DOM-friendly identifier. */
+	@SuppressWarnings ("static-method")
 	protected String sanitizeForDomId(final String value) {
 		return sanitizeForIdentifier(value, FIELD_ID_PREFIX + "-autogen");
 	}
 
 	/** Sanitizes raw text for use in filenames with a custom fallback. */
+	@SuppressWarnings ("static-method")
 	protected String sanitizeForFileName(final String value, final String fallback) {
 		return sanitizeForIdentifier(value, fallback);
-	}
-
-	private String sanitizeForIdentifier(final String value, final String fallback) {
-		final String safeFallback = (fallback == null) || fallback.isBlank() ? "autogen" : fallback;
-		if ((value == null) || value.isBlank()) {
-			return safeFallback;
-		}
-		final String sanitized = value.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
-				.replaceAll("(^-|-$)", "").toLowerCase();
-		return sanitized.isBlank() ? safeFallback : sanitized;
 	}
 
 	/** Selects the first option in the first ComboBox found on the page. */
@@ -1419,7 +1421,7 @@ public abstract class CBaseUITest {
 				final int itemCount = breadcrumbItems.count();
 				LOGGER.info("📊 Found {} breadcrumb items", itemCount);
 				// Test clicking breadcrumb items (except last one which is current)
-				for (int i = 0; i < (itemCount - 1); i++) {
+				for (int i = 0; i < itemCount - 1; i++) {
 					try {
 						final Locator item = breadcrumbItems.nth(i);
 						final String itemText = item.textContent();
@@ -1865,7 +1867,7 @@ public abstract class CBaseUITest {
 			return 0;
 		}
 		LOGGER.info("📋 Found {} menu entries to visit", totalItems);
-		if ((totalItems == 0) && !allowEmpty) {
+		if (totalItems == 0 && !allowEmpty) {
 			throw new AssertionError("No navigation items found to exercise - failing fast");
 		}
 		final Set<String> visitedLabels = new HashSet<>();
@@ -1889,8 +1891,8 @@ public abstract class CBaseUITest {
 				navItem.click();
 				wait_1000();
 				if (captureScreenshots) {
-					final String prefix = (screenshotPrefix == null) ? "menu" : screenshotPrefix;
-					final String screenshotName = prefix + "-" + (safeLabel.isBlank() ? ("entry-" + (i + 1)) : safeLabel + "-" + (i + 1));
+					final String prefix = screenshotPrefix == null ? "menu" : screenshotPrefix;
+					final String screenshotName = prefix + "-" + (safeLabel.isBlank() ? "entry-" + (i + 1) : safeLabel + "-" + (i + 1));
 					takeScreenshot(screenshotName, false);
 				}
 				visitedLabels.add(label);
@@ -1902,6 +1904,7 @@ public abstract class CBaseUITest {
 	}
 
 	/** Waits for 1000 milliseconds to allow complex operations to complete. */
+	@SuppressWarnings ("static-method")
 	protected void wait_1000() {
 		try {
 			Thread.sleep(1000);
@@ -1911,6 +1914,7 @@ public abstract class CBaseUITest {
 	}
 
 	/** Waits for 2000 milliseconds for slow operations like navigation. */
+	@SuppressWarnings ("static-method")
 	protected void wait_2000() {
 		try {
 			Thread.sleep(2000);
@@ -1923,6 +1927,7 @@ public abstract class CBaseUITest {
 	// ===========================================
 
 	/** Waits for 500 milliseconds to allow UI updates to complete. */
+	@SuppressWarnings ("static-method")
 	protected void wait_500() {
 		try {
 			Thread.sleep(500);

@@ -18,27 +18,12 @@ import tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
 
-/**
- * CComponentKanbanBoardFilterToolbar - Filtering toolbar for Kanban board items.
+/** CComponentKanbanBoardFilterToolbar - Filtering toolbar for Kanban board items.
  * <p>
  * Supports filtering by responsible user and entity type.
  * </p>
  */
 public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar {
-
-	public enum ResponsibleFilterMode {
-		ALL("All items"),
-		CURRENT_USER("My items"),
-		SPECIFIC_USER("Specific user");
-
-		private final String label;
-
-		ResponsibleFilterMode(final String label) {
-			this.label = label;
-		}
-
-		public String getLabel() { return label; }
-	}
 
 	public static class FilterCriteria {
 
@@ -59,7 +44,61 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		public void setResponsibleUser(final CUser responsibleUser) { this.responsibleUser = responsibleUser; }
 	}
 
+	public enum ResponsibleFilterMode {
+
+		ALL("All items"), CURRENT_USER("My items"), SPECIFIC_USER("Specific user");
+
+		private final String label;
+
+		ResponsibleFilterMode(final String label) {
+			this.label = label;
+		}
+
+		public String getLabel() { return label; }
+	}
+
+	private static class TypeOption {
+
+		private final Class<?> entityClass;
+		private final String label;
+
+		TypeOption(final String label, final Class<?> entityClass) {
+			this.label = label;
+			this.entityClass = entityClass;
+		}
+
+		@Override
+		public boolean equals(final Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof TypeOption)) {
+				return false;
+			}
+			final TypeOption option = (TypeOption) other;
+			return Objects.equals(entityClass, option.entityClass) && Objects.equals(label, option.label);
+		}
+
+		public Class<?> getEntityClass() { return entityClass; }
+
+		public String getLabel() { return label; }
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(entityClass, label);
+		}
+	}
+
 	private static final long serialVersionUID = 1L;
+
+	private static String resolveEntityTypeLabel(final Class<?> entityClass) {
+		Check.notNull(entityClass, "Entity class cannot be null");
+		final String registeredTitle = CEntityRegistry.getEntityTitleSingular(entityClass);
+		if (registeredTitle != null && !registeredTitle.isBlank()) {
+			return registeredTitle;
+		}
+		return entityClass.getSimpleName();
+	}
 
 	private final Button clearButton;
 	private final FilterCriteria currentCriteria;
@@ -85,14 +124,6 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 	public void addKanbanFilterChangeListener(final Consumer<FilterCriteria> listener) {
 		Check.notNull(listener, "Filter listener cannot be null");
 		listeners.add(listener);
-	}
-
-	public FilterCriteria getCurrentCriteria() { return currentCriteria; }
-
-	public void setAvailableItems(final List<CProjectItem<?>> items) {
-		Check.notNull(items, "Items cannot be null");
-		updateResponsibleOptions(items);
-		updateTypeOptions(items);
 	}
 
 	private Button buildClearButton() {
@@ -156,19 +187,18 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		notifyListeners();
 	}
 
+	public FilterCriteria getCurrentCriteria() { return currentCriteria; }
+
 	private void notifyListeners() {
 		for (final Consumer<FilterCriteria> listener : listeners) {
 			listener.accept(currentCriteria);
 		}
 	}
 
-	private String resolveEntityTypeLabel(final Class<?> entityClass) {
-		Check.notNull(entityClass, "Entity class cannot be null");
-		final String registeredTitle = CEntityRegistry.getEntityTitleSingular(entityClass);
-		if (registeredTitle != null && !registeredTitle.isBlank()) {
-			return registeredTitle;
-		}
-		return entityClass.getSimpleName();
+	public void setAvailableItems(final List<CProjectItem<?>> items) {
+		Check.notNull(items, "Items cannot be null");
+		updateResponsibleOptions(items);
+		updateTypeOptions(items);
 	}
 
 	private void updateResponsibleOptions(final List<CProjectItem<?>> items) {
@@ -180,8 +210,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 			uniqueUsers.putIfAbsent(item.getResponsible().getId(), item.getResponsible());
 		}
 		final List<CUser> users = uniqueUsers.values().stream()
-				.sorted(Comparator.comparing(user -> user.getName() != null ? user.getName().toLowerCase() : ""))
-				.collect(Collectors.toList());
+				.sorted(Comparator.comparing(user -> user.getName() != null ? user.getName().toLowerCase() : "")).collect(Collectors.toList());
 		comboResponsibleUser.setItems(users);
 		if (comboResponsibleUser.getValue() != null && !users.contains(comboResponsibleUser.getValue())) {
 			comboResponsibleUser.clear();
@@ -198,46 +227,13 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 			final Class<?> entityClass = item.getClass();
 			options.putIfAbsent(entityClass, new TypeOption(resolveEntityTypeLabel(entityClass), entityClass));
 		}
-		final List<TypeOption> typeOptions = options.values().stream()
-				.sorted(Comparator.comparing(option -> option.getLabel().toLowerCase()))
-				.collect(Collectors.toList());
+		final List<TypeOption> typeOptions =
+				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
 		typeOptions.add(0, typeAllOption);
 		comboType.setItems(typeOptions);
 		if (comboType.getValue() != null && !typeOptions.contains(comboType.getValue())) {
 			comboType.setValue(typeAllOption);
 			currentCriteria.setEntityType(null);
-		}
-	}
-
-	private static class TypeOption {
-
-		private final Class<?> entityClass;
-		private final String label;
-
-		TypeOption(final String label, final Class<?> entityClass) {
-			this.label = label;
-			this.entityClass = entityClass;
-		}
-
-		public Class<?> getEntityClass() { return entityClass; }
-
-		public String getLabel() { return label; }
-
-		@Override
-		public boolean equals(final Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof TypeOption)) {
-				return false;
-			}
-			final TypeOption option = (TypeOption) other;
-			return Objects.equals(entityClass, option.entityClass) && Objects.equals(label, option.label);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(entityClass, label);
 		}
 	}
 }

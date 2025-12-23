@@ -13,6 +13,7 @@ import com.vaadin.flow.shared.Registration;
  * initialization and is better suited for integration tests (e.g., Playwright tests). */
 class CComponentEntitySelectionHasValueTest {
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasAddValueChangeListenerMethod() throws Exception {
 		// When: checking for addValueChangeListener() method
@@ -22,6 +23,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertTrue(Registration.class.isAssignableFrom(addListenerMethod.getReturnType()), "addValueChangeListener() should return Registration");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasClearMethod() throws Exception {
 		// When: checking for clear() method
@@ -30,6 +32,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertNotNull(clearMethod, "clear() method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasGetSelectedItemsMethod() throws Exception {
 		// When: checking for getSelectedItems() method (existing method, not part of HasValue)
@@ -39,6 +42,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertTrue(Set.class.isAssignableFrom(getSelectedItemsMethod.getReturnType()), "getSelectedItems() should return a Set");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasGetValueMethod() throws Exception {
 		// When: checking for getValue() method
@@ -48,6 +52,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertTrue(Set.class.isAssignableFrom(getValueMethod.getReturnType()), "getValue() should return a Set");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasIsEmptyMethod() throws Exception {
 		// When: checking for isEmpty() method
@@ -57,6 +62,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertTrue(isEmptyMethod.getReturnType().equals(boolean.class), "isEmpty() should return boolean");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasIsReadOnlyMethod() throws Exception {
 		// When: checking for isReadOnly() method
@@ -66,6 +72,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertTrue(isReadOnlyMethod.getReturnType().equals(boolean.class), "isReadOnly() should return boolean");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasIsRequiredIndicatorVisibleMethod() throws Exception {
 		// When: checking for isRequiredIndicatorVisible() method
@@ -75,6 +82,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertTrue(isRequiredMethod.getReturnType().equals(boolean.class), "isRequiredIndicatorVisible() should return boolean");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasSetReadOnlyMethod() throws Exception {
 		// When: checking for setReadOnly(boolean) method
@@ -83,6 +91,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertNotNull(setReadOnlyMethod, "setReadOnly(boolean) method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasSetRequiredIndicatorVisibleMethod() throws Exception {
 		// When: checking for setRequiredIndicatorVisible(boolean) method
@@ -91,6 +100,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertNotNull(setRequiredMethod, "setRequiredIndicatorVisible(boolean) method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testHasSetValueMethod() throws Exception {
 		// When: checking for setValue(Set) method
@@ -99,6 +109,7 @@ class CComponentEntitySelectionHasValueTest {
 		assertNotNull(setValueMethod, "setValue(Set) method should exist");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testImplementsHasValueInterface() {
 		// When: checking if CComponentEntitySelection implements HasValue

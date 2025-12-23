@@ -27,6 +27,16 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		extends CPanelRelationalBase<MasterClass, CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
+
+	/** Gets the permission as a formatted string */
+	protected static String getPermissionAsString(final CUserProjectSettings settings) {
+		Check.notNull(settings, "Settings cannot be null when getting permission string");
+		if (settings.getPermission() == null || settings.getPermission().isEmpty()) {
+			return "";
+		}
+		return settings.getPermission();
+	}
+
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;
 
@@ -54,7 +64,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			CNotificationService.showWarning("Please select a relationship to delete.");
 			return;
 		}
-		if ((getSettings == null)) {
+		if (getSettings == null) {
 			CNotificationService.showWarning("Settings handlers are not available. Please refresh the page.");
 			return;
 		}
@@ -77,15 +87,6 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			}
 			refresh();
 		});
-	}
-
-	/** Gets the permission as a formatted string */
-	protected String getPermissionAsString(final CUserProjectSettings settings) {
-		Check.notNull(settings, "Settings cannot be null when getting permission string");
-		if ((settings.getPermission() == null) || settings.getPermission().isEmpty()) {
-			return "";
-		}
-		return settings.getPermission();
 	}
 
 	/** Abstract method to handle settings save events */
@@ -138,7 +139,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		grid.addColumn(CUserProjectSettings::getId, "ID", "id");
 		CGrid.styleColumnHeader(grid.addComponentColumn(settings -> CLabelEntity.createUserLabel(settings.getUser())).setAutoWidth(true), "User");
 		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getProjectName).setAutoWidth(true).setSortable(true), "Project Name");
-		CGrid.styleColumnHeader(grid.addColumn(this::getPermissionAsString).setAutoWidth(true), "Permission");
+		CGrid.styleColumnHeader(grid.addColumn(CPanelUserProjectBase::getPermissionAsString).setAutoWidth(true), "Permission");
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		final GridSingleSelectionModel<CUserProjectSettings> sm = (GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();
 		sm.setDeselectAllowed(false);

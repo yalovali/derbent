@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.screens.service.CViewsService;
 import tech.derbent.api.utils.Check;
 
 @Service
@@ -41,6 +40,8 @@ public class CPageServiceUtility {
 		}
 	}
 
+	public static List<String> getPageServiceList() { return CPageServiceUtility.availablePageServices; }
+
 	/** Maps entity class to corresponding PageService class name. Now uses the entity registry for O(1) lookup performance.
 	 * @param entityClass The entity class
 	 * @return The PageService class name, or null if not mapped */
@@ -59,9 +60,7 @@ public class CPageServiceUtility {
 		}
 	}
 
-	public CPageServiceUtility(CViewsService viewsService) {
+	public CPageServiceUtility() {
 		super();
 	}
-
-	public List<String> getPageServiceList() { return CPageServiceUtility.availablePageServices; }
 }

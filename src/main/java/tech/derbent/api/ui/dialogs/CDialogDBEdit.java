@@ -36,9 +36,11 @@ public abstract class CDialogDBEdit<EntityClass> extends CDialog {
 	public EntityClass getEntity() { return entity; }
 
 	/** Child can override: success message for create. */
+	@SuppressWarnings ("static-method")
 	protected String getSuccessCreateMessage() { return "Entity created successfully"; }
 
 	/** Child can override: success message for update. */
+	@SuppressWarnings ("static-method")
 	protected String getSuccessUpdateMessage() { return "Entity updated successfully"; }
 
 	/** Child must implement: populate form fields from data. */

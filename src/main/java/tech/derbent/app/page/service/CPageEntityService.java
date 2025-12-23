@@ -49,13 +49,6 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 		}).findFirst();
 	}
 
-	/** Find child pages by parent page. */
-	public List<CPageEntity> findByParentPage(CPageEntity parentPage) {
-		Check.notNull(parentPage, "Parent page cannot be null");
-		// For now, return empty list as hierarchy is not fully implemented
-		return List.of();
-	}
-
 	/** Find page by route. */
 	public Optional<CPageEntity> findByRoute(String route) {
 		Check.notBlank(route, "Route cannot be blank");

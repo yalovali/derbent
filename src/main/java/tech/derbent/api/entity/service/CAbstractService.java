@@ -28,6 +28,26 @@ import tech.derbent.base.session.service.ISessionService;
  * support for all entity types. */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
 
+	/** Formats a Java field name into a human-readable display name. Converts camelCase to Title Case with spaces.
+	 * @param fieldName the field name to format
+	 * @return formatted display name */
+	private static String formatFieldName(final String fieldName) {
+		if (fieldName == null || fieldName.isEmpty()) {
+			return fieldName;
+		}
+		// Split camelCase into words
+		final StringBuilder result = new StringBuilder();
+		result.append(Character.toUpperCase(fieldName.charAt(0)));
+		for (int i = 1; i < fieldName.length(); i++) {
+			final char c = fieldName.charAt(i);
+			if (Character.isUpperCase(c)) {
+				result.append(' ');
+			}
+			result.append(c);
+		}
+		return result.toString();
+	}
+
 	protected final Clock clock;
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final IAbstractRepository<EntityClass> repository;
@@ -141,26 +161,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			LOGGER.error("Failed to find all entities: {}", e.getMessage());
 			throw e;
 		}
-	}
-
-	/** Formats a Java field name into a human-readable display name. Converts camelCase to Title Case with spaces.
-	 * @param fieldName the field name to format
-	 * @return formatted display name */
-	private String formatFieldName(final String fieldName) {
-		if (fieldName == null || fieldName.isEmpty()) {
-			return fieldName;
-		}
-		// Split camelCase into words
-		final StringBuilder result = new StringBuilder();
-		result.append(Character.toUpperCase(fieldName.charAt(0)));
-		for (int i = 1; i < fieldName.length(); i++) {
-			final char c = fieldName.charAt(i);
-			if (Character.isUpperCase(c)) {
-				result.append(' ');
-			}
-			result.append(c);
-		}
-		return result.toString();
 	}
 
 	@Transactional (readOnly = true)

@@ -33,12 +33,10 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsService;
 
 /** Custom login view using basic Vaadin components instead of LoginOverlay. This provides an alternative login interface for testing purposes. */
 @Route (value = "login", autoLayout = false)
@@ -74,8 +72,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired
-	public CCustomLoginView(CSystemSettingsService systemSettingsService, CRouteDiscoveryService routeDiscoveryService,
-			ISessionService sessionService, CCompanyService companyService) {
+	public CCustomLoginView(ISessionService sessionService, CCompanyService companyService) {
 		this.sessionService = sessionService;
 		this.companyService = companyService;
 		addClassNames("custom-login-view");

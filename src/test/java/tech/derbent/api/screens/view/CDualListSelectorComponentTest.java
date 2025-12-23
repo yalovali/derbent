@@ -12,10 +12,11 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for CDualListSelectorComponent to verify basic functionality. */
 public class CDualListSelectorComponentTest {
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testClear() {
-		CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
-		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
+		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
+		final List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setItems(items);
 		component.setValue(Set.of("Item 1", "Item 2"));
 		assertFalse(component.isEmpty());
@@ -24,30 +25,33 @@ public class CDualListSelectorComponentTest {
 		assertEquals(0, component.getValue().size());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testComponentInitialization() {
-		CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
+		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
 		assertNotNull(component);
 		assertTrue(component.isEmpty());
 		assertNotNull(component.getValue());
 		assertTrue(component.getValue().isEmpty());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testGetSelectedItems() {
-		CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
-		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
+		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
+		final List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setItems(items);
 		component.setValue(Set.of("Item 2", "Item 1")); // Order may vary in Set
-		List<String> selectedItems = component.getSelectedItems();
+		final List<String> selectedItems = component.getSelectedItems();
 		assertEquals(2, selectedItems.size());
 		assertTrue(selectedItems.contains("Item 1"));
 		assertTrue(selectedItems.contains("Item 2"));
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testReadOnlyMode() {
-		CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
+		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
 		assertFalse(component.isReadOnly());
 		component.setReadOnly(true);
 		assertTrue(component.isReadOnly());
@@ -55,22 +59,24 @@ public class CDualListSelectorComponentTest {
 		assertFalse(component.isReadOnly());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testSetItems() {
-		CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
-		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
+		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
+		final List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setItems(items);
 		// Initially no items should be selected
 		assertTrue(component.isEmpty());
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	public void testSetValue() {
-		CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
-		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
+		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
+		final List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 		component.setItems(items);
 		// Select some items
-		Set<String> selectedItems = Set.of("Item 1", "Item 3");
+		final Set<String> selectedItems = Set.of("Item 1", "Item 3");
 		component.setValue(selectedItems);
 		assertEquals(2, component.getValue().size());
 		assertTrue(component.getValue().contains("Item 1"));

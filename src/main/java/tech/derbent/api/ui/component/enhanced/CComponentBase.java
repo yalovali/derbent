@@ -32,10 +32,6 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 		super();
 	}
 
-	protected CComponentBase(final boolean padding, final boolean spacing, final boolean margin) {
-		super(padding, spacing, margin);
-	}
-
 	@Override
 	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<EntityClass>> listener) {
 		Check.notNull(listener, "ValueChangeListener cannot be null");
@@ -77,7 +73,7 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 	public EntityClass getValue() { return value; }
 
 	@Override
-	public boolean isEmpty() { return isValueEmpty(value); }
+	public boolean isEmpty() { return value == null; }
 
 	@Override
 	public boolean isReadOnly() { return readOnly; }
@@ -85,31 +81,17 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 	@Override
 	public boolean isRequiredIndicatorVisible() { return requiredIndicatorVisible; }
 
-	protected boolean isValueEmpty(final EntityClass check) {
-		return check == null;
-	}
-
-	protected void onReadOnlyChanged(@SuppressWarnings ("unused") final boolean readOnly) { /*****/
-	}
-
-	protected void onRequiredIndicatorVisibleChanged(@SuppressWarnings ("unused") final boolean requiredIndicatorVisible) { /*****/
-	}
-
-	protected void onValueChanged(@SuppressWarnings ("unused") final EntityClass oldValue, @SuppressWarnings ("unused") final EntityClass newValue,
-			@SuppressWarnings ("unused") final boolean fromClient) { /*****/
+	/* onValueChanged() must NEVER call setValue() */
+	protected void onValueChanged(@SuppressWarnings ("unused") final EntityClass oldValue, final EntityClass newValue, final boolean fromClient) {
+		/*****/
+		// Override in subclasses to update UI when value changes, LET IT EMPTY
 	}
 
 	@Override
-	public void setReadOnly(final boolean readOnly) {
-		this.readOnly = readOnly;
-		onReadOnlyChanged(readOnly);
-	}
+	public void setReadOnly(final boolean readOnly) { this.readOnly = readOnly; }
 
 	@Override
-	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
-		this.requiredIndicatorVisible = requiredIndicatorVisible;
-		onRequiredIndicatorVisibleChanged(requiredIndicatorVisible);
-	}
+	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) { this.requiredIndicatorVisible = requiredIndicatorVisible; }
 
 	@Override
 	public void setValue(final EntityClass value) {
@@ -125,7 +107,7 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 		}
 	}
 
-	protected final void updateValueFromClient(final EntityClass value) {
-		updateValue(value, true);
+	protected final void updateValueFromClient(EntityClass newValue) {
+		updateValue(newValue, true);
 	}
 }

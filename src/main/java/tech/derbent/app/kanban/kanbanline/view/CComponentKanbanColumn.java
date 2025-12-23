@@ -76,6 +76,9 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 	protected void onValueChanged(final CKanbanColumn oldValue, final CKanbanColumn newValue, final boolean fromClient) {
 		LOGGER.debug("Kanban column value changed from {} to {}", oldValue != null ? oldValue.getName() : "null",
 				newValue != null ? newValue.getName() : "null");
+		if (binder.getBean() == newValue) {
+			return;
+		}
 		binder.setBean(newValue);
 		refreshHeader();
 		refreshStatuses();

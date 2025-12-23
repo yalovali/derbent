@@ -50,7 +50,7 @@ import tech.derbent.base.users.domain.CUser;
 
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
  * components. It extends Composite to allow for easy composition of the toolbar's content. */
-public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>> extends Composite<Header> implements IProjectListChangeListener {
+public final class CViewToolbar extends Composite<Header> implements IProjectListChangeListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -280,9 +280,9 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		layoutToggleButton.addClickListener(e -> {
 			LOGGER.info("Layout toggle button clicked");
 			Check.notNull(layoutService, "LayoutService is null, cannot toggle layout mode");
-			final CLayoutService.LayoutMode oldMode = layoutService.getCurrentLayoutMode();
-			layoutService.toggleLayoutMode();
-			final CLayoutService.LayoutMode newMode = layoutService.getCurrentLayoutMode();
+			final CLayoutService.LayoutMode oldMode = CLayoutService.getCurrentLayoutMode();
+			CLayoutService.toggleLayoutMode();
+			final CLayoutService.LayoutMode newMode = CLayoutService.getCurrentLayoutMode();
 			LOGGER.info("Layout toggled from {} to {}", oldMode, newMode);
 			updateLayoutToggleIcon();
 			// Try to force UI update, but handle case where push is not enabled
@@ -501,7 +501,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 	private void updateLayoutToggleIcon() {
 		Check.notNull(layoutService, "LayoutService must not be null to update layout toggle icon");
 		Check.notNull(layoutToggleButton, "Layout toggle button must not be null to update its icon");
-		final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
+		final CLayoutService.LayoutMode currentMode = CLayoutService.getCurrentLayoutMode();
 		Check.notNull(currentMode, "Current layout mode must not be null to update layout toggle icon");
 		final String iconString =
 				currentMode == CLayoutService.LayoutMode.HORIZONTAL ? CColorUtils.CRUD_LAYOUT_HORIZONTAL_ICON : CColorUtils.CRUD_LAYOUT_VERTICAL_ICON;

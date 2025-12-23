@@ -16,7 +16,7 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityRegistryInitializer.class);
 
-	public void registerAll() {
+	public static void registerAll() {
 		// Clear previous state (useful for tests / re-deploys)
 		CEntityRegistry.clear();
 		final Map<String, IEntityRegistrable> beans = CSpringContext.getBeansOfType(IEntityRegistrable.class);

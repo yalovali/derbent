@@ -41,6 +41,7 @@ public class CInterfaceRefactoringValidationTest {
 	@Autowired
 	private CUserService userService;
 
+	@SuppressWarnings ("static-method")
 	@Test
 	@DisplayName ("Entity classes extend CEntityDB")
 	void testEntityClassesExtendCEntityDB() {
@@ -50,6 +51,7 @@ public class CInterfaceRefactoringValidationTest {
 		assertTrue(CEntityDB.class.isAssignableFrom(CUser.class), "CUser should extend CEntityDB");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	@DisplayName ("IContentOwner methods are accessible")
 	void testIContentOwnerMethodsAccessible() {
@@ -61,11 +63,12 @@ public class CInterfaceRefactoringValidationTest {
 			IContentOwner.class.getMethod("setValue", CEntityDB.class);
 			IContentOwner.class.getMethod("createNewEntityInstance");
 			IContentOwner.class.getMethod("refreshGrid");
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			fail("IContentOwner should have all required methods: " + e.getMessage());
 		}
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	@DisplayName ("IPageServiceImplementer extends IContentOwner")
 	void testIPageServiceImplementerExtendsIContentOwner() {
@@ -73,6 +76,7 @@ public class CInterfaceRefactoringValidationTest {
 		assertTrue(IContentOwner.class.isAssignableFrom(IPageServiceImplementer.class), "IPageServiceImplementer should extend IContentOwner");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	@DisplayName ("IPageServiceImplementer methods are accessible")
 	void testIPageServiceImplementerMethodsAccessible() {
@@ -84,11 +88,12 @@ public class CInterfaceRefactoringValidationTest {
 			IPageServiceImplementer.class.getMethod("getEntityClass");
 			IPageServiceImplementer.class.getMethod("getSessionService");
 			IPageServiceImplementer.class.getMethod("selectFirstInGrid");
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			fail("IPageServiceImplementer should have all required methods: " + e.getMessage());
 		}
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	@DisplayName ("No duplicate method declarations in interface hierarchy")
 	void testNoDuplicateMethodDeclarations() {
@@ -96,21 +101,22 @@ public class CInterfaceRefactoringValidationTest {
 		// if they're inherited from IContentOwner (except for overrides with narrower types)
 		try {
 			// getValue is overridden in IPageServiceImplementer with covariant return type
-			var contentOwnerMethod = IContentOwner.class.getMethod("getValue");
-			var pageServiceMethod = IPageServiceImplementer.class.getMethod("getValue");
+			final var contentOwnerMethod = IContentOwner.class.getMethod("getValue");
+			final var pageServiceMethod = IPageServiceImplementer.class.getMethod("getValue");
 			// Both should exist but IPageServiceImplementer should override with specific type
 			assertNotNull(contentOwnerMethod);
 			assertNotNull(pageServiceMethod);
 			// getEntityService is also overridden with specific generic type
-			var contentOwnerServiceMethod = IContentOwner.class.getMethod("getEntityService");
-			var pageServiceServiceMethod = IPageServiceImplementer.class.getMethod("getEntityService");
+			final var contentOwnerServiceMethod = IContentOwner.class.getMethod("getEntityService");
+			final var pageServiceServiceMethod = IPageServiceImplementer.class.getMethod("getEntityService");
 			assertNotNull(contentOwnerServiceMethod);
 			assertNotNull(pageServiceServiceMethod);
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			fail("Methods should be properly declared in interface hierarchy: " + e.getMessage());
 		}
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	@DisplayName ("Page base classes implement IContentOwner through inheritance")
 	void testPageBaseClassesImplementIContentOwner() {
@@ -121,6 +127,7 @@ public class CInterfaceRefactoringValidationTest {
 				"CDynamicPageBase should implement IContentOwner through IPageServiceImplementer");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	@DisplayName ("Page base classes implement IPageServiceImplementer")
 	void testPageBaseClassesImplementIPageServiceImplementer() {
@@ -149,15 +156,16 @@ public class CInterfaceRefactoringValidationTest {
 		assertTrue(CAbstractService.class.isAssignableFrom(userService.getClass()), "CUserService should extend CAbstractService");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	@DisplayName ("setValue method uses correct signature")
 	void testSetValueSignature() {
 		try {
 			// Verify setValue accepts CEntityDB<?>
-			var method = IContentOwner.class.getMethod("setValue", CEntityDB.class);
+			final var method = IContentOwner.class.getMethod("setValue", CEntityDB.class);
 			assertNotNull(method, "setValue method should exist");
 			assertEquals(void.class, method.getReturnType(), "setValue should return void");
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			fail("setValue(CEntityDB<?>) method should exist: " + e.getMessage());
 		}
 	}

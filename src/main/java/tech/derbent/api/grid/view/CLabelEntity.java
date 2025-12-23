@@ -274,6 +274,7 @@ public class CLabelEntity extends Div {
 		getStyle().set("align-items", "center");
 		getStyle().set("padding", DEFAULT_PADDING);
 		getStyle().set("box-sizing", "border-box");
+		getStyle().set("gap", "6px");
 	}
 
 	/** Resets styling to default state. */

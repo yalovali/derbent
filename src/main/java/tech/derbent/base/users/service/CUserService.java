@@ -42,6 +42,24 @@ import tech.derbent.base.users.domain.CUser;
 public class CUserService extends CEntityOfCompanyService<CUser> implements UserDetailsService, IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
+
+	/** Converts comma-separated role string to Spring Security authorities. Roles are prefixed with "ROLE_" as per Spring Security convention.
+	 * @param rolesString comma-separated roles (e.g., "USER,ADMIN")
+	 * @return Collection of GrantedAuthority objects */
+	private static Collection<GrantedAuthority> getAuthorities(final String rolesString) {
+		if (rolesString == null || rolesString.trim().isEmpty()) {
+			LOGGER.warn("User has no roles assigned, defaulting to ROLE_USER");
+			return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+		}
+		// Split roles by comma and convert to authorities
+		final Collection<GrantedAuthority> authorities = Arrays.stream(rolesString.split(",")).map(String::trim).filter(role -> !role.isEmpty())
+				.map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role) // Add
+				// ROLE_ prefix if not present
+				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+		LOGGER.debug("Converted roles '{}' to authorities: {}", rolesString, authorities);
+		return authorities;
+	}
+
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
 
@@ -143,23 +161,6 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			LOGGER.warn("Error generating unique user name, falling back to base class: {}", e.getMessage());
 			return super.generateUniqueName();
 		}
-	}
-
-	/** Converts comma-separated role string to Spring Security authorities. Roles are prefixed with "ROLE_" as per Spring Security convention.
-	 * @param rolesString comma-separated roles (e.g., "USER,ADMIN")
-	 * @return Collection of GrantedAuthority objects */
-	private Collection<GrantedAuthority> getAuthorities(final String rolesString) {
-		if (rolesString == null || rolesString.trim().isEmpty()) {
-			LOGGER.warn("User has no roles assigned, defaulting to ROLE_USER");
-			return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
-		}
-		// Split roles by comma and convert to authorities
-		final Collection<GrantedAuthority> authorities = Arrays.stream(rolesString.split(",")).map(String::trim).filter(role -> !role.isEmpty())
-				.map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role) // Add
-				// ROLE_ prefix if not present
-				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-		LOGGER.debug("Converted roles '{}' to authorities: {}", rolesString, authorities);
-		return authorities;
 	}
 
 	@Transactional (readOnly = true)

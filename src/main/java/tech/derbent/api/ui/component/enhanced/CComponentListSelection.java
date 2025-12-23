@@ -228,6 +228,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		}
 	}
 
+	@SuppressWarnings ("unused")
 	public void setItemLabelGenerator(final ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
 		try {
 			grid.getColumns().forEach(grid::removeColumn);

@@ -32,7 +32,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.ui.component.enhanced.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.enhanced.CViewToolbar;
@@ -89,7 +88,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 		String initials = "";
 		// Get initials from first name
-		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
+		if (user.getName() != null && !user.getName().trim().isEmpty()) {
 			final String[] nameParts = user.getName().trim().split("\\s+");
 			for (final String part : nameParts) {
 				if (!part.isEmpty()) {
@@ -101,11 +100,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			}
 		}
 		// Add last name initial if we have less than 2 initials
-		if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty() && (initials.length() < 2)) {
+		if (user.getLastname() != null && !user.getLastname().trim().isEmpty() && initials.length() < 2) {
 			initials += user.getLastname().substring(0, 1).toUpperCase();
 		}
 		// Fall back to username if no name is available
-		if (initials.isEmpty() && (user.getLogin() != null) && !user.getLogin().trim().isEmpty()) {
+		if (initials.isEmpty() && user.getLogin() != null && !user.getLogin().trim().isEmpty()) {
 			initials = user.getLogin().substring(0, 1).toUpperCase();
 		}
 		// Final fallback
@@ -115,9 +114,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		avatar.setAbbreviation(initials);
 		// Set tooltip with full name
 		String displayName = "";
-		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
+		if (user.getName() != null && !user.getName().trim().isEmpty()) {
 			displayName = user.getName();
-			if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty()) {
+			if (user.getLastname() != null && !user.getLastname().trim().isEmpty()) {
 				displayName += " " + user.getLastname();
 			}
 		} else {
@@ -130,7 +129,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final User currentUser;
 	private final CLayoutService layoutService;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	private CViewToolbar<?> mainToolbar;
+	private CViewToolbar mainToolbar;
 	private final CPageMenuIntegrationService pageMenuService;
 	private final CPageTestAuxillaryService pageTestAuxillaryService;
 	private final PasswordEncoder passwordEncoder;
@@ -229,8 +228,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final Div navBar = new Div();
 		// dont add any other compoents to the navbar, just the toolbar otherwise call it
 		// with ,xyz,xyz etc..
-		mainToolbar = new CViewToolbar<CAbstractNamedEntityPage<?>>("Main Layout", sessionService, layoutService, authenticationContext,
-				systemSettingsService, routeDiscoveryService, pageMenuService);
+		mainToolbar = new CViewToolbar("Main Layout", sessionService, layoutService, authenticationContext, systemSettingsService,
+				routeDiscoveryService, pageMenuService);
 		navBar.add(mainToolbar);
 		return navBar;
 	}
@@ -337,7 +336,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			return; // Avatar will use default behavior
 		}
 		final byte[] profilePictureData = user.getProfilePictureData();
-		if ((profilePictureData != null) && (profilePictureData.length > 0)) {
+		if (profilePictureData != null && profilePictureData.length > 0) {
 			try {
 				// Create a StreamResource from the profile picture data
 				final StreamResource imageResource =

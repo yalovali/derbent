@@ -85,7 +85,7 @@ public class CRouteDiscoveryService {
 
 	/** Discovers all available routes by scanning for view classes with @Route annotations
 	 * @return List of RouteInfo objects containing route metadata */
-	public List<RouteInfo> discoverAllRoutes() {
+	public static List<RouteInfo> discoverAllRoutes() {
 		final List<RouteInfo> routes = new ArrayList<>();
 		try {
 			// Add manual routes first (these are common routes that might not have view classes)
@@ -103,12 +103,12 @@ public class CRouteDiscoveryService {
 	}
 
 	/** Gets all route values as a list of strings */
-	public List<String> getAllRouteValues() {
+	public static List<String> getAllRouteValues() {
 		return discoverAllRoutes().stream().map(RouteInfo::getRoute).collect(Collectors.toList());
 	}
 
 	/** Gets default routes as fallback */
-	private List<RouteInfo> getDefaultRoutes() {
+	private static List<RouteInfo> getDefaultRoutes() {
 		final List<RouteInfo> routes = new ArrayList<>();
 		addCommonRoutes(routes);
 		addHardcodedRoutes(routes);
@@ -116,7 +116,7 @@ public class CRouteDiscoveryService {
 	}
 
 	/** Gets route info by route value */
-	public RouteInfo getRouteInfo(String route) {
+	public static RouteInfo getRouteInfo(String route) {
 		return discoverAllRoutes().stream().filter(r -> r.getRoute().equals(route)).findFirst().orElse(null);
 	}
 }

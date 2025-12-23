@@ -30,6 +30,32 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEnhancedBinder.class);
 	private static final long serialVersionUID = 1L;
+
+	private static String getFieldNameFromBinding(final BindingValidationStatus<?> status) {
+		try {
+			// Try to extract field name from the binding
+			if (status.getBinding() != null) {
+				// Extract field name from binding toString or use reflection
+				final String bindingStr = status.getBinding().toString();
+				// Try to extract property name from binding string representation
+				if (bindingStr.contains("property=")) {
+					final int start = bindingStr.indexOf("property=") + 9;
+					int end = bindingStr.indexOf(",", start);
+					if (end == -1) {
+						end = bindingStr.indexOf("}", start);
+					}
+					if (end > start) {
+						return bindingStr.substring(start, end).trim();
+					}
+				}
+				return bindingStr;
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not extract field name from binding: {}", e.getMessage());
+		}
+		return "unknown_field";
+	}
+
 	private final Class<EntityClass> beanType;
 	private final Map<String, String> lastValidationErrors = new HashMap<>();
 
@@ -75,31 +101,6 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	 * @return the error message for the field, or null if no error */
 	public String getFieldError(final String fieldName) {
 		return lastValidationErrors.get(fieldName);
-	}
-
-	private String getFieldNameFromBinding(final BindingValidationStatus<?> status) {
-		try {
-			// Try to extract field name from the binding
-			if (status.getBinding() != null) {
-				// Extract field name from binding toString or use reflection
-				final String bindingStr = status.getBinding().toString();
-				// Try to extract property name from binding string representation
-				if (bindingStr.contains("property=")) {
-					final int start = bindingStr.indexOf("property=") + 9;
-					int end = bindingStr.indexOf(",", start);
-					if (end == -1) {
-						end = bindingStr.indexOf("}", start);
-					}
-					if (end > start) {
-						return bindingStr.substring(start, end).trim();
-					}
-				}
-				return bindingStr;
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not extract field name from binding: {}", e.getMessage());
-		}
-		return "unknown_field";
 	}
 
 	/** Gets a list of field names that have validation errors.
@@ -154,8 +155,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	public void printBindingProperties() {
 		LOGGER.debug("Current bindings for bean type: {} count: {}", beanType.getSimpleName(), getBindings().size());
 		for (final Binding<EntityClass, ?> binding : getBindings()) {
-			LOGGER.debug("Binding properties: {} field: {}", binding.toString(),
-					(binding.getField() != null) ? binding.getField().toString() : "null");
+			LOGGER.debug("Binding properties: {} field: {}", binding.toString(), binding.getField() != null ? binding.getField().toString() : "null");
 		}
 	}
 
@@ -257,7 +257,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			// Get all fields from the bean's class and superclasses
 			final List<Field> fieldsToCheck = new ArrayList<>();
 			Class<?> currentClass = bean.getClass();
-			while ((currentClass != null) && (currentClass != Object.class)) {
+			while (currentClass != null && currentClass != Object.class) {
 				final Field[] declaredFields = currentClass.getDeclaredFields();
 				for (final Field field : declaredFields) {
 					// Only check entity fields (CEntityDB and its subclasses)
@@ -336,7 +336,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				} else {
 					LOGGER.debug("Incomplete bindings field is of unexpected type: {}", incompleteBindingsObj.getClass().getSimpleName());
 				}
-				if ((incompleteBindings != null) && !incompleteBindings.isEmpty()) {
+				if (incompleteBindings != null && !incompleteBindings.isEmpty()) {
 					LOGGER.warn(
 							"Found {} incomplete bindings for {} - clearing them to prevent readBean error. This indicates a form binding issue that should be investigated.",
 							incompleteBindings.size(), beanType.getSimpleName());

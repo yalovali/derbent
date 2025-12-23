@@ -56,6 +56,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * creating users, plain passwords are encoded with BCrypt 2. Encoded passwords are stored in database 3. During authentication, submitted
 	 * passwords are compared using BCrypt 4. BCrypt handles salt generation and verification automatically
 	 * @return BCryptPasswordEncoder instance for password hashing */
+	@SuppressWarnings ("static-method")
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();

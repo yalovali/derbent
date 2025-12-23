@@ -46,6 +46,11 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint";
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CSprint.class);
 	public static final String VIEW_NAME = "Sprints View";
+
+	private static boolean isSameSprintable(final Long itemId, final String itemType, final CSprintItem sprintItem) {
+		return itemId.equals(sprintItem.getItemId()) && itemType.equals(sprintItem.getItemType());
+	}
+
 	@Transient
 	@AMetaData (
 			displayName = "Item Detail", required = false, readOnly = false, description = "Item fields", hidden = false,
@@ -262,7 +267,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			}
 			return false;
 		}).count();
-		return (int) ((completedCount * 100) / activities.size());
+		return (int) (completedCount * 100 / activities.size());
 	}
 
 	/** Gets the responsible user for Gantt chart display.
@@ -358,10 +363,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			return false;
 		}
 		return LocalDate.now().isAfter(endDate);
-	}
-
-	private boolean isSameSprintable(final Long itemId, final String itemType, final CSprintItem sprintItem) {
-		return itemId.equals(sprintItem.getItemId()) && itemType.equals(sprintItem.getItemType());
 	}
 
 	/** JPA lifecycle callback: Populates transient calculated fields after entity is loaded from database. This method automatically discovers fields

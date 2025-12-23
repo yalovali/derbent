@@ -45,8 +45,9 @@ class CAbstractServiceValidationTest {
 	private TestService service;
 
 	/** Helper method to set ID using reflection since there's no public setter. */
+	@SuppressWarnings ("static-method")
 	private void setEntityId(TestEntity entity, Long id) throws Exception {
-		Field idField = entity.getClass().getSuperclass().getSuperclass().getDeclaredField("id");
+		final Field idField = entity.getClass().getSuperclass().getSuperclass().getDeclaredField("id");
 		idField.setAccessible(true);
 		idField.set(entity, id);
 	}
@@ -70,7 +71,7 @@ class CAbstractServiceValidationTest {
 	@Test
 	void testCheckDeleteAllowed_WithNullId_ThrowsException() {
 		// Given: an entity without an ID
-		TestEntity entity = new TestEntity("Test Entity");
+		final TestEntity entity = new TestEntity("Test Entity");
 		// ID is null by default
 		// When/Then: entity without ID should throw IllegalArgumentException
 		assertThrows(IllegalArgumentException.class, () -> {
@@ -81,10 +82,10 @@ class CAbstractServiceValidationTest {
 	@Test
 	void testCheckDeleteAllowed_WithValidEntity_ReturnsNull() throws Exception {
 		// Given: a valid entity
-		TestEntity entity = new TestEntity("Test Entity");
+		final TestEntity entity = new TestEntity("Test Entity");
 		setEntityId(entity, 1L);
 		// When: checking if delete is allowed
-		String result = service.checkDeleteAllowed(entity);
+		final String result = service.checkDeleteAllowed(entity);
 		// Then: validation should pass (base implementation allows delete)
 		assertNull(result, "Valid entity should pass delete validation");
 	}
@@ -92,11 +93,11 @@ class CAbstractServiceValidationTest {
 	@Test
 	void testCheckSaveAllowed_WithMissingName_ReturnsError() throws Exception {
 		// Given: an entity with null name (name is marked as nullable=false in CEntityNamed)
-		TestEntity entity = new TestEntity();
+		final TestEntity entity = new TestEntity();
 		setEntityId(entity, 1L);
 		// Name is null by default in TestEntity()
 		// When: checking if save is allowed
-		String result = service.checkSaveAllowed(entity);
+		final String result = service.checkSaveAllowed(entity);
 		// Then: validation should fail with appropriate message
 		assertNotNull(result, "Entity with null required field should fail validation");
 		assertTrue(result.contains("Name") || result.contains("name"), "Error message should mention the missing field name");
@@ -113,10 +114,10 @@ class CAbstractServiceValidationTest {
 	@Test
 	void testCheckSaveAllowed_WithValidEntity_ReturnsNull() throws Exception {
 		// Given: an entity with all required fields populated
-		TestEntity entity = new TestEntity("Test Entity");
+		final TestEntity entity = new TestEntity("Test Entity");
 		setEntityId(entity, 1L);
 		// When: checking if save is allowed
-		String result = service.checkSaveAllowed(entity);
+		final String result = service.checkSaveAllowed(entity);
 		// Then: validation should pass
 		assertNull(result, "Valid entity should pass validation");
 	}
@@ -124,10 +125,10 @@ class CAbstractServiceValidationTest {
 	@Test
 	void testValidateNullableFields_FormatsFieldNamesNicely() throws Exception {
 		// Given: an entity with missing required field
-		TestEntity entity = new TestEntity();
+		final TestEntity entity = new TestEntity();
 		setEntityId(entity, 1L);
 		// When: validating nullable fields
-		String result = service.checkSaveAllowed(entity);
+		final String result = service.checkSaveAllowed(entity);
 		// Then: error message should contain properly formatted field name
 		assertNotNull(result, "Missing required field should fail validation");
 		// The error should mention "Name" (from @AMetaData displayName)

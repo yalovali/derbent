@@ -31,6 +31,17 @@ public class CPageTestAuxillary extends Main {
 	public static final String DEFAULT_ICON = "vaadin:progressbar";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Test View";
+
+	/** Generate a stable, unique button ID from title and index for Playwright testing.
+	 * @param title       Button title
+	 * @param buttonIndex Button index
+	 * @return Sanitized button ID */
+	private static String generateButtonId(final String title, final int buttonIndex) {
+		// Sanitize title to create a valid DOM ID
+		final String sanitized = title.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
+		return "test-aux-btn-" + sanitized + "-" + buttonIndex;
+	}
+
 	// Header is a persistent component for this view; create once and add in constructor
 	private final CDiv header = new CDiv();
 	Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillary.class);
@@ -48,16 +59,6 @@ public class CPageTestAuxillary extends Main {
 		add(pageLinksLayout);
 		// prepare dynamic route buttons
 		prepareRoutes();
-	}
-
-	/** Generate a stable, unique button ID from title and index for Playwright testing.
-	 * @param title       Button title
-	 * @param buttonIndex Button index
-	 * @return Sanitized button ID */
-	private String generateButtonId(final String title, final int buttonIndex) {
-		// Sanitize title to create a valid DOM ID
-		final String sanitized = title.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
-		return "test-aux-btn-" + sanitized + "-" + buttonIndex;
 	}
 
 	protected void prepareRoutes() {

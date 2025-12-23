@@ -11,7 +11,6 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.products.product.service.CProductService;
 import tech.derbent.app.products.productversion.domain.CProductVersion;
 import tech.derbent.app.products.productversiontype.service.CProductVersionTypeService;
 import tech.derbent.app.projects.domain.CProject;
@@ -20,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:file-o", title = "Settings.ProductVersions")
+@Menu (icon = "vaadin:file-o", title = "Settings.ProductVersions")
 @PermitAll
 public class CProductVersionService extends CProjectItemService<CProductVersion> implements IEntityRegistrable {
 
@@ -28,8 +27,7 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 	private final CProductVersionTypeService productversionTypeService;
 
 	CProductVersionService(final IProductVersionRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProductVersionTypeService productversionTypeService, final CProductService cProductService,
-			final CProjectItemStatusService projectItemStatusService) {
+			final CProductVersionTypeService productversionTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.productversionTypeService = productversionTypeService;
 	}

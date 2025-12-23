@@ -88,7 +88,6 @@ class CPageServiceHasValueEventPropagationTest {
 	}
 
 	/** Test that components implementing HasValue can be recognized. Verifies that the component properly implements the interface. */
-	@SuppressWarnings ("cast")
 	@Test
 	void testComponentImplementsHasValue() {
 		assertTrue(testComponent instanceof HasValue, "TestHasValueComponent should implement HasValue");

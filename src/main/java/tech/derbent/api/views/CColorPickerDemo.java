@@ -21,6 +21,10 @@ public class CColorPickerDemo extends Main {
 	public static final String DEFAULT_ICON = "vaadin:paintbrush";
 	private static final long serialVersionUID = 1L;
 
+	private static CDiv createDemoSection(String title, String description, String id) {
+		return createDemoSection(title, description, id, "#4A90E2");
+	}
+
 	private static CDiv createDemoSection(String title, String description, String id, String defaultColor) {
 		final CDiv section = new CDiv();
 		section.getStyle().set("margin", "20px 0").set("padding", "20px").set("border", "2px solid #ddd").set("border-radius", "8px")
@@ -76,9 +80,5 @@ public class CColorPickerDemo extends Main {
 		layout.add(createDemoSection("Demo 4: Color Picker with Dark Default",
 				"This picker starts with a dark color (#2C3E50) - notice the white text for readability", "color-picker-demo-4", "#2C3E50"));
 		add(layout);
-	}
-
-	private CDiv createDemoSection(String title, String description, String id) {
-		return createDemoSection(title, description, id, "#4A90E2");
 	}
 }

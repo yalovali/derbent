@@ -19,19 +19,9 @@ import tech.derbent.base.session.service.ISessionService;
 public class CPageMenuIntegrationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageMenuIntegrationService.class);
-	private final CPageEntityService pageEntityService;
-	private final ISessionService sessionService;
-
-	public CPageMenuIntegrationService(CPageEntityService pageEntityService, ISessionService sessionService) {
-		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
-		Check.notNull(sessionService, "CSessionService cannot be null");
-		this.pageEntityService = pageEntityService;
-		this.sessionService = sessionService;
-		LOGGER.info("CPageMenuIntegrationService initialized");
-	}
 
 	/** Create a MenuEntry from a CPageEntity. */
-	private MenuEntry createMenuEntryFromPage(CPageEntity page) {
+	private static MenuEntry createMenuEntryFromPage(CPageEntity page) {
 		Check.notNull(page, "Page entity cannot be null");
 		// Get icon with fallback
 		String icon = page.getIconString();
@@ -51,6 +41,39 @@ public class CPageMenuIntegrationService {
 		final Double order = parseMenuOrderToDouble(page.getMenuOrder());
 		// Create the menu entry with enhanced metadata
 		return new MenuEntry("dynamic." + page.getId(), menuTitle, order, icon, CDynamicPageRouter.class);
+	}
+
+	/** Parse menu order string to a Double value. For hierarchical menus, menuOrder is in format like "4.1" where: - "4" is the order of the parent
+	 * level - "1" is the order of the child level The string is converted to a Double (e.g., "4.1" → 4.1), which preserves the hierarchical
+	 * information. CHierarchicalSideMenu will parse this to extract orders for each level. Examples: - "5" → 5.0 - "4.1" → 4.1 - "4.1.2" → 4.12
+	 * (concatenated as decimal) - "" or null → 999.0 (default high order)
+	 * @param menuOrderStr The menu order string from CPageEntity
+	 * @return The parsed order value */
+	private static Double parseMenuOrderToDouble(String menuOrderStr) {
+		// Default order for missing or invalid menuOrder
+		final Double DEFAULT_ORDER = 999.0;
+		// Check for null or empty menuOrder
+		if (menuOrderStr == null || menuOrderStr.trim().isEmpty()) {
+			return DEFAULT_ORDER;
+		}
+		try {
+			// Try to parse as a simple Double first
+			return Double.parseDouble(menuOrderStr.trim());
+		} catch (final NumberFormatException e) {
+			LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER, e.getMessage());
+			return DEFAULT_ORDER;
+		}
+	}
+
+	private final CPageEntityService pageEntityService;
+	private final ISessionService sessionService;
+
+	public CPageMenuIntegrationService(CPageEntityService pageEntityService, ISessionService sessionService) {
+		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
+		Check.notNull(sessionService, "CSessionService cannot be null");
+		this.pageEntityService = pageEntityService;
+		this.sessionService = sessionService;
+		LOGGER.info("CPageMenuIntegrationService initialized");
 	}
 
 	/** Get menu entries for database-defined pages for the current project. These entries can be added to the existing menu system. */
@@ -117,26 +140,4 @@ public class CPageMenuIntegrationService {
 
 	/** Check if the service is ready (has an active project). */
 	public boolean isReady() { return sessionService.getActiveProject().isPresent(); }
-
-	/** Parse menu order string to a Double value. For hierarchical menus, menuOrder is in format like "4.1" where: - "4" is the order of the parent
-	 * level - "1" is the order of the child level The string is converted to a Double (e.g., "4.1" → 4.1), which preserves the hierarchical
-	 * information. CHierarchicalSideMenu will parse this to extract orders for each level. Examples: - "5" → 5.0 - "4.1" → 4.1 - "4.1.2" → 4.12
-	 * (concatenated as decimal) - "" or null → 999.0 (default high order)
-	 * @param menuOrderStr The menu order string from CPageEntity
-	 * @return The parsed order value */
-	private Double parseMenuOrderToDouble(String menuOrderStr) {
-		// Default order for missing or invalid menuOrder
-		final Double DEFAULT_ORDER = 999.0;
-		// Check for null or empty menuOrder
-		if (menuOrderStr == null || menuOrderStr.trim().isEmpty()) {
-			return DEFAULT_ORDER;
-		}
-		try {
-			// Try to parse as a simple Double first
-			return Double.parseDouble(menuOrderStr.trim());
-		} catch (final NumberFormatException e) {
-			LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER, e.getMessage());
-			return DEFAULT_ORDER;
-		}
-	}
 }
