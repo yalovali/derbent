@@ -23,13 +23,13 @@ import tech.derbent.base.session.service.ISessionService;
 public class CWorkflowStatusRelationService extends CAbstractEntityRelationService<CWorkflowStatusRelation> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowStatusRelationService.class);
-	private final IWorkflowStatusRelationRepository repository;
+	// private final IWorkflowStatusRelationRepository repository;
 
 	@Autowired
 	public CWorkflowStatusRelationService(final IWorkflowStatusRelationRepository repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.repository = repository;
+		// this.repository = repository;
 	}
 
 	/** Add status transition to workflow with specific roles */
@@ -93,7 +93,8 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		Check.notNull(workflow.getId(), "Workflow must have a valid ID");
 		Check.notNull(fromStatus.getId(), "From status must have a valid ID");
 		Check.notNull(toStatus.getId(), "To status must have a valid ID");
-		repository.deleteByWorkflowIdAndFromStatusIdAndToStatusId(workflow.getId(), fromStatus.getId(), toStatus.getId());
+		((IWorkflowStatusRelationRepository) repository).deleteByWorkflowIdAndFromStatusIdAndToStatusId(workflow.getId(), fromStatus.getId(),
+				toStatus.getId());
 		LOGGER.debug("Successfully removed status transition from workflow {} from status {} to status {}", workflow.getId(), fromStatus.getId(),
 				toStatus.getId());
 	}
@@ -101,7 +102,7 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	@Override
 	@Transactional (readOnly = true)
 	public List<CWorkflowStatusRelation> findByChildEntityId(final Long statusId) {
-		return repository.findByFromStatusId(statusId);
+		return ((IWorkflowStatusRelationRepository) repository).findByFromStatusId(statusId);
 	}
 
 	/** Find workflow status relations by from status */
@@ -114,28 +115,28 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	@Override
 	@Transactional (readOnly = true)
 	public List<CWorkflowStatusRelation> findByParentEntityId(final Long workflowId) {
-		return repository.findByWorkflowId(workflowId);
+		return ((IWorkflowStatusRelationRepository) repository).findByWorkflowId(workflowId);
 	}
 
 	/** Find workflow status relations by role */
 	@Transactional (readOnly = true)
 	public List<CWorkflowStatusRelation> findByRole(final CUserProjectRole role) {
 		Check.notNull(role, "Role cannot be null");
-		return repository.findByRoleId(role.getId());
+		return ((IWorkflowStatusRelationRepository) repository).findByRoleId(role.getId());
 	}
 
 	/** Find workflow status relations by to status */
 	@Transactional (readOnly = true)
 	public List<CWorkflowStatusRelation> findByToStatus(final CProjectItemStatus toStatus) {
 		Check.notNull(toStatus, "To status cannot be null");
-		return repository.findByToStatusId(toStatus.getId());
+		return ((IWorkflowStatusRelationRepository) repository).findByToStatusId(toStatus.getId());
 	}
 
 	/** Find workflow status relations by workflow */
 	@Transactional (readOnly = true)
 	public List<CWorkflowStatusRelation> findByWorkflow(final CWorkflowEntity workflow) {
 		Check.notNull(workflow, "Workflow cannot be null");
-		return repository.findByWorkflowId(workflow.getId());
+		return ((IWorkflowStatusRelationRepository) repository).findByWorkflowId(workflow.getId());
 	}
 
 	@Override
@@ -149,7 +150,7 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	/** Find a specific workflow status relation by workflow, from status, and to status */
 	@Transactional (readOnly = true)
 	public Optional<CWorkflowStatusRelation> findRelationshipByStatuses(final Long workflowId, final Long fromStatusId, final Long toStatusId) {
-		return repository.findByWorkflowIdAndFromStatusIdAndToStatusId(workflowId, fromStatusId, toStatusId);
+		return ((IWorkflowStatusRelationRepository) repository).findByWorkflowIdAndFromStatusIdAndToStatusId(workflowId, fromStatusId, toStatusId);
 	}
 
 	@Override
@@ -201,7 +202,7 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	/** Check if a relationship exists between workflow and statuses */
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long workflowId, final Long fromStatusId, final Long toStatusId) {
-		return repository.existsByWorkflowIdAndFromStatusIdAndToStatusId(workflowId, fromStatusId, toStatusId);
+		return ((IWorkflowStatusRelationRepository) repository).existsByWorkflowIdAndFromStatusIdAndToStatusId(workflowId, fromStatusId, toStatusId);
 	}
 
 	/** Update workflow status relation */

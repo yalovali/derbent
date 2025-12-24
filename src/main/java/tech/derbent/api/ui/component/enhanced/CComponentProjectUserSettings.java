@@ -1,6 +1,8 @@
 package tech.derbent.api.ui.component.enhanced;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -17,6 +19,7 @@ import tech.derbent.base.users.service.CUserService;
  * when the current project changes. */
 public class CComponentProjectUserSettings extends CComponentUserProjectRelationBase<CProject, CUserProjectSettings> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentProjectUserSettings.class);
 	private static final long serialVersionUID = 1L;
 	private final CUserService userService;
 

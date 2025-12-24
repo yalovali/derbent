@@ -1,7 +1,5 @@
 package tech.derbent.api.ui.component.basic;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -10,10 +8,10 @@ import tech.derbent.api.ui.component.IFormContainerComponent;
 /** CAccordion - Enhanced base class for accordion components. Layer: View (MVC) Provides common accordion functionality with standardized styling and
  * behavior. */
 public class CTab extends Accordion implements IFormContainerComponent {
+
 	private static final long serialVersionUID = 1L;
 	private final String accordionTitle;
 	private final VerticalLayout baseLayout = new VerticalLayout();
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public CTab(final String title) {
 		super();

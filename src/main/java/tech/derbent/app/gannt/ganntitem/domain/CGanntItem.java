@@ -144,9 +144,9 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 			Check.fail("Unsupported entity type selected in Gantt item: " + selectedItem.getClass().getSimpleName());
 		}
 		// Add other entity type checks as needed
-		final CProjectItem<?> entity = (CProjectItem<?>) service.getById(getEntityId()).orElse(null);
-		Check.notNull(entity, "Entity not found for Gantt item selection");
-		return entity;
+		final CProjectItem<?> entity1 = (CProjectItem<?>) service.getById(getEntityId()).orElse(null);
+		Check.notNull(entity1, "Entity not found for Gantt item selection");
+		return entity1;
 	}
 
 	/** Get the hierarchy level.

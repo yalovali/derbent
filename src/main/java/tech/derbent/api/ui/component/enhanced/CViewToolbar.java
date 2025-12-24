@@ -65,7 +65,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	private final AuthenticationContext authenticationContext;
 	private final CLayoutService layoutService;
 	private CButton layoutToggleButton;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final CPageMenuIntegrationService pageMenuIntegrationService;
 	private final H1 pageTitle;
 	private ComboBox<CProject> projectComboBox;

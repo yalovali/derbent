@@ -1,7 +1,5 @@
 package tech.derbent.base.users.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 import tech.derbent.base.session.service.ISessionService;
@@ -11,9 +9,8 @@ import tech.derbent.base.users.service.CUserService;
 @Configuration
 public class UserServiceConfiguration {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceConfiguration.class);
-	private final CUserService userService;
 	private final ISessionService sessionService;
+	private final CUserService userService;
 
 	public UserServiceConfiguration(final CUserService userService, final ISessionService sessionService) {
 		this.userService = userService;

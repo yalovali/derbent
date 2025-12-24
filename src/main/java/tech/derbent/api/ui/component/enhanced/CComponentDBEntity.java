@@ -27,7 +27,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	private List<String> EntityFields = null;
 	protected CAbstractService<EntityClass> entityService;
 	private boolean isPanelInitialized = false;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	@SuppressWarnings ("unchecked")
 	public CComponentDBEntity(final Class<EntityClass> entityClass) {

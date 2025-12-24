@@ -1,5 +1,7 @@
 package tech.derbent.app.page.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -19,6 +21,7 @@ import tech.derbent.base.session.service.ISessionService;
 @SuppressWarnings ("rawtypes")
 public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageBase.class);
 	private static final long serialVersionUID = 1L;
 	protected Class<?> currentEntityType = null;
 	private Long currentEntityViewID;

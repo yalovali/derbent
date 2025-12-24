@@ -2,6 +2,8 @@ package tech.derbent.api.views;
 
 import java.util.List;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -12,6 +14,7 @@ import tech.derbent.api.interfaces.IContentOwner;
 public abstract class CPanelRelationalBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CAccordionDBEntity<MasterClass> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelRelationalBase.class);
 	private static final long serialVersionUID = 1L;
 	protected Supplier<List<RelationalClass>> getSettings;
 	protected final Grid<RelationalClass> grid;

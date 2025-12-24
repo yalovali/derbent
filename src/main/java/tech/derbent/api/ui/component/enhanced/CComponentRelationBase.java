@@ -3,10 +3,9 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -16,16 +15,16 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 	private static final long serialVersionUID = 1L;
 	protected Supplier<List<RelationalClass>> getSettings;
 	private final Grid<RelationalClass> grid;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final Class<RelationalClass> relationalClass;
 	protected Runnable saveEntity;
 	protected ISessionService sessionService;
 
-	public CComponentRelationBase(final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
-			ISessionService sessionService) {
+	public CComponentRelationBase(final Class<MasterClass> entityClass, CAbstractService<MasterClass> entityService,
+			final Class<RelationalClass> relationalClass, ISessionService sessionService) {
 		super(entityClass);
 		this.relationalClass = relationalClass;
 		this.sessionService = sessionService;
+		this.entityService = entityService;
 		grid = new CGrid<>(relationalClass);
 		getSettings = () -> List.of();
 	}

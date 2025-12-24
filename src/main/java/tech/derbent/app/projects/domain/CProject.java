@@ -63,14 +63,14 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	}
 
 	/** Add a user setting to this project and maintain bidirectional relationship.
-	 * @param userSettings the user settings to add */
-	public void addUserSettings(final CUserProjectSettings userSettings) {
-		if (userSettings == null) {
+	 * @param userSettings1 the user settings to add */
+	public void addUserSettings(final CUserProjectSettings userSettings1) {
+		if (userSettings1 == null) {
 			return;
 		}
-		if (!this.userSettings.contains(userSettings)) {
-			this.userSettings.add(userSettings);
-			userSettings.setProject(this);
+		if (!this.userSettings.contains(userSettings1)) {
+			this.userSettings.add(userSettings1);
+			userSettings1.setProject(this);
 		}
 	}
 
@@ -82,9 +82,9 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		if (getCompanyId() == null) {
 			return null;
 		}
-		final CCompany company =
+		final CCompany company1 =
 				service.getById(getCompanyId()).orElseThrow(() -> new IllegalStateException("Company with ID " + getCompanyId() + " not found"));
-		return company;
+		return company1;
 	}
 
 	/** Gets the list of user project settings for this project. */
@@ -134,11 +134,11 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	}
 
 	/** Remove a user setting from this project and maintain bidirectional relationship.
-	 * @param userSettings the user settings to remove */
-	public void removeUserSettings(final CUserProjectSettings userSettings) {
-		Check.notNull(userSettings, "User settings cannot be null");
-		if (this.userSettings.remove(userSettings)) {
-			userSettings.setProject(null);
+	 * @param userSettings1 the user settings to remove */
+	public void removeUserSettings(final CUserProjectSettings userSettings1) {
+		Check.notNull(userSettings1, "User settings cannot be null");
+		if (this.userSettings.remove(userSettings1)) {
+			userSettings1.setProject(null);
 		}
 	}
 

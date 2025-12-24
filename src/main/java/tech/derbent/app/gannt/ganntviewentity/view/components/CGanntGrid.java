@@ -1,15 +1,16 @@
 package tech.derbent.app.gannt.ganntviewentity.view.components;
 
-import tech.derbent.api.utils.Check;
-
 import java.time.LocalDate;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.ganntitem.domain.CGanntItem;
 import tech.derbent.app.gannt.ganntviewentity.view.datasource.CGanntDataProvider;
@@ -22,6 +23,7 @@ import tech.derbent.app.projects.domain.CProject;
 public class CGanntGrid extends CGrid<CGanntItem> {
 
 	private static final int DEFAULT_TIMELINE_WIDTH_PIXELS = 800; // Default width for timeline column
+	private static final Logger LOGGER = LoggerFactory.getLogger(CGanntGrid.class);
 	private static final int MAX_TIMELINE_WIDTH_PIXELS = 1600; // Maximum width
 	private static final int MIN_TIMELINE_WIDTH_PIXELS = 400; // Minimum width
 	private static final long serialVersionUID = 1L;

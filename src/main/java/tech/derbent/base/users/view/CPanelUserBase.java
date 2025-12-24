@@ -2,6 +2,8 @@ package tech.derbent.base.users.view;
 
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.annotations.CFormBuilder.IComboBoxDataProvider;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -17,6 +19,7 @@ import tech.derbent.base.users.service.CUserService;
  * panels following the same pattern as CPanelActivityBase. */
 public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelUserBase.class);
 	private static final long serialVersionUID = 1L;
 	private final CCompanyService companyService;
 

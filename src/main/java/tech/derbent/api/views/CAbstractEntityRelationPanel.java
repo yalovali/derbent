@@ -35,7 +35,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 
 	protected Supplier<List<RelationEntity>> getRelations;
 	protected final Grid<RelationEntity> grid = new Grid<>(getRelationEntityClass(), false);
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected Runnable saveEntity;
 	protected Consumer<List<RelationEntity>> setRelations;
 

@@ -128,7 +128,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final AuthenticationContext authenticationContext;
 	private final User currentUser;
 	private final CLayoutService layoutService;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private CViewToolbar mainToolbar;
 	private final CPageMenuIntegrationService pageMenuService;
 	private final CPageTestAuxillaryService pageTestAuxillaryService;

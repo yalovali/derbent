@@ -1,5 +1,7 @@
 package tech.derbent.app.page.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
@@ -13,6 +15,7 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - entity edit
 	public static final String DEFAULT_ICON = "vaadin:database";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewForEntityEdit.class);
 	private static final long serialVersionUID = 1L;
 	protected CCrudToolbar crudToolbar;
 

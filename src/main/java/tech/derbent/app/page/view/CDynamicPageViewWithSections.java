@@ -1,7 +1,5 @@
 package tech.derbent.app.page.view;
 
-import tech.derbent.api.utils.Check;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +16,7 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentDetailsMasterToolbar;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -35,7 +34,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 	private final CGridEntityService gridEntityService;
 	private final CVerticalLayout splitBottomLayout = new CVerticalLayout(false, false, false);
 	// Layout components
-	protected final SplitLayout splitLayout = new SplitLayout();
+	// protected final SplitLayout splitLayout = new SplitLayout();
 
 	@Autowired
 	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final ISessionService sessionService,

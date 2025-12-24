@@ -1,7 +1,5 @@
 package tech.derbent.app.page.view;
 
-import tech.derbent.api.utils.Check;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,7 @@ import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.ui.view.MainLayout;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
@@ -72,17 +71,17 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	}
 
 	/** Load a specific page by entity ID.
-	 * @param pageItemId
+	 * @param pageItemId1
 	 * @throws Exception */
-	public void loadSpecificPage(Long pageEntityId, Long pageItemId, boolean AsDetailComponent) throws Exception {
-		if (pageEntityId == null) {
+	public void loadSpecificPage(Long pageEntityId1, Long pageItemId1, boolean AsDetailComponent) throws Exception {
+		if (pageEntityId1 == null) {
 			LOGGER.debug("No page entity ID provided, clearing dynamic page router content.");
 			removeAll();
 			return;
 		}
-		LOGGER.debug("Loading specific page for entity ID: {}", pageEntityId);
+		LOGGER.debug("Loading specific page for entity ID: {}", pageEntityId1);
 		currentPageEntity =
-				pageEntityService.getById(pageEntityId).orElseThrow(() -> new IllegalStateException("No page found for ID: " + pageEntityId));
+				pageEntityService.getById(pageEntityId1).orElseThrow(() -> new IllegalStateException("No page found for ID: " + pageEntityId1));
 		if (currentPageEntity.getRequiresAuthentication()) {
 			sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user found"));
 		}
@@ -99,9 +98,9 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 				page = new CDynamicPageViewWithoutGrid(null, currentPageEntity, sessionService, detailSectionService);
 			}
 			Check.notNull(page, "Dynamic page view cannot be null after instantiation");
-			if (pageItemId != null) {
+			if (pageItemId1 != null) {
 				// Locate specific item on the page or just load it
-				page.locateItemById(pageItemId);
+				page.locateItemById(pageItemId1);
 			}
 			removeAll();
 			add(page);
@@ -123,5 +122,6 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	}
 
 	@Override
-	protected void setupToolbar() { /*****/ }
+	protected void setupToolbar() { /*****/
+	}
 }

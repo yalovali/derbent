@@ -18,7 +18,6 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
@@ -140,14 +139,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 			dataProviderBean = "CUserService"
 	)
 	private CUser responsible;
-	// Status Management
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "order_status_id", nullable = false)
-	@AMetaData (
-			displayName = "Status", required = true, readOnly = false, description = "Current status of the order", hidden = false,
-			dataProviderBean = "CProjectItemStatusService"
-	)
-	private CProjectItemStatus status;
 
 	public COrder() {
 		super();
@@ -218,9 +209,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	 * @return the order date */
 	@Override
 	public LocalDate getStartDate() { return orderDate; }
-
-	@Override
-	public CProjectItemStatus getStatus() { return status; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
@@ -311,12 +299,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	public void setResponsible(final CUser responsible) {
 		this.responsible = responsible;
-		updateLastModified();
-	}
-
-	@Override
-	public void setStatus(final CProjectItemStatus status) {
-		this.status = status;
 		updateLastModified();
 	}
 }

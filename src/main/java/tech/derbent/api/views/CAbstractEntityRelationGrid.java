@@ -21,7 +21,7 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 	public static final String WIDTH_PERMISSION = "150px";
 	public static final String WIDTH_ROLE = "150px";
 	public static final String WIDTH_STATUS = "120px";
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Constructor for relation grid */
 	public CAbstractEntityRelationGrid(final Class<RelationEntity> relationClass) {

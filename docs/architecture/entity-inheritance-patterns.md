@@ -34,7 +34,7 @@ CProjectItem<T>
 **Usage Pattern**:
 ```java
 public abstract class CEntity<EntityClass> {
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Transient
     protected final Class<EntityClass> clazz;
     

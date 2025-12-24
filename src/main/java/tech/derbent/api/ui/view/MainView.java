@@ -1,7 +1,5 @@
 package tech.derbent.api.ui.view;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Main;
@@ -21,8 +19,6 @@ public final class MainView extends Main {
 	public static void showMainView() {
 		UI.getCurrent().navigate(MainView.class);
 	}
-
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	// now it is a simple view with a message
 	MainView() {

@@ -1,7 +1,5 @@
 package tech.derbent.api.entity.view;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -10,7 +8,6 @@ import tech.derbent.api.interfaces.IPageTitleProvider;
 public abstract class CAbstractPage extends Main implements BeforeEnterObserver, IPageTitleProvider {
 
 	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public CAbstractPage() {
 		super();

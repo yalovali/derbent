@@ -2,6 +2,8 @@ package tech.derbent.app.page.view;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
@@ -28,6 +30,7 @@ import tech.derbent.base.session.service.ISessionService;
 public abstract class CPageBaseProjectAware extends CPageBase
 		implements IProjectChangeListener, IContentOwner, IHasContentOwner, IPageServiceImplementer {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageBaseProjectAware.class);
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected Map<String, Component> componentMap = new HashMap<String, Component>();

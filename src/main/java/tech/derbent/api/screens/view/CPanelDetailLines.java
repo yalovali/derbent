@@ -1,6 +1,8 @@
 package tech.derbent.api.screens.view;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -12,6 +14,7 @@ import tech.derbent.api.utils.Check;
 
 public class CPanelDetailLines extends CPanelDetailSectionBase {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelDetailLines.class);
 	private static final long serialVersionUID = 1L;
 	private final CComponentListDetailLines listComponent;
 

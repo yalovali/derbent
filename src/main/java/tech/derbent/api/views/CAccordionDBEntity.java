@@ -1,6 +1,8 @@
 package tech.derbent.api.views;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.annotations.CFormBuilder.IComboBoxDataProvider;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -11,6 +13,7 @@ import tech.derbent.api.ui.component.basic.CAccordion;
 
 public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CAccordion implements IContentOwner {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAccordionDBEntity.class);
 	private static final long serialVersionUID = 1L;
 	private final CEnhancedBinder<EntityClass> binder;
 	protected final Class<EntityClass> entityClass;

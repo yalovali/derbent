@@ -25,12 +25,10 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectAwareMDPage.class);
 	private static final long serialVersionUID = 1L;
 	protected CProject currentProject;
-	protected final ISessionService sessionService;
 
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CEntityNamedService<EntityClass> entityService,
 			final ISessionService sessionService, final CDetailSectionService screenService) throws Exception {
 		super(entityClass, entityService, sessionService, screenService);
-		this.sessionService = sessionService;
 		// Now that sessionService is set, we can populate the grid
 		refreshProjectAwareGrid();
 	}

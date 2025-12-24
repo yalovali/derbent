@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,7 +27,6 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import jakarta.annotation.PostConstruct;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.entity.domain.CEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -53,6 +54,7 @@ import tech.derbent.base.session.service.ISessionService;
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAbstractEntityDBPage.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
@@ -427,10 +429,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			return false;
 		}
 		return true;
-	}
-
-	protected void onClonedItem(final CEntity<?> clonedItem) {
-		LOGGER.debug("Cloned item callback received: {}", clonedItem);
 	}
 
 	@Override

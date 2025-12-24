@@ -287,10 +287,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			Check.notBlank(serviceBeanName, "Service bean name is blank for search filtering");
 			// Get the service and entity class
 			final CEntityOfProjectService<?> projectService = CSpringContext.<CEntityOfProjectService<?>>getBean(serviceBeanName);
-			final CProject currentProject = sessionService != null
+			final CProject currentProject1 = sessionService != null
 					? sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found.")) : null;
 			// Get all entities for the current project - note: using raw types due to grid constraints
-			final List allEntities = projectService.listByProject(currentProject, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+			final List allEntities = projectService.listByProject(currentProject1, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
 			// Filter entities based on search text
 			final List filteredEntities = (List) allEntities.stream().filter(entity -> {
 				try {
@@ -628,11 +628,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// clear existing columns
 			grid.removeAllColumns();
 			final String serviceBeanName = gridEntity.getDataServiceBeanName();
-			final Class<?> entityClass = getEntityClassFromService(serviceBeanName);
-			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
+			final Class<?> entityClass1 = getEntityClassFromService(serviceBeanName);
+			Check.notNull(entityClass1, "Could not determine entity class from service: " + serviceBeanName);
 			// Check if widget mode is enabled
 			// Traditional column-based mode
-			final List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
+			final List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass1);
 			fieldConfigs.forEach(fc -> createColumnForField(fc));
 			// Configure sorting - sort by first column (ID) initially
 			// Get the first column (ID column) and sort by it

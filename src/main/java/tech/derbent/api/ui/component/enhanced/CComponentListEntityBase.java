@@ -72,7 +72,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		extends VerticalLayout
 		implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>, IPageServiceAutoRegistrable, IHasDragControl {
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Creates an entity type configuration for use with addButtonFromList.
@@ -220,9 +220,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 
 	/** Configure the grid columns and appearance. Subclasses must implement this to define their specific columns. Implements
 	 * IGridComponent.configureGrid()
-	 * @param grid The grid to configure */
+	 * @param grid1 The grid to configure */
 	@Override
-	public abstract void configureGrid(CGrid<ChildEntity> grid);
+	public abstract void configureGrid(CGrid<ChildEntity> grid1);
 
 	protected CButton create_buttonAdd() {
 		final CButton button = new CButton(VaadinIcon.PLUS.create());

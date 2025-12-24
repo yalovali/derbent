@@ -208,17 +208,17 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	/** Add a project setting to this user and maintain bidirectional relationship.
-	 * @param projectSettings the project settings to add */
-	public void addProjectSettings(final CUserProjectSettings projectSettings) {
-		if (projectSettings == null) {
+	 * @param projectSettings1 the project settings to add */
+	public void addProjectSettings(final CUserProjectSettings projectSettings1) {
+		if (projectSettings1 == null) {
 			return;
 		}
 		if (this.projectSettings == null) {
 			this.projectSettings = new ArrayList<>();
 		}
-		if (!this.projectSettings.contains(projectSettings)) {
-			this.projectSettings.add(projectSettings);
-			projectSettings.setUser(this);
+		if (!this.projectSettings.contains(projectSettings1)) {
+			this.projectSettings.add(projectSettings1);
+			projectSettings1.setUser(this);
 		}
 	}
 
@@ -431,12 +431,12 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	/** Remove a project setting from this user and maintain bidirectional relationship.
-	 * @param projectSettings the project settings to remove */
-	public void removeProjectSettings(final CUserProjectSettings projectSettings) {
-		Check.notNull(projectSettings, "Project settings cannot be null");
+	 * @param projectSettings1 the project settings to remove */
+	public void removeProjectSettings(final CUserProjectSettings projectSettings1) {
+		Check.notNull(projectSettings1, "Project settings cannot be null");
 		Check.notNull(this.projectSettings, "User's project settings collection cannot be null");
-		if (this.projectSettings.remove(projectSettings)) {
-			projectSettings.setUser(null);
+		if (this.projectSettings.remove(projectSettings1)) {
+			projectSettings1.setUser(null);
 		}
 	}
 

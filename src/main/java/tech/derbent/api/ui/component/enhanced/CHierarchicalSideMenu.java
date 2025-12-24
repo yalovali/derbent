@@ -277,7 +277,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private final Div currentLevelContainer;
 	private String currentRoute; // Track current route for highlighting
 	private final HorizontalLayout headerLayout;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	// Menu structure components
 	private final VerticalLayout menuContainer;
 	private final Map<String, CMenuLevel> menuLevels;

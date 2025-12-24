@@ -25,12 +25,10 @@ import tech.derbent.base.users.domain.CUserCompanySetting;
 public class CUserCompanySettingsService extends CAbstractEntityRelationService<CUserCompanySetting> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingsService.class);
-	private final IUserCompanySettingsRepository repository;
 
 	@Autowired
 	public CUserCompanySettingsService(final IUserCompanySettingsRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.repository = repository;
 	}
 
 	/** Add user to company with full configuration */
@@ -68,7 +66,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Transactional (readOnly = false)
 	public void deleteAllByCompanyId(final Long company_id) {
 		Check.notNull(company_id, "Company ID cannot be null");
-		repository.deleteByCompanyId(company_id);
+		((IUserCompanySettingsRepository) repository).deleteByCompanyId(company_id);
 	}
 
 	/** Delete all company settings for a user. Used for cleanup operations.
@@ -77,7 +75,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	public void deleteAllByUserId(final Long userId) {
 		Check.notNull(userId, "User ID cannot be null");
 		LOGGER.debug("Deleting all company settings for user {}", userId);
-		repository.deleteByUserId(userId);
+		((IUserCompanySettingsRepository) repository).deleteByUserId(userId);
 	}
 
 	@Transactional (readOnly = false)
@@ -86,13 +84,13 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		Check.notNull(company, "Company cannot be null");
 		Check.notNull(user.getId(), "User must have a valid ID");
 		Check.notNull(company.getId(), "Company must have a valid ID");
-		repository.deleteByUserIdAndCompanyId(user.getId(), company.getId());
+		((IUserCompanySettingsRepository) repository).deleteByUserIdAndCompanyId(user.getId(), company.getId());
 	}
 
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserCompanySetting> findByChildEntityId(final Long company_id) {
-		return repository.findByCompany_Id(company_id);
+		return ((IUserCompanySettingsRepository) repository).findByCompany_Id(company_id);
 	}
 
 	/** Find user company settings by company */
@@ -105,7 +103,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserCompanySetting> findByParentEntityId(final Long userId) {
-		return repository.findByUserId(userId);
+		return ((IUserCompanySettingsRepository) repository).findByUserId(userId);
 	}
 
 	/** Find user company settings by user */
@@ -118,7 +116,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CUserCompanySetting> findRelationship(final Long userId, final Long company_id) {
-		return repository.findByUserIdAndCompanyId(userId, company_id);
+		return ((IUserCompanySettingsRepository) repository).findByUserIdAndCompanyId(userId, company_id);
 	}
 
 	/** Find the single company setting for a user. Returns the first setting if multiple exist. This is used for single company setting scenarios.
@@ -127,7 +125,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Transactional (readOnly = true)
 	public Optional<CUserCompanySetting> findSingleByUserId(final Long userId) {
 		Check.notNull(userId, "User ID cannot be null");
-		final List<CUserCompanySetting> settings = repository.findSingleByUserId(userId);
+		final List<CUserCompanySetting> settings = ((IUserCompanySettingsRepository) repository).findSingleByUserId(userId);
 		return settings.isEmpty() ? Optional.empty() : Optional.of(settings.get(0));
 	}
 
@@ -152,7 +150,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Override
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long userId, final Long company_id) {
-		return repository.existsByUserIdAndCompanyId(userId, company_id);
+		return ((IUserCompanySettingsRepository) repository).existsByUserIdAndCompanyId(userId, company_id);
 	}
 
 	@Override

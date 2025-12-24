@@ -139,7 +139,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	boolean HeaderVisible = true;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private Consumer<CGrid<EntityClass>> refreshConsumer;
 	/** Map to store widget providers for columns that create components implementing IStateOwnerComponent. Key: Column key, Value: Widget provider
 	 * function */

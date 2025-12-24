@@ -1,10 +1,10 @@
 package tech.derbent.app.workflow.view;
 
 import java.util.List;
-import tech.derbent.api.config.CSpringContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
@@ -16,12 +16,11 @@ import tech.derbent.base.session.service.ISessionService;
  * updates when the current workflow changes. */
 public class CComponentWorkflowStatusRelations extends CComponentWorkflowStatusRelationBase<CWorkflowEntity, CWorkflowStatusRelation> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWorkflowStatusRelations.class);
 	private static final long serialVersionUID = 1L;
-	private final CProjectItemStatusService statusService;
 
 	public CComponentWorkflowStatusRelations(final CWorkflowEntityService entityService, ISessionService sessionService) throws Exception {
 		super(CWorkflowEntity.class, entityService, sessionService);
-		statusService = CSpringContext.<CProjectItemStatusService>getBean(CProjectItemStatusService.class);
 		initComponent();
 	}
 

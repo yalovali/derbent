@@ -74,21 +74,21 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	}
 
 	@Override
-	public void configureGrid(final CGrid<CSprintItem> grid) {
-		Check.notNull(grid, "Grid cannot be null");
-		grid.hideHeader();
-		grid.addIdColumn(CSprintItem::getId, "ID", "id");
+	public void configureGrid(final CGrid<CSprintItem> grid1) {
+		Check.notNull(grid1, "Grid cannot be null");
+		grid1.hideHeader();
+		grid1.addIdColumn(CSprintItem::getId, "ID", "id");
 		// grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
 		// Use expanding column for Name to fill remaining width
-		grid.addShortTextColumn(item -> {
+		grid1.addShortTextColumn(item -> {
 			return item.getItem().getName();
 		}, "Name", "name");
-		grid.addExpandingLongTextColumn(item -> {
+		grid1.addExpandingLongTextColumn(item -> {
 			return item.getItem().getDescriptionShort();
 		}, "description", "Description");
-		grid.addStoryPointColumn(CSprintItem::getItem, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
+		grid1.addStoryPointColumn(CSprintItem::getItem, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
 		try {
-			grid.addEntityColumn(item -> {
+			grid1.addEntityColumn(item -> {
 				return item.getItem().getStatus();
 			}, "Status", "status", CSprintItem.class);
 		} catch (final Exception e) {
@@ -99,11 +99,11 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	protected CButton create_buttonAdd() {
 		// Use the base class implementation but with a list select icon
-		final CButton buttonAdd = new CButton(VaadinIcon.LIST_SELECT.create());
-		buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		buttonAdd.setTooltipText("Add items to sprint");
-		buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
-		return buttonAdd;
+		final CButton buttonAdd1 = new CButton(VaadinIcon.LIST_SELECT.create());
+		buttonAdd1.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonAdd1.setTooltipText("Add items to sprint");
+		buttonAdd1.addClickListener(e -> on_buttonAdd_clicked());
+		return buttonAdd1;
 	}
 
 	/** Populates the component by refreshing the grid with sprint items. This method is called automatically by CFormBuilder when the binder's entity

@@ -61,7 +61,6 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	}
 
 	private final PasswordEncoder passwordEncoder;
-	private ISessionService sessionService;
 
 	public CUserService(final IEntityOfCompanyRepository<CUser> repository, final Clock clock, @Lazy final ISessionService sessionService) {
 		super(repository, clock, sessionService);

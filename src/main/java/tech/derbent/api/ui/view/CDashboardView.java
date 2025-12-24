@@ -3,6 +3,8 @@ package tech.derbent.api.ui.view;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -33,6 +35,7 @@ public final class CDashboardView extends CAbstractPage {
 
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - main dashboard
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardView.class);
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Dashboard View";
 

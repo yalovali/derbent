@@ -1,5 +1,7 @@
 package tech.derbent.api.ui.component.enhanced;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.config.CSpringContext;
@@ -24,6 +26,7 @@ import tech.derbent.base.users.service.CUserProjectSettingsService;
 public abstract class CComponentUserProjectRelationBase<MasterClass extends CEntityNamed<MasterClass>,
 		RelationalClass extends CEntityDB<RelationalClass>> extends CComponentRelationPanelBase<MasterClass, CUserProjectSettings> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentUserProjectRelationBase.class);
 	private static final long serialVersionUID = 1L;
 	protected final CCompanyService companyService;
 	protected final CProjectService projectService;

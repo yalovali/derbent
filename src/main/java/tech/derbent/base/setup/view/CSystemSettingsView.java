@@ -1,6 +1,8 @@
 package tech.derbent.base.setup.view;
 
 import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -38,6 +40,7 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - settings view (darker)
 	public static final String DEFAULT_ICON = "vaadin:sliders";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsView.class);
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "System Settings View";
 	private final CEnhancedBinder<CSystemSettings> binder;
@@ -78,7 +81,6 @@ public class CSystemSettingsView extends CAbstractPage {
 			try {
 				on_resetToDefaults();
 			} catch (final Exception e1) {
-				
 				e1.printStackTrace();
 			}
 		});
@@ -138,9 +140,7 @@ public class CSystemSettingsView extends CAbstractPage {
 	public CSystemSettings getCurrentSettings() { return currentSettings; }
 
 	@Override
-	public String getPageTitle() { 
-		return "System Setup & Configuration";
-	}
+	public String getPageTitle() { return "System Setup & Configuration"; }
 
 	@Override
 	protected void initPage() {
@@ -217,33 +217,12 @@ public class CSystemSettingsView extends CAbstractPage {
 		try {
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
-						runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.", "Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.",
+								"Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 					});
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
-	}
-
-	private void runDatabaseReset(final boolean minimal, final String successMessage, final String infoMessage) {
-		final UI ui = getUI().orElse(null);
-		Check.notNull(ui, "UI must be available to run database reset");
-		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
-		CompletableFuture.runAsync(() -> {
-			try {
-				final CDataInitializer init = new CDataInitializer(sessionService);
-				init.reloadForced(minimal);
-				ui.access(() -> {
-					progressDialog.close();
-					CNotificationService.showSuccess(successMessage);
-					CNotificationService.showInfoDialog(infoMessage);
-				});
-			} catch (final Exception ex) {
-				ui.access(() -> {
-					progressDialog.close();
-					CNotificationService.showException("Hata", ex);
-				});
-			}
-		});
 	}
 
 	/** Saves the current system settings with validation. */
@@ -323,6 +302,28 @@ public class CSystemSettingsView extends CAbstractPage {
 		LOGGER.debug("postConstruct called for CSystemSettingsView - loading system settings");
 		// Now it's safe to load system settings since all dependencies are injected
 		loadSystemSettings();
+	}
+
+	private void runDatabaseReset(final boolean minimal, final String successMessage, final String infoMessage) {
+		final UI ui = getUI().orElse(null);
+		Check.notNull(ui, "UI must be available to run database reset");
+		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
+		CompletableFuture.runAsync(() -> {
+			try {
+				final CDataInitializer init = new CDataInitializer(sessionService);
+				init.reloadForced(minimal);
+				ui.access(() -> {
+					progressDialog.close();
+					CNotificationService.showSuccess(successMessage);
+					CNotificationService.showInfoDialog(infoMessage);
+				});
+			} catch (final Exception ex) {
+				ui.access(() -> {
+					progressDialog.close();
+					CNotificationService.showException("Hata", ex);
+				});
+			}
+		});
 	}
 
 	/** Sets the session service. This is called after bean creation via configuration class.

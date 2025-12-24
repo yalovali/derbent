@@ -126,7 +126,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentEntitySelection.class);
 	private static final long serialVersionUID = 1L;
 	private List<EntityClass> allItems = new ArrayList<>();
 	private List<EntityClass> alreadySelectedItems = new ArrayList<>();
@@ -315,22 +315,22 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Configure grid columns following standard CGrid pattern. Implements IGridComponent.configureGrid()
-	 * @param grid The grid to configure (must not be null) */
+	 * @param grid1 The grid to configure (must not be null) */
 	@Override
 	@SuppressWarnings ("rawtypes")
-	public void configureGrid(final CGrid<EntityClass> grid) {
-		Check.notNull(grid, "Grid cannot be null");
+	public void configureGrid(final CGrid<EntityClass> grid1) {
+		Check.notNull(grid1, "Grid cannot be null");
 		// Clear existing columns
-		grid.getColumns().forEach(grid::removeColumn);
+		grid1.getColumns().forEach(grid1::removeColumn);
 		if (currentEntityType == null) {
 			return;
 		}
 		LOGGER.debug("Configuring grid columns for entity type: {}", currentEntityType.getDisplayName());
-		grid.addIdColumn(item -> item.getId(), "ID", "id");
-		grid.addShortTextColumn(this::getEntityName, "Name", "name");
+		grid1.addIdColumn(item -> item.getId(), "ID", "id");
+		grid1.addShortTextColumn(this::getEntityName, "Name", "name");
 		// Use expanding column for description to fill remaining width
-		grid.addExpandingLongTextColumn(this::getEntityDescription, "Description", "description");
-		CGrid.styleColumnHeader(grid.addComponentColumn(item -> {
+		grid1.addExpandingLongTextColumn(this::getEntityDescription, "Description", "description");
+		CGrid.styleColumnHeader(grid1.addComponentColumn(item -> {
 			try {
 				return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
 			} catch (final Exception e) {

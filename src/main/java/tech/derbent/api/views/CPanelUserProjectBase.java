@@ -37,7 +37,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		return settings.getPermission();
 	}
 
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;
 
 	public CPanelUserProjectBase(final String title, final IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,

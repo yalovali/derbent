@@ -23,12 +23,10 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 public class CUserProjectSettingsService extends CAbstractEntityRelationService<CUserProjectSettings> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectSettingsService.class);
-	private final IUserProjectSettingsRepository repository;
 
 	@Autowired
 	public CUserProjectSettingsService(final IUserProjectSettingsRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.repository = repository;
 	}
 
 	/** Add user to project with specific role and permissions */
@@ -82,20 +80,20 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(user.getId(), "User must have a valid ID");
 		Check.notNull(project.getId(), "Project must have a valid ID");
-		repository.deleteByUserIdProjectId(user.getId(), project.getId());
+		((IUserProjectSettingsRepository) repository).deleteByUserIdProjectId(user.getId(), project.getId());
 		LOGGER.debug("Successfully removed user {} from project {}", user.getId(), project.getId());
 	}
 
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserProjectSettings> findByChildEntityId(final Long projectId) {
-		return repository.findByProjectId(projectId);
+		return ((IUserProjectSettingsRepository) repository).findByProjectId(projectId);
 	}
 
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserProjectSettings> findByParentEntityId(final Long userId) {
-		return repository.findByUserId(userId);
+		return ((IUserProjectSettingsRepository) repository).findByUserId(userId);
 	}
 
 	/** Find user project settings by project */
@@ -115,7 +113,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CUserProjectSettings> findRelationship(final Long userId, final Long projectId) {
-		return repository.findByUserIdAndProjectId(userId, projectId);
+		return ((IUserProjectSettingsRepository) repository).findByUserIdAndProjectId(userId, projectId);
 	}
 
 	@Override
@@ -159,7 +157,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	@Override
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long userId, final Long projectId) {
-		return repository.existsByUserIdAndProjectId(userId, projectId);
+		return ((IUserProjectSettingsRepository) repository).existsByUserIdAndProjectId(userId, projectId);
 	}
 
 	/** Update user role and permissions for a project */

@@ -1,7 +1,5 @@
 package tech.derbent.api.ui.component.basic;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
@@ -84,8 +82,6 @@ public class CButton extends Button {
 		button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		return button;
 	}
-
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Default constructor for CButton. */
 	public CButton() {

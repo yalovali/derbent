@@ -111,15 +111,15 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	/** Configures columns for the grid following standard pattern with color-aware rendering and selection indicator. If the item is a CEntityNamed,
 	 * it will be rendered with its color and icon using CEntityLabel. Otherwise, it falls back to text rendering. A separate column shows a checkmark
 	 * for selected items.
-	 * @param grid   The Grid to configure (must not be null)
+	 * @param grid1  The Grid to configure (must not be null)
 	 * @param header The header text for the entity column
 	 * @throws IllegalArgumentException if grid is null */
-	protected void configureGrid(final Grid<DetailEntity> grid, final String header) {
-		Check.notNull(grid, "Grid cannot be null");
+	protected void configureGrid(final Grid<DetailEntity> grid1, final String header) {
+		Check.notNull(grid1, "Grid cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
 		LOGGER.debug("Configuring grid columns with header: {}", header);
 		// Selection indicator column (checkmark for selected items)
-		grid.addComponentColumn(item -> {
+		grid1.addComponentColumn(item -> {
 			final String width = "20px";
 			Component checkmark;
 			if (selectedItems.contains(item)) {
@@ -131,7 +131,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			return checkmark;
 		}).setHeader("").setWidth("30px").setFlexGrow(0).setPartNameGenerator(item -> "check-column-cell");
 		// Item display column (with color and icon for CEntityNamed)
-		final var column = grid.addComponentColumn(item -> {
+		final var column = grid1.addComponentColumn(item -> {
 			try {
 				return new CEntityLabel((CEntityNamed<?>) item);
 			} catch (final Exception e) {
@@ -140,7 +140,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			return new Span("N/A");
 		}).setAutoWidth(true).setFlexGrow(1);
 		CGrid.styleColumnHeader(column, header);
-		grid.addClassName("first-column-checkbox-grid");
+		grid1.addClassName("first-column-checkbox-grid");
 	}
 
 	/** Creates and configures a grid for list selection with common styling and behavior following standard pattern.
@@ -148,11 +148,11 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	 * @param class1 The entity class
 	 * @return Configured Grid instance */
 	private CGrid<DetailEntity> createAndSetupGrid(final String header, final Class<?> class1) {
-		final CGrid<DetailEntity> grid = new CGrid<DetailEntity>(class1);
-		CGrid.setupGrid(grid);
-		grid.setHeight(DEFAULT_GRID_HEIGHT);
-		configureGrid(grid, header);
-		return grid;
+		final CGrid<DetailEntity> grid1 = new CGrid<DetailEntity>(class1);
+		CGrid.setupGrid(grid1);
+		grid1.setHeight(DEFAULT_GRID_HEIGHT);
+		configureGrid(grid1, header);
+		return grid1;
 	}
 
 	/** Fires a value change event to listeners. */

@@ -27,18 +27,16 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	private CButton addButton;
 	private CButton deleteButton;
 	private CButton editButton;
-	protected CAbstractService<MasterClass> entityService;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CAbstractEntityRelationService<RelationalClass> relationService;
 
 	public CComponentRelationPanelBase(final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
 			final CAbstractService<MasterClass> entityService, final CAbstractEntityRelationService<RelationalClass> relationService,
 			final ISessionService sessionService) {
-		super(entityClass, relationalClass, sessionService);
+		super(entityClass, entityService, relationalClass, sessionService);
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
 		Check.notNull(relationService, "Relation service cannot be null - relational component requires a valid relation service");
 		this.relationService = relationService;
-		this.entityService = entityService;
 		setupButtons();
 		closePanel();
 	}

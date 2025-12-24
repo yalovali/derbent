@@ -114,11 +114,11 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	}
 
 	/** Sets the entity type and loads available fields. */
-	private void refreshSourceList(String entityType) {
-		if (entityType == null) {
+	private void refreshSourceList(String entityType1) {
+		if (entityType1 == null) {
 			return;
 		}
-		final List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
+		final List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType1);
 		dualListSelector.setItems(allFields);
 	}
 

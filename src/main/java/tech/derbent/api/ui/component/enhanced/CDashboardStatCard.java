@@ -1,7 +1,5 @@
 package tech.derbent.api.ui.component.enhanced;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -28,7 +26,6 @@ public final class CDashboardStatCard extends Div {
 
 	private static final long serialVersionUID = 1L;
 	private final Icon icon;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final Span titleLabel;
 	private final H2 valueLabel;
 

@@ -222,9 +222,9 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 					}
 				}
 			}
-			final ComboBox<String> cmbFieldProperties = ((ComboBox<String>) formEntity.getComponent("entityProperty"));
-			Check.notNull(cmbFieldProperties, "Entity property combobox must not be null");
-			cmbFieldProperties.setItems(fieldProperties.stream().map(CEntityFieldService.EntityFieldInfo::getFieldName).toList());
+			final ComboBox<String> cmbFieldProperties1 = ((ComboBox<String>) formEntity.getComponent("entityProperty"));
+			Check.notNull(cmbFieldProperties1, "Entity property combobox must not be null");
+			cmbFieldProperties1.setItems(fieldProperties.stream().map(CEntityFieldService.EntityFieldInfo::getFieldName).toList());
 		} catch (final Exception e) {
 			LOGGER.error("Error updating entity property based on class:{}", e.getMessage());
 			throw e;

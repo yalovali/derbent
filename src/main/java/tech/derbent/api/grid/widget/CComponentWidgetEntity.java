@@ -65,7 +65,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		public T getEntity() { return entity; }
 	}
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntity.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetEntity.class);
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings ("unchecked")

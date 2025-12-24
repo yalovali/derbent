@@ -1,5 +1,7 @@
 package tech.derbent.app.workflow.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -24,6 +26,7 @@ import tech.derbent.base.session.service.ISessionService;
 public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends CEntityNamed<MasterClass>,
 		RelationalClass extends CEntityDB<RelationalClass>> extends CComponentRelationPanelBase<MasterClass, CWorkflowStatusRelation> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowStatusRelation.class);
 	private static final long serialVersionUID = 1L;
 	protected final CUserProjectRoleService roleService;
 	protected final CProjectItemStatusService statusService;

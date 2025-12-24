@@ -1,7 +1,5 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
-import tech.derbent.api.utils.Check;
-
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -10,6 +8,7 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.enhanced.CComponentListEntityBase;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanColumnService;
@@ -32,12 +31,12 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 	}
 
 	@Override
-	public void configureGrid(final CGrid<CKanbanColumn> grid) {
-		Check.notNull(grid, "Grid cannot be null");
-		grid.addIdColumn(CKanbanColumn::getId, "ID", "id");
-		grid.addShortTextColumn(CKanbanColumn::getName, "Name", "name");
-		grid.addShortTextColumn(this::formatIncludedStatuses, "Included Statuses", "includedStatuses");
-		grid.addBooleanColumn(CKanbanColumn::getDefaultColumn, "Default", "Yes", "No");
+	public void configureGrid(final CGrid<CKanbanColumn> grid1) {
+		Check.notNull(grid1, "Grid cannot be null");
+		grid1.addIdColumn(CKanbanColumn::getId, "ID", "id");
+		grid1.addShortTextColumn(CKanbanColumn::getName, "Name", "name");
+		grid1.addShortTextColumn(this::formatIncludedStatuses, "Included Statuses", "includedStatuses");
+		grid1.addBooleanColumn(CKanbanColumn::getDefaultColumn, "Default", "Yes", "No");
 	}
 
 	@Override

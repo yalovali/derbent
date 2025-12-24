@@ -1,7 +1,5 @@
 package tech.derbent.api.ui.component.basic;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -15,7 +13,6 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 	private static final long serialVersionUID = 1L;
 	private final String accordionTitle;
 	private final VerticalLayout baseLayout = new VerticalLayout();
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Constructor for CAccordion.
 	 * @param title the title of the accordion panel */

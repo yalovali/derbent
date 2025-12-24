@@ -59,7 +59,7 @@ public interface IAbstractRepository<EntityClass extends CEntityDB<EntityClass>>
 ```java
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
     protected final Clock clock;
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     protected final IAbstractRepository<EntityClass> repository;
     protected @Nullable ISessionService sessionService;
 }

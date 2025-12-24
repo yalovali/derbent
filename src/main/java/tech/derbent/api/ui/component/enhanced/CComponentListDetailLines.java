@@ -1,9 +1,9 @@
 package tech.derbent.api.ui.component.enhanced;
 
-import tech.derbent.api.utils.Check;
-
 import java.util.List;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.domain.CDetailLines;
@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.view.CDialogDetailLinesEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 
 /** CComponentListDetailLines - Component for managing CDetailLines in a CDetailSection. Provides full CRUD functionality for screen field definitions
  * with ordering.
@@ -29,6 +30,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
  */
 public class CComponentListDetailLines extends CComponentListEntityBase<CDetailSection, CDetailLines> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListDetailLines.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Constructor for CComponentListDetailLines.
@@ -42,16 +44,16 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 	}
 
 	@Override
-	public void configureGrid(final CGrid<CDetailLines> grid) {
-		Check.notNull(grid, "Grid cannot be null");
+	public void configureGrid(final CGrid<CDetailLines> grid1) {
+		Check.notNull(grid1, "Grid cannot be null");
 		LOGGER.debug("Configuring grid columns for CDetailLines");
 		// Use CGrid helper methods for consistent column creation
-		grid.addIdColumn(CDetailLines::getId, "ID", "id");
-		grid.addIntegerColumn(CDetailLines::getItemOrder, "Order", "order");
-		grid.addShortTextColumn(CDetailLines::getFieldCaption, "Caption", "caption");
-		grid.addShortTextColumn(CDetailLines::getEntityProperty, "Field Name", "fieldName");
-		grid.addBooleanColumn(CDetailLines::getIsRequired, "Required", "Yes", "No");
-		grid.addBooleanColumn(CDetailLines::getActive, "Status", "Active", "Inactive");
+		grid1.addIdColumn(CDetailLines::getId, "ID", "id");
+		grid1.addIntegerColumn(CDetailLines::getItemOrder, "Order", "order");
+		grid1.addShortTextColumn(CDetailLines::getFieldCaption, "Caption", "caption");
+		grid1.addShortTextColumn(CDetailLines::getEntityProperty, "Field Name", "fieldName");
+		grid1.addBooleanColumn(CDetailLines::getIsRequired, "Required", "Yes", "No");
+		grid1.addBooleanColumn(CDetailLines::getActive, "Status", "Active", "Inactive");
 	}
 
 	@Override
