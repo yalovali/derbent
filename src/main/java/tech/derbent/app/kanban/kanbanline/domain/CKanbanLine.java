@@ -31,7 +31,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 			displayName = "Kanban Board", required = true, readOnly = false, description = "Kanban Board", hidden = false,
 			createComponentMethod = "createKanbanBoardComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final Boolean kanbanBoard = Boolean.TRUE;
+	private final CKanbanLine kanbanBoard = null;
 	@OneToMany (mappedBy = "kanbanLine", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@OrderBy ("itemOrder ASC")
 	@AMetaData (
@@ -60,6 +60,8 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		kanbanColumns.add(column);
 		updateLastModified();
 	}
+
+	public CKanbanLine getKanbanBoard() { return this; }
 
 	public Set<CKanbanColumn> getKanbanColumns() { return kanbanColumns; }
 

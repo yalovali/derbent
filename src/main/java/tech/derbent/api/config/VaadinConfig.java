@@ -18,7 +18,7 @@ public class VaadinConfig {
 
 	@PostConstruct
 	public static void configureAtmosphere() {
-		LOGGER.info("Configuring Atmosphere system properties to prevent WebSocket initialization issues...");
+		// LOGGER.info("Configuring Atmosphere system properties to prevent WebSocket initialization issues...");
 		// Disable Atmosphere's JSR356 WebSocket support to prevent initialization errors
 		System.setProperty("org.atmosphere.container.JSR356AsyncSupport.force", "false");
 		System.setProperty("org.atmosphere.cpr.broadcaster.maxProcessingThreads", "1");

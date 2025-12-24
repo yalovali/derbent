@@ -26,12 +26,16 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		super(pageEntity, sessionService, detailSectionService);
 		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());
 		initializePage();
-		if (entity != null) {
-			setValue(entity);
-		} else {
+		if (entity == null) {
+			// call locateFirstEntity only if entity is null
 			locateFirstEntity();
+			// setValue(getCurrentBinder().getBean());
+			// getBinder().readBean(getValue());
+		} else {
+			setValue(entity);
+			// do we need it? binded ihasvalueandelement implementers already binded with binder
+			populateForm();
 		}
-		populateForm();
 	}
 
 	/** Create the main page content area.
@@ -105,6 +109,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 	}
 
 	void locateFirstEntity() throws Exception {
+		LOGGER.debug("Locating first entity for dynamic page view without grid");
 		// this method is called in the constructor,
 		Check.notNull(entityService, "Entity service is not initialized");
 		// it triggers entityservice to load entity

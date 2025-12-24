@@ -420,7 +420,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for custom component creation");
 			Check.notNull(fieldInfo.getCreateComponentMethod(), "CreateComponentMethod for custom component creation");
-			Check.notNull(binder, "Binder for custom component creation");
+			// binder may be null in some call paths, but when provided we should attempt to bind the custom component
 			// Object bean = dataProviderResolver.resolveBean(fieldInfo.getDataProviderBean(), contentOwner);
 			// use first method only
 			final String methodName = fieldInfo.getCreateComponentMethod();
@@ -430,6 +430,22 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final Component component = dataProviderResolver.resolveDataComponent(contentOwner, fieldInfo);
 			fieldInfo.setDataProviderMethod(oldBeanMethod); // orijinal method adına geri dön
 			Check.notNull(component, "Custom component created by method " + methodName + " for field " + fieldInfo.getFieldName());
+			// Set id for better test automation (consistent with other creators)
+			CAuxillaries.setId(component);
+			// Attempt to bind if component exposes HasValueAndElement (bindable)
+			if (binder != null) {
+				if (component instanceof HasValueAndElement) {
+					final HasValueAndElement<?, ?> bindable = (HasValueAndElement<?, ?>) component;
+					safeBindComponent(binder, bindable, fieldInfo.getFieldName(), "CustomComponent");
+				} else if (component instanceof IContentOwner) {
+					// If the custom component is a content owner, let it receive the entity value via setValue when populating
+					LOGGER.debug("Custom component for field '{}' is an IContentOwner and will not be auto-bound by binder",
+							fieldInfo.getFieldName());
+				} else {
+					LOGGER.debug("Custom component for field '{}' is not bindable (no HasValueAndElement) - skipping binder binding",
+							fieldInfo.getFieldName());
+				}
+			}
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating custom component for field {}: {}", fieldInfo.getFieldName(), e.getMessage());
