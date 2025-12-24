@@ -88,6 +88,8 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 		// Override in subclasses to update UI when value changes, LET IT EMPTY
 	}
 
+	protected abstract void refreshComponent();
+
 	@Override
 	public void setReadOnly(final boolean readOnly) { this.readOnly = readOnly; }
 

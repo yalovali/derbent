@@ -105,7 +105,9 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 	}
 
 	void locateFirstEntity() throws Exception {
+		// this method is called in the constructor,
 		Check.notNull(entityService, "Entity service is not initialized");
+		// it triggers entityservice to load entity
 		entityService.findAll().stream().findFirst().ifPresent(this::setValue);
 	}
 

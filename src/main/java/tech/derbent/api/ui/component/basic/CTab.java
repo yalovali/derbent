@@ -1,21 +1,22 @@
 package tech.derbent.api.ui.component.basic;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
 import tech.derbent.api.ui.component.IFormContainerComponent;
 
 /** CAccordion - Enhanced base class for accordion components. Layer: View (MVC) Provides common accordion functionality with standardized styling and
  * behavior. */
-public class CTab extends Accordion implements IFormContainerComponent {
+public class CTab extends Tab implements IFormContainerComponent {
 
 	private static final long serialVersionUID = 1L;
-	private final String accordionTitle;
-	private final VerticalLayout baseLayout = new VerticalLayout();
+	private final CVerticalLayout baseLayout = new CVerticalLayout();
+	private final String thTitle;
 
 	public CTab(final String title) {
 		super();
-		accordionTitle = title;
+		thTitle = title;
+		add(baseLayout);
 		initializeComponent();
 	}
 
@@ -27,27 +28,19 @@ public class CTab extends Accordion implements IFormContainerComponent {
 		baseLayout.removeAll();
 	}
 
-	public void closePanel() {
-		close();
-	}
-
-	public String getAccordionTitle() { return accordionTitle; }
+	public String getAccordionTitle() { return thTitle; }
 
 	@Override
 	public VerticalLayout getBaseLayout() { return baseLayout; }
 
 	private void initializeComponent() {
-		add(accordionTitle, baseLayout);
-		addClassName("c-accordion");
-		setSizeFull();
+		// add(accordionTitle, baseLayout);
+		// addClassName("c-accordion");
+		// setSizeFull();
 		baseLayout.setWidthFull();
 		baseLayout.setPadding(false);
 		baseLayout.setMargin(false);
-		baseLayout.setClassName("c-accordion-content-layout");
-	}
-
-	public void openPanel() {
-		open(0);
+		// baseLayout.setClassName("c-accordion-content-layout");
 	}
 
 	public void removeAllFromContent() {

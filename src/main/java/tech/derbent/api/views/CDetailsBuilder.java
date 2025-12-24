@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.PersistenceUtil;
@@ -68,6 +69,9 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			formLayout = detailsLayout;
 		} else {
 			formLayout = new FormLayout();
+		}
+		if (formLayout instanceof HasStyle) {
+			((HasStyle) formLayout).addClassName("cdetailsbuilder-form-layout");
 		}
 		final CDetailSectionService screenService = applicationContext.getBean(CDetailSectionService.class);
 		Check.notNull(screenService, "Screen service cannot be null");

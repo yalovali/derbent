@@ -34,7 +34,7 @@ public class CPageTestAuxillaryService {
 	final List<RouteEntry> routes = new ArrayList<RouteEntry>();
 
 	public CPageTestAuxillaryService() {
-		LOGGER.debug("CPageTestAuxillaryService initialized");
+		// LOGGER.debug("CPageTestAuxillaryService initialized");
 		// Add static test pages that don't appear in the main menu
 		addStaticTestRoutes();
 	}

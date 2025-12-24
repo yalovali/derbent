@@ -17,8 +17,9 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
 /** CWorkflowEntityInitializerService - Initializer service for workflow entity screens. Layer: Service (MVC) Provides screen and grid configurations
  * for workflow entity management. */
 public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CWorkflowEntity.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityInitializerService.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".21";
 	private static final String menuTitle = MenuTitle_PROJECT + ".Workflows";
 	private static final String pageDescription = "Workflow management for projects";

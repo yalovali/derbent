@@ -178,5 +178,9 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 		} else {
 			currentEntityType = entity.getClass();
 		}
+		// shall we call currentBinder.readBean(entity) here?
+		if (currentBinder != null && entity != null) {
+			currentBinder.readBean(entity);
+		}
 	}
 }

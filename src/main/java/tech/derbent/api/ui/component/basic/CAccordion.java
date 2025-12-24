@@ -21,7 +21,6 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 		accordionTitle = title;
 		addClassName("c-accordion");
 		add(title, baseLayout);
-		// baseLayout.setWidthFull();
 		baseLayout.setClassName("c-accordion-content-layout");
 	}
 

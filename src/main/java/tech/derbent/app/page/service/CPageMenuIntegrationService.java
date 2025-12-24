@@ -73,7 +73,7 @@ public class CPageMenuIntegrationService {
 		Check.notNull(sessionService, "CSessionService cannot be null");
 		this.pageEntityService = pageEntityService;
 		this.sessionService = sessionService;
-		LOGGER.info("CPageMenuIntegrationService initialized");
+		// LOGGER.info("CPageMenuIntegrationService initialized");
 	}
 
 	/** Get menu entries for database-defined pages for the current project. These entries can be added to the existing menu system. */

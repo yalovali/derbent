@@ -33,6 +33,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		setPadding(true);
 		setSpacing(true);
 		setWidth("280px");
+		setMinHeight("500px");
 		setHeightFull();
 		getStyle().set("background-color", "#F5F5F5").set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
 		headerLayout = new CHorizontalLayout();
@@ -57,6 +58,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 	}
 
 	private List<CProjectItem<?>> filterItems(final List<CProjectItem<?>> items) {
+		LOGGER.debug("Filtering items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		if (items == null || items.isEmpty()) {
 			return List.of();
 		}
@@ -86,6 +88,11 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		refreshItems();
 	}
 
+	@Override
+	protected void refreshComponent() {
+		// TODO Auto-generated method stub
+	}
+
 	private void refreshHeader() {
 		final CKanbanColumn column = getValue();
 		title.setText(column != null ? column.getName() : "");
@@ -100,13 +107,15 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 	}
 
 	private void refreshItems() {
+		LOGGER.debug("Refreshing items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		itemsLayout.removeAll();
 		for (final CProjectItem<?> item : filterItems(projectItems)) {
-			itemsLayout.add(new CComponentPostit(item));
+			itemsLayout.add(new CComponentKanbanPostit(item));
 		}
 	}
 
 	private void refreshStatuses() {
+		LOGGER.debug("Refreshing statuses label for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		final CKanbanColumn column = getValue();
 		if (column == null || column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
 			statusesLabel.setText("");
@@ -118,6 +127,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 	}
 
 	public void setItems(final List<CProjectItem<?>> items) {
+		LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		projectItems = items == null ? List.of() : List.copyOf(items);
 		refreshItems();
 	}

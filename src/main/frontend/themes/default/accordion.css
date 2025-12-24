@@ -16,6 +16,16 @@ vaadin-accordion {
     gap: 0 !important;
 }
 
+vaadin-tab {
+	/* this makes the tab expand! otherwise it won't take the full height */
+	/* background-color: #319800; */
+	margin: 0 !important;
+    padding: 0 !important;
+	height: 100%;
+	width:100%;
+}
+
+
 .c-accordion {
     margin: 0px;
     padding: 0px;
@@ -40,3 +50,16 @@ vaadin-accordion {
 	height: 100%;
 	width:100%;
 }
+.cdetailsbuilder-form-layout{
+    /*background-color:green;*/
+    margin: 0px;
+    padding: 0;
+    gap: 0 !important;
+    height: 100%;
+    width:100%;
+	align-items: stretch;
+
+}
+
+
+

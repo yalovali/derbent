@@ -1,6 +1,5 @@
 package tech.derbent.api.ui.component.basic;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 
@@ -24,18 +23,6 @@ public class CVerticalLayout extends VerticalLayout {
 		setPadding(padding);
 		setSpacing(spacing);
 		setMargin(margin);
-	}
-
-	/** Constructor with components. */
-	public CVerticalLayout(final Component... components) {
-		this();
-		add(components);
-	}
-
-	/** Constructor with CSS class name. */
-	public CVerticalLayout(final String style) {
-		this();
-		addClassName(style);
 	}
 
 	protected void initializeComponent() {

@@ -7,11 +7,11 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 
 /** CComponentPostit - A compact post-it style widget for displaying project items inside kanban columns. */
-public class CComponentPostit extends CComponentWidgetEntity<CProjectItem<?>> {
+public class CComponentKanbanPostit extends CComponentWidgetEntity<CProjectItem<?>> {
 
 	private static final long serialVersionUID = 1L;
 
-	public CComponentPostit(final CProjectItem<?> item) {
+	public CComponentKanbanPostit(final CProjectItem<?> item) {
 		super(item);
 		Check.notNull(item, "Project item cannot be null for postit");
 		getStyle().set("background-color", "#FFFDE7").set("border-radius", "8px").set("padding", "10px")

@@ -41,13 +41,13 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		return entityClass.isAssignableFrom(item.getClass());
 	}
 
-	protected SplitLayout splitLayout = new SplitLayout();
 	private List<CProjectItem<?>> allProjectItems;
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
 	private final CHorizontalLayout layoutColumns;
+	final CVerticalLayout layoutDetails = new CVerticalLayout();
 	private List<CProjectItem<?>> projectItems;
 	private final ISessionService sessionService;
-	final CVerticalLayout layoutDetails = new CVerticalLayout();
+	protected SplitLayout splitLayout = new SplitLayout();
 
 	public CComponentKanbanBoard() {
 		LOGGER.debug("Initializing Kanban board component");
@@ -68,7 +68,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		splitLayout.addToPrimary(layoutColumns);
 		splitLayout.addToSecondary(layoutDetails);
+		// splitLayout.setFlexGrow(1, layoutColumns);
 		add(filterToolbar, splitLayout);
+		expand(splitLayout);
 	}
 
 	private void applyFilters() {
@@ -146,6 +148,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		refreshComponent();
 	}
 
+	@Override
 	public void refreshComponent() {
 		LOGGER.debug("Refreshing Kanban board component");
 		layoutColumns.removeAll();
@@ -177,17 +180,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	}
 
 	@Override
-	public void setValue(final CEntityDB<?> entity) {
-		LOGGER.debug("Setting current entity for Kanban board component");
-		if (entity == null) {
-			setValue(null);
-			return;
-		}
-		Check.instanceOf(entity, CKanbanLine.class, "Kanban board expects CKanbanLine as current entity");
-		if (entity.equals(getValue())) {
-			LOGGER.debug("New entity is the same as current value; no action taken");
-			return;
-		}
-		setValue((CKanbanLine) entity);
+	public void setValue(CEntityDB<?> entity) {
+		// TODO Auto-generated method stub
 	}
 }

@@ -28,6 +28,7 @@ public class CPanelDetails extends CDiv {
 
 	public CPanelDetails(final String name, final String title, final CUser user) {
 		super();
+		setSizeFull();
 		addClassName("cpaneldetails");
 		// set height minimum?
 		// setHeightUndefined();
