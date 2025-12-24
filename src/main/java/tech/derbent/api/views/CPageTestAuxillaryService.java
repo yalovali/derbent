@@ -10,7 +10,9 @@ import tech.derbent.api.utils.Check;
 
 @Service
 public class CPageTestAuxillaryService {
+
 	public class RouteEntry {
+
 		public String iconColor;
 		final public String iconName;
 		final public String route;
@@ -37,14 +39,6 @@ public class CPageTestAuxillaryService {
 		addStaticTestRoutes();
 	}
 
-	/** Add static test pages that are available but not in the main menu. These pages are specifically created for testing purposes. 
-	 * This method is public so it can be called after clearing routes to re-add static test pages. */
-	public void addStaticTestRoutes() {
-		// Add User Icon Test page
-		addRoute("User Icon Test", "vaadin:user", "#6B5FA7", "user-icon-test");
-		LOGGER.debug("Added static test routes");
-	}
-
 	/** Add a route entry to the service. This method is idempotent — it will not add duplicate entries (same title + route) if called multiple times.
 	 * It also normalizes "dynamic." prefixes into the internal dynamic route format.
 	 * @param iconColor */
@@ -59,6 +53,14 @@ public class CPageTestAuxillaryService {
 			resolvedRoute = route;
 		}
 		routes.add(new RouteEntry(title, iconName, iconColor, resolvedRoute));
+	}
+
+	/** Add static test pages that are available but not in the main menu. These pages are specifically created for testing purposes. This method is
+	 * public so it can be called after clearing routes to re-add static test pages. */
+	public void addStaticTestRoutes() {
+		// Add User Icon Test page
+		addRoute("User Icon Test", "vaadin:user", "#6B5FA7", "user-icon-test");
+		// LOGGER.debug("Added static test routes");
 	}
 
 	public synchronized void clearRoutes() {

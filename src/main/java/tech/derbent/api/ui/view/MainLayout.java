@@ -344,7 +344,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 				imageResource.setContentType("image/jpeg");
 				// Set the image resource to the avatar
 				avatar.setImageResource(imageResource);
-				LOGGER.debug("Set avatar image from user profile picture data for user: {}", user.getLogin());
+				// LOGGER.debug("Set avatar image from user profile picture data for user: {}", user.getLogin());
 				return;
 			} catch (final Exception e) {
 				LOGGER.warn("Error creating StreamResource from profile picture: {}", e.getMessage());
@@ -355,7 +355,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	}
 
 	private void setSessionUserFromContext() {
-		LOGGER.info("Setting session user from authentication context");
+		// LOGGER.info("Setting session user from authentication context");
 		Check.notNull(currentUser, "No authenticated user found in security context");
 		Check.notNull(currentUser.getUsername(), "Authenticated user must have a username");
 		Check.notNull(sessionService, "Session service cannot be null");

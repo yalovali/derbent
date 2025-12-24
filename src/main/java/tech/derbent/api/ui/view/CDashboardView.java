@@ -78,7 +78,7 @@ public final class CDashboardView extends CAbstractPage {
 
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
-		LOGGER.debug("BeforeEnter event for CDashboardView");
+		// LOGGER.debug("BeforeEnter event for CDashboardView");
 		// No specific navigation logic needed for the dashboard
 	}
 
@@ -140,7 +140,7 @@ public final class CDashboardView extends CAbstractPage {
 	 * complete. */
 	@PostConstruct
 	private void postConstruct() {
-		LOGGER.info("PostConstruct - loading dashboard data");
+		// LOGGER.info("PostConstruct - loading dashboard data");
 		// Load data after all dependencies are properly injected
 		refreshDashboardData();
 	}
@@ -194,7 +194,7 @@ public final class CDashboardView extends CAbstractPage {
 	/** Updates the project details section with per-project metrics.
 	 * @param projectMetrics map of project names to their metrics */
 	private void updateProjectDetails(final Map<String, Map<String, Long>> projectMetrics) {
-		LOGGER.debug("Updating project details for {} projects", projectMetrics.size());
+		// LOGGER.debug("Updating project details for {} projects", projectMetrics.size());
 		// Clear existing project details (keep the title)
 		if (projectDetailsLayout.getComponentCount() > 1) {
 			projectDetailsLayout.removeAll();

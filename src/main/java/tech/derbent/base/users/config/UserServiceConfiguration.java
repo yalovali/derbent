@@ -1,8 +1,8 @@
 package tech.derbent.base.users.config;
 
-import org.springframework.context.annotation.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.service.CUserService;
@@ -23,6 +23,6 @@ public class UserServiceConfiguration {
 	@PostConstruct
 	public void configureServices() {
 		userService.setSessionService(sessionService);
-		LOGGER.info("UserServiceConfiguration: Successfully configured CUserService with CSessionService");
+		// LOGGER.info("UserServiceConfiguration: Successfully configured CUserService with CSessionService");
 	}
 }

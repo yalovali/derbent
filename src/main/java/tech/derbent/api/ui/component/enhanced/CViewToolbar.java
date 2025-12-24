@@ -460,7 +460,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 
 	/** Refreshes the project list in the ComboBox. */
 	public void refreshProjectList() {
-		LOGGER.debug("Refreshing project list in toolbar ComboBox");
+		// LOGGER.debug("Refreshing project list in toolbar ComboBox");
 		Check.notNull(sessionService, "SessionService must not be null to refresh project list");
 		Check.notNull(projectComboBox, "Project ComboBox must not be null to refresh project list");
 		try {

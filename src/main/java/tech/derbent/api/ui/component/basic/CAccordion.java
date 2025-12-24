@@ -24,9 +24,7 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 		accordionTitle = title;
 		addClassName("c-accordion");
 		add(title, baseLayout);
-		baseLayout.setWidthFull();
-		baseLayout.setPadding(false);
-		baseLayout.setMargin(false);
+		// baseLayout.setWidthFull();
 		baseLayout.setClassName("c-accordion-content-layout");
 	}
 
@@ -34,11 +32,6 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 	 * @param components the components to add */
 	public void addToContent(final Component... components) {
 		baseLayout.add(components);
-	}
-
-	/** Convenience method to remove all components from the base layout. */
-	public void clearContent() {
-		baseLayout.removeAll();
 	}
 
 	/** Convenience method to close this accordion panel. */
@@ -66,11 +59,5 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 
 	public void removeAllFromContent() {
 		baseLayout.removeAll();
-	}
-
-	/** Convenience method to set spacing for the base layout.
-	 * @param spacing whether to enable spacing */
-	public void setContentSpacing(final boolean spacing) {
-		baseLayout.setSpacing(spacing);
 	}
 }

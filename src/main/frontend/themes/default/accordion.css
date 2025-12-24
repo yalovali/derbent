@@ -19,12 +19,24 @@ vaadin-accordion {
 .c-accordion {
     margin: 0px;
     padding: 0px;
-/*	width: 50%; */	 
+	height: 100%;
+	width:100%;
+}
+
+.cpaneldetails {
+    /*background-color:yellow;*/
+    margin: 0px;
+    padding: 0;
+    gap: 0 !important;
+    height: 100%;
+    width:100%;
 }
 
 .c-accordion-content-layout{
 	/*background-color:green;*/
-	margin: 10px;
+	margin: 0px;
 	padding: 0;
 	gap: 0 !important;
+	height: 100%;
+	width:100%;
 }

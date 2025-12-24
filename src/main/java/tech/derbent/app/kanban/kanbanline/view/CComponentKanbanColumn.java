@@ -33,6 +33,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		setPadding(true);
 		setSpacing(true);
 		setWidth("280px");
+		setHeightFull();
 		getStyle().set("background-color", "#F5F5F5").set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
 		headerLayout = new CHorizontalLayout();
 		headerLayout.setWidthFull();

@@ -73,7 +73,7 @@ public class VaadinConfig {
 				Files.createDirectories(jarResourcesPath);
 				LOGGER.info("Created jar-resources directory: {}", jarResourcesPath);
 			}
-			LOGGER.debug("Frontend directory structure verified at: {}", frontendPath);
+			// LOGGER.debug("Frontend directory structure verified at: {}", frontendPath);
 		} catch (final Exception e) {
 			LOGGER.warn("Could not create frontend directories (this is not critical): {}", e.getMessage());
 		}

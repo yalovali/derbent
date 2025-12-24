@@ -20,11 +20,11 @@ public class CAuthenticationEntryPoint implements AuthenticationEntryPoint {
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
 			throws IOException, ServletException {
-		LOGGER.debug("Authentication required, saving requested URL and redirecting to login");
+		// LOGGER.debug("Authentication required, saving requested URL and redirecting to login");
 		// Save the originally requested URL using our success handler utility
 		CAuthenticationSuccessHandler.saveRequestedUrl(request);
 		// Redirect to login page
-		String loginUrl = request.getContextPath() + "/login";
+		final String loginUrl = request.getContextPath() + "/login";
 		response.sendRedirect(loginUrl);
 	}
 }

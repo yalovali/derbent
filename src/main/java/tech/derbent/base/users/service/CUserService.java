@@ -288,7 +288,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	// overloaded for spring security
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		try {
-			LOGGER.debug("Attempting to load user by username: {}", username);
+			// LOGGER.debug("Attempting to load user by username: {}", username);
 			// username syntax is username@company_id
 			// split login and company id
 			final String[] parts = username.split("@");

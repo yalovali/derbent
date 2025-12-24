@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -12,6 +13,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
@@ -39,11 +41,13 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		return entityClass.isAssignableFrom(item.getClass());
 	}
 
+	protected SplitLayout splitLayout = new SplitLayout();
 	private List<CProjectItem<?>> allProjectItems;
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
 	private final CHorizontalLayout layoutColumns;
 	private List<CProjectItem<?>> projectItems;
 	private final ISessionService sessionService;
+	final CVerticalLayout layoutDetails = new CVerticalLayout();
 
 	public CComponentKanbanBoard() {
 		LOGGER.debug("Initializing Kanban board component");
@@ -52,14 +56,19 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		allProjectItems = new ArrayList<>();
 		projectItems = new ArrayList<>();
 		layoutColumns = new CHorizontalLayout();
-		layoutColumns.setWidthFull();
+		layoutColumns.setSizeFull();
 		layoutColumns.setSpacing(true);
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
 		filterToolbar.addKanbanFilterChangeListener(criteria -> applyFilters());
-		setWidthFull();
+		setSizeFull();
 		setPadding(true);
 		setSpacing(true);
-		add(filterToolbar, layoutColumns);
+		add(splitLayout);
+		splitLayout.setSizeFull();
+		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+		splitLayout.addToPrimary(layoutColumns);
+		splitLayout.addToSecondary(layoutDetails);
+		add(filterToolbar, splitLayout);
 	}
 
 	private void applyFilters() {
@@ -119,6 +128,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		return true;
 	}
 
+	private void on_postit_selected() {
+		layoutDetails.removeAll();
+		// TODO populate details layout with selected post-it details
+		layoutDetails.add(new CDiv("Post-it details go here"));
+	}
+
 	@Override
 	protected void onValueChanged(final CKanbanLine oldValue, final CKanbanLine newValue, final boolean fromClient) {
 		LOGGER.debug("Kanban board value changed from {} to {}", oldValue, newValue);
@@ -149,6 +164,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 			columnComponent.setItems(projectItems);
 			layoutColumns.add(columnComponent);
 		}
+		on_postit_selected();
 	}
 
 	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
