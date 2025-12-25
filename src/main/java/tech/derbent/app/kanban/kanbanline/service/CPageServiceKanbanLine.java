@@ -13,10 +13,10 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceKanbanLine.class);
+	private CComponentKanbanBoard componentKanbanBoard;
 	private CComponentListKanbanColumns componentKanbanColumns;
 	private CKanbanColumnService kanbanColumnService;
 	private CKanbanLineService kanbanLineService;
-	private CComponentKanbanBoard componentKanbanBoard;
 
 	public CPageServiceKanbanLine(final IPageServiceImplementer<CKanbanLine> view) {
 		super(view);
@@ -49,7 +49,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			componentKanbanBoard = new CComponentKanbanBoard();
 		}
 		// this is always null here, no problem
-		componentKanbanBoard.setValue(currentLine);
+		// componentKanbanBoard.setValue(currentLine); let the binder handle this
 		return componentKanbanBoard;
 	}
 

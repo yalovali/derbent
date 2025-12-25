@@ -181,6 +181,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 
 	@Override
 	public void setValue(CEntityDB<?> entity) {
-		// TODO Auto-generated method stub
+		super.setValue((CKanbanLine) entity);
 	}
 }

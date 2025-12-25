@@ -113,7 +113,8 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		// this method is called in the constructor,
 		Check.notNull(entityService, "Entity service is not initialized");
 		// it triggers entityservice to load entity
-		entityService.findAll().stream().findFirst().ifPresent(this::setValue);
+		// entityService.findAll().stream().findFirst().ifPresent(this::setValue);
+		entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
 	}
 
 	@Override
