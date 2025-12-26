@@ -61,6 +61,8 @@ import tech.derbent.app.deliverables.deliverable.service.CDeliverableInitializer
 import tech.derbent.app.deliverables.deliverable.service.CDeliverableService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
+import tech.derbent.app.gannt.ganntitem.service.CGanntItemInitializerService;
+import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityInitializerService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanColumnInitializerService;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineInitializerService;
@@ -1047,16 +1049,18 @@ public class CDataInitializer {
 					CDecisionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMeetingTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CWorkflowStatusRelationInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					// CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CWorkflowStatusRelationInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CGanntItemInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        // CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+                                        CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* SAMPLES **************************/
 					// Project-specific type and configuration entities
 					CCurrencyInitializerService.initializeSample(project, minimal);
@@ -1073,11 +1077,13 @@ public class CDataInitializer {
 					CDeliverableTypeInitializerService.initializeSample(project, minimal);
 					CMilestoneTypeInitializerService.initializeSample(project, minimal);
 					CTicketTypeInitializerService.initializeSample(project, minimal);
-					CProviderTypeInitializerService.initializeSample(project, minimal);
-					CProductTypeInitializerService.initializeSample(project, minimal);
-					CProjectComponentTypeInitializerService.initializeSample(project, minimal);
-					CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
-					CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
+                                        CProviderTypeInitializerService.initializeSample(project, minimal);
+                                        CProductTypeInitializerService.initializeSample(project, minimal);
+                                        CProjectComponentTypeInitializerService.initializeSample(project, minimal);
+                                        CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
+                                        CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
+                                        CGanntViewEntityInitializerService.initializeSample(project, minimal);
+                                        CGanntItemInitializerService.initializeSample(project, minimal);
 					CActivityPriorityInitializerService.initializeSample(project, minimal);
 					CCommentPriorityInitializerService.initializeSample(project, minimal);
 					CSprintTypeInitializerService.initializeSample(project, minimal);

@@ -3,6 +3,8 @@ package tech.derbent.app.kanban.kanbanline.view;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -18,6 +20,9 @@ import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
+import tech.derbent.app.sprints.domain.CSprint;
+import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -41,22 +46,25 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		return entityClass.isAssignableFrom(item.getClass());
 	}
 
-	private List<CProjectItem<?>> allProjectItems;
-	private final CComponentKanbanBoardFilterToolbar filterToolbar;
-	private final CHorizontalLayout layoutColumns;
-	final CVerticalLayout layoutDetails = new CVerticalLayout();
-	private List<CProjectItem<?>> projectItems;
-	private final ISessionService sessionService;
-	protected SplitLayout splitLayout = new SplitLayout();
+        private List<CProjectItem<?>> allProjectItems;
+        private final CComponentKanbanBoardFilterToolbar filterToolbar;
+        private final CHorizontalLayout layoutColumns;
+        final CVerticalLayout layoutDetails = new CVerticalLayout();
+        private List<CProjectItem<?>> projectItems;
+        private final CSprintItemService sprintItemService;
+        private final ISessionService sessionService;
+        protected SplitLayout splitLayout = new SplitLayout();
 
-	public CComponentKanbanBoard() {
-		LOGGER.debug("Initializing Kanban board component");
-		sessionService = CSpringContext.getBean(ISessionService.class);
-		Check.notNull(sessionService, "Session service cannot be null for Kanban board");
-		allProjectItems = new ArrayList<>();
-		projectItems = new ArrayList<>();
-		layoutColumns = new CHorizontalLayout();
-		layoutColumns.setSizeFull();
+        public CComponentKanbanBoard() {
+                LOGGER.debug("Initializing Kanban board component");
+                sessionService = CSpringContext.getBean(ISessionService.class);
+                sprintItemService = CSpringContext.getBean(CSprintItemService.class);
+                Check.notNull(sessionService, "Session service cannot be null for Kanban board");
+                Check.notNull(sprintItemService, "Sprint item service cannot be null for Kanban board");
+                allProjectItems = new ArrayList<>();
+                projectItems = new ArrayList<>();
+                layoutColumns = new CHorizontalLayout();
+                layoutColumns.setSizeFull();
 		layoutColumns.setSpacing(true);
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
 		filterToolbar.addKanbanFilterChangeListener(criteria -> applyFilters());
@@ -138,11 +146,16 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		layoutDetails.add(new CDiv("Post-it details go here"));
 	}
 
-	@Override
-	protected void onValueChanged(final CKanbanLine oldValue, final CKanbanLine newValue, final boolean fromClient) {
-		LOGGER.debug("Kanban board value changed from {} to {}", oldValue, newValue);
-		refreshComponent();
-	}
+        @Override
+        protected void onValueChanged(final CKanbanLine oldValue, final CKanbanLine newValue, final boolean fromClient) {
+                LOGGER.debug("Kanban board value changed from {} to {}", oldValue, newValue);
+                if (newValue == null) {
+                        layoutColumns.removeAll();
+                        return;
+                }
+                loadSprintItemsForActiveProject();
+                applyFilters();
+        }
 
 	@Override
 	public void populateForm() {
@@ -150,10 +163,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		refreshComponent();
 	}
 
-	@Override
-	public void refreshComponent() {
-		LOGGER.debug("Refreshing Kanban board component");
-		layoutColumns.removeAll();
+        @Override
+        public void refreshComponent() {
+                LOGGER.debug("Refreshing Kanban board component");
+                layoutColumns.removeAll();
 		final CKanbanLine currentLine = getValue();
 		if (currentLine == null) {
 			// TODO create an empty loading div
@@ -163,26 +176,53 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		}
 		final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
 		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
-		for (final CKanbanColumn column : columns) {
-			final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
-			columnComponent.setValue(column);
-			columnComponent.setItems(projectItems);
-			layoutColumns.add(columnComponent);
-		}
-		on_postit_selected();
-	}
+                for (final CKanbanColumn column : columns) {
+                        final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
+                        columnComponent.setItems(projectItems);
+                        columnComponent.setValue(column);
+                        layoutColumns.add(columnComponent);
+                }
+                on_postit_selected();
+        }
 
-	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
-		LOGGER.debug("Setting project items for Kanban board component");
-		Check.notNull(getValue(), "Kanban line must be set before setting project items");
-		Check.notNull(projectItems, "Project items cannot be null for kanban board");
-		allProjectItems = new ArrayList<>(projectItems);
-		filterToolbar.setAvailableItems(allProjectItems);
-		applyFilters();
-	}
+        public void setProjectItems(final List<CProjectItem<?>> projectItems) {
+                LOGGER.debug("Setting project items for Kanban board component");
+                Check.notNull(getValue(), "Kanban line must be set before setting project items");
+                Check.notNull(projectItems, "Project items cannot be null for kanban board");
+                allProjectItems = new ArrayList<>(projectItems);
+                filterToolbar.setAvailableItems(allProjectItems);
+                applyFilters();
+        }
 
-	@Override
-	public void setValue(CEntityDB<?> entity) {
-		super.setValue((CKanbanLine) entity);
-	}
+        @Override
+        public void setValue(CEntityDB<?> entity) {
+                super.setValue((CKanbanLine) entity);
+        }
+
+        private void loadSprintItemsForActiveProject() {
+                if (getValue() == null) {
+                        return;
+                }
+                final CSprint activeSprint = sessionService.getActiveProject().flatMap(project -> {
+                        try {
+                                final List<CSprint> sprints = sprintItemService.findAll().stream().map(CSprintItem::getSprint)
+                                                .filter(Objects::nonNull).filter(sprint -> project.equals(sprint.getProject()))
+                                                .distinct().collect(Collectors.toList());
+                                return sprints.stream().findFirst();
+                        } catch (final Exception e) {
+                                LOGGER.error("Failed to load sprint items for Kanban board", e);
+                                return null;
+                        }
+                }).orElse(null);
+                if (activeSprint == null) {
+                        LOGGER.debug("No active project sprint found for Kanban board; skipping sprint item load");
+                        return;
+                }
+                final List<CSprintItem> sprintItems = sprintItemService.findByMasterIdWithItems(activeSprint.getId());
+                final List<CProjectItem<?>> sprintProjectItems = sprintItems.stream().map(CSprintItem::getItem).filter(Objects::nonNull)
+                                .filter(CProjectItem.class::isInstance).map(item -> (CProjectItem<?>) item).collect(Collectors.toList());
+                allProjectItems = new ArrayList<>(sprintProjectItems);
+                filterToolbar.setAvailableItems(allProjectItems);
+                projectItems = new ArrayList<>(allProjectItems);
+        }
 }

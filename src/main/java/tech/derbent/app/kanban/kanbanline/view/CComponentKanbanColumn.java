@@ -106,13 +106,13 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		}
 	}
 
-	private void refreshItems() {
-		LOGGER.debug("Refreshing items for kanban column {}", getValue() != null ? getValue().getName() : "null");
-		itemsLayout.removeAll();
-		for (final CProjectItem<?> item : filterItems(projectItems)) {
-			itemsLayout.add(new CComponentKanbanPostit(item));
-		}
-	}
+        private void refreshItems() {
+                LOGGER.debug("Refreshing items for kanban column {}", getValue() != null ? getValue().getName() : "null");
+                itemsLayout.removeAll();
+                for (final CProjectItem<?> item : filterItems(projectItems)) {
+                        itemsLayout.add(new CComponentKanbanPostit(item));
+                }
+        }
 
 	private void refreshStatuses() {
 		LOGGER.debug("Refreshing statuses label for kanban column {}", getValue() != null ? getValue().getName() : "null");
@@ -126,9 +126,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		statusesLabel.setText(statuses);
 	}
 
-	public void setItems(final List<CProjectItem<?>> items) {
-		LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
-		projectItems = items == null ? List.of() : List.copyOf(items);
-		refreshItems();
-	}
+        public void setItems(final List<CProjectItem<?>> items) {
+                LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
+                projectItems = items == null ? List.of() : List.copyOf(items);
+        }
 }
