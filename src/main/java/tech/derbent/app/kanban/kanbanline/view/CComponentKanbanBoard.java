@@ -61,13 +61,15 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
 		filterToolbar.addKanbanFilterChangeListener(criteria -> applyFilters());
 		setSizeFull();
-		setPadding(true);
-		setSpacing(true);
+		setPadding(false);
+		setSpacing(false);
 		add(splitLayout);
 		splitLayout.setSizeFull();
+		splitLayout.getStyle().set("padding", "0px");
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		splitLayout.addToPrimary(layoutColumns);
 		splitLayout.addToSecondary(layoutDetails);
+		splitLayout.setSplitterPosition(70);
 		// splitLayout.setFlexGrow(1, layoutColumns);
 		add(filterToolbar, splitLayout);
 		expand(splitLayout);
