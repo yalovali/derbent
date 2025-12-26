@@ -125,6 +125,7 @@ import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.sprints.service.CSprintInitializerService;
+import tech.derbent.app.sprints.service.CSprintItemInitializerService;
 import tech.derbent.app.sprints.service.CSprintTypeInitializerService;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.app.teams.team.service.CTeamInitializerService;
@@ -1112,10 +1113,11 @@ public class CDataInitializer {
 					CProductInitializerService.initializeSample(project, minimal);
 					CProjectComponentInitializerService.initializeSample(project, minimal);
 					initializeSampleProjectExpenses(project, minimal);
-					initializeSampleProjectIncomes(project, minimal);
-					initializeSampleTeams(project, minimal);
-					CRiskInitializerService.initializeSample(project, minimal);
-					CSprintInitializerService.initializeSample(project, minimal);
+                                   initializeSampleProjectIncomes(project, minimal);
+                                   initializeSampleTeams(project, minimal);
+                                   CRiskInitializerService.initializeSample(project, minimal);
+                                   CSprintInitializerService.initializeSample(project, minimal);
+                                   CSprintItemInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CKanbanColumnInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {
