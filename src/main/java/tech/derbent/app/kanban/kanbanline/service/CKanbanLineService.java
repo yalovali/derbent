@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,6 +65,13 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		line.removeKanbanColumn(target);
 		normalizeKanbanColumnOrder(line);
 		save(line);
+	}
+
+	// override finddefault
+	@Override
+	public Optional<CKanbanLine> findDefault() {
+		// check the current project kanbanline,
+		// if empty return the first kanbanline of the current company
 	}
 
 	@Override

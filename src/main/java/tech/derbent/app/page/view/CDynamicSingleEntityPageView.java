@@ -66,7 +66,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 	@Override
 	protected void initializePage() throws Exception {
 		super.initializePage();
-		if ((getPageEntity().getPageTitle() != null) && !getPageEntity().getPageTitle().trim().isEmpty()) {
+		if (getPageEntity().getPageTitle() != null && !getPageEntity().getPageTitle().trim().isEmpty()) {
 			getElement().executeJs("document.title = $0", getPageEntity().getPageTitle());
 		}
 		createSingleEntityLayout();
@@ -85,6 +85,11 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 	}
 
 	@Override
+	protected void locateFirstEntity() throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	protected void locateItemById(Long pageItemId) {
 		try {
 			if (pageItemId == null) {
@@ -99,6 +104,11 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 			LOGGER.error("Error locating item by ID {}: {}", pageItemId, e.getMessage());
 			throw new IllegalStateException("Error locating item by ID " + pageItemId + ": " + e.getMessage());
 		}
+	}
+
+	@Override
+	protected void on_after_construct() {
+		// TODO Auto-generated method stub
 	}
 
 	@SuppressWarnings ("rawtypes")

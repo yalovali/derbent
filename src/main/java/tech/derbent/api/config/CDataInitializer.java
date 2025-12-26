@@ -61,7 +61,6 @@ import tech.derbent.app.deliverables.deliverable.service.CDeliverableInitializer
 import tech.derbent.app.deliverables.deliverable.service.CDeliverableService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
-import tech.derbent.app.gannt.ganntitem.service.CGanntItemInitializerService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityInitializerService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
@@ -266,6 +265,15 @@ public class CDataInitializer {
 	// PUBLIC API METHODS - Main entry points for initialization
 	// ========================================================================
 
+	private void assignDefaultKanbanLine(final CProject project) {
+		Check.notNull(project, "Project cannot be null when assigning kanban line");
+		final CCompany company = project.getCompany();
+		Check.notNull(company, "Company cannot be null when assigning kanban line to project");
+		final CKanbanLine defaultKanbanLine = kanbanLineService.getRandom(company);
+		project.setKanbanLine(defaultKanbanLine);
+		projectService.save(project);
+	}
+
 	@Transactional
 	private void clearSampleData() {
 		LOGGER.warn("Clearing sample data from database (forced)");
@@ -353,20 +361,11 @@ public class CDataInitializer {
 		projectService.save(project);
 	}
 
-        private void createProjectInfrastructureUpgrade(final CCompany company) {
-                final CProject project = new CProject("Infrastructure Upgrade Project", company);
-                project.setDescription("Upgrading IT infrastructure for improved performance and scalability");
-                projectService.save(project);
-        }
-
-        private void assignDefaultKanbanLine(final CProject project) {
-                Check.notNull(project, "Project cannot be null when assigning kanban line");
-                final CCompany company = project.getCompany();
-                Check.notNull(company, "Company cannot be null when assigning kanban line to project");
-                final CKanbanLine defaultKanbanLine = kanbanLineService.getRandom(company);
-                project.setKanbanLine(defaultKanbanLine);
-                projectService.save(project);
-        }
+	private void createProjectInfrastructureUpgrade(final CCompany company) {
+		final CProject project = new CProject("Infrastructure Upgrade Project", company);
+		project.setDescription("Upgrading IT infrastructure for improved performance and scalability");
+		projectService.save(project);
+	}
 
 	/** Create sample comments for a decision.
 	 * @param decision the decision to create comments for */
@@ -981,18 +980,18 @@ public class CDataInitializer {
 			}
 			/* create sample projects */
 			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
-                                initializeSampleCompanyRoles(company, minimal);
-                                createProjectDigitalTransformation(company);
-                                if (!minimal) {
-                                        createProjectInfrastructureUpgrade(company);
-                                }
-                                createUserForCompany(company);
-                                CKanbanLineInitializerService.initializeSample(company, minimal);
-                                if (minimal) {
-                                        break;
-                                }
-                                // createUserFor(company);
-                        }
+				initializeSampleCompanyRoles(company, minimal);
+				createProjectDigitalTransformation(company);
+				if (!minimal) {
+					createProjectInfrastructureUpgrade(company);
+				}
+				createUserForCompany(company);
+				CKanbanLineInitializerService.initializeSample(company, minimal);
+				if (minimal) {
+					break;
+				}
+				// createUserFor(company);
+			}
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
 			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
 				// sessionService.setActiveCompany(company);
@@ -1007,12 +1006,12 @@ public class CDataInitializer {
 				CApprovalStatusInitializerService.initializeSample(company, minimal);
 				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 				for (final CProject project : projects) {
-                                        LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),
-                                                        company.getName());
-                                        sessionService.setActiveProject(project);
-                                        assignDefaultKanbanLine(project);
-                                        CSystemSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        // Core system entities required for project operation
+					LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),
+							company.getName());
+					sessionService.setActiveProject(project);
+					assignDefaultKanbanLine(project);
+					CSystemSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					// Core system entities required for project operation
 					CActivityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CUserInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CCompanyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -1061,18 +1060,19 @@ public class CDataInitializer {
 					CDecisionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMeetingTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CWorkflowStatusRelationInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CGanntItemInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        // CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CWorkflowStatusRelationInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					/* THERE IS NO NEED TO INITIALIZE CGanntItem AGAIN HERE */
+					// CGanntItemInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					// CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* SAMPLES **************************/
 					// Project-specific type and configuration entities
 					CCurrencyInitializerService.initializeSample(project, minimal);
@@ -1089,13 +1089,14 @@ public class CDataInitializer {
 					CDeliverableTypeInitializerService.initializeSample(project, minimal);
 					CMilestoneTypeInitializerService.initializeSample(project, minimal);
 					CTicketTypeInitializerService.initializeSample(project, minimal);
-                                        CProviderTypeInitializerService.initializeSample(project, minimal);
-                                        CProductTypeInitializerService.initializeSample(project, minimal);
-                                        CProjectComponentTypeInitializerService.initializeSample(project, minimal);
-                                        CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
-                                        CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
-                                        CGanntViewEntityInitializerService.initializeSample(project, minimal);
-                                        CGanntItemInitializerService.initializeSample(project, minimal);
+					CProviderTypeInitializerService.initializeSample(project, minimal);
+					CProductTypeInitializerService.initializeSample(project, minimal);
+					CProjectComponentTypeInitializerService.initializeSample(project, minimal);
+					CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
+					CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
+					CGanntViewEntityInitializerService.initializeSample(project, minimal);
+					// No need to initialize CGanntItem sample separately
+					// CGanntItemInitializerService.initializeSample(project, minimal);
 					CActivityPriorityInitializerService.initializeSample(project, minimal);
 					CCommentPriorityInitializerService.initializeSample(project, minimal);
 					CSprintTypeInitializerService.initializeSample(project, minimal);
@@ -1113,11 +1114,11 @@ public class CDataInitializer {
 					CProductInitializerService.initializeSample(project, minimal);
 					CProjectComponentInitializerService.initializeSample(project, minimal);
 					initializeSampleProjectExpenses(project, minimal);
-                                   initializeSampleProjectIncomes(project, minimal);
-                                   initializeSampleTeams(project, minimal);
-                                   CRiskInitializerService.initializeSample(project, minimal);
-                                   CSprintInitializerService.initializeSample(project, minimal);
-                                   CSprintItemInitializerService.initializeSample(project, minimal);
+					initializeSampleProjectIncomes(project, minimal);
+					initializeSampleTeams(project, minimal);
+					CRiskInitializerService.initializeSample(project, minimal);
+					CSprintInitializerService.initializeSample(project, minimal);
+					CSprintItemInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CKanbanColumnInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {

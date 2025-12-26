@@ -26,12 +26,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		super(pageEntity, sessionService, detailSectionService);
 		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());
 		initializePage();
-		if (entity == null) {
-			// call locateFirstEntity only if entity is null
-			locateFirstEntity();
-			// setValue(getCurrentBinder().getBean());
-			// getBinder().readBean(getValue());
-		} else {
+		if (entity != null) {
 			setValue(entity);
 			// do we need it? binded ihasvalueandelement implementers already binded with binder
 			populateForm();
@@ -108,18 +103,36 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		}
 	}
 
-	void locateFirstEntity() throws Exception {
+	@Override
+	protected void locateFirstEntity() throws Exception {
 		LOGGER.debug("Locating first entity for dynamic page view without grid");
-		// this method is called in the constructor,
-		Check.notNull(entityService, "Entity service is not initialized");
 		// it triggers entityservice to load entity
 		// entityService.findAll().stream().findFirst().ifPresent(this::setValue);
-		entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
+		// entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
+		entityService.findDefault().ifPresent(entity -> {
+			try {
+				currentBinder.readBean(entity);
+			} catch (final Exception e) {
+				LOGGER.error("Error setting default entity value: {}", e.getMessage());
+			}
+		});
 	}
 
 	@Override
 	protected void locateItemById(final Long pageItemId) {
 		return;
+	}
+
+	@Override
+	protected void on_after_construct() {
+		LOGGER.debug("on_after_construct called for dynamic page view without grid");
+		if (getValue() == null) {
+			try {
+				locateFirstEntity();
+			} catch (final Exception e) {
+				LOGGER.error("Error locating first entity after construct: {}", e.getMessage());
+			}
+		}
 	}
 
 	@SuppressWarnings ("rawtypes")
