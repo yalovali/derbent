@@ -52,7 +52,7 @@ import tech.derbent.api.ui.component.basic.CColorPickerComboBox;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
-import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
 import tech.derbent.api.ui.component.enhanced.CComponentFieldSelection;
 import tech.derbent.api.ui.component.enhanced.CComponentListSelection;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
@@ -96,40 +96,40 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	@SuppressWarnings ("unchecked")
-	public static <EntityClass> CVerticalLayout buildEnhancedForm(final Class<?> entityClass) throws Exception {
+	public static <EntityClass> CVerticalLayoutTop buildEnhancedForm(final Class<?> entityClass) throws Exception {
 		final CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 		return buildForm(entityClass, enhancedBinder, null);
 	}
 
 	@SuppressWarnings ("unchecked")
-	public static <EntityClass> CVerticalLayout buildEnhancedForm(final Class<?> entityClass, final List<String> entityFields) throws Exception {
+	public static <EntityClass> CVerticalLayoutTop buildEnhancedForm(final Class<?> entityClass, final List<String> entityFields) throws Exception {
 		final CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 		return buildForm(entityClass, enhancedBinder, entityFields);
 	}
 
-	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder) throws Exception {
-		return buildForm(entityClass, binder, null, null, null, new CVerticalLayout(false, false, false));
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder) throws Exception {
+		return buildForm(entityClass, binder, null, null, null, new CVerticalLayoutTop(false, false, false));
 	}
 
-	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final List<String> entityFields) throws Exception {
-		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayout(false, false, false));
+		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayoutTop(false, false, false));
 	}
 
-	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final List<String> entityFields, final IContentOwner contentOwner) throws Exception {
-		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayout(false, false, false), contentOwner);
+		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayoutTop(false, false, false), contentOwner);
 	}
 
-	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final List<String> entityFields, final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
-			final CVerticalLayout formLayout) throws Exception {
+			final CVerticalLayoutTop formLayout) throws Exception {
 		return buildForm(entityClass, binder, entityFields, mapComponents, mapHorizontalLayouts, formLayout, null);
 	}
 
-	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			List<String> entityFields, final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
-			final CVerticalLayout formLayout, final IContentOwner contentOwner) throws Exception {
+			final CVerticalLayoutTop formLayout, final IContentOwner contentOwner) throws Exception {
 		try {
 			Check.notNull(entityClass, "Entity class cannot be null");
 			// Set content owner in data provider resolver context
@@ -165,7 +165,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param contentOwner  the content owner (page) for context-aware data providers
 	 * @return the form layout
 	 * @throws Exception if form building fails */
-	public static <EntityClass> CVerticalLayout buildFormWithOwner(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
+	public static <EntityClass> CVerticalLayoutTop buildFormWithOwner(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final IContentOwner contentOwner) throws Exception {
 		return buildForm(entityClass, binder, null, contentOwner);
 	}
@@ -949,13 +949,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	private CEnhancedBinder<?> binder;
 	private final Map<String, Component> componentMap;
-	final CVerticalLayout formLayout;
+	final CVerticalLayoutTop formLayout;
 	final Map<String, CHorizontalLayout> horizontalLayoutMap;
 
 	public CFormBuilder() {
 		componentMap = new HashMap<>();
 		horizontalLayoutMap = new HashMap<>();
-		formLayout = new CVerticalLayout(false, false, false);
+		formLayout = new CVerticalLayoutTop(false, false, false);
 	}
 
 	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass) throws Exception {
@@ -970,7 +970,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final List<String> entityFields) throws Exception {
 		componentMap = new HashMap<>();
 		horizontalLayoutMap = new HashMap<>();
-		formLayout = new CVerticalLayout(false, false, false);
+		formLayout = new CVerticalLayoutTop(false, false, false);
 		this.binder = binder;
 		CFormBuilder.buildForm(entityClass, binder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout, contentOwner);
 	}
@@ -986,7 +986,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(externalComponentMap, "External component map cannot be null");
 		componentMap = externalComponentMap;
 		horizontalLayoutMap = new HashMap<>();
-		formLayout = new CVerticalLayout(false, false, false);
+		formLayout = new CVerticalLayoutTop(false, false, false);
 		this.binder = binder;
 		CFormBuilder.buildForm(entityClass, binder, List.of(), getComponentMap(), horizontalLayoutMap, formLayout, contentOwner);
 	}
@@ -1003,7 +1003,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap2);
 	}
 
-	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> ebinder, final List<String> entityFields)
+	public CVerticalLayoutTop build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> ebinder, final List<String> entityFields)
 			throws Exception {
 		return CFormBuilder.buildForm(entityClass, ebinder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout);
 	}
@@ -1021,7 +1021,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	public Map<String, Component> getComponentMap() { return componentMap; }
 
-	public CVerticalLayout getFormLayout() { return formLayout; }
+	public CVerticalLayoutTop getFormLayout() { return formLayout; }
 
 	public CHorizontalLayout getHorizontalLayout(final String fieldName) {
 		Check.notNull(fieldName, "Field name for horizontal layout retrieval");

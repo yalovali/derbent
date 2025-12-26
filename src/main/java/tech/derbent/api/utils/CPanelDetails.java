@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -12,12 +13,12 @@ import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.ui.component.IFormContainerComponent;
 import tech.derbent.api.ui.component.basic.CAccordion;
-import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CContainerDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
-import tech.derbent.api.ui.component.basic.CTab;
+import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
 import tech.derbent.base.users.domain.CUser;
 
-public class CPanelDetails extends CDiv {
+public class CPanelDetails extends CVerticalLayoutTop {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelDetails.class);
 	private static final long serialVersionUID = 1L;
@@ -33,7 +34,11 @@ public class CPanelDetails extends CDiv {
 		// set height minimum?
 		// setHeightUndefined();
 		if (user.getAttributeDisplaySectionsAsTabs()) {
-			component = new CTab(title);
+			component = new CContainerDiv(title);
+			if (component instanceof HasSize) {
+				((HasSize) component).setSizeFull();
+			}
+			component.addClassName("cpaneldetails-tabsection");
 		} else {
 			component = new CAccordion(title);
 		}

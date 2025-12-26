@@ -25,7 +25,7 @@ public class CVerticalLayout extends VerticalLayout {
 		setMargin(margin);
 	}
 
-	protected void initializeComponent() {
+	final private void initializeComponent() {
 		CAuxillaries.setId(this);
 		setSizeFull();
 		setPadding(false);

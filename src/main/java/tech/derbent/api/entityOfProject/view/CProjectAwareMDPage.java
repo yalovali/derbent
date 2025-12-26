@@ -12,7 +12,7 @@ import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -91,7 +91,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	@Override
 	protected void updateDetailsComponent()
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, Exception {
-		final CVerticalLayout formLayout = CFormBuilder.buildForm(entityClass, getBinder(), null, this);
+		final CVerticalLayoutTop formLayout = CFormBuilder.buildForm(entityClass, getBinder(), null, this);
 		getBaseDetailsLayout().add(formLayout);
 	}
 }

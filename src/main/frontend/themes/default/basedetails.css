@@ -71,18 +71,11 @@
 	/*border: 1px solid var(--lumo-primary-color);*/
 	margin: 0 !important;
 	padding: 0 !important;
-	gap: 0 !important;	
-	height:100%;
+	gap: 0px !important;
+	/* dont make height 100%, let empty space bottom of vertical layouts */	
+	/*height:100%;*/
 	width:100%;
 }
-
-xvaadin-vertical-layout{
-	width: 100%;
-    padding: 0px;
-    margin: 0px;
-    spacing: 0px;
-}
-
 
 .editor-layout{
 	width:100%;
