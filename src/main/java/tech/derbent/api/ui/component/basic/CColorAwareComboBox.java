@@ -1,5 +1,7 @@
 package tech.derbent.api.ui.component.basic;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,14 +11,19 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.projects.domain.CProject;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
@@ -36,6 +43,31 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		this.entityType = entityType;
 		initializeComboBox();
 		CAuxillaries.setId(this);
+	}
+
+	/** Constructor for CColorAwareComboBox that loads items from a service with optional context.
+	 * @param entityType    the entity class for the ComboBox
+	 * @param serviceClass  the service class used to load items
+	 * @param currentEntity the current entity context for project-scoped services
+	 * @throws Exception if item loading fails */
+	public CColorAwareComboBox(final Class<T> entityType, final Class<? extends CAbstractService<T>> serviceClass, final CEntityDB<?> currentEntity)
+			throws Exception {
+		this(entityType, serviceClass, currentEntity, List.of());
+	}
+
+	/** Constructor for CColorAwareComboBox that loads items from a service with optional context and additional items.
+	 * @param entityType      the entity class for the ComboBox
+	 * @param serviceClass    the service class used to load items
+	 * @param currentEntity   the current entity context for project-scoped services
+	 * @param additionalItems optional items to prepend in the ComboBox list
+	 * @throws Exception if item loading fails */
+	public CColorAwareComboBox(final Class<T> entityType, final Class<? extends CAbstractService<T>> serviceClass, final CEntityDB<?> currentEntity,
+			final List<T> additionalItems) throws Exception {
+		super();
+		this.entityType = entityType;
+		initializeComboBox();
+		CAuxillaries.setId(this);
+		populateItemsFromService(serviceClass, currentEntity, additionalItems);
 	}
 
 	/** Constructor for CColorAwareComboBox with entity type and label.
@@ -89,7 +121,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			}
 			setItems(items);
 			if (!items.isEmpty()) {
-				if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+				if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 					// For entity types, try to find by name or toString match
 					final T defaultItem = items.stream().filter(item -> {
 						final String itemDisplay = CColorUtils.getDisplayTextFromEntity(item);
@@ -119,7 +151,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				if (item == null) {
 					return new Span("N/A");
 				}
-				if ((item instanceof CEntityNamed) == false) {
+				if (item instanceof CEntityNamed == false) {
 					return new Span("Invalid Entity");
 				}
 				// Use the new CEntityLabel for consistent entity display
@@ -151,6 +183,49 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	public boolean isAutoContrast() { return autoContrast; }
 
 	public boolean isRoundedCorners() { return roundedCorners; }
+
+	private List<T> mergeItems(final List<T> additionalItems, final List<T> items) {
+		final LinkedHashSet<T> uniqueItems = new LinkedHashSet<>();
+		if (additionalItems != null) {
+			uniqueItems.addAll(additionalItems);
+		}
+		if (items != null) {
+			uniqueItems.addAll(items);
+		}
+		return new ArrayList<>(uniqueItems);
+	}
+
+	@SuppressWarnings ({
+			"unchecked"
+	})
+	private void populateItemsFromService(final Class<? extends CAbstractService<T>> serviceClass, final CEntityDB<?> currentEntity,
+			final List<T> additionalItems) throws Exception {
+		Check.notNull(serviceClass, "Service class cannot be null");
+		final CAbstractService<T> service = CSpringContext.getBean(serviceClass);
+		Check.notNull(service, "Service instance cannot be null for " + serviceClass.getSimpleName());
+		try {
+			List<T> items = null;
+			if (currentEntity != null && service instanceof CEntityOfProjectService) {
+				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) service;
+				if (currentEntity instanceof CEntityOfProject) {
+					final CProject project = ((CEntityOfProject<?>) currentEntity).getProject();
+					if (project != null) {
+						items = (List<T>) projectService.listByProject(project);
+					}
+				} else if (currentEntity instanceof CProject) {
+					items = (List<T>) projectService.listByProject((CProject) currentEntity);
+				}
+			}
+			if (items == null) {
+				items = service.findAll();
+			}
+			setItems(mergeItems(additionalItems, items));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to load items for {} combo box from service {}", entityType != null ? entityType.getSimpleName() : "<null>",
+					serviceClass.getSimpleName(), e);
+			throw e;
+		}
+	}
 
 	public void setAutoContrast(final boolean autoContrast) {
 		this.autoContrast = autoContrast;
@@ -192,7 +267,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 					CColorUtils.styleIcon(icon);
 					try {
 						final String color = CColorUtils.getColorFromEntity(selectedItem);
-						if ((color != null) && !color.isEmpty()) {
+						if (color != null && !color.isEmpty()) {
 							icon.getElement().getStyle().set("color", color);
 						}
 					} catch (final Exception colorEx) {
@@ -200,7 +275,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 					}
 					setPrefixComponent(icon);
 					final String backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
-					if ((backgroundColor != null) && !backgroundColor.isEmpty()) {
+					if (backgroundColor != null && !backgroundColor.isEmpty()) {
 						getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
 						if (autoContrast) {
 							final String textColor = CColorUtils.getContrastTextColor(backgroundColor);

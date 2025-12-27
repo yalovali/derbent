@@ -27,7 +27,8 @@ public class CDialogKanbanColumnEdit extends CDialogDBEdit<CKanbanColumn> {
 
 	private void createFormFields() throws Exception {
 		Check.notNull(getDialogLayout(), "Dialog layout must be initialized before building form fields");
-		getDialogLayout().add(formBuilder.build(CKanbanColumn.class, binder, List.of("name", "itemOrder", "defaultColumn", "includedStatuses")));
+		getDialogLayout()
+				.add(formBuilder.build(CKanbanColumn.class, binder, List.of("name", "color", "itemOrder", "defaultColumn", "includedStatuses")));
 	}
 
 	@Override

@@ -1,10 +1,9 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
-import tech.derbent.api.utils.Check;
-
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.utils.Check;
 
 /** CComponentPostit - A compact post-it style widget for displaying project items inside kanban columns. */
 public class CComponentKanbanPostit extends CComponentWidgetEntity<CProjectItem<?>> {
@@ -14,8 +13,9 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CProjectItem<
 	public CComponentKanbanPostit(final CProjectItem<?> item) {
 		super(item);
 		Check.notNull(item, "Project item cannot be null for postit");
-		getStyle().set("background-color", "#FFFDE7").set("border-radius", "8px").set("padding", "10px")
-				.set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.12)").set("width", "100%");
+		addClassName("kanban-postit");
+		getStyle().set("width", "100%");
+		getElement().setAttribute("tabindex", "0");
 	}
 
 	@Override
@@ -38,6 +38,16 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CProjectItem<
 	protected void createThirdLine() {
 		if (entity.getStartDate() != null || entity.getEndDate() != null) {
 			layoutLineThree.add(CLabelEntity.createDateRangeLabel(entity.getStartDate(), entity.getEndDate()));
+		}
+	}
+
+	@Override
+	public void setSelected(final boolean selected) {
+		this.selected = selected;
+		if (selected) {
+			addClassName("kanban-postit-selected");
+		} else {
+			removeClassName("kanban-postit-selected");
 		}
 	}
 }

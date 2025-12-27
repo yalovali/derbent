@@ -3,6 +3,7 @@ package tech.derbent.app.kanban.kanbanline.view;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 	private final CHorizontalLayout headerLayout;
 	private final CVerticalLayout itemsLayout;
 	Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumn.class);
+	private Consumer<CComponentKanbanPostit> postitSelectionListener;
 	private List<CProjectItem<?>> projectItems = List.of();
 	private final CLabelEntity statusesLabel;
 	private final CH3 title;
@@ -34,7 +36,9 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		setSpacing(true);
 		setWidth("280px");
 		setMinHeight("500px");
-		setHeightFull();
+		setHeight(null);
+		setDefaultHorizontalComponentAlignment(Alignment.STRETCH);
+		addClassName("kanban-column");
 		getStyle().set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
 		headerLayout = new CHorizontalLayout();
 		headerLayout.setWidthFull();
@@ -52,6 +56,9 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		itemsLayout = new CVerticalLayout(false, true, false);
 		itemsLayout.setPadding(false);
 		itemsLayout.setSpacing(true);
+		itemsLayout.setWidthFull();
+		itemsLayout.setHeight(null);
+		itemsLayout.addClassName("kanban-column-items");
 		add(itemsLayout);
 		binder = new Binder<>(CKanbanColumn.class);
 		binder.forField(this).bind(value -> value, (bean, value) -> {/**/});
@@ -70,16 +77,39 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 			return List.of();
 		}
 		final CKanbanColumn column = getValue();
-		if (column == null || column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
+		if (column == null) {
 			return List.of();
 		}
-		final Set<Long> includedStatusIds = column.getIncludedStatuses().stream().filter(Objects::nonNull).map(status -> status.getId())
-				.filter(Objects::nonNull).collect(Collectors.toSet());
-		if (includedStatusIds.isEmpty()) {
-			return List.of();
+		final List<CKanbanColumn> lineColumns = resolveLineColumns(column);
+		final boolean hasStatusMappings = lineColumns.stream().filter(Objects::nonNull)
+				.anyMatch(entry -> entry.getIncludedStatuses() != null && !entry.getIncludedStatuses().isEmpty());
+		final boolean isFallbackColumn = column.getDefaultColumn() || !hasStatusMappings && isFirstColumn(lineColumns, column);
+		final Set<Long> includedStatusIds = column.getIncludedStatuses() == null ? Set.of() : column.getIncludedStatuses().stream()
+				.filter(Objects::nonNull).map(status -> status.getId()).filter(Objects::nonNull).collect(Collectors.toSet());
+		final Set<Long> lineStatusIds = isFallbackColumn ? resolveLineStatusIds(lineColumns) : Set.of();
+		return items.stream().filter(Objects::nonNull).filter(item -> {
+			if (item.getStatus() == null || item.getStatus().getId() == null) {
+				return isFallbackColumn;
+			}
+			final Long statusId = item.getStatus().getId();
+			if (!includedStatusIds.isEmpty() && includedStatusIds.contains(statusId)) {
+				return true;
+			}
+			return isFallbackColumn && !lineStatusIds.contains(statusId);
+		}).collect(Collectors.toList());
+	}
+
+	private boolean isFirstColumn(final List<CKanbanColumn> lineColumns, final CKanbanColumn column) {
+		if (lineColumns.isEmpty()) {
+			return false;
 		}
-		return items.stream().filter(Objects::nonNull).filter(item -> item.getStatus() != null && item.getStatus().getId() != null)
-				.filter(item -> includedStatusIds.contains(item.getStatus().getId())).collect(Collectors.toList());
+		return lineColumns.get(0).equals(column);
+	}
+
+	private void on_postit_clicked(final CComponentKanbanPostit postit) {
+		if (postitSelectionListener != null) {
+			postitSelectionListener.accept(postit);
+		}
 	}
 
 	@Override
@@ -121,7 +151,9 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		LOGGER.debug("Refreshing items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		itemsLayout.removeAll();
 		for (final CProjectItem<?> item : filterItems(projectItems)) {
-			itemsLayout.add(new CComponentKanbanPostit(item));
+			final CComponentKanbanPostit postit = new CComponentKanbanPostit(item);
+			postit.addClickListener(event -> on_postit_clicked(postit));
+			itemsLayout.add(postit);
 		}
 	}
 
@@ -137,9 +169,37 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		statusesLabel.setText(statuses);
 	}
 
+	private List<CKanbanColumn> resolveLineColumns(final CKanbanColumn column) {
+		if (column.getKanbanLine() == null || column.getKanbanLine().getKanbanColumns() == null) {
+			return List.of();
+		}
+		return column.getKanbanLine().getKanbanColumns().stream().filter(Objects::nonNull).sorted((left, right) -> {
+			if (left.getItemOrder() == null && right.getItemOrder() == null) {
+				return 0;
+			}
+			if (left.getItemOrder() == null) {
+				return 1;
+			}
+			if (right.getItemOrder() == null) {
+				return -1;
+			}
+			return left.getItemOrder().compareTo(right.getItemOrder());
+		}).collect(Collectors.toList());
+	}
+
+	private Set<Long> resolveLineStatusIds(final List<CKanbanColumn> lineColumns) {
+		if (lineColumns.isEmpty()) {
+			return Set.of();
+		}
+		return lineColumns.stream().map(CKanbanColumn::getIncludedStatuses).filter(Objects::nonNull).flatMap(List::stream).filter(Objects::nonNull)
+				.map(status -> status.getId()).filter(Objects::nonNull).collect(Collectors.toSet());
+	}
+
 	public void setItems(final List<CProjectItem<?>> items) {
 		LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		projectItems = items == null ? List.of() : List.copyOf(items);
 		refreshItems();
 	}
+
+	public void setPostitSelectionListener(final Consumer<CComponentKanbanPostit> listener) { postitSelectionListener = listener; }
 }

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Main;
@@ -28,6 +27,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
@@ -60,7 +60,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	}
 
 	// private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_UPDATE_COLOR));
-	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
+	private final CColorAwareComboBox<CCompany> companyField = new CColorAwareComboBox<>(CCompany.class);
 	private final CCompanyService companyService;
 	private final Div errorMessage = new Div();
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
@@ -228,7 +228,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		companyField.setRequired(true);
 		companyField.setRequiredIndicatorVisible(true);
 		companyField.setId("custom-company-input");
-		companyField.setItemLabelGenerator(company -> company.getName());
 		// Add enter key listener to company field using addEventListener
 		companyField.getElement().addEventListener("keydown", event -> {
 			handleLogin();

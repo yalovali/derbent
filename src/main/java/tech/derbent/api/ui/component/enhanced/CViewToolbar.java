@@ -14,7 +14,6 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
@@ -35,6 +34,7 @@ import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.screens.view.CDetailSectionView;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
@@ -68,7 +68,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final CPageMenuIntegrationService pageMenuIntegrationService;
 	private final H1 pageTitle;
-	private ComboBox<CProject> projectComboBox;
+	private CColorAwareComboBox<CProject> projectComboBox;
 	private final ISessionService sessionService;
 	private final CSystemSettingsService systemSettingsService;
 	private Avatar userAvatar;
@@ -317,8 +317,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	/** Creates the project selection ComboBox. */
 	private void createProjectComboBox() {
 		Check.notNull(sessionService, "SessionService must not be null to create project ComboBox");
-		projectComboBox = new ComboBox<>();
-		projectComboBox.setItemLabelGenerator(CProject::getName);
+		projectComboBox = new CColorAwareComboBox<>(CProject.class);
 		projectComboBox.setPlaceholder("Select Project");
 		projectComboBox.setWidth("200px");
 		// Load available projects
