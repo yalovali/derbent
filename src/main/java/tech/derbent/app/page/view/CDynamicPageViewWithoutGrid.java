@@ -9,6 +9,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.kanban.kanbanline.service.CKanbanLineService;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -108,14 +109,18 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		}
 	}
 
-	void locateFirstEntity() throws Exception {
-		LOGGER.debug("Locating first entity for dynamic page view without grid");
-		// this method is called in the constructor,
-		Check.notNull(entityService, "Entity service is not initialized");
-		// it triggers entityservice to load entity
-		// entityService.findAll().stream().findFirst().ifPresent(this::setValue);
-		entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
-	}
+        void locateFirstEntity() throws Exception {
+                LOGGER.debug("Locating first entity for dynamic page view without grid");
+                // this method is called in the constructor,
+                Check.notNull(entityService, "Entity service is not initialized");
+                if (entityService instanceof CKanbanLineService kanbanLineService) {
+                        kanbanLineService.findDefaultForCurrentProject()
+                                        .or(() -> kanbanLineService.findAll().stream().findFirst())
+                                        .ifPresent(entity -> currentBinder.readBean(entity));
+                        return;
+                }
+                entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
+        }
 
 	@Override
 	protected void locateItemById(final Long pageItemId) {

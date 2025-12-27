@@ -1,7 +1,5 @@
 package tech.derbent.app.kanban.kanbanline.domain;
 
-import tech.derbent.api.utils.Check;
-
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.AttributeOverride;
@@ -13,10 +11,12 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.screens.service.IOrderedEntity;
+import tech.derbent.api.utils.Check;
 
 @Entity
 @Table (name = "ckanbancolumn")
@@ -25,12 +25,19 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 
 	public static final String DEFAULT_COLOR = "#FFD54F";
 	public static final String DEFAULT_ICON = "vaadin:columns";
-	public static final String ENTITY_TITLE_PLURAL = "Kanban Columns";
-	public static final String ENTITY_TITLE_SINGULAR = "Kanban Column";
-	public static final String VIEW_NAME = "Kanban Columns View";
-	@Column (name = "default_column", nullable = false)
-	@AMetaData (
-			displayName = "Default Column", required = false, readOnly = false, defaultValue = "false",
+        public static final String ENTITY_TITLE_PLURAL = "Kanban Columns";
+        public static final String ENTITY_TITLE_SINGULAR = "Kanban Column";
+        public static final String VIEW_NAME = "Kanban Columns View";
+        @Column (nullable = true, length = 7)
+        @Size (max = 7)
+        @AMetaData (
+                        displayName = "Color", required = false, readOnly = false, defaultValue = DEFAULT_COLOR,
+                        description = "Background color for this Kanban column", hidden = false, colorField = true
+        )
+        private String color = DEFAULT_COLOR;
+        @Column (name = "default_column", nullable = false)
+        @AMetaData (
+                        displayName = "Default Column", required = false, readOnly = false, defaultValue = "false",
 			description = "When enabled, this column handles items without explicit status mapping", hidden = false
 	)
 	private boolean defaultColumn = false;
@@ -59,14 +66,18 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	private CKanbanLine kanbanLine;
 
 	/** Default constructor for JPA. */
-	public CKanbanColumn() {
-		super();
-	}
+        public CKanbanColumn() {
+                super();
+                color = DEFAULT_COLOR;
+        }
 
-	public CKanbanColumn(final String header, final CKanbanLine kanbanLine) {
-		super(CKanbanColumn.class, header);
-		setKanbanLine(kanbanLine);
-	}
+        public CKanbanColumn(final String header, final CKanbanLine kanbanLine) {
+                super(CKanbanColumn.class, header);
+                color = DEFAULT_COLOR;
+                setKanbanLine(kanbanLine);
+        }
+
+        public String getColor() { return color; }
 
 	public boolean getDefaultColumn() { return defaultColumn; }
 
@@ -77,7 +88,9 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 
 	public CKanbanLine getKanbanLine() { return kanbanLine; }
 
-	public void setDefaultColumn(final boolean defaultColumn) { this.defaultColumn = defaultColumn; }
+        public void setDefaultColumn(final boolean defaultColumn) { this.defaultColumn = defaultColumn; }
+
+        public void setColor(final String color) { this.color = color == null || color.isBlank() ? DEFAULT_COLOR : color; }
 
 	public void setIncludedStatuses(final List<CProjectItemStatus> includedStatuses) {
 		Check.notNull(includedStatuses, "Included statuses cannot be null");

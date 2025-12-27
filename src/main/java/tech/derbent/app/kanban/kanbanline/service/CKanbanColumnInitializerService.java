@@ -31,10 +31,11 @@ public class CKanbanColumnInitializerService extends CInitializerServiceBase {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, ENTITY_CLASS, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "kanbanLine"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "defaultColumn"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "includedStatuses"));
+                        CInitializerServiceNamedEntity.createBasicView(detailSection, ENTITY_CLASS, project, true);
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "kanbanLine"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "color"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "defaultColumn"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "includedStatuses"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "lastModifiedDate"));
@@ -46,11 +47,11 @@ public class CKanbanColumnInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
-		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "name", "kanbanLine", "defaultColumn", "includedStatuses"));
-		return grid;
-	}
+        public static CGridEntity createGridEntity(final CProject project) {
+                final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
+                grid.setColumnFields(List.of("id", "name", "color", "kanbanLine", "defaultColumn", "includedStatuses"));
+                return grid;
+        }
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {

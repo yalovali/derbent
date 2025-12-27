@@ -31,14 +31,15 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "userSettings");
+                        CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "kanbanLine"));
+
+                        detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+                        final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "userSettings");
 			line.setRelationFieldName("userSettings");
 			line.setFieldCaption("userSettings");
 			line.setEntityProperty("Component:createProjectUserSettingsComponent");
@@ -53,11 +54,11 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
-		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "active", "createdDate", "lastModifiedDate"));
-		return grid;
-	}
+        public static CGridEntity createGridEntity(final CProject project) {
+                final CGridEntity grid = createBaseGridEntity(project, clazz);
+                grid.setColumnFields(List.of("id", "name", "description", "kanbanLine", "active", "createdDate", "lastModifiedDate"));
+                return grid;
+        }
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {

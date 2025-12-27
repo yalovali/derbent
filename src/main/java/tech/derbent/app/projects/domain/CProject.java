@@ -21,6 +21,7 @@ import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyService;
+import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
 /** CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database functionality. */
@@ -40,13 +41,20 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	public static final String VIEW_NAME = "Projects View";
 	// Many projects can belong to one company
 	@AMetaData (displayName = "Company", required = true, readOnly = false, description = "The company this project belongs to", hidden = false)
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "company_id", nullable = false)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private CCompany company;
-	// lets keep it layzily loaded to avoid loading all user settings at once
-	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@AMetaData (
+        @ManyToOne (fetch = FetchType.LAZY)
+        @JoinColumn (name = "company_id", nullable = false)
+        @OnDelete (action = OnDeleteAction.CASCADE)
+        private CCompany company;
+        @ManyToOne (fetch = FetchType.LAZY)
+        @JoinColumn (name = "kanban_line_id")
+        @AMetaData (
+                        displayName = "Kanban Line", required = false, readOnly = false,
+                        description = "Default Kanban line used to visualize project sprints", hidden = false
+        )
+        private CKanbanLine kanbanLine;
+        // lets keep it layzily loaded to avoid loading all user settings at once
+        @OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+        @AMetaData (
 			displayName = "User Settings", required = false, readOnly = false, description = "User project settings for this project", hidden = false,
 			createComponentMethod = "createProjectUserSettingsComponent"
 	)
@@ -74,14 +82,16 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		}
 	}
 
-	public CCompany getCompany() { return company; }
+        public CCompany getCompany() { return company; }
 
-	public Long getCompanyId() { return company != null ? company.getId() : null; }
+        public Long getCompanyId() { return company != null ? company.getId() : null; }
 
-	public CCompany getCompanyInstance(CCompanyService service) {
-		if (getCompanyId() == null) {
-			return null;
-		}
+        public CKanbanLine getKanbanLine() { return kanbanLine; }
+
+        public CCompany getCompanyInstance(CCompanyService service) {
+                if (getCompanyId() == null) {
+                        return null;
+                }
 		final CCompany company1 =
 				service.getById(getCompanyId()).orElseThrow(() -> new IllegalStateException("Company with ID " + getCompanyId() + " not found"));
 		return company1;
@@ -135,12 +145,14 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 
 	/** Remove a user setting from this project and maintain bidirectional relationship.
 	 * @param userSettings1 the user settings to remove */
-	public void removeUserSettings(final CUserProjectSettings userSettings1) {
-		Check.notNull(userSettings1, "User settings cannot be null");
-		if (this.userSettings.remove(userSettings1)) {
-			userSettings1.setProject(null);
-		}
-	}
+        public void removeUserSettings(final CUserProjectSettings userSettings1) {
+                Check.notNull(userSettings1, "User settings cannot be null");
+                if (this.userSettings.remove(userSettings1)) {
+                        userSettings1.setProject(null);
+                }
+        }
 
-	public void setCompany(final CCompany company) { this.company = company; }
+        public void setCompany(final CCompany company) { this.company = company; }
+
+        public void setKanbanLine(final CKanbanLine kanbanLine) { this.kanbanLine = kanbanLine; }
 }

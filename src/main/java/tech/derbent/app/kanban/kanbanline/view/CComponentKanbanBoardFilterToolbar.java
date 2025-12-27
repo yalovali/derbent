@@ -16,6 +16,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.base.users.domain.CUser;
 
 /** CComponentKanbanBoardFilterToolbar - Filtering toolbar for Kanban board items.
@@ -27,22 +28,27 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 
 	public static class FilterCriteria {
 
-		private Class<?> entityType;
-		private ResponsibleFilterMode responsibleMode = ResponsibleFilterMode.ALL;
-		private CUser responsibleUser;
+                private Class<?> entityType;
+                private ResponsibleFilterMode responsibleMode = ResponsibleFilterMode.ALL;
+                private CUser responsibleUser;
+                private CSprint sprint;
 
-		public Class<?> getEntityType() { return entityType; }
+                public Class<?> getEntityType() { return entityType; }
 
-		public ResponsibleFilterMode getResponsibleMode() { return responsibleMode; }
+                public ResponsibleFilterMode getResponsibleMode() { return responsibleMode; }
 
-		public CUser getResponsibleUser() { return responsibleUser; }
+                public CUser getResponsibleUser() { return responsibleUser; }
 
-		public void setEntityType(final Class<?> entityType) { this.entityType = entityType; }
+                public CSprint getSprint() { return sprint; }
 
-		public void setResponsibleMode(final ResponsibleFilterMode responsibleMode) { this.responsibleMode = responsibleMode; }
+                public void setEntityType(final Class<?> entityType) { this.entityType = entityType; }
 
-		public void setResponsibleUser(final CUser responsibleUser) { this.responsibleUser = responsibleUser; }
-	}
+                public void setResponsibleMode(final ResponsibleFilterMode responsibleMode) { this.responsibleMode = responsibleMode; }
+
+                public void setResponsibleUser(final CUser responsibleUser) { this.responsibleUser = responsibleUser; }
+
+                public void setSprint(final CSprint sprint) { this.sprint = sprint; }
+        }
 
 	public enum ResponsibleFilterMode {
 
@@ -100,42 +106,45 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		return entityClass.getSimpleName();
 	}
 
-	private final Button clearButton;
-	private final FilterCriteria currentCriteria;
-	private final ComboBox<ResponsibleFilterMode> comboResponsibleMode;
-	private final ComboBox<CUser> comboResponsibleUser;
-	private final ComboBox<TypeOption> comboType;
-	private final List<Consumer<FilterCriteria>> listeners;
-	private final TypeOption typeAllOption;
+        private final Button clearButton;
+        private final FilterCriteria currentCriteria;
+        private final ComboBox<ResponsibleFilterMode> comboResponsibleMode;
+        private final ComboBox<CUser> comboResponsibleUser;
+        private final ComboBox<CSprint> comboSprint;
+        private final ComboBox<TypeOption> comboType;
+        private CSprint defaultSprint;
+        private final List<Consumer<FilterCriteria>> listeners;
+        private final TypeOption typeAllOption;
 
-	public CComponentKanbanBoardFilterToolbar() {
-		super(new ToolbarConfig().hideAll());
-		currentCriteria = new FilterCriteria();
-		listeners = new ArrayList<>();
-		typeAllOption = new TypeOption("All types", null);
-		comboResponsibleUser = buildResponsibleUserCombo();
-		comboResponsibleMode = buildResponsibleModeCombo();
-		comboType = buildTypeCombo();
-		clearButton = buildClearButton();
-		addFilterComponents(comboResponsibleMode, comboResponsibleUser, comboType, clearButton);
-		setAlignItems(Alignment.CENTER);
-	}
+        public CComponentKanbanBoardFilterToolbar() {
+                super(new ToolbarConfig().hideAll());
+                currentCriteria = new FilterCriteria();
+                listeners = new ArrayList<>();
+                typeAllOption = new TypeOption("All types", null);
+                comboSprint = buildSprintCombo();
+                comboResponsibleUser = buildResponsibleUserCombo();
+                comboResponsibleMode = buildResponsibleModeCombo();
+                comboType = buildTypeCombo();
+                clearButton = buildClearButton();
+                addFilterComponents(comboSprint, comboResponsibleMode, comboResponsibleUser, comboType, clearButton);
+                setAlignItems(Alignment.CENTER);
+        }
 
 	public void addKanbanFilterChangeListener(final Consumer<FilterCriteria> listener) {
 		Check.notNull(listener, "Filter listener cannot be null");
 		listeners.add(listener);
 	}
 
-	private Button buildClearButton() {
-		final Button button = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
-		button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-		button.addClickListener(event -> clearFilters());
+        private Button buildClearButton() {
+                final Button button = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
+                button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+                button.addClickListener(event -> clearFilters());
 		button.setTooltipText("Clear Kanban filters");
 		return button;
 	}
 
-	private ComboBox<ResponsibleFilterMode> buildResponsibleModeCombo() {
-		final ComboBox<ResponsibleFilterMode> combo = new ComboBox<>("Responsible");
+        private ComboBox<ResponsibleFilterMode> buildResponsibleModeCombo() {
+                final ComboBox<ResponsibleFilterMode> combo = new ComboBox<>("Responsible");
 		combo.setItems(ResponsibleFilterMode.values());
 		combo.setItemLabelGenerator(ResponsibleFilterMode::getLabel);
 		combo.setValue(ResponsibleFilterMode.ALL);
@@ -149,8 +158,18 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 			}
 			notifyListeners();
 		});
-		return combo;
-	}
+                return combo;
+        }
+
+        private ComboBox<CSprint> buildSprintCombo() {
+                final ComboBox<CSprint> combo = new ComboBox<>("Sprint");
+                combo.setItemLabelGenerator(sprint -> sprint != null ? sprint.getName() : "");
+                combo.addValueChangeListener(event -> {
+                        currentCriteria.setSprint(event.getValue());
+                        notifyListeners();
+                });
+                return combo;
+        }
 
 	private ComboBox<CUser> buildResponsibleUserCombo() {
 		final ComboBox<CUser> combo = new ComboBox<>("User");
@@ -176,18 +195,20 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		return combo;
 	}
 
-	@Override
-	public void clearFilters() {
-		comboResponsibleMode.setValue(ResponsibleFilterMode.ALL);
-		comboResponsibleUser.clear();
-		comboType.setValue(typeAllOption);
-		currentCriteria.setResponsibleMode(ResponsibleFilterMode.ALL);
-		currentCriteria.setResponsibleUser(null);
-		currentCriteria.setEntityType(null);
-		notifyListeners();
-	}
+        @Override
+        public void clearFilters() {
+                comboSprint.setValue(defaultSprint);
+                currentCriteria.setSprint(defaultSprint);
+                comboResponsibleMode.setValue(ResponsibleFilterMode.ALL);
+                comboResponsibleUser.clear();
+                comboType.setValue(typeAllOption);
+                currentCriteria.setResponsibleMode(ResponsibleFilterMode.ALL);
+                currentCriteria.setResponsibleUser(null);
+                currentCriteria.setEntityType(null);
+                notifyListeners();
+        }
 
-	public FilterCriteria getCurrentCriteria() { return currentCriteria; }
+        public FilterCriteria getCurrentCriteria() { return currentCriteria; }
 
 	private void notifyListeners() {
 		for (final Consumer<FilterCriteria> listener : listeners) {
@@ -195,11 +216,28 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		}
 	}
 
-	public void setAvailableItems(final List<CProjectItem<?>> items) {
-		Check.notNull(items, "Items cannot be null");
-		updateResponsibleOptions(items);
-		updateTypeOptions(items);
-	}
+        public void setAvailableItems(final List<CProjectItem<?>> items) {
+                Check.notNull(items, "Items cannot be null");
+                updateResponsibleOptions(items);
+                updateTypeOptions(items);
+        }
+
+        public void setAvailableSprints(final List<CSprint> sprints, final CSprint defaultSprint) {
+                comboSprint.setItems(sprints);
+                this.defaultSprint = defaultSprint;
+                if (defaultSprint != null && sprints.contains(defaultSprint)) {
+                        comboSprint.setValue(defaultSprint);
+                        currentCriteria.setSprint(defaultSprint);
+                } else if (comboSprint.getValue() != null && !sprints.contains(comboSprint.getValue())) {
+                        comboSprint.clear();
+                        currentCriteria.setSprint(null);
+                }
+                if (comboSprint.getValue() == null && !sprints.isEmpty()) {
+                        comboSprint.setValue(sprints.get(0));
+                        currentCriteria.setSprint(sprints.get(0));
+                }
+                notifyListeners();
+        }
 
 	private void updateResponsibleOptions(final List<CProjectItem<?>> items) {
 		final Map<Long, CUser> uniqueUsers = new LinkedHashMap<>();
