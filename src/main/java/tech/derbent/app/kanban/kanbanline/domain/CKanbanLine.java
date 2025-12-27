@@ -20,7 +20,6 @@ import tech.derbent.app.companies.domain.CCompany;
 @Table (name = "ckanbanline")
 @AttributeOverride (name = "id", column = @Column (name = "kanban_line_id"))
 public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
-
 	public static final String DEFAULT_COLOR = "#4DB6AC"; // Bold teal for Kanban headers
 	public static final String DEFAULT_ICON = "vaadin:barcode";
 	public static final String ENTITY_TITLE_PLURAL = "Kanban Lines";
@@ -53,7 +52,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 
 	public void addKanbanColumn(final CKanbanColumn column) {
 		Check.notNull(column, "Column cannot be null");
-		if (column.getItemOrder() == null || column.getItemOrder() <= 0) {
+		if ((column.getItemOrder() == null) || (column.getItemOrder() <= 0)) {
 			column.setItemOrder(getNextKanbanColumnOrder());
 		}
 		column.setKanbanLine(this);
@@ -66,7 +65,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	public Set<CKanbanColumn> getKanbanColumns() { return kanbanColumns; }
 
 	private Integer getNextKanbanColumnOrder() {
-		if (kanbanColumns == null || kanbanColumns.isEmpty()) {
+		if ((kanbanColumns == null) || kanbanColumns.isEmpty()) {
 			return 1;
 		}
 		return kanbanColumns.stream().map(CKanbanColumn::getItemOrder).filter(order -> order != null).mapToInt(Integer::intValue).max().orElse(0) + 1;
