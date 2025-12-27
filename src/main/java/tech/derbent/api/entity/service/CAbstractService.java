@@ -163,6 +163,11 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
+	public Optional<EntityClass> findDefault() throws Exception {
+		/// returns the first item by default, you can override to provide custom logic
+		return Optional.ofNullable(findAll().getFirst());
+	}
+
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> getById(final Long id) {
 		if (id == null) {

@@ -138,7 +138,9 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 
 	protected void initializePage() throws Exception {/**/}
 
+	protected abstract void locateFirstEntity() throws Exception;
 	protected abstract void locateItemById(Long pageItemId);
+	protected abstract void on_after_construct();
 
 	@Override
 	public void populateForm() throws Exception {

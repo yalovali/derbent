@@ -101,7 +101,10 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			if (pageItemId1 != null) {
 				// Locate specific item on the page or just load it
 				page.locateItemById(pageItemId1);
+			} else {
+				page.locateFirstEntity();
 			}
+			page.on_after_construct();
 			removeAll();
 			add(page);
 		} catch (final Exception e) {

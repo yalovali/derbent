@@ -21,6 +21,7 @@ import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyService;
+import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
 /** CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database functionality. */
@@ -44,6 +45,13 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	@JoinColumn (name = "company_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private CCompany company;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "kanban_line_id")
+	@AMetaData (
+			displayName = "Kanban Line", required = false, readOnly = false, description = "Default Kanban line used to visualize project sprints",
+			hidden = false
+	)
+	private CKanbanLine kanbanLine;
 	// lets keep it layzily loaded to avoid loading all user settings at once
 	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
@@ -68,8 +76,8 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		if (userSettings1 == null) {
 			return;
 		}
-		if (!this.userSettings.contains(userSettings1)) {
-			this.userSettings.add(userSettings1);
+		if (!userSettings.contains(userSettings1)) {
+			userSettings.add(userSettings1);
 			userSettings1.setProject(this);
 		}
 	}
@@ -87,25 +95,27 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		return company1;
 	}
 
+	public CKanbanLine getKanbanLine() { return kanbanLine; }
+
 	/** Gets the list of user project settings for this project. */
 	public List<CUserProjectSettings> getUserSettings() { return userSettings; }
 
 	@Override
 	public boolean matches(final String searchText) {
-		if ((searchText == null) || searchText.trim().isEmpty()) {
+		if (searchText == null || searchText.trim().isEmpty()) {
 			return true; // Empty search matches all
 		}
 		final String lowerSearchText = searchText.toLowerCase().trim();
 		// Search in name field
-		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
+		if (getName() != null && getName().toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in description field
-		if ((getDescription() != null) && getDescription().toLowerCase().contains(lowerSearchText)) {
+		if (getDescription() != null && getDescription().toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in ID as string
-		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
+		if (getId() != null && getId().toString().contains(lowerSearchText)) {
 			return true;
 		}
 		return false;
@@ -119,7 +129,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
@@ -127,7 +137,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity field
-		if (fieldNames.remove("company") && (getCompany() != null) && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("company") && getCompany() != null && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
@@ -137,10 +147,12 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	 * @param userSettings1 the user settings to remove */
 	public void removeUserSettings(final CUserProjectSettings userSettings1) {
 		Check.notNull(userSettings1, "User settings cannot be null");
-		if (this.userSettings.remove(userSettings1)) {
+		if (userSettings.remove(userSettings1)) {
 			userSettings1.setProject(null);
 		}
 	}
 
 	public void setCompany(final CCompany company) { this.company = company; }
+
+	public void setKanbanLine(final CKanbanLine kanbanLine) { this.kanbanLine = kanbanLine; }
 }

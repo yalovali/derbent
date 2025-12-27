@@ -35,7 +35,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		setWidth("280px");
 		setMinHeight("500px");
 		setHeightFull();
-		getStyle().set("background-color", "#F5F5F5").set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
+		getStyle().set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
 		headerLayout = new CHorizontalLayout();
 		headerLayout.setWidthFull();
 		headerLayout.setSpacing(true);
@@ -55,6 +55,13 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		add(itemsLayout);
 		binder = new Binder<>(CKanbanColumn.class);
 		binder.forField(this).bind(value -> value, (bean, value) -> {/**/});
+	}
+
+	private void applyBackgroundColor() {
+		final CKanbanColumn column = getValue();
+		final String backgroundColor =
+				column != null && column.getColor() != null && !column.getColor().isBlank() ? column.getColor() : CKanbanColumn.DEFAULT_COLOR;
+		getStyle().set("background-color", backgroundColor);
 	}
 
 	private List<CProjectItem<?>> filterItems(final List<CProjectItem<?>> items) {
@@ -83,6 +90,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 			return;
 		}
 		binder.setBean(newValue);
+		applyBackgroundColor();
 		refreshHeader();
 		refreshStatuses();
 		refreshItems();
@@ -90,7 +98,10 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 
 	@Override
 	protected void refreshComponent() {
-		// TODO Auto-generated method stub
+		applyBackgroundColor();
+		refreshHeader();
+		refreshStatuses();
+		refreshItems();
 	}
 
 	private void refreshHeader() {

@@ -136,13 +136,13 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		return sprintItems;
 	}
 
-	@Override
-	public Class<CSprintItem> getEntityClass() { return CSprintItem.class; }
+        @Override
+        public Class<CSprintItem> getEntityClass() { return CSprintItem.class; }
 
-	@Override
-	public Class<?> getInitializerServiceClass() {
-		return null; // No initializer service needed
-	}
+        @Override
+        public Class<?> getInitializerServiceClass() {
+                return CSprintItemInitializerService.class;
+        }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceSprintItem.class; }

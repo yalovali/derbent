@@ -169,6 +169,11 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 	}
 
 	@Override
+	protected void locateFirstEntity() throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	protected void locateItemById(final Long pageItemId) {
 		try {
 			if (pageItemId == null) {
@@ -187,6 +192,11 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			LOGGER.error("Error locating item by ID {}: {}", pageItemId, e.getMessage());
 			throw new IllegalStateException("Error locating item by ID " + pageItemId + ": " + e.getMessage());
 		}
+	}
+
+	@Override
+	protected void on_after_construct() {
+		// TODO Auto-generated method stub
 	}
 
 	// Implementation of CEntityUpdateListener

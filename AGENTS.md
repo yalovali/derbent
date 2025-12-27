@@ -23,7 +23,6 @@ Build rules:
 - Do not add new Maven dependencies
 - No test framework changes
 - If code is untestable, explain why
-- Dont run playwright tests unless i told you to do
 Before coding:
 - Read existing implementations of similar features
 - Identify patterns already used in the codebase

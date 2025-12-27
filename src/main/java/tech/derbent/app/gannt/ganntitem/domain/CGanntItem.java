@@ -17,6 +17,12 @@ import tech.derbent.base.users.domain.CUser;
 // <T extends CEntityDB<T>>
 public class CGanntItem extends CEntityOfProject<CGanntItem> {
 
+	public static final String DEFAULT_COLOR = "#3B5FA7"; // CDE Purple - organizational entity
+	public static final String DEFAULT_ICON = "vaadin:folder-open";
+	public static final String ENTITY_TITLE_PLURAL = "Gannt Items";
+	public static final String ENTITY_TITLE_SINGULAR = "Gannt Item";
+	public static final String VIEW_NAME = "Gannt Items View";
+
 	static public CProjectItem<?> getGanntItemById(Long id, CProjectItem<?> selectedItem, final CEntityOfProjectService<?> activityService,
 			final CEntityOfProjectService<?> meetingService) {
 		CEntityOfProjectService<?> service = null;
@@ -110,7 +116,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	/** Get the duration in days.
 	 * @return The duration in days, or 1 if dates are not available */
 	public long getDurationDays() {
-		if ((startDate != null) && (endDate != null)) {
+		if (startDate != null && endDate != null) {
 			return java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
 		}
 		return 1; // Default duration
@@ -193,7 +199,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 			final long totalDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
 			final long elapsedDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, now);
 			if (totalDays > 0) {
-				return (int) ((elapsedDays * 100) / totalDays);
+				return (int) (elapsedDays * 100 / totalDays);
 			}
 		}
 		return 0;
@@ -220,12 +226,12 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	/** Check if dates are available for timeline display.
 	 * @return true if both start and end dates are available */
 	public boolean hasDates() {
-		return (startDate != null) && (endDate != null);
+		return startDate != null && endDate != null;
 	}
 
 	/** Check if this item has a parent.
 	 * @return true if parent exists */
 	public boolean hasParent() {
-		return (parentId != null) && (parentType != null);
+		return parentId != null && parentType != null;
 	}
 }

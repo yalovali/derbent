@@ -34,15 +34,15 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	@Override
 	public void bind() {
 		try {
+			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CKanbanLine.class.getSimpleName());
+			Check.notNull(getView(), "View must not be null to bind page service.");
+			super.bind();
 			if (getView() instanceof CDynamicPageViewWithoutGrid) {
 				// after form creation
 				final CHorizontalLayout layout = getView().getDetailsBuilder().getFormBuilder().getHorizontalLayout("kanbanBoard");
 				Objects.requireNonNull(layout, "Kanban board layout must not be null");
 				layout.setHeightFull();
 			}
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CKanbanLine.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
 		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CKanbanLine.class.getSimpleName(),
 					e.getMessage());
@@ -51,7 +51,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	}
 
 	public CComponentKanbanBoard createKanbanBoardComponent() {
-		final CKanbanLine currentLine = getView().getValue();
 		// it is null when ui is created
 		// Check.notNull(currentLine, "Kanban line must be available to create board component");
 		if (componentKanbanBoard == null) {
@@ -70,4 +69,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		}
 		return componentKanbanColumns;
 	}
+
+	public void on_load_after_bind() throws Exception {}
 }
