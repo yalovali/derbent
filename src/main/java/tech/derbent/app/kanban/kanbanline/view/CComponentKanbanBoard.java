@@ -172,36 +172,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		}
 	}
 
-	private void loadSprintItemsForActiveProject() {
-		LOGGER.debug("Loading sprint items for active project in Kanban board component");
-		if (getValue() != null) {
-			return;
-		}
-		final CSprint activeSprint = sessionService.getActiveProject().flatMap(project -> {
-			try {
-				final List<CSprint> sprints = sprintItemService.findAll().stream().map(CSprintItem::getSprint).filter(Objects::nonNull)
-						.filter(sprint -> project.equals(sprint.getProject())).distinct().collect(Collectors.toList());
-				return sprints.stream().findFirst();
-			} catch (final Exception e) {
-				LOGGER.error("Failed to load sprint items for Kanban board", e);
-				return null;
-			}
-		}).orElse(null);
-		if (activeSprint == null) {
-			LOGGER.debug("No active project sprint found for Kanban board; skipping sprint item load");
-			return;
-		}
-		final List<CSprintItem> sprintItems = sprintItemService.findByMasterIdWithItems(activeSprint.getId());
-		final List<CProjectItem<?>> sprintProjectItems = sprintItems.stream().map(CSprintItem::getItem).filter(Objects::nonNull)
-				.filter(CProjectItem.class::isInstance).map(item -> (CProjectItem<?>) item).collect(Collectors.toList());
-		allProjectItems = new ArrayList<>(sprintProjectItems);
-		filterToolbar.setAvailableItems(allProjectItems);
-		projectItems = new ArrayList<>(allProjectItems);
-	}
-
-	private void loadSprintsForActiveProject() {
-		availableSprints = new ArrayList<>();
-		final CProject project = sessionService.getActiveProject().orElse(null);
+        private void loadSprintsForActiveProject() {
+                availableSprints = new ArrayList<>();
+                final CProject project = sessionService.getActiveProject().orElse(null);
 		if (project == null) {
 			filterToolbar.setAvailableSprints(List.of(), null);
 			filterToolbar.setAvailableItems(List.of());
@@ -252,14 +225,13 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 
 	@Override
 	protected void onValueChanged(final CKanbanLine oldValue, final CKanbanLine newValue, final boolean fromClient) {
-		LOGGER.debug("Kanban board value changed from {} to {}", oldValue, newValue);
-		if (newValue == null) {
-			layoutColumns.removeAll();
-			return;
-		}
-		loadSprintsForActiveProject();
-		applyFilters();
-	}
+                LOGGER.debug("Kanban board value changed from {} to {}", oldValue, newValue);
+                if (newValue == null) {
+                        layoutColumns.removeAll();
+                        return;
+                }
+                loadSprintsForActiveProject();
+        }
 
 	@Override
 	public void populateForm() {

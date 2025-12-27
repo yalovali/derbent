@@ -69,12 +69,25 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		save(line);
 	}
 
-	// override finddefault
-	@Override
-	public Optional<CKanbanLine> findDefault() {
-		// check the current project kanbanline,
-		// if empty return the first kanbanline of the current company
-	}
+        // override finddefault
+        @Override
+        public Optional<CKanbanLine> findDefault() {
+                final Optional<CProject> activeProject = sessionService.getActiveProject();
+                if (activeProject.isPresent()) {
+                        final Optional<CKanbanLine> projectDefault = findDefaultForProject(activeProject.get());
+                        if (projectDefault.isPresent()) {
+                                return projectDefault;
+                        }
+                }
+                final Optional<CCompany> activeCompany = sessionService.getActiveCompany();
+                if (activeCompany.isPresent()) {
+                        final Optional<CKanbanLine> companyDefault = findDefaultForCompany(activeCompany.get());
+                        if (companyDefault.isPresent()) {
+                                return companyDefault;
+                        }
+                }
+                return resolveDefaultLine(findAll());
+        }
 
 	@Override
 	public Class<CKanbanLine> getEntityClass() { return CKanbanLine.class; }
