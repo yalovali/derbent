@@ -36,15 +36,15 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanBoard.class);
 	private static final long serialVersionUID = 1L;
 
-	private static boolean matchesResponsibleUser(final CProjectItem<?> item, final CUser targetUser) {
-		if (item.getResponsible() == null || item.getResponsible().getId() == null || targetUser.getId() == null) {
-			return false;
-		}
-		return item.getResponsible().getId().equals(targetUser.getId());
-	}
+        private static boolean matchesResponsibleUser(final CProjectItem<?> item, final CUser targetUser) {
+                if (item.getResponsible() == null || item.getResponsible().getId() == null || targetUser.getId() == null) {
+                        return false;
+                }
+                return item.getResponsible().getId().equals(targetUser.getId());
+        }
 
-	private static boolean matchesTypeFilter(final CProjectItem<?> item, final Class<?> entityClass) {
-		if (entityClass == null) {
+        private static boolean matchesTypeFilter(final CProjectItem<?> item, final Class<?> entityClass) {
+                if (entityClass == null) {
 			return true;
 		}
 		return entityClass.isAssignableFrom(item.getClass());
@@ -200,23 +200,19 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		}
 	}
 
-	private boolean matchesResponsibleFilter(final CProjectItem<?> item, final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria) {
-		LOGGER.debug("Checking responsible filter for Kanban board item {}", item != null ? item.getId() : "null");
-		final CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode mode = criteria.getResponsibleMode();
-		if (mode == null || mode == CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode.ALL) {
-			return true;
-		}
-		if (mode == CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode.CURRENT_USER) {
-			final CUser activeUser = sessionService.getActiveUser().orElse(null);
-			Check.notNull(activeUser, "Active user not available for Kanban board filtering");
-			return matchesResponsibleUser(item, activeUser);
-		}
-		if (mode == CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode.SPECIFIC_USER) {
-			Check.notNull(criteria.getResponsibleUser(), "Responsible user must be selected for specific filter");
-			return matchesResponsibleUser(item, criteria.getResponsibleUser());
-		}
-		return true;
-	}
+        private boolean matchesResponsibleFilter(final CProjectItem<?> item, final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria) {
+                LOGGER.debug("Checking responsible filter for Kanban board item {}", item != null ? item.getId() : "null");
+                final CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode mode = criteria.getResponsibleMode();
+                if (mode == null || mode == CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode.ALL) {
+                        return true;
+                }
+                if (mode == CComponentKanbanBoardFilterToolbar.ResponsibleFilterMode.CURRENT_USER) {
+                        final CUser activeUser = sessionService.getActiveUser().orElse(null);
+                        Check.notNull(activeUser, "Active user not available for Kanban board filtering");
+                        return matchesResponsibleUser(item, activeUser);
+                }
+                return true;
+        }
 
 	private void on_postit_selected() {
 		layoutDetails.removeAll();
@@ -279,9 +275,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		super.setValue((CKanbanLine) entity);
 	}
 
-	private Comparator<CSprint> sprintRecencyComparator() {
-		return Comparator.<CSprint, LocalDate>comparing(CSprint::getStartDate, Comparator.nullsLast(LocalDate::compareTo)).reversed()
-				.thenComparing(CSprint::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo)).reversed()
-				.thenComparing(CSprint::getId, Comparator.nullsLast(Long::compareTo)).reversed();
-	}
+        private Comparator<CSprint> sprintRecencyComparator() {
+                return Comparator.<CSprint, LocalDateTime>comparing(CSprint::getLastModifiedDate, Comparator.nullsLast(LocalDateTime::compareTo)).reversed()
+                                .thenComparing(CSprint::getStartDate, Comparator.nullsLast(LocalDate::compareTo)).reversed()
+                                .thenComparing(CSprint::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo)).reversed()
+                                .thenComparing(CSprint::getId, Comparator.nullsLast(Long::compareTo)).reversed();
+        }
 }

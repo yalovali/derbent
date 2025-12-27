@@ -64,23 +64,30 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		getStyle().set("background-color", backgroundColor);
 	}
 
-	private List<CProjectItem<?>> filterItems(final List<CProjectItem<?>> items) {
-		LOGGER.debug("Filtering items for kanban column {}", getValue() != null ? getValue().getName() : "null");
-		if (items == null || items.isEmpty()) {
-			return List.of();
-		}
-		final CKanbanColumn column = getValue();
-		if (column == null || column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
-			return List.of();
-		}
-		final Set<Long> includedStatusIds = column.getIncludedStatuses().stream().filter(Objects::nonNull).map(status -> status.getId())
-				.filter(Objects::nonNull).collect(Collectors.toSet());
-		if (includedStatusIds.isEmpty()) {
-			return List.of();
-		}
-		return items.stream().filter(Objects::nonNull).filter(item -> item.getStatus() != null && item.getStatus().getId() != null)
-				.filter(item -> includedStatusIds.contains(item.getStatus().getId())).collect(Collectors.toList());
-	}
+        private List<CProjectItem<?>> filterItems(final List<CProjectItem<?>> items) {
+                LOGGER.debug("Filtering items for kanban column {}", getValue() != null ? getValue().getName() : "null");
+                if (items == null || items.isEmpty()) {
+                        return List.of();
+                }
+                final CKanbanColumn column = getValue();
+                if (column == null || column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
+                        return column != null && column.getDefaultColumn() ? List.copyOf(items) : List.of();
+                }
+                final Set<Long> includedStatusIds = column.getIncludedStatuses().stream().filter(Objects::nonNull).map(status -> status.getId())
+                                .filter(Objects::nonNull).collect(Collectors.toSet());
+                if (includedStatusIds.isEmpty()) {
+                        return column.getDefaultColumn() ? List.copyOf(items) : List.of();
+                }
+                return items.stream().filter(Objects::nonNull).filter(item -> {
+                        if (item.getStatus() == null || item.getStatus().getId() == null) {
+                                return column.getDefaultColumn();
+                        }
+                        if (includedStatusIds.contains(item.getStatus().getId())) {
+                                return true;
+                        }
+                        return column.getDefaultColumn();
+                }).collect(Collectors.toList());
+        }
 
 	@Override
 	protected void onValueChanged(final CKanbanColumn oldValue, final CKanbanColumn newValue, final boolean fromClient) {
