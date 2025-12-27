@@ -27,6 +27,7 @@ import tech.derbent.base.session.service.ISessionService;
 public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanLineService.class);
+	private final Comparator<CKanbanLine> recencyComparator;
 
 	private static void normalizeKanbanColumnOrder(final CKanbanLine line) {
 		Check.notNull(line, "Kanban line cannot be null when normalizing column order");
@@ -54,6 +55,10 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 
 	public CKanbanLineService(final IKanbanLineRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+		recencyComparator = Comparator.<CKanbanLine, LocalDateTime>comparing(CKanbanLine::getLastModifiedDate,
+				Comparator.nullsLast(LocalDateTime::compareTo))
+						.thenComparing(CKanbanLine::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
+						.thenComparing(CKanbanLine::getId, Comparator.nullsLast(Long::compareTo)).reversed();
 	}
 
 	@Transactional
@@ -169,11 +174,6 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
                 if (lines == null || lines.isEmpty()) {
                         return Optional.empty();
                 }
-                final Comparator<CKanbanLine> recencyComparator = Comparator
-                                .<CKanbanLine, LocalDateTime>comparing(CKanbanLine::getLastModifiedDate,
-                                                Comparator.nullsLast(LocalDateTime::compareTo))
-                                .thenComparing(CKanbanLine::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
-                                .thenComparing(CKanbanLine::getId, Comparator.nullsLast(Long::compareTo)).reversed();
                 return lines.stream().max(recencyComparator);
         }
 }

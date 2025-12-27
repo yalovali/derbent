@@ -268,7 +268,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	@Transactional (readOnly = true)
-	public Page<EntityClass> list(final Pageable pageable, final String searchText) throws Exception {
+	public Page<EntityClass> listForPageView(final Pageable pageable, final String searchText) throws Exception {
 		try {
 			LOGGER.debug("Search text: {}", searchText);
 			final Pageable safePage = CPageableUtils.validateAndFix(pageable);

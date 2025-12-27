@@ -1,6 +1,7 @@
 package tech.derbent.app.gannt.ganntitem.domain;
 
 import java.time.LocalDate;
+import org.springframework.security.core.Transient;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -15,6 +16,7 @@ import tech.derbent.base.users.domain.CUser;
  * COrder) to provide a unified interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity
  * properties through the CProjectItem base class. */
 // <T extends CEntityDB<T>>
+@Transient
 public class CGanntItem extends CEntityOfProject<CGanntItem> {
 
 	public static final String DEFAULT_COLOR = "#3B5FA7"; // CDE Purple - organizational entity

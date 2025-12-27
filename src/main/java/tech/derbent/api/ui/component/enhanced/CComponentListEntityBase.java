@@ -573,7 +573,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
 	 * @param alreadySelectedMode     Mode for handling already-selected items */
 	@SuppressWarnings ({
-			"unchecked", "rawtypes", "static-method"
+			"unchecked", "rawtypes"
 	})
 	protected void on_buttonFromList_clicked(final String dialogTitle, final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CComponentEntitySelection.ItemsProvider<?> itemsProvider, final Consumer<List<?>> onItemsSelected, final boolean multiSelect,

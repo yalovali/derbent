@@ -486,7 +486,59 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			return "Unknown Item: " + String.valueOf(item);
 		});
-		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
+		if (binder != null && fieldInfo.getFieldTypeClass() != null && java.util.Set.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
+			@SuppressWarnings ("unchecked")
+			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
+			final com.vaadin.flow.data.converter.Converter<List<DetailClass>, java.util.Set<DetailClass>> converter =
+					new com.vaadin.flow.data.converter.Converter<>() {
+						@Override
+						public com.vaadin.flow.data.binder.Result<java.util.Set<DetailClass>> convertToModel(final List<DetailClass> value,
+								final com.vaadin.flow.data.binder.ValueContext context) {
+							if (value == null) {
+								return com.vaadin.flow.data.binder.Result.ok(new java.util.LinkedHashSet<>());
+							}
+							return com.vaadin.flow.data.binder.Result.ok(new java.util.LinkedHashSet<>(value));
+						}
+
+						@Override
+						public List<DetailClass> convertToPresentation(final java.util.Set<DetailClass> value,
+								final com.vaadin.flow.data.binder.ValueContext context) {
+							if (value == null) {
+								return new java.util.ArrayList<>();
+							}
+							return new java.util.ArrayList<>(value);
+						}
+					};
+			typedBinder.forField(dualListSelector).withConverter(converter).bind(fieldInfo.getFieldName());
+		} else if (binder != null && fieldInfo.getFieldTypeClass() != null
+				&& java.util.Collection.class.isAssignableFrom(fieldInfo.getFieldTypeClass())
+				&& !java.util.List.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
+			@SuppressWarnings ("unchecked")
+			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
+			final com.vaadin.flow.data.converter.Converter<List<DetailClass>, java.util.Collection<DetailClass>> converter =
+					new com.vaadin.flow.data.converter.Converter<>() {
+						@Override
+						public com.vaadin.flow.data.binder.Result<java.util.Collection<DetailClass>> convertToModel(final List<DetailClass> value,
+								final com.vaadin.flow.data.binder.ValueContext context) {
+							if (value == null) {
+								return com.vaadin.flow.data.binder.Result.ok(new java.util.ArrayList<>());
+							}
+							return com.vaadin.flow.data.binder.Result.ok(new java.util.ArrayList<>(value));
+						}
+
+						@Override
+						public List<DetailClass> convertToPresentation(final java.util.Collection<DetailClass> value,
+								final com.vaadin.flow.data.binder.ValueContext context) {
+							if (value == null) {
+								return new java.util.ArrayList<>();
+							}
+							return new java.util.ArrayList<>(value);
+						}
+					};
+			typedBinder.forField(dualListSelector).withConverter(converter).bind(fieldInfo.getFieldName());
+		} else {
+			safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
+		}
 		return dualListSelector;
 	}
 

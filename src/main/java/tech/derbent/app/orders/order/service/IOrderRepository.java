@@ -1,10 +1,12 @@
 package tech.derbent.app.orders.order.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.orders.order.domain.COrder;
+import tech.derbent.app.projects.domain.CProject;
 
 public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 
@@ -14,4 +16,22 @@ public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 				+ "LEFT JOIN FETCH o.entityType et " + "LEFT JOIN FETCH et.workflow " + "LEFT JOIN FETCH o.status " + "WHERE o.id = :id"
 	)
 	Optional<COrder> findById(@Param ("id") Long id);
+
+	@Override
+	@Query ("""
+			SELECT DISTINCT o FROM COrder o
+			LEFT JOIN FETCH o.project
+			LEFT JOIN FETCH o.assignedTo
+			LEFT JOIN FETCH o.createdBy
+			LEFT JOIN FETCH o.status
+			LEFT JOIN FETCH o.entityType et
+			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH o.currency
+			LEFT JOIN FETCH o.requestor
+			LEFT JOIN FETCH o.responsible
+			LEFT JOIN FETCH o.approvals
+			WHERE o.project = :project
+			ORDER BY o.name ASC
+			""")
+	List<COrder> listByProjectForPageView(@Param ("project") CProject project);
 }

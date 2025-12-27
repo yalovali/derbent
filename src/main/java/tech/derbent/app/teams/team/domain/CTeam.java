@@ -86,6 +86,13 @@ public class CTeam extends CEntityNamed<CTeam> {
 		return members;
 	}
 
+	@Override
+	public void initializeAllFields() {
+		if (members != null) {
+			members.size();
+		}
+	}
+
 	public CUser getTeamManager() { return teamManager; }
 
 	public void removeMember(final CUser user) {

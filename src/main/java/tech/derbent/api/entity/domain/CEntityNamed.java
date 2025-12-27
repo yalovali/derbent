@@ -2,7 +2,6 @@ package tech.derbent.api.entity.domain;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Map;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +11,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 
@@ -86,12 +84,6 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 			return description;
 		}
 		return description.substring(0, 75) + "...";
-	}
-
-	@SuppressWarnings ("static-method")
-	public Map<String, EntityFieldInfo> getFieldsInfo() { // TODO Auto-generated method
-															// stub
-		return null;
 	}
 
 	public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }

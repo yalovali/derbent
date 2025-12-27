@@ -34,4 +34,10 @@ public interface IDetailSectionRepository extends IEntityOfProjectRepository<CDe
 				+ "WHERE s.project = :project ORDER BY s.name ASC"
 	)
 	Page<CDetailSection> listByProject(@Param ("project") CProject project, Pageable pageable);
+	@Override
+	@Query (
+		"SELECT s FROM CDetailSection s " + "LEFT JOIN FETCH s.project " + "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
+				+ "LEFT JOIN FETCH s.detailLines " + "WHERE s.project = :project ORDER BY s.name ASC"
+	)
+	List<CDetailSection> listByProjectForPageView(@Param ("project") CProject project);
 }

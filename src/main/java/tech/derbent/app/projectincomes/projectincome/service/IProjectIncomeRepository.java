@@ -1,11 +1,13 @@
 package tech.derbent.app.projectincomes.projectincome.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType;
+import tech.derbent.app.projects.domain.CProject;
 
 public interface IProjectIncomeRepository extends IEntityOfProjectRepository<CProjectIncome> {
 
@@ -16,4 +18,18 @@ public interface IProjectIncomeRepository extends IEntityOfProjectRepository<CPr
 		"SELECT r FROM CProjectIncome r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow " + "WHERE r.id = :id"
 	)
 	Optional<CProjectIncome> findById(@Param ("id") Long id);
+
+	@Override
+	@Query ("""
+			SELECT r FROM CProjectIncome r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.assignedTo
+			LEFT JOIN FETCH r.createdBy
+			LEFT JOIN FETCH r.status
+			LEFT JOIN FETCH r.entityType et
+			LEFT JOIN FETCH et.workflow
+			WHERE r.project = :project
+			ORDER BY r.name ASC
+			""")
+	List<CProjectIncome> listByProjectForPageView(@Param ("project") CProject project);
 }

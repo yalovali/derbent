@@ -42,6 +42,21 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   ORDER BY m.id DESC
 			""")
 	Page<CMeeting> listByProject(@Param ("project") CProject project, Pageable pageable);
+	@Override
+	@Query ("""
+			   SELECT m FROM #{#entityName} m
+			   LEFT JOIN FETCH m.project
+			   LEFT JOIN FETCH m.entityType et
+			   LEFT JOIN FETCH et.workflow
+			   LEFT JOIN FETCH m.status
+			   LEFT JOIN FETCH m.responsible
+			   LEFT JOIN FETCH m.relatedActivity
+			   LEFT JOIN FETCH m.attendees
+			   LEFT JOIN FETCH m.participants
+			   WHERE m.project = :project
+			   ORDER BY m.id DESC
+			""")
+	List<CMeeting> listByProjectForPageView(@Param ("project") CProject project);
 	/** Find all meetings by project ordered by sprint order for sprint-aware components. Null sprintOrder values will appear last.
 	 * @param project the project
 	 * @return list of meetings ordered by sprintOrder ASC, id DESC */

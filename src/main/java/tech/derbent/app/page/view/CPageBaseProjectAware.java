@@ -1,6 +1,9 @@
 package tech.derbent.app.page.view;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +12,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -32,6 +37,23 @@ public abstract class CPageBaseProjectAware extends CPageBase
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageBaseProjectAware.class);
 	private static final long serialVersionUID = 1L;
+
+	private static List<Field> getAllFields(final Class<?> clazz) {
+		final List<Field> fields = new ArrayList<>();
+		Class<?> currentClass = clazz;
+		while (currentClass != null) {
+			for (final Field field : currentClass.getDeclaredFields()) {
+				fields.add(field);
+			}
+			currentClass = currentClass.getSuperclass();
+		}
+		return fields;
+	}
+
+	private static boolean isSingleValueRelationField(final Field field) {
+		return field.isAnnotationPresent(ManyToOne.class) || field.isAnnotationPresent(OneToOne.class);
+	}
+
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected Map<String, Component> componentMap = new HashMap<String, Component>();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
@@ -214,12 +236,36 @@ public abstract class CPageBaseProjectAware extends CPageBase
 		try {
 			if (entity == null) {
 				LOGGER.debug("Setting current entity to null.");
+				currentEntity = null;
+				return;
 			}
+			// Fail fast if lazy relations were not initialized before binding.
+			entity.initializeAllFields();
+			validateLazyFieldsInitialized(entity);
 			// LOGGER.debug("Setting current entity: {}", entity);
 			currentEntity = entity;
 		} catch (final Exception e) {
 			LOGGER.error("Error setting current entity.");
 			throw e;
+		}
+	}
+
+	private void validateLazyFieldsInitialized(final CEntityDB<?> entity) {
+		Check.notNull(entity, "Entity cannot be null while validating lazy fields");
+		for (final Field field : getAllFields(entity.getClass())) {
+			if (!isSingleValueRelationField(field)) {
+				continue;
+			}
+			field.setAccessible(true);
+			try {
+				final Object value = field.get(entity);
+				if (value != null) {
+					Check.isInitialized(value, "Lazy field '" + field.getName() + "' is not initialized for " + entity.getClass().getSimpleName());
+				}
+			} catch (final IllegalAccessException e) {
+				LOGGER.error("Failed to validate lazy field {} for entity {}", field.getName(), entity.getClass().getSimpleName(), e);
+				throw new IllegalStateException("Unable to validate lazy fields for " + entity.getClass().getSimpleName(), e);
+			}
 		}
 	}
 }

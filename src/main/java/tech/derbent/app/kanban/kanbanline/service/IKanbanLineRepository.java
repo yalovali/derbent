@@ -40,6 +40,17 @@ public interface IKanbanLineRepository extends IEntityOfCompanyRepository<CKanba
 			   LEFT JOIN FETCH l.company
 			   LEFT JOIN FETCH l.kanbanColumns kc
 			   LEFT JOIN FETCH kc.includedStatuses
+			   WHERE l.company = :company
+			   ORDER BY l.name ASC
+			""")
+	List<CKanbanLine> listByCompanyForPageView(@Param ("company") CCompany company);
+
+	@Override
+	@Query ("""
+			   SELECT DISTINCT l FROM #{#entityName} l
+			   LEFT JOIN FETCH l.company
+			   LEFT JOIN FETCH l.kanbanColumns kc
+			   LEFT JOIN FETCH kc.includedStatuses
 			   WHERE l.id = :id
 			""")
 	Optional<CKanbanLine> findById(@Param ("id") Long id);

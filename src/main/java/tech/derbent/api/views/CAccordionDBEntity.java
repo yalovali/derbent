@@ -4,7 +4,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.annotations.CFormBuilder;
-import tech.derbent.api.annotations.CFormBuilder.IComboBoxDataProvider;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -35,12 +34,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		binder.readBean(null);
 	}
 
-	@SuppressWarnings ("static-method")
-	@Deprecated
-	protected IComboBoxDataProvider createComboBoxDataProvider() {
-		return null;
-	}
-
 	// Override if you need to customize the panel content creation
 	protected void createPanelContent() throws Exception {
 		addToContent(CFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()));
@@ -58,15 +51,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	@Override
 	public CAbstractService<EntityClass> getEntityService() { return entityService; }
-
-	/** Override this method in subclasses to provide local context values specific to this accordion panel.
-	 * @param contextName the context name to resolve
-	 * @return the local context value, or null if not found locally */
-	@SuppressWarnings ("static-method")
-	protected Object getLocalContextValue(String contextName) {
-		// Subclasses can override to provide specific context values
-		return null;
-	}
 
 	@SuppressWarnings ("unchecked")
 	@Override
@@ -97,10 +81,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		// fields with the entity data
 		LOGGER.debug("Populating accordion {} with entity: {}", getAccordionTitle(), entity.getId() != null ? entity.getId() : "null");
 		binder.readBean(entity);
-	}
-
-	// used if there is a specific save logic for the entity
-	public void saveEventHandler() { /*****/
 	}
 
 	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }

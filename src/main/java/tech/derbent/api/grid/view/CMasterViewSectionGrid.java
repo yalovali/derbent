@@ -23,7 +23,6 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		createMasterView();
 	}
 
-	@SuppressWarnings ("static-method")
 	protected Component createGridToolbar() {
 		return null;
 	}
@@ -38,11 +37,6 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 		page.createGridForEntity(grid);
 		add(grid);
-	}
-
-	private int dpSize() {
-		// If you prefer your PageableUtils, you can replace with it.
-		return grid.getDataProvider().size(new Query<>());
 	}
 
 	private Optional<EntityClass> fetchIndex(final int index) {
@@ -81,27 +75,6 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	public void selectFirst() {
 		final Optional<EntityClass> first = fetchIndex(0);
 		grid.asSingleSelect().setValue(first.orElse(null));
-	}
-
-	/** Select by zero-based index; negative or out-of-range clears. */
-	public void selectIndex(final int index) {
-		if (index < 0) {
-			grid.asSingleSelect().clear();
-			return;
-		}
-		final Optional<EntityClass> found = fetchIndex(index);
-		grid.asSingleSelect().setValue(found.orElse(null));
-	}
-
-	/** Select the last row if any; otherwise clears selection. */
-	public void selectLast() {
-		final int size = dpSize();
-		if (size <= 0) {
-			grid.asSingleSelect().clear();
-			return;
-		}
-		final Optional<EntityClass> last = fetchIndex(size - 1);
-		grid.asSingleSelect().setValue(last.orElse(null));
 	}
 
 	/** Convenience: try to select last; if none, select first (clears when empty). */

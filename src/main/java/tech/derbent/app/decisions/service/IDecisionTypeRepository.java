@@ -23,4 +23,16 @@ public interface IDecisionTypeRepository extends IEntityOfProjectRepository<CDec
 	List<CDecisionType> findByProjectAndRequiresApprovalTrue(@Param ("project") CProject project);
 	@Query ("SELECT dt FROM CDecisionType dt WHERE dt.project = :project")
 	List<CDecisionType> findByProjectOrderBySortOrderAsc(@Param ("project") CProject project);
+
+	@Override
+	@Query ("""
+			SELECT dt FROM CDecisionType dt
+			LEFT JOIN FETCH dt.project
+			LEFT JOIN FETCH dt.assignedTo
+			LEFT JOIN FETCH dt.createdBy
+			LEFT JOIN FETCH dt.workflow
+			WHERE dt.project = :project
+			ORDER BY dt.name ASC
+			""")
+	List<CDecisionType> listByProjectForPageView(@Param ("project") CProject project);
 }

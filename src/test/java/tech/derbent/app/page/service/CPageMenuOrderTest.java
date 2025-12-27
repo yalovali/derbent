@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 public class CPageMenuOrderTest {
 
 	/** Test default order value (999.0) for missing or invalid orders. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testDefaultOrder() {
 		final Double defaultOrder = 999.0;
@@ -19,7 +19,7 @@ public class CPageMenuOrderTest {
 
 	/** Test parsing of hierarchical order values. Tests the interpretation of order values like 4.1 where: - Integer part (4) represents parent order
 	 * - Fractional part (0.1) represents child order (1) */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testHierarchicalOrderParsing() {
 		// Test single level order
@@ -56,7 +56,7 @@ public class CPageMenuOrderTest {
 	}
 
 	/** Test that order values are correctly interpreted for menu hierarchy. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testMenuOrderInterpretation() {
 		// Simulate menu ordering scenarios

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.roles.domain.CUserProjectRole;
+import tech.derbent.app.projects.domain.CProject;
 
 /** CUserProjectRoleRepository - Repository interface for CUserProjectRole entity. Layer: Service (MVC) Provides data access operations for
  * project-aware user project roles with eager loading support. Uses super interface methods where available to maintain simplicity. */
@@ -27,4 +28,15 @@ public interface IUserProjectRoleRepository extends IEntityOfProjectRepository<C
 	List<CUserProjectRole> findUserRoles();
 	@Query ("SELECT upr FROM CUserProjectRole upr " + "WHERE upr.isGuest = true")
 	List<CUserProjectRole> findGuestRoles();
+
+	@Override
+	@Query ("""
+			SELECT upr FROM CUserProjectRole upr
+			LEFT JOIN FETCH upr.project
+			LEFT JOIN FETCH upr.assignedTo
+			LEFT JOIN FETCH upr.createdBy
+			WHERE upr.project = :project
+			ORDER BY upr.name ASC
+			""")
+	List<CUserProjectRole> listByProjectForPageView(@Param ("project") CProject project);
 }

@@ -58,6 +58,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	private List<CProjectItem<?>> projectItems;
 	private CSprint currentSprint;
 	private CComponentKanbanPostit selectedPostit;
+	private final Comparator<CSprint> sprintRecencyComparator;
 	private final CSprintItemService sprintItemService;
 	private final CSprintService sprintService;
 	private final ISessionService sessionService;
@@ -80,6 +81,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		layoutColumns.setSpacing(true);
 		layoutColumns.setAlignItems(Alignment.START);
 		layoutColumns.addClassName("kanban-board-columns");
+		sprintRecencyComparator = Comparator.<CSprint, LocalDateTime>comparing(CSprint::getLastModifiedDate, Comparator.nullsLast(LocalDateTime::compareTo))
+				.thenComparing(CSprint::getStartDate, Comparator.nullsLast(LocalDate::compareTo))
+				.thenComparing(CSprint::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
+				.thenComparing(CSprint::getId, Comparator.nullsLast(Long::compareTo));
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
 		filterToolbar.addKanbanFilterChangeListener(criteria -> applyFilters());
 		setSizeFull();
@@ -102,7 +107,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		final CKanbanLine currentLine = getValue();
 		Check.notNull(currentLine, "Kanban line must be set before applying filters");
 		final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
-		if (!isSameSprint(criteria.getSprint(), currentSprint)) {
+		if (!isSameSprint(criteria.getSprint())) {
 			currentSprint = criteria.getSprint();
 			loadProjectItemsForSprint(currentSprint);
 		}
@@ -141,17 +146,17 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	@Override
 	public CAbstractService<?> getEntityService() { return null; }
 
-	private boolean isSameSprint(final CSprint first, final CSprint second) {
-		if (first == null && second == null) {
+	private boolean isSameSprint(final CSprint candidate) {
+		if (candidate == null && currentSprint == null) {
 			return true;
 		}
-		if (first == null || second == null) {
+		if (candidate == null || currentSprint == null) {
 			return false;
 		}
-		if (first.getId() != null && second.getId() != null) {
-			return first.getId().equals(second.getId());
+		if (candidate.getId() != null && currentSprint.getId() != null) {
+			return candidate.getId().equals(currentSprint.getId());
 		}
-		return Objects.equals(first, second);
+		return Objects.equals(candidate, currentSprint);
 	}
 
 	private void loadProjectItemsForSprint(final CSprint sprint) {
@@ -193,7 +198,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 			// Keep sprint selection constrained to the active project and preselect the newest sprint
 			// so the board always opens with the freshest work.
 			availableSprints = sprintService.listByProject(project);
-			availableSprints.sort(sprintRecencyComparator().reversed());
+			availableSprints.sort(sprintRecencyComparator.reversed());
 			final CSprint defaultSprint = resolveDefaultSprint(availableSprints);
 			filterToolbar.setAvailableSprints(availableSprints, defaultSprint);
 			currentSprint = filterToolbar.getCurrentCriteria().getSprint();
@@ -275,7 +280,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	}
 
 	private CSprint resolveDefaultSprint(final List<CSprint> sprints) {
-		return sprints.stream().max(sprintRecencyComparator()).orElse(null);
+		return sprints.stream().max(sprintRecencyComparator).orElse(null);
 	}
 
 	public void setProjectItems(final List<CProjectItem<?>> projectItems) {
@@ -292,10 +297,4 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		super.setValue((CKanbanLine) entity);
 	}
 
-	private Comparator<CSprint> sprintRecencyComparator() {
-		return Comparator.<CSprint, LocalDateTime>comparing(CSprint::getLastModifiedDate, Comparator.nullsLast(LocalDateTime::compareTo))
-				.thenComparing(CSprint::getStartDate, Comparator.nullsLast(LocalDate::compareTo))
-				.thenComparing(CSprint::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
-				.thenComparing(CSprint::getId, Comparator.nullsLast(Long::compareTo));
-	}
 }

@@ -1,5 +1,6 @@
 package tech.derbent.app.activities.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +16,16 @@ public interface IActivityPriorityRepository extends IEntityOfProjectRepository<
 
 	@Query ("SELECT p FROM CActivityPriority p WHERE p.isDefault = true and p.project = :project")
 	Optional<CActivityPriority> findByIsDefaultTrue(@Param ("project") CProject project);
+
+	@Override
+	@Query ("""
+			SELECT p FROM CActivityPriority p
+			LEFT JOIN FETCH p.project
+			LEFT JOIN FETCH p.assignedTo
+			LEFT JOIN FETCH p.createdBy
+			LEFT JOIN FETCH p.workflow
+			WHERE p.project = :project
+			ORDER BY p.name ASC
+			""")
+	List<CActivityPriority> listByProjectForPageView(@Param ("project") CProject project);
 }

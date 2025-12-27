@@ -206,7 +206,6 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
 
-	@SuppressWarnings ("static-method")
 	private Set<IProjectChangeListener> getCurrentProjectChangeListeners() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -217,7 +216,6 @@ public class CWebSessionService implements ISessionService {
 		return listeners != null ? listeners : Collections.emptySet();
 	}
 
-	@SuppressWarnings ("static-method")
 	private Set<IProjectListChangeListener> getCurrentProjectListChangeListeners() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -229,7 +227,7 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	@SuppressWarnings ({
-			"unchecked", "static-method"
+			"unchecked"
 	})
 	private Set<String> getOrCreateActiveIdAttributes(final VaadinSession session) {
 		Set<String> attributes = (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);

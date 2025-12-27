@@ -43,6 +43,19 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			ORDER BY a.id DESC
 			""")
 	Page<CActivity> listByProject(@Param ("project") CProject project, Pageable pageable);
+	@Override
+	@Query ("""
+			SELECT a FROM #{#entityName} a
+			LEFT JOIN FETCH a.project
+			LEFT JOIN FETCH a.assignedTo
+			LEFT JOIN FETCH a.createdBy
+			LEFT JOIN FETCH a.entityType et
+			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH a.status
+			WHERE a.project = :project
+			ORDER BY a.id DESC
+			""")
+	List<CActivity> listByProjectForPageView(@Param ("project") CProject project);
 	// find all activities of projects where the user's company owns the project
 	@Query ("""
 				SELECT a FROM #{#entityName} a
@@ -60,13 +73,13 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.project
 			LEFT JOIN FETCH a.assignedTo
 			LEFT JOIN FETCH a.createdBy
-				LEFT JOIN FETCH a.entityType et
-				LEFT JOIN FETCH et.workflow
-				LEFT JOIN FETCH a.status
-				WHERE a.project = :project
-				and a.sprintItem IS NULL
-				ORDER BY a.sprintOrder ASC NULLS LAST, a.id DESC
-				""")
+			LEFT JOIN FETCH a.entityType et
+			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH a.status
+			WHERE a.project = :project
+			and a.sprintItem IS NULL
+			ORDER BY a.sprintOrder ASC NULLS LAST, a.id DESC
+			""")
 	List<CActivity> listForProjectBacklog(@Param ("project") CProject project);
 
 	/** Find all activities that are members of a specific sprint (via sprintItem relation).

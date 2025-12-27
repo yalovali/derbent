@@ -6,8 +6,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.utils.CPageableUtils;
@@ -94,6 +96,28 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 			LOGGER.error("findByProject failed (company: {}): {}", Optional.ofNullable(company.getName()).orElse("<no-name>"), ex.toString(), ex);
 			throw ex; // Spring’in exception translation’ını koru
 		}
+	}
+
+	@Transactional (readOnly = true)
+	public Page<EntityClass> listByCompanyForPageView(final CCompany company, final Pageable pageable, final String searchText) {
+		Check.notNull(company, "Company cannot be null");
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final String term = searchText == null ? "" : searchText.trim();
+		final List<EntityClass> all = ((IEntityOfCompanyRepository<EntityClass>) repository).listByCompanyForPageView(company);
+		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
+		final List<EntityClass> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+		final List<EntityClass> content = filtered.subList(start, end);
+		return new PageImpl<>(content, safePage, filtered.size());
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<EntityClass> listForPageView(final Pageable pageable, final String searchText) throws Exception {
+		final CCompany company = sessionService.getActiveCompany()
+				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot list entities without company context"));
+		return listByCompanyForPageView(company, pageable, searchText);
 	}
 
 	@Override

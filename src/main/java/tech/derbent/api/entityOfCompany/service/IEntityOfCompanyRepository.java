@@ -20,6 +20,13 @@ public interface IEntityOfCompanyRepository<EntityClass extends CEntityOfCompany
 	List<EntityClass> findByCompany(@Param ("company") CCompany company);
 	@Query ("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.company co WHERE e.company = :company ORDER BY e.name ASC")
 	Page<EntityClass> findByCompany(@Param ("company") CCompany company, Pageable pageable);
+	@Query ("""
+			SELECT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.company co
+			WHERE e.company = :company
+			ORDER BY e.name ASC
+			""")
+	List<EntityClass> listByCompanyForPageView(@Param ("company") CCompany company);
 	Optional<EntityClass> findByNameIgnoreCaseAndCompany(String name, CCompany company);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.company.id = :cid ORDER BY e.name ASC")
 	List<EntityClass> listByCompanyId(@Param ("cid") Long cid);

@@ -21,6 +21,11 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company = :company"
 	)
 	Page<CUser> findByCompany(@Param ("company") CCompany company, Pageable pageable);
+	@Override
+	@Query (
+		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company = :company"
+	)
+	List<CUser> listByCompanyForPageView(@Param ("company") CCompany company);
 	// Page<CUser> findByCompany(CCompany company, Pageable pageable);
 	/** Find all users by company ID with eager loading */
 	@Override

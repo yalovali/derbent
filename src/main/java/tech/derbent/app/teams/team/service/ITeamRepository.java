@@ -14,6 +14,9 @@ public interface ITeamRepository extends IAbstractNamedRepository<CTeam> {
 	/** Find all teams for a specific company */
 	@Query ("SELECT t FROM CTeam t WHERE t.company = :company ORDER BY t.name")
 	List<CTeam> findByCompany(@Param ("company") CCompany company);
+	/** Page view query with fetch joins for full entity graph */
+	@Query ("SELECT DISTINCT t FROM CTeam t LEFT JOIN FETCH t.company LEFT JOIN FETCH t.teamManager LEFT JOIN FETCH t.members WHERE t.company = :company ORDER BY t.name")
+	List<CTeam> listByCompanyForPageView(@Param ("company") CCompany company);
 	@Override
 	@Query ("SELECT t FROM CTeam t LEFT JOIN FETCH t.company LEFT JOIN FETCH t.teamManager LEFT JOIN FETCH t.members WHERE t.id = :id")
 	Optional<CTeam> findById(@Param ("id") Long id);

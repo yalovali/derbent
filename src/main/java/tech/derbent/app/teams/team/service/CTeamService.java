@@ -4,13 +4,19 @@ import java.time.Clock;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.service.CEntityNamedService;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.utils.CPageableUtils;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.base.session.service.ISessionService;
@@ -45,6 +51,28 @@ public class CTeamService extends CEntityNamedService<CTeam> implements IEntityR
 	public List<CTeam> findByCompany(final CCompany company) {
 		LOGGER.debug("Finding teams for company: {}", company != null ? company.getName() : "null");
 		return ((ITeamRepository) repository).findByCompany(company);
+	}
+
+	@Transactional (readOnly = true)
+	public Page<CTeam> listByCompanyForPageView(final CCompany company, final Pageable pageable, final String searchText) {
+		Check.notNull(company, "Company cannot be null");
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final String term = searchText == null ? "" : searchText.trim();
+		final List<CTeam> all = ((ITeamRepository) repository).listByCompanyForPageView(company);
+		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
+		final List<CTeam> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+		final List<CTeam> content = filtered.subList(start, end);
+		return new PageImpl<>(content, safePage, filtered.size());
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CTeam> listForPageView(final Pageable pageable, final String searchText) throws Exception {
+		final CCompany company = sessionService.getActiveCompany()
+				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot list entities without company context"));
+		return listByCompanyForPageView(company, pageable, searchText);
 	}
 
 	/**

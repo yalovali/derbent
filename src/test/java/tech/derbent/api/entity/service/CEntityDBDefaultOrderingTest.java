@@ -38,7 +38,7 @@ class CEntityDBDefaultOrderingTest {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testCEntityDB_defaultOrderByReturnsId() {
 		final TestEntity entity = new TestEntity();
@@ -47,7 +47,7 @@ class CEntityDBDefaultOrderingTest {
 		assertEquals("id", orderField, "CEntityDB should order by 'id' by default");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testCEntityNamed_defaultOrderByReturnsName() {
 		final TestNamedEntity entity = new TestNamedEntity("Test");
@@ -56,7 +56,7 @@ class CEntityDBDefaultOrderingTest {
 		assertEquals("name", orderField, "CEntityNamed should order by 'name' by default");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testCustomEntity_canOverrideDefaultOrder() {
 		final TestCustomOrderEntity entity = new TestCustomOrderEntity();
@@ -65,7 +65,7 @@ class CEntityDBDefaultOrderingTest {
 		assertEquals("createDate", orderField, "Custom entity should order by 'createDate'");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testSort_canBeCreatedFromDefaultOrder() {
 		final TestEntity entity = new TestEntity();

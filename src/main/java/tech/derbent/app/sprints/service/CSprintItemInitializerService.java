@@ -71,7 +71,8 @@ public class CSprintItemInitializerService extends CInitializerServiceBase {
 		final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
 		final List<CSprint> sprints = sprintService.listByProject(project);
 		for (final CSprint sprint : sprints) {
-			if (!sprintItemService.findByMasterIdWithItems(sprint.getId()).isEmpty()) {
+			// Avoid loading transient sprint item fields when checking for existing data.
+			if (!sprintItemService.findByMasterId(sprint.getId()).isEmpty()) {
 				if (minimal) {
 					return;
 				}

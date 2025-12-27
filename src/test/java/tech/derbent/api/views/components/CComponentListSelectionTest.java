@@ -46,7 +46,7 @@ public class CComponentListSelectionTest {
 		assertEquals(2, changeCount[0], "Should still have two value changes (no change)");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testBinderIntegration_SimulateEntitySwitch() {
 		// This test simulates how the binder behaves when switching between entities
@@ -77,7 +77,7 @@ public class CComponentListSelectionTest {
 		assertEquals(allItems.size(), component.getValue().size());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testClear() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -90,7 +90,7 @@ public class CComponentListSelectionTest {
 		assertEquals(0, component.getValue().size());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testComponentInitialization() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -100,7 +100,7 @@ public class CComponentListSelectionTest {
 		assertTrue(component.getValue().isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testListSeparation() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -118,7 +118,7 @@ public class CComponentListSelectionTest {
 		assertFalse(component.isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testReadOnlyMode() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -129,7 +129,7 @@ public class CComponentListSelectionTest {
 		assertFalse(component.isReadOnly());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testSetSourceItems() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -139,7 +139,7 @@ public class CComponentListSelectionTest {
 		assertTrue(component.isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testSetValue() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -158,7 +158,7 @@ public class CComponentListSelectionTest {
 		assertFalse(component.isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testValueChangeWithNullHandling() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);

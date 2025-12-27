@@ -278,7 +278,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				}
 			});
 		}
-		masterViewSection.setDataProvider(getMasterQuery());
+		masterViewSection.setDataProvider(getPageViewQuery());
 		final VerticalLayout gridContainer = new VerticalLayout();
 		gridContainer.setClassName("grid-container");
 		gridContainer.setPadding(false);
@@ -336,7 +336,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	@Override
 	public CAbstractService<EntityClass> getEntityService() { return entityService; }
 
-	protected CallbackDataProvider<EntityClass, Void> getMasterQuery() {
+	@Override
+	public abstract CPageService<EntityClass> getPageService();
+
+	protected CallbackDataProvider<EntityClass, Void> getPageViewQuery() {
 		return new CallbackDataProvider<>(query -> {
 			// --- sort (manuel çeviri)
 			final List<QuerySortOrder> sortOrders = Optional.ofNullable(query.getSortOrders()).orElse(java.util.Collections.emptyList());
@@ -352,7 +355,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			final String term = currentSearchText == null ? "" : currentSearchText.trim();
 			// *** TEK KAYNAK: her zaman search'lü metodu kullan ***
 			try {
-				return entityService.list(pageable, term).stream();
+				return entityService.listForPageView(pageable, term).stream();
 			} catch (final Exception e) {
 				e.printStackTrace();
 				return java.util.Collections.<EntityClass>emptyList().stream();
@@ -361,7 +364,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			final String term = currentSearchText == null ? "" : currentSearchText.trim();
 			long total;
 			try {
-				total = entityService.list(PageRequest.of(0, 1), term).getTotalElements();
+				total = entityService.listForPageView(PageRequest.of(0, 1), term).getTotalElements();
 				return (int) Math.min(total, Integer.MAX_VALUE);
 			} catch (final Exception e1) {
 				e1.printStackTrace();
@@ -369,9 +372,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			}
 		});
 	}
-
-	@Override
-	public abstract CPageService<EntityClass> getPageService();
 
 	/** Gets the search toolbar component, if available.
 	 * @return the search toolbar component, or null if entity doesn't support searching */
@@ -593,7 +593,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				}
 			});
 		}
-		masterViewSection.setDataProvider(getMasterQuery());
+		masterViewSection.setDataProvider(getPageViewQuery());
 		// Create the grid container with search toolbar
 		final VerticalLayout gridContainer = new VerticalLayout();
 		gridContainer.setClassName("grid-container");

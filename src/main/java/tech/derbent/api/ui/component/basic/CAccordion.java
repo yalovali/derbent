@@ -35,7 +35,6 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 		close();
 	}
 
-	@SuppressWarnings ("static-method")
 	protected String createDeleteConfirmationMessage(@SuppressWarnings ("unused") CUserProjectSettings selected) {
 		// TODO Auto-generated method stub
 		return null;

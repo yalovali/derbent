@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for CDualListSelectorComponent to verify basic functionality. */
 public class CDualListSelectorComponentTest {
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testClear() {
 		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
@@ -25,7 +25,7 @@ public class CDualListSelectorComponentTest {
 		assertEquals(0, component.getValue().size());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testComponentInitialization() {
 		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
@@ -35,7 +35,7 @@ public class CDualListSelectorComponentTest {
 		assertTrue(component.getValue().isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testGetSelectedItems() {
 		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
@@ -48,7 +48,7 @@ public class CDualListSelectorComponentTest {
 		assertTrue(selectedItems.contains("Item 2"));
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testReadOnlyMode() {
 		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
@@ -59,7 +59,7 @@ public class CDualListSelectorComponentTest {
 		assertFalse(component.isReadOnly());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testSetItems() {
 		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");
@@ -69,7 +69,7 @@ public class CDualListSelectorComponentTest {
 		assertTrue(component.isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testSetValue() {
 		final CDualListSelectorComponent<String> component = new CDualListSelectorComponent<>("Available", "Selected");

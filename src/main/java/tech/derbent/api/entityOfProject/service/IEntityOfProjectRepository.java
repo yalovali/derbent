@@ -24,6 +24,15 @@ public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject
 	List<EntityClass> listByProject(@Param ("project") CProject project);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project ORDER BY e.name ASC")
 	Page<EntityClass> listByProject(@Param ("project") CProject project, Pageable pageable);
+	@Query ("""
+			SELECT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.project
+			LEFT JOIN FETCH e.assignedTo
+			LEFT JOIN FETCH e.createdBy
+			WHERE e.project = :project
+			ORDER BY e.name ASC
+			""")
+	List<EntityClass> listByProjectForPageView(@Param ("project") CProject project);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project.id = :pid ORDER BY e.name ASC")
 	List<EntityClass> listByProjectId(@Param ("pid") Long pid);
 }

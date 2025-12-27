@@ -451,6 +451,16 @@ public abstract class CBaseUITest {
 		if (exceptionDialog.count() > 0) {
 			throw new AssertionError("Exception dialog detected at " + controlPoint + "; failing fast.");
 		}
+		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
+		if (overlay.count() == 0) {
+			return;
+		}
+		final Locator errorOverlay = overlay.filter(new Locator.FilterOptions().setHasText("Error Details"))
+				.or(overlay.filter(new Locator.FilterOptions().setHasText("Exception")))
+				.or(overlay.filter(new Locator.FilterOptions().setHasText("Error handling")));
+		if (errorOverlay.count() > 0) {
+			throw new AssertionError("Exception dialog detected at " + controlPoint + "; failing fast.");
+		}
 	}
 
 	private void failFastIfLoginErrorVisible(final String controlPoint) {
@@ -1094,6 +1104,9 @@ public abstract class CBaseUITest {
 
 	/** Comprehensive exception check - combines log scanning and browser console checks */
 	protected void performFailFastCheck(String controlPoint) {
+		if (!isBrowserAvailable()) {
+			return;
+		}
 		failFastIfExceptionDialogVisible(controlPoint);
 		checkForExceptionsAndFailFast(controlPoint);
 		checkBrowserConsoleForErrors(controlPoint);
@@ -1167,13 +1180,11 @@ public abstract class CBaseUITest {
 	}
 
 	/** Sanitizes raw text into a lower-case, hyphenated DOM-friendly identifier. */
-	@SuppressWarnings ("static-method")
 	protected String sanitizeForDomId(final String value) {
 		return sanitizeForIdentifier(value, FIELD_ID_PREFIX + "-autogen");
 	}
 
 	/** Sanitizes raw text for use in filenames with a custom fallback. */
-	@SuppressWarnings ("static-method")
 	protected String sanitizeForFileName(final String value, final String fallback) {
 		return sanitizeForIdentifier(value, fallback);
 	}
@@ -1904,22 +1915,24 @@ public abstract class CBaseUITest {
 	}
 
 	/** Waits for 1000 milliseconds to allow complex operations to complete. */
-	@SuppressWarnings ("static-method")
 	protected void wait_1000() {
 		try {
 			Thread.sleep(1000);
 		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} finally {
+			performFailFastCheck("wait_1000");
 		}
 	}
 
 	/** Waits for 2000 milliseconds for slow operations like navigation. */
-	@SuppressWarnings ("static-method")
 	protected void wait_2000() {
 		try {
 			Thread.sleep(2000);
 		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} finally {
+			performFailFastCheck("wait_2000");
 		}
 	}
 	// ===========================================
@@ -1927,12 +1940,13 @@ public abstract class CBaseUITest {
 	// ===========================================
 
 	/** Waits for 500 milliseconds to allow UI updates to complete. */
-	@SuppressWarnings ("static-method")
 	protected void wait_500() {
 		try {
 			Thread.sleep(500);
 		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} finally {
+			performFailFastCheck("wait_500");
 		}
 	}
 

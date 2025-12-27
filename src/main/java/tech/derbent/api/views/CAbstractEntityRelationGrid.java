@@ -21,6 +21,20 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 	public static final String WIDTH_PERMISSION = "150px";
 	public static final String WIDTH_ROLE = "150px";
 	public static final String WIDTH_STATUS = "120px";
+
+	private static int compareIds(final Long left, final Long right) {
+		if (left == null && right == null) {
+			return 0;
+		}
+		if (left == null) {
+			return 1;
+		}
+		if (right == null) {
+			return -1;
+		}
+		return Long.compare(left, right);
+	}
+
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Constructor for relation grid */
@@ -70,20 +84,6 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 			final String header) {
 		final var column = addColumn(statusProvider).setWidth(WIDTH_STATUS).setFlexGrow(0).setSortable(true);
 		return CGrid.styleColumnHeader(column, header);
-	}
-
-	@SuppressWarnings ("static-method")
-	private int compareIds(final Long left, final Long right) {
-		if (left == null && right == null) {
-			return 0;
-		}
-		if (left == null) {
-			return 1;
-		}
-		if (right == null) {
-			return -1;
-		}
-		return Long.compare(left, right);
 	}
 
 	/** Initialize grid with common settings and styling */

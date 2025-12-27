@@ -1,6 +1,7 @@
 package tech.derbent.app.sprints.service;
 
 import java.util.Optional;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -24,7 +25,7 @@ public interface ISprintRepository extends IProjectItemRespository<CSprint> {
 			LEFT JOIN FETCH s.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH s.status
-			      LEFT JOIN FETCH s.sprintItems si
+			LEFT JOIN FETCH s.sprintItems si
 			WHERE s.id = :id
 			""")
 	Optional<CSprint> findById(@Param ("id") Long id);
@@ -37,8 +38,21 @@ public interface ISprintRepository extends IProjectItemRespository<CSprint> {
 			LEFT JOIN FETCH s.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH s.status
-			      LEFT JOIN FETCH s.sprintItems si
+			LEFT JOIN FETCH s.sprintItems si
 			WHERE s.project = :project
 			""")
 	Page<CSprint> listByProject(@Param ("project") CProject project, Pageable pageable);
+	@Override
+	@Query ("""
+			SELECT s FROM #{#entityName} s
+			LEFT JOIN FETCH s.project
+			LEFT JOIN FETCH s.assignedTo
+			LEFT JOIN FETCH s.createdBy
+			LEFT JOIN FETCH s.entityType et
+			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH s.status
+			      LEFT JOIN FETCH s.sprintItems si
+			WHERE s.project = :project
+			""")
+	List<CSprint> listByProjectForPageView(@Param ("project") CProject project);
 }

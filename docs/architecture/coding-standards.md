@@ -709,6 +709,10 @@ public boolean check(CActivity activity) { }
 public void process(CActivity activity, CUser user) { }
 ```
 
+- Prefer instance methods that rely on the owning class state over utility-style methods with parameters. If a method can use existing fields
+  (e.g., `currentSprint`, `getValue()`, cached lists), refactor to reduce parameters and bind behavior to the instance. Avoid static-looking helpers
+  inside stateful classes unless there's a clear reason.
+
 ### Comments and Documentation
 
 ```java
@@ -870,6 +874,7 @@ CEntityTypeInitializerService.initializeSample(project, minimal);
 The project uses Spotless for automatic code formatting:
 
 ```bash
+# Always use the system Maven executable (do not use ./mvnw)
 # Apply formatting
 mvn spotless:apply
 
@@ -1049,6 +1054,10 @@ public Page<CActivity> findAll(Pageable pageable) {
     return repository.findAll(pageable);
 }
 ```
+
+- **Page-view list queries**: every `IEntityOfProjectRepository` must provide `listByProjectForPageView(...)` and every
+  `IEntityOfCompanyRepository` must provide `listByCompanyForPageView(...)` with entity-specific `LEFT JOIN FETCH` clauses so grids/pages load
+  fully-initialized entities (all relations needed for display).
 
 ### Lazy Loading
 

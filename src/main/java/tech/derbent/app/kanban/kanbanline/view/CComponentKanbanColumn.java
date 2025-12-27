@@ -80,13 +80,13 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		if (column == null) {
 			return List.of();
 		}
-		final List<CKanbanColumn> lineColumns = resolveLineColumns(column);
+		final List<CKanbanColumn> lineColumns = resolveLineColumns();
 		final boolean hasStatusMappings = lineColumns.stream().filter(Objects::nonNull)
 				.anyMatch(entry -> entry.getIncludedStatuses() != null && !entry.getIncludedStatuses().isEmpty());
-		final boolean isFallbackColumn = column.getDefaultColumn() || !hasStatusMappings && isFirstColumn(lineColumns, column);
+		final boolean isFallbackColumn = column.getDefaultColumn() || !hasStatusMappings && isFirstColumn(lineColumns);
 		final Set<Long> includedStatusIds = column.getIncludedStatuses() == null ? Set.of() : column.getIncludedStatuses().stream()
 				.filter(Objects::nonNull).map(status -> status.getId()).filter(Objects::nonNull).collect(Collectors.toSet());
-		final Set<Long> lineStatusIds = isFallbackColumn ? resolveLineStatusIds(lineColumns) : Set.of();
+		final Set<Long> lineStatusIds = isFallbackColumn ? resolveLineStatusIds() : Set.of();
 		return items.stream().filter(Objects::nonNull).filter(item -> {
 			if (item.getStatus() == null || item.getStatus().getId() == null) {
 				return isFallbackColumn;
@@ -99,8 +99,9 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		}).collect(Collectors.toList());
 	}
 
-	private boolean isFirstColumn(final List<CKanbanColumn> lineColumns, final CKanbanColumn column) {
-		if (lineColumns.isEmpty()) {
+	private boolean isFirstColumn(final List<CKanbanColumn> lineColumns) {
+		final CKanbanColumn column = getValue();
+		if (column == null || lineColumns.isEmpty()) {
 			return false;
 		}
 		return lineColumns.get(0).equals(column);
@@ -169,8 +170,9 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		statusesLabel.setText(statuses);
 	}
 
-	private List<CKanbanColumn> resolveLineColumns(final CKanbanColumn column) {
-		if (column.getKanbanLine() == null || column.getKanbanLine().getKanbanColumns() == null) {
+	private List<CKanbanColumn> resolveLineColumns() {
+		final CKanbanColumn column = getValue();
+		if (column == null || column.getKanbanLine() == null || column.getKanbanLine().getKanbanColumns() == null) {
 			return List.of();
 		}
 		return column.getKanbanLine().getKanbanColumns().stream().filter(Objects::nonNull).sorted((left, right) -> {
@@ -187,7 +189,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		}).collect(Collectors.toList());
 	}
 
-	private Set<Long> resolveLineStatusIds(final List<CKanbanColumn> lineColumns) {
+	private Set<Long> resolveLineStatusIds() {
+		final List<CKanbanColumn> lineColumns = resolveLineColumns();
 		if (lineColumns.isEmpty()) {
 			return Set.of();
 		}

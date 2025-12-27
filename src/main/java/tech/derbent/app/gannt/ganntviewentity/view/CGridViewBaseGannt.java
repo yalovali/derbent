@@ -44,7 +44,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		this.pageEntityService = pageEntityService;
 		final CDetailSectionService detailSectionService = CSpringContext.getBean(CDetailSectionService.class);
 		// CGridEntityService gridEntityService = CSpringContext.getBean(CGridEntityService.class);
-		this.currentEntityPageRouter = new CDynamicPageRouter(pageEntityService, sessionService, detailSectionService, null);
+		currentEntityPageRouter = new CDynamicPageRouter(pageEntityService, sessionService, detailSectionService, null);
 		getBaseDetailsLayout().add(currentEntityPageRouter);
 		// currentEntityPageRouter.setHeight("50%");
 		getBaseDetailsLayout().add(currentEntityPageRouter);
@@ -68,6 +68,15 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	/** Gets the entity binder for the actual entity (Activity or Meeting). This is needed for the page service to write binder data before saving.
 	 * @return The entity binder */
 	public CEnhancedBinder<CProjectItem<?>> getEntityBinder() { return entityBinder; }
+
+	private CProjectItem<?> getGanntEntityFromSelectedItem() {
+		CProjectItem<?> ganntEntity = null;
+		final CGanntItem gannItem = getGanttMasterViewSection().getGrid().getSelectedEntity();
+		if (gannItem != null) {
+			ganntEntity = gannItem.getGanntItem(activityService, meetingService);
+		}
+		return ganntEntity;
+	}
 
 	/** Gets the master view section cast to CMasterViewSectionGannt for accessing Gantt-specific functionality.
 	 * @return The master view section as CMasterViewSectionGannt */
@@ -199,10 +208,6 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	@Override
 	protected void updateDetailsComponent() throws Exception {
 		LOGGER.debug("Updating details component for Gantt view");
-		CProjectItem<?> ganntEntity = null;
-		if (getValue() != null) {
-			ganntEntity = ((CGanntItem) getValue()).getGanntItem(activityService, meetingService);
-		}
-		locateGanntEntityInDynamicPage(ganntEntity);
+		locateGanntEntityInDynamicPage(getGanntEntityFromSelectedItem());
 	}
 }

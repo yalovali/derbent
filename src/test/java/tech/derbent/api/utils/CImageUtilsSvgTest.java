@@ -40,7 +40,7 @@ class CImageUtilsSvgTest {
 	}
 
 	/** Tests that createDataUrl works correctly with SVG data. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testCreateDataUrl_WithSvg_GeneratesCorrectDataUrl() {
 		// Given: A valid SVG image
@@ -54,7 +54,7 @@ class CImageUtilsSvgTest {
 	}
 
 	/** Tests that resizeImage handles SVG without XML declaration. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testResizeImage_WithSimpleSvg_ReturnsOriginalData() throws IOException {
 		// Given: A simple SVG without XML declaration
@@ -68,7 +68,7 @@ class CImageUtilsSvgTest {
 
 	/** Tests that resizeImage returns original SVG data without modification when input is SVG. Since SVG is vector-based, it doesn't need
 	 * resizing. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testResizeImage_WithValidSvg_ReturnsOriginalData() throws IOException {
 		// Given: A valid SVG image
@@ -81,7 +81,7 @@ class CImageUtilsSvgTest {
 	}
 
 	/** Tests that resizeToProfilePicture works with SVG images. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testResizeToProfilePicture_WithSvg_ReturnsOriginalData() throws IOException {
 		// Given: A valid SVG image
@@ -94,7 +94,7 @@ class CImageUtilsSvgTest {
 	}
 
 	/** Tests that SVG format is included in supported formats array. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testSupportedFormats_IncludesSvg() {
 		// Given: The SUPPORTED_FORMATS array
@@ -112,7 +112,7 @@ class CImageUtilsSvgTest {
 	}
 
 	/** Tests that validateImageData rejects invalid SVG data (missing closing tag). */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testValidateImageData_WithInvalidSvg_ThrowsException() {
 		// Given: Invalid SVG data (missing closing tag)
@@ -124,7 +124,7 @@ class CImageUtilsSvgTest {
 	}
 
 	/** Tests that validateImageData rejects non-SVG file with .svg extension. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testValidateImageData_WithNonSvgDataButSvgExtension_ThrowsException() {
 		// Given: Non-SVG data with .svg extension
@@ -135,7 +135,7 @@ class CImageUtilsSvgTest {
 	}
 
 	/** Tests that validateImageData accepts SVG files with .svg extension. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testValidateImageData_WithSvgExtension_Succeeds() {
 		// Given: A valid SVG image
@@ -145,7 +145,7 @@ class CImageUtilsSvgTest {
 	}
 
 	/** Tests that validateImageData accepts valid SVG files. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testValidateImageData_WithValidSvg_Succeeds() {
 		// Given: A valid SVG image

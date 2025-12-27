@@ -1,5 +1,6 @@
 package tech.derbent.api.screens.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,4 +12,15 @@ public interface IGridEntityRepository extends IEntityOfProjectRepository<CGridE
 
 	@Query ("SELECT g FROM CGridEntity g WHERE g.project = :project AND g.name = :name")
 	Optional<CGridEntity> findByNameAndProject(@Param ("project") CProject project, @Param ("name") String name);
+
+	@Override
+	@Query ("""
+			SELECT g FROM CGridEntity g
+			LEFT JOIN FETCH g.project
+			LEFT JOIN FETCH g.assignedTo
+			LEFT JOIN FETCH g.createdBy
+			WHERE g.project = :project
+			ORDER BY g.name ASC
+			""")
+	List<CGridEntity> listByProjectForPageView(@Param ("project") CProject project);
 }

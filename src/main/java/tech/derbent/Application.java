@@ -76,7 +76,7 @@ public class Application implements AppShellConfigurator {
 			try {
 				final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
 				// Data initialization is currently disabled (count < 0 condition)
-				if ((count != null) && (count == 0) && (count < 0)) {
+				if (count != null && count == 0 && count < 0) {
 					final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(), StandardCharsets.UTF_8);
 					jdbcTemplate.execute(sql);
 					LOGGER.info("Initial data loaded successfully");

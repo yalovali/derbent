@@ -61,7 +61,6 @@ import tech.derbent.app.deliverables.deliverable.service.CDeliverableInitializer
 import tech.derbent.app.deliverables.deliverable.service.CDeliverableService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
-import tech.derbent.app.gannt.ganntitem.service.CGanntItemInitializerService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityInitializerService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
@@ -705,29 +704,7 @@ public class CDataInitializer {
 			meetingService.save(meeting2);
 			// Create second meeting comments
 			createSampleCommentsForMeeting(meeting2, minimal);
-			// Create third meeting as a child of the first meeting (follow-up meeting)
-			final CMeetingType type3 = meetingTypeService.getRandom(project);
-			final CMeeting meeting3 = new CMeeting("Q1 Planning Follow-up", project, type3);
-			meeting3.setDescription("Follow-up meeting to review action items from Q1 Planning Session");
-			// Set initial status from workflow
-			if (type3 != null && type3.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting3);
-				if (!initialStatuses.isEmpty()) {
-					meeting3.setStatus(initialStatuses.get(0));
-				}
-			}
-			meeting3.setAssignedTo(user1);
-			meeting3.setResponsible(user2);
-			meeting3.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
-			meeting3.setEndDate(meeting2.getStartDate().plusDays((int) (Math.random() * 2)));
-			meeting3.setLocation("Conference Room B / Virtual");
-			meeting3.setAgenda("1. Review action items from Q1 Planning\n2. Progress updates\n3. Blockers and challenges");
-			meeting3.addParticipant(user1);
-			meeting3.addParticipant(user2);
-			// Set parent relationship to first meeting
-			meeting3.setParent(meeting1);
-			meetingService.save(meeting3);
-			LOGGER.debug("Created 3 sample meetings with parent-child relationship for project: {}", project.getName());
+			LOGGER.debug("Created 2 sample meetings with parent-child relationship for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
@@ -1067,8 +1044,6 @@ public class CDataInitializer {
 					CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CGanntItemInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					// CGanntInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -1095,7 +1070,6 @@ public class CDataInitializer {
 					CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
 					CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
 					CGanntViewEntityInitializerService.initializeSample(project, minimal);
-					CGanntItemInitializerService.initializeSample(project, minimal);
 					CActivityPriorityInitializerService.initializeSample(project, minimal);
 					CCommentPriorityInitializerService.initializeSample(project, minimal);
 					CSprintTypeInitializerService.initializeSample(project, minimal);

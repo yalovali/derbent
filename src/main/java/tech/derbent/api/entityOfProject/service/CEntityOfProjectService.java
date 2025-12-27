@@ -134,14 +134,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		return listByProject(project, pageable);
 	}
 
-	@Override
-	@Transactional (readOnly = true)
-	public Page<EntityClass> list(final Pageable pageable, final String searchText) {
-		final CProject project = sessionService.getActiveProject()
-				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
-		return listByProject(project, pageable, searchText);
-	}
-
 	@Transactional (readOnly = true)
 	public List<EntityClass> listByProject(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
@@ -168,13 +160,13 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	}
 
 	@Transactional (readOnly = true)
-	public Page<EntityClass> listByProject(final CProject project, final Pageable pageable, final String searchText) {
+	public Page<EntityClass> listByProjectForPageView(final CProject project, final Pageable pageable, final String searchText) {
 		LOGGER.debug("Listing entities for project:'{}' with search text: '{}'", project != null ? project.getName() : "<null>", searchText);
 		Check.notNull(project, "Project cannot be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = searchText == null ? "" : searchText.trim();
 		// Repository query includes ORDER BY clause, no need for manual sorting
-		final List<EntityClass> all = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
+		final List<EntityClass> all = ((IEntityOfProjectRepository<EntityClass>) repository).listByProjectForPageView(project);
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
 		final List<EntityClass> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
 		// Data is already sorted by repository query
@@ -182,6 +174,14 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
 		final List<EntityClass> content = filtered.subList(start, end);
 		return new PageImpl<>(content, safePage, filtered.size());
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<EntityClass> listForPageView(final Pageable pageable, final String searchText) {
+		final CProject project = sessionService.getActiveProject()
+				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
+		return listByProjectForPageView(project, pageable, searchText);
 	}
 
 	@Override

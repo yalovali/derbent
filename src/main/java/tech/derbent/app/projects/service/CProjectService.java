@@ -7,12 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.ui.component.enhanced.CComponentProjectUserSettings;
@@ -154,6 +156,21 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 		final Specification<CProject> combinedSpec = filter != null ? companySpec.and(filter) : companySpec;
 		final Page<CProject> page = repository.findAll(combinedSpec, safePage);
 		return page;
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CProject> listForPageView(final Pageable pageable, final String searchText) {
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final String term = searchText == null ? "" : searchText.trim();
+		final CCompany company = getCurrentCompany();
+		final List<CProject> all = ((IProjectRepository) repository).listByCompanyForPageView(company.getId());
+		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
+		final List<CProject> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+		final List<CProject> content = filtered.subList(start, end);
+		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
 	@Override

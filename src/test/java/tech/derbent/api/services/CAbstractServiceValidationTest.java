@@ -45,7 +45,6 @@ class CAbstractServiceValidationTest {
 	private TestService service;
 
 	/** Helper method to set ID using reflection since there's no public setter. */
-	@SuppressWarnings ("static-method")
 	private void setEntityId(TestEntity entity, Long id) throws Exception {
 		final Field idField = entity.getClass().getSuperclass().getSuperclass().getDeclaredField("id");
 		idField.setAccessible(true);
