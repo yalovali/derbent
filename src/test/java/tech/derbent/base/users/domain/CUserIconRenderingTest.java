@@ -13,7 +13,7 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
  * generated and contain SVG content in their innerHTML. */
 class CUserIconRenderingTest {
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetIcon_WithoutProfilePicture_ContainsSvgInInnerHTML() {
 		// Create a user without a profile picture
@@ -38,7 +38,7 @@ class CUserIconRenderingTest {
 		assertEquals("span", icon.getElement().getTag(), "Icon element should be a span to support custom SVG");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetIcon_WithProfilePicture_ContainsSvgWithImageInInnerHTML() throws Exception {
 		// Create a user with a profile picture
@@ -65,7 +65,7 @@ class CUserIconRenderingTest {
 		assertEquals("span", icon.getElement().getTag(), "Icon element should be a span to support custom SVG");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testIconSize_IsSetCorrectly() {
 		// Create a user
@@ -82,7 +82,7 @@ class CUserIconRenderingTest {
 		assertTrue(size.contains("px"), "Icon size should be in pixels");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testMultipleUsers_DifferentIconColors() {
 		// Create multiple users with different names

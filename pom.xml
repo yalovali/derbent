@@ -224,10 +224,34 @@
 						<link>https://docs.oracle.com/en/java/javase/21/docs/api/</link>
 						<link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
 					</links>
-				</configuration>
-			</plugin> 
-		</plugins>
-	</build>
+					</configuration>
+				</plugin> 
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-pmd-plugin</artifactId>
+					<version>3.21.0</version>
+					<configuration>
+						<rulesets>
+							<ruleset>config/pmd/pmd-rules.xml</ruleset>
+						</rulesets>
+						<linkXref>false</linkXref>
+						<failOnViolation>true</failOnViolation>
+						<targetJdk>20</targetJdk>
+						<typeResolution>false</typeResolution>
+					</configuration>
+					<executions>
+						<execution>
+							<id>pmd-enforcement</id>
+							<phase>compile</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</build>
 
 	<organization>
 		<name>Lova.tech</name>

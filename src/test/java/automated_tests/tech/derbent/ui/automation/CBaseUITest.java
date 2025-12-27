@@ -1167,13 +1167,13 @@ public abstract class CBaseUITest {
 	}
 
 	/** Sanitizes raw text into a lower-case, hyphenated DOM-friendly identifier. */
-	@SuppressWarnings ("static-method")
+	
 	protected String sanitizeForDomId(final String value) {
 		return sanitizeForIdentifier(value, FIELD_ID_PREFIX + "-autogen");
 	}
 
 	/** Sanitizes raw text for use in filenames with a custom fallback. */
-	@SuppressWarnings ("static-method")
+	
 	protected String sanitizeForFileName(final String value, final String fallback) {
 		return sanitizeForIdentifier(value, fallback);
 	}
@@ -1904,7 +1904,7 @@ public abstract class CBaseUITest {
 	}
 
 	/** Waits for 1000 milliseconds to allow complex operations to complete. */
-	@SuppressWarnings ("static-method")
+	
 	protected void wait_1000() {
 		try {
 			Thread.sleep(1000);
@@ -1914,7 +1914,7 @@ public abstract class CBaseUITest {
 	}
 
 	/** Waits for 2000 milliseconds for slow operations like navigation. */
-	@SuppressWarnings ("static-method")
+	
 	protected void wait_2000() {
 		try {
 			Thread.sleep(2000);
@@ -1927,7 +1927,7 @@ public abstract class CBaseUITest {
 	// ===========================================
 
 	/** Waits for 500 milliseconds to allow UI updates to complete. */
-	@SuppressWarnings ("static-method")
+	
 	protected void wait_500() {
 		try {
 			Thread.sleep(500);

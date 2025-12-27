@@ -36,7 +36,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that CImageUtils correctly resizes images to icon size. This validates the core resizing functionality used by CUser. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testCImageUtils_ResizeImage_CreatesCorrectSize() throws IOException {
 		// Given: A large test image
@@ -53,7 +53,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that CImageUtils generates avatar with initials. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGenerateAvatarWithInitials_CreatesImage() throws IOException {
 		// Given: Initials and size
@@ -72,7 +72,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that CUser.getIcon() generates avatar with initials when no profile picture. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetIcon_NoProfilePicture_GeneratesAvatarWithInitials() {
 		// Given: A user with name but no profile picture
@@ -89,7 +89,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that CUser.getIcon() returns default icon when no profile picture is set. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetIcon_NoProfilePicture_ReturnsDefaultIcon() {
 		// Given: A user without profile picture
@@ -102,7 +102,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that CUser.getIcon() returns custom icon when profile picture with thumbnail is set. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetIcon_WithProfilePicture_ReturnsCustomIcon() throws IOException {
 		// Given: A user with profile picture
@@ -120,7 +120,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that CUser generates correct initials from first name and last name. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetInitials_WithFirstAndLastName_ReturnsInitials() {
 		// Given: A user with first name and last name
@@ -134,7 +134,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that CUser generates initials from first name only when no last name. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetInitials_WithFirstNameOnly_ReturnsFirstInitial() {
 		// Given: A user with only first name
@@ -147,7 +147,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that CUser falls back to login for initials when no names available. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetInitials_WithLoginOnly_ReturnsLoginInitials() {
 		// Given: A user with only login
@@ -160,7 +160,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that thumbnail is automatically generated with correct size when setting profile picture. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testSetProfilePictureData_AutoGeneratesThumbnail() throws IOException {
 		// Given: A user and a test image
@@ -178,7 +178,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that setting empty byte array clears thumbnail. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testSetProfilePictureData_EmptyArray_ClearsThumbnail() throws IOException {
 		// Given: A user with profile picture
@@ -193,7 +193,7 @@ class CUserIconTest {
 
 	/** Tests that thumbnail generation is resilient to image processing errors. This test verifies that if thumbnail generation fails, the user
 	 * object remains valid with null thumbnail. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testSetProfilePictureData_InvalidImage_HandlesGracefully() {
 		// Given: A user and invalid image data
@@ -211,7 +211,7 @@ class CUserIconTest {
 	}
 
 	/** Tests that clearing profile picture also clears thumbnail. */
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testSetProfilePictureData_Null_ClearsThumbnail() throws IOException {
 		// Given: A user with profile picture and thumbnail

@@ -13,7 +13,7 @@ import tech.derbent.app.roles.domain.CUserCompanyRole;
 /** Test class for user SVG icon functionality. Verifies that icons are properly generated using SVG data URLs with Vaadin's Icon component. */
 class CUserSvgIconTest {
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGenerateAvatarSvg_ConsistentColors() {
 		// Generate avatars with the same initials multiple times
@@ -23,7 +23,7 @@ class CUserSvgIconTest {
 		assertEquals(svg1, svg2, "SVG should be identical for same initials");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGenerateAvatarSvg_CreatesValidSvg() {
 		// Test the SVG generation utility
@@ -37,7 +37,7 @@ class CUserSvgIconTest {
 		assertTrue(svgContent.endsWith("</svg>"), "Should end with closing SVG tag");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGenerateAvatarSvg_DifferentColors() {
 		// Generate avatars with different initials
@@ -47,7 +47,7 @@ class CUserSvgIconTest {
 		assertNotEquals(svg1, svg2, "SVG should be different for different initials");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetIcon_WithoutProfilePicture_GeneratesSvgAvatar() {
 		// Create a user without a profile picture
@@ -66,7 +66,7 @@ class CUserSvgIconTest {
 		assertTrue(innerHTML.contains("svg"), "Element innerHTML should contain SVG tags");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetIcon_WithProfilePicture_UsesImageData() throws Exception {
 		// Create a user with a profile picture (generate a simple PNG)
@@ -88,7 +88,7 @@ class CUserSvgIconTest {
 		assertTrue(innerHTML.contains("image"), "Element innerHTML should contain an image element");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetInitials_ExtractsCorrectly() {
 		final CCompany company = new CCompany("Test Company");

@@ -53,11 +53,11 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 		if (privilege == null || privilege.trim().isEmpty()) {
 			return;
 		}
-		privilege = privilege.toUpperCase().trim();
+		final String normalizedPrivilege = privilege.toUpperCase().trim();
 		if (privileges == null || privileges.isEmpty()) {
-			privileges = privilege;
-		} else if (!hasPrivilege(privilege)) {
-			privileges += "," + privilege;
+			privileges = normalizedPrivilege;
+		} else if (!hasPrivilege(normalizedPrivilege)) {
+			privileges += "," + normalizedPrivilege;
 		}
 	}
 
@@ -103,12 +103,12 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 		if (privilege == null || privileges == null) {
 			return;
 		}
-		privilege = privilege.toUpperCase().trim();
+		final String normalizedPrivilege = privilege.toUpperCase().trim();
 		String[] privilegeArray = privileges.split(",");
 		StringBuilder newPrivileges = new StringBuilder();
 		for (String p : privilegeArray) {
 			p = p.trim();
-			if (!p.equals(privilege) && !p.isEmpty()) {
+			if (!p.equals(normalizedPrivilege) && !p.isEmpty()) {
 				if (newPrivileges.length() > 0) {
 					newPrivileges.append(",");
 				}

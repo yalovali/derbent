@@ -71,7 +71,6 @@ import tech.derbent.api.utils.Check;
 public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>, ChildEntity extends CEntityDB<?> & IOrderedEntity>
 		extends VerticalLayout
 		implements IContentOwner, IGridComponent<ChildEntity>, IGridRefreshListener<ChildEntity>, IPageServiceAutoRegistrable, IHasDragControl {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
 
@@ -327,7 +326,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			LOGGER.debug("Firing value change event: old={}, new={}, fromClient={}", oldValue != null ? oldValue.getId() : "null",
 					newValue != null ? newValue.getId() : "null", fromClient);
 			final ValueChangeEvent<ChildEntity> event = new ValueChangeEvent<ChildEntity>() {
-
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -380,7 +378,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @return The ID string or null if no sprint is set */
 	@Override
 	public String getCurrentEntityIdString() {
-		return getMasterEntity() != null && getMasterEntity().getId() != null ? getMasterEntity().getId().toString() : null;
+		return (getMasterEntity() != null) && (getMasterEntity().getId() != null) ? getMasterEntity().getId().toString() : null;
 	}
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
@@ -573,7 +571,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
 	 * @param alreadySelectedMode     Mode for handling already-selected items */
 	@SuppressWarnings ({
-			"unchecked", "rawtypes", "static-method"
+			"unchecked", "rawtypes"
 	})
 	protected void on_buttonFromList_clicked(final String dialogTitle, final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CComponentEntitySelection.ItemsProvider<?> itemsProvider, final Consumer<List<?>> onItemsSelected, final boolean multiSelect,
@@ -659,7 +657,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@Override
 	public void populateForm() {
 		LOGGER.debug("Populating form - refreshing grid if master entity is set");
-		if (getMasterEntity() != null && getMasterEntity().getId() != null) {
+		if ((getMasterEntity() != null) && (getMasterEntity().getId() != null)) {
 			refreshGrid();
 		} else {
 			clearGrid();

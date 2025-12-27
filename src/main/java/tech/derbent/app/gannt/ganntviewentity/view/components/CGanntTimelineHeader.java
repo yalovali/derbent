@@ -162,38 +162,40 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 
 	public LinkedHashMap<LocalDate, Integer> getDateToPixelMap() { return dateToPixelMap; }
 
-	private void on_actioAapplyRange(LocalDate desiredStart, LocalDate desiredEnd, final boolean notifyChange) {
+	private void on_actioAapplyRange(final LocalDate desiredStart, final LocalDate desiredEnd, final boolean notifyChange) {
 		Check.notNull(desiredStart, "desiredStart cannot be null");
 		Check.notNull(desiredEnd, "desiredEnd cannot be null");
-		if (desiredStart.isAfter(desiredEnd)) {
-			final LocalDate swap = desiredStart;
-			desiredStart = desiredEnd;
-			desiredEnd = swap;
+		LocalDate normalizedStart = desiredStart;
+		LocalDate normalizedEnd = desiredEnd;
+		if (normalizedStart.isAfter(normalizedEnd)) {
+			final LocalDate swap = normalizedStart;
+			normalizedStart = normalizedEnd;
+			normalizedEnd = swap;
 		}
 		final long maxDuration = ChronoUnit.DAYS.between(fullRangeStart, fullRangeEnd) + 1;
-		long desiredDuration = ChronoUnit.DAYS.between(desiredStart, desiredEnd) + 1;
+		long desiredDuration = ChronoUnit.DAYS.between(normalizedStart, normalizedEnd) + 1;
 		if (desiredDuration < MIN_DURATION_DAYS) {
 			desiredDuration = MIN_DURATION_DAYS;
-			desiredEnd = desiredStart.plusDays(desiredDuration - 1);
+			normalizedEnd = normalizedStart.plusDays(desiredDuration - 1);
 		}
 		if (desiredDuration > maxDuration) {
-			desiredStart = fullRangeStart;
-			desiredEnd = fullRangeEnd;
+			normalizedStart = fullRangeStart;
+			normalizedEnd = fullRangeEnd;
 			desiredDuration = maxDuration;
 		}
-		if (desiredStart.isBefore(fullRangeStart)) {
-			desiredStart = fullRangeStart;
-			desiredEnd = desiredStart.plusDays(desiredDuration - 1);
+		if (normalizedStart.isBefore(fullRangeStart)) {
+			normalizedStart = fullRangeStart;
+			normalizedEnd = normalizedStart.plusDays(desiredDuration - 1);
 		}
-		if (desiredEnd.isAfter(fullRangeEnd)) {
-			desiredEnd = fullRangeEnd;
-			desiredStart = desiredEnd.minusDays(desiredDuration - 1);
-			if (desiredStart.isBefore(fullRangeStart)) {
-				desiredStart = fullRangeStart;
+		if (normalizedEnd.isAfter(fullRangeEnd)) {
+			normalizedEnd = fullRangeEnd;
+			normalizedStart = normalizedEnd.minusDays(desiredDuration - 1);
+			if (normalizedStart.isBefore(fullRangeStart)) {
+				normalizedStart = fullRangeStart;
 			}
 		}
-		startDate = desiredStart;
-		endDate = desiredEnd;
+		startDate = normalizedStart;
+		endDate = normalizedEnd;
 		renderTimeline(notifyChange);
 	}
 

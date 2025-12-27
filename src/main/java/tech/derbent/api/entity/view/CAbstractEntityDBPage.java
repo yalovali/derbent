@@ -53,7 +53,6 @@ import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAbstractEntityDBPage.class);
 	private static final long serialVersionUID = 1L;
 
@@ -67,7 +66,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		CNotificationService.showSuccess(message);
 	}
 
-	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
+	private final ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	private CFlexLayout baseDetailsLayout;
 	private final CEnhancedBinder<EntityClass> binder;
 	protected Map<String, Component> componentMap = new HashMap<String, Component>();
@@ -143,7 +142,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public void actionRefresh() {
 		try {
 			final EntityClass current = getValue();
-			if (current != null && current.getId() != null) {
+			if ((current != null) && (current.getId() != null)) {
 				final EntityClass reloaded = entityService.getById(current.getId()).orElse(null);
 				if (reloaded != null) {
 					setValue(reloaded);
@@ -203,7 +202,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	// for details view
 	protected void addAccordionPanel(final CAccordionDBEntity<EntityClass> accordion) {
-		AccordionList.add(accordion);
+		getAccordionList().add(accordion);
 		getBaseDetailsLayout().add(accordion);
 	}
 
@@ -230,6 +229,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@PostConstruct
+	@SuppressWarnings ("PMD.UnusedPrivateMethod")
 	private final void createDetails() throws Exception {
 		createDetailsViewTab();
 		createDetailsComponent();
@@ -239,8 +239,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected abstract void createDetailsComponent() throws Exception;
 
 	private void createDetailsSection() {
-		baseDetailsLayout = CFlexLayout.forEntityPage();
-		detailsTabLayout.setClassName("details-tab-layout");
+		this.baseDetailsLayout = CFlexLayout.forEntityPage();
+		this.detailsTabLayout.setClassName("details-tab-layout");
 		// now the content are!!!
 		final Scroller detailsScroller = new Scroller();
 		// FLEX LAYOUT///////////////////
@@ -306,6 +306,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	private void createPageContent() {
 		createDetailsSection();
 	}
+
+	public ArrayList<CAccordionDBEntity<EntityClass>> getAccordionList() { return this.AccordionList; }
 
 	public HasComponents getBaseDetailsLayout() { return baseDetailsLayout; }
 
@@ -493,7 +495,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected void populateAccordionPanels(final EntityClass entity) {
 		LOGGER.debug("Populating accordion panels for entity: {}", entity != null ? entity.getId() : "null");
 		// This method can be overridden by subclasses to populate accordion panels
-		AccordionList.forEach(accordion -> {
+		getAccordionList().forEach(accordion -> {
 			accordion.populateForm(entity);
 		});
 	}
@@ -504,7 +506,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
 		populateAccordionPanels(value);
 		getBinder().setBean(value);
-		if (value == null && masterViewSection != null) {
+		if ((value == null) && (masterViewSection != null)) {
 			masterViewSection.select(null);
 		}
 	}
@@ -552,7 +554,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	/** Updates the split layout orientation based on the current layout mode. */
 	private void updateLayoutOrientation() {
-		if (layoutService != null && splitLayout != null) {
+		if ((layoutService != null) && (splitLayout != null)) {
 			final CLayoutService.LayoutMode currentMode = CLayoutService.getCurrentLayoutMode();
 			// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
 			if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {

@@ -88,7 +88,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		return description.substring(0, 75) + "...";
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	public Map<String, EntityFieldInfo> getFieldsInfo() { // TODO Auto-generated method
 															// stub
 		return null;

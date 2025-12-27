@@ -72,7 +72,7 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 		return CGrid.styleColumnHeader(column, header);
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private int compareIds(final Long left, final Long right) {
 		if (left == null && right == null) {
 			return 0;

@@ -22,7 +22,6 @@ import tech.derbent.base.session.service.ISessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Setup.UI.Detail Sections")
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
-
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - sections (darker)
 	public static final String DEFAULT_ICON = "vaadin:clipboard";
 	private static final long serialVersionUID = 1L;
@@ -51,7 +50,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 		grid.addColumn(screen -> screen.getActive() ? "Active" : "Inactive", "Status", null);
 		grid.addColumn(screen -> {
 			try {
-				return String.valueOf(screenLinesService.countByMaster(screen));
+				return String.valueOf(getScreenLinesService().countByMaster(screen));
 			} catch (final Exception e) {
 				return "0";
 			}
@@ -72,6 +71,8 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	@Override
 	public CPageService<CDetailSection> getPageService() { return pageService; }
 
+	public CDetailLinesService getScreenLinesService() { return screenLinesService; }
+
 	@Override
 	public ISessionService getSessionService() { return null; }
 
@@ -87,8 +88,8 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		addAccordionPanel(new CPanelDetailSectionBasicInfo(this, getBinder(), (CDetailSectionService) entityService));
-		addAccordionPanel(new CPanelDetailLines(this, getBinder(), (CDetailSectionService) entityService, screenLinesService));
-		addAccordionPanel(new CPanelDetailSectionPreview(this, getBinder(), (CDetailSectionService) entityService, sessionService));
+		addAccordionPanel(new CPanelDetailSectionBasicInfo(this, getBinder(), (CDetailSectionService) getEntityService()));
+		addAccordionPanel(new CPanelDetailLines(this, getBinder(), (CDetailSectionService) getEntityService(), getScreenLinesService()));
+		addAccordionPanel(new CPanelDetailSectionPreview(this, getBinder(), (CDetailSectionService) getEntityService(), getSessionService()));
 	}
 }

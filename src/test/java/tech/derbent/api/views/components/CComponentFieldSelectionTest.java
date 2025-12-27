@@ -12,7 +12,7 @@ import tech.derbent.api.ui.component.enhanced.CComponentFieldSelection;
 /** Unit tests for CComponentFieldSelection to verify List-based functionality and ordering preservation. */
 public class CComponentFieldSelectionTest {
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testBinderIntegration_OrderPreservationAcrossEntitySwitch() {
 		// Test that order is preserved when switching between entities
@@ -40,7 +40,7 @@ public class CComponentFieldSelectionTest {
 		assertEquals("E", entity1OrderRestored.get(2));
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testBinderIntegration_SimulateEntitySwitch() {
 		// This test simulates how the binder behaves when switching between entities
@@ -71,7 +71,7 @@ public class CComponentFieldSelectionTest {
 		assertEquals(allItems, component.getValue());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testBinderIntegration_ValueChangeListener() {
 		// Test that value change listeners are notified when binder triggers setValue
@@ -106,7 +106,7 @@ public class CComponentFieldSelectionTest {
 		assertEquals(2, changeCount[0], "Should still have two value changes (no change)");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testClear() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");
@@ -119,7 +119,7 @@ public class CComponentFieldSelectionTest {
 		assertEquals(0, component.getValue().size());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testComponentInitialization() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");
@@ -129,7 +129,7 @@ public class CComponentFieldSelectionTest {
 		assertTrue(component.getValue().isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testDoubleClickEventSetup() {
 		// This test verifies that the component initializes without errors
@@ -147,7 +147,7 @@ public class CComponentFieldSelectionTest {
 		// 3. Manual UI testing should verify double-click adds/removes items correctly
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testGetSelectedItemsReturnsOrderedList() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");
@@ -163,7 +163,7 @@ public class CComponentFieldSelectionTest {
 		assertEquals("Item 1", selectedItems.get(2));
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testListSeparation() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");
@@ -184,7 +184,7 @@ public class CComponentFieldSelectionTest {
 		assertFalse(component.isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testReadOnlyMode() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");
@@ -195,7 +195,7 @@ public class CComponentFieldSelectionTest {
 		assertFalse(component.isReadOnly());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testSetSelectedItemsPreservesOrder() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");
@@ -212,7 +212,7 @@ public class CComponentFieldSelectionTest {
 		assertEquals("E", result.get(2));
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testSetSourceItems() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");
@@ -222,7 +222,7 @@ public class CComponentFieldSelectionTest {
 		assertTrue(component.isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testSetValuePreservesOrder() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");
@@ -241,7 +241,7 @@ public class CComponentFieldSelectionTest {
 		assertFalse(component.isEmpty());
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	public void testValueChangeWithNullHandling() {
 		final CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available", "Selected");

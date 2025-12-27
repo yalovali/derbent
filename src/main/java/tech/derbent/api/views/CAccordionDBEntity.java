@@ -35,7 +35,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		binder.readBean(null);
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Deprecated
 	protected IComboBoxDataProvider createComboBoxDataProvider() {
 		return null;
@@ -62,7 +62,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	/** Override this method in subclasses to provide local context values specific to this accordion panel.
 	 * @param contextName the context name to resolve
 	 * @return the local context value, or null if not found locally */
-	@SuppressWarnings ("static-method")
+	
 	protected Object getLocalContextValue(String contextName) {
 		// Subclasses can override to provide specific context values
 		return null;

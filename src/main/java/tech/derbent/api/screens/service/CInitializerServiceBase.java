@@ -104,12 +104,13 @@ public abstract class CInitializerServiceBase {
 	 * @param clazz     the class to search
 	 * @param fieldName the field name to find
 	 * @return the field or null if not found */
-	private static Field findFieldInHierarchy(Class<?> clazz, final String fieldName) {
-		while (clazz != null) {
+	private static Field findFieldInHierarchy(final Class<?> clazz, final String fieldName) {
+		Class<?> currentClazz = clazz;
+		while (currentClazz != null) {
 			try {
-				return clazz.getDeclaredField(fieldName);
+				return currentClazz.getDeclaredField(fieldName);
 			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
-				clazz = clazz.getSuperclass();
+				currentClazz = currentClazz.getSuperclass();
 			}
 		}
 		return null;

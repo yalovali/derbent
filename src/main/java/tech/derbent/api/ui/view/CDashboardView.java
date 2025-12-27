@@ -142,6 +142,7 @@ public final class CDashboardView extends CAbstractPage {
 	/** Initialize dashboard data after all dependencies are injected. This method is called after the constructor and dependency injection are
 	 * complete. */
 	@PostConstruct
+	@SuppressWarnings ("PMD.UnusedPrivateMethod")
 	private void postConstruct() {
 		// LOGGER.info("PostConstruct - loading dashboard data");
 		// Load data after all dependencies are properly injected

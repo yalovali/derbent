@@ -47,7 +47,7 @@ class CFontSizeServiceTest {
 		assertTrue(cssVars.contains("--lumo-font-size-xxs:"), "Should include xxs");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	@Test
 	void testGetAvailableFontSizeScales() {
 		// When: getting available font size scales
