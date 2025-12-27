@@ -276,7 +276,7 @@ public class CDataInitializer {
 
 	@Transactional
 	private void clearSampleData() {
-		LOGGER.warn("Clearing sample data from database (forced)");
+		LOGGER.debug("Clearing sample data from database (forced)");
 		try {
 			// ---- 1) PostgreSQL yolu: public şemadaki tabloları topla ve TRUNCATE et
 			try {
@@ -291,7 +291,7 @@ public class CDataInitializer {
 					final List<String> quoted = tableNames.stream().map(t -> "\"" + t + "\"").toList();
 					final String joined = String.join(", ", quoted);
 					final String sql = "TRUNCATE TABLE " + joined + " RESTART IDENTITY CASCADE";
-					LOGGER.warn("Executing: {}", sql);
+					LOGGER.debug("Executing: {}", sql);
 					jdbcTemplate.execute(sql);
 					LOGGER.info("All public tables truncated (PostgreSQL).");
 					return; // İş bitti

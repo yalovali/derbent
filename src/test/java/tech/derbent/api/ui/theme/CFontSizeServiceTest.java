@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for CFontSizeService - Font size scaling functionality. Tests CSS variable generation for different font size scales. */
+@SuppressWarnings ("static-method")
 class CFontSizeServiceTest {
 
 	/** Helper method to simulate the private getCssVariablesForScale method. This is a copy of the implementation for testing purposes. */
@@ -47,7 +48,6 @@ class CFontSizeServiceTest {
 		assertTrue(cssVars.contains("--lumo-font-size-xxs:"), "Should include xxs");
 	}
 
-	
 	@Test
 	void testGetAvailableFontSizeScales() {
 		// When: getting available font size scales

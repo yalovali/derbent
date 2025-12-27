@@ -9,6 +9,7 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 
 /** Unit tests for the default ordering functionality in entities. Tests that getDefaultOrderBy() returns appropriate values and that services use
  * these for ordering. */
+@SuppressWarnings ("static-method")
 class CEntityDBDefaultOrderingTest {
 
 	/** Test entity that overrides default ordering to use a custom field. */
@@ -38,7 +39,6 @@ class CEntityDBDefaultOrderingTest {
 		}
 	}
 
-	
 	@Test
 	void testCEntityDB_defaultOrderByReturnsId() {
 		final TestEntity entity = new TestEntity();
@@ -47,7 +47,6 @@ class CEntityDBDefaultOrderingTest {
 		assertEquals("id", orderField, "CEntityDB should order by 'id' by default");
 	}
 
-	
 	@Test
 	void testCEntityNamed_defaultOrderByReturnsName() {
 		final TestNamedEntity entity = new TestNamedEntity("Test");
@@ -56,7 +55,6 @@ class CEntityDBDefaultOrderingTest {
 		assertEquals("name", orderField, "CEntityNamed should order by 'name' by default");
 	}
 
-	
 	@Test
 	void testCustomEntity_canOverrideDefaultOrder() {
 		final TestCustomOrderEntity entity = new TestCustomOrderEntity();
@@ -65,7 +63,6 @@ class CEntityDBDefaultOrderingTest {
 		assertEquals("createDate", orderField, "Custom entity should order by 'createDate'");
 	}
 
-	
 	@Test
 	void testSort_canBeCreatedFromDefaultOrder() {
 		final TestEntity entity = new TestEntity();

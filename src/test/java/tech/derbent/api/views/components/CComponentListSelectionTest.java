@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import tech.derbent.api.ui.component.enhanced.CComponentListSelection;
 
 /** Unit tests for CComponentListSelection to verify List-based selection functionality without ordering. */
+@SuppressWarnings ("static-method")
 public class CComponentListSelectionTest {
 
 	@Test
@@ -46,7 +47,6 @@ public class CComponentListSelectionTest {
 		assertEquals(2, changeCount[0], "Should still have two value changes (no change)");
 	}
 
-	
 	@Test
 	public void testBinderIntegration_SimulateEntitySwitch() {
 		// This test simulates how the binder behaves when switching between entities
@@ -77,7 +77,6 @@ public class CComponentListSelectionTest {
 		assertEquals(allItems.size(), component.getValue().size());
 	}
 
-	
 	@Test
 	public void testClear() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -90,7 +89,6 @@ public class CComponentListSelectionTest {
 		assertEquals(0, component.getValue().size());
 	}
 
-	
 	@Test
 	public void testComponentInitialization() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -100,7 +98,6 @@ public class CComponentListSelectionTest {
 		assertTrue(component.getValue().isEmpty());
 	}
 
-	
 	@Test
 	public void testListSeparation() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -118,7 +115,6 @@ public class CComponentListSelectionTest {
 		assertFalse(component.isEmpty());
 	}
 
-	
 	@Test
 	public void testReadOnlyMode() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -129,7 +125,6 @@ public class CComponentListSelectionTest {
 		assertFalse(component.isReadOnly());
 	}
 
-	
 	@Test
 	public void testSetSourceItems() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -139,7 +134,6 @@ public class CComponentListSelectionTest {
 		assertTrue(component.isEmpty());
 	}
 
-	
 	@Test
 	public void testSetValue() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);
@@ -158,7 +152,6 @@ public class CComponentListSelectionTest {
 		assertFalse(component.isEmpty());
 	}
 
-	
 	@Test
 	public void testValueChangeWithNullHandling() {
 		final CComponentListSelection<Object, String> component = new CComponentListSelection<>(null, null, null, "Items", String.class);

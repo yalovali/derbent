@@ -39,6 +39,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 			final ISessionService sessionService, final CDetailSectionService screenService, final CActivityService activityService,
 			final CMeetingService meetingService, final CPageEntityService pageEntityService) throws Exception {
 		super(entityClass, entityService, sessionService, screenService);
+		LOGGER.debug("Initializing CGridViewBaseGannt for entity class: {}", entityClass.getSimpleName());
 		this.activityService = activityService;
 		this.meetingService = meetingService;
 		this.pageEntityService = pageEntityService;
@@ -50,6 +51,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		getBaseDetailsLayout().add(currentEntityPageRouter);
 		// NO CRUD toolbar for Gantt view
 		crudToolbar.setVisible(false); // no CRUD toolbar for Gantt view
+		LOGGER.debug("CGridViewBaseGannt initialized for entity class: {}", entityClass.getSimpleName());
 	}
 
 	@Override
@@ -70,6 +72,15 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	public CEnhancedBinder<CProjectItem<?>> getEntityBinder() { return entityBinder; }
 
 	private CProjectItem<?> getGanntEntityFromSelectedItem() {
+		LOGGER.debug("Getting Gantt entity from selected CGanttItem");
+		if (getGanttMasterViewSection() == null) {
+			LOGGER.warn("Gantt master view section is null - cannot get selected entity");
+			return null;
+		}
+		if (getGanttMasterViewSection().getGrid() == null) {
+			LOGGER.warn("Gantt grid is null - cannot get selected entity");
+			return null;
+		}
 		CProjectItem<?> ganntEntity = null;
 		final CGanntItem gannItem = getGanttMasterViewSection().getGrid().getSelectedEntity();
 		if (gannItem != null) {

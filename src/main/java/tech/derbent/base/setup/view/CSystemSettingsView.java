@@ -59,7 +59,7 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
-		if ((systemSettingsService != null) && (currentSettings == null)) {
+		if (systemSettingsService != null && currentSettings == null) {
 			loadSystemSettings();
 		}
 	}
@@ -298,7 +298,6 @@ public class CSystemSettingsView extends CAbstractPage {
 	/** Post-construction initialization method called after dependency injection is complete. This ensures that systemSettingsService is properly
 	 * injected before we try to use it. */
 	@PostConstruct
-	@SuppressWarnings ("PMD.UnusedPrivateMethod")
 	private void postConstruct() {
 		LOGGER.debug("postConstruct called for CSystemSettingsView - loading system settings");
 		// Now it's safe to load system settings since all dependencies are injected

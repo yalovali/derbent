@@ -157,7 +157,12 @@
 			<version>5.9.2</version>
 			<scope>test</scope>
 		</dependency>
-
+<dependency>
+  <groupId>net.sourceforge.pmd</groupId>
+  <artifactId>pmd-java</artifactId>
+  <version>6.55.0</version>
+  <scope>provided</scope>
+</dependency>
 	</dependencies>
 
 	<build>
@@ -234,21 +239,20 @@
 					<configuration>
 						<rulesets>
 							<ruleset>config/pmd/pmd-rules.xml</ruleset>
-						</rulesets>
-						<linkXref>false</linkXref>
+						</rulesets>						
 						<failOnViolation>true</failOnViolation>
-						<targetJdk>20</targetJdk>
+						<targetJdk>21</targetJdk>
 						<typeResolution>false</typeResolution>
 					</configuration>
-					<executions>
-						<execution>
-							<id>pmd-enforcement</id>
-							<phase>compile</phase>
-							<goals>
-								<goal>check</goal>
-							</goals>
-						</execution>
-					</executions>
+						<executions>
+							<execution>
+								<id>pmd-enforcement</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
 				</plugin>
 			</plugins>
 		</build>

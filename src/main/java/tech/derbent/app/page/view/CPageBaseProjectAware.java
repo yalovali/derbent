@@ -250,6 +250,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 		}
 	}
 
+	@SuppressWarnings ("static-method")
 	private void validateLazyFieldsInitialized(final CEntityDB<?> entity) {
 		Check.notNull(entity, "Entity cannot be null while validating lazy fields");
 		for (final Field field : getAllFields(entity.getClass())) {

@@ -36,6 +36,7 @@ import tech.derbent.app.projects.domain.CProject;
  * Grid interactions and data verification - Screenshot capture for debugging - Cross-view data consistency testing */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles ("test")
+@SuppressWarnings ("static-method")
 public abstract class CBaseUITest {
 
 	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
@@ -153,6 +154,10 @@ public abstract class CBaseUITest {
 			return route.value();
 		}
 		return viewClass.getSimpleName();
+	}
+
+	private static String sanitizeForDomId(final String value) {
+		return sanitizeForIdentifier(value, "dom-id");
 	}
 
 	private static String sanitizeForIdentifier(final String value, final String fallback) {

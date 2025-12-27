@@ -26,11 +26,13 @@ import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.IUserRepository;
 
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */
+@SuppressWarnings ("static-method")
 @Service ("CSessionService")
 @Primary
 @ConditionalOnWebApplication
 @Profile ("!reset-db")
 public class CWebSessionService implements ISessionService {
+
 	// private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
 	private static final String ACTIVE_ID_KEY = "activeId";
@@ -331,10 +333,10 @@ public class CWebSessionService implements ISessionService {
 		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		if ((project == null) && (getActiveProject().orElse(null) == null)) {
+		if (project == null && getActiveProject().orElse(null) == null) {
 			return;
 		}
-		if ((project != null) && (getActiveProject().orElse(null) != null) && project.getId().equals(getActiveProject().orElse(null).getId())) {
+		if (project != null && getActiveProject().orElse(null) != null && project.getId().equals(getActiveProject().orElse(null).getId())) {
 			// LOGGER.debug("setActiveProject called with same project, no action taken");
 			return;
 		}

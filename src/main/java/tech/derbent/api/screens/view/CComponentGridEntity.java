@@ -32,7 +32,6 @@ import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
@@ -55,7 +54,6 @@ import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -733,21 +731,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Use pageable to get data - limit to first 1000 records for performance
 			final PageRequest pageRequest = PageRequest.of(0, 1000);
 			List data;
-			// Check if this is a project-specific service and filter by the gridEntity's project
-			if (serviceBean instanceof CEntityOfProjectService) {
-				final CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found."));
-				Check.notNull(project, "Project is null");
-				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
-				data = projectService.listByProject(project, pageRequest).getContent();
-			} else if (serviceBean instanceof CEntityOfCompanyService) {
-				final CCompany company = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company found."));
-				Check.notNull(company, "Company is null");
-				final CEntityOfCompanyService<?> projectService = (CEntityOfCompanyService<?>) serviceBean;
-				data = projectService.findByCompany(company, pageRequest).getContent();
-			} else {
-				// For non-project or company services, use regular list method
-				data = serviceBean.list(pageRequest).getContent();
-			}
+			// Use listForPageView to honor service-specific fetch-join queries for UI usage.
+			data = serviceBean.listForPageView(pageRequest, null).getContent();
 			Check.notNull(data, "Data loaded from service is null");
 			grid.setItems(data);
 			enableSelectionChangeListener = old_enableSelectionChangeListener;

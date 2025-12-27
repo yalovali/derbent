@@ -18,6 +18,7 @@ import tech.derbent.base.users.service.CUserService;
  * successful, user is authenticated and granted access 8. User roles determine what resources they can access */
 @EnableWebSecurity
 @Configuration
+@SuppressWarnings ("static-method")
 @ConditionalOnWebApplication
 class CSecurityConfig extends VaadinWebSecurity {
 
@@ -56,7 +57,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * creating users, plain passwords are encoded with BCrypt 2. Encoded passwords are stored in database 3. During authentication, submitted
 	 * passwords are compared using BCrypt 4. BCrypt handles salt generation and verification automatically
 	 * @return BCryptPasswordEncoder instance for password hashing */
-	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();

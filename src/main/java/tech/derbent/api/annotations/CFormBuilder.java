@@ -63,7 +63,9 @@ import tech.derbent.api.utils.Check;
 
 @org.springframework.stereotype.Component
 public final class CFormBuilder<EntityClass> implements ApplicationContextAware {
+
 	public interface IComboBoxDataProvider {
+
 		<T extends CEntityDB<T>> List<T> getItems(Class<T> entityType);
 	}
 
@@ -72,7 +74,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFormBuilder.class);
 
 	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		if ((component == null) || (fieldInfo == null)) {
+		if (component == null || fieldInfo == null) {
 			return;
 		}
 		String entityPart = "entity";
@@ -138,8 +140,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final List<Field> sortedFields = getSortedFilteredFieldsList(allFields);
 			// LOGGER.info("Processing {} visible fields for form generation", sortedFields.size());
 			// Create components with enhanced error handling and logging
-			final List<String> resolvedEntityFields = entityFields != null ? entityFields
-					: sortedFields.stream().map(Field::getName).collect(Collectors.toList());
+			final List<String> resolvedEntityFields =
+					entityFields != null ? entityFields : sortedFields.stream().map(Field::getName).collect(Collectors.toList());
 			for (final String fieldName : resolvedEntityFields) {
 				final Field field = sortedFields.stream().filter(f -> f.getName().equals(fieldName)).findFirst().orElse(null);
 				if (field == null) {
@@ -173,7 +175,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		final NumberField numberField = new NumberField();
 		CAuxillaries.setId(numberField);
 		numberField.setStep(0.01); // Set decimal step for BigDecimal fields
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				final double defaultVal = Double.parseDouble(fieldInfo.getDefaultValue());
 				numberField.setValue(defaultVal);
@@ -207,7 +209,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			// Set ID for better test automation
 			CAuxillaries.setId(checkbox);
 			// Safe null checking and parsing for default value
-			if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+			if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 				checkbox.setValue(Boolean.parseBoolean(fieldInfo.getDefaultValue()));
 			}
 			safeBindComponent(binder, checkbox, fieldInfo.getFieldName(), "Checkbox");
@@ -245,7 +247,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			navigableComboBox.setItems(items);
 			if (!items.isEmpty()) {
-				if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+				if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 					// For entity types, try to find by name or toString match
 					final T defaultItem = items.stream().filter(item -> {
 						final String itemDisplay = CColorUtils.getDisplayTextFromEntity(item);
@@ -317,7 +319,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 			Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
 			// Check for custom component creation method first (highest priority)
-			if ((fieldInfo.getCreateComponentMethod() != null) && !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
+			if (fieldInfo.getCreateComponentMethod() != null && !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
 				component = createCustomComponent(contentOwner, fieldInfo, binder);
 				Check.notNull(component, "Custom component for field " + fieldInfo.getFieldName());
 				return component;
@@ -327,7 +329,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			// Check if field should be rendered as ComboBox based on metadata
 			final boolean hasDataProvider = hasValidDataProvider(fieldInfo.getDataProviderBean());
-			if (hasDataProvider && (fieldType == String.class)) {
+			if (hasDataProvider && fieldType == String.class) {
 				// gets strings from a method in a spring bean
 				component = createStringComboBox(contentOwner, fieldInfo, binder);
 			} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
@@ -339,7 +341,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
-			} else if (hasDataProvider && (fieldType == List.class)) {
+			} else if (hasDataProvider && fieldType == List.class) {
 				// Check if should use grid selection, dual list selector, or multiselect combobox
 				if (fieldInfo.isUseGridSelection()) {
 					component = createGridListSelector(contentOwner, fieldInfo, binder);
@@ -348,23 +350,23 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
-			} else if ((fieldType == Integer.class) || (fieldType == int.class) || (fieldType == Long.class) || (fieldType == long.class)) {
+			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class) {
 				// Integer types
 				component = createIntegerField(fieldInfo, binder);
 			} else if (fieldType == BigDecimal.class) {
 				component = createBigDecimalField(fieldInfo, binder);
-			} else if ((fieldType == Double.class) || (fieldType == double.class) || (fieldType == Float.class) || (fieldType == float.class)) {
+			} else if (fieldType == Double.class || fieldType == double.class || fieldType == Float.class || fieldType == float.class) {
 				// Floating-point types
 				component = createFloatingPointField(fieldInfo, binder);
 			} else if (fieldType == LocalDate.class) {
 				component = createDatePicker(fieldInfo, binder);
 			} else if (fieldType == LocalTime.class) {
 				component = createTimePicker(fieldInfo, binder);
-			} else if ((fieldType == LocalDateTime.class) || (fieldType == Instant.class)) {
+			} else if (fieldType == LocalDateTime.class || fieldType == Instant.class) {
 				component = createDateTimePicker(fieldInfo, binder);
 			} else if (fieldType.isEnum()) {
 				component = createEnumComponent(fieldInfo, binder);
-			} else if ((fieldType == byte[].class) && fieldInfo.isImageData()) {
+			} else if (fieldType == byte[].class && fieldInfo.isImageData()) {
 				component = createPictureSelector(fieldInfo, binder);
 			} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
 				// it has a dataprovider or entity type
@@ -374,7 +376,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					fieldInfo.setDataProviderBean(fieldType.getSimpleName() + "Service");
 				}
 				component = createComboBox(contentOwner, fieldInfo, binder);
-			} else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
+			} else if (fieldType == Boolean.class || fieldType == boolean.class) {
 				component = createCheckbox(fieldInfo, binder);
 			} else if (fieldType == String.class) {
 				if (fieldInfo.isColorField()) {
@@ -489,6 +491,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
 			final com.vaadin.flow.data.converter.Converter<List<DetailClass>, java.util.Set<DetailClass>> converter =
 					new com.vaadin.flow.data.converter.Converter<>() {
+
 						@Override
 						public com.vaadin.flow.data.binder.Result<java.util.Set<DetailClass>> convertToModel(final List<DetailClass> value,
 								final com.vaadin.flow.data.binder.ValueContext context) {
@@ -515,6 +518,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
 			final com.vaadin.flow.data.converter.Converter<List<DetailClass>, java.util.Collection<DetailClass>> converter =
 					new com.vaadin.flow.data.converter.Converter<>() {
+
 						@Override
 						public com.vaadin.flow.data.binder.Result<java.util.Collection<DetailClass>> convertToModel(final List<DetailClass> value,
 								final com.vaadin.flow.data.binder.ValueContext context) {
@@ -595,7 +599,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// Set step for floating point fields
 		numberField.setStep(0.01);
 		// Set default value if specified
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			final double defaultVal = Double.parseDouble(fieldInfo.getDefaultValue());
 			numberField.setValue(defaultVal);
 		}
@@ -643,7 +647,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		comboBox.setItems(iconNames);
 		// Set up custom renderer to show icon with name
 		comboBox.setRenderer(new ComponentRenderer<>(iconName -> {
-			if ((iconName == null) || iconName.isEmpty()) {
+			if (iconName == null || iconName.isEmpty()) {
 				return new Span("No icon selected");
 			}
 			final HorizontalLayout layout = new HorizontalLayout();
@@ -668,7 +672,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// Set item label generator for text representation
 		comboBox.setItemLabelGenerator(iconName -> iconName);
 		// Handle default value
-		final boolean hasDefaultValue = (fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty();
+		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
 		if (hasDefaultValue) {
 			final String defaultIcon = fieldInfo.getDefaultValue();
 			if (iconNames.contains(defaultIcon)) {
@@ -692,18 +696,18 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CAuxillaries.setId(numberField);
 		numberField.setStep(1);
 		// Set default value if specified
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			final double defaultVal = Double.parseDouble(fieldInfo.getDefaultValue());
 			numberField.setValue(defaultVal);
 		}
 		// Handle different integer types with proper conversion
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 		final String propertyName = fieldInfo.getFieldName();
-		if ((fieldType == Integer.class) || (fieldType == int.class)) {
+		if (fieldType == Integer.class || fieldType == int.class) {
 			binder.forField(numberField).withConverter(value -> value != null ? value.intValue() : null,
 					value -> value != null ? value.doubleValue() : null, "Invalid integer value").bind(propertyName);
 			// LOGGER.debug("Successfully bound NumberField with Integer converter for field '{}'", fieldInfo.getFieldName());
-		} else if ((fieldType == Long.class) || (fieldType == long.class)) {
+		} else if (fieldType == Long.class || fieldType == long.class) {
 			binder.forField(numberField).withConverter(value -> value != null ? value.longValue() : null,
 					value -> value != null ? value.doubleValue() : null, "Invalid long value").bind(propertyName);
 			// LOGGER.debug("Successfully bound NumberField with Long converter for field '{}'", fieldInfo.getFieldName());
@@ -744,7 +748,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			comboBox.setValue(null);
 		}
 		// Handle default value
-		final boolean hasDefaultValue = (fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty();
+		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
 		if (hasDefaultValue) {
 			// For String ComboBox, try to match default value exactly
 			if (items.contains(fieldInfo.getDefaultValue())) {
@@ -772,7 +776,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		item.setMinWidth("200px");
 		item.setMaxWidth("800px");
 		item.setMinHeight("100px");
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
 			} catch (final Exception e) {
@@ -800,7 +804,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		item.setWidthFull();
 		item.setMinWidth("200px");
 		item.setMaxWidth("800px");
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
 			} catch (final Exception e) {
@@ -828,7 +832,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		item.setWidthFull();
 		item.setMinWidth("200px");
 		item.setMaxWidth("800px");
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			item.setValue(fieldInfo.getDefaultValue());
 		}
 		item.setRevealButtonVisible(fieldInfo.isPasswordRevealButton());
@@ -844,7 +848,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	private static void getListOfAllFields(final Class<?> entityClass, final List<Field> allFields) {
 		Class<?> current = entityClass;
-		while ((current != null) && (current != Object.class)) {
+		while (current != null && current != Object.class) {
 			final Field[] declaredFields = current.getDeclaredFields();
 			allFields.addAll(Arrays.asList(declaredFields));
 			current = current.getSuperclass();
@@ -886,7 +890,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	private static boolean hasValidDataProvider(final String dataProviderBean) {
-		return (dataProviderBean != null) && !dataProviderBean.trim().isEmpty();
+		return dataProviderBean != null && !dataProviderBean.trim().isEmpty();
 		// && !"none".equalsIgnoreCase(dataProviderBean.trim());
 	}
 
@@ -962,7 +966,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(fieldName, "Field name for safe binding");
 			binder.bind(component, fieldName);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind {} for field '{}': {} - this may cause incomplete bindings", componentType, fieldName, e.getMessage());
+			LOGGER.error("Failed to bind {}:{} for field '{}': {} - this may cause incomplete bindings", componentType, component, fieldName,
+					e.getMessage());
 			throw e;
 		}
 	}

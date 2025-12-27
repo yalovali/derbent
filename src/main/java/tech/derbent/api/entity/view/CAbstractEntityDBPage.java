@@ -53,6 +53,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAbstractEntityDBPage.class);
 	private static final long serialVersionUID = 1L;
 
@@ -142,7 +143,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public void actionRefresh() {
 		try {
 			final EntityClass current = getValue();
-			if ((current != null) && (current.getId() != null)) {
+			if (current != null && current.getId() != null) {
 				final EntityClass reloaded = entityService.getById(current.getId()).orElse(null);
 				if (reloaded != null) {
 					setValue(reloaded);
@@ -229,7 +230,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@PostConstruct
-	@SuppressWarnings ("PMD.UnusedPrivateMethod")
 	private final void createDetails() throws Exception {
 		createDetailsViewTab();
 		createDetailsComponent();
@@ -239,8 +239,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected abstract void createDetailsComponent() throws Exception;
 
 	private void createDetailsSection() {
-		this.baseDetailsLayout = CFlexLayout.forEntityPage();
-		this.detailsTabLayout.setClassName("details-tab-layout");
+		baseDetailsLayout = CFlexLayout.forEntityPage();
+		detailsTabLayout.setClassName("details-tab-layout");
 		// now the content are!!!
 		final Scroller detailsScroller = new Scroller();
 		// FLEX LAYOUT///////////////////
@@ -307,7 +307,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		createDetailsSection();
 	}
 
-	public ArrayList<CAccordionDBEntity<EntityClass>> getAccordionList() { return this.AccordionList; }
+	public ArrayList<CAccordionDBEntity<EntityClass>> getAccordionList() { return AccordionList; }
 
 	public HasComponents getBaseDetailsLayout() { return baseDetailsLayout; }
 
@@ -506,7 +506,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
 		populateAccordionPanels(value);
 		getBinder().setBean(value);
-		if ((value == null) && (masterViewSection != null)) {
+		if (value == null && masterViewSection != null) {
 			masterViewSection.select(null);
 		}
 	}
@@ -539,7 +539,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@Override
-	protected void setupToolbar() { /*****/
+	protected void setupToolbar() {
+		/*****/
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -554,7 +555,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	/** Updates the split layout orientation based on the current layout mode. */
 	private void updateLayoutOrientation() {
-		if ((layoutService != null) && (splitLayout != null)) {
+		if (layoutService != null && splitLayout != null) {
 			final CLayoutService.LayoutMode currentMode = CLayoutService.getCurrentLayoutMode();
 			// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
 			if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {

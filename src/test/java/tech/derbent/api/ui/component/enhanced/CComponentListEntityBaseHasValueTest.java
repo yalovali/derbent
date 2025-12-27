@@ -10,6 +10,7 @@ import com.vaadin.flow.shared.Registration;
 /** Unit tests for CComponentListEntityBase to verify HasValue interface implementation. These tests verify that the component properly implements the
  * HasValue interface with correct method signatures and return types. Note: Full functional testing of UI components requires Vaadin UI context
  * initialization and is better suited for integration tests (e.g., Playwright tests). */
+@SuppressWarnings ("static-method")
 class CComponentListEntityBaseHasValueTest {
 
 	@Test

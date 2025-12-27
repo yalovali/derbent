@@ -11,6 +11,7 @@ import tech.derbent.api.exceptions.CImageProcessingException;
 
 /** Test class for SVG image handling in CImageUtils. Validates that SVG images are properly detected, validated, and handled during resize
  * operations. */
+@SuppressWarnings ("static-method")
 class CImageUtilsSvgTest {
 
 	/** Creates an invalid SVG (missing closing tag).

@@ -34,6 +34,7 @@ import com.vaadin.flow.theme.Theme;
  * @since 1.0 */
 @SpringBootApplication (scanBasePackages = "tech.derbent")
 @Theme ("default")
+@SuppressWarnings ("static-method")
 @Import (ServletWebServerFactoryAutoConfiguration.class)
 public class Application implements AppShellConfigurator {
 
@@ -69,7 +70,6 @@ public class Application implements AppShellConfigurator {
 	 * </p>
 	 * @param jdbcTemplate the JDBC template for database operations
 	 * @return ApplicationRunner that handles data initialization */
-	
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
 		return e -> {

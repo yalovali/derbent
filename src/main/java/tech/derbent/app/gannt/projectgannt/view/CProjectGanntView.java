@@ -41,6 +41,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 		setValue(viewEntity);
 		pageService = new CPageServiceProjectGannt(this);
 		// createDetailsLayout();
+		LOGGER.debug("CProjectGanntView initialized");
 	}
 
 	@Override

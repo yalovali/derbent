@@ -15,6 +15,7 @@ import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Unit tests for CAbstractService validation functionality. Demonstrates the nullable field validation using a concrete implementation. */
+@SuppressWarnings ("static-method")
 class CAbstractServiceValidationTest {
 
 	/** Test entity class with nullable and non-nullable fields. */

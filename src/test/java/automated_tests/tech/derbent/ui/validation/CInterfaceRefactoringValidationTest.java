@@ -29,6 +29,7 @@ import tech.derbent.base.users.service.CUserService;
  * hierarchy 4. Services can be properly accessed through interfaces */
 @SpringBootTest (classes = tech.derbent.Application.class)
 @ActiveProfiles ("test")
+@SuppressWarnings ("static-method")
 @DisplayName ("Interface Refactoring Validation Tests")
 public class CInterfaceRefactoringValidationTest {
 
@@ -41,7 +42,6 @@ public class CInterfaceRefactoringValidationTest {
 	@Autowired
 	private CUserService userService;
 
-	
 	@Test
 	@DisplayName ("Entity classes extend CEntityDB")
 	void testEntityClassesExtendCEntityDB() {
@@ -51,7 +51,6 @@ public class CInterfaceRefactoringValidationTest {
 		assertTrue(CEntityDB.class.isAssignableFrom(CUser.class), "CUser should extend CEntityDB");
 	}
 
-	
 	@Test
 	@DisplayName ("IContentOwner methods are accessible")
 	void testIContentOwnerMethodsAccessible() {
@@ -68,7 +67,6 @@ public class CInterfaceRefactoringValidationTest {
 		}
 	}
 
-	
 	@Test
 	@DisplayName ("IPageServiceImplementer extends IContentOwner")
 	void testIPageServiceImplementerExtendsIContentOwner() {
@@ -76,7 +74,6 @@ public class CInterfaceRefactoringValidationTest {
 		assertTrue(IContentOwner.class.isAssignableFrom(IPageServiceImplementer.class), "IPageServiceImplementer should extend IContentOwner");
 	}
 
-	
 	@Test
 	@DisplayName ("IPageServiceImplementer methods are accessible")
 	void testIPageServiceImplementerMethodsAccessible() {
@@ -93,7 +90,6 @@ public class CInterfaceRefactoringValidationTest {
 		}
 	}
 
-	
 	@Test
 	@DisplayName ("No duplicate method declarations in interface hierarchy")
 	void testNoDuplicateMethodDeclarations() {
@@ -116,7 +112,6 @@ public class CInterfaceRefactoringValidationTest {
 		}
 	}
 
-	
 	@Test
 	@DisplayName ("Page base classes implement IContentOwner through inheritance")
 	void testPageBaseClassesImplementIContentOwner() {
@@ -127,7 +122,6 @@ public class CInterfaceRefactoringValidationTest {
 				"CDynamicPageBase should implement IContentOwner through IPageServiceImplementer");
 	}
 
-	
 	@Test
 	@DisplayName ("Page base classes implement IPageServiceImplementer")
 	void testPageBaseClassesImplementIPageServiceImplementer() {
@@ -156,7 +150,6 @@ public class CInterfaceRefactoringValidationTest {
 		assertTrue(CAbstractService.class.isAssignableFrom(userService.getClass()), "CUserService should extend CAbstractService");
 	}
 
-	
 	@Test
 	@DisplayName ("setValue method uses correct signature")
 	void testSetValueSignature() {

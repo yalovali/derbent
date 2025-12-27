@@ -74,7 +74,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	public CDetailLinesService getScreenLinesService() { return screenLinesService; }
 
 	@Override
-	public ISessionService getSessionService() { return null; }
+	public ISessionService getSessionService() { return sessionService; }
 
 	@Override
 	public void selectFirstInGrid() {

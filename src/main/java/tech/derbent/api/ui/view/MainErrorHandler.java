@@ -14,7 +14,7 @@ class MainErrorHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainErrorHandler.class);
 
-	
+	@SuppressWarnings ("static-method")
 	@Bean
 	public VaadinServiceInitListener errorHandlerInitializer() {
 		return (event) -> event.getSource().addSessionInitListener(sessionInitEvent -> sessionInitEvent.getSession().setErrorHandler(errorEvent -> {

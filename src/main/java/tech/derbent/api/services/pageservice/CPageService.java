@@ -17,7 +17,9 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
@@ -32,7 +34,7 @@ import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
-public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
+public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceHasStatusAndWorkflow<EntityClass> {
 
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CPageService.class);
@@ -474,6 +476,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 	protected EntityClass getValue() { return getView().getValue(); }
 
 	public IPageServiceImplementer<EntityClass> getView() { return view; }
+
+	@Override
+	public CProjectItemStatusService getProjectItemStatusService() {
+		return CSpringContext.getBean(CProjectItemStatusService.class);
+	}
 
 	protected void on_dragEnd(@SuppressWarnings ("unused") CDragDropEvent event) {
 		setActiveDragStartEvent(null);

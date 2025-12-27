@@ -165,7 +165,6 @@ public class CWidgetGridDemo extends Main {
 
 	/** Post-construct initialization. */
 	@PostConstruct
-	@SuppressWarnings ("PMD.UnusedPrivateMethod")
 	private void postConstruct() {
 		LOGGER.debug("Initializing CWidgetGridDemo");
 		try {

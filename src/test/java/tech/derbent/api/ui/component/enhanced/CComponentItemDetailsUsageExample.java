@@ -108,7 +108,7 @@ public class CComponentItemDetailsUsageExample {
 	}
 
 	/** Helper method to simulate getting a selected entity */
-	
+	@SuppressWarnings ("static-method")
 	private CProjectItem<?> getSelectedEntity() {
 		// In real code, this would get the entity from a grid selection,
 		// form field, database query, etc.
