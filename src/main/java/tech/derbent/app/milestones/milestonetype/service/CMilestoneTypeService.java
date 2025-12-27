@@ -9,19 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.milestones.milestone.service.IMilestoneRepository;
 import tech.derbent.app.milestones.milestonetype.domain.CMilestoneType;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CMilestoneTypeService extends CTypeEntityService<CMilestoneType> implements IEntityRegistrable {
+public class CMilestoneTypeService extends CTypeEntityService<CMilestoneType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestoneTypeService.class);
 	@Autowired
-	private IMilestoneRepository milestoneRepository;
+	private final IMilestoneRepository milestoneRepository;
 
 	public CMilestoneTypeService(final IMilestoneTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final IMilestoneRepository milestoneRepository) {
@@ -62,9 +63,9 @@ public class CMilestoneTypeService extends CTypeEntityService<CMilestoneType> im
 	@Override
 	public void initializeNewEntity(final CMilestoneType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IMilestoneTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("MilestoneType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((IMilestoneTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("MilestoneType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

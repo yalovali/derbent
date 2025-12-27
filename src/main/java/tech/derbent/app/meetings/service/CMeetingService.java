@@ -13,6 +13,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.projects.domain.CProject;
@@ -24,7 +25,7 @@ import tech.derbent.base.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CMeetingService extends CProjectItemService<CMeeting> implements IEntityRegistrable {
+public class CMeetingService extends CProjectItemService<CMeeting> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
 	private final CMeetingTypeService meetingTypeService;
@@ -41,6 +42,34 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	@Override
 	public String checkDeleteAllowed(final CMeeting entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final CMeeting meeting) {
+		Check.notNull(meeting, "Meeting cannot be null");
+		Check.notNull(meeting.getId(), "Meeting ID cannot be null");
+		detachSprintItemIfPresent(meeting);
+		super.delete(meeting);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final Long id) {
+		Check.notNull(id, "Meeting ID cannot be null");
+		final CMeeting meeting =
+				repository.findById(id).orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Meeting not found: " + id));
+		delete(meeting);
+	}
+
+	private void detachSprintItemIfPresent(final CMeeting meeting) {
+		final CSprintItem sprintItem = meeting.getSprintItem();
+		if (sprintItem == null || sprintItem.getId() == null) {
+			return;
+		}
+		meeting.setSprintItem(null);
+		repository.saveAndFlush(meeting);
+		sprintItemService.delete(sprintItem.getId());
 	}
 
 	@Override
@@ -79,33 +108,5 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	public java.util.List<CMeeting> listForProjectBacklog(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IMeetingRepository) repository).listForProjectBacklog(project);
-	}
-
-	private void detachSprintItemIfPresent(final CMeeting meeting) {
-		final CSprintItem sprintItem = meeting.getSprintItem();
-		if (sprintItem == null || sprintItem.getId() == null) {
-			return;
-		}
-		meeting.setSprintItem(null);
-		repository.saveAndFlush(meeting);
-		sprintItemService.delete(sprintItem.getId());
-	}
-
-	@Override
-	@Transactional
-	public void delete(final CMeeting meeting) {
-		Check.notNull(meeting, "Meeting cannot be null");
-		Check.notNull(meeting.getId(), "Meeting ID cannot be null");
-		detachSprintItemIfPresent(meeting);
-		super.delete(meeting);
-	}
-
-	@Override
-	@Transactional
-	public void delete(final Long id) {
-		Check.notNull(id, "Meeting ID cannot be null");
-		final CMeeting meeting = repository.findById(id)
-				.orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Meeting not found: " + id));
-		delete(meeting);
 	}
 }

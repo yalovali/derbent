@@ -193,10 +193,6 @@ public class CEntityRegistry {
 			serviceClassesByEntity.put(entityClass, serviceClass);
 			serviceClassesByName.put(serviceClass.getSimpleName(), serviceClass);
 			// Optional initializer service
-			final Class<?> initializer = registrable.getInitializerServiceClass();
-			if (initializer != null) {
-				initializerServices.put(entityClass, initializer);
-			}
 			// Optional page service
 			final Class<?> pageService = registrable.getPageServiceClass();
 			if (pageService != null) {
@@ -204,27 +200,34 @@ public class CEntityRegistry {
 				pageServiceClassesByName.put(pageService.getSimpleName(), pageService);
 			}
 			// Optional default icon
-			final String defaultIconName = registrable.getDefaultIconName();
-			if (defaultIconName != null && !defaultIconName.isBlank()) {
-				defaultIcons.put(entityClass, defaultIconName);
-				defaultIconsByName.put(entityClass.getName(), defaultIconName);
-			}
-			// Optional default color
-			final String defaultColor = registrable.getDefaultColor();
-			if (defaultColor != null && !defaultColor.isBlank()) {
-				defaultColors.put(entityClass, defaultColor);
-				defaultColorsByName.put(entityClass.getName(), defaultColor);
-			}
-			// Entity titles (singular and plural)
-			final String singularTitle = registrable.getEntityTitleSingular();
-			if (singularTitle != null && !singularTitle.isBlank()) {
-				entityTitlesSingular.put(entityClass, singularTitle);
-				entityClassesBySingularTitle.put(singularTitle, entityClass);
-			}
-			final String pluralTitle = registrable.getEntityTitlePlural();
-			if (pluralTitle != null && !pluralTitle.isBlank()) {
-				entityTitlesPlural.put(entityClass, pluralTitle);
-				entityClassesByPluralTitle.put(pluralTitle, entityClass);
+			if (registrable instanceof IEntityWithView) {
+				final IEntityWithView entityWithView = (IEntityWithView) registrable;
+				final Class<?> initializer = entityWithView.getInitializerServiceClass();
+				if (initializer != null) {
+					initializerServices.put(entityClass, initializer);
+				}
+				final String defaultIconName = entityWithView.getDefaultIconName();
+				if (defaultIconName != null && !defaultIconName.isBlank()) {
+					defaultIcons.put(entityClass, defaultIconName);
+					defaultIconsByName.put(entityClass.getName(), defaultIconName);
+				}
+				// Optional default color
+				final String defaultColor = entityWithView.getDefaultColor();
+				if (defaultColor != null && !defaultColor.isBlank()) {
+					defaultColors.put(entityClass, defaultColor);
+					defaultColorsByName.put(entityClass.getName(), defaultColor);
+				}
+				// Entity titles (singular and plural)
+				final String singularTitle = entityWithView.getEntityTitleSingular();
+				if (singularTitle != null && !singularTitle.isBlank()) {
+					entityTitlesSingular.put(entityClass, singularTitle);
+					entityClassesBySingularTitle.put(singularTitle, entityClass);
+				}
+				final String pluralTitle = entityWithView.getEntityTitlePlural();
+				if (pluralTitle != null && !pluralTitle.isBlank()) {
+					entityTitlesPlural.put(entityClass, pluralTitle);
+					entityClassesByPluralTitle.put(pluralTitle, entityClass);
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error registering entity: {}", e.getMessage(), e);

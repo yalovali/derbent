@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -16,7 +17,7 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderApprovalService extends CEntityNamedService<COrderApproval> implements IEntityRegistrable {
+public class COrderApprovalService extends CEntityNamedService<COrderApproval> implements IEntityRegistrable, IEntityWithView {
 
 	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

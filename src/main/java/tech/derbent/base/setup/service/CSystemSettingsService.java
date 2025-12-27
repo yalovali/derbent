@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.domain.CSystemSettings;
@@ -21,7 +22,7 @@ import tech.derbent.base.setup.domain.CSystemSettings;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CSystemSettingsService extends CAbstractService<CSystemSettings> implements IEntityRegistrable {
+public class CSystemSettingsService extends CAbstractService<CSystemSettings> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsService.class);
 

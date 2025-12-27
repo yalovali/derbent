@@ -13,6 +13,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
@@ -25,7 +26,7 @@ import tech.derbent.base.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable {
+public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
 
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityTypeService entityTypeService;

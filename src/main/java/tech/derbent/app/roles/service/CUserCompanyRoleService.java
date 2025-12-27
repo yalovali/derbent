@@ -36,7 +36,7 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 
 	@Transactional
 	public CUserCompanyRole createAdminRole(CCompany company) {
-		CUserCompanyRole adminRole = new CUserCompanyRole("Company Admin", company);
+		final CUserCompanyRole adminRole = new CUserCompanyRole("Company Admin", company);
 		adminRole.setIsAdmin(true);
 		adminRole.setIsUser(true);
 		adminRole.setIsGuest(false);
@@ -45,7 +45,7 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 
 	@Transactional
 	public CUserCompanyRole createGuestRole(CCompany company) {
-		CUserCompanyRole guestRole = new CUserCompanyRole("Company Guest", company);
+		final CUserCompanyRole guestRole = new CUserCompanyRole("Company Guest", company);
 		guestRole.setIsAdmin(false);
 		guestRole.setIsUser(false);
 		guestRole.setIsGuest(true);
@@ -54,7 +54,7 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 
 	@Transactional
 	public CUserCompanyRole createUserRole(CCompany company) {
-		CUserCompanyRole userRole = new CUserCompanyRole("Company User", company);
+		final CUserCompanyRole userRole = new CUserCompanyRole("Company User", company);
 		userRole.setIsAdmin(false);
 		userRole.setIsUser(true);
 		userRole.setIsGuest(false);
@@ -71,13 +71,7 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 	public Class<CUserCompanyRole> getEntityClass() { return CUserCompanyRole.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return CUserCompanyRoleInitializerService.class; }
-
-	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceUserCompanyRole.class; }
-
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public CUserCompanyRole getRandom() {
@@ -86,18 +80,21 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 	}
 
 	public CUserCompanyRole getRandom(CCompany company) {
-		List<CUserCompanyRole> roles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
+		final List<CUserCompanyRole> roles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
 		if (roles.isEmpty()) {
 			throw new IllegalStateException("No roles found for company: " + company.getName());
 		}
-		int randomIndex = (int) (Math.random() * roles.size());
+		final int randomIndex = (int) (Math.random() * roles.size());
 		return roles.get(randomIndex);
 	}
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Transactional
 	public void initializeDefaultRoles(CCompany company) {
 		// Check if roles already exist for this company
-		List<CUserCompanyRole> existingRoles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
+		final List<CUserCompanyRole> existingRoles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
 		if (existingRoles.isEmpty()) {
 			createAdminRole(company);
 			createUserRole(company);

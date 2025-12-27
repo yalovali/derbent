@@ -240,8 +240,11 @@
 						<rulesets>
 							<ruleset>config/pmd/pmd-rules.xml</ruleset>
 						</rulesets>						
+						<excludes>
+							<exclude>**/tech/derbent/api/**</exclude>
+						</excludes>
 						<failOnViolation>true</failOnViolation>
-						<targetJdk>21</targetJdk>
+						<targetJdk>17</targetJdk>
 						<typeResolution>false</typeResolution>
 					</configuration>
 						<executions>

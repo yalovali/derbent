@@ -6,13 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.orders.type.domain.COrderType;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderTypeService extends CTypeEntityService<COrderType> implements IEntityRegistrable {
+public class COrderTypeService extends CTypeEntityService<COrderType> implements IEntityRegistrable, IEntityWithView {
 
 	COrderTypeService(final IOrderTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

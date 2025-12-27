@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.projects.domain.CProject;
@@ -14,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CPageEntityService extends CEntityOfProjectService<CPageEntity> implements IEntityRegistrable {
+public class CPageEntityService extends CEntityOfProjectService<CPageEntity> implements IEntityRegistrable, IEntityWithView {
 
 	public CPageEntityService(final IPageEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

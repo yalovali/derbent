@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.Check;
@@ -18,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CGridEntityService extends CEntityOfProjectService<CGridEntity> implements IEntityRegistrable {
+public class CGridEntityService extends CEntityOfProjectService<CGridEntity> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridEntityService.class);
 
@@ -50,7 +51,7 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 	public Optional<CGridEntity> findByNameAndProject(final String name, final CProject project) {
 		Check.notBlank(name, "Name must not be blank");
 		Check.notNull(project, "Project must not be null");
-		if ((name == null) || name.isBlank()) {
+		if (name == null || name.isBlank()) {
 			return Optional.empty();
 		}
 		return ((IGridEntityRepository) repository).findByNameAndProject(project, name);

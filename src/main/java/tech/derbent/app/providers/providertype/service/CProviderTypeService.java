@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.providers.provider.service.IProviderRepository;
 import tech.derbent.app.providers.providertype.domain.CProviderType;
@@ -17,11 +18,11 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CProviderTypeService extends CTypeEntityService<CProviderType> implements IEntityRegistrable {
+public class CProviderTypeService extends CTypeEntityService<CProviderType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProviderTypeService.class);
 	@Autowired
-	private IProviderRepository providerRepository;
+	private final IProviderRepository providerRepository;
 
 	public CProviderTypeService(final IProviderTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final IProviderRepository providerRepository) {
@@ -62,9 +63,9 @@ public class CProviderTypeService extends CTypeEntityService<CProviderType> impl
 	@Override
 	public void initializeNewEntity(final CProviderType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IProviderTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("ProviderType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((IProviderTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("ProviderType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

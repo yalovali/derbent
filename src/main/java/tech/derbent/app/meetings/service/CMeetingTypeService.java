@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.domain.CPageServiceMeetingType;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -15,7 +16,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CMeetingTypeService extends CTypeEntityService<CMeetingType> implements IEntityRegistrable {
+public class CMeetingTypeService extends CTypeEntityService<CMeetingType> implements IEntityRegistrable, IEntityWithView {
 
 	CMeetingTypeService(final IMeetingTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

@@ -10,14 +10,15 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.risklevel.risklevel.domain.CRiskLevel;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:level-up", title = "Settings.Risk Levels")
+@Menu (icon = "vaadin:level-up", title = "Settings.Risk Levels")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CRiskLevelService extends CProjectItemService<CRiskLevel> implements IEntityRegistrable {
+public class CRiskLevelService extends CProjectItemService<CRiskLevel> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskLevelService.class);
 

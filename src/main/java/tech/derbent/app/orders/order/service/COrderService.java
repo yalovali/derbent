@@ -13,6 +13,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.currency.service.CCurrencyService;
@@ -26,7 +27,7 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderService extends CEntityOfProjectService<COrder> implements IEntityRegistrable {
+public class COrderService extends CEntityOfProjectService<COrder> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderService.class);
 	private final CCurrencyService currencyService;

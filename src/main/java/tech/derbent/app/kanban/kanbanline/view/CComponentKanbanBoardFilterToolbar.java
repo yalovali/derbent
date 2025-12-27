@@ -12,12 +12,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.sprints.domain.CSprint;
+import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CComponentKanbanBoardFilterToolbar - Filtering toolbar for Kanban board items.
  * <p>
@@ -32,16 +32,22 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
                 private ResponsibleFilterMode responsibleMode = ResponsibleFilterMode.ALL;
                 private CSprint sprint;
 
+		/** Returns the selected entity type filter. */
                 public Class<?> getEntityType() { return entityType; }
 
+		/** Returns the selected responsible filter mode. */
                 public ResponsibleFilterMode getResponsibleMode() { return responsibleMode; }
 
+		/** Returns the selected sprint filter. */
                 public CSprint getSprint() { return sprint; }
 
+		/** Sets the entity type filter. */
                 public void setEntityType(final Class<?> entityType) { this.entityType = entityType; }
 
+		/** Sets the responsible filter mode. */
                 public void setResponsibleMode(final ResponsibleFilterMode responsibleMode) { this.responsibleMode = responsibleMode; }
 
+		/** Sets the sprint filter. */
                 public void setSprint(final CSprint sprint) { this.sprint = sprint; }
         }
 
@@ -51,10 +57,12 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 
 		private final String label;
 
+		/** Creates a responsible filter entry with a label. */
 		ResponsibleFilterMode(final String label) {
 			this.label = label;
 		}
 
+		/** Returns the display label for the mode. */
 		public String getLabel() { return label; }
 	}
 
@@ -63,11 +71,13 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		private final Class<?> entityClass;
 		private final String label;
 
+		/** Creates a type option with label and class. */
 		TypeOption(final String label, final Class<?> entityClass) {
 			this.label = label;
 			this.entityClass = entityClass;
 		}
 
+		/** Compares type options by class and label. */
 		@Override
 		public boolean equals(final Object other) {
 			if (this == other) {
@@ -80,10 +90,13 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 			return Objects.equals(entityClass, option.entityClass) && Objects.equals(label, option.label);
 		}
 
+		/** Returns the entity class for this option. */
 		public Class<?> getEntityClass() { return entityClass; }
 
+		/** Returns the display label for this option. */
 		public String getLabel() { return label; }
 
+		/** Computes hash based on class and label. */
 		@Override
 		public int hashCode() {
 			return Objects.hash(entityClass, label);
@@ -92,6 +105,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 
 	private static final long serialVersionUID = 1L;
 
+	/** Resolves a display label for an entity class. */
 	private static String resolveEntityTypeLabel(final Class<?> entityClass) {
 		Check.notNull(entityClass, "Entity class cannot be null");
 		final String registeredTitle = CEntityRegistry.getEntityTitleSingular(entityClass);
@@ -110,6 +124,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
         private final List<Consumer<FilterCriteria>> listeners;
         private final TypeOption typeAllOption;
 
+	/** Builds the filter toolbar and its components. */
         public CComponentKanbanBoardFilterToolbar() {
                 super(new ToolbarConfig().hideAll());
                 currentCriteria = new FilterCriteria();
@@ -123,11 +138,13 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
                 setAlignItems(Alignment.CENTER);
         }
 
+	/** Registers a listener that reacts to filter changes. */
 	public void addKanbanFilterChangeListener(final Consumer<FilterCriteria> listener) {
 		Check.notNull(listener, "Filter listener cannot be null");
 		listeners.add(listener);
 	}
 
+	/** Builds the clear button for the toolbar. */
         private Button buildClearButton() {
                 final Button button = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
                 button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
@@ -136,6 +153,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		return button;
 	}
 
+	/** Builds the responsible filter combo box. */
         private ComboBox<ResponsibleFilterMode> buildResponsibleModeCombo() {
                 final ComboBox<ResponsibleFilterMode> combo = new ComboBox<>("Responsible");
 		combo.setItems(ResponsibleFilterMode.values());
@@ -149,6 +167,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
                 return combo;
         }
 
+	/** Builds the sprint filter combo box. */
         private CColorAwareComboBox<CSprint> buildSprintCombo() {
                 final CColorAwareComboBox<CSprint> combo = new CColorAwareComboBox<>(CSprint.class, "Sprint");
                 combo.addValueChangeListener(event -> {
@@ -158,6 +177,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
                 return combo;
         }
 
+	/** Builds the entity type filter combo box. */
 	private ComboBox<TypeOption> buildTypeCombo() {
 		final ComboBox<TypeOption> combo = new ComboBox<>("Type");
 		combo.setItemLabelGenerator(TypeOption::getLabel);
@@ -171,6 +191,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		return combo;
 	}
 
+	/** Resets filters to defaults and notifies listeners. */
         @Override
         public void clearFilters() {
                 comboSprint.setValue(defaultSprint);
@@ -182,19 +203,23 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
                 notifyListeners();
         }
 
+	/** Returns the active filter criteria. */
         public FilterCriteria getCurrentCriteria() { return currentCriteria; }
 
+	/** Notifies listeners of a filter change. */
 	private void notifyListeners() {
 		for (final Consumer<FilterCriteria> listener : listeners) {
 			listener.accept(currentCriteria);
 		}
 	}
 
-        public void setAvailableItems(final List<CProjectItem<?>> items) {
+	/** Updates available type options based on item list. */
+        public void setAvailableItems(final List<CSprintItem> items) {
                 Check.notNull(items, "Items cannot be null");
                 updateTypeOptions(items);
         }
 
+	/** Updates sprint options and selects a default. */
         public void setAvailableSprints(final List<CSprint> sprints, final CSprint defaultSprint) {
                 comboSprint.setItems(sprints);
                 this.defaultSprint = defaultSprint;
@@ -212,13 +237,14 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
                 notifyListeners();
         }
 
-	private void updateTypeOptions(final List<CProjectItem<?>> items) {
+	/** Refreshes the type options list. */
+	private void updateTypeOptions(final List<CSprintItem> items) {
 		final Map<Class<?>, TypeOption> options = new LinkedHashMap<>();
-		for (final CProjectItem<?> item : items) {
-			if (item == null) {
+		for (final CSprintItem sprintItem : items) {
+			if (sprintItem == null || sprintItem.getItem() == null) {
 				continue;
 			}
-			final Class<?> entityClass = item.getClass();
+			final Class<?> entityClass = sprintItem.getItem().getClass();
 			options.putIfAbsent(entityClass, new TypeOption(resolveEntityTypeLabel(entityClass), entityClass));
 		}
 		final List<TypeOption> typeOptions =

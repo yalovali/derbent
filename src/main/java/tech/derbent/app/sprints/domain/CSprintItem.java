@@ -40,6 +40,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	// Transient field - loaded dynamically at runtime from itemId and itemType
 	@Transient
 	private ISprintableItem item;
+	@Transient
+	private Long kanbanColumnId;
 	// Store only the ID of the project item - loaded dynamically at runtime
 	@Column (name = "item_id", nullable = false)
 	@NotNull (message = "Project item ID is required")
@@ -90,9 +92,10 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	public CSprintItem(final CSprint sprint, final ISprintableItem item) {
 		super();
 		this.sprint = sprint;
-		this.itemId = item.getId();
-		this.itemType = item.getClass().getSimpleName();
+		itemId = item.getId();
+		itemType = item.getClass().getSimpleName();
 		this.item = item;
+		status = item.getStatus();
 		item.setSprintItem(this);
 	}
 
@@ -131,6 +134,9 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 
 	public String getItemType() { return itemType; }
 
+	/** Returns the assigned kanban column id for UI placement. */
+	public Long getKanbanColumnId() { return kanbanColumnId; }
+
 	public CSprint getSprint() { return sprint; }
 
 	public CProjectItemStatus getStatus() {
@@ -150,8 +156,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	public void setItem(final ISprintableItem item) {
 		this.item = item;
 		if (item != null) {
-			this.itemId = item.getId();
-			this.itemType = item.getClass().getSimpleName();
+			itemId = item.getId();
+			itemType = item.getClass().getSimpleName();
 		}
 	}
 
@@ -161,6 +167,11 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
 	public void setItemType(final String itemType) { this.itemType = itemType; }
+
+	/** Sets the assigned kanban column id for UI placement. */
+	public void setKanbanColumnId(final Long kanbanColumnId) {
+		this.kanbanColumnId = kanbanColumnId;
+	}
 
 	public void setSprint(final CSprint sprint) { this.sprint = sprint; }
 

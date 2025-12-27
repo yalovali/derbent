@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -14,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CCurrencyService extends CEntityOfProjectService<CCurrency> implements IEntityRegistrable {
+public class CCurrencyService extends CEntityOfProjectService<CCurrency> implements IEntityRegistrable, IEntityWithView {
 
 	CCurrencyService(final ICurrencyRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

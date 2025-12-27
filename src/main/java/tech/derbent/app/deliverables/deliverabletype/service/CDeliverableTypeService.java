@@ -9,19 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.deliverables.deliverable.service.IDeliverableRepository;
 import tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType> implements IEntityRegistrable {
+public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableTypeService.class);
 	@Autowired
-	private IDeliverableRepository deliverableRepository;
+	private final IDeliverableRepository deliverableRepository;
 
 	public CDeliverableTypeService(final IDeliverableTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final IDeliverableRepository deliverableRepository) {
@@ -62,9 +63,9 @@ public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType
 	@Override
 	public void initializeNewEntity(final CDeliverableType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IDeliverableTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("DeliverableType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((IDeliverableTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("DeliverableType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

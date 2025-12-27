@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.decisions.domain.CDecisionType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -16,7 +17,7 @@ import tech.derbent.base.session.service.ISessionService;
  * decision type management including validation, creation, and status management. */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CDecisionTypeService extends CTypeEntityService<CDecisionType> implements IEntityRegistrable {
+public class CDecisionTypeService extends CTypeEntityService<CDecisionType> implements IEntityRegistrable, IEntityWithView {
 
 	public CDecisionTypeService(final IDecisionTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

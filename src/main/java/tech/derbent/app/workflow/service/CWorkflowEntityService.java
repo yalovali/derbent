@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.view.CComponentWorkflowStatusRelations;
 import tech.derbent.base.session.service.ISessionService;
@@ -17,7 +18,7 @@ import tech.derbent.base.session.service.ISessionService;
  * management including CRUD operations and validation. */
 @Service
 @Transactional
-public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> implements IEntityRegistrable {
+public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
 	@SuppressWarnings ("unused")

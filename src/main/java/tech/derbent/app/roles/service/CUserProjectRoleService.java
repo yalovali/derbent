@@ -39,7 +39,7 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	 * @return the created admin role */
 	@Transactional
 	public CUserProjectRole createAdminRole(String projectName) {
-		CUserProjectRole adminRole = new CUserProjectRole("Project Admin",
+		final CUserProjectRole adminRole = new CUserProjectRole("Project Admin",
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session")));
 		adminRole.setIsAdmin(true);
 		adminRole.setIsUser(true);
@@ -52,7 +52,7 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	 * @return the created guest role */
 	@Transactional
 	public CUserProjectRole createGuestRole(String projectName) {
-		CUserProjectRole guestRole = new CUserProjectRole("Project Guest",
+		final CUserProjectRole guestRole = new CUserProjectRole("Project Guest",
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session")));
 		guestRole.setIsAdmin(false);
 		guestRole.setIsUser(false);
@@ -65,7 +65,7 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	 * @return the created user role */
 	@Transactional
 	public CUserProjectRole createUserRole(String projectName) {
-		CUserProjectRole userRole = new CUserProjectRole("Project User",
+		final CUserProjectRole userRole = new CUserProjectRole("Project User",
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session")));
 		userRole.setIsAdmin(false);
 		userRole.setIsUser(true);
@@ -75,9 +75,6 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 
 	@Override
 	public Class<CUserProjectRole> getEntityClass() { return CUserProjectRole.class; }
-
-	@Override
-	public Class<?> getInitializerServiceClass() { return CUserProjectRoleInitializerService.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceUserProjectRole.class; }

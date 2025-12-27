@@ -30,6 +30,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Kanban Lines";
 	private static final boolean showInQuickToolbar = true;
 
+	/** Builds the standard detail view for kanban lines. */
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
@@ -49,12 +50,14 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		}
 	}
 
+	/** Builds the grid configuration for kanban line list views. */
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "company", "active"));
 		return grid;
 	}
 
+	/** Builds the board-focused detail view for kanban lines. */
 	private static CDetailSection createKanbanView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
@@ -71,6 +74,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		}
 	}
 
+	/** Registers kanban line pages and grids for a project. */
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
@@ -87,6 +91,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 				menuOrder + ".1");
 	}
 
+	/** Seeds default kanban lines and columns for a company. */
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] sampleLines = {
 				{

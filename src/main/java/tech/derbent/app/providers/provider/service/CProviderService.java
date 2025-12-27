@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.providers.provider.domain.CProvider;
 import tech.derbent.app.providers.providertype.service.CProviderTypeService;
@@ -19,9 +20,9 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:file-o", title = "Settings.Providers")
+@Menu (icon = "vaadin:file-o", title = "Settings.Providers")
 @PermitAll
-public class CProviderService extends CProjectItemService<CProvider> implements IEntityRegistrable {
+public class CProviderService extends CProjectItemService<CProvider> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProviderService.class);
 	private final CProviderTypeService providerTypeService;

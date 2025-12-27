@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService;
 import tech.derbent.app.projects.domain.CProject;
@@ -19,9 +20,9 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:file-o", title = "Settings.ProjectIncomes")
+@Menu (icon = "vaadin:file-o", title = "Settings.ProjectIncomes")
 @PermitAll
-public class CProjectIncomeService extends CProjectItemService<CProjectIncome> implements IEntityRegistrable {
+public class CProjectIncomeService extends CProjectItemService<CProjectIncome> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectIncomeService.class);
 	private final CProjectIncomeTypeService projectincomeTypeService;

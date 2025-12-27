@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.activities.domain.CActivityType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -18,11 +19,11 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CActivityTypeService extends CTypeEntityService<CActivityType> implements IEntityRegistrable {
+public class CActivityTypeService extends CTypeEntityService<CActivityType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityTypeService.class);
 	@Autowired
-	private IActivityRepository activityRepository;
+	private final IActivityRepository activityRepository;
 
 	public CActivityTypeService(final IActivityTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final IActivityRepository activityRepository) {
@@ -70,9 +71,9 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> impl
 	@Override
 	public void initializeNewEntity(final CActivityType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IActivityTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("ActivityType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((IActivityTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("ActivityType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

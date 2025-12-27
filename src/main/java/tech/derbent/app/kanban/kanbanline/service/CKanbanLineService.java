@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
@@ -24,11 +25,11 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> implements IEntityRegistrable {
+public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanLineService.class);
-	private final Comparator<CKanbanLine> recencyComparator;
 
+	/** Normalizes column ordering to a contiguous sequence. */
 	private static void normalizeKanbanColumnOrder(final CKanbanLine line) {
 		Check.notNull(line, "Kanban line cannot be null when normalizing column order");
 		Check.notNull(line.getKanbanColumns(), "Kanban columns cannot be null when normalizing order");
@@ -43,6 +44,7 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		}
 	}
 
+	/** Resolves the matching column instance inside the line. */
 	private static CKanbanColumn resolveColumnForDelete(final CKanbanLine line, final CKanbanColumn column) {
 		if (line.getKanbanColumns().contains(column)) {
 			return column;
@@ -53,14 +55,18 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		return resolved;
 	}
 
+	private final Comparator<CKanbanLine> recencyComparator;
+
+	/** Creates the service with repository, clock, and session context. */
 	public CKanbanLineService(final IKanbanLineRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		recencyComparator = Comparator.<CKanbanLine, LocalDateTime>comparing(CKanbanLine::getLastModifiedDate,
-				Comparator.nullsLast(LocalDateTime::compareTo))
+		recencyComparator =
+				Comparator.<CKanbanLine, LocalDateTime>comparing(CKanbanLine::getLastModifiedDate, Comparator.nullsLast(LocalDateTime::compareTo))
 						.thenComparing(CKanbanLine::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
 						.thenComparing(CKanbanLine::getId, Comparator.nullsLast(Long::compareTo)).reversed();
 	}
 
+	/** Removes a column from a line and reorders the remainder. */
 	@Transactional
 	public void deleteKanbanColumn(final CKanbanLine line, final CKanbanColumn column) {
 		Check.notNull(line, "Kanban line cannot be null for column delete");
@@ -74,74 +80,82 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		save(line);
 	}
 
-        // override finddefault
-        @Override
-        public Optional<CKanbanLine> findDefault() {
-                // Resolve defaults in the same order the UI expects: project → company → most recent line
-                // across all tenants. This keeps the Kanban board deterministic when context is missing.
-                final Optional<CProject> activeProject = sessionService.getActiveProject();
-                if (activeProject.isPresent()) {
-                        final Optional<CKanbanLine> projectDefault = findDefaultForProject(activeProject.get());
-                        if (projectDefault.isPresent()) {
-                                return projectDefault;
-                        }
-                }
-                final Optional<CCompany> activeCompany = sessionService.getActiveCompany();
-                if (activeCompany.isPresent()) {
-                        final Optional<CKanbanLine> companyDefault = findDefaultForCompany(activeCompany.get());
-                        if (companyDefault.isPresent()) {
-                                return companyDefault;
-                        }
-                }
-                return resolveDefaultLine(findAll());
-        }
+	// override finddefault
+	/** Resolves the default line using project then company context. */
+	@Override
+	public Optional<CKanbanLine> findDefault() {
+		// Resolve defaults in the same order the UI expects: project → company → most recent line
+		// across all tenants. This keeps the Kanban board deterministic when context is missing.
+		final Optional<CProject> activeProject = sessionService.getActiveProject();
+		if (activeProject.isPresent()) {
+			final Optional<CKanbanLine> projectDefault = findDefaultForProject(activeProject.get());
+			if (projectDefault.isPresent()) {
+				return projectDefault;
+			}
+		}
+		final Optional<CCompany> activeCompany = sessionService.getActiveCompany();
+		if (activeCompany.isPresent()) {
+			final Optional<CKanbanLine> companyDefault = findDefaultForCompany(activeCompany.get());
+			if (companyDefault.isPresent()) {
+				return companyDefault;
+			}
+		}
+		return resolveDefaultLine(findAll());
+	}
 
+	/** Finds the default line for a company. */
+	@Transactional (readOnly = true)
+	public Optional<CKanbanLine> findDefaultForCompany(final CCompany company) {
+		Check.notNull(company, "Company cannot be null when locating default Kanban line");
+		final List<CKanbanLine> lines = listByCompany(company);
+		return resolveDefaultLine(lines);
+	}
+
+	/** Finds the default line for the current project. */
+	@Transactional (readOnly = true)
+	public Optional<CKanbanLine> findDefaultForCurrentProject() {
+		return sessionService.getActiveProject().flatMap(this::findDefaultForProject);
+	}
+
+	/** Finds the default line for a specific project. */
+	@Transactional (readOnly = true)
+	public Optional<CKanbanLine> findDefaultForProject(final CProject project) {
+		Check.notNull(project, "Project cannot be null when locating default Kanban line");
+		if (project.getKanbanLine() != null) {
+			final Long identifier = project.getKanbanLine().getId();
+			if (identifier != null) {
+				final Optional<CKanbanLine> persisted = getById(identifier);
+				if (persisted.isPresent()) {
+					return persisted;
+				}
+			}
+			return Optional.of(project.getKanbanLine());
+		}
+		final CCompany company = project.getCompany() != null ? project.getCompany() : sessionService.getActiveCompany().orElse(null);
+		if (company == null) {
+			LOGGER.warn("Cannot resolve default Kanban line without a company context");
+			return Optional.empty();
+		}
+		return findDefaultForCompany(company);
+	}
+
+	/** Returns the managed entity class. */
 	@Override
 	public Class<CKanbanLine> getEntityClass() { return CKanbanLine.class; }
 
+	/** Returns the initializer service class. */
 	@Override
 	public Class<?> getInitializerServiceClass() { return CKanbanLineInitializerService.class; }
 
+	/** Returns the page service class. */
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceKanbanLine.class; }
 
-        @Override
-        public Class<?> getServiceClass() { return this.getClass(); }
+	/** Returns the service runtime class. */
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
-        @Transactional (readOnly = true)
-        public Optional<CKanbanLine> findDefaultForCompany(final CCompany company) {
-                Check.notNull(company, "Company cannot be null when locating default Kanban line");
-                final List<CKanbanLine> lines = listByCompany(company);
-                return resolveDefaultLine(lines);
-        }
-
-        @Transactional (readOnly = true)
-        public Optional<CKanbanLine> findDefaultForCurrentProject() {
-                return sessionService.getActiveProject().flatMap(this::findDefaultForProject);
-        }
-
-        @Transactional (readOnly = true)
-        public Optional<CKanbanLine> findDefaultForProject(final CProject project) {
-                Check.notNull(project, "Project cannot be null when locating default Kanban line");
-                if (project.getKanbanLine() != null) {
-                        final Long identifier = project.getKanbanLine().getId();
-                        if (identifier != null) {
-                                final Optional<CKanbanLine> persisted = getById(identifier);
-                                if (persisted.isPresent()) {
-                                        return persisted;
-                                }
-                        }
-                        return Optional.of(project.getKanbanLine());
-                }
-                final CCompany company = project.getCompany() != null ? project.getCompany()
-                                : sessionService.getActiveCompany().orElse(null);
-                if (company == null) {
-                        LOGGER.warn("Cannot resolve default Kanban line without a company context");
-                        return Optional.empty();
-                }
-                return findDefaultForCompany(company);
-        }
-
+	/** Initializes defaults for a new line entity. */
 	@Override
 	public void initializeNewEntity(final CKanbanLine entity) {
 		super.initializeNewEntity(entity);
@@ -153,27 +167,29 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		}
 	}
 
+	/** Picks the most recently modified line as default. */
+	private Optional<CKanbanLine> resolveDefaultLine(final List<CKanbanLine> lines) {
+		if (lines == null || lines.isEmpty()) {
+			return Optional.empty();
+		}
+		return lines.stream().max(recencyComparator);
+	}
+
+	/** Validates name uniqueness within the company. */
 	@Override
-        protected void validateEntity(final CKanbanLine entity) {
-                super.validateEntity(entity);
-                Check.notBlank(entity.getName(), "Kanban line name cannot be blank");
-                final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
-                Check.notNull(company, "Company cannot be null for kanban line validation");
+	protected void validateEntity(final CKanbanLine entity) {
+		super.validateEntity(entity);
+		Check.notBlank(entity.getName(), "Kanban line name cannot be blank");
+		final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
+		Check.notNull(company, "Company cannot be null for kanban line validation");
 		final String trimmedName = entity.getName().trim();
 		final CKanbanLine existing = findByNameAndCompany(trimmedName, company).orElse(null);
 		if (existing == null) {
 			return;
 		}
-                if (entity.getId() != null && entity.getId().equals(existing.getId())) {
-                        return;
-                }
-                throw new CValidationException("Kanban line name must be unique within the company");
-        }
-
-        private Optional<CKanbanLine> resolveDefaultLine(final List<CKanbanLine> lines) {
-                if (lines == null || lines.isEmpty()) {
-                        return Optional.empty();
-                }
-                return lines.stream().max(recencyComparator);
-        }
+		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
+			return;
+		}
+		throw new CValidationException("Kanban line name must be unique within the company");
+	}
 }

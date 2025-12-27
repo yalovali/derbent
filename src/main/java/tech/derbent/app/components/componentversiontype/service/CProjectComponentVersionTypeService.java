@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.components.componentversion.service.IProjectComponentVersionRepository;
 import tech.derbent.app.components.componentversiontype.domain.CProjectComponentVersionType;
 import tech.derbent.app.projects.domain.CProject;
@@ -17,7 +18,8 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CProjectComponentVersionTypeService extends CTypeEntityService<CProjectComponentVersionType> implements IEntityRegistrable {
+public class CProjectComponentVersionTypeService extends CTypeEntityService<CProjectComponentVersionType>
+		implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionTypeService.class);
 	@Autowired

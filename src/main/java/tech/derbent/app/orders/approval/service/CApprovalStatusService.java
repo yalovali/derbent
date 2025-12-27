@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CStatusService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -14,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CApprovalStatusService extends CStatusService<CApprovalStatus> implements IEntityRegistrable {
+public class CApprovalStatusService extends CStatusService<CApprovalStatus> implements IEntityRegistrable, IEntityWithView {
 
 	CApprovalStatusService(final IApprovalStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

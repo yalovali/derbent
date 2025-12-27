@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.products.productversion.domain.CProductVersion;
 import tech.derbent.app.products.productversiontype.service.CProductVersionTypeService;
 import tech.derbent.app.projects.domain.CProject;
@@ -21,7 +22,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:file-o", title = "Settings.ProductVersions")
 @PermitAll
-public class CProductVersionService extends CProjectItemService<CProductVersion> implements IEntityRegistrable {
+public class CProductVersionService extends CProjectItemService<CProductVersion> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductVersionService.class);
 	private final CProductVersionTypeService productversionTypeService;

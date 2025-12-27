@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.tickets.ticket.service.ITicketRepository;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
@@ -17,11 +18,11 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CTicketTypeService extends CTypeEntityService<CTicketType> implements IEntityRegistrable {
+public class CTicketTypeService extends CTypeEntityService<CTicketType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketTypeService.class);
 	@Autowired
-	private ITicketRepository ticketRepository;
+	private final ITicketRepository ticketRepository;
 
 	public CTicketTypeService(final ITicketTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final ITicketRepository ticketRepository) {
@@ -62,9 +63,9 @@ public class CTicketTypeService extends CTypeEntityService<CTicketType> implemen
 	@Override
 	public void initializeNewEntity(final CTicketType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((ITicketTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("TicketType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((ITicketTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("TicketType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

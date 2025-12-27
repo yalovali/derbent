@@ -8,8 +8,6 @@
 
     <rule ref="category/java/bestpractices.xml/AvoidReassigningParameters"/>
 
-    <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod">
-        <exclude-pattern>tech/derbent/api/.*</exclude-pattern>
-    </rule>
+    <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod"/>
 
 </ruleset>

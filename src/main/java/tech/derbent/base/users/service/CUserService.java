@@ -191,9 +191,6 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	public Class<CUser> getEntityClass() { return CUser.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return CUserInitializerService.class; }
-
-	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceUser.class; }
 
 	public CUser getRandomByCompany(final CCompany company) {

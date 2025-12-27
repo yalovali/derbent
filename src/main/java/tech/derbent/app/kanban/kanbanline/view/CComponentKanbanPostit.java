@@ -1,46 +1,69 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
-import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CComponentPostit - A compact post-it style widget for displaying project items inside kanban columns. */
-public class CComponentKanbanPostit extends CComponentWidgetEntity<CProjectItem<?>> {
+public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> {
 
 	private static final long serialVersionUID = 1L;
 
-	public CComponentKanbanPostit(final CProjectItem<?> item) {
+	/** Creates a post-it card for the given sprint item. */
+	public CComponentKanbanPostit(final CSprintItem item) {
 		super(item);
-		Check.notNull(item, "Project item cannot be null for postit");
+		Check.notNull(item, "Sprint item cannot be null for postit");
 		addClassName("kanban-postit");
 		getStyle().set("width", "100%");
 		getElement().setAttribute("tabindex", "0");
 	}
 
+	/** Builds the primary title line. */
 	@Override
 	protected void createFirstLine() throws Exception {
+		final ISprintableItem item = resolveSprintableItem();
 		layoutLineOne.setWidthFull();
-		layoutLineOne.add(CLabelEntity.createH3Label(entity));
+		if (item instanceof CEntityDB<?>) {
+			layoutLineOne.add(CLabelEntity.createH3Label((CEntityDB<?>) item));
+		} else {
+			layoutLineOne.add(CLabelEntity.createH3Label(item != null ? item.getName() : ""));
+		}
 	}
 
+	/** Builds the status and responsible line. */
 	@Override
 	protected void createSecondLine() throws Exception {
-		if (entity.getStatus() != null) {
-			layoutLineTwo.add(new CLabelEntity(entity.getStatus()));
+		final ISprintableItem item = resolveSprintableItem();
+		if (item == null) {
+			return;
 		}
-		if (entity.getResponsible() != null) {
-			layoutLineTwo.add(CLabelEntity.createUserLabel(entity.getResponsible()));
+		if (item.getStatus() != null) {
+			layoutLineTwo.add(new CLabelEntity(item.getStatus()));
+		}
+		if (item.getResponsible() != null) {
+			layoutLineTwo.add(CLabelEntity.createUserLabel(item.getResponsible()));
 		}
 	}
 
+	/** Builds the date range line when available. */
 	@Override
 	protected void createThirdLine() {
-		if (entity.getStartDate() != null || entity.getEndDate() != null) {
-			layoutLineThree.add(CLabelEntity.createDateRangeLabel(entity.getStartDate(), entity.getEndDate()));
+		final ISprintableItem item = resolveSprintableItem();
+		if (item != null && (item.getStartDate() != null || item.getEndDate() != null)) {
+			layoutLineThree.add(CLabelEntity.createDateRangeLabel(item.getStartDate(), item.getEndDate()));
 		}
 	}
 
+	/** Resolves the sprintable item for display. */
+	private ISprintableItem resolveSprintableItem() {
+		final CSprintItem sprintItem = entity;
+		return sprintItem != null ? sprintItem.getItem() : null;
+	}
+
+	/** Sets selected styles for the post-it. */
 	@Override
 	public void setSelected(final boolean selected) {
 		this.selected = selected;

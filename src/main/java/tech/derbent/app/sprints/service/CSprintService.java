@@ -13,6 +13,7 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
@@ -23,7 +24,7 @@ import tech.derbent.base.session.service.ISessionService;
 /** CSprintService - Service class for managing sprints. Provides business logic for sprint operations. */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CSprintService extends CProjectItemService<CSprint> implements IEntityRegistrable {
+public class CSprintService extends CProjectItemService<CSprint> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintService.class);
 

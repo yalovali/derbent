@@ -9,15 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.sprints.domain.CSprintType;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CSprintTypeService - Service layer for CSprintType entity. Layer: Service (MVC) Handles business logic for project-aware sprint type
  * operations. */
 @Service
-@PreAuthorize("isAuthenticated()")
-@Transactional(readOnly = true)
-public class CSprintTypeService extends CTypeEntityService<CSprintType> implements IEntityRegistrable {
+@PreAuthorize ("isAuthenticated()")
+@Transactional (readOnly = true)
+public class CSprintTypeService extends CTypeEntityService<CSprintType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintTypeService.class);
 	@Autowired
@@ -51,22 +52,14 @@ public class CSprintTypeService extends CTypeEntityService<CSprintType> implemen
 	}
 
 	@Override
-	public Class<CSprintType> getEntityClass() {
-		return CSprintType.class;
-	}
+	public Class<CSprintType> getEntityClass() { return CSprintType.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() {
-		return CSprintTypeInitializerService.class;
-	}
+	public Class<?> getInitializerServiceClass() { return CSprintTypeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() {
-		return CPageServiceSprintType.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceSprintType.class; }
 
 	@Override
-	public Class<?> getServiceClass() {
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 }

@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.budgets.budget.domain.CBudget;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeService;
 import tech.derbent.app.projects.domain.CProject;
@@ -19,9 +20,9 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:file-o", title = "Settings.Budgets")
+@Menu (icon = "vaadin:file-o", title = "Settings.Budgets")
 @PermitAll
-public class CBudgetService extends CProjectItemService<CBudget> implements IEntityRegistrable {
+public class CBudgetService extends CProjectItemService<CBudget> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetService.class);
 	private final CBudgetTypeService budgetTypeService;

@@ -6,17 +6,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.entity.service.CEntityNamedService;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.ui.component.enhanced.CComponentProjectUserSettings;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
@@ -27,7 +28,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CProjectService extends CEntityNamedService<CProject> implements IEntityRegistrable {
+public class CProjectService extends CEntityNamedService<CProject> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
@@ -152,7 +153,8 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		// Apply company filter to the specification
 		final CCompany company = getCurrentCompany();
-		final Specification<CProject> companySpec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
+		final Specification<CProject> companySpec =
+				(root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
 		final Specification<CProject> combinedSpec = filter != null ? companySpec.and(filter) : companySpec;
 		final Page<CProject> page = repository.findAll(combinedSpec, safePage);
 		return page;
@@ -166,7 +168,7 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 		final CCompany company = getCurrentCompany();
 		final List<CProject> all = ((IProjectRepository) repository).listByCompanyForPageView(company.getId());
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
-		final List<CProject> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+		final List<CProject> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> e.matches(term)).toList();
 		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
 		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
 		final List<CProject> content = filtered.subList(start, end);

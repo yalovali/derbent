@@ -34,25 +34,25 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	/** Add status transition to workflow with specific roles */
 	@Transactional
-        public CWorkflowStatusRelation addStatusTransition(final CWorkflowEntity workflowEntity, final CProjectItemStatus fromStatus,
-                        final CProjectItemStatus toStatus, final List<CUserProjectRole> roles) {
-                LOGGER.debug("Adding status transition to workflow {} from {} to {} for roles {}", workflowEntity, fromStatus, toStatus, roles);
-                Check.notNull(workflowEntity, "Workflow must not be null");
-                Check.notNull(fromStatus, "From status must not be null");
-                Check.notNull(toStatus, "To status must not be null");
-                if ((workflowEntity.getId() == null) || (fromStatus.getId() == null) || (toStatus.getId() == null)) {
-                        throw new IllegalArgumentException("Workflow and statuses must have valid IDs");
-                }
-                if (relationshipExists(workflowEntity.getId(), fromStatus.getId(), toStatus.getId())) {
-                        throw new IllegalArgumentException("This status transition is already defined for this workflow");
-                }
-                final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
-                relation.setWorkflowEntity(workflowEntity);
-                relation.setFromStatus(fromStatus);
-                relation.setToStatus(toStatus);
-                relation.setRoles(roles);
-                validateRelationship(relation);
-                return save(relation);
+	public CWorkflowStatusRelation addStatusTransition(final CWorkflowEntity workflowEntity, final CProjectItemStatus fromStatus,
+			final CProjectItemStatus toStatus, final List<CUserProjectRole> roles) {
+		LOGGER.debug("Adding status transition to workflow {} from {} to {} for roles {}", workflowEntity, fromStatus, toStatus, roles);
+		Check.notNull(workflowEntity, "Workflow must not be null");
+		Check.notNull(fromStatus, "From status must not be null");
+		Check.notNull(toStatus, "To status must not be null");
+		if (workflowEntity.getId() == null || fromStatus.getId() == null || toStatus.getId() == null) {
+			throw new IllegalArgumentException("Workflow and statuses must have valid IDs");
+		}
+		if (relationshipExists(workflowEntity.getId(), fromStatus.getId(), toStatus.getId())) {
+			throw new IllegalArgumentException("This status transition is already defined for this workflow");
+		}
+		final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
+		relation.setWorkflowEntity(workflowEntity);
+		relation.setFromStatus(fromStatus);
+		relation.setToStatus(toStatus);
+		relation.setRoles(roles);
+		validateRelationship(relation);
+		return save(relation);
 	}
 
 	@Override
@@ -155,9 +155,6 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	@Override
 	public Class<CWorkflowStatusRelation> getEntityClass() { return CWorkflowStatusRelation.class; }
-
-	@Override
-	public Class<?> getInitializerServiceClass() { return CWorkflowStatusRelationInitializerService.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceWorkflowStatusRelation.class; }

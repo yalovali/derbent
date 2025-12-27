@@ -71,35 +71,46 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
                 color = DEFAULT_COLOR;
         }
 
+	/** Creates a column with a header and parent line. */
         public CKanbanColumn(final String header, final CKanbanLine kanbanLine) {
                 super(CKanbanColumn.class, header);
                 color = DEFAULT_COLOR;
                 setKanbanLine(kanbanLine);
         }
 
+	/** Returns the column background color. */
         public String getColor() { return color; }
 
+	/** Returns true when this column is the fallback/default bucket. */
 	public boolean getDefaultColumn() { return defaultColumn; }
 
+	/** Returns the statuses mapped to this column. */
 	public List<CProjectItemStatus> getIncludedStatuses() { return includedStatuses; }
 
+	/** Returns the sort order for this column. */
 	@Override
 	public Integer getItemOrder() { return itemOrder; }
 
+	/** Returns the owning kanban line. */
 	public CKanbanLine getKanbanLine() { return kanbanLine; }
 
+	/** Sets whether this column is the fallback/default bucket. */
         public void setDefaultColumn(final boolean defaultColumn) { this.defaultColumn = defaultColumn; }
 
+	/** Sets the background color, defaulting when blank. */
         public void setColor(final String color) { this.color = color == null || color.isBlank() ? DEFAULT_COLOR : color; }
 
+	/** Replaces the included status list defensively. */
 	public void setIncludedStatuses(final List<CProjectItemStatus> includedStatuses) {
 		Check.notNull(includedStatuses, "Included statuses cannot be null");
 		this.includedStatuses = new ArrayList<>(includedStatuses);
 	}
 
+	/** Sets the sort order for this column. */
 	@Override
 	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
+	/** Sets the owning kanban line. */
 	public void setKanbanLine(final CKanbanLine kanbanLine) {
 		if (kanbanLine == null) {
 			this.kanbanLine = null;

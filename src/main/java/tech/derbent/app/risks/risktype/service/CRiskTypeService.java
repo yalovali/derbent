@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.risks.risk.service.IRiskRepository;
 import tech.derbent.app.risks.risktype.domain.CRiskType;
@@ -19,11 +20,11 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CRiskTypeService extends CTypeEntityService<CRiskType> implements IEntityRegistrable {
+public class CRiskTypeService extends CTypeEntityService<CRiskType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskTypeService.class);
 	@Autowired
-	private IRiskRepository riskRepository;
+	private final IRiskRepository riskRepository;
 
 	public CRiskTypeService(final IRiskTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final IRiskRepository riskRepository) {
@@ -69,9 +70,9 @@ public class CRiskTypeService extends CTypeEntityService<CRiskType> implements I
 	@Override
 	public void initializeNewEntity(final CRiskType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IRiskTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("RiskType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((IRiskTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("RiskType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

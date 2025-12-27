@@ -45,11 +45,13 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		initializeDefaults();
 	}
 
+	/** Creates a kanban line for a company with a display name. */
 	public CKanbanLine(final String name, final CCompany company) {
 		super(CKanbanLine.class, name, company);
 		initializeDefaults();
 	}
 
+	/** Adds a column and assigns order/ownership. */
 	public void addKanbanColumn(final CKanbanColumn column) {
 		Check.notNull(column, "Column cannot be null");
 		if ((column.getItemOrder() == null) || (column.getItemOrder() <= 0)) {
@@ -60,10 +62,13 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		updateLastModified();
 	}
 
+	/** Returns a self-reference for the board component binding. */
 	public CKanbanLine getKanbanBoard() { return this; }
 
+	/** Returns the column set for this line. */
 	public Set<CKanbanColumn> getKanbanColumns() { return kanbanColumns; }
 
+	/** Calculates the next column sort order. */
 	private Integer getNextKanbanColumnOrder() {
 		if ((kanbanColumns == null) || kanbanColumns.isEmpty()) {
 			return 1;
@@ -71,6 +76,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		return kanbanColumns.stream().map(CKanbanColumn::getItemOrder).filter(order -> order != null).mapToInt(Integer::intValue).max().orElse(0) + 1;
 	}
 
+	/** Ensures internal collections are initialized. */
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
@@ -79,6 +85,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		}
 	}
 
+	/** Removes a column and clears its ownership. */
 	public void removeKanbanColumn(final CKanbanColumn column) {
 		Check.notNull(column, "Column cannot be null");
 		if (kanbanColumns.remove(column)) {
@@ -87,6 +94,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		}
 	}
 
+	/** Replaces the columns set while preserving ownership rules. */
 	public void setKanbanColumns(final Set<CKanbanColumn> columns) {
 		Check.notNull(columns, "Columns collection cannot be null");
 		kanbanColumns.clear();

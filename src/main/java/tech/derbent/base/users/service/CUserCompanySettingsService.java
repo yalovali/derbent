@@ -37,7 +37,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		LOGGER.debug("Adding user {} to company {} with ownership level {} and role {}", user, company, ownershipLevel, role);
 		Check.notNull(user, "User must not be null");
 		Check.notNull(company, "Company must not be null");
-		if ((user.getId() == null) || (company.getId() == null) || (role.getId() == null)) {
+		if (user.getId() == null || company.getId() == null || role.getId() == null) {
 			throw new IllegalArgumentException("User,role and company must have valid IDs");
 		}
 		if (relationshipExists(user.getId(), company.getId())) {
@@ -131,9 +131,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	@Override
 	public Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
-
-	@Override
-	public Class<?> getInitializerServiceClass() { return CUserCompanySettingInitializerService.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceUserCompanySetting.class; }

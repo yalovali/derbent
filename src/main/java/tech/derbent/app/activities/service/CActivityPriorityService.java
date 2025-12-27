@@ -6,13 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @Transactional
-public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable {
+public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable, IEntityWithView {
 
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CActivityPriorityService.class);
 

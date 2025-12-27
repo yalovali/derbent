@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
 import tech.derbent.app.projects.domain.CProject;
@@ -19,9 +20,9 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:file-o", title = "Settings.Deliverables")
+@Menu (icon = "vaadin:file-o", title = "Settings.Deliverables")
 @PermitAll
-public class CDeliverableService extends CProjectItemService<CDeliverable> implements IEntityRegistrable {
+public class CDeliverableService extends CProjectItemService<CDeliverable> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableService.class);
 	private final CDeliverableTypeService deliverableTypeService;

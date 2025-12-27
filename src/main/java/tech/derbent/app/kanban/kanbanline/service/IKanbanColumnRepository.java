@@ -27,8 +27,10 @@ public interface IKanbanColumnRepository extends IAbstractRepository<CKanbanColu
 
 	@Query ("SELECT DISTINCT e FROM #{#entityName} e LEFT JOIN FETCH e.kanbanLine LEFT JOIN FETCH e.includedStatuses "
 			+ "WHERE e.kanbanLine = :master AND LOWER(e.name) = LOWER(:name)")
+	/** Finds a column by line and case-insensitive name. */
 	Optional<CKanbanColumn> findByMasterAndNameIgnoreCase(@Param ("master") CKanbanLine master, @Param ("name") String name);
 
+	/** Loads a column with its line and included statuses. */
 	@Query ("SELECT DISTINCT e FROM #{#entityName} e LEFT JOIN FETCH e.kanbanLine LEFT JOIN FETCH e.includedStatuses WHERE e.id = :id")
 	Optional<CKanbanColumn> findByIdWithLine(@Param ("id") Long id);
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
@@ -19,7 +20,7 @@ import tech.derbent.base.users.service.IUserCompanySettingsRepository;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CCompanyService extends CEntityNamedService<CCompany> implements IEntityRegistrable {
+public class CCompanyService extends CEntityNamedService<CCompany> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
 	@Autowired
@@ -110,7 +111,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 	}
 
 	public List<CCompany> searchCompaniesByName(final String searchTerm) {
-		if ((searchTerm == null) || searchTerm.trim().isEmpty()) {
+		if (searchTerm == null || searchTerm.trim().isEmpty()) {
 			LOGGER.debug("Empty search term, returning all companies");
 			return ((ICompanyRepository) repository).findAllOrderByName();
 		}

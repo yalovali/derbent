@@ -22,6 +22,7 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 	private static final long serialVersionUID = 1L;
 	private final CKanbanLineService kanbanLineService;
 
+	/** Creates the column list component with required services. */
 	public CComponentListKanbanColumns(final CKanbanLineService kanbanLineService, final CKanbanColumnService kanbanColumnService) {
 		super("Kanban Columns", CKanbanLine.class, CKanbanColumn.class, kanbanColumnService);
 		Check.notNull(kanbanLineService, "KanbanLineService cannot be null");
@@ -30,6 +31,7 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		setDynamicHeight("400px");
 	}
 
+	/** Configures grid columns for kanban column display. */
 	@Override
 	public void configureGrid(final CGrid<CKanbanColumn> grid1) {
 		Check.notNull(grid1, "Grid cannot be null");
@@ -39,6 +41,7 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		grid1.addBooleanColumn(CKanbanColumn::getDefaultColumn, "Default", "Yes", "No");
 	}
 
+	/** Creates a new column instance for the current line. */
 	@Override
 	protected CKanbanColumn createNewEntity() {
 		Check.notNull(getMasterEntity(), "Kanban line must be selected before creating columns");
@@ -47,16 +50,19 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		return column;
 	}
 
+	/** No-op for drag checks after pass. */
 	@Override
 	public void drag_checkEventAfterPass(final CEvent event) {
 		// No-op for kanban column list (no special drag behavior).
 	}
 
+	/** No-op for drag checks before pass. */
 	@Override
 	public void drag_checkEventBeforePass(final CEvent event) {
 		// No-op for kanban column list (no special drag behavior).
 	}
 
+	/** Formats included statuses for grid display. */
 	private String formatIncludedStatuses(final CKanbanColumn column) {
 		Check.notNull(column, "Kanban column cannot be null");
 		if (column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
@@ -66,9 +72,11 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 				.sorted(String::compareToIgnoreCase).reduce((first, second) -> first + ", " + second).orElse("-");
 	}
 
+	/** Returns the component name for layout binding. */
 	@Override
 	public String getComponentName() { return "kanbanColumns"; }
 
+	/** Calculates the next order index for a new column. */
 	@Override
 	protected Integer getNextOrder() {
 		Check.notNull(getMasterEntity(), "Kanban line cannot be null when calculating next order");
@@ -79,6 +87,7 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		return service.getNextItemOrder(getMasterEntity());
 	}
 
+	/** Loads columns for the current line. */
 	@Override
 	protected List<CKanbanColumn> loadItems(final CKanbanLine master) {
 		Check.notNull(master, "Kanban line cannot be null");
@@ -90,6 +99,7 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		return service.findByMaster(master);
 	}
 
+	/** Handles delete button with confirmation and refresh. */
 	@Override
 	protected void on_buttonDelete_clicked() {
 		Check.notNull(getSelectedItem(), "No item selected for deletion");
@@ -111,6 +121,7 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		}
 	}
 
+	/** Opens the column edit dialog. */
 	@Override
 	protected void openEditDialog(final CKanbanColumn entity, final Consumer<CKanbanColumn> saveCallback, final boolean isNew) {
 		try {

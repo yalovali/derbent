@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.milestones.milestone.domain.CMilestone;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService;
 import tech.derbent.app.projects.domain.CProject;
@@ -19,9 +20,9 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:file-o", title = "Settings.Milestones")
+@Menu (icon = "vaadin:file-o", title = "Settings.Milestones")
 @PermitAll
-public class CMilestoneService extends CProjectItemService<CMilestone> implements IEntityRegistrable {
+public class CMilestoneService extends CProjectItemService<CMilestone> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestoneService.class);
 	private final CMilestoneTypeService milestoneTypeService;

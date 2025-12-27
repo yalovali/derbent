@@ -9,19 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.budgets.budget.service.IBudgetRepository;
 import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CBudgetTypeService extends CTypeEntityService<CBudgetType> implements IEntityRegistrable {
+public class CBudgetTypeService extends CTypeEntityService<CBudgetType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetTypeService.class);
 	@Autowired
-	private IBudgetRepository budgetRepository;
+	private final IBudgetRepository budgetRepository;
 
 	public CBudgetTypeService(final IBudgetTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final IBudgetRepository budgetRepository) {
@@ -62,9 +63,9 @@ public class CBudgetTypeService extends CTypeEntityService<CBudgetType> implemen
 	@Override
 	public void initializeNewEntity(final CBudgetType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IBudgetTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("BudgetType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((IBudgetTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("BudgetType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

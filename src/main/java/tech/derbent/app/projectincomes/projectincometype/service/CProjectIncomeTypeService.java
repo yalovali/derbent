@@ -9,19 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.projectincomes.projectincome.service.IProjectIncomeRepository;
 import tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CProjectIncomeTypeService extends CTypeEntityService<CProjectIncomeType> implements IEntityRegistrable {
+public class CProjectIncomeTypeService extends CTypeEntityService<CProjectIncomeType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectIncomeTypeService.class);
 	@Autowired
-	private IProjectIncomeRepository projectincomeRepository;
+	private final IProjectIncomeRepository projectincomeRepository;
 
 	public CProjectIncomeTypeService(final IProjectIncomeTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final IProjectIncomeRepository projectincomeRepository) {
@@ -62,9 +63,9 @@ public class CProjectIncomeTypeService extends CTypeEntityService<CProjectIncome
 	@Override
 	public void initializeNewEntity(final CProjectIncomeType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IProjectIncomeTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("ProjectIncomeType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((IProjectIncomeTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("ProjectIncomeType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

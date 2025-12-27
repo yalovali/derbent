@@ -64,7 +64,6 @@ import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeSer
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityInitializerService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
-import tech.derbent.app.kanban.kanbanline.service.CKanbanColumnInitializerService;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineInitializerService;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineService;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -124,7 +123,6 @@ import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.sprints.service.CSprintInitializerService;
-import tech.derbent.app.sprints.service.CSprintItemInitializerService;
 import tech.derbent.app.sprints.service.CSprintTypeInitializerService;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.app.teams.team.service.CTeamInitializerService;
@@ -139,14 +137,11 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
-import tech.derbent.app.workflow.service.CWorkflowStatusRelationInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserCompanySettingInitializerService;
 import tech.derbent.base.users.service.CUserInitializerService;
-import tech.derbent.base.users.service.CUserProjectSettingsInitializerService;
 import tech.derbent.base.users.service.CUserProjectSettingsService;
 import tech.derbent.base.users.service.CUserService;
 
@@ -1039,10 +1034,7 @@ public class CDataInitializer {
 					CMeetingTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CWorkflowStatusRelationInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -1091,9 +1083,7 @@ public class CDataInitializer {
 					initializeSampleTeams(project, minimal);
 					CRiskInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);
-					CSprintItemInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CKanbanColumnInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {
 						break;
 					}

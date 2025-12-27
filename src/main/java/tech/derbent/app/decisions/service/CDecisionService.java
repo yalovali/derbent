@@ -10,6 +10,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.decisions.domain.CDecision;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
@@ -20,7 +21,7 @@ import tech.derbent.base.users.domain.CUser;
  * validation, creation, approval workflow management, and project-based queries. */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CDecisionService extends CEntityOfProjectService<CDecision> implements IEntityRegistrable {
+public class CDecisionService extends CEntityOfProjectService<CDecision> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionService.class);
 	private final CProjectItemStatusService entityStatusService;

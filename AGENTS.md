@@ -11,6 +11,8 @@ DO NOT:
 - Modify unrelated files
 - Remove existing functionality
 - Bypass existing abstractions or base classes
+DO NOT CREATE INITIALIZERS or VIEWS FOR relation classes, which the user doesnot need to access directly, like CWorkflowStatusRelation,CUserProjectSettings
+
 Architecture rules:
 - Follow existing Derbent package structure if possible
 - Use existing base classes and interfaces if possible

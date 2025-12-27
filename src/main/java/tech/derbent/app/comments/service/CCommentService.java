@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.comments.domain.CComment;
@@ -22,7 +23,7 @@ import tech.derbent.base.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CCommentService extends CAbstractService<CComment> implements IEntityRegistrable {
+public class CCommentService extends CAbstractService<CComment> implements IEntityRegistrable, IEntityWithView {
 
 	public CCommentService(final ICommentRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

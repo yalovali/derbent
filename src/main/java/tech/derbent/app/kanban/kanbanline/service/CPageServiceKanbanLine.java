@@ -20,6 +20,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	private CKanbanColumnService kanbanColumnService;
 	private CKanbanLineService kanbanLineService;
 
+	/** Creates the page service and resolves kanban dependencies. */
 	public CPageServiceKanbanLine(final IPageServiceImplementer<CKanbanLine> view) {
 		super(view);
 		try {
@@ -30,6 +31,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		}
 	}
 
+	/** Binds the kanban line page and adjusts layout sizing. */
 	@Override
 	public void bind() {
 		try {
@@ -49,6 +51,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		}
 	}
 
+	/** Builds or returns the cached kanban board component. */
 	public CComponentKanbanBoard createKanbanBoardComponent() {
 		// it is null when ui is created
 		// Check.notNull(currentLine, "Kanban line must be available to create board component");
@@ -60,6 +63,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		return componentKanbanBoard;
 	}
 
+	/** Builds or returns the cached kanban columns list component. */
 	public CComponentListKanbanColumns createKanbanColumnsComponent() {
 		LOGGER.debug("Creating Kanban columns component for Kanban line page service.");
 		if (componentKanbanColumns == null) {
@@ -69,6 +73,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		return componentKanbanColumns;
 	}
 
+	/** Hook executed after binding for optional post-load work. */
 	public void on_load_after_bind() throws Exception {
 		// todo: implement if needed
 	}

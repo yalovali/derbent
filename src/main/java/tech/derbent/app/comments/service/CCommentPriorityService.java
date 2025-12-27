@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.comments.domain.CCommentPriority;
 import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.base.session.service.ISessionService;
@@ -14,7 +15,7 @@ import tech.derbent.base.session.service.ISessionService;
  * components */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CCommentPriorityService extends CTypeEntityService<CCommentPriority> implements IEntityRegistrable {
+public class CCommentPriorityService extends CTypeEntityService<CCommentPriority> implements IEntityRegistrable, IEntityWithView {
 
 	CCommentPriorityService(final ICommentPriorityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

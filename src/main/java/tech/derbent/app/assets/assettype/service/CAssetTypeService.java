@@ -9,19 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.assets.asset.service.IAssetRepository;
 import tech.derbent.app.assets.assettype.domain.CAssetType;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CAssetTypeService extends CTypeEntityService<CAssetType> implements IEntityRegistrable {
+public class CAssetTypeService extends CTypeEntityService<CAssetType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetTypeService.class);
 	@Autowired
-	private IAssetRepository assetRepository;
+	private final IAssetRepository assetRepository;
 
 	public CAssetTypeService(final IAssetTypeRepository repository, final Clock clock, final ISessionService sessionService,
 			final IAssetRepository assetRepository) {
@@ -62,9 +63,9 @@ public class CAssetTypeService extends CTypeEntityService<CAssetType> implements
 	@Override
 	public void initializeNewEntity(final CAssetType entity) {
 		super.initializeNewEntity(entity);
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		long typeCount = ((IAssetTypeRepository) repository).countByProject(activeProject);
-		String autoName = String.format("AssetType %02d", typeCount + 1);
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final long typeCount = ((IAssetTypeRepository) repository).countByProject(activeProject);
+		final String autoName = String.format("AssetType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
 }

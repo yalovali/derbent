@@ -28,12 +28,14 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanColumnService.class);
 	private final CKanbanLineService kanbanLineService;
 
+	/** Creates the service with dependencies and session context. */
 	public CKanbanColumnService(final IKanbanColumnRepository repository, final Clock clock, final ISessionService sessionService,
 			final CKanbanLineService kanbanLineService) {
 		super(repository, clock, sessionService);
 		this.kanbanLineService = kanbanLineService;
 	}
 
+	/** Enforces unique default column and status ownership across a line. */
 	private void applyStatusAndDefaultConstraints(final CKanbanColumn saved) {
 		Check.notNull(saved, "Kanban column cannot be null when applying constraints");
 		Check.notNull(saved.getId(), "Kanban column must be saved before enforcing constraints");
@@ -70,6 +72,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		}
 	}
 
+	/** Deletes a column through the parent line to preserve relationships. */
 	@Override
 	@Transactional
 	public void delete(final CKanbanColumn entity) {
@@ -79,6 +82,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		kanbanLineService.deleteKanbanColumn(line, entity);
 	}
 
+	/** Deletes a column by id with its line loaded. */
 	@Override
 	@Transactional
 	public void delete(final Long id) {
@@ -88,6 +92,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		delete(entity);
 	}
 
+	/** Lists columns for a line in display order. */
 	public List<CKanbanColumn> findByMaster(final CKanbanLine master) {
 		Check.notNull(master, "Master kanban line cannot be null");
 		if (master.getId() == null) {
@@ -96,12 +101,11 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		return getTypedRepository().findByMaster(master);
 	}
 
+	/** Returns the managed entity class. */
 	@Override
 	public Class<CKanbanColumn> getEntityClass() { return CKanbanColumn.class; }
 
-	@Override
-	public Class<?> getInitializerServiceClass() { return CKanbanColumnInitializerService.class; }
-
+	/** Calculates the next item order within a line. */
 	public Integer getNextItemOrder(final CKanbanLine master) {
 		Check.notNull(master, "Master kanban line cannot be null");
 		if (master.getId() == null) {
@@ -110,14 +114,18 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		return getTypedRepository().getNextItemOrder(master);
 	}
 
+	/** Kanban columns do not expose a page service. */
 	@Override
 	public Class<?> getPageServiceClass() { return null; }
 
+	/** Returns the service runtime class. */
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	/** Returns the repository with kanban-specific methods. */
 	private IKanbanColumnRepository getTypedRepository() { return (IKanbanColumnRepository) repository; }
 
+	/** Initializes defaults for a new column entity. */
 	@Override
 	public void initializeNewEntity(final CKanbanColumn entity) {
 		super.initializeNewEntity(entity);
@@ -127,6 +135,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		}
 	}
 
+	/** Moves a column one position down within its line. */
 	@Override
 	@Transactional
 	public void moveItemDown(final CKanbanColumn childItem) {
@@ -135,7 +144,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		Check.notNull(master, "Kanban line cannot be null for column");
 		final List<CKanbanColumn> items = normalizeItemOrder(master);
 		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getId().equals(childItem.getId()) && (i < (items.size() - 1))) {
+			if (items.get(i).getId().equals(childItem.getId()) && i < items.size() - 1) {
 				final CKanbanColumn nextColumn = items.get(i + 1);
 				final Integer currentOrder = childItem.getItemOrder();
 				final Integer nextOrder = nextColumn.getItemOrder();
@@ -148,6 +157,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		}
 	}
 
+	/** Moves a column one position up within its line. */
 	@Override
 	@Transactional
 	public void moveItemUp(final CKanbanColumn childItem) {
@@ -156,7 +166,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		Check.notNull(master, "Kanban line cannot be null for column");
 		final List<CKanbanColumn> items = normalizeItemOrder(master);
 		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getId().equals(childItem.getId()) && (i > 0)) {
+			if (items.get(i).getId().equals(childItem.getId()) && i > 0) {
 				final CKanbanColumn previousColumn = items.get(i - 1);
 				final Integer currentOrder = childItem.getItemOrder();
 				final Integer previousOrder = previousColumn.getItemOrder();
@@ -169,6 +179,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		}
 	}
 
+	/** Normalizes column ordering and persists corrections. */
 	private List<CKanbanColumn> normalizeItemOrder(final CKanbanLine master) {
 		Check.notNull(master, "Kanban line cannot be null when normalizing order");
 		final List<CKanbanColumn> items = new ArrayList<>(findByMaster(master));
@@ -195,12 +206,14 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		return items;
 	}
 
+	/** Reloads a saved column by line and name. */
 	private CKanbanColumn reloadByName(final CKanbanLine line, final String name) {
 		final CKanbanColumn saved = getTypedRepository().findByMasterAndNameIgnoreCase(line, name).orElse(null);
 		Check.notNull(saved, "Saved kanban column could not be reloaded");
 		return saved;
 	}
 
+	/** Resolves a managed line instance for delete operations. */
 	private CKanbanLine resolveLineForDelete(final CKanbanColumn entity) {
 		Check.notNull(entity.getKanbanLine(), "Kanban line reference missing for column delete");
 		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID missing for column delete");
@@ -209,6 +222,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		return line;
 	}
 
+	/** Resolves a managed line instance for save operations. */
 	private CKanbanLine resolveLineForSave(final CKanbanColumn entity) {
 		Check.notNull(entity.getKanbanLine(), "Kanban line reference missing for column save");
 		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID missing for column save");
@@ -217,6 +231,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		return line;
 	}
 
+	/** Saves a column and enforces ordering and status constraints. */
 	@Override
 	@Transactional
 	public CKanbanColumn save(final CKanbanColumn entity) {
@@ -242,6 +257,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		return saved;
 	}
 
+	/** Validates column naming and uniqueness within the line. */
 	@Override
 	protected void validateEntity(final CKanbanColumn entity) {
 		super.validateEntity(entity);

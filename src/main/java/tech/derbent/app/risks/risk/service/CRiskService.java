@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.risks.risk.domain.CRisk;
 import tech.derbent.app.risks.risk.domain.ERiskSeverity;
@@ -20,9 +21,9 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu ( icon = "vaadin:clipboard-check", title = "Settings.Risks")
+@Menu (icon = "vaadin:clipboard-check", title = "Settings.Risks")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable {
+public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskService.class);
 	private final CRiskTypeService riskTypeService;
