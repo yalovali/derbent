@@ -104,35 +104,18 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		}
 	}
 
-<<<<<<< HEAD
 	@Override
 	protected void locateFirstEntity() throws Exception {
 		LOGGER.debug("Locating first entity for dynamic page view without grid");
-		// it triggers entityservice to load entity
-		// entityService.findAll().stream().findFirst().ifPresent(this::setValue);
-		// entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
-		entityService.findDefault().ifPresent(entity -> {
-			try {
-				currentBinder.readBean(entity);
-			} catch (final Exception e) {
-				LOGGER.error("Error setting default entity value: {}", e.getMessage());
-			}
-		});
+		// this method is called in the constructor,
+		Check.notNull(entityService, "Entity service is not initialized");
+		if (entityService instanceof final CKanbanLineService kanbanLineService) {
+			kanbanLineService.findDefaultForCurrentProject().or(() -> kanbanLineService.findAll().stream().findFirst())
+					.ifPresent(entity -> currentBinder.readBean(entity));
+			return;
+		}
+		entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
 	}
-=======
-        void locateFirstEntity() throws Exception {
-                LOGGER.debug("Locating first entity for dynamic page view without grid");
-                // this method is called in the constructor,
-                Check.notNull(entityService, "Entity service is not initialized");
-                if (entityService instanceof CKanbanLineService kanbanLineService) {
-                        kanbanLineService.findDefaultForCurrentProject()
-                                        .or(() -> kanbanLineService.findAll().stream().findFirst())
-                                        .ifPresent(entity -> currentBinder.readBean(entity));
-                        return;
-                }
-                entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
-        }
->>>>>>> branch 'codex/check-redundant-refreshing-in-kanban-board-zzhhza' of https://github.com/yalovali/derbent
 
 	@Override
 	protected void locateItemById(final Long pageItemId) {
