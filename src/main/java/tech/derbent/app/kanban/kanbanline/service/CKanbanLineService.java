@@ -72,6 +72,8 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
         // override finddefault
         @Override
         public Optional<CKanbanLine> findDefault() {
+                // Resolve defaults in the same order the UI expects: project → company → most recent line
+                // across all tenants. This keeps the Kanban board deterministic when context is missing.
                 final Optional<CProject> activeProject = sessionService.getActiveProject();
                 if (activeProject.isPresent()) {
                         final Optional<CKanbanLine> projectDefault = findDefaultForProject(activeProject.get());
