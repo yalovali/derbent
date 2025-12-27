@@ -68,7 +68,7 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 			displayName = "Workflow", required = true, readOnly = false, description = "The workflow this status relation belongs to", hidden = false,
 			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CWorkflowEntityService"
 	)
-	private CWorkflowEntity workflowentity;
+        private CWorkflowEntity workflowEntity;
 
 	public CWorkflowStatusRelation() {
 		super(CWorkflowStatusRelation.class);
@@ -82,7 +82,7 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public CProjectItemStatus getToStatus() { return toStatus; }
 
-	public CWorkflowEntity getWorkflowEntity() { return workflowentity; }
+        public CWorkflowEntity getWorkflowEntity() { return workflowEntity; }
 
 	public void setFromStatus(final CProjectItemStatus fromStatus) { this.fromStatus = fromStatus; }
 
@@ -92,14 +92,14 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public void setToStatus(final CProjectItemStatus toStatus) { this.toStatus = toStatus; }
 
-	public void setWorkflowEntity(final CWorkflowEntity workflowentity) { this.workflowentity = workflowentity; }
+        public void setWorkflowEntity(final CWorkflowEntity workflowEntity) { this.workflowEntity = workflowEntity; }
 
 	@Override
 	public String toString() {
-		return String.format("WorkflowStatusRelation[workflow id=%s, from status id=%s, to status id=%s, roles=%s]",
-				workflowentity != null ? CSpringAuxillaries.safeGetId(workflowentity) : null,
-				fromStatus != null ? CSpringAuxillaries.safeGetId(fromStatus) : null,
-				toStatus != null ? CSpringAuxillaries.safeGetId(toStatus) : null,
+                                return String.format("WorkflowStatusRelation[workflow id=%s, from status id=%s, to status id=%s, roles=%s]",
+                                workflowEntity != null ? CSpringAuxillaries.safeGetId(workflowEntity) : null,
+                                fromStatus != null ? CSpringAuxillaries.safeGetId(fromStatus) : null,
+                                toStatus != null ? CSpringAuxillaries.safeGetId(toStatus) : null,
 				roles != null ? roles.stream().map(CSpringAuxillaries::safeToString).collect(java.util.stream.Collectors.joining(", ")) : "[]");
 	}
 }

@@ -15,15 +15,14 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
 
 	Logger LOGGER = LoggerFactory.getLogger(IHasStatusAndWorkflowService.class);
 
-	static CProjectItemStatus getInitialStatus(final IHasStatusAndWorkflow<?> entity, final CProjectItemStatusService projectItemStatusService) {
-		LOGGER.debug("Retrieving initial status for entity of type: {}", entity.getClass().getSimpleName());
-		Check.notNull(projectItemStatusService, "projectItemStatusService cannot be null");
-		Check.notNull(entity, "entity cannot be null");
-		Check.notNull(entity.getWorkflow(), "entity.workflow cannot be null");
-		final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(entity);
-		Check.notEmpty(initialStatuses, "No statuses returned from getValidNextStatuses for entity type " + entity.getClass().getSimpleName());
-		return initialStatuses.get(0);
-	}
+        static CProjectItemStatus getInitialStatus(final IHasStatusAndWorkflow<?> entity, final CProjectItemStatusService projectItemStatusService) {
+                LOGGER.debug("Retrieving initial status for entity of type: {}", entity.getClass().getSimpleName());
+                Check.notNull(projectItemStatusService, "projectItemStatusService cannot be null");
+                Check.notNull(entity, "entity cannot be null");
+                final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(entity);
+                Check.notEmpty(initialStatuses, "No statuses returned from getValidNextStatuses for entity type " + entity.getClass().getSimpleName());
+                return initialStatuses.get(0);
+        }
 
 	static void initializeNewEntity(final IHasStatusAndWorkflow<?> entity, final CProject currentProject, final CTypeEntityService<?> typeService,
 			final CProjectItemStatusService projectItemStatusService) {

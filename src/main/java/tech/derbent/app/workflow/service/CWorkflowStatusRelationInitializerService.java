@@ -32,10 +32,11 @@ public final class CWorkflowStatusRelationInitializerService extends CInitialize
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "id"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "workflowentity"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "fromStatus"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "toStatus"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "roles"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "workflowEntity"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "fromStatus"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "toStatus"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "initialStatus"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "roles"));
 			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
@@ -52,9 +53,9 @@ public final class CWorkflowStatusRelationInitializerService extends CInitialize
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "workflowentity", "fromStatus", "toStatus", "roles", "active"));
-		return grid;
-	}
+                grid.setColumnFields(List.of("id", "workflowEntity", "fromStatus", "toStatus", "initialStatus", "roles", "active"));
+                return grid;
+        }
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
