@@ -97,18 +97,32 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		};
 		initializeCompanyEntity(sampleLines, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
 				company, minimal, (entity, index) -> {
-					Check.instanceOf(entity, CKanbanLine.class, "Expected Kanban line for column initialization");
-					final CKanbanLine line = (CKanbanLine) entity;
-					if (index == 0) {
-						line.addKanbanColumn(new CKanbanColumn("Backlog", line));
-						line.addKanbanColumn(new CKanbanColumn("In Progress", line));
-						line.addKanbanColumn(new CKanbanColumn("Done", line));
-					} else {
-						line.addKanbanColumn(new CKanbanColumn("To Do", line));
-						line.addKanbanColumn(new CKanbanColumn("Doing", line));
-						line.addKanbanColumn(new CKanbanColumn("Review", line));
-						line.addKanbanColumn(new CKanbanColumn("Done", line));
-					}
-				});
-	}
+                        Check.instanceOf(entity, CKanbanLine.class, "Expected Kanban line for column initialization");
+                        final CKanbanLine line = (CKanbanLine) entity;
+                        if (index == 0) {
+                                final CKanbanColumn backlog = new CKanbanColumn("Backlog", line);
+                                backlog.setColor("#F5F5F5");
+                                line.addKanbanColumn(backlog);
+                                final CKanbanColumn inProgress = new CKanbanColumn("In Progress", line);
+                                inProgress.setColor("#BBDEFB");
+                                line.addKanbanColumn(inProgress);
+                                final CKanbanColumn done = new CKanbanColumn("Done", line);
+                                done.setColor("#C8E6C9");
+                                line.addKanbanColumn(done);
+                        } else {
+                                final CKanbanColumn todo = new CKanbanColumn("To Do", line);
+                                todo.setColor("#FFF9C4");
+                                line.addKanbanColumn(todo);
+                                final CKanbanColumn doing = new CKanbanColumn("Doing", line);
+                                doing.setColor("#B3E5FC");
+                                line.addKanbanColumn(doing);
+                                final CKanbanColumn review = new CKanbanColumn("Review", line);
+                                review.setColor("#FFE0B2");
+                                line.addKanbanColumn(review);
+                                final CKanbanColumn done = new CKanbanColumn("Done", line);
+                                done.setColor("#C8E6C9");
+                                line.addKanbanColumn(done);
+                        }
+                });
+        }
 }

@@ -21,21 +21,21 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 
 	private static final long serialVersionUID = 1L;
 	private final Binder<CKanbanColumn> binder;
-	private final Span defaultBadge;
-	private final CHorizontalLayout headerLayout;
-	private final CVerticalLayout itemsLayout;
-	Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumn.class);
-	private List<CProjectItem<?>> projectItems = List.of();
+        private final Span defaultBadge;
+        private final CHorizontalLayout headerLayout;
+        private final CVerticalLayout itemsLayout;
+        Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumn.class);
+        private List<CProjectItem<?>> projectItems = List.of();
 	private final CLabelEntity statusesLabel;
 	private final CH3 title;
 
 	public CComponentKanbanColumn() {
 		setPadding(true);
-		setSpacing(true);
-		setWidth("280px");
-		setMinHeight("500px");
-		setHeightFull();
-		getStyle().set("background-color", "#F5F5F5").set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
+                setSpacing(true);
+                setWidth("280px");
+                setMinHeight("500px");
+                setHeightFull();
+                getStyle().set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
 		headerLayout = new CHorizontalLayout();
 		headerLayout.setWidthFull();
 		headerLayout.setSpacing(true);
@@ -79,19 +79,23 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 	protected void onValueChanged(final CKanbanColumn oldValue, final CKanbanColumn newValue, final boolean fromClient) {
 		LOGGER.debug("Kanban column value changed from {} to {}", oldValue != null ? oldValue.getName() : "null",
 				newValue != null ? newValue.getName() : "null");
-		if (binder.getBean() == newValue) {
-			return;
-		}
-		binder.setBean(newValue);
-		refreshHeader();
-		refreshStatuses();
-		refreshItems();
-	}
+                if (binder.getBean() == newValue) {
+                        return;
+                }
+                binder.setBean(newValue);
+                applyBackgroundColor();
+                refreshHeader();
+                refreshStatuses();
+                refreshItems();
+        }
 
-	@Override
-	protected void refreshComponent() {
-		// TODO Auto-generated method stub
-	}
+        @Override
+        protected void refreshComponent() {
+                applyBackgroundColor();
+                refreshHeader();
+                refreshStatuses();
+                refreshItems();
+        }
 
 	private void refreshHeader() {
 		final CKanbanColumn column = getValue();
@@ -114,11 +118,11 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
                 }
         }
 
-	private void refreshStatuses() {
-		LOGGER.debug("Refreshing statuses label for kanban column {}", getValue() != null ? getValue().getName() : "null");
-		final CKanbanColumn column = getValue();
-		if (column == null || column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
-			statusesLabel.setText("");
+        private void refreshStatuses() {
+                LOGGER.debug("Refreshing statuses label for kanban column {}", getValue() != null ? getValue().getName() : "null");
+                final CKanbanColumn column = getValue();
+                if (column == null || column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
+                        statusesLabel.setText("");
 			return;
 		}
 		final String statuses = column.getIncludedStatuses().stream().filter(Objects::nonNull).map(status -> status.getName())
@@ -129,5 +133,17 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
         public void setItems(final List<CProjectItem<?>> items) {
                 LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
                 projectItems = items == null ? List.of() : List.copyOf(items);
+<<<<<<< HEAD
+=======
+                refreshItems();
+        }
+
+        private void applyBackgroundColor() {
+                final CKanbanColumn column = getValue();
+                final String backgroundColor = column != null && column.getColor() != null && !column.getColor().isBlank()
+                                ? column.getColor()
+                                : CKanbanColumn.DEFAULT_COLOR;
+                getStyle().set("background-color", backgroundColor);
+>>>>>>> branch 'codex/check-redundant-refreshing-in-kanban-board-zzhhza' of https://github.com/yalovali/derbent
         }
 }

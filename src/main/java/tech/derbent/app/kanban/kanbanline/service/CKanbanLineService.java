@@ -1,6 +1,7 @@
 package tech.derbent.app.kanban.kanbanline.service;
 
 import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,6 +18,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -83,8 +85,42 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceKanbanLine.class; }
 
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
+        @Override
+        public Class<?> getServiceClass() { return this.getClass(); }
+
+        @Transactional (readOnly = true)
+        public Optional<CKanbanLine> findDefaultForCompany(final CCompany company) {
+                Check.notNull(company, "Company cannot be null when locating default Kanban line");
+                final List<CKanbanLine> lines = listByCompany(company);
+                return resolveDefaultLine(lines);
+        }
+
+        @Transactional (readOnly = true)
+        public Optional<CKanbanLine> findDefaultForCurrentProject() {
+                return sessionService.getActiveProject().flatMap(this::findDefaultForProject);
+        }
+
+        @Transactional (readOnly = true)
+        public Optional<CKanbanLine> findDefaultForProject(final CProject project) {
+                Check.notNull(project, "Project cannot be null when locating default Kanban line");
+                if (project.getKanbanLine() != null) {
+                        final Long identifier = project.getKanbanLine().getId();
+                        if (identifier != null) {
+                                final Optional<CKanbanLine> persisted = getById(identifier);
+                                if (persisted.isPresent()) {
+                                        return persisted;
+                                }
+                        }
+                        return Optional.of(project.getKanbanLine());
+                }
+                final CCompany company = project.getCompany() != null ? project.getCompany()
+                                : sessionService.getActiveCompany().orElse(null);
+                if (company == null) {
+                        LOGGER.warn("Cannot resolve default Kanban line without a company context");
+                        return Optional.empty();
+                }
+                return findDefaultForCompany(company);
+        }
 
 	@Override
 	public void initializeNewEntity(final CKanbanLine entity) {
@@ -98,19 +134,31 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 	}
 
 	@Override
-	protected void validateEntity(final CKanbanLine entity) {
-		super.validateEntity(entity);
-		Check.notBlank(entity.getName(), "Kanban line name cannot be blank");
-		final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
-		Check.notNull(company, "Company cannot be null for kanban line validation");
+        protected void validateEntity(final CKanbanLine entity) {
+                super.validateEntity(entity);
+                Check.notBlank(entity.getName(), "Kanban line name cannot be blank");
+                final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
+                Check.notNull(company, "Company cannot be null for kanban line validation");
 		final String trimmedName = entity.getName().trim();
 		final CKanbanLine existing = findByNameAndCompany(trimmedName, company).orElse(null);
 		if (existing == null) {
 			return;
 		}
-		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
-			return;
-		}
-		throw new CValidationException("Kanban line name must be unique within the company");
-	}
+                if (entity.getId() != null && entity.getId().equals(existing.getId())) {
+                        return;
+                }
+                throw new CValidationException("Kanban line name must be unique within the company");
+        }
+
+        private Optional<CKanbanLine> resolveDefaultLine(final List<CKanbanLine> lines) {
+                if (lines == null || lines.isEmpty()) {
+                        return Optional.empty();
+                }
+                final Comparator<CKanbanLine> recencyComparator = Comparator
+                                .<CKanbanLine, LocalDateTime>comparing(CKanbanLine::getLastModifiedDate,
+                                                Comparator.nullsLast(LocalDateTime::compareTo))
+                                .thenComparing(CKanbanLine::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
+                                .thenComparing(CKanbanLine::getId, Comparator.nullsLast(Long::compareTo)).reversed();
+                return lines.stream().max(recencyComparator);
+        }
 }
