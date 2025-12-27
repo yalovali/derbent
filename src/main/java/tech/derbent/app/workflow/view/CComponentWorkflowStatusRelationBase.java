@@ -64,7 +64,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		Check.notNull(relation, "Relation cannot be null when getting display text");
 		try {
 			switch (type) {
-			case "workflowentity":
+                        case "workflowEntity":
 				Check.notNull(relation.getWorkflowEntity(), "Workflow cannot be null");
 				return CColorUtils.getDisplayTextFromEntity(relation.getWorkflowEntity());
 			case "fromStatus":
@@ -130,7 +130,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 						return new CLabelEntity(relation.getWorkflowEntity());
 					} catch (@SuppressWarnings ("unused") final Exception e) {
 						LOGGER.error("Failed to create workflow component.");
-						return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflowentity"));
+                                                return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflowEntity"));
 					}
 				}).setAutoWidth(true).setSortable(true), "Workflow");
 			}

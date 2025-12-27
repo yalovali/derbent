@@ -4,9 +4,11 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -68,26 +70,34 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	 * is defined in the workflow's status relations where CWorkflowStatusRelation.initialStatus = true.
 	 * @param workflow the workflow entity to get initial status from
 	 * @return Optional containing the initial status if found, empty otherwise */
-	public Optional<CProjectItemStatus> getInitialStatusFromWorkflow(final CWorkflowEntity workflow) {
-		Check.notNull(workflow, "Workflow cannot be null when retrieving initial status");
-		try {
-			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
-			Check.notEmpty(relations, "No status relations found for workflow: " + workflow.getName());
-			final Optional<CProjectItemStatus> initialStatus = relations.stream().filter(r -> r.getInitialStatus() != null && r.getInitialStatus())
-					.map(CWorkflowStatusRelation::getToStatus).distinct().findFirst();
-			if (initialStatus.isPresent()) {
-				return initialStatus;
-			}
-			if (!relations.isEmpty()) {
-				final CProjectItemStatus fallbackStatus = relations.get(0).getFromStatus();
-				return Optional.of(fallbackStatus);
-			}
-			LOGGER.warn("No status relations found for workflow: {}", workflow.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving initial status for workflow {}: {}", workflow.getName(), e.getMessage());
-		}
-		return Optional.empty();
-	}
+        public Optional<CProjectItemStatus> getInitialStatusFromWorkflow(final CWorkflowEntity workflow) {
+                Check.notNull(workflow, "Workflow cannot be null when retrieving initial status");
+                try {
+                        final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
+                        if (relations == null || relations.isEmpty()) {
+                                LOGGER.warn("No status relations found for workflow: {}", workflow.getName());
+                                return Optional.empty();
+                        }
+                        final Optional<CProjectItemStatus> initialStatus = relations.stream()
+                                        .filter(r -> Boolean.TRUE.equals(r.getInitialStatus())).map(CWorkflowStatusRelation::getToStatus).filter(Objects::nonNull).distinct()
+                                        .findFirst();
+                        if (initialStatus.isPresent()) {
+                                return initialStatus;
+                        }
+                        for (final CWorkflowStatusRelation relation : relations) {
+                                if (relation.getFromStatus() != null) {
+                                        return Optional.of(relation.getFromStatus());
+                                }
+                        }
+                        final CWorkflowStatusRelation firstRelation = relations.get(0);
+                        if (firstRelation.getToStatus() != null) {
+                                return Optional.of(firstRelation.getToStatus());
+                        }
+                } catch (final Exception e) {
+                        LOGGER.error("Error retrieving initial status for workflow {}: {}", workflow.getName(), e.getMessage());
+                }
+                return Optional.empty();
+        }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceProjectItemStatus.class; }
@@ -104,33 +114,66 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	 * </ul>
 	 * @param item the project item entity
 	 * @return list of valid next statuses */
-	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
-		try {
-			Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
-			final List<CProjectItemStatus> validStatuses = new ArrayList<>();
-			final CWorkflowEntity workflow = item.getWorkflow();
-			Check.notNull(workflow, "Workflow cannot be null for project item");
-			final CProjectItemStatus currentStatus = item.getStatus();
-			if (currentStatus != null) {
-				validStatuses.add(item.getStatus()); // Always include current status
-			} else {
-				// For new items without a status, return initial statuses from the workflow
-				// LOGGER.debug("Getting initial statuses for new project item with workflow: {}", workflow.getName());
-				final Optional<CProjectItemStatus> initialStatus = getInitialStatusFromWorkflow(workflow);
-				initialStatus.ifPresent(validStatuses::add);
-				return validStatuses;
-			}
-			// Get workflow relations to find valid next statuses
-			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
-			// Find relations where fromStatus matches current status and exclude current status from valid next statuses
-			relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
-					.distinct().filter(r -> !r.getId().equals(currentStatus.getId())).forEach(validStatuses::add);
-			return validStatuses;
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving valid next statuses for project item {}: {}", item.toString(), e.getMessage());
-			throw e;
-		}
-	}
+        public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
+                try {
+                        Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
+                        final List<CProjectItemStatus> validStatuses = new ArrayList<>();
+                        final CWorkflowEntity workflow = item.getWorkflow();
+                        final CProjectItemStatus currentStatus = item.getStatus();
+                        if (currentStatus != null && !validStatuses.contains(currentStatus)) {
+                                validStatuses.add(item.getStatus()); // Always include current status
+                        }
+                        if (workflow == null) {
+                                LOGGER.warn("Workflow cannot be null for project item {}; returning default statuses", item.getClass().getSimpleName());
+                                addFallbackStatuses(validStatuses);
+                                return validStatuses;
+                        }
+                        // For new items without a status, return initial statuses from the workflow
+                        if (currentStatus == null) {
+                                final Optional<CProjectItemStatus> initialStatus = getInitialStatusFromWorkflow(workflow);
+                                if (initialStatus.isPresent()) {
+                                        addIfAbsent(validStatuses, initialStatus.get());
+                                        return validStatuses;
+                                }
+                        }
+                        final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
+                        if (relations == null || relations.isEmpty()) {
+                                addFallbackStatuses(validStatuses);
+                                return validStatuses;
+                        }
+                        if (currentStatus != null && currentStatus.getId() != null) {
+                                relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
+                                                .filter(Objects::nonNull).distinct().filter(r -> !r.getId().equals(currentStatus.getId()))
+                                                .forEach(status -> addIfAbsent(validStatuses, status));
+                        }
+                        if (validStatuses.isEmpty()) {
+                                addFallbackStatuses(validStatuses);
+                        }
+                        return validStatuses;
+                } catch (final Exception e) {
+                        LOGGER.error("Error retrieving valid next statuses for project item {}: {}", item.toString(), e.getMessage());
+                        throw e;
+                }
+        }
+
+        private void addFallbackStatuses(final List<CProjectItemStatus> validStatuses) {
+                list(Pageable.unpaged()).getContent().forEach(status -> addIfAbsent(validStatuses, status));
+        }
+
+        private void addIfAbsent(final List<CProjectItemStatus> statuses, final CProjectItemStatus statusToAdd) {
+                if (statusToAdd == null) {
+                        return;
+                }
+                final boolean alreadyPresent = statuses.stream().anyMatch(status -> {
+                        if (status.getId() != null && statusToAdd.getId() != null) {
+                                return status.getId().equals(statusToAdd.getId());
+                        }
+                        return status.equals(statusToAdd);
+                });
+                if (!alreadyPresent) {
+                        statuses.add(statusToAdd);
+                }
+        }
 
 	/** Initializes a new activity status with default values. Most common fields are initialized by super class.
 	 * @param entity the newly created activity status to initialize */
