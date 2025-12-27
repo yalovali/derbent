@@ -1179,12 +1179,6 @@ public abstract class CBaseUITest {
 		consoleListenerRegistered = true;
 	}
 
-	/** Sanitizes raw text into a lower-case, hyphenated DOM-friendly identifier. */
-	protected String sanitizeForDomId(final String value) {
-		return sanitizeForIdentifier(value, FIELD_ID_PREFIX + "-autogen");
-	}
-
-	/** Sanitizes raw text for use in filenames with a custom fallback. */
 	protected String sanitizeForFileName(final String value, final String fallback) {
 		return sanitizeForIdentifier(value, fallback);
 	}

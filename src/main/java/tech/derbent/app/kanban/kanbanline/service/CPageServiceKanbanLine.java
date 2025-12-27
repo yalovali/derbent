@@ -14,7 +14,6 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.app.page.view.CDynamicPageViewWithoutGrid;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceKanbanLine.class);
 	private CComponentKanbanBoard componentKanbanBoard;
 	private CComponentListKanbanColumns componentKanbanColumns;
@@ -70,5 +69,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		return componentKanbanColumns;
 	}
 
-	public void on_load_after_bind() throws Exception {}
+	public void on_load_after_bind() throws Exception {
+		// todo: implement if needed
+	}
 }

@@ -21,10 +21,8 @@ import tech.derbent.api.utils.Check;
  * entities. */
 @Service
 public class CEntityFieldService {
-
 	/** Data class to hold entity field information. */
 	public static class EntityFieldInfo {
-
 		private boolean allowCustomValue = false;
 		// Additional AMetaData properties
 		private boolean autoSelectFirst = false;
@@ -165,7 +163,7 @@ public class CEntityFieldService {
 
 		public void setImageData(final boolean imageData) { this.imageData = imageData; }
 
-		public void setIsCaptionVisible(Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
+		public void setIsCaptionVisible(final Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
 
 		public void setJavaType(final String javaType) { this.javaType = javaType; }
 
@@ -313,7 +311,7 @@ public class CEntityFieldService {
 		}
 	}
 
-	public static String extractEntityTypeFromBeanName(String beanName) {
+	public static String extractEntityTypeFromBeanName(final String beanName) {
 		Check.notNull(beanName, "Bean name cannot be null");
 		Check.notBlank(beanName, "Bean name cannot be empty");
 		// Convert service bean name to entity class name
@@ -373,18 +371,18 @@ public class CEntityFieldService {
 				"CRiskPriorityService", "CProjectService", "CUserService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
 	}
 
-	public static Field getEntityField(Class<?> type, final String fieldName) throws NoSuchFieldException {
+	public static Field getEntityField(final Class<?> type, final String fieldName) throws NoSuchFieldException {
 		Check.notNull(type, "Entity class must not be null");
 		Check.notBlank(fieldName, "Field name must not be empty");
-		final Class<?> clazz = type;
-		while ((type != null) && (type != Object.class)) {
+		Class<?> currentType = type;
+		while ((currentType != null) && (currentType != Object.class)) {
 			try {
-				return type.getDeclaredField(fieldName);
+				return currentType.getDeclaredField(fieldName);
 			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
-				type = type.getSuperclass(); // bir üst sınıfa bak
+				currentType = currentType.getSuperclass(); // bir üst sınıfa bak
 			}
 		}
-		throw new NoSuchFieldException("Field '" + fieldName + "' not found in entity type: " + clazz.getSimpleName());
+		throw new NoSuchFieldException("Field '" + fieldName + "' not found in entity type: " + type.getSimpleName());
 	}
 
 	public static Field getEntityField(final String entityType, final String fieldName) throws NoSuchFieldException {

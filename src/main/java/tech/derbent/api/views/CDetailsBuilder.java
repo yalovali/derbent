@@ -60,7 +60,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		componentMap = new HashMap<>();
 	}
 
-	public HasComponents buildDetails(final IContentOwner contentOwner, CDetailSection screen, final CEnhancedBinder<?> binder,
+	public HasComponents buildDetails(final IContentOwner contentOwner, final CDetailSection screen, final CEnhancedBinder<?> binder,
 			final HasComponents detailsLayout) throws Exception {
 		Check.notNull(screen, "Screen cannot be null");
 		Check.notNull(binder, "Binder cannot be null");
@@ -75,16 +75,17 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		}
 		final CDetailSectionService screenService = applicationContext.getBean(CDetailSectionService.class);
 		Check.notNull(screenService, "Screen service cannot be null");
+		CDetailSection screenToUse = screen;
 		// for lazy loading of screen lines
 		final PersistenceUtil persistenceUtil = Persistence.getPersistenceUtil();
-		if (!persistenceUtil.isLoaded(screen, "screenLines")) {
-			screen = screenService.findByIdWithScreenLines(screen.getId());
+		if (!persistenceUtil.isLoaded(screenToUse, "screenLines")) {
+			screenToUse = screenService.findByIdWithScreenLines(screenToUse.getId());
 		}
-		if (screen.getScreenLines() == null || screen.getScreenLines().isEmpty()) {
-			LOGGER.warn("No lines found for screen: {}", screen.getName());
+		if (screenToUse.getScreenLines() == null || screenToUse.getScreenLines().isEmpty()) {
+			LOGGER.warn("No lines found for screen: {}", screenToUse.getName());
 			return new FormLayout(); // Return an empty layout if no lines are present
 		}
-		final Class<?> screenClass = CEntityRegistry.getEntityClass(screen.getEntityType());
+		final Class<?> screenClass = CEntityRegistry.getEntityClass(screenToUse.getEntityType());
 		Check.notNull(screenClass, "Screen class cannot be null");
 		formBuilder = new CFormBuilder<>(null, screenClass, binder, componentMap);
 		//
@@ -98,14 +99,14 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		} else {
 			// LOGGER.debug("User '{}' prefers sections as accordion.", user.getUsername());
 		}
-		final List<CDetailLines> lines = screen.getScreenLines();
+		final List<CDetailLines> lines = screenToUse.getScreenLines();
 		for (final CDetailLines line : lines) {
 			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
 				// no more current section. switch to base
 				currentSection = null;
 			}
 			if (currentSection != null) {
-				currentSection.processLine(contentOwner, screen, line, getFormBuilder(), componentMap);
+				currentSection.processLine(contentOwner, screenToUse, line, getFormBuilder(), componentMap);
 				continue;
 			}
 			final Component component = processLine(line, user);

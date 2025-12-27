@@ -35,24 +35,25 @@ public final class CPageableUtils {
 	 * @param sort the sort specification
 	 * @return a valid Pageable object
 	 * @throws IllegalArgumentException if page or size is negative */
-	public static Pageable createSafe(final int page, int size, final Sort sort) {
+	public static Pageable createSafe(final int page, final int size, final Sort sort) {
 		if (page < 0) {
 			LOGGER.error("Negative page number detected: {}", page);
 			throw new IllegalArgumentException("Page number cannot be negative: " + page);
 		}
-		if (size < 0) {
-			LOGGER.error("Negative page size detected: {}", size);
-			throw new IllegalArgumentException("Page size cannot be negative: " + size);
+		int validatedSize = size;
+		if (validatedSize < 0) {
+			LOGGER.error("Negative page size detected: {}", validatedSize);
+			throw new IllegalArgumentException("Page size cannot be negative: " + validatedSize);
 		}
-		if (size == 0) {
+		if (validatedSize == 0) {
 			LOGGER.warn("Page size is 0, using default size: {}", CEntityConstants.DEFAULT_PAGE_SIZE);
-			size = CEntityConstants.DEFAULT_PAGE_SIZE;
+			validatedSize = CEntityConstants.DEFAULT_PAGE_SIZE;
 		}
-		if (size > CEntityConstants.MAX_PAGE_SIZE) {
-			LOGGER.warn("Page size {} exceeds maximum {}, using maximum", size, CEntityConstants.MAX_PAGE_SIZE);
-			size = CEntityConstants.MAX_PAGE_SIZE;
+		if (validatedSize > CEntityConstants.MAX_PAGE_SIZE) {
+			LOGGER.warn("Page size {} exceeds maximum {}, using maximum", validatedSize, CEntityConstants.MAX_PAGE_SIZE);
+			validatedSize = CEntityConstants.MAX_PAGE_SIZE;
 		}
-		return PageRequest.of(page, size, sort);
+		return PageRequest.of(page, validatedSize, sort);
 	}
 
 	/** Validates an existing Pageable object to ensure it doesn't have negative values.
