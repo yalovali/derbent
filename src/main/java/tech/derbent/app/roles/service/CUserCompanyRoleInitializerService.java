@@ -10,6 +10,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.roles.domain.CUserCompanyRole;
@@ -51,11 +54,40 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
-	}
+        public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+                        final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+                final CDetailSection detailSection = createBasicView(project);
+                final CGridEntity grid = createGridEntity(project);
+                initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+                                pageDescription, showInQuickToolbar, menuOrder);
+        }
+
+        public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
+                final CUserCompanyRoleService service = CSpringContext.getBean(CUserCompanyRoleService.class);
+                final String[][] nameAndDescription = {
+                                {
+                                                "Company Admin", "Administrative role with full company access"
+                                }, {
+                                                "Company User", "Standard user role with regular access"
+                                }, {
+                                                "Company Guest", "Guest role with limited access"
+                                }
+                };
+                int index = 0;
+                for (final String[] seed : nameAndDescription) {
+                        final CUserCompanyRole role = service.newEntity(seed[0]);
+                        role.setDescription(seed[1]);
+                        role.setCompany(company);
+                        role.setColor(CColorUtils.getRandomColor(true));
+                        role.setSortOrder(index + 1);
+                        role.setIsAdmin(index == 0);
+                        role.setIsUser(index == 1);
+                        role.setIsGuest(index == 2);
+                        service.save(role);
+                        index++;
+                        if (minimal) {
+                                return;
+                        }
+                }
+        }
 }

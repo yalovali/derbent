@@ -3,6 +3,8 @@ package tech.derbent.api.entityOfCompany.domain;
 import java.util.Arrays;
 import java.util.Collection;
 import org.jspecify.annotations.Nullable;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -14,13 +16,14 @@ import tech.derbent.app.companies.domain.CCompany;
 @MappedSuperclass
 public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityClass> {
 
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "company_id", nullable = true)
-	@AMetaData (
-			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false,
-			setBackgroundFromColor = true, useIcon = true
-	)
-	private CCompany company;
+        @ManyToOne (fetch = FetchType.LAZY)
+        @JoinColumn (name = "company_id", nullable = true)
+        @OnDelete (action = OnDeleteAction.CASCADE)
+        @AMetaData (
+                        displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false,
+                        setBackgroundFromColor = true, useIcon = true
+        )
+        private CCompany company;
 
 	/** Default constructor for JPA. */
 	protected CEntityOfCompany() {

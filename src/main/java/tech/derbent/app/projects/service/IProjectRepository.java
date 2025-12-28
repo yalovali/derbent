@@ -5,11 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entity.service.IAbstractNamedRepository;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.app.companies.service.ICompanyEntityRepositoryBase;
 import tech.derbent.app.projects.domain.CProject;
 
-public interface IProjectRepository extends IAbstractNamedRepository<CProject>, ICompanyEntityRepositoryBase<CProject> {
+public interface IProjectRepository extends IEntityOfCompanyRepository<CProject>, ICompanyEntityRepositoryBase<CProject> {
 
 	@Override
 	@Query ("SELECT p FROM CProject p LEFT JOIN FETCH company WHERE p.company.id = :company_id ORDER BY p.name")

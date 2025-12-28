@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,7 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
@@ -32,31 +31,26 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 		})
 })
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
-public class CProject extends CEntityNamed<CProject> implements ISearchable {
+@AssociationOverride (name = "company", joinColumns = @JoinColumn (name = "company_id", nullable = false))
+public class CProject extends CEntityOfCompany<CProject> implements ISearchable {
 
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - organizational entity
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
 	public static final String ENTITY_TITLE_PLURAL = "Projects";
 	public static final String ENTITY_TITLE_SINGULAR = "Project";
 	public static final String VIEW_NAME = "Projects View";
-	// Many projects can belong to one company
-	@AMetaData (displayName = "Company", required = true, readOnly = false, description = "The company this project belongs to", hidden = false)
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "company_id", nullable = false)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private CCompany company;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "kanban_line_id")
-	@AMetaData (
-			displayName = "Kanban Line", required = false, readOnly = false, description = "Default Kanban line used to visualize project sprints",
-			hidden = false
-	)
-	private CKanbanLine kanbanLine;
-	// lets keep it layzily loaded to avoid loading all user settings at once
-	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@AMetaData (
-			displayName = "User Settings", required = false, readOnly = false, description = "User project settings for this project", hidden = false,
-			createComponentMethod = "createProjectUserSettingsComponent"
+        @ManyToOne (fetch = FetchType.LAZY)
+        @JoinColumn (name = "kanban_line_id")
+        @AMetaData (
+                        displayName = "Kanban Line", required = false, readOnly = false, description = "Default Kanban line used to visualize project sprints",
+                        hidden = false
+        )
+        private CKanbanLine kanbanLine;
+        // lets keep it layzily loaded to avoid loading all user settings at once
+        @OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+        @AMetaData (
+                        displayName = "User Settings", required = false, readOnly = false, description = "User project settings for this project", hidden = false,
+                        createComponentMethod = "createProjectUserSettingsComponent"
 	)
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
 
@@ -65,26 +59,24 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		super();
 	}
 
-	public CProject(final String name, CCompany company) {
-		super(CProject.class, name);
-		this.company = company;
-	}
+        public CProject(final String name, CCompany company) {
+                super(CProject.class, name, company);
+        }
 
 	/** Add a user setting to this project and maintain bidirectional relationship.
 	 * @param userSettings1 the user settings to add */
-	public void addUserSettings(final CUserProjectSettings userSettings1) {
-		if (userSettings1 == null) {
-			return;
-		}
-		if (!userSettings.contains(userSettings1)) {
-			userSettings.add(userSettings1);
-			userSettings1.setProject(this);
-		}
-	}
+        public void addUserSettings(final CUserProjectSettings userSettings1) {
+                Check.notNull(userSettings1, "User settings cannot be null");
+                if (userSettings1.getProject() != null && !userSettings1.getProject().equals(this)) {
+                        throw new IllegalArgumentException("User settings already assigned to a different project");
+                }
+                if (!userSettings.contains(userSettings1)) {
+                        userSettings.add(userSettings1);
+                        userSettings1.setProject(this);
+                }
+        }
 
-	public CCompany getCompany() { return company; }
-
-	public Long getCompanyId() { return company != null ? company.getId() : null; }
+        public Long getCompanyId() { return getCompany() != null ? getCompany().getId() : null; }
 
 	public CCompany getCompanyInstance(CCompanyService service) {
 		if (getCompanyId() == null) {
@@ -128,31 +120,44 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	 *                    fields plus "company"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, final Collection<String> fieldNames) {
-		if (searchValue == null || searchValue.isBlank()) {
-			return true; // No filter means match all
-		}
-		if (super.matchesFilter(searchValue, fieldNames)) {
-			return true;
-		}
-		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		// Check entity field
-		if (fieldNames.remove("company") && getCompany() != null && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
-			return true;
-		}
-		return false;
-	}
+        public boolean matchesFilter(final String searchValue, final Collection<String> fieldNames) {
+                if (searchValue == null || searchValue.isBlank()) {
+                        return true; // No filter means match all
+                }
+                if (super.matchesFilter(searchValue, fieldNames)) {
+                        return true;
+                }
+                final String lowerSearchValue = searchValue.toLowerCase().trim();
+                // Check entity field
+                if (fieldNames != null && fieldNames.remove("company") && getCompany() != null
+                                && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+                        return true;
+                }
+                return false;
+        }
 
 	/** Remove a user setting from this project and maintain bidirectional relationship.
 	 * @param userSettings1 the user settings to remove */
-	public void removeUserSettings(final CUserProjectSettings userSettings1) {
-		Check.notNull(userSettings1, "User settings cannot be null");
-		if (userSettings.remove(userSettings1)) {
-			userSettings1.setProject(null);
-		}
-	}
+        public void removeUserSettings(final CUserProjectSettings userSettings1) {
+                Check.notNull(userSettings1, "User settings cannot be null");
+                if (userSettings.remove(userSettings1)) {
+                        userSettings1.setProject(null);
+                }
+        }
 
-	public void setCompany(final CCompany company) { this.company = company; }
+        @Override
+        public void setCompany(final CCompany company) {
+                Check.notNull(company, "Company cannot be null for a project");
+                super.setCompany(company);
+                if (kanbanLine != null) {
+                        Check.isSameCompany(this, kanbanLine);
+                }
+        }
 
-	public void setKanbanLine(final CKanbanLine kanbanLine) { this.kanbanLine = kanbanLine; }
+        public void setKanbanLine(final CKanbanLine kanbanLine) {
+                if (kanbanLine != null) {
+                        Check.isSameCompany(this, kanbanLine);
+                }
+                this.kanbanLine = kanbanLine;
+        }
 }

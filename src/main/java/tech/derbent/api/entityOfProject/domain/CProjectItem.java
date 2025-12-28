@@ -128,11 +128,11 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	public void setParentType(final String parentType) { this.parentType = parentType; }
 
-	public void setStatus(final CProjectItemStatus status) {
-		Check.notNull(status, "Status cannot be null");
-		Check.isTrue(status.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Status company id " + status.getCompany().getId() + " does not match item company id " + getProject().getCompany().getId());
-		this.status = status;
-		updateLastModified();
-	}
+        public void setStatus(final CProjectItemStatus status) {
+                Check.notNull(status, "Status cannot be null");
+                Check.notNull(getProject(), "Project must be set before applying status");
+                Check.isSameCompany(getProject(), status);
+                this.status = status;
+                updateLastModified();
+        }
 }

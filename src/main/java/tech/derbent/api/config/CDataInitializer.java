@@ -1,7 +1,5 @@
 package tech.derbent.api.config;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
@@ -162,10 +160,9 @@ public class CDataInitializer {
 	private static final String COMPANY_OF_TEKNOLOJI = "Of Teknoloji Çözümleri";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataInitializer.class);
 	// Standard password for all users as per coding guidelines
-	private static final String STANDARD_PASSWORD = "test123";
-	// User Login Names
-	private static final String USER_ADMIN = "admin";
-	private static final String USER_ADMIN2 = "yasin";
+        // User Login Names
+        private static final String USER_ADMIN = "admin";
+        private static final String USER_ADMIN2 = "yasin";
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityService activityService;
 	private final CProjectItemStatusService activityStatusService;
@@ -339,40 +336,6 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Creates consulting company. */
-	private void createConsultingCompany() {
-		final CCompany consulting = new CCompany(COMPANY_OF_DANISMANLIK);
-		consulting.setDescription("Yönetim danışmanlığı ve stratejik planlama hizmetleri");
-		consulting.setAddress("Merkez Mahallesi, Gülbahar Sokağı No:7, Of/Trabzon");
-		consulting.setPhone("+90-462-751-0303");
-		consulting.setEmail("merhaba@ofdanismanlik.com.tr");
-		consulting.setWebsite("https://www.ofdanismanlik.com.tr");
-		consulting.setTaxNumber("TR-456789123");
-		consulting.setCompanyTheme("lumo-light");
-		consulting.setCompanyLogoUrl("/assets/logos/consulting-logo.svg");
-		consulting.setPrimaryColor("#4caf50");
-		consulting.setWorkingHoursStart("08:30");
-		consulting.setWorkingHoursEnd("17:30");
-		consulting.setCompanyTimezone("Europe/Istanbul");
-		consulting.setDefaultLanguage("tr");
-		consulting.setEnableNotifications(true);
-		consulting.setNotificationEmail("bildirim@ofdanismanlik.com.tr");
-		companyService.save(consulting);
-	}
-
-	private void createProjectDigitalTransformation(final CCompany company) {
-		final CProject project = new CProject("Digital Transformation Initiative", company);
-		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
-		project.setActive(true);
-		projectService.save(project);
-	}
-
-	private void createProjectInfrastructureUpgrade(final CCompany company) {
-		final CProject project = new CProject("Infrastructure Upgrade Project", company);
-		project.setDescription("Upgrading IT infrastructure for improved performance and scalability");
-		projectService.save(project);
-	}
-
 	/** Create sample comments for a decision.
 	 * @param decision the decision to create comments for */
 	private void createSampleCommentsForDecision(final CDecision decision) {
@@ -446,59 +409,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating comments for meeting: {}", meeting.getName(), e);
 		}
-	}
-
-	/** Creates a single user for a company with specified username and details.
-	 * @param company            The company to create user for
-	 * @param username           The username for the user
-	 * @param firstname          The first name for the user
-	 * @param phone              The phone number for the user
-	 * @param profilePictureFile The filename of the profile picture (e.g., "admin.svg") */
-	@Transactional (readOnly = false)
-	private void createSingleUserForCompany(final CCompany company, final String username, final String firstname, final String phone,
-			final String profilePictureFile) {
-		final String companyShortName = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
-		final String userEmail = username + "@" + companyShortName + ".com.tr";
-		final CUserCompanyRole companyRole = userCompanyRoleService.getRandom(company);
-		final CUser user = userService.createLoginUser(username, STANDARD_PASSWORD, firstname, userEmail, company, companyRole);
-		// Set user profile directly on entity
-		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		user.setLastname(company.getName() + " Yöneticisi");
-		user.setPhone(phone);
-		user.setProfilePictureData(profilePictureBytes);
-		user.setAttributeDisplaySectionsAsTabs(true);
-		userService.save(user);
-		// LOGGER.info("Created user {} for company {} with profile picture {}", username, company.getName(), profilePictureFile);
-	}
-
-	/** Creates technology startup company. */
-	private void createTechCompany() {
-		final CCompany techStartup = new CCompany(COMPANY_OF_TEKNOLOJI);
-		techStartup.setDescription("Dijital dönüşüm için yenilikçi teknoloji çözümleri");
-		techStartup.setAddress("Cumhuriyet Mahallesi, Atatürk Caddesi No:15, Of/Trabzon");
-		techStartup.setPhone("+90-462-751-0101");
-		techStartup.setEmail("iletisim@ofteknoloji.com.tr");
-		techStartup.setWebsite("https://www.ofteknoloji.com.tr");
-		techStartup.setTaxNumber("TR-123456789");
-		techStartup.setCompanyTheme("lumo-dark");
-		techStartup.setCompanyLogoUrl("/assets/logos/tech-logo.svg");
-		techStartup.setPrimaryColor("#1976d2");
-		techStartup.setWorkingHoursStart("09:00");
-		techStartup.setWorkingHoursEnd("18:00");
-		techStartup.setCompanyTimezone("Europe/Istanbul");
-		techStartup.setDefaultLanguage("tr");
-		techStartup.setEnableNotifications(true);
-		techStartup.setNotificationEmail("bildirim@ofteknoloji.com.tr");
-		companyService.save(techStartup);
-	}
-
-	@Transactional (readOnly = false)
-	private void createUserForCompany(final CCompany company) {
-		// Create first admin user
-		createSingleUserForCompany(company, USER_ADMIN, "Admin", "+90-462-751-1001", "admin.svg");
-		// Create second admin user
-		createSingleUserForCompany(company, USER_ADMIN2, USER_ADMIN2, "+90-462-751-1002", "admin.svg");
-		LOGGER.info("Created 2 admin users for company {}", company.getName());
 	}
 
 	/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
@@ -913,48 +823,20 @@ public class CDataInitializer {
 		return cnt == 0;
 	}
 
-	/** Loads profile picture data from the profile-pictures directory.
-	 * @param filename The SVG filename to load
-	 * @return byte array of the SVG content, or null if not found */
-	private byte[] loadProfilePictureData(final String filename) {
-		try {
-			// Try direct file path first (since profile-pictures is in project root)
-			final Path filePath = java.nio.file.Paths.get("profile-pictures", filename);
-			Check.isTrue(!filename.contains(".."), "Invalid filename: " + filename); // Prevent path traversal
-			if (Files.exists(filePath)) {
-				return Files.readAllBytes(filePath);
-			}
-			// Fallback: Load from classpath resources
-			final var resource = getClass().getClassLoader().getResourceAsStream("profile-pictures/" + filename);
-			Check.notNull(resource, "Profile picture resource not found in classpath: " + filename);
-			return resource.readAllBytes();
-		} catch (final Exception e) {
-			LOGGER.error("Error loading profile picture: {}", filename, e);
-			return null;
-		}
-	}
-
-	public void loadSampleData(final boolean minimal) throws Exception {
-		try {
-			// ========== NON-PROJECT RELATED INITIALIZATION PHASE ==========
-			// **** CREATE COMPANY SAMPLES ****//
-			createTechCompany();
-			if (!minimal) {
-				createConsultingCompany();
-			}
-			/* create sample projects */
-			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
-				initializeSampleCompanyRoles(company, minimal);
-				createProjectDigitalTransformation(company);
-				if (!minimal) {
-					createProjectInfrastructureUpgrade(company);
-				}
-				createUserForCompany(company);
-				if (minimal) {
-					break;
-				}
-				// createUserFor(company);
-			}
+        public void loadSampleData(final boolean minimal) throws Exception {
+                try {
+                        // ========== NON-PROJECT RELATED INITIALIZATION PHASE ==========
+                        // **** CREATE COMPANY SAMPLES ****//
+                        CCompanyInitializerService.initializeSample(minimal);
+                        /* create sample projects */
+                        for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+                                CUserCompanyRoleInitializerService.initializeSample(company, minimal);
+                                CUserInitializerService.initializeSample(company, minimal);
+                                CProjectInitializerService.initializeSample(company, minimal);
+                                if (minimal) {
+                                        break;
+                                }
+                        }
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
 			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
 				// sessionService.setActiveCompany(company);
