@@ -19,6 +19,9 @@ public interface IHasSelectionNotification {
 		select_getSelectListeners().add(listener);
 	}
 
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
 	private void notifySelectListeners(CSelectEvent event) {
 		for (final ComponentEventListener listener : select_getSelectListeners()) {
 			try {
@@ -33,9 +36,9 @@ public interface IHasSelectionNotification {
 		select_notifyEvents(event);
 	}
 
-	public default void select_checkEventAfterPass(CEvent event) {}
+	public default void select_checkEventAfterPass(@SuppressWarnings ("unused") CEvent event) {}
 
-	public default void select_checkEventBeforePass(CEvent event) {}
+	public default void select_checkEventBeforePass(@SuppressWarnings ("unused") CEvent event) {}
 
 	public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners();
 
