@@ -138,6 +138,7 @@ import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
 import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.domain.CUser;
@@ -267,6 +268,16 @@ public class CDataInitializer {
 		final CKanbanLine defaultKanbanLine = kanbanLineService.findDefaultForCompany(company).orElseGet(() -> kanbanLineService.getRandom(company));
 		project.setKanbanLine(defaultKanbanLine);
 		projectService.save(project);
+	}
+
+	private void assignStatusToActivity(IHasStatusAndWorkflow<?> item) {
+		Check.notNull(item, "Item cannot be null when assigning status");
+		final CWorkflowEntity workflow = item.getWorkflow();
+		Check.notNull(workflow, "Workflow cannot be null when assigning status");
+		final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(item);
+		if (!initialStatuses.isEmpty()) {
+			item.setStatus(initialStatuses.get(0));
+		}
 	}
 
 	@Transactional
@@ -507,13 +518,7 @@ public class CDataInitializer {
 			activity1.setAssignedTo(user1);
 			activity1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
 			activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 150)));
-			// Set initial status from workflow
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity1);
-				if (!initialStatuses.isEmpty()) {
-					activity1.setStatus(initialStatuses.get(0));
-				}
-			}
+			assignStatusToActivity(activity1);
 			activityService.save(activity1);
 			// Create child activity 1
 			final CActivityType type2 = activityTypeService.getRandom(project);
@@ -526,15 +531,8 @@ public class CDataInitializer {
 			activity2.setAssignedTo(user2);
 			activity2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
 			activity2.setDueDate(activity2.getStartDate().plusDays((long) (Math.random() * 50)));
-			// Set parent relationship
 			activity2.setParent(activity1);
-			// Set initial status from workflow
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity2);
-				if (!initialStatuses.isEmpty()) {
-					activity2.setStatus(initialStatuses.get(0));
-				}
-			}
+			assignStatusToActivity(activity2);
 			activityService.save(activity2);
 			if (minimal) {
 				return;
@@ -550,15 +548,8 @@ public class CDataInitializer {
 			activity3.setAssignedTo(user3);
 			activity3.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 50)));
 			activity3.setDueDate(activity3.getStartDate().plusDays((long) (Math.random() * 50)));
-			// Set parent relationship
 			activity3.setParent(activity1);
-			// Set initial status from workflow
-			if (type3 != null && type3.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity3);
-				if (!initialStatuses.isEmpty()) {
-					activity3.setStatus(initialStatuses.get(0));
-				}
-			}
+			assignStatusToActivity(activity3);
 			activityService.save(activity3);
 			LOGGER.debug("Created sample activities with parent-child relationships for project: {}", project.getName());
 		} catch (final Exception e) {
@@ -959,7 +950,6 @@ public class CDataInitializer {
 					createProjectInfrastructureUpgrade(company);
 				}
 				createUserForCompany(company);
-				CKanbanLineInitializerService.initializeSample(company, minimal);
 				if (minimal) {
 					break;
 				}
@@ -976,6 +966,7 @@ public class CDataInitializer {
 				Check.notNull(sessionService, "SessionService is not initialized");
 				sessionService.setActiveUser(user); // Set company first, then user who is member of that company
 				CProjectItemStatusInitializerService.initializeSample(company, minimal);
+				CKanbanLineInitializerService.initializeSample(company, minimal); // must be after status
 				CApprovalStatusInitializerService.initializeSample(company, minimal);
 				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 				for (final CProject project : projects) {

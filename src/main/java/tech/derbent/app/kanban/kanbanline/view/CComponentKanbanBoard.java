@@ -155,6 +155,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 			final ISprintableItem sprintableItem = sprintItem.getItem();
 			final Long statusId = sprintableItem.getStatus().getId();
 			final Long columnId = statusToColumnId.computeIfAbsent(statusId, key -> statusToColumnId.getOrDefault(-1L, -1L));
+			// dump result
+			LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company id:{}", statusId, sprintableItem.getStatus().getName(),
+					statusToColumnId.get(statusId), columnId, sprintableItem.getStatus().getCompany().getId());
 			if (columnId == -1L) {
 				LOGGER.warn("No kanban column found for status id {} in line {}", statusId, getValue() != null ? getValue().getName() : "null");
 				continue;
@@ -226,9 +229,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		try {
 			// Sprint items already encode the project scope; use them as the single source of truth
 			// for the board cards to keep project selection aligned with the sprint filter.
-			final List<CSprintItem> sprintItems = sprintItemService.findByMasterIdWithItems(sprint.getId());
-			allSprintItems = new ArrayList<>(sprintItems);
-			this.sprintItems = new ArrayList<>(allSprintItems);
+			final List<CSprintItem> sprintItemsRaw = sprintItemService.findByMasterIdWithItems(sprint.getId());
+			allSprintItems = new ArrayList<>(sprintItemsRaw);
+			sprintItems = new ArrayList<>(allSprintItems);
 			filterToolbar.setAvailableItems(allSprintItems);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load sprint items for Kanban board", e);
@@ -332,6 +335,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 					continue;
 				}
 				statusToColumnId.putIfAbsent(status.getId(), column.getId());
+				// dump for debug purposes
+				LOGGER.debug("Mapping status id {}:{} to column id {} company id:{}", status.getId(), status.getName(), column.getId(),
+						status.getCompany().getId());
 			}
 		}
 		return statusToColumnId;

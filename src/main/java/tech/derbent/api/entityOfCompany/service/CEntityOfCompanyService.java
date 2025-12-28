@@ -9,9 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
@@ -81,14 +81,14 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		Check.notNull(company, "Company cannot be null");
 		final List<EntityClass> all = listByCompany(company);
 		if (all.isEmpty()) {
-			throw new IllegalStateException("No entities found for company: " + company.getName());
+			throw new IllegalStateException("No entities found for company " + company.getName() + " of type " + getEntityClass().getSimpleName());
 		}
 		final int randomIndex = (int) (Math.random() * all.size());
 		return all.get(randomIndex);
 	}
 
 	public List<EntityClass> listByCompany(final CCompany company) {
-		Check.notNull(company, "Project cannot be null");
+		Check.notNull(company, "Company cannot be null");
 		try {
 			final List<EntityClass> entities = ((IEntityOfCompanyRepository<EntityClass>) repository).findByCompany(company);
 			return entities;

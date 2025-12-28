@@ -64,7 +64,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	 * @return the project */
 	public CProject getProject() { return project; }
 
-	public String getProjectName() { return (project != null) ? project.getName() : "No Project"; }
+	public String getProjectName() { return project != null ? project.getName() : "No Project"; }
 
 	@Override
 	protected void initializeDefaults() {
@@ -73,20 +73,20 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 
 	@Override
 	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("project") && (getProject() != null) && getProject().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("project") && getProject() != null && getProject().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("assignedTo") && (getAssignedTo() != null) && getAssignedTo().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("assignedTo") && getAssignedTo() != null && getAssignedTo().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("createdBy") && (getCreatedBy() != null) && getCreatedBy().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("createdBy") && getCreatedBy() != null && getCreatedBy().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
@@ -94,7 +94,10 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 
 	/** Sets the assigned user for this entity.
 	 * @param assignedTo the user to assign */
-	public void setAssignedTo(final CUser assignedTo) { this.assignedTo = assignedTo; }
+	public void setAssignedTo(final CUser assignedTo) {
+		// Check.isSameCompany(getProject(), assignedTo);
+		this.assignedTo = assignedTo;
+	}
 
 	/** Sets the user who created this entity.
 	 * @param createdBy the creator user */

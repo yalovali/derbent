@@ -4,7 +4,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -13,6 +15,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
@@ -48,6 +51,15 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 			LOGGER.error("Error creating Kanban line view.");
 			throw e;
 		}
+	}
+
+	private static CKanbanColumn createColumn(String name, final CCompany company, final CProjectItemStatusService statusService,
+			final CKanbanLine line) {
+		final CKanbanColumn item = new CKanbanColumn(name, line);
+		item.setColor(CColorUtils.getRandomFromWebColors(false));
+		item.setIncludedStatuses(List.of(statusService.getRandom(company), statusService.getRandom(company)));
+		line.addKanbanColumn(item);
+		return item;
 	}
 
 	/** Builds the grid configuration for kanban line list views. */
@@ -100,34 +112,23 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 						"Team Swimlanes", "Single row Kanban board per team"
 				}
 		};
+		final CProjectItemStatusService statusService =
+				(CProjectItemStatusService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(CProjectItemStatus.class));
 		initializeCompanyEntity(sampleLines, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
 				company, minimal, (entity, index) -> {
-                        Check.instanceOf(entity, CKanbanLine.class, "Expected Kanban line for column initialization");
-                        final CKanbanLine line = (CKanbanLine) entity;
-                        if (index == 0) {
-                                final CKanbanColumn backlog = new CKanbanColumn("Backlog", line);
-                                backlog.setColor("#F5F5F5");
-                                line.addKanbanColumn(backlog);
-                                final CKanbanColumn inProgress = new CKanbanColumn("In Progress", line);
-                                inProgress.setColor("#BBDEFB");
-                                line.addKanbanColumn(inProgress);
-                                final CKanbanColumn done = new CKanbanColumn("Done", line);
-                                done.setColor("#C8E6C9");
-                                line.addKanbanColumn(done);
-                        } else {
-                                final CKanbanColumn todo = new CKanbanColumn("To Do", line);
-                                todo.setColor("#FFF9C4");
-                                line.addKanbanColumn(todo);
-                                final CKanbanColumn doing = new CKanbanColumn("Doing", line);
-                                doing.setColor("#B3E5FC");
-                                line.addKanbanColumn(doing);
-                                final CKanbanColumn review = new CKanbanColumn("Review", line);
-                                review.setColor("#FFE0B2");
-                                line.addKanbanColumn(review);
-                                final CKanbanColumn done = new CKanbanColumn("Done", line);
-                                done.setColor("#C8E6C9");
-                                line.addKanbanColumn(done);
-                        }
-                });
-        }
+					Check.instanceOf(entity, CKanbanLine.class, "Expected Kanban line for column initialization");
+					final CKanbanLine line = (CKanbanLine) entity;
+					if (index == 0) {
+						createColumn("Backlog", company, statusService, line);
+						createColumn("In Progress", company, statusService, line);
+						createColumn("In Progress", company, statusService, line);
+						createColumn("Done", company, statusService, line).setDefaultColumn(true);
+					} else {
+						createColumn("To Do", company, statusService, line);
+						createColumn("Doing", company, statusService, line);
+						createColumn("Review", company, statusService, line);
+						createColumn("Done", company, statusService, line).setDefaultColumn(true);
+					}
+				});
+	}
 }

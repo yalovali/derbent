@@ -90,32 +90,23 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	 * is defined in the workflow's status relations where CWorkflowStatusRelation.initialStatus = true.
 	 * @param workflow the workflow entity to get initial status from
 	 * @return Optional containing the initial status if found, empty otherwise */
-	public Optional<CProjectItemStatus> getInitialStatusFromWorkflow(final CWorkflowEntity workflow) {
+	public CProjectItemStatus getInitialStatusFromWorkflow(final CWorkflowEntity workflow) {
 		Check.notNull(workflow, "Workflow cannot be null when retrieving initial status");
 		try {
 			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
-			if (relations == null || relations.isEmpty()) {
-				LOGGER.warn("No status relations found for workflow: {}", workflow.getName());
-				return Optional.empty();
-			}
+			Check.isTrue((relations == null || relations.isEmpty()) == false, "No status relations found for workflow: " + workflow.getName());
 			final Optional<CProjectItemStatus> initialStatus = relations.stream().filter(r -> Boolean.TRUE.equals(r.getInitialStatus()))
 					.map(CWorkflowStatusRelation::getToStatus).filter(Objects::nonNull).distinct().findFirst();
 			if (initialStatus.isPresent()) {
-				return initialStatus;
-			}
-			for (final CWorkflowStatusRelation relation : relations) {
-				if (relation.getFromStatus() != null) {
-					return Optional.of(relation.getFromStatus());
-				}
+				return initialStatus.get();
 			}
 			final CWorkflowStatusRelation firstRelation = relations.get(0);
-			if (firstRelation.getToStatus() != null) {
-				return Optional.of(firstRelation.getToStatus());
-			}
+			Check.notNull(firstRelation, "First status relation is null for workflow: " + workflow.getName());
+			return firstRelation.getToStatus();
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving initial status for workflow {}: {}", workflow.getName(), e.getMessage());
+			throw e;
 		}
-		return Optional.empty();
 	}
 
 	@Override
@@ -136,37 +127,28 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
 		try {
 			Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
-			final List<CProjectItemStatus> validStatuses = new ArrayList<>();
 			final CWorkflowEntity workflow = item.getWorkflow();
+			Check.notNull(workflow, "Workflow cannot be null when retrieving valid next statuses for project item");
 			final CProjectItemStatus currentStatus = item.getStatus();
-			if (currentStatus != null && !validStatuses.contains(currentStatus)) {
+			final List<CProjectItemStatus> validStatuses = new ArrayList<>();
+			if (currentStatus != null) {
 				validStatuses.add(item.getStatus()); // Always include current status
-			}
-			if (workflow == null) {
-				LOGGER.warn("Workflow cannot be null for project item {}; returning default statuses", item.getClass().getSimpleName());
-				addFallbackStatuses(validStatuses);
-				return validStatuses;
 			}
 			// For new items without a status, return initial statuses from the workflow
 			if (currentStatus == null) {
-				final Optional<CProjectItemStatus> initialStatus = getInitialStatusFromWorkflow(workflow);
-				if (initialStatus.isPresent()) {
-					addIfAbsent(validStatuses, initialStatus.get());
-					return validStatuses;
-				}
+				final CProjectItemStatus initialStatus = getInitialStatusFromWorkflow(workflow);
+				Check.notNull(initialStatus, "Initial status cannot be null when retrieving valid next statuses for new project item");
+				addIfAbsent(validStatuses, initialStatus);
+				return validStatuses;
 			}
 			final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
 			if (relations == null || relations.isEmpty()) {
-				addFallbackStatuses(validStatuses);
 				return validStatuses;
 			}
 			if (currentStatus != null && currentStatus.getId() != null) {
 				relations.stream().filter(r -> r.getFromStatus().getId().equals(currentStatus.getId())).map(CWorkflowStatusRelation::getToStatus)
 						.filter(Objects::nonNull).distinct().filter(r -> !r.getId().equals(currentStatus.getId()))
 						.forEach(status -> addIfAbsent(validStatuses, status));
-			}
-			if (validStatuses.isEmpty()) {
-				addFallbackStatuses(validStatuses);
 			}
 			return validStatuses;
 		} catch (final Exception e) {

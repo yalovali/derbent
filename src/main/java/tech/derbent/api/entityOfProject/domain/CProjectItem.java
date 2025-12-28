@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 
@@ -128,6 +129,9 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	public void setParentType(final String parentType) { this.parentType = parentType; }
 
 	public void setStatus(final CProjectItemStatus status) {
+		Check.notNull(status, "Status cannot be null");
+		Check.isTrue(status.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Status company id " + status.getCompany().getId() + " does not match item company id " + getProject().getCompany().getId());
 		this.status = status;
 		updateLastModified();
 	}

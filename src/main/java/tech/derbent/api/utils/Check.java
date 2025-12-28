@@ -4,6 +4,8 @@ import java.util.Collection;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 
 public class Check {
 
@@ -221,6 +223,32 @@ public class Check {
 
 	public static void isNull(final String string) {
 		isNull(string, "Object must be null");
+	}
+
+	public static void isSameCompany(CEntityOfCompany<?> entity1, CEntityOfCompany<?> entity2) {
+		notNull(entity1, "First entity cannot be null");
+		notNull(entity2, "Second entity cannot be null");
+		notNull(entity1.getCompany(), "First entity's company cannot be null");
+		notNull(entity2.getCompany(), "Second entity's company cannot be null");
+		if (!entity1.getCompany().getId().equals(entity2.getCompany().getId())) {
+			final String def = String.format("Entities belong to different companies: name(%d):%s: id:%d != name(%d):%s: id:%d", entity1.getName(),
+					entity1.getId(), entity1.getCompany().getId(), entity2.getName(), entity2.getId(), entity2.getCompany().getId());
+			logFail(def);
+			throw new IllegalArgumentException(def);
+		}
+	}
+
+	public static void isSameProject(CEntityOfProject<?> entity1, CEntityOfProject<?> entity2) {
+		notNull(entity1, "First entity cannot be null");
+		notNull(entity2, "Second entity cannot be null");
+		notNull(entity1.getProject(), "First entity's project cannot be null");
+		notNull(entity2.getProject(), "Second entity's project cannot be null");
+		if (!entity1.getProject().getId().equals(entity2.getProject().getId())) {
+			final String def = String.format("Entities belong to different projects: name(%d):%s: pid:%d != name(%d):%s: pid:%d", entity1.getName(),
+					entity1.getId(), entity1.getProject().getId(), entity2.getName(), entity2.getId(), entity2.getProject().getId());
+			logFail(def);
+			throw new IllegalArgumentException(def);
+		}
 	}
 
 	public static void isTrue(final boolean condition, final String message) {

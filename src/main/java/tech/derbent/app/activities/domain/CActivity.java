@@ -214,7 +214,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Calculate the cost variance (actual cost - estimated cost).
 	 * @return the cost variance, positive if over budget, negative if under budget */
 	public BigDecimal calculateCostVariance() {
-		if ((actualCost == null) || (estimatedCost == null)) {
+		if (actualCost == null || estimatedCost == null) {
 			LOGGER.debug("calculateCostVariance() - Missing cost data, actual={}, estimated={}", actualCost, estimatedCost);
 			return BigDecimal.ZERO;
 		}
@@ -224,7 +224,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Calculate the time variance (actual hours - estimated hours).
 	 * @return the time variance, positive if over estimated, negative if under estimated */
 	public BigDecimal calculateTimeVariance() {
-		if ((actualHours == null) || (estimatedHours == null)) {
+		if (actualHours == null || estimatedHours == null) {
 			return BigDecimal.ZERO;
 		}
 		final BigDecimal variance = actualHours.subtract(estimatedHours);
@@ -349,8 +349,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	 * @return true if the activity has a completion date or progress is 100% */
 	public boolean isCompleted() {
 		final boolean hasCompletionDate = completionDate != null;
-		final boolean isFullProgress = (progressPercentage != null) && (progressPercentage >= 100);
-		final boolean isFinalStatus = (status != null) && status.getFinalStatus();
+		final boolean isFullProgress = progressPercentage != null && progressPercentage >= 100;
+		final boolean isFinalStatus = status != null && status.getFinalStatus();
 		final boolean completed = hasCompletionDate || isFullProgress || isFinalStatus;
 		LOGGER.debug("isCompleted() - Activity id={} completed={} (completionDate={}, progress={}, finalStatus={})", getId(), completed,
 				hasCompletionDate, progressPercentage, isFinalStatus);
@@ -360,7 +360,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Check if the activity is overdue.
 	 * @return true if the due date has passed and the activity is not completed */
 	public boolean isOverdue() {
-		if ((dueDate == null) || isCompleted()) {
+		if (dueDate == null || isCompleted()) {
 			return false;
 		}
 		final boolean overdue = LocalDate.now().isAfter(dueDate);
@@ -376,7 +376,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
@@ -384,10 +384,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity fields
-		if (fieldNames.remove("entityType") && (getEntityType() != null) && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("entityType") && getEntityType() != null && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("priority") && (getPriority() != null) && getPriority().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("priority") && getPriority() != null && getPriority().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
@@ -399,7 +399,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	public void setActualCost(final BigDecimal actualCost) {
-		if ((actualCost != null) && (actualCost.compareTo(BigDecimal.ZERO) < 0)) {
+		if (actualCost != null && actualCost.compareTo(BigDecimal.ZERO) < 0) {
 			LOGGER.warn("setActualCost - Attempting to set negative actual cost: {} for activity id={}", actualCost, getId());
 		}
 		this.actualCost = actualCost != null ? actualCost : BigDecimal.ZERO;
@@ -407,7 +407,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	public void setActualHours(final BigDecimal actualHours) {
-		if ((actualHours != null) && (actualHours.compareTo(BigDecimal.ZERO) < 0)) {
+		if (actualHours != null && actualHours.compareTo(BigDecimal.ZERO) < 0) {
 			LOGGER.warn("setActualHours - Attempting to set negative actual hours: {} for activity id={}", actualHours, getId());
 		}
 		this.actualHours = actualHours != null ? actualHours : BigDecimal.ZERO;
@@ -415,7 +415,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	@Override
-	public void setColor(String color) { /*****/ }
+	public void setColor(String color) { /*****/
+	}
 
 	/** Sets the list of comments for this activity.
 	 * @param comments the list of comments */
@@ -426,7 +427,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public void setCompletionDate(final LocalDate completionDate) {
 		this.completionDate = completionDate;
-		if ((completionDate != null) && (progressPercentage != null) && (progressPercentage < 100)) {
+		if (completionDate != null && progressPercentage != null && progressPercentage < 100) {
 			progressPercentage = 100;
 		}
 		updateLastModified();
@@ -441,13 +442,16 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	 * @param typeEntity the type entity to set */
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CActivityType.class, "Type entity must be an instance of CActivityType");
+		Check.isTrue(typeEntity.getProject().getId().equals(getProject().getId()),
+				"Type entity project id " + typeEntity.getProject().getId() + " does not match activity project id " + getProject().getId());
 		entityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}
 
 	public void setEstimatedCost(final BigDecimal estimatedCost) {
-		if ((estimatedCost != null) && (estimatedCost.compareTo(BigDecimal.ZERO) < 0)) {
+		if (estimatedCost != null && estimatedCost.compareTo(BigDecimal.ZERO) < 0) {
 			LOGGER.warn("setEstimatedCost - Attempting to set negative estimated cost: {} for activity id={}", estimatedCost, getId());
 		}
 		this.estimatedCost = estimatedCost;
@@ -455,7 +459,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	public void setEstimatedHours(final BigDecimal estimatedHours) {
-		if ((estimatedHours != null) && (estimatedHours.compareTo(BigDecimal.ZERO) < 0)) {
+		if (estimatedHours != null && estimatedHours.compareTo(BigDecimal.ZERO) < 0) {
 			LOGGER.warn("setEstimatedHours - Attempting to set negative estimated hours: {} for activity id={}", estimatedHours, getId());
 		}
 		this.estimatedHours = estimatedHours;
@@ -463,7 +467,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	public void setHourlyRate(final BigDecimal hourlyRate) {
-		if ((hourlyRate != null) && (hourlyRate.compareTo(BigDecimal.ZERO) < 0)) {
+		if (hourlyRate != null && hourlyRate.compareTo(BigDecimal.ZERO) < 0) {
 			LOGGER.warn("setHourlyRate - Attempting to set negative hourly rate: {} for activity id={}", hourlyRate, getId());
 		}
 		this.hourlyRate = hourlyRate;
@@ -481,20 +485,20 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	public void setProgressPercentage(final Integer progressPercentage) {
-		if ((progressPercentage != null) && ((progressPercentage < 0) || (progressPercentage > 100))) {
+		if (progressPercentage != null && (progressPercentage < 0 || progressPercentage > 100)) {
 			LOGGER.warn("setProgressPercentage - Invalid progress percentage: {} for activity id={}", progressPercentage, getId());
 			return;
 		}
 		this.progressPercentage = progressPercentage != null ? progressPercentage : 0;
 		// Auto-set completion date if progress reaches 100%
-		if ((progressPercentage != null) && (progressPercentage >= 100) && (completionDate == null)) {
+		if (progressPercentage != null && progressPercentage >= 100 && completionDate == null) {
 			completionDate = LocalDate.now();
 		}
 		updateLastModified();
 	}
 
 	public void setRemainingHours(final BigDecimal remainingHours) {
-		if ((remainingHours != null) && (remainingHours.compareTo(BigDecimal.ZERO) < 0)) {
+		if (remainingHours != null && remainingHours.compareTo(BigDecimal.ZERO) < 0) {
 			LOGGER.warn("setRemainingHours - Attempting to set negative remaining hours: {} for activity id={}", remainingHours, getId());
 		}
 		this.remainingHours = remainingHours;
@@ -519,15 +523,14 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	@Override
 	public void setStatus(final CProjectItemStatus status) {
-		this.status = status;
+		super.setStatus(status);
 		// Auto-set completion date if status is final
-		if ((status != null) && status.getFinalStatus() && (completionDate == null)) {
+		if (status != null && status.getFinalStatus() && completionDate == null) {
 			completionDate = LocalDate.now();
-			if ((progressPercentage != null) && (progressPercentage < 100)) {
+			if (progressPercentage != null && progressPercentage < 100) {
 				progressPercentage = 100;
 			}
 		}
-		updateLastModified();
 	}
 
 	@Override

@@ -114,6 +114,7 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 	/** Finds the default line for the current project. */
 	@Transactional (readOnly = true)
 	public Optional<CKanbanLine> findDefaultForCurrentProject() {
+		LOGGER.debug("active project {} company {}", sessionService.getActiveProject(), sessionService.getActiveCompany());
 		return sessionService.getActiveProject().flatMap(this::findDefaultForProject);
 	}
 
