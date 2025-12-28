@@ -20,7 +20,6 @@ import tech.derbent.app.gannt.ganntviewentity.view.components.CGanntGrid;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.page.view.CDynamicPageRouter;
-import tech.derbent.app.page.view.CDynamicPageRouter;
 import tech.derbent.base.session.service.ISessionService;
 
 /* display a Gannt chart for any entity of project type */
@@ -66,9 +65,9 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 				new CMasterViewSectionGannt<EntityClass>(entityClass, this, sessionService, activityService, meetingService, pageEntityService);
 	}
 
-        /** Gets the entity binder for the actual entity (Activity or Meeting). This is needed for the page service to write binder data before saving.
-         * @return The entity binder */
-        public CEnhancedBinder<CProjectItem<?>> getEntityBinder() { return entityBinder; }
+	/** Gets the entity binder for the actual entity (Activity or Meeting). This is needed for the page service to write binder data before saving.
+	 * @return The entity binder */
+	public CEnhancedBinder<CProjectItem<?>> getEntityBinder() { return entityBinder; }
 
 	private CProjectItem<?> getGanntEntityFromSelectedItem() {
 		LOGGER.debug("Getting Gantt entity from selected CGanttItem");
@@ -196,9 +195,9 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 		}
 	}
 
-        @Override
-        protected void updateDetailsComponent() throws Exception {
-                LOGGER.debug("Updating details component for Gantt view");
-                CDynamicPageRouter.displayEntityInDynamicOnepager(getGanntEntityFromSelectedItem(), currentEntityPageRouter, sessionService);
-        }
+	@Override
+	protected void updateDetailsComponent() throws Exception {
+		LOGGER.debug("Updating details component for Gantt view");
+		CDynamicPageRouter.displayEntityInDynamicOnepager(getGanntEntityFromSelectedItem(), currentEntityPageRouter, sessionService);
+	}
 }

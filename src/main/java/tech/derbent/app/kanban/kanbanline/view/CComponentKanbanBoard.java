@@ -204,9 +204,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		return null;
 	}
 
-        @Override
-        public void drag_checkEventAfterPass(final CEvent event) {
-                LOGGER.debug("[KanbanDrag] Completed drag event {}", event.getClass().getSimpleName());
+	@Override
+	public void drag_checkEventAfterPass(final CEvent event) {
+		LOGGER.debug("[KanbanDrag] Completed drag event {}", event.getClass().getSimpleName());
 	}
 
 	@Override
@@ -331,33 +331,22 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	}
 
 	/** Updates selection state and details area. */
-        private void on_postit_selected(final CComponentKanbanPostit postit) {
-                LOGGER.debug("Kanban board post-it selection changed to {}", postit != null ? postit.getEntity().getId() : "null");
-                if (selectedPostit != null && selectedPostit != postit) {
-                        selectedPostit.setSelected(false);
-                }
-                selectedPostit = postit;
-                if (selectedPostit != null) {
-                        selectedPostit.setSelected(true);
-                }
-                final CProjectItem<?> sprintableEntity = resolveSprintableEntity(postit);
-                CDynamicPageRouter.displayEntityInDynamicOnepager(sprintableEntity, currentEntityPageRouter, sessionService);
-                // layoutDetails.removeAll();
-                // layoutDetails.add(new CDiv("Select a card to view its details."));
-        }
-
-        private CProjectItem<?> resolveSprintableEntity(final CComponentKanbanPostit postit) {
-                final CSprintItem sprintItem = postit != null ? postit.getEntity() : null;
-                if (sprintItem == null) {
-                        return null;
-                }
-                final ISprintableItem sprintableItem = sprintItem.getItem();
-                if (sprintableItem instanceof final CProjectItem<?> projectItem) {
-                        return projectItem;
-                }
-                LOGGER.warn("Selected sprint item {} does not expose a project item for onepager display", sprintItem.getId());
-                return null;
-        }
+	private void on_postit_selected(final CComponentKanbanPostit postit) {
+		LOGGER.debug("Kanban board post-it selection changed to {}", postit != null ? postit.getEntity().getId() : "null");
+		if (selectedPostit != null && selectedPostit != postit) {
+			selectedPostit.setSelected(false);
+		}
+		selectedPostit = postit;
+		if (selectedPostit != null) {
+			selectedPostit.setSelected(true);
+		} else {
+			CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService);
+			return;
+		}
+		final ISprintableItem sprintableEntity = postit.resolveSprintableItem();
+		Check.instanceOf(sprintableEntity, CProjectItem.class, "Sprintable item must be a CEntityDB for Kanban board details display");
+		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter, sessionService);
+	}
 
 	/** Reacts to kanban line changes by reloading sprints. */
 	@Override
