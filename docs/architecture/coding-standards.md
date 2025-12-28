@@ -1504,3 +1504,10 @@ public class CPageTestAuxillary extends Main {
 ```
 
 **Reference**: See `docs/testing/comprehensive-page-testing.md` for complete guide.
+
+### Context-aware random selection
+
+- Always prefer context-bound helpers like `getRandom(project)` or `getRandom(company)` instead of parameterless randomizers to avoid pulling entities from other tenants.
+- Seed data and workflow/type defaults must validate tenant ownership (`Check.isSameCompany`) before binding statuses, roles, or workflows together.
+- When no context is available, treat it as a bug: fail fast rather than silently choosing a global random record.
+- Initializers that attach workflows or statuses must pass explicit project/company context into `getRandom(...)` and assert the workflow/status is non-null before saving the entity.

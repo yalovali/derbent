@@ -216,12 +216,15 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		return updateRelationship(relation);
 	}
 
-	@Override
-	protected void validateRelationship(final CWorkflowStatusRelation relationship) {
-		super.validateRelationship(relationship);
-		Check.notNull(relationship, "Relationship cannot be null");
-		Check.notNull(relationship.getWorkflowEntity(), "Workflow cannot be null");
-		Check.notNull(relationship.getFromStatus(), "From status cannot be null");
-		Check.notNull(relationship.getToStatus(), "To status cannot be null");
-	}
+        @Override
+        protected void validateRelationship(final CWorkflowStatusRelation relationship) {
+                super.validateRelationship(relationship);
+                Check.notNull(relationship, "Relationship cannot be null");
+                Check.notNull(relationship.getWorkflowEntity(), "Workflow cannot be null");
+                Check.notNull(relationship.getWorkflowEntity().getProject(), "Workflow must belong to a project");
+                Check.notNull(relationship.getFromStatus(), "From status cannot be null");
+                Check.notNull(relationship.getToStatus(), "To status cannot be null");
+                Check.isSameCompany(relationship.getWorkflowEntity().getProject(), relationship.getFromStatus());
+                Check.isSameCompany(relationship.getWorkflowEntity().getProject(), relationship.getToStatus());
+        }
 }
