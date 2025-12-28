@@ -1,34 +1,54 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.dnd.DropEffect;
+import com.vaadin.flow.component.dnd.DropTarget;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
 import tech.derbent.api.grid.view.CLabelEntity;
+import tech.derbent.api.interfaces.CSelectEvent;
+import tech.derbent.api.interfaces.IHasDragControl;
+import tech.derbent.api.interfaces.IHasSelectionNotification;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CComponentKanbanColumn - Renders a single kanban column with its header and post-it items. */
-public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
+public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn>
+                implements IHasSelectionNotification, IHasDragControl {
 
-	private static final long serialVersionUID = 1L;
-	private final Binder<CKanbanColumn> binder;
-	private final Span defaultBadge;
-	private final CHorizontalLayout headerLayout;
-	private final CVerticalLayout itemsLayout;
-	Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumn.class);
-	private Consumer<CComponentKanbanPostit> postitSelectionListener;
-	private List<CSprintItem> sprintItems = List.of();
-	private final CLabelEntity statusesLabel;
-	private final CH3 title;
+        private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumn.class);
+        private static final long serialVersionUID = 1L;
+        private final Binder<CKanbanColumn> binder;
+        private final Span defaultBadge;
+        private final CHorizontalLayout headerLayout;
+        private final CVerticalLayout itemsLayout;
+        private DropTarget<CVerticalLayout> columnDropTarget;
+        private boolean dragEnabled;
+        private boolean dropEnabled;
+        private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
+        private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
+        private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
+        private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
+        private List<CSprintItem> sprintItems = List.of();
+        private final CLabelEntity statusesLabel;
+        private final CH3 title;
 
 	/** Creates the kanban column component and its layout. */
 	public CComponentKanbanColumn() {
@@ -50,19 +70,20 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 				.set("font-size", "10px").set("font-weight", "600");
 		headerLayout.add(title);
 		add(headerLayout);
-		statusesLabel = new CLabelEntity();
-		statusesLabel.getStyle().set("font-size", "11px").set("color", "#666");
-		add(statusesLabel);
-		itemsLayout = new CVerticalLayout(false, true, false);
-		itemsLayout.setPadding(false);
+                statusesLabel = new CLabelEntity();
+                statusesLabel.getStyle().set("font-size", "11px").set("color", "#666");
+                add(statusesLabel);
+                itemsLayout = new CVerticalLayout(false, true, false);
+                itemsLayout.setPadding(false);
 		itemsLayout.setSpacing(true);
 		itemsLayout.setWidthFull();
 		itemsLayout.setHeight(null);
-		itemsLayout.addClassName("kanban-column-items");
-		add(itemsLayout);
-		binder = new Binder<>(CKanbanColumn.class);
-		binder.forField(this).bind(value -> value, (bean, value) -> {/**/});
-	}
+                itemsLayout.addClassName("kanban-column-items");
+                add(itemsLayout);
+                binder = new Binder<>(CKanbanColumn.class);
+                binder.forField(this).bind(value -> value, (bean, value) -> {/**/});
+                initializeColumnDropTarget();
+        }
 
 	/** Applies the configured background color for the column. */
 	private void applyBackgroundColor() {
@@ -87,13 +108,6 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 			final Long itemColumnId = item.getKanbanColumnId();
 			return itemColumnId != null && itemColumnId.equals(columnId);
 		}).toList();
-	}
-
-	/** Propagates a post-it click to the selection listener. */
-	private void on_postit_clicked(final CComponentKanbanPostit postit) {
-		if (postitSelectionListener != null) {
-			postitSelectionListener.accept(postit);
-		}
 	}
 
 	/** Updates the column UI when its value changes. */
@@ -134,16 +148,19 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 		}
 	}
 
-	/** Refreshes the item cards inside the column. */
-	private void refreshItems() {
-		LOGGER.debug("Refreshing items for kanban column {}", getValue() != null ? getValue().getName() : "null");
-		itemsLayout.removeAll();
-		for (final CSprintItem item : filterItems(sprintItems)) {
-			final CComponentKanbanPostit postit = new CComponentKanbanPostit(item);
-			postit.addClickListener(event -> on_postit_clicked(postit));
-			itemsLayout.add(postit);
-		}
-	}
+        /** Refreshes the item cards inside the column. */
+        private void refreshItems() {
+                LOGGER.debug("Refreshing items for kanban column {}", getValue() != null ? getValue().getName() : "null");
+                itemsLayout.removeAll();
+                for (final CSprintItem item : filterItems(sprintItems)) {
+                        final CComponentKanbanPostit postit = new CComponentKanbanPostit(item);
+                        postit.setDragEnabled(dragEnabled);
+                        postit.setDropEnabled(dropEnabled);
+                        setupSelectionNotification(postit);
+                        setupChildDragDropForwarding(postit);
+                        itemsLayout.add(postit);
+                }
+        }
 
 	/** Refreshes the status summary label. */
 	private void refreshStatuses() {
@@ -159,14 +176,80 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> {
 	}
 
 	/** Sets the items displayed in this column. */
-	public void setItems(final List<CSprintItem> items) {
-		LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
-		sprintItems = items == null ? List.of() : List.copyOf(items);
-		refreshItems();
-	}
+        public void setItems(final List<CSprintItem> items) {
+                LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
+                sprintItems = items == null ? List.of() : List.copyOf(items);
+                refreshItems();
+        }
 
-	/** Sets the selection listener for post-it clicks. */
-	public void setPostitSelectionListener(final Consumer<CComponentKanbanPostit> listener) {
-		postitSelectionListener = listener;
-	}
+        @Override
+        public void drag_checkEventAfterPass(final CEvent event) {
+                LOGGER.debug("[KanbanDrag] Completed drag propagation for column {}", getValue() != null ? getValue().getName() : "null");
+        }
+
+        @Override
+        public void drag_checkEventBeforePass(final CEvent event) {
+                Check.notNull(event, "Drag event cannot be null for kanban column");
+                if (event instanceof final CDragDropEvent dropEvent && dropEvent.getTargetItem() == null) {
+                        dropEvent.setTargetItem(getValue());
+                }
+                LOGGER.debug("[KanbanDrag] Propagating {} event for column {}", event.getClass().getSimpleName(),
+                                getValue() != null ? getValue().getName() : "null");
+        }
+
+        @Override
+        public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() { return dragEndListeners; }
+
+        @Override
+        public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() { return dragStartListeners; }
+
+        @Override
+        public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() { return dropListeners; }
+
+        @Override
+        public void select_checkEventAfterPass(final CEvent event) {
+                LOGGER.debug("[KanbanSelect] Selection propagated for column {}", getValue() != null ? getValue().getName() : "null");
+        }
+
+        @Override
+        public void select_checkEventBeforePass(final CEvent event) {
+                Check.notNull(event, "Selection event cannot be null for kanban column");
+                LOGGER.debug("[KanbanSelect] Column {} received selection", getValue() != null ? getValue().getName() : "null");
+        }
+
+        @Override
+        public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners() { return selectListeners; }
+
+        @Override
+        public void setDragEnabled(final boolean enabled) {
+                dragEnabled = enabled;
+                itemsLayout.getChildren().filter(CComponentKanbanPostit.class::isInstance)
+                                .map(component -> (CComponentKanbanPostit) component).forEach(postit -> postit.setDragEnabled(enabled));
+        }
+
+        @Override
+        public void setDropEnabled(final boolean enabled) {
+                dropEnabled = enabled;
+                itemsLayout.getChildren().filter(CComponentKanbanPostit.class::isInstance)
+                                .map(component -> (CComponentKanbanPostit) component).forEach(postit -> postit.setDropEnabled(enabled));
+                if (columnDropTarget != null) {
+                        columnDropTarget.setActive(enabled);
+                }
+        }
+
+        private void initializeColumnDropTarget() {
+                columnDropTarget = DropTarget.create(itemsLayout);
+                columnDropTarget.setDropEffect(DropEffect.MOVE);
+                columnDropTarget.addDropListener(event -> {
+                        if (!dropEnabled) {
+                                LOGGER.debug("[KanbanDrag] Drop ignored because column drop is disabled");
+                                return;
+                        }
+                        final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, getValue(), GridDropLocation.EMPTY, true);
+                        LOGGER.debug("[KanbanDrag] Drop on column {}", getValue() != null ? getValue().getName() : "null");
+                        notifyEvents(dropEvent);
+                });
+                columnDropTarget.setActive(dropEnabled);
+        }
+
 }

@@ -3,15 +3,23 @@ package tech.derbent.app.kanban.kanbanline.service;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.interfaces.CSelectEvent;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanBoard;
+import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanColumn;
+import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.app.page.view.CDynamicPageViewWithoutGrid;
+import tech.derbent.app.sprints.domain.CSprintItem;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceKanbanLine.class);
@@ -52,29 +60,92 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	}
 
 	/** Builds or returns the cached kanban board component. */
-	public CComponentKanbanBoard createKanbanBoardComponent() {
-		// it is null when ui is created
-		// Check.notNull(currentLine, "Kanban line must be available to create board component");
-		if (componentKanbanBoard == null) {
-			componentKanbanBoard = new CComponentKanbanBoard();
-		}
-		// this is always null here, no problem
-		// componentKanbanBoard.setValue(currentLine); let the binder handle this
-		return componentKanbanBoard;
-	}
+        public CComponentKanbanBoard createKanbanBoardComponent() {
+                // it is null when ui is created
+                // Check.notNull(currentLine, "Kanban line must be available to create board component");
+                if (componentKanbanBoard == null) {
+                        componentKanbanBoard = new CComponentKanbanBoard();
+                        componentKanbanBoard.registerWithPageService(this);
+                }
+                // this is always null here, no problem
+                // componentKanbanBoard.setValue(currentLine); let the binder handle this
+                return componentKanbanBoard;
+        }
 
 	/** Builds or returns the cached kanban columns list component. */
-	public CComponentListKanbanColumns createKanbanColumnsComponent() {
-		LOGGER.debug("Creating Kanban columns component for Kanban line page service.");
-		if (componentKanbanColumns == null) {
-			componentKanbanColumns = new CComponentListKanbanColumns(kanbanLineService, kanbanColumnService);
-			componentKanbanColumns.registerWithPageService(this);
-		}
-		return componentKanbanColumns;
-	}
+        public CComponentListKanbanColumns createKanbanColumnsComponent() {
+                LOGGER.debug("Creating Kanban columns component for Kanban line page service.");
+                if (componentKanbanColumns == null) {
+                        componentKanbanColumns = new CComponentListKanbanColumns(kanbanLineService, kanbanColumnService);
+                        componentKanbanColumns.registerWithPageService(this);
+                }
+                return componentKanbanColumns;
+        }
 
-	/** Hook executed after binding for optional post-load work. */
-	public void on_load_after_bind() throws Exception {
-		// todo: implement if needed
-	}
+        /** Hook executed after binding for optional post-load work. */
+        public void on_load_after_bind() throws Exception {
+                // todo: implement if needed
+        }
+
+        public void on_kanbanBoard_selected(final Component component, final Object value) {
+                Check.instanceOf(value, CSelectEvent.class, "Selection value must be CSelectEvent");
+                final CSelectEvent event = (CSelectEvent) value;
+                if (event.getSource() instanceof final CComponentKanbanPostit postit) {
+                        LOGGER.info("[KanbanSelect] Post-it selected for sprint item {}", postit.getEntity().getId());
+                } else {
+                        LOGGER.debug("[KanbanSelect] Kanban board selection event from {}", event.getSource().getClass().getSimpleName());
+                }
+        }
+
+        public void on_kanbanBoard_dragStart(final Component component, final Object value) {
+                Check.instanceOf(value, CDragStartEvent.class, "Drag value must be CDragStartEvent");
+                setActiveDragStartEvent((CDragStartEvent) value);
+        }
+
+        public void on_kanbanBoard_dragEnd(final Component component, final Object value) {
+                setActiveDragStartEvent(null);
+        }
+
+        public void on_kanbanBoard_drop(final Component component, final Object value) {
+                Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
+                final CDragDropEvent event = (CDragDropEvent) value;
+                handleKanbanDrop(event);
+        }
+
+        private void handleKanbanDrop(final CDragDropEvent event) {
+                try {
+                        final CDragStartEvent dragStartEvent = getActiveDragStartEvent();
+                        Check.notNull(dragStartEvent, "Active drag start event required for Kanban drop handling");
+                        final Object draggedItem = dragStartEvent.getDraggedItems().isEmpty() ? null : dragStartEvent.getDraggedItems().get(0);
+                        Check.instanceOf(draggedItem, CSprintItem.class, "Dragged item must be a sprint item for Kanban drop");
+                        final CSprintItem sprintItem = (CSprintItem) draggedItem;
+                        final CKanbanColumn targetColumn = resolveTargetColumn(event);
+                        Check.notNull(targetColumn, "Target column cannot be resolved for Kanban drop");
+                        sprintItem.setKanbanColumnId(targetColumn.getId());
+                        LOGGER.info("[KanbanDrag] Moved sprint item {} to column {}", sprintItem.getId(), targetColumn.getName());
+                        if (componentKanbanBoard != null) {
+                                componentKanbanBoard.refreshComponent();
+                        }
+                        setActiveDragStartEvent(null);
+                } catch (final Exception e) {
+                        LOGGER.error("Failed to handle Kanban board drop", e);
+                        throw e;
+                }
+        }
+
+        private CKanbanColumn resolveTargetColumn(final CDragDropEvent event) {
+                final Object targetItem = event.getTargetItem();
+                if (targetItem instanceof final CKanbanColumn column) {
+                        return column;
+                }
+                if (targetItem instanceof final CSprintItem targetSprintItem && targetSprintItem.getKanbanColumnId() != null
+                                && componentKanbanBoard != null && componentKanbanBoard.getValue() != null) {
+                        return componentKanbanBoard.getValue().getKanbanColumns().stream()
+                                        .filter(col -> targetSprintItem.getKanbanColumnId().equals(col.getId())).findFirst().orElse(null);
+                }
+                if (event.getDropTarget() instanceof final CComponentKanbanColumn columnComponent) {
+                        return columnComponent.getValue();
+                }
+                return null;
+        }
 }

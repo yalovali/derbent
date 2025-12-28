@@ -4,18 +4,29 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IHasDragControl;
+import tech.derbent.api.interfaces.IHasSelectionNotification;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -33,7 +44,8 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
 /** CComponentKanbanBoard - Displays a kanban line as a board with vertical columns and post-it style project items. */
-public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implements IContentOwner {
+public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
+                implements IContentOwner, IHasSelectionNotification, IHasDragControl, IPageServiceAutoRegistrable {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanBoard.class);
 	private static final long serialVersionUID = 1L;
@@ -61,15 +73,21 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	private final CHorizontalLayout layoutColumns;
 	final CVerticalLayout layoutDetails = new CVerticalLayout();
 	private List<CSprint> availableSprints;
-	private List<CSprintItem> sprintItems;
-	private CSprint currentSprint;
-	private CComponentKanbanPostit selectedPostit;
-	private final Comparator<CSprint> sprintRecencyComparator;
-	private final CKanbanLineService kanbanLineService;
-	private final CSprintItemService sprintItemService;
-	private final CSprintService sprintService;
-	private final ISessionService sessionService;
-	protected SplitLayout splitLayout = new SplitLayout();
+        private List<CSprintItem> sprintItems;
+        private CSprint currentSprint;
+        private CComponentKanbanPostit selectedPostit;
+        private final Comparator<CSprint> sprintRecencyComparator;
+        private final CKanbanLineService kanbanLineService;
+        private final CSprintItemService sprintItemService;
+        private final CSprintService sprintService;
+        private final ISessionService sessionService;
+        private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
+        private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
+        private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
+        private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
+        private boolean dragEnabled = true;
+        private boolean dropEnabled = true;
+        protected SplitLayout splitLayout = new SplitLayout();
 
 	/** Creates the kanban board and initializes filters and layout. */
 	public CComponentKanbanBoard() {
@@ -146,16 +164,20 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 		if (items == null || items.isEmpty() || columns == null || columns.isEmpty()) {
 			return;
 		}
-		final Map<Long, Long> statusToColumnId = prepareStatusToColumnIdMap(columns);
-		for (final CSprintItem sprintItem : items) {
-			if (sprintItem == null) {
-				continue;
-			}
-			final ISprintableItem sprintableItem = sprintItem.getItem();
-			final Long statusId = sprintableItem.getStatus().getId();
-			final Long columnId = statusToColumnId.computeIfAbsent(statusId, key -> statusToColumnId.getOrDefault(-1L, -1L));
-			// dump result
-			LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company id:{}", statusId, sprintableItem.getStatus().getName(),
+                final Map<Long, Long> statusToColumnId = prepareStatusToColumnIdMap(columns);
+                for (final CSprintItem sprintItem : items) {
+                        if (sprintItem == null) {
+                                continue;
+                        }
+                        if (sprintItem.getKanbanColumnId() != null) {
+                                LOGGER.debug("Kanban column already assigned for item {}, skipping auto-mapping", sprintItem.getId());
+                                continue;
+                        }
+                        final ISprintableItem sprintableItem = sprintItem.getItem();
+                        final Long statusId = sprintableItem.getStatus().getId();
+                        final Long columnId = statusToColumnId.computeIfAbsent(statusId, key -> statusToColumnId.getOrDefault(-1L, -1L));
+                        // dump result
+                        LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company id:{}", statusId, sprintableItem.getStatus().getName(),
 					statusToColumnId.get(statusId), columnId, sprintableItem.getStatus().getCompany().getId());
 			if (columnId == -1L) {
 				LOGGER.warn("No kanban column found for status id {} in line {}", statusId, getValue() != null ? getValue().getName() : "null");
@@ -338,17 +360,20 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 			layoutColumns.add(div);
 			return;
 		}
-		final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
-		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
-		assignKanbanColumns(sprintItems, columns);
-		for (final CKanbanColumn column : columns) {
-			final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
-			columnComponent.setPostitSelectionListener(this::on_postit_selected);
-			columnComponent.setItems(sprintItems);
-			columnComponent.setValue(column);
-			layoutColumns.add(columnComponent);
-		}
-		on_postit_selected(null);
+                final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
+                columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
+                assignKanbanColumns(sprintItems, columns);
+                for (final CKanbanColumn column : columns) {
+                        final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
+                        columnComponent.setDragEnabled(dragEnabled);
+                        columnComponent.setDropEnabled(dropEnabled);
+                        setupSelectionNotification(columnComponent);
+                        setupChildDragDropForwarding(columnComponent);
+                        columnComponent.setItems(sprintItems);
+                        columnComponent.setValue(column);
+                        layoutColumns.add(columnComponent);
+                }
+                on_postit_selected(null);
 	}
 
 	/** Picks the newest sprint as default. */
@@ -369,18 +394,79 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	}
 
 	/** Sets items and reapplies filters for display. */
-	public void setSprintItems(final List<CSprintItem> sprintItems) {
-		LOGGER.debug("Setting sprint items for Kanban board component");
-		Check.notNull(getValue(), "Kanban line must be set before setting sprint items");
-		Check.notNull(sprintItems, "Sprint items cannot be null for kanban board");
-		allSprintItems = new ArrayList<>(sprintItems);
-		filterToolbar.setAvailableItems(allSprintItems);
-		applyFilters();
-	}
+        public void setSprintItems(final List<CSprintItem> sprintItems) {
+                LOGGER.debug("Setting sprint items for Kanban board component");
+                Check.notNull(getValue(), "Kanban line must be set before setting sprint items");
+                Check.notNull(sprintItems, "Sprint items cannot be null for kanban board");
+                allSprintItems = new ArrayList<>(sprintItems);
+                filterToolbar.setAvailableItems(allSprintItems);
+                applyFilters();
+        }
 
-	/** Sets the current kanban line value. */
-	@Override
-	public void setValue(CEntityDB<?> entity) {
-		super.setValue((CKanbanLine) entity);
-	}
+        /** Sets the current kanban line value. */
+        @Override
+        public void setValue(CEntityDB<?> entity) {
+                super.setValue((CKanbanLine) entity);
+        }
+
+        @Override
+        public void drag_checkEventAfterPass(final CEvent event) {
+                LOGGER.debug("[KanbanDrag] Completed drag event {}", event.getClass().getSimpleName());
+        }
+
+        @Override
+        public void drag_checkEventBeforePass(final CEvent event) {
+                Check.notNull(event, "Drag event cannot be null for Kanban board");
+                LOGGER.debug("[KanbanDrag] Board propagating {}", event.getClass().getSimpleName());
+        }
+
+        @Override
+        public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() { return dragEndListeners; }
+
+        @Override
+        public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() { return dragStartListeners; }
+
+        @Override
+        public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() { return dropListeners; }
+
+        @Override
+        public String getComponentName() { return "kanbanBoard"; }
+
+        @Override
+        public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
+                Check.notNull(pageService, "Page service cannot be null when registering Kanban board");
+                pageService.registerComponent(getComponentName(), this);
+                LOGGER.debug("[BindDebug] Registered Kanban board component as '{}'", getComponentName());
+        }
+
+        @Override
+        public void select_checkEventAfterPass(final CEvent event) {
+                LOGGER.debug("[KanbanSelect] Selection propagated to board");
+        }
+
+        @Override
+        public void select_checkEventBeforePass(final CEvent event) {
+                Check.notNull(event, "Selection event cannot be null for Kanban board");
+                if (event instanceof final CSelectEvent selectEvent
+                                && selectEvent.getSource() instanceof final CComponentKanbanPostit postit) {
+                        on_postit_selected(postit);
+                }
+        }
+
+        @Override
+        public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners() { return selectListeners; }
+
+        @Override
+        public void setDragEnabled(final boolean enabled) {
+                dragEnabled = enabled;
+                layoutColumns.getChildren().filter(CComponentKanbanColumn.class::isInstance)
+                                .map(component -> (CComponentKanbanColumn) component).forEach(column -> column.setDragEnabled(enabled));
+        }
+
+        @Override
+        public void setDropEnabled(final boolean enabled) {
+                dropEnabled = enabled;
+                layoutColumns.getChildren().filter(CComponentKanbanColumn.class::isInstance)
+                                .map(component -> (CComponentKanbanColumn) component).forEach(column -> column.setDropEnabled(enabled));
+        }
 }
