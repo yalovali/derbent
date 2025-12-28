@@ -29,7 +29,6 @@ import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.app.sprints.service.CSprintService;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -186,23 +185,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine> implement
 	/** Kanban board does not expose a direct entity service. */
 	@Override
 	public CAbstractService<?> getEntityService() { return null; }
-
-	/** Returns true when the sprintable item has workflow and status assigned. */
-	private boolean hasStatusAndWorkflow(final ISprintableItem item) {
-		if (item == null) {
-			return false;
-		}
-		if (!(item instanceof final IHasStatusAndWorkflow<?> workflowItem)) {
-			return false;
-		}
-		if (item.getStatus() == null || item.getStatus().getId() == null) {
-			return false;
-		}
-		if (workflowItem.getWorkflow() == null || workflowItem.getWorkflow().getId() == null) {
-			return false;
-		}
-		return true;
-	}
 
 	/** Checks whether the sprint selection has changed. */
 	private boolean isSameSprint(final CSprint candidate) {

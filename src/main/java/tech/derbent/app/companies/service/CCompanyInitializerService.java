@@ -13,21 +13,21 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.companies.service.CCompanyService;
 import tech.derbent.app.projects.domain.CProject;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
-        static final Class<?> clazz = CCompany.class;
-        private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
-        private static final String menuOrder = Menu_Order_SYSTEM + ".1";
-        private static final String menuTitle = MenuTitle_SYSTEM + ".Companies";
-        private static final String pageDescription = "Company management with contact details";
-        private static final String pageTitle = "Company Management";
-        private static final boolean showInQuickToolbar = false;
-        private record CompanySeed(String name, String description, String address, String phone, String email, String website,
-                        String taxNumber, String theme, String logoUrl, String primaryColor, String workingHoursStart,
-                        String workingHoursEnd, String timezone, String language, boolean notificationsEnabled,
-                        String notificationEmail) {}
+
+	private record CompanySeed(String name, String description, String address, String phone, String email, String website, String taxNumber,
+			String theme, String logoUrl, String primaryColor, String workingHoursStart, String workingHoursEnd, String timezone, String language,
+			boolean notificationsEnabled, String notificationEmail) {}
+
+	static final Class<?> clazz = CCompany.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
+	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
+	private static final String menuTitle = MenuTitle_SYSTEM + ".Companies";
+	private static final String pageDescription = "Company management with contact details";
+	private static final String pageTitle = "Company Management";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
@@ -80,49 +80,45 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		grid = createGridEntity(project);
 		detailSection = createBasicView(project);
 		detailSection.setName("Current Company Detail Section");
-                grid.setName("Current Company Grid");
-                grid.setAttributeNone(true);
-                initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Current Company", pageTitle,
-                                pageDescription, showInQuickToolbar, menuOrder);
-        }
+		grid.setName("Current Company Grid");
+		grid.setAttributeNone(true);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Current Company", pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
+	}
 
-        public static void initializeSample(final boolean minimal) throws Exception {
-                final CCompanyService companyService = CSpringContext.getBean(CCompanyService.class);
-                final List<CompanySeed> seeds = List.of(
-                                new CompanySeed("Of Teknoloji Çözümleri",
-                                                "Dijital dönüşüm için yenilikçi teknoloji çözümleri",
-                                                "Cumhuriyet Mahallesi, Atatürk Caddesi No:15, Of/Trabzon", "+90-462-751-0101",
-                                                "iletisim@ofteknoloji.com.tr", "https://www.ofteknoloji.com.tr", "TR-123456789",
-                                                "lumo-dark", "/assets/logos/tech-logo.svg", "#1976d2", "09:00", "18:00",
-                                                "Europe/Istanbul", "tr", true, "bildirim@ofteknoloji.com.tr"),
-                                new CompanySeed("Of Stratejik Danışmanlık",
-                                                "Yönetim danışmanlığı ve stratejik planlama hizmetleri",
-                                                "Merkez Mahallesi, Gülbahar Sokağı No:7, Of/Trabzon", "+90-462-751-0303",
-                                                "merhaba@ofdanismanlik.com.tr", "https://www.ofdanismanlik.com.tr", "TR-456789123",
-                                                "lumo-light", "/assets/logos/consulting-logo.svg", "#4caf50", "08:30", "17:30",
-                                                "Europe/Istanbul", "tr", true, "bildirim@ofdanismanlik.com.tr"));
-                for (final CompanySeed seed : seeds) {
-                        final CCompany company = new CCompany(seed.name());
-                        company.setDescription(seed.description());
-                        company.setAddress(seed.address());
-                        company.setPhone(seed.phone());
-                        company.setEmail(seed.email());
-                        company.setWebsite(seed.website());
-                        company.setTaxNumber(seed.taxNumber());
-                        company.setCompanyTheme(seed.theme());
-                        company.setCompanyLogoUrl(seed.logoUrl());
-                        company.setPrimaryColor(seed.primaryColor());
-                        company.setWorkingHoursStart(seed.workingHoursStart());
-                        company.setWorkingHoursEnd(seed.workingHoursEnd());
-                        company.setCompanyTimezone(seed.timezone());
-                        company.setDefaultLanguage(seed.language());
-                        company.setEnableNotifications(seed.notificationsEnabled());
-                        company.setNotificationEmail(seed.notificationEmail());
-                        company.setActive(true);
-                        companyService.save(company);
-                        if (minimal) {
-                                break;
-                        }
-                }
-        }
+	public static void initializeSample(final boolean minimal) throws Exception {
+		final CCompanyService companyService = CSpringContext.getBean(CCompanyService.class);
+		final List<CompanySeed> seeds = List.of(
+				new CompanySeed("Of Teknoloji Çözümleri", "Dijital dönüşüm için yenilikçi teknoloji çözümleri",
+						"Cumhuriyet Mahallesi, Atatürk Caddesi No:15, Of/Trabzon", "+90-462-751-0101", "iletisim@ofteknoloji.com.tr",
+						"https://www.ofteknoloji.com.tr", "TR-123456789", "lumo-dark", "/assets/logos/tech-logo.svg", "#1976d2", "09:00", "18:00",
+						"Europe/Istanbul", "tr", true, "bildirim@ofteknoloji.com.tr"),
+				new CompanySeed("Of Stratejik Danışmanlık", "Yönetim danışmanlığı ve stratejik planlama hizmetleri",
+						"Merkez Mahallesi, Gülbahar Sokağı No:7, Of/Trabzon", "+90-462-751-0303", "merhaba@ofdanismanlik.com.tr",
+						"https://www.ofdanismanlik.com.tr", "TR-456789123", "lumo-light", "/assets/logos/consulting-logo.svg", "#4caf50", "08:30",
+						"17:30", "Europe/Istanbul", "tr", true, "bildirim@ofdanismanlik.com.tr"));
+		for (final CompanySeed seed : seeds) {
+			final CCompany company = new CCompany(seed.name());
+			company.setDescription(seed.description());
+			company.setAddress(seed.address());
+			company.setPhone(seed.phone());
+			company.setEmail(seed.email());
+			company.setWebsite(seed.website());
+			company.setTaxNumber(seed.taxNumber());
+			company.setCompanyTheme(seed.theme());
+			company.setCompanyLogoUrl(seed.logoUrl());
+			company.setPrimaryColor(seed.primaryColor());
+			company.setWorkingHoursStart(seed.workingHoursStart());
+			company.setWorkingHoursEnd(seed.workingHoursEnd());
+			company.setCompanyTimezone(seed.timezone());
+			company.setDefaultLanguage(seed.language());
+			company.setEnableNotifications(seed.notificationsEnabled());
+			company.setNotificationEmail(seed.notificationEmail());
+			company.setActive(true);
+			companyService.save(company);
+			if (minimal) {
+				break;
+			}
+		}
+	}
 }

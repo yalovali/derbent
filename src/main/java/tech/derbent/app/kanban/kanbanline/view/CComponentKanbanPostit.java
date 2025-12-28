@@ -1,16 +1,24 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
+import java.util.HashSet;
+import java.util.Set;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.interfaces.CSelectEvent;
+import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CComponentPostit - A compact post-it style widget for displaying project items inside kanban columns. */
-public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> {
+public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> implements IHasSelectionNotification {
 
 	private static final long serialVersionUID = 1L;
+	Set<ComponentEventListener<CSelectEvent>> select_listeners = new HashSet<>();
 
 	/** Creates a post-it card for the given sprint item. */
 	public CComponentKanbanPostit(final CSprintItem item) {
@@ -19,6 +27,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		addClassName("kanban-postit");
 		getStyle().set("width", "100%");
 		getElement().setAttribute("tabindex", "0");
+		addClickListener(on_component_click());
 	}
 
 	/** Builds the primary title line. */
@@ -57,10 +66,24 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		}
 	}
 
+	private ComponentEventListener<ClickEvent<HorizontalLayout>> on_component_click() {
+		return event -> {
+			final CSelectEvent selectEvent = new CSelectEvent(this, true);
+			// on_select(selectEvent);
+			select_notifyEvents(selectEvent);
+		};
+	}
+
 	/** Resolves the sprintable item for display. */
 	private ISprintableItem resolveSprintableItem() {
 		final CSprintItem sprintItem = entity;
 		return sprintItem != null ? sprintItem.getItem() : null;
+	}
+
+	@Override
+	public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners() {
+		// TODO Auto-generated method stub
+		return select_listeners;
 	}
 
 	/** Sets selected styles for the post-it. */
