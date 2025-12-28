@@ -1,5 +1,6 @@
 package tech.derbent.api.screens.service;
 
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.utils.Check;
 
 import java.util.List;
@@ -7,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
@@ -53,11 +55,28 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 		return createGridEntity(project);
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
-	}
+        public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+                        final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+                final CDetailSection detailSection = createBasicView(project);
+                final CGridEntity grid = createGridEntity(project);
+                initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+                                pageDescription, showInQuickToolbar, menuOrder);
+        }
+
+        public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+                Check.notNull(project, "project cannot be null");
+                final String[][] sampleGrids = {
+                                {"Project Grid Registry", "Catalog of grid definitions available in the project"},
+                                {"Read-Only Grid Template", "Baseline grid template with non-deletable flag"}
+                };
+                final CGridEntityService gridService = CSpringContext.getBean(CGridEntityService.class);
+                initializeProjectEntity(sampleGrids, gridService, project, minimal, (gridEntity, index) -> {
+                        gridEntity.setDataServiceBeanName(CGridEntityService.class.getSimpleName());
+                        gridEntity.setAttributeNonDeletable(true);
+                        gridEntity.setColumnFields(List.of("name", "description", "dataServiceBeanName", "project", "attributeNonDeletable"));
+                        if (index == 1) {
+                                gridEntity.setAttributeNone(true);
+                        }
+                });
+        }
 }

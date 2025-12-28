@@ -1,6 +1,5 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,12 +33,10 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
-import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineService;
-import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.page.view.CDynamicPageRouter;
 import tech.derbent.app.projects.domain.CProject;
@@ -207,28 +204,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		return null;
 	}
 
-	private void displayEntityInDynamicOnepager(CProjectItem<?> onepagerEntity) {
-		try {
-			LOGGER.debug("Locating Gantt entity in dynamic page: {}", onepagerEntity != null ? onepagerEntity.getName() : "null");
-			if (onepagerEntity == null) {
-				currentEntityPageRouter.loadSpecificPage(null, null, true);
-				return;
-			}
-			final CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
-			final Field viewNameField = onepagerEntity.getClass().getField("VIEW_NAME");
-			final String entityViewName = (String) viewNameField.get(null);
-			final CPageEntity page = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null)).orElseThrow();
-			Check.notNull(page, "Screen service cannot be null");
-			//
-			currentEntityPageRouter.loadSpecificPage(page.getId(), onepagerEntity.getId(), true);
-		} catch (final Exception e) {
-			CNotificationService.showException("Error creating dynamic page for entity", e);
-		}
-	}
-
-	@Override
-	public void drag_checkEventAfterPass(final CEvent event) {
-		LOGGER.debug("[KanbanDrag] Completed drag event {}", event.getClass().getSimpleName());
+        @Override
+        public void drag_checkEventAfterPass(final CEvent event) {
+                LOGGER.debug("[KanbanDrag] Completed drag event {}", event.getClass().getSimpleName());
 	}
 
 	@Override
@@ -353,20 +331,33 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	}
 
 	/** Updates selection state and details area. */
-	private void on_postit_selected(final CComponentKanbanPostit postit) {
-		LOGGER.debug("Kanban board post-it selection changed to {}", postit != null ? postit.getEntity().getId() : "null");
-		if (selectedPostit != null && selectedPostit != postit) {
-			selectedPostit.setSelected(false);
-		}
-		selectedPostit = postit;
-		if (selectedPostit != null) {
-			selectedPostit.setSelected(true);
-		}
-		final ISprintableItem<?> entity = postit.getEntity();
-		displayEntityInDynamicOnepager(entity);
-		// layoutDetails.removeAll();
-		// layoutDetails.add(new CDiv("Select a card to view its details."));
-	}
+        private void on_postit_selected(final CComponentKanbanPostit postit) {
+                LOGGER.debug("Kanban board post-it selection changed to {}", postit != null ? postit.getEntity().getId() : "null");
+                if (selectedPostit != null && selectedPostit != postit) {
+                        selectedPostit.setSelected(false);
+                }
+                selectedPostit = postit;
+                if (selectedPostit != null) {
+                        selectedPostit.setSelected(true);
+                }
+                final CProjectItem<?> sprintableEntity = resolveSprintableEntity(postit);
+                CDynamicPageRouter.displayEntityInDynamicOnepager(sprintableEntity, currentEntityPageRouter, sessionService);
+                // layoutDetails.removeAll();
+                // layoutDetails.add(new CDiv("Select a card to view its details."));
+        }
+
+        private CProjectItem<?> resolveSprintableEntity(final CComponentKanbanPostit postit) {
+                final CSprintItem sprintItem = postit != null ? postit.getEntity() : null;
+                if (sprintItem == null) {
+                        return null;
+                }
+                final ISprintableItem sprintableItem = sprintItem.getItem();
+                if (sprintableItem instanceof final CProjectItem<?> projectItem) {
+                        return projectItem;
+                }
+                LOGGER.warn("Selected sprint item {} does not expose a project item for onepager display", sprintItem.getId());
+                return null;
+        }
 
 	/** Reacts to kanban line changes by reloading sprints. */
 	@Override
