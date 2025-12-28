@@ -77,6 +77,12 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		}
 	}
 
+	@Override
+	public EntityClass getRandom() {
+		Check.fail("getRandom without company context is not supported");
+		return null;
+	}
+
 	public EntityClass getRandom(final CCompany company) {
 		Check.notNull(company, "Company cannot be null");
 		final List<EntityClass> all = listByCompany(company);

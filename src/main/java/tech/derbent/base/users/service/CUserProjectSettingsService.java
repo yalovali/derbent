@@ -42,8 +42,8 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 			throw new IllegalArgumentException("User is already assigned to this project");
 		}
 		final CUserProjectSettings settings = new CUserProjectSettings();
-		settings.setUser(user);
 		settings.setProject(project);
+		settings.setUser(user);
 		// TODO: Update to handle CUserProjectRole instead of String
 		// settings.setRole(role);
 		settings.setPermission(permission);

@@ -40,7 +40,6 @@ public class CProjectComponentInitializerService extends CInitializerServiceBase
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -75,7 +74,7 @@ public class CProjectComponentInitializerService extends CInitializerServiceBase
 				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
 				(item, index) -> {
 					final CProjectComponent component = (CProjectComponent) item;
-					final CUser user = CSpringContext.getBean(CUserService.class).getRandom();
+					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					component.setAssignedTo(user);
 				});
 	}

@@ -231,8 +231,11 @@ public class Check {
 		notNull(entity1.getCompany(), "First entity's company cannot be null");
 		notNull(entity2.getCompany(), "Second entity's company cannot be null");
 		if (!entity1.getCompany().getId().equals(entity2.getCompany().getId())) {
+			// this field may be lazy loaded, so we use getName() instead of company.getName()
+			final Long comp_id1 = entity1.getCompany().getId();
+			final Long comp_id2 = entity2.getCompany().getId();
 			final String def = String.format("Entities belong to different companies: name(%d):%s: id:%d != name(%d):%s: id:%d", entity1.getName(),
-					entity1.getId(), entity1.getCompany().getId(), entity2.getName(), entity2.getId(), entity2.getCompany().getId());
+					entity1.getId(), comp_id1, entity2.getName(), entity2.getId(), comp_id2);
 			logFail(def);
 			throw new IllegalArgumentException(def);
 		}

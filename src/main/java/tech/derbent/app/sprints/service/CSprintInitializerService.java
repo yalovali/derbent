@@ -25,6 +25,7 @@ import tech.derbent.base.users.service.CUserService;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
+
 	static final Class<?> clazz = CSprint.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".3";
@@ -129,7 +130,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			final int sprintCount = minimal ? 1 : 2;
 			for (int i = 1; i <= sprintCount; i++) {
 				final CSprintType sprintType = sprintTypeService.getRandom(project);
-				final CUser assignedUser = userService.getRandom();
+				final CUser assignedUser = userService.getRandom(project.getCompany());
 				final CSprint sprint = new CSprint("Sprint " + i, project);
 				sprint.setDescription("Sprint " + i + " - Development iteration");
 				sprint.setEntityType(sprintType);
