@@ -1,5 +1,6 @@
 package tech.derbent.app.page.view;
 
+import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,13 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.view.CAbstractPage;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.view.MainLayout;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
@@ -35,23 +39,50 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	private final CDetailSectionService detailSectionService;
 	private final CGridEntityService gridEntityService;
 	private Long pageEntityId = null;
-	private final CPageEntityService pageEntityService;
-	private Long pageItemId = null;
-	private final ISessionService sessionService;
+        private final CPageEntityService pageEntityService;
+        private Long pageItemId = null;
+        private final ISessionService sessionService;
 
-	@Autowired
-	public CDynamicPageRouter(CPageEntityService pageEntityService, ISessionService sessionService, CDetailSectionService detailSectionService,
-			CGridEntityService gridEntityService) {
-		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
-		Check.notNull(sessionService, "CSessionService cannot be null");
-		Check.notNull(detailSectionService, "CDetailSectionService cannot be null");
-		// Check.notNull(gridEntityService, "CGridEntityService cannot be null");
-		this.pageEntityService = pageEntityService;
-		this.sessionService = sessionService;
-		this.detailSectionService = detailSectionService;
-		this.gridEntityService = gridEntityService;
-		// LOGGER.info("CDynamicPageRouter initialized with grid and detail section support");
-	}
+        @Autowired
+        public CDynamicPageRouter(CPageEntityService pageEntityService, ISessionService sessionService, CDetailSectionService detailSectionService,
+                        CGridEntityService gridEntityService) {
+                Check.notNull(pageEntityService, "CPageEntityService cannot be null");
+                Check.notNull(sessionService, "CSessionService cannot be null");
+                Check.notNull(detailSectionService, "CDetailSectionService cannot be null");
+                // Check.notNull(gridEntityService, "CGridEntityService cannot be null");
+                this.pageEntityService = pageEntityService;
+                this.sessionService = sessionService;
+                this.detailSectionService = detailSectionService;
+                this.gridEntityService = gridEntityService;
+                // LOGGER.info("CDynamicPageRouter initialized with grid and detail section support");
+        }
+
+        /** Displays the provided project item in the dynamic one-pager slider using the configured router.
+         * @param onepagerEntity  the entity to show, can be null to clear the view
+         * @param pageRouter      the router responsible for rendering the one-pager
+         * @param sessionService  session service used to resolve the active project */
+        public static void displayEntityInDynamicOnepager(final CProjectItem<?> onepagerEntity,
+                        final CDynamicPageRouter pageRouter, final ISessionService sessionService) {
+                Check.notNull(pageRouter, "Dynamic page router cannot be null");
+                Check.notNull(sessionService, "Session service cannot be null");
+                try {
+                        LOGGER.debug("Locating entity in dynamic page: {}", onepagerEntity != null ? onepagerEntity.getName() : "null");
+                        if (onepagerEntity == null) {
+                                pageRouter.loadSpecificPage(null, null, true);
+                                return;
+                        }
+                        final CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
+                        final Field viewNameField = onepagerEntity.getClass().getField("VIEW_NAME");
+                        final String entityViewName = (String) viewNameField.get(null);
+                        final CPageEntity page = pageService
+                                        .findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null))
+                                        .orElseThrow();
+                        Check.notNull(page, "Screen service cannot be null");
+                        pageRouter.loadSpecificPage(page.getId(), onepagerEntity.getId(), true);
+                } catch (final Exception e) {
+                        CNotificationService.showException("Error creating dynamic page for entity", e);
+                }
+        }
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
