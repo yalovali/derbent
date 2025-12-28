@@ -67,6 +67,25 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 				new CMasterViewSectionGannt<EntityClass>(entityClass, this, sessionService, activityService, meetingService, pageEntityService);
 	}
 
+	private void displayEntityInDynamicOnepager(CProjectItem<?> onepagerEntity) {
+		try {
+			LOGGER.debug("Locating Gantt entity in dynamic page: {}", onepagerEntity != null ? onepagerEntity.getName() : "null");
+			if (onepagerEntity == null) {
+				currentEntityPageRouter.loadSpecificPage(null, null, true);
+				return;
+			}
+			final CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
+			final Field viewNameField = onepagerEntity.getClass().getField("VIEW_NAME");
+			final String entityViewName = (String) viewNameField.get(null);
+			final CPageEntity page = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null)).orElseThrow();
+			Check.notNull(page, "Screen service cannot be null");
+			//
+			currentEntityPageRouter.loadSpecificPage(page.getId(), onepagerEntity.getId(), true);
+		} catch (final Exception e) {
+			CNotificationService.showException("Error creating dynamic page for entity", e);
+		}
+	}
+
 	/** Gets the entity binder for the actual entity (Activity or Meeting). This is needed for the page service to write binder data before saving.
 	 * @return The entity binder */
 	public CEnhancedBinder<CProjectItem<?>> getEntityBinder() { return entityBinder; }
@@ -93,25 +112,6 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	 * @return The master view section as CMasterViewSectionGannt */
 	protected CMasterViewSectionGannt<EntityClass> getGanttMasterViewSection() {
 		return (CMasterViewSectionGannt<EntityClass>) masterViewSection;
-	}
-
-	private void locateGanntEntityInDynamicPage(CProjectItem<?> ganntEntity) {
-		try {
-			if (ganntEntity == null) {
-				currentEntityPageRouter.loadSpecificPage(null, null, true);
-				return;
-			}
-			LOGGER.debug("Creating dynamic page for Gantt entity: {}", ganntEntity.getName());
-			final CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
-			final Field viewNameField = ganntEntity.getClass().getField("VIEW_NAME");
-			final String entityViewName = (String) viewNameField.get(null);
-			final CPageEntity page = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null)).orElseThrow();
-			Check.notNull(page, "Screen service cannot be null");
-			//
-			currentEntityPageRouter.loadSpecificPage(page.getId(), ganntEntity.getId(), true);
-		} catch (final Exception e) {
-			CNotificationService.showException("Error creating dynamic page for entity", e);
-		}
 	}
 
 	/** Locates a CGanttItem in the grid that wraps the given actual entity. This is needed after save operations to restore selection to the saved
@@ -219,6 +219,6 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
 	@Override
 	protected void updateDetailsComponent() throws Exception {
 		LOGGER.debug("Updating details component for Gantt view");
-		locateGanntEntityInDynamicPage(getGanntEntityFromSelectedItem());
+		displayEntityInDynamicOnepager(getGanntEntityFromSelectedItem());
 	}
 }
