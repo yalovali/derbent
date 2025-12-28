@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import tech.derbent.api.entity.service.CEntityNamedService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -28,7 +28,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CProjectService extends CEntityNamedService<CProject> implements IEntityRegistrable, IEntityWithView {
+public class CProjectService extends CEntityOfCompanyService<CProject> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
@@ -119,23 +119,21 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceProject.class; }
 
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
+        @Override
+        public Class<?> getServiceClass() { return this.getClass(); }
 
-	@PreAuthorize ("permitAll()")
-	public long getTotalProjectCount() { return repository.count(); }
+        @PreAuthorize ("permitAll()")
+        public long getTotalProjectCount() { return countByCompany(getCurrentCompany()); }
 
 	@Override
-	public void initializeNewEntity(final CProject entity) {
-		super.initializeNewEntity(entity);
-		// Get current company from session
-		final CCompany currentCompany = getCurrentCompany();
-		// Initialize company with current company
-		entity.setCompany(currentCompany);
-		// Name is set by base class generateUniqueName() which is overridden below
-		// Note: CProject extends CEntityNamed, not CEntityOfProject, so it doesn't have project field
-		// The company field is the primary association for projects
-	}
+        public void initializeNewEntity(final CProject entity) {
+                super.initializeNewEntity(entity);
+                // Get current company from session
+                final CCompany currentCompany = getCurrentCompany();
+                // Initialize company with current company
+                entity.setCompany(currentCompany);
+                // Name is set by base class generateUniqueName() which is overridden below
+        }
 
 	@Override
 	@Transactional (readOnly = true)
@@ -175,18 +173,15 @@ public class CProjectService extends CEntityNamedService<CProject> implements IE
 		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
-	@Override
-	@Transactional
-	public CProject save(final CProject entity) {
-		// Ensure company is set for new entities
-		if (entity.getCompany() == null) {
-			final CCompany company = getCurrentCompany();
-			entity.setCompany(company);
-		}
-		final boolean isNew = entity.getId() == null;
-		final CProject savedEntity = super.save(entity);
-		final ProjectListChangeEvent.ChangeType changeType =
-				isNew ? ProjectListChangeEvent.ChangeType.CREATED : ProjectListChangeEvent.ChangeType.UPDATED;
+        @Override
+        @Transactional
+        public CProject save(final CProject entity) {
+                Check.notNull(entity.getCompany(), "Company must be set before saving a project");
+                if (entity.getKanbanLine() != null) { Check.isSameCompany(entity, entity.getKanbanLine()); }
+                final boolean isNew = entity.getId() == null;
+                final CProject savedEntity = super.save(entity);
+                final ProjectListChangeEvent.ChangeType changeType =
+                                isNew ? ProjectListChangeEvent.ChangeType.CREATED : ProjectListChangeEvent.ChangeType.UPDATED;
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, savedEntity, changeType));
 		return savedEntity;
 	}

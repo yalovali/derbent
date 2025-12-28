@@ -11,6 +11,7 @@ import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.roles.domain.CUserProjectRole;
 
@@ -67,11 +68,33 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	public void setPermission(final String permission) { this.permission = permission; }
 
-	public void setProject(final CProject project) { this.project = project; }
+        public void setProject(final CProject project) {
+                Check.notNull(project, "Project cannot be null for user project settings");
+                if (user != null) { Check.isSameCompany(project, user); }
+                if (role != null && role.getProject() != null) {
+                        Check.isTrue(role.getProject().getId().equals(project.getId()), "Project role is linked to a different project");
+                }
+                this.project = project;
+        }
 
-	public void setRole(final CUserProjectRole role) { this.role = role; }
+        public void setRole(final CUserProjectRole role) {
+                if (role == null) {
+                        this.role = null;
+                        return;
+                }
+                Check.notNull(project, "Project must be set before assigning a role");
+                if (role.getProject() != null) {
+                        Check.isTrue(role.getProject().getId().equals(project.getId()), "Role must belong to the same project");
+                }
+                this.role = role;
+        }
 
-	public void setUser(final CUser user) { this.user = user; }
+        public void setUser(final CUser user) {
+                Check.notNull(user, "User cannot be null for project settings");
+                Check.notNull(project, "Project must be set before assigning a user");
+                Check.isSameCompany(project, user);
+                this.user = user;
+        }
 
 	@Override
 	public String toString() {

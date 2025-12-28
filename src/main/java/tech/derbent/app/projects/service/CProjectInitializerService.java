@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -11,9 +13,11 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 
 public class CProjectInitializerService extends CInitializerServiceBase {
@@ -60,11 +64,24 @@ public class CProjectInitializerService extends CInitializerServiceBase {
                 return grid;
         }
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
-	}
+        public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+                        final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+                final CDetailSection detailSection = createBasicView(project);
+                final CGridEntity grid = createGridEntity(project);
+                initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+                                pageDescription, showInQuickToolbar, menuOrder);
+        }
+
+        public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
+                final String[][] nameAndDescription = {
+                                {
+                                                "Digital Transformation Initiative", "Comprehensive digital transformation for enhanced customer experience"
+                                }, {
+                                                "Infrastructure Upgrade Project", "Upgrading IT infrastructure for improved performance and scalability"
+                                }
+                };
+                initializeCompanyEntity(nameAndDescription,
+                                (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company,
+                                minimal, (item, index) -> ((CProject) item).setActive(true));
+        }
 }
