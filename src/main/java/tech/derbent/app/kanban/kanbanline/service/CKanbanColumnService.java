@@ -13,12 +13,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.domain.CStatus;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
+import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -123,7 +125,9 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Returns the repository with kanban-specific methods. */
-	private IKanbanColumnRepository getTypedRepository() { return (IKanbanColumnRepository) repository; }
+	private IKanbanColumnRepository getTypedRepository() {
+		return (IKanbanColumnRepository) repository;
+	}
 
 	/** Initializes defaults for a new column entity. */
 	@Override
@@ -229,6 +233,11 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		final CKanbanLine line = kanbanLineService.getById(entity.getKanbanLine().getId()).orElse(null);
 		Check.notNull(line, "Kanban line could not be loaded for column save");
 		return line;
+	}
+
+	public List<CStatus> resolveStatusesForColumn(CKanbanColumn targetColumn, CSprintItem sprintItem) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/** Saves a column and enforces ordering and status constraints. */

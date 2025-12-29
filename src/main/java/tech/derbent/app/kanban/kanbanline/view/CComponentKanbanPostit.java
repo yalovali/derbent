@@ -21,6 +21,7 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
@@ -30,9 +31,9 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanPostit.class);
 	private static final long serialVersionUID = 1L;
 	private DragSource<CComponentKanbanPostit> dragSource;
+	private boolean dropEnabled;
 	private DropTarget<CComponentKanbanPostit> dropTarget;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
-	private boolean dropEnabled;
 
 	/** Creates a post-it card for the given sprint item. */
 	public CComponentKanbanPostit(final CSprintItem item) {
@@ -81,12 +82,12 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	}
 
 	@Override
-	public void drag_checkEventAfterPass(final tech.derbent.api.interfaces.drag.CEvent event) {
+	public void drag_checkEventAfterPass(final CEvent event) {
 		// No-op hook for now; included for symmetry with drag_checkEventBeforePass.
 	}
 
 	@Override
-	public void drag_checkEventBeforePass(final tech.derbent.api.interfaces.drag.CEvent event) {
+	public void drag_checkEventBeforePass(final CEvent event) {
 		LOGGER.debug("[KanbanDrag] Passing drag event {} for sprint item {}", event.getClass().getSimpleName(), entity.getId());
 	}
 

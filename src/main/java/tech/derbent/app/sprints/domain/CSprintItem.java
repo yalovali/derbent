@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.domain.CStatus;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -40,8 +41,6 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	// Transient field - loaded dynamically at runtime from itemId and itemType
 	@Transient
 	private ISprintableItem item;
-	@Transient
-	private Long kanbanColumnId;
 	// Store only the ID of the project item - loaded dynamically at runtime
 	@Column (name = "item_id", nullable = false)
 	@NotNull (message = "Project item ID is required")
@@ -66,6 +65,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 			hidden = false, maxLength = 50
 	)
 	private String itemType;
+	@Transient
+	private Long kanbanColumnId;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "sprint_id", nullable = false)
 	@NotNull (message = "Sprint reference is requ`ired")
@@ -174,6 +175,10 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	}
 
 	public void setSprint(final CSprint sprint) { this.sprint = sprint; }
+
+	public void setStatus(CStatus newStatus) {
+		// TODO Auto-generated method stub
+	}
 
 	@Override
 	public String toString() {

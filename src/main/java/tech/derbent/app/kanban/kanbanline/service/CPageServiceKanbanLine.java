@@ -1,16 +1,19 @@
 package tech.derbent.app.kanban.kanbanline.service;
 
+import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CStatus;
 import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
@@ -20,6 +23,7 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.app.page.view.CDynamicPageViewWithoutGrid;
 import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.service.CSprintItemService;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 
@@ -94,6 +98,26 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			final CKanbanColumn targetColumn = resolveTargetColumn(event);
 			Check.notNull(targetColumn, "Target column cannot be resolved for Kanban drop");
 			sprintItem.setKanbanColumnId(targetColumn.getId());
+			final List<CStatus> targetStatuses = kanbanColumnService.resolveStatusesForColumn(targetColumn, sprintItem);
+			if (targetStatuses.isEmpty()) {
+				LOGGER.warn("No statuses mapped to target column {}, sprint item {} status not changed.", targetColumn.getName(), sprintItem.getId());
+				CNotificationService.showWarning("The target column has no statuses mapped. Sprint item status was not changed.");
+				return;
+			}
+			final CStatus targetStatus = targetStatuses.get(0);
+			if (targetStatuses.size() > 1) {
+				// TODO ask user to choose?
+				LOGGER.info("Multiple statuses mapped to target column {}, sprint item {} status set to first status" + " {}.",
+						targetColumn.getName(), sprintItem.getId(), targetStatus.getName());
+				CNotificationService
+						.showInfo("Multiple statuses are mapped to the target column. Sprint item status set to " + targetStatus.getName() + ".");
+			}
+			final CStatus newStatus = targetStatuses.get(0);
+			sprintItem.setStatus(newStatus);
+			final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
+			sprintItemService.save(sprintItem);
+			LOGGER.info("Updated sprint item {} status to {} due to Kanban drop to column {}.", sprintItem.getId(), newStatus.getName(),
+					targetColumn.getName());
 			LOGGER.info("[KanbanDrag] Moved sprint item {} to column {}", sprintItem.getId(), targetColumn.getName());
 			if (componentKanbanBoard != null) {
 				componentKanbanBoard.refreshComponent();
@@ -105,8 +129,10 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		}
 	}
 
-	public void on_kanbanBoard_dragEnd(@SuppressWarnings ("unused") final Component component, @SuppressWarnings ("unused") final Object value) {
-		LOGGER.debug("Kanban board drag end event received.");
+	public void on_kanbanBoard_dragEnd(@SuppressWarnings ("unused") final Component component, final Object value) {
+		LOGGER.debug("Kanban board drag end event received. Active drag item name is {}.",
+				getActiveDragStartEvent() != null && !getActiveDragStartEvent().getDraggedItems().isEmpty()
+						? getActiveDragStartEvent().getDraggedItems().get(0).toString() : "None");
 		setActiveDragStartEvent(null);
 	}
 
