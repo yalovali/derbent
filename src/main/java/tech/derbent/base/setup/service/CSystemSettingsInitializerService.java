@@ -4,18 +4,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.utils.Check;
+import tech.derbent.app.page.domain.CPageEntity;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.setup.domain.CSystemSettings;
-import tech.derbent.base.setup.service.CSystemSettingsService;
 
 /** CSystemSettingsInitializerService - Initializer service for CSystemSettings entities. This service creates the dynamic page configuration for
  * system-wide settings management, including grid and detail section definitions. Since system settings are global (not project-related), this
@@ -40,45 +39,36 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "applicationVersion"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "applicationDescription"));
 			// Security
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Security"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "accountLockoutDurationMinutes"));
 			// File Management
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("File Management"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "allowedFileExtensions"));
 			// Auto-Login
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Auto-Login"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "autoLoginEnabled"));
 			// Backup
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Backup and Maintenance"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableAutomaticBackups"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "backupRetentionDays"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "backupScheduleCron"));
 			// Caching
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Caching"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableCaching"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cacheTtlMinutes"));
 			// Database
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Database"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "databaseConnectionPoolSize"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "databaseName"));
 			// UI/Theming
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("UI and Theming"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultSystemTheme"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableDarkMode"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultLoginView"));
 			// Additional
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -103,31 +93,32 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
-        public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-                        final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-                Check.notNull(project, "project cannot be null");
-                final CDetailSection detailSection = createBasicView(project);
-                final CGridEntity grid = createGridEntity(project);
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		Check.notNull(project, "project cannot be null");
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 		// Create a single system settings page (like company single view)
 		final CGridEntity singleGrid = createGridEntity(project, true);
-                singleGrid.setName("System Settings Single View");
-                gridEntityService.save(singleGrid);
-                final CPageEntity singlePage = createPageEntity(clazz, project, singleGrid, detailSection, "System.Current Settings", "System Settings",
-                                "System-wide configuration settings", "1.1");
-                pageEntityService.save(singlePage);
-        }
+		singleGrid.setName("System Settings Single View");
+		gridEntityService.save(singleGrid);
+		final CPageEntity singlePage = createPageEntity(clazz, project, singleGrid, detailSection, "System.Current Settings", "System Settings",
+				"System-wide configuration settings", "1.1");
+		pageEntityService.save(singlePage);
+	}
 
-        public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-                final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
-                final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();
-                if (settings.getApplicationName() == null || settings.getApplicationName().isBlank()) {
-                        settings.setApplicationName("Derbent Project Management");
-                }
-                if (settings.getApplicationVersion() == null || settings.getApplicationVersion().isBlank()) {
-                        settings.setApplicationVersion("1.0.0");
-                }
-                systemSettingsService.save(settings);
-        }
+	public static void initializeSample(@SuppressWarnings ("unused") final CProject project, @SuppressWarnings ("unused") final boolean minimal)
+			throws Exception {
+		final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
+		final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();
+		if (settings.getApplicationName() == null || settings.getApplicationName().isBlank()) {
+			settings.setApplicationName("Derbent Project Management");
+		}
+		if (settings.getApplicationVersion() == null || settings.getApplicationVersion().isBlank()) {
+			settings.setApplicationVersion("1.0.0");
+		}
+		systemSettingsService.save(settings);
+	}
 }

@@ -15,7 +15,6 @@ import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfCompany.domain.CStatus;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -175,10 +174,6 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	}
 
 	public void setSprint(final CSprint sprint) { this.sprint = sprint; }
-
-	public void setStatus(CStatus newStatus) {
-		// TODO Auto-generated method stub
-	}
 
 	@Override
 	public String toString() {

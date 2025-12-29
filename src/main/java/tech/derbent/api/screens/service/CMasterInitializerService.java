@@ -1,15 +1,13 @@
 package tech.derbent.api.screens.service;
 
-import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.utils.Check;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CMasterSection;
-import tech.derbent.api.screens.service.CMasterSectionService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
@@ -50,26 +48,29 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
-        public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-                        final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-                final CDetailSection detailSection = createBasicView(project);
-                final CGridEntity grid = createGridEntity(project);
-                initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-                                pageDescription, showInQuickToolbar, menuOrder);
-        }
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
+	}
 
-        public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-                Check.notNull(project, "project cannot be null");
-                final String[][] sections = {
-                                {"General Master Section", "Reusable section template for project pages"},
-                                {"Timeline Master Section", "Timeline-focused master layout"}
-                };
-                final CMasterSectionService masterSectionService = CSpringContext.getBean(CMasterSectionService.class);
-                initializeProjectEntity(sections, masterSectionService, project, minimal, (section, index) -> {
-                        final List<String> availableTypes = CMasterSectionService.getAvailableTypes();
-                        final String defaultType = availableTypes.isEmpty() ? "None" : availableTypes.get(Math.min(index, availableTypes.size() - 1));
-                        section.setSectionType(defaultType);
-                        section.setSectionDBName((section.getName() + "_" + project.getId()).toLowerCase().replaceAll("[^a-z0-9]+", "_"));
-                });
-        }
+	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		Check.notNull(project, "project cannot be null");
+		final String[][] sections = {
+				{
+						"General Master Section", "Reusable section template for project pages"
+				}, {
+						"Timeline Master Section", "Timeline-focused master layout"
+				}
+		};
+		final CMasterSectionService masterSectionService = CSpringContext.getBean(CMasterSectionService.class);
+		initializeProjectEntity(sections, masterSectionService, project, minimal, (section, index) -> {
+			final List<String> availableTypes = CMasterSectionService.getAvailableTypes();
+			final String defaultType = availableTypes.isEmpty() ? "None" : availableTypes.get(Math.min(index, availableTypes.size() - 1));
+			section.setSectionType(defaultType);
+			section.setSectionDBName((section.getName() + "_" + project.getId()).toLowerCase().replaceAll("[^a-z0-9]+", "_"));
+		});
+	}
 }

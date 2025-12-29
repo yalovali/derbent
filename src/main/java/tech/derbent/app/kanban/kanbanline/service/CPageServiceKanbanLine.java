@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfCompany.domain.CStatus;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
@@ -23,7 +23,7 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.app.page.view.CDynamicPageViewWithoutGrid;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.app.sprints.service.CSprintItemService;
+import tech.derbent.app.workflow.service.CWorkflowEntityService;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 
@@ -97,14 +97,15 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			final CSprintItem sprintItem = (CSprintItem) draggedItem;
 			final CKanbanColumn targetColumn = resolveTargetColumn(event);
 			Check.notNull(targetColumn, "Target column cannot be resolved for Kanban drop");
+			// set it? not here !
 			sprintItem.setKanbanColumnId(targetColumn.getId());
-			final List<CStatus> targetStatuses = kanbanColumnService.resolveStatusesForColumn(targetColumn, sprintItem);
+			final List<CProjectItemStatus> targetStatuses = kanbanColumnService.resolveStatusesForColumn(targetColumn, sprintItem);
 			if (targetStatuses.isEmpty()) {
 				LOGGER.warn("No statuses mapped to target column {}, sprint item {} status not changed.", targetColumn.getName(), sprintItem.getId());
 				CNotificationService.showWarning("The target column has no statuses mapped. Sprint item status was not changed.");
 				return;
 			}
-			final CStatus targetStatus = targetStatuses.get(0);
+			final CProjectItemStatus targetStatus = targetStatuses.get(0);
 			if (targetStatuses.size() > 1) {
 				// TODO ask user to choose?
 				LOGGER.info("Multiple statuses mapped to target column {}, sprint item {} status set to first status" + " {}.",
@@ -112,16 +113,16 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				CNotificationService
 						.showInfo("Multiple statuses are mapped to the target column. Sprint item status set to " + targetStatus.getName() + ".");
 			}
-			final CStatus newStatus = targetStatuses.get(0);
-			sprintItem.setStatus(newStatus);
-			final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
-			sprintItemService.save(sprintItem);
-			LOGGER.info("Updated sprint item {} status to {} due to Kanban drop to column {}.", sprintItem.getId(), newStatus.getName(),
-					targetColumn.getName());
-			LOGGER.info("[KanbanDrag] Moved sprint item {} to column {}", sprintItem.getId(), targetColumn.getName());
-			if (componentKanbanBoard != null) {
-				componentKanbanBoard.refreshComponent();
+			final CProjectItemStatus newStatus = targetStatuses.get(0);
+			// check if the workflow allows this transition?
+			final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
+			if (!workflowEntityService.checkStatusTransitionAllowed(sprintItem.getItem(), sprintItem.getStatus(), newStatus)) {
+				CNotificationService.showError(
+						"Status transition to " + newStatus.getName() + " is not allowed by workflow. Sprint item status was not changed.");
+				return;
 			}
+			sprintItem.getItem().setStatus(newStatus);
+			componentKanbanBoard.refreshComponent();
 			setActiveDragStartEvent(null);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to handle Kanban board drop", e);
@@ -129,7 +130,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		}
 	}
 
-	public void on_kanbanBoard_dragEnd(@SuppressWarnings ("unused") final Component component, final Object value) {
+	@SuppressWarnings ("unused")
+	public void on_kanbanBoard_dragEnd(final Component component, final Object value) {
 		LOGGER.debug("Kanban board drag end event received. Active drag item name is {}.",
 				getActiveDragStartEvent() != null && !getActiveDragStartEvent().getDraggedItems().isEmpty()
 						? getActiveDragStartEvent().getDraggedItems().get(0).toString() : "None");

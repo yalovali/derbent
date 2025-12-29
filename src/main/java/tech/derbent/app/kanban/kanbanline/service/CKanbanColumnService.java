@@ -13,7 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.entityOfCompany.domain.CStatus;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
@@ -235,7 +235,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		return line;
 	}
 
-	public List<CStatus> resolveStatusesForColumn(CKanbanColumn targetColumn, CSprintItem sprintItem) {
+	public List<CProjectItemStatus> resolveStatusesForColumn(CKanbanColumn targetColumn, CSprintItem sprintItem) {
 		// TODO Auto-generated method stub
 		return null;
 	}

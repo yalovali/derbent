@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
@@ -47,6 +49,18 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 			LOGGER.error("Error checking dependencies for workflow entity: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
 		}
+	}
+
+	public boolean checkStatusTransitionAllowed(ISprintableItem item, CProjectItemStatus status, CProjectItemStatus newStatus) {
+		// 1️⃣ Basic sanity checks
+		if (item == null || status == null || newStatus == null) {
+			return false;
+		}
+		// 2️⃣ Same status = always allowed (no transition)
+		if (status.equals(newStatus)) {
+			return true;
+		}
+		return false;
 	}
 
 	public Component createWorkflowStatusRelationsComponent() {

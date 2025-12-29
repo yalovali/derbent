@@ -47,5 +47,6 @@ public interface ISprintableItem {
 	Long getStoryPoint();
 	void setSprintItem(CSprintItem cSprintItem);
 	void setSprintOrder(Integer sprintOrder);
+	void setStatus(CProjectItemStatus newStatus);
 	void setStoryPoint(Long storyPoint);
 }
