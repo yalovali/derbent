@@ -21,4 +21,9 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
 	}
+
+	@SuppressWarnings ("unchecked")
+	public final void revokeSave(final CProjectItem<?> rawEntity) {
+		save((EntityClass) rawEntity);
+	}
 }

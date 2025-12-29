@@ -16,6 +16,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
@@ -189,5 +190,23 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	public void initializeNewEntity(final CProjectItemStatus entity) {
 		super.initializeNewEntity(entity);
 		setNameOfEntity(entity, "Activity Status");
+	}
+
+	public List<CProjectItemStatus> resolveStatusesForColumn(CKanbanColumn targetColumn, IHasStatusAndWorkflow<?> iSprintableItem) {
+		// the whole status for the column
+		final List<CProjectItemStatus> columnStatuses = targetColumn.getIncludedStatuses();
+		// possible next steps for the sprint item
+		final List<CProjectItemStatus> possibleNextStatuses = getValidNextStatuses(iSprintableItem);
+		// create a list of intersection of both lists
+		final List<CProjectItemStatus> resolvedStatuses = new ArrayList<>();
+		for (final CProjectItemStatus status : columnStatuses) {
+			for (final CProjectItemStatus possibleStatus : possibleNextStatuses) {
+				if (status.getId().equals(possibleStatus.getId())) {
+					resolvedStatuses.add(status);
+					break;
+				}
+			}
+		}
+		return resolvedStatuses;
 	}
 }

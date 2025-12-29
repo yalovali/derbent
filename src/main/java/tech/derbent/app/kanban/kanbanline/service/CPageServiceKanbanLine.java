@@ -7,9 +7,14 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.CSelectEvent;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -23,7 +28,7 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.app.page.view.CDynamicPageViewWithoutGrid;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.app.workflow.service.CWorkflowEntityService;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 
@@ -95,11 +100,15 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			final Object draggedItem = dragStartEvent.getDraggedItems().isEmpty() ? null : dragStartEvent.getDraggedItems().get(0);
 			Check.instanceOf(draggedItem, CSprintItem.class, "Dragged item must be a sprint item for Kanban drop");
 			final CSprintItem sprintItem = (CSprintItem) draggedItem;
+			final CProjectItem<?> item = (CProjectItem<?>) sprintItem.getItem();
 			final CKanbanColumn targetColumn = resolveTargetColumn(event);
 			Check.notNull(targetColumn, "Target column cannot be resolved for Kanban drop");
 			// set it? not here !
 			sprintItem.setKanbanColumnId(targetColumn.getId());
-			final List<CProjectItemStatus> targetStatuses = kanbanColumnService.resolveStatusesForColumn(targetColumn, sprintItem);
+			final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			// these are the available statuses for the target column, intersected with the item next status of the workflow
+			final List<CProjectItemStatus> targetStatuses =
+					projectItemStatusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
 			if (targetStatuses.isEmpty()) {
 				LOGGER.warn("No statuses mapped to target column {}, sprint item {} status not changed.", targetColumn.getName(), sprintItem.getId());
 				CNotificationService.showWarning("The target column has no statuses mapped. Sprint item status was not changed.");
@@ -114,14 +123,12 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 						.showInfo("Multiple statuses are mapped to the target column. Sprint item status set to " + targetStatus.getName() + ".");
 			}
 			final CProjectItemStatus newStatus = targetStatuses.get(0);
-			// check if the workflow allows this transition?
-			final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
-			if (!workflowEntityService.checkStatusTransitionAllowed(sprintItem.getItem(), sprintItem.getStatus(), newStatus)) {
-				CNotificationService.showError(
-						"Status transition to " + newStatus.getName() + " is not allowed by workflow. Sprint item status was not changed.");
-				return;
-			}
-			sprintItem.getItem().setStatus(newStatus);
+			((ISprintableItem) item).setStatus(newStatus);
+			// get the service of sprintItem.getItem() to save
+			final Class<?> projectItemServiceClass = CEntityRegistry.getServiceClassForEntity(item.getClass());
+			final CProjectItemService<?> projectItemService = (CProjectItemService<?>) CSpringContext.getBean(projectItemServiceClass);
+			projectItemService.revokeSave(item);
+			// .projectItemServiceClass.getMethod("save", sprintItem.getItem().getClass()).invoke(projectItemService, sprintItem.getItem());
 			componentKanbanBoard.refreshComponent();
 			setActiveDragStartEvent(null);
 		} catch (final Exception e) {
