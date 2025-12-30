@@ -19,6 +19,7 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -218,6 +219,12 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	@Override
+	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -253,6 +260,11 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 			LOGGER.error("Error initializing widget for entity {}: {}", entity, e.getMessage());
 			layoutLeft.add(new CDiv("Exception occured"));
 		}
+	}
+
+	@Override
+	public boolean isDropAllowed(CDragOverEvent event) {
+		return false;
 	}
 
 	/** Checks if the widget is selected.

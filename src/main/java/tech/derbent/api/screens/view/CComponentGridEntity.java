@@ -43,6 +43,7 @@ import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -661,6 +662,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	@Override
+	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -740,6 +747,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
 		}
+	}
+
+	@Override
+	public boolean isDropAllowed(CDragOverEvent event) {
+		return false;
 	}
 
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }

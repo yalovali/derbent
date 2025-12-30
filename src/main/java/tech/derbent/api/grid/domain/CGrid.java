@@ -43,6 +43,7 @@ import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.service.CEntityFieldService;
@@ -577,6 +578,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
 
 	@Override
+	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -631,6 +638,11 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		// Note: Do NOT call setupChildDragDropForwarding() here - CGrid already forwards
 		// Vaadin Grid events to IHasDragControl listeners via on_grid_dragStart(), on_grid_dragEnd(), on_grid_dragDrop()
 		// Calling setupChildDragDropForwarding() would create an infinite loop
+	}
+
+	@Override
+	public boolean isDropAllowed(CDragOverEvent event) {
+		return false;
 	}
 
 	private Long normalizeId(final Object value) {

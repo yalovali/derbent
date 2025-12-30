@@ -1,10 +1,13 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.enhanced.CComponentListEntityBase;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -62,6 +65,12 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		// No-op for kanban column list (no special drag behavior).
 	}
 
+	@Override
+	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/** Formats included statuses for grid display. */
 	private String formatIncludedStatuses(final CKanbanColumn column) {
 		Check.notNull(column, "Kanban column cannot be null");
@@ -85,6 +94,11 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 		}
 		final CKanbanColumnService service = (CKanbanColumnService) childService;
 		return service.getNextItemOrder(getMasterEntity());
+	}
+
+	@Override
+	public boolean isDropAllowed(CDragOverEvent event) {
+		return false;
 	}
 
 	/** Loads columns for the current line. */

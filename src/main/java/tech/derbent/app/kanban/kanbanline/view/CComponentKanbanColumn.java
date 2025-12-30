@@ -19,6 +19,7 @@ import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CH3;
@@ -46,6 +47,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private List<CSprintItem> sprintItems = List.of();
 	private final CLabelEntity statusesLabel;
 	private final CH3 title;
+	private final Set<ComponentEventListener<CDragOverEvent>> dragOverListeners = new HashSet<>();
 
 	/** Creates the kanban column component and its layout. */
 	public CComponentKanbanColumn() {
@@ -110,6 +112,11 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	}
 
 	@Override
+	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
+		return dragOverListeners;
+	}
+
+	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -136,6 +143,19 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		}).toList();
 	}
 
+	@Override
+	public boolean isDropAllowed(CDragOverEvent event) {
+		final Object item = event.getDraggedItem();
+		if (!(item instanceof final CSprintItem sprintItem)) {
+			return false;
+		}
+		final CKanbanColumn column = getValue();
+		if (column == null || column.getIncludedStatuses() == null) {
+			return false;
+		}
+		return column.getIncludedStatuses().stream().anyMatch(status -> status.getId().equals(sprintItem.getStatus().getId()));
+	}
+
 	private ComponentEventListener<DropEvent<CVerticalLayout>> on_column_dragDrop() {
 		return event -> {
 			try {
@@ -145,6 +165,15 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 			} catch (final Exception e) {
 				LOGGER.error("Error handling grid drop event", e);
 			}
+		};
+	}
+
+	private ComponentEventListener<DropEvent<CVerticalLayout>> on_column_dragOver() {
+		return event -> {
+			// You decide how dragged items are resolved
+			final List<Object> draggedItems = List.of(); // from your drag source logic
+			final CDragOverEvent dragOverEvent = new CDragOverEvent(this, draggedItems, true);
+			on_dragOver(dragOverEvent);
 		};
 	}
 
@@ -244,6 +273,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		columnDropTarget = DropTarget.create(this);
 		columnDropTarget.setDropEffect(DropEffect.MOVE);
 		columnDropTarget.addDropListener(on_column_dragDrop());
+		// columnDropTarget.addDragOverListener(on_column_dragOver());
 		columnDropTarget.setActive(true);
 	}
 

@@ -26,6 +26,7 @@ import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -221,6 +222,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	}
 
 	@Override
+	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -246,6 +253,11 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Kanban board does not expose a direct entity service. */
 	@Override
 	public CAbstractService<?> getEntityService() { return null; }
+
+	@Override
+	public boolean isDropAllowed(CDragOverEvent event) {
+		return false;
+	}
 
 	/** Checks whether the sprint selection has changed. */
 	private boolean isSameSprint(final CSprint candidate) {
