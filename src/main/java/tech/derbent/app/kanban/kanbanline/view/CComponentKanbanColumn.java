@@ -41,7 +41,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
 	private boolean dropEnabled;
-	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CDragDropEvent>> dragDropListeners = new HashSet<>();
 	private final CHorizontalLayout headerLayout;
 	private final CVerticalLayout itemsLayout;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
@@ -119,7 +119,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 
 	@Override
 	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
-		return dropListeners;
+		return dragDropListeners;
 	}
 
 	/** Filters items that should appear in this column. */
