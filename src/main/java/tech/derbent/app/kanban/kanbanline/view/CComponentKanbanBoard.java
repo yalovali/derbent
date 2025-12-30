@@ -72,28 +72,28 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		return item != null && entityClass.isAssignableFrom(item.getClass());
 	}
 
-	private final CDynamicPageRouter currentEntityPageRouter;
 	private List<CSprintItem> allSprintItems;
-	private final CComponentKanbanBoardFilterToolbar filterToolbar;
-	private final CHorizontalLayout layoutColumns;
-	final CVerticalLayout layoutDetails = new CVerticalLayout();
 	private List<CSprint> availableSprints;
-	private List<CSprintItem> sprintItems;
+	private final CDynamicPageRouter currentEntityPageRouter;
 	private CSprint currentSprint;
-	private CComponentKanbanPostit selectedPostit;
-	private final Comparator<CSprint> sprintRecencyComparator;
-	private final CKanbanLineService kanbanLineService;
-	private final CSprintItemService sprintItemService;
-	private final CSprintService sprintService;
-	private final ISessionService sessionService;
-	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
+	private boolean dragEnabled = true;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
-	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
-	private boolean dragEnabled = true;
 	private boolean dropEnabled = true;
-	protected SplitLayout splitLayout = new SplitLayout();
+	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
+	private final CComponentKanbanBoardFilterToolbar filterToolbar;
+	private final CKanbanLineService kanbanLineService;
+	private final CHorizontalLayout layoutColumns;
+	final CVerticalLayout layoutDetails = new CVerticalLayout();
 	protected final CPageEntityService pageEntityService;
+	private CComponentKanbanPostit selectedPostit;
+	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
+	private final ISessionService sessionService;
+	protected SplitLayout splitLayout = new SplitLayout();
+	private List<CSprintItem> sprintItems;
+	private final CSprintItemService sprintItemService;
+	private final Comparator<CSprint> sprintRecencyComparator;
+	private final CSprintService sprintService;
 
 	/** Creates the kanban board and initializes filters and layout. */
 	public CComponentKanbanBoard() {
@@ -139,6 +139,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		// splitLayout.setFlexGrow(1, layoutColumns);
 		add(filterToolbar, splitLayout);
 		expand(splitLayout);
+		// setDropEnabled(true);
+		// addDropListener(on_grid_dragDrop());
 	}
 
 	/** Applies current filters and refreshes the board. */

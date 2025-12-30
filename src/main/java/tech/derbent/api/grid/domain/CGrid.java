@@ -146,10 +146,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	private final Map<String, Function<EntityClass, ? extends Component>> widgetProviders = new HashMap<>();
 
 	@SuppressWarnings ("unchecked")
-	public CGrid(final Class<?> class1) {
-		super((Class<EntityClass>) class1, false);
+	public CGrid(final Class<?> clazz) {
+		super((Class<EntityClass>) clazz, false);
 		setEmptyStateText("No entites ...");
-		setClazz(class1);
+		setClazz(clazz);
 		initializeGrid();
 		addDragStartListener(on_grid_dragStart());
 		addDragEndListener(on_grid_dragEnd());
