@@ -76,10 +76,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private List<CSprint> availableSprints;
 	private final CDynamicPageRouter currentEntityPageRouter;
 	private CSprint currentSprint;
-	private boolean dragEnabled = true;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
-	private boolean dropEnabled = true;
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
 	private final CKanbanLineService kanbanLineService;
@@ -411,8 +409,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		assignKanbanColumns(sprintItems, columns);
 		for (final CKanbanColumn column : columns) {
 			final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
-			columnComponent.setDragEnabled(dragEnabled);
-			columnComponent.setDropEnabled(dropEnabled);
+			columnComponent.setDragEnabled(true);
+			columnComponent.setDropEnabled(true);
 			setupSelectionNotification(columnComponent);
 			setupChildDragDropForwarding(columnComponent);
 			columnComponent.setItems(sprintItems);
@@ -466,16 +464,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	@Override
 	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		layoutColumns.getChildren().filter(CComponentKanbanColumn.class::isInstance).map(component -> (CComponentKanbanColumn) component)
-				.forEach(column -> column.setDragEnabled(enabled));
+		// children are set at construction time
+		return;
 	}
 
 	@Override
 	public void setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
-		layoutColumns.getChildren().filter(CComponentKanbanColumn.class::isInstance).map(component -> (CComponentKanbanColumn) component)
-				.forEach(column -> column.setDropEnabled(enabled));
+		// children are set at construction time
+		return;
 	}
 
 	/** Sets items and reapplies filters for display. */

@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.dnd.DropEffect;
+import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
-import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
 import tech.derbent.api.grid.view.CLabelEntity;
@@ -37,10 +37,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private final Binder<CKanbanColumn> binder;
 	private DropTarget<CVerticalLayout> columnDropTarget;
 	private final Span defaultBadge;
-	private boolean dragEnabled;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
-	private boolean dropEnabled;
 	private final Set<ComponentEventListener<CDragDropEvent>> dragDropListeners = new HashSet<>();
 	private final CHorizontalLayout headerLayout;
 	private final CVerticalLayout itemsLayout;
@@ -81,7 +79,6 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		add(itemsLayout);
 		binder = new Binder<>(CKanbanColumn.class);
 		binder.forField(this).bind(value -> value, (bean, value) -> {/**/});
-		initializeColumnDropTarget();
 	}
 
 	/** Applies the configured background color for the column. */
@@ -139,19 +136,16 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		}).toList();
 	}
 
-	private void initializeColumnDropTarget() {
-		columnDropTarget = DropTarget.create(itemsLayout);
-		columnDropTarget.setDropEffect(DropEffect.MOVE);
-		columnDropTarget.addDropListener(event -> {
-			if (!dropEnabled) {
-				LOGGER.debug("[KanbanDrag] Drop ignored because column drop is disabled");
-				return;
+	private ComponentEventListener<DropEvent<CVerticalLayout>> on_column_dragDrop() {
+		return event -> {
+			try {
+				LOGGER.debug("Handling column drop event for column id: {}", getId());
+				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, null, null, true);
+				notifyEvents(dropEvent);
+			} catch (final Exception e) {
+				LOGGER.error("Error handling grid drop event", e);
 			}
-			final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, getValue(), GridDropLocation.EMPTY, true);
-			LOGGER.debug("[KanbanDrag] Drop on column {}", getValue() != null ? getValue().getName() : "null");
-			notifyEvents(dropEvent);
-		});
-		columnDropTarget.setActive(dropEnabled);
+		};
 	}
 
 	/** Updates the column UI when its value changes. */
@@ -198,8 +192,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		itemsLayout.removeAll();
 		for (final CSprintItem item : filterItems(sprintItems)) {
 			final CComponentKanbanPostit postit = new CComponentKanbanPostit(item);
-			postit.setDragEnabled(dragEnabled);
-			postit.setDropEnabled(dropEnabled);
+			postit.setDragEnabled(true);
+			postit.setDropEnabled(true);
 			setupSelectionNotification(postit);
 			setupChildDragDropForwarding(postit);
 			itemsLayout.add(postit);
@@ -237,19 +231,20 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 
 	@Override
 	public void setDragEnabled(final boolean enabled) {
-		dragEnabled = enabled;
-		itemsLayout.getChildren().filter(CComponentKanbanPostit.class::isInstance).map(component -> (CComponentKanbanPostit) component)
-				.forEach(postit -> postit.setDragEnabled(enabled));
+		// itemsLayout.getChildren().filter(CComponentKanbanPostit.class::isInstance).map(component -> (CComponentKanbanPostit) component)
+		// .forEach(postit -> postit.setDragEnabled(enabled));
 	}
 
 	@Override
 	public void setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
-		itemsLayout.getChildren().filter(CComponentKanbanPostit.class::isInstance).map(component -> (CComponentKanbanPostit) component)
-				.forEach(postit -> postit.setDropEnabled(enabled));
-		if (columnDropTarget != null) {
-			columnDropTarget.setActive(enabled);
+		if (enabled == false) {
+			columnDropTarget = null;
+			return;
 		}
+		columnDropTarget = DropTarget.create(this);
+		columnDropTarget.setDropEffect(DropEffect.MOVE);
+		columnDropTarget.addDropListener(on_column_dragDrop());
+		columnDropTarget.setActive(true);
 	}
 
 	/** Sets the items displayed in this column. */
