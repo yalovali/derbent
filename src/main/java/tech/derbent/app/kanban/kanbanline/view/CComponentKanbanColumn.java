@@ -91,7 +91,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 
 	@Override
 	public void drag_checkEventAfterPass(final CEvent event) {
-		LOGGER.debug("[KanbanDrag] Completed drag propagation for column {}", getValue() != null ? getValue().getName() : "null");
+		// LOGGER.debug("[KanbanDrag] Completed drag propagation for column {}", getValue() != null ? getValue().getName() : "null");
 	}
 
 	@Override
@@ -100,8 +100,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		if (event instanceof final CDragDropEvent dropEvent && dropEvent.getTargetItem() == null) {
 			dropEvent.setTargetItem(getValue());
 		}
-		LOGGER.debug("[KanbanDrag] Propagating {} event for column {}", event.getClass().getSimpleName(),
-				getValue() != null ? getValue().getName() : "null");
+		// LOGGER.debug("[KanbanDrag] Propagating {} event for column {}", event.getClass().getSimpleName(),getValue() != null ? getValue().getName()
+		// : "null");
 	}
 
 	@Override

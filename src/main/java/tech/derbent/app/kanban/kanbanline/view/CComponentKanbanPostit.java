@@ -88,7 +88,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 
 	@Override
 	public void drag_checkEventBeforePass(final CEvent event) {
-		LOGGER.debug("[KanbanDrag] Passing drag event {} for sprint item {}", event.getClass().getSimpleName(), entity.getId());
+		// LOGGER.debug("[KanbanDrag] Passing drag event {} for sprint item {}", event.getClass().getSimpleName(), entity.getId());
 	}
 
 	private void initializeDragSource() {
