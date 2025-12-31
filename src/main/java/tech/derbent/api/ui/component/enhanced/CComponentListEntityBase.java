@@ -711,8 +711,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * enabled.
 	 * @param enabled true to enable drag, false to disable */
 	@Override
-	public void setDragEnabled(final boolean enabled) {
-		grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
+	public void drag_setDragEnabled(final boolean enabled) {
+		grid.drag_setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 	}
 
 	/** Enables or disables drop functionality for the grid.
@@ -721,8 +721,8 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * accept drops without being draggable.
 	 * @param enabled true to enable drop, false to disable */
 	@Override
-	public void setDropEnabled(final boolean enabled) {
-		grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
+	public void drag_setDropEnabled(final boolean enabled) {
+		grid.drag_setDropEnabled(enabled); // Use CGrid's IHasDragControl method
 	}
 
 	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.

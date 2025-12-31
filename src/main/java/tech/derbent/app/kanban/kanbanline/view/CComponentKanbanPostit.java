@@ -154,7 +154,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	}
 
 	@Override
-	public void setDragEnabled(final boolean enabled) {
+	public void drag_setDragEnabled(final boolean enabled) {
 		if (enabled) {
 			initializeDragSource();
 		} else if (dragSource != null) {
@@ -163,7 +163,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	}
 
 	@Override
-	public void setDropEnabled(final boolean enabled) {
+	public void drag_setDropEnabled(final boolean enabled) {
 		dropEnabled = enabled;
 		if (enabled) {
 			initializeDropTarget();

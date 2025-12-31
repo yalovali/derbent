@@ -59,7 +59,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	private CButton buttonToggleItems;
 	private CComponentListSprintItems componentSprintItems;
 	private CDiv containerSprintItems;
-	DropTarget<CComponentWidgetSprint> dropTarget;
+	private DropTarget<CComponentWidgetSprint> dropTarget;
 	private CLabelEntity itemCountLabel;
 	private Span itemCountText;
 	private boolean sprintItemsVisible = false;
@@ -143,8 +143,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			// Use the general refresh listener pattern instead of the old setOnItemChangeListener
 			componentSprintItems.addRefreshListener(item -> refreshItemCount());
 			// Enable drag-drop on the grid for external drag-drop operations
-			componentSprintItems.setDragEnabled(true);
-			componentSprintItems.setDropEnabled(true);
+			componentSprintItems.drag_setDragEnabled(true);
+			componentSprintItems.drag_setDropEnabled(true);
 			// Set up drag-drop event forwarding from componentSprintItems to this widget
 			// This ensures events from the internal grid propagate up through the widget hierarchy
 			setupChildDragDropForwarding(componentSprintItems);

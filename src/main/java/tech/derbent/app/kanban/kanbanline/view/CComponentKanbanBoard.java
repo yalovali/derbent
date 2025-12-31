@@ -26,7 +26,6 @@ import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -222,12 +221,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	}
 
 	@Override
-	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -255,7 +248,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	public CAbstractService<?> getEntityService() { return null; }
 
 	@Override
-	public boolean isDropAllowed(CDragOverEvent event) {
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -421,8 +415,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		assignKanbanColumns(sprintItems, columns);
 		for (final CKanbanColumn column : columns) {
 			final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
-			columnComponent.setDragEnabled(true);
-			columnComponent.setDropEnabled(true);
+			columnComponent.drag_setDragEnabled(true);
+			columnComponent.drag_setDropEnabled(true);
 			setupSelectionNotification(columnComponent);
 			setupChildDragDropForwarding(columnComponent);
 			columnComponent.setItems(sprintItems);
@@ -475,13 +469,13 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	}
 
 	@Override
-	public void setDragEnabled(final boolean enabled) {
+	public void drag_setDragEnabled(final boolean enabled) {
 		// children are set at construction time
 		return;
 	}
 
 	@Override
-	public void setDropEnabled(final boolean enabled) {
+	public void drag_setDropEnabled(final boolean enabled) {
 		// children are set at construction time
 		return;
 	}

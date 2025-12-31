@@ -43,7 +43,6 @@ import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -662,12 +661,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	@Override
-	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -750,7 +743,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	@Override
-	public boolean isDropAllowed(CDragOverEvent event) {
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -958,8 +952,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * enabled.
 	 * @param enabled true to enable drag, false to disable */
 	@Override
-	public void setDragEnabled(final boolean enabled) {
-		grid.setDragEnabled(enabled); // Use CGrid's IHasDragControl method
+	public void drag_setDragEnabled(final boolean enabled) {
+		grid.drag_setDragEnabled(enabled); // Use CGrid's IHasDragControl method
 		// LOGGER.debug("[DragDebug] Drag {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
 	}
 
@@ -969,8 +963,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * accept drops without being draggable.
 	 * @param enabled true to enable drop, false to disable */
 	@Override
-	public void setDropEnabled(final boolean enabled) {
-		grid.setDropEnabled(enabled); // Use CGrid's IHasDragControl method
+	public void drag_setDropEnabled(final boolean enabled) {
+		grid.drag_setDropEnabled(enabled); // Use CGrid's IHasDragControl method
 		// LOGGER.debug("[DragDebug] Drop {} for CComponentGridEntity", enabled ? "enabled" : "disabled");
 	}
 	// IHasDragControl interface implementation

@@ -65,8 +65,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			grid = new CComponentGridEntity(pageEntity.getGridEntity(), getSessionService());
 			// Set the content owner so widget columns can access page service
 			grid.setContentOwner(this);
-			grid.setDropEnabled(false);
-			grid.setDragEnabled(false);
+			grid.drag_setDropEnabled(false);
+			grid.drag_setDragEnabled(false);
 			// Register the grid component with page service using unified auto-registration pattern
 			// This enables automatic binding of on_grid_dragStart/dragEnd/drop handlers
 			if (pageService != null) {

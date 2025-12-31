@@ -30,7 +30,6 @@ import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.ISelectionOwner;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -431,12 +430,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	@Override
-	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -499,7 +492,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public Set<EntityClass> getValue() { return new HashSet<>(selectedItems); }
 
 	@Override
-	public boolean isDropAllowed(CDragOverEvent event) {
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -719,14 +712,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	@Override
-	public void setDragEnabled(final boolean enabled) {
-		grid.setDragEnabled(enabled);
+	public void drag_setDragEnabled(final boolean enabled) {
+		grid.drag_setDragEnabled(enabled);
 		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 
 	@Override
-	public void setDropEnabled(final boolean enabled) {
-		grid.setDropEnabled(enabled);
+	public void drag_setDropEnabled(final boolean enabled) {
+		grid.drag_setDropEnabled(enabled);
 		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 

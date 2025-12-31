@@ -19,7 +19,6 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -219,12 +218,6 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	@Override
-	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -263,7 +256,8 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	@Override
-	public boolean isDropAllowed(CDragOverEvent event) {
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -295,12 +289,12 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 	}
 
 	@Override
-	public void setDragEnabled(boolean enabled) {
+	public void drag_setDragEnabled(boolean enabled) {
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void setDropEnabled(boolean enabled) {
+	public void drag_setDropEnabled(boolean enabled) {
 		// TODO Auto-generated method stub
 	}
 

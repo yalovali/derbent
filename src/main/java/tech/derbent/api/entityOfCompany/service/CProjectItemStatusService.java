@@ -150,7 +150,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 				addIfAbsent(validStatuses, initialStatus);
 				return validStatuses;
 			}
-			if (currentStatus != null && currentStatus.getId() != null) {
+			if (currentStatus.getId() != null) {
 				relations.stream()
 						.filter(relation -> relation.getFromStatus() != null && relation.getFromStatus().getId() != null
 								&& relation.getFromStatus().getId().equals(currentStatus.getId()))

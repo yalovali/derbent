@@ -4,10 +4,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.dnd.DropEffect;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.utils.Check;
@@ -32,14 +30,6 @@ public interface IHasDragControl {
 		drag_getDragEndListeners().add(listener);
 	}
 
-	default void addEventListener_dragOver(ComponentEventListener<CDragOverEvent> listener) {
-		if (listener == null) {
-			return;
-		}
-		// LOGGER.debug("[DragDebug] {} adding drag over listener {}", getClass().getSimpleName(), listener.getClass().getSimpleName());
-		drag_getDragOverListeners().add(listener);
-	}
-
 	default void addEventListener_dragStart(ComponentEventListener<CDragStartEvent> listener) {
 		if (listener == null) {
 			return;
@@ -51,10 +41,9 @@ public interface IHasDragControl {
 	void drag_checkEventAfterPass(CEvent event);
 	void drag_checkEventBeforePass(CEvent event);
 	public Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners();
-	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners();
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners();
 	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners();
-	public boolean isDropAllowed(CDragOverEvent event);
+	public boolean drag_isDropAllowed(CDragStartEvent event);
 
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
@@ -65,19 +54,6 @@ public interface IHasDragControl {
 				listener.onComponentEvent(event);
 			} catch (final Exception e) {
 				LOGGER.error("[DragDebug] Error notifying drag end listener in {}: {}", getClass().getSimpleName(), e.getMessage());
-			}
-		}
-	}
-
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
-	private void notifyDragOverListeners(final CDragOverEvent event) {
-		for (final ComponentEventListener listener : drag_getDragOverListeners()) {
-			try {
-				listener.onComponentEvent(event);
-			} catch (final Exception e) {
-				LOGGER.error("[DragDebug] Error notifying drag over listener in {}: {}", getClass().getSimpleName(), e.getMessage());
 			}
 		}
 	}
@@ -132,10 +108,7 @@ public interface IHasDragControl {
 				notifyDropListeners((CDragDropEvent) event);
 			} else if (event instanceof CDragEndEvent) {
 				notifyDragEndListeners((CDragEndEvent) event);
-			} else if (event instanceof CDragOverEvent) {
-				notifyDragOverListeners((CDragOverEvent) event);
 			}
-			drag_checkEventAfterPass(event);
 		} catch (final Exception e) {
 			LOGGER.error("Error in notifyEvents for event: {}", event.toString(), e);
 			throw e;
@@ -155,28 +128,12 @@ public interface IHasDragControl {
 		notifyEvents(event);
 	}
 
-	default void on_dragOver(CDragOverEvent event) {
-		try {
-			// business rule
-			final boolean dropAllowed = isDropAllowed(event);
-			// Vaadin visual feedback
-			event.setDropEffect(dropAllowed ? DropEffect.MOVE : DropEffect.NONE);
-			// Cursor must be set on DRAG SOURCE
-			event.getDragSource().getElement().getStyle().set("cursor", dropAllowed ? "move" : "not-allowed");
-			// propagate through your event system
-			notifyEvents(event);
-		} catch (final Exception e) {
-			LOGGER.error("Error in on_dragOver", e);
-			throw e;
-		}
-	}
-
 	default void on_dragStart(CDragStartEvent event) {
 		notifyEvents(event);
 	}
 
-	void setDragEnabled(boolean enabled);
-	void setDropEnabled(boolean enabled);
+	void drag_setDragEnabled(boolean enabled);
+	void drag_setDropEnabled(boolean enabled);
 
 	@SuppressWarnings ({})
 	default void setupChildDragDropForwarding(final IHasDragControl child) {
@@ -189,9 +146,6 @@ public interface IHasDragControl {
 		});
 		child.addEventListener_dragDrop(event -> {
 			on_dragDrop(event);
-		});
-		child.addEventListener_dragOver(event -> {
-			on_dragOver(event);
 		});
 	}
 }

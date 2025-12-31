@@ -1,13 +1,11 @@
 package tech.derbent.api.ui.component.enhanced;
 
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.ComponentEventListener;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.interfaces.drag.CDragOverEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -94,12 +92,6 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 	}
 
 	@Override
-	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	protected Integer getNextOrder() {
 		final CDetailSection master = getMasterEntity();
 		Check.notNull(master, "Master section cannot be null when getting next order");
@@ -110,7 +102,8 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 	}
 
 	@Override
-	public boolean isDropAllowed(CDragOverEvent event) {
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 

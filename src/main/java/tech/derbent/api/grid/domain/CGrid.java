@@ -43,7 +43,6 @@ import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
-import tech.derbent.api.interfaces.drag.CDragOverEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.service.CEntityFieldService;
@@ -578,12 +577,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	// ==================== IHasDragStart, IHasDragEnd Implementation ====================
 
 	@Override
-	public Set<ComponentEventListener<CDragOverEvent>> drag_getDragOverListeners() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
 		return dragStartListeners;
 	}
@@ -641,7 +634,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	@Override
-	public boolean isDropAllowed(CDragOverEvent event) {
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -737,12 +731,12 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public void setClazz(Class<?> class1) { clazz = (Class<EntityClass>) class1; }
 
 	@Override
-	public void setDragEnabled(final boolean enabled) {
+	public void drag_setDragEnabled(final boolean enabled) {
 		setRowsDraggable(enabled);
 	}
 
 	@Override
-	public void setDropEnabled(final boolean enabled) {
+	public void drag_setDropEnabled(final boolean enabled) {
 		if (enabled) {
 			setDropMode(GridDropMode.BETWEEN);
 		} else {
