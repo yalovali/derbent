@@ -95,7 +95,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	
 	/** Constructor for backlog component with compact mode option.
 	 * @param project project to load backlog items for (required)
-	 * @param compactMode true for compact display (only name column and type/name filters), false for full display */
+	 * @param compactMode true for compact display (only name column in grid, only type selector in toolbar), false for full display */
 	public CComponentBacklog(final CProject project, final boolean compactMode) {
 		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
 		Check.notNull(project, "Project cannot be null");
@@ -139,12 +139,12 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			new tech.derbent.api.ui.component.enhanced.CComponentGridSearchToolbar.ToolbarConfig();
 		
 		if (compactMode) {
-			// Compact mode: only show name filter and clear button
+			// Compact mode: hide all filters, leaving only the type selector combobox
 			config.setIdFilter(false)
-				.setNameFilter(true)
+				.setNameFilter(false)
 				.setDescriptionFilter(false)
 				.setStatusFilter(false)
-				.setClearButton(true);
+				.setClearButton(false);
 		} else {
 			// Normal mode: show all filters
 			config.showAll();
