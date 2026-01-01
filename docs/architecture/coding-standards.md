@@ -1635,3 +1635,155 @@ When items are dragged between kanban columns:
 - [Kanban Board Workflow](../../features/kanban-board-workflow.md) - Complete kanban system documentation
 - [Workflow Status Change Pattern](../../development/workflow-status-change-pattern.md) - Workflow validation patterns
 - [Drag-Drop Component Pattern](../drag-drop-component-pattern.md) - Drag-drop implementation guide
+
+## Master-Detail Validation Pattern (CRITICAL - MANDATORY)
+
+### Rule: Validate Against BOTH Persisted AND In-Memory Child Collections
+
+**When validating child entities in master-detail relationships, ALWAYS check both persisted children (from database) AND in-memory children (from parent's collection).**
+
+This rule applies to ALL services that:
+1. Manage child entities with a master-detail relationship
+2. Perform uniqueness validation within the master's scope
+3. Support batch creation/modification of child entities
+
+### Why This Matters
+
+During batch operations (especially initialization), child entities are:
+1. Added to the parent's collection in memory (e.g., `master.getChildren().add(child)`)
+2. Parent is saved, which cascade-saves all children
+3. Validation runs per-child, but new children don't have IDs yet
+4. Result: **In-memory children are invisible to validation queries**
+
+This creates a validation gap where constraints can be violated during batch operations.
+
+### Implementation Pattern
+
+**WRONG - Only checks persisted entities:**
+```java
+private void validateUniqueness(final ChildEntity entity) {
+    final List<ChildEntity> allChildren = findByMaster(entity.getMaster());
+    // This only returns persisted children from database
+    // Misses in-memory children being created in the same batch
+}
+```
+
+**CORRECT - Checks both persisted AND in-memory entities:**
+```java
+private void validateUniqueness(final ChildEntity entity) {
+    final MasterEntity master = entity.getMaster();
+    
+    // Get persisted children from database
+    final List<ChildEntity> persistedChildren = findByMaster(master);
+    
+    // Combine with in-memory children from parent's collection
+    final Set<ChildEntity> allChildren = new HashSet<>(persistedChildren);
+    if (master.getChildren() != null) {
+        allChildren.addAll(master.getChildren());
+    }
+    
+    // Log validation coverage for debugging
+    LOGGER.debug("[Validation] Checking {} total children ({} persisted + {} in-memory)",
+        allChildren.size(), persistedChildren.size(), 
+        master.getChildren() != null ? master.getChildren().size() : 0);
+    
+    // Perform validation against ALL children
+    for (final ChildEntity existing : allChildren) {
+        // Skip self - use equals() for in-memory, ID for persisted
+        if (entity.equals(existing)) {
+            continue;
+        }
+        if (entity.getId() != null && existing.getId() != null 
+            && entity.getId().equals(existing.getId())) {
+            continue;
+        }
+        
+        // Check for constraint violations
+        if (violatesConstraint(entity, existing)) {
+            throw new CValidationException("Constraint violated");
+        }
+    }
+}
+```
+
+### Key Implementation Details
+
+1. **Use HashSet to combine sources** - Automatically deduplicates if an entity appears in both
+2. **Check entity.equals() for in-memory** - Works even when IDs are null
+3. **Check ID equality for persisted** - Standard comparison for database entities
+4. **Add debug logging** - Show count of persisted vs in-memory children checked
+
+### Common Master-Detail Patterns Requiring This Validation
+
+| Master Entity | Child Entity | Validation Scenario |
+|---------------|--------------|---------------------|
+| CKanbanLine | CKanbanColumn | Status uniqueness across columns |
+| CDetailSection | CDetailLines | Field name uniqueness within section |
+| CSprint | CSprintItem | Item uniqueness within sprint |
+| CWorkflow | CWorkflowStatusRelation | Transition uniqueness within workflow |
+| Any parent | Any ordered children | Order uniqueness within parent |
+
+### Example: CKanbanColumnService (Reference Implementation)
+
+See `CKanbanColumnService.validateStatusUniqueness()` for a complete working example:
+
+```java
+private void validateStatusUniqueness(final CKanbanColumn entity) {
+    // Skip if no data to validate
+    if (entity.getIncludedStatuses() == null || entity.getIncludedStatuses().isEmpty()) {
+        return;
+    }
+    
+    final CKanbanLine line = entity.getKanbanLine();
+    
+    // CRITICAL: Check BOTH persisted AND in-memory columns
+    final List<CKanbanColumn> persistedColumns = findByMaster(line);
+    final Set<CKanbanColumn> allColumns = new HashSet<>(persistedColumns);
+    
+    if (line.getKanbanColumns() != null) {
+        allColumns.addAll(line.getKanbanColumns());
+        LOGGER.debug("[KanbanValidation] Checking {} total columns ({} persisted + {} in-memory)",
+            allColumns.size(), persistedColumns.size(), line.getKanbanColumns().size());
+    }
+    
+    // Build constraint map from ALL columns
+    final Map<Long, String> statusToColumnMap = new HashMap<>();
+    for (final CKanbanColumn column : allColumns) {
+        if (entity.equals(column)) continue;
+        if (entity.getId() != null && column.getId() != null 
+            && column.getId().equals(entity.getId())) continue;
+        
+        // Add constraint data from this column
+        // ... validation logic ...
+    }
+    
+    // Check for violations
+    // ... throw CValidationException if found ...
+}
+```
+
+### Checklist for Implementing This Pattern
+
+When creating or reviewing validation logic in a child entity service:
+
+- [ ] Identify the master-detail relationship
+- [ ] Check if validation queries use `findByMaster()` or similar
+- [ ] Verify parent entity has a collection of children (e.g., `master.getChildren()`)
+- [ ] Combine persisted and in-memory children using `HashSet`
+- [ ] Use `entity.equals()` comparison in addition to ID comparison
+- [ ] Add debug logging showing counts of persisted vs in-memory
+- [ ] Test with batch initialization to verify validation catches violations
+- [ ] Document the validation pattern in the service class
+
+### Testing Requirements
+
+All services implementing this pattern MUST be tested for:
+1. **Single entity validation** - Creates one child, validates against persisted
+2. **Batch creation validation** - Creates multiple children together, validates against in-memory
+3. **Mixed scenario validation** - Creates children when some already exist
+
+### Related Patterns
+
+- **Fail-fast validation** - Throw exceptions immediately when constraints violated
+- **Defensive cleanup** - Remove violations after save as safeguard
+- **Debug logging** - Use consistent prefixes like `[Validation]` for troubleshooting
