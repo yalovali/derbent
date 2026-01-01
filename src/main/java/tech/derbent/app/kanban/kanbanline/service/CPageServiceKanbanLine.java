@@ -26,6 +26,7 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanBoard;
 import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
+import tech.derbent.app.kanban.kanbanline.view.CDialogKanbanStatusSelection;
 import tech.derbent.app.page.view.CDynamicPageViewWithoutGrid;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
@@ -92,49 +93,166 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		return componentKanbanColumns;
 	}
 
+	/** Handles kanban board drop events by updating sprint item status and kanban column assignment.
+	 * 
+	 * This is the core drag-drop workflow for the kanban board:
+	 * 1. Extract dragged sprint item from active drag start event
+	 * 2. Resolve target kanban column from drop event
+	 * 3. Update sprint item's kanban column ID (visual assignment)
+	 * 4. Resolve valid status(es) for target column (workflow-aware status mapping)
+	 * 5a. If ONE valid status: automatically set it and save
+	 * 5b. If MULTIPLE valid statuses: show selection dialog for user choice
+	 * 5c. If NO valid statuses: show warning, kanban column updates but status doesn't change
+	 * 6. Save project item to database
+	 * 7. Refresh kanban board to reflect changes
+	 * 
+	 * Status Resolution Logic:
+	 * - Gets statuses mapped to target column (column.getIncludedStatuses())
+	 * - Intersects with workflow-valid transitions (getValidNextStatuses())
+	 * - Single status: automatic transition
+	 * - Multiple statuses: user selection via dialog
+	 * - No statuses: warning notification
+	 * 
+	 * This ensures drag-drop respects both kanban column mappings AND workflow transition rules.
+	 */
 	private void handleKanbanDrop(final CDragDropEvent event) {
 		try {
 			LOGGER.debug("Handling Kanban board drop event.");
+			
+			// Step 1: Extract dragged sprint item from active drag start event
 			final CDragStartEvent dragStartEvent = getActiveDragStartEvent();
 			Check.notNull(dragStartEvent, "Active drag start event required for Kanban drop handling");
 			final Object draggedItem = dragStartEvent.getDraggedItems().isEmpty() ? null : dragStartEvent.getDraggedItems().get(0);
 			Check.instanceOf(draggedItem, CSprintItem.class, "Dragged item must be a sprint item for Kanban drop");
 			final CSprintItem sprintItem = (CSprintItem) draggedItem;
 			final CProjectItem<?> item = (CProjectItem<?>) sprintItem.getItem();
+			
+			// Step 2: Resolve target kanban column from drop event (column, post-it, or component)
 			final CKanbanColumn targetColumn = resolveTargetColumn(event);
 			Check.notNull(targetColumn, "Target column cannot be resolved for Kanban drop");
-			// set it? not here !
+			
+			// Step 3: Update sprint item's kanban column ID (visual assignment for board display)
 			sprintItem.setKanbanColumnId(targetColumn.getId());
+			
+			// Step 4: Resolve valid status(es) for target column
+			// This intersects column's included statuses with workflow-valid transitions
 			final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-			// these are the available statuses for the target column, intersected with the item next status of the workflow
 			final List<CProjectItemStatus> targetStatuses =
 					projectItemStatusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
+			
+			// Step 5: Handle status transition based on number of valid statuses
 			if (targetStatuses.isEmpty()) {
+				// Case 1: No valid status for this column - update column assignment but not status
 				LOGGER.warn("No statuses mapped to target column {}, sprint item {} status not changed.", targetColumn.getName(), sprintItem.getId());
 				CNotificationService.showWarning("The target column has no statuses mapped. Sprint item status was not changed.");
 				return;
 			}
-			final CProjectItemStatus targetStatus = targetStatuses.get(0);
-			if (targetStatuses.size() > 1) {
-				// TODO ask user to choose?
-				LOGGER.info("Multiple statuses mapped to target column {}, sprint item {} status set to first status" + " {}.",
-						targetColumn.getName(), sprintItem.getId(), targetStatus.getName());
-				CNotificationService
-						.showInfo("Multiple statuses are mapped to the target column. Sprint item status set to " + targetStatus.getName() + ".");
+			
+			if (targetStatuses.size() == 1) {
+				// Case 2: Exactly one valid status - automatically apply it
+				final CProjectItemStatus newStatus = targetStatuses.get(0);
+				LOGGER.info("Single status available for column {}, automatically setting status to {} for sprint item {}",
+						targetColumn.getName(), newStatus.getName(), sprintItem.getId());
+				applyStatusAndSave(item, sprintItem, newStatus);
+			} else {
+				// Case 3: Multiple valid statuses - show selection dialog for user to choose
+				LOGGER.info("Multiple statuses ({}) available for column {}, showing selection dialog for sprint item {}",
+						targetStatuses.size(), targetColumn.getName(), sprintItem.getId());
+				showStatusSelectionDialog(item, sprintItem, targetColumn, targetStatuses);
 			}
-			final CProjectItemStatus newStatus = targetStatuses.get(0);
-			((ISprintableItem) item).setStatus(newStatus);
-			// get the service of sprintItem.getItem() to save
-			final Class<?> projectItemServiceClass = CEntityRegistry.getServiceClassForEntity(item.getClass());
-			final CProjectItemService<?> projectItemService = (CProjectItemService<?>) CSpringContext.getBean(projectItemServiceClass);
-			projectItemService.revokeSave(item);
-			// .projectItemServiceClass.getMethod("save", sprintItem.getItem().getClass()).invoke(projectItemService, sprintItem.getItem());
-			componentKanbanBoard.refreshComponent();
-			setActiveDragStartEvent(null);
+			
+			// Clear active drag state (if not showing dialog, otherwise cleared after dialog closes)
+			if (targetStatuses.size() == 1 || targetStatuses.isEmpty()) {
+				setActiveDragStartEvent(null);
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Failed to handle Kanban board drop", e);
+			setActiveDragStartEvent(null);
 			throw e;
 		}
+	}
+	
+	/** Applies the selected status to the project item and saves it.
+	 * 
+	 * This method encapsulates the save logic so it can be called both from
+	 * automatic single-status transitions and from dialog-based multi-status selections.
+	 * 
+	 * @param item The project item to update
+	 * @param sprintItem The sprint item wrapping the project item
+	 * @param newStatus The status to apply
+	 */
+	private void applyStatusAndSave(final CProjectItem<?> item, final CSprintItem sprintItem, final CProjectItemStatus newStatus) {
+		try {
+			Check.notNull(item, "Project item cannot be null");
+			Check.notNull(sprintItem, "Sprint item cannot be null");
+			Check.notNull(newStatus, "New status cannot be null");
+			
+			// Update project item status
+			((ISprintableItem) item).setStatus(newStatus);
+			
+			// Save project item using its specific service (dynamic service lookup by entity class)
+			final Class<?> projectItemServiceClass = CEntityRegistry.getServiceClassForEntity(item.getClass());
+			final CProjectItemService<?> projectItemService = (CProjectItemService<?>) CSpringContext.getBean(projectItemServiceClass);
+			projectItemService.revokeSave(item);  // revokeSave = save bypassing some validations for system updates
+			
+			// Refresh kanban board to reflect changes
+			componentKanbanBoard.refreshComponent();
+			
+			// Show success notification
+			CNotificationService.showSuccess("Status updated to '" + newStatus.getName() + "'");
+			
+			LOGGER.info("Successfully updated sprint item {} status to {}", sprintItem.getId(), newStatus.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Failed to apply status and save project item", e);
+			CNotificationService.showError("Failed to update status: " + e.getMessage());
+			// Refresh board anyway to reset visual state
+			componentKanbanBoard.refreshComponent();
+			throw e;
+		}
+	}
+	
+	/** Shows a dialog for the user to select which status to apply when multiple valid statuses exist.
+	 * 
+	 * This dialog displays all valid statuses with their colors and icons, allowing the user
+	 * to choose the appropriate status for the transition. If the user cancels, the status
+	 * is not changed but the kanban column assignment remains (visual-only change).
+	 * 
+	 * @param item The project item being moved
+	 * @param sprintItem The sprint item wrapping the project item
+	 * @param targetColumn The column being dropped onto
+	 * @param targetStatuses List of valid statuses the user can choose from (must have at least 2 items)
+	 */
+	private void showStatusSelectionDialog(final CProjectItem<?> item, final CSprintItem sprintItem,
+			final CKanbanColumn targetColumn, final List<CProjectItemStatus> targetStatuses) {
+		Check.notNull(item, "Project item cannot be null");
+		Check.notNull(sprintItem, "Sprint item cannot be null");
+		Check.notNull(targetColumn, "Target column cannot be null");
+		Check.notEmpty(targetStatuses, "Target statuses list cannot be empty");
+		Check.isTrue(targetStatuses.size() >= 2, "Status selection dialog requires at least 2 statuses");
+		
+		// Create and open the status selection dialog
+		final CDialogKanbanStatusSelection dialog = new CDialogKanbanStatusSelection(
+			targetColumn.getName(),
+			targetStatuses,
+			selectedStatus -> {
+				// This callback is invoked when user selects a status or cancels
+				if (selectedStatus != null) {
+					// User selected a status: apply it and save
+					LOGGER.info("User selected status {} for sprint item {}", selectedStatus.getName(), sprintItem.getId());
+					applyStatusAndSave(item, sprintItem, selectedStatus);
+				} else {
+					// User cancelled: keep kanban column assignment but don't change status
+					LOGGER.info("User cancelled status selection for sprint item {}, keeping current status", sprintItem.getId());
+					CNotificationService.showInfo("Column changed but status remained the same.");
+					// Refresh board to show the item in the new column (even though status didn't change)
+					componentKanbanBoard.refreshComponent();
+				}
+				// Clear active drag state after dialog closes
+				setActiveDragStartEvent(null);
+			}
+		);
+		
+		dialog.open();
 	}
 
 	@SuppressWarnings ("unused")
