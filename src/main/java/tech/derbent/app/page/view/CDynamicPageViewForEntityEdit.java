@@ -84,7 +84,7 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 				crudToolbar.setValue(entity);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error setting current entity in toolbar: {}", e.getMessage());
+			LOGGER.error("Error setting current entity in toolbar", e);
 			throw e;
 		}
 	}
