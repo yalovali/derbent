@@ -115,11 +115,29 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 	@Override
 	public void onEntityDeleted(CEntityDB entity) throws Exception {
 		loadAndDisplaySingleEntity();
+		// Notify parent content owner (e.g., kanban board) to refresh after deletion
+		if (getContentOwner() != null) {
+			try {
+				getContentOwner().refreshGrid();
+				LOGGER.debug("Notified parent content owner to refresh after entity deletion");
+			} catch (final Exception e) {
+				LOGGER.warn("Failed to notify parent content owner after entity deletion: {}", e.getMessage());
+			}
+		}
 	}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
 	public void onEntitySaved(CEntityDB entity) throws Exception {
 		onEntitySelected(entity);
+		// Notify parent content owner (e.g., kanban board) to refresh after save
+		if (getContentOwner() != null) {
+			try {
+				getContentOwner().refreshGrid();
+				LOGGER.debug("Notified parent content owner to refresh after entity save");
+			} catch (final Exception e) {
+				LOGGER.warn("Failed to notify parent content owner after entity save: {}", e.getMessage());
+			}
+		}
 	}
 }

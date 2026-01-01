@@ -396,12 +396,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		if (selectedPostit != null) {
 			selectedPostit.setSelected(true);
 		} else {
-			CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService);
+			CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService, this);
 			return;
 		}
 		final ISprintableItem sprintableEntity = postit.resolveSprintableItem();
 		Check.instanceOf(sprintableEntity, CProjectItem.class, "Sprintable item must be a CEntityDB for Kanban board details display");
-		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter, sessionService);
+		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter, sessionService, this);
 	}
 
 	/** Reacts to kanban line changes by reloading sprints. */
@@ -527,6 +527,21 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
 			sprintItems = filterSprintItems(criteria);
 		}
+	}
+
+	/** Implements IContentOwner.refreshGrid() to refresh the kanban board when entity changes occur.
+	 * 
+	 * This method is called by child components (e.g., detail views) when entities are saved or deleted.
+	 * It reloads sprint items from the database and refreshes the kanban board UI to reflect changes.
+	 * 
+	 * This enables automatic updates when, for example, an activity's status is changed via the CRUD toolbar
+	 * in the detail view - the kanban board will automatically reflect the new status/column assignment.
+	 */
+	@Override
+	public void refreshGrid() throws Exception {
+		LOGGER.debug("Refreshing kanban board grid after entity change notification");
+		reloadSprintItems();
+		refreshComponent();
 	}
 
 	@Override
