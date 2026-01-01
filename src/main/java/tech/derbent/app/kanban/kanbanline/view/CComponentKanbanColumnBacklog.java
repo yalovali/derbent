@@ -12,14 +12,15 @@ import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.kanban.kanbanline.service.CPageServiceKanbanLine;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CComponentKanbanColumnBacklog - A specialized kanban column that displays the project backlog.
  * <p>
  * This component extends CComponentKanbanColumn to provide a dedicated backlog column in the kanban board. Unlike regular kanban columns that display
- * sprint items filtered by status, the backlog column displays all project items that are not assigned to any sprint.
- * The backlog is always displayed in compact mode (narrow, 220px width) with only name column and type/name filters visible.
+ * sprint items filtered by status, the backlog column displays all project items that are not assigned to any sprint. The backlog is always displayed
+ * in compact mode (narrow, 220px width) with only name column and type/name filters visible.
  * </p>
  * <h3>Key Features:</h3>
  * <ul>
@@ -60,14 +61,13 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumnBacklog.class);
 	private static final long serialVersionUID = 1L;
 	/** Backlog component embedded in this column */
-	private CComponentBacklog backlogComponent;
+	private final CComponentBacklog backlogComponent;
 	/** Drop target for handling drops onto the backlog area */
 	private DropTarget<CVerticalLayout> backlogDropTarget;
 	/** The project context for loading backlog items */
 	private final CProject project;
 
-	/** Creates a backlog kanban column for the specified project.
-	 * The backlog component is always created in compact mode for narrow display.
+	/** Creates a backlog kanban column for the specified project. The backlog component is always created in compact mode for narrow display.
 	 * @param project The project whose backlog items should be displayed (required)
 	 * @throws IllegalArgumentException if project is null */
 	public CComponentKanbanColumnBacklog(final CProject project) {
@@ -75,40 +75,14 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		Check.notNull(project, "Project cannot be null for backlog column");
 		this.project = project;
 		LOGGER.debug("Creating backlog kanban column for project: {}", project.getName());
-		
 		// Create backlog component in compact mode (always true for narrow display in kanban board)
 		backlogComponent = new CComponentBacklog(project, true);
-		
 		// Add backlog component to the column
 		add(backlogComponent);
-		
-		// Configure column styling for backlog
-		applyBacklogStyling();
-		
 		// Set up drag-drop for backlog items
 		setupBacklogDragDrop();
 	}
 
-	/** Applies backlog-specific styling to distinguish it from regular kanban columns. 
-	 * Uses a different background color and border to indicate it's the backlog area.
-	 * Sets fixed width for compact display (220px). */
-	private void applyBacklogStyling() {
-		// Override default kanban column styling with backlog-specific colors
-		getStyle().set("background-color", "#F5F5F5"); // Light gray background
-		getStyle().set("border", "2px dashed #BDBDBD"); // Dashed border to distinguish from regular columns
-		getStyle().set("border-radius", "10px");
-		setWidth("220px"); // Fixed width for compact display in kanban board
-		addClassName("kanban-column-backlog");
-	}
-
-	/** Gets the embedded backlog component. Useful for accessing backlog grid, items, and refresh methods.
-	 * @return The CComponentBacklog instance */
-	public CComponentBacklog getBacklogComponent() { return backlogComponent; }
-
-	/** Gets the project context for this backlog column.
-	 * @return The project whose backlog is displayed */
-	public CProject getProject() { return project; }
-	
 	/** Hook executed after drag-drop events are processed. Used to refresh the backlog display after items are added/removed. */
 	@Override
 	public void drag_checkEventAfterPass(final CEvent event) {
@@ -141,7 +115,8 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 				LOGGER.debug("Handling backlog drop event");
 				// Create drop event and propagate to page service
 				// The page service will detect this is a backlog drop and handle sprint removal
-				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("BacklogColumn"), this, this, // Target item is the backlog column itself
+				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("BacklogColumn"), this, this, // Target item is the backlog column
+																													// itself
 						null, // No specific drop location for backlog
 						true // Drop is allowed
 				);
@@ -151,6 +126,14 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 			}
 		};
 	}
+
+	/** Gets the embedded backlog component. Useful for accessing backlog grid, items, and refresh methods.
+	 * @return The CComponentBacklog instance */
+	public CComponentBacklog getBacklogComponent() { return backlogComponent; }
+
+	/** Gets the project context for this backlog column.
+	 * @return The project whose backlog is displayed */
+	public CProject getProject() { return project; }
 
 	/** Refreshes the backlog component to reload items from database. Called after drag-drop operations or when sprint items change. */
 	public void refreshBacklog() {
