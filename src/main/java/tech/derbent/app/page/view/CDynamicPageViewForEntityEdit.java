@@ -70,4 +70,22 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 			CNotificationService.showException("Error handling entity selection", e);
 		}
 	}
+
+	/** Overrides setValue to notify the CRUD toolbar about the current entity.
+	 * This ensures the toolbar buttons are enabled/disabled based on whether an entity is selected.
+	 * @param entity The entity to set as current, or null to clear */
+	@Override
+	public void setValue(final CEntityDB<?> entity) {
+		LOGGER.debug("Setting current entity in dynamic page view for entity edit: {}", entity);
+		try {
+			super.setValue(entity);
+			// Notify CRUD toolbar about the current entity to update button states
+			if (crudToolbar != null) {
+				crudToolbar.setValue(entity);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error setting current entity in toolbar", e);
+			throw e;
+		}
+	}
 }

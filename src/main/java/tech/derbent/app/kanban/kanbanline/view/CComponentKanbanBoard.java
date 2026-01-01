@@ -151,6 +151,20 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			currentSprint = criteria.getSprint();
 			loadSprintItemsForSprint(currentSprint);
 		}
+		sprintItems = filterSprintItems(criteria);
+		refreshComponent();
+	}
+
+	/** Filters sprint items based on the provided criteria.
+	 * 
+	 * Applies the following filters:
+	 * - Entity type filter (if specified in criteria)
+	 * - Responsible user filter (if specified in criteria)
+	 * 
+	 * @param criteria The filter criteria to apply
+	 * @return Filtered list of sprint items matching the criteria
+	 */
+	private List<CSprintItem> filterSprintItems(final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria) {
 		final List<CSprintItem> filtered = new ArrayList<>();
 		for (final CSprintItem sprintItem : allSprintItems) {
 			if (sprintItem == null || sprintItem.getItem() == null) {
@@ -164,8 +178,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			}
 			filtered.add(sprintItem);
 		}
-		sprintItems = filtered;
-		refreshComponent();
+		return filtered;
 	}
 
 	/** Assigns each sprint item to a kanban column id before rendering.
@@ -383,12 +396,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		if (selectedPostit != null) {
 			selectedPostit.setSelected(true);
 		} else {
-			CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService);
+			CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService, this);
 			return;
 		}
 		final ISprintableItem sprintableEntity = postit.resolveSprintableItem();
 		Check.instanceOf(sprintableEntity, CProjectItem.class, "Sprintable item must be a CEntityDB for Kanban board details display");
-		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter, sessionService);
+		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter, sessionService, this);
 	}
 
 	/** Reacts to kanban line changes by reloading sprints. */
@@ -496,6 +509,39 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			layoutColumns.add(columnComponent);
 		}
 		on_postit_selected(null);
+	}
+
+	/** Reloads sprint items from database to reflect persisted changes.
+	 * 
+	 * This method is called after drag-drop operations to ensure the UI displays
+	 * the latest data from the database. Without reloading, the in-memory list
+	 * contains stale objects that don't reflect recent kanbanColumnId or status changes.
+	 * 
+	 * After reloading, filters are reapplied to maintain the current filter state.
+	 */
+	public void reloadSprintItems() {
+		LOGGER.debug("Reloading sprint items from database for Kanban board");
+		if (currentSprint != null && currentSprint.getId() != null) {
+			loadSprintItemsForSprint(currentSprint);
+			// Reapply filters to maintain filter state after reload
+			final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
+			sprintItems = filterSprintItems(criteria);
+		}
+	}
+
+	/** Implements IContentOwner.refreshGrid() to refresh the kanban board when entity changes occur.
+	 * 
+	 * This method is called by child components (e.g., detail views) when entities are saved or deleted.
+	 * It reloads sprint items from the database and refreshes the kanban board UI to reflect changes.
+	 * 
+	 * This enables automatic updates when, for example, an activity's status is changed via the CRUD toolbar
+	 * in the detail view - the kanban board will automatically reflect the new status/column assignment.
+	 */
+	@Override
+	public void refreshGrid() throws Exception {
+		LOGGER.debug("Refreshing kanban board grid after entity change notification");
+		reloadSprintItems();
+		refreshComponent();
 	}
 
 	@Override
