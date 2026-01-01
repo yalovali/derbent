@@ -151,6 +151,16 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			currentSprint = criteria.getSprint();
 			loadSprintItemsForSprint(currentSprint);
 		}
+		sprintItems = filterSprintItems(criteria);
+		refreshComponent();
+	}
+
+	/** Filters sprint items based on the provided criteria.
+	 * 
+	 * @param criteria The filter criteria to apply
+	 * @return Filtered list of sprint items matching the criteria
+	 */
+	private List<CSprintItem> filterSprintItems(final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria) {
 		final List<CSprintItem> filtered = new ArrayList<>();
 		for (final CSprintItem sprintItem : allSprintItems) {
 			if (sprintItem == null || sprintItem.getItem() == null) {
@@ -164,8 +174,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			}
 			filtered.add(sprintItem);
 		}
-		sprintItems = filtered;
-		refreshComponent();
+		return filtered;
 	}
 
 	/** Assigns each sprint item to a kanban column id before rendering.
@@ -512,20 +521,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			loadSprintItemsForSprint(currentSprint);
 			// Reapply filters to maintain filter state after reload
 			final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
-			final List<CSprintItem> filtered = new ArrayList<>();
-			for (final CSprintItem sprintItem : allSprintItems) {
-				if (sprintItem == null || sprintItem.getItem() == null) {
-					continue;
-				}
-				if (!matchesTypeFilter(sprintItem, criteria.getEntityType())) {
-					continue;
-				}
-				if (!matchesResponsibleFilter(sprintItem, criteria)) {
-					continue;
-				}
-				filtered.add(sprintItem);
-			}
-			sprintItems = filtered;
+			sprintItems = filterSprintItems(criteria);
 		}
 	}
 
