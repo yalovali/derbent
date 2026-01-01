@@ -1511,3 +1511,127 @@ public class CPageTestAuxillary extends Main {
 - Seed data and workflow/type defaults must validate tenant ownership (`Check.isSameCompany`) before binding statuses, roles, or workflows together.
 - When no context is available, treat it as a bug: fail fast rather than silently choosing a global random record.
 - Initializers that attach workflows or statuses must pass explicit project/company context into `getRandom(...)` and assert the workflow/status is non-null before saving the entity.
+
+## Kanban Board Validation Rules (CRITICAL)
+
+### Rule: Status Uniqueness Across Columns (MANDATORY)
+
+**Each status must be mapped to AT MOST ONE column within a kanban line.**
+
+#### Why This Matters
+
+If a status is mapped to multiple columns (status overlap), it creates:
+1. **Display Ambiguity**: System cannot determine which column should display items with that status
+2. **Drag-Drop Errors**: Incorrect column assignment during status changes
+3. **Data Inconsistency**: Items could conceptually appear in multiple columns
+
+#### Implementation Requirements
+
+**Validation Layer 1: Fail-Fast Check** (Primary Defense)
+```java
+// In CKanbanColumnService.validateStatusUniqueness()
+// Runs during validateEntity() before save
+// Throws CValidationException immediately if overlap detected
+// Prevents invalid configuration from reaching database
+
+private void validateStatusUniqueness(final CKanbanColumn entity) {
+    // Check if any status in this column already exists in another column
+    // Build map of statusId -> columnName for all other columns
+    // If overlap found: throw CValidationException with clear error message
+}
+```
+
+**Validation Layer 2: Automatic Cleanup** (Safeguard)
+```java
+// In CKanbanColumnService.applyStatusAndDefaultConstraints()
+// Runs after save as defensive programming
+// Removes overlapping statuses from other columns automatically
+// Logs all removals for debugging
+
+private void applyStatusAndDefaultConstraints(final CKanbanColumn saved) {
+    // For each status in saved column:
+    //   Remove that status from all other columns in the line
+    //   Log removal count for debugging
+}
+```
+
+#### Error Message Format
+
+When validation fails, provide clear, actionable error:
+
+```
+Status overlap detected in kanban line 'Sprint Board': 
+The following statuses are already mapped to other columns: 
+'In Progress' (already in column 'Active Tasks'), 
+'Testing' (already in column 'QA Column'). 
+Each status must be mapped to exactly one column to avoid 
+ambiguity in kanban board display.
+```
+
+#### Debug Logging Requirements
+
+All kanban column operations must include detailed logging:
+
+```java
+// Status mapping
+LOGGER.debug("[KanbanValidation] Mapping status id {}:{} to column id {}", 
+    statusId, statusName, columnId);
+
+// Overlap detection
+LOGGER.warn("[KanbanValidation] Status overlap detected: status '{}' (ID: {}) " +
+    "is mapped to both column '{}' and column '{}'", 
+    statusName, statusId, existingColumnName, newColumnName);
+
+// Automatic cleanup
+LOGGER.info("[KanbanValidation] Enforced status uniqueness: removed {} " +
+    "overlapping status mapping(s) from other columns in kanban line '{}'",
+    removalCount, lineName);
+
+// Validation success
+LOGGER.debug("[KanbanValidation] Status uniqueness validated successfully " +
+    "for column '{}' with {} status(es)", columnName, statusCount);
+```
+
+### Rule: Single Default Column per Kanban Line
+
+**Only one column can be marked as defaultColumn=true within a kanban line.**
+
+The default column serves as a fallback for items whose status is not explicitly mapped to any column.
+
+#### Enforcement
+
+When saving a column with `defaultColumn=true`:
+1. Automatically remove `defaultColumn=true` from all other columns
+2. Log the change for debugging
+
+```java
+if (isDefaultColumn && column.getDefaultColumn()) {
+    LOGGER.debug("[KanbanValidation] Removing default flag from column '{}' " +
+        "(ID: {}) because column '{}' (ID: {}) is now the default",
+        column.getName(), column.getId(), saved.getName(), saved.getId());
+    column.setDefaultColumn(false);
+}
+```
+
+### Rule: Workflow-Aware Status Transitions
+
+When items are dragged between kanban columns:
+
+1. **Resolve valid statuses**: Intersect column's included statuses with workflow-valid transitions
+2. **Single status**: Automatically apply it
+3. **Multiple statuses**: Show selection dialog for user choice
+4. **No valid statuses**: Show warning, update column but not status
+
+```java
+// Example: Item with status "To Do" dropped on "Completed" column
+// 1. Get column statuses: ["Done", "Closed"]  
+// 2. Get workflow transitions from "To Do": ["In Progress"]
+// 3. Intersect: [] (empty - no valid transition)
+// 4. Action: Show warning, don't change status
+```
+
+### Related Documentation
+
+- [Kanban Board Workflow](../../features/kanban-board-workflow.md) - Complete kanban system documentation
+- [Workflow Status Change Pattern](../../development/workflow-status-change-pattern.md) - Workflow validation patterns
+- [Drag-Drop Component Pattern](../drag-drop-component-pattern.md) - Drag-drop implementation guide
