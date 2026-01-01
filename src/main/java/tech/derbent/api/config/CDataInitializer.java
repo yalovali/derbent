@@ -759,7 +759,25 @@ public class CDataInitializer {
 				relation.getRoles().add(filteredRoles.get(0));
 			}
 			workflowStatusRelationService.save(relation);
+			if (i > 0) {
+				// Also add a backward transition for demonstration
+				final CWorkflowStatusRelation backRelation = new CWorkflowStatusRelation();
+				backRelation.setWorkflowEntity(activityWorkflow);
+				backRelation.setFromStatus(filteredStatuses.get(i + 1));
+				backRelation.setToStatus(filteredStatuses.get(i));
+				// Add second role to the backward transition if available
+				if (filteredRoles.size() > 1) {
+					backRelation.getRoles().add(filteredRoles.get(1));
+				}
+				workflowStatusRelationService.save(backRelation);
+			}
 		}
+		// for the last status:
+		final CWorkflowStatusRelation finalRelation = new CWorkflowStatusRelation();
+		finalRelation.setWorkflowEntity(activityWorkflow);
+		finalRelation.setFromStatus(filteredStatuses.get(filteredStatuses.size() - 1));
+		finalRelation.setToStatus(filteredStatuses.get(0)); // No next status
+		workflowStatusRelationService.save(finalRelation);
 	}
 
 	/** Initialize sample workflow entities to demonstrate workflow management.
@@ -880,17 +898,17 @@ public class CDataInitializer {
 					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-                                        /******************* SAMPLES **************************/
-                                        // Project-specific type and configuration entities
-                                        CSystemSettingsInitializerService.initializeSample(project, minimal);
-                                        CGridEntityInitializerService.initializeSample(project, minimal);
-                                        CMasterInitializerService.initializeSample(project, minimal);
-                                        CCurrencyInitializerService.initializeSample(project, minimal);
-                                        CUserProjectRoleInitializerService.initializeSample(project, minimal);
+					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					/******************* SAMPLES **************************/
+					// Project-specific type and configuration entities
+					CSystemSettingsInitializerService.initializeSample(project, minimal);
+					CGridEntityInitializerService.initializeSample(project, minimal);
+					CMasterInitializerService.initializeSample(project, minimal);
+					CCurrencyInitializerService.initializeSample(project, minimal);
+					CUserProjectRoleInitializerService.initializeSample(project, minimal);
 					// types
 					initializeSampleWorkflowEntities(project, minimal);
 					CMeetingTypeInitializerService.initializeSample(project, minimal);
@@ -923,15 +941,15 @@ public class CDataInitializer {
 					CMilestoneInitializerService.initializeSample(project, minimal);
 					initializeSampleTickets(project, minimal);
 					CProviderInitializerService.initializeSample(project, minimal);
-                                        CProductInitializerService.initializeSample(project, minimal);
-                                        CProjectComponentInitializerService.initializeSample(project, minimal);
-                                        initializeSampleProjectExpenses(project, minimal);
-                                        initializeSampleProjectIncomes(project, minimal);
-                                        COrderApprovalInitializerService.initializeSample(project, minimal);
-                                        initializeSampleTeams(project, minimal);
-                                        CRiskInitializerService.initializeSample(project, minimal);
-                                        CSprintInitializerService.initializeSample(project, minimal);
-                                        CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CProductInitializerService.initializeSample(project, minimal);
+					CProjectComponentInitializerService.initializeSample(project, minimal);
+					initializeSampleProjectExpenses(project, minimal);
+					initializeSampleProjectIncomes(project, minimal);
+					COrderApprovalInitializerService.initializeSample(project, minimal);
+					initializeSampleTeams(project, minimal);
+					CRiskInitializerService.initializeSample(project, minimal);
+					CSprintInitializerService.initializeSample(project, minimal);
+					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {
 						break;
 					}
