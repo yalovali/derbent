@@ -1,6 +1,7 @@
 package tech.derbent.app.kanban.kanbanline.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
@@ -53,11 +54,48 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	private static CKanbanColumn createColumn(String name, final CCompany company, final CProjectItemStatusService statusService,
-			final CKanbanLine line) {
+	/** Creates a kanban column with specific statuses by name.
+	 * 
+	 * This ensures each status is only assigned to one column, preventing the status overlap
+	 * validation error. Statuses are looked up by name to ensure predictable kanban board
+	 * configurations that match common agile workflows.
+	 * 
+	 * @param name Column display name
+	 * @param company Company context for status lookup
+	 * @param statusService Service for finding statuses
+	 * @param line Parent kanban line
+	 * @param statusNames Array of status names to include in this column
+	 * @return Created column with assigned statuses
+	 */
+	private static CKanbanColumn createColumn(final String name, final CCompany company, 
+			final CProjectItemStatusService statusService, final CKanbanLine line, final String... statusNames) {
 		final CKanbanColumn item = new CKanbanColumn(name, line);
 		item.setColor(CColorUtils.getRandomFromWebColors(false));
-		item.setIncludedStatuses(List.of(statusService.getRandom(company), statusService.getRandom(company)));
+		
+		// Look up statuses by name to ensure predictable, non-overlapping assignments
+		final List<CProjectItemStatus> statuses = new java.util.ArrayList<>();
+		for (final String statusName : statusNames) {
+			try {
+				final Optional<CProjectItemStatus> statusOpt = statusService.findByNameAndCompany(statusName, company);
+				if (statusOpt.isPresent()) {
+					final CProjectItemStatus status = statusOpt.get();
+					statuses.add(status);
+					LOGGER.debug("[KanbanInit] Assigning status '{}' (ID: {}) to column '{}'", 
+						statusName, status.getId(), name);
+				} else {
+					LOGGER.warn("[KanbanInit] Status '{}' not found for column '{}', skipping", statusName, name);
+				}
+			} catch (final Exception e) {
+				LOGGER.error("[KanbanInit] Error looking up status '{}': {}", statusName, e.getMessage());
+			}
+		}
+		
+		if (!statuses.isEmpty()) {
+			item.setIncludedStatuses(statuses);
+		} else {
+			LOGGER.warn("[KanbanInit] Column '{}' has no valid statuses assigned", name);
+		}
+		
 		line.addKanbanColumn(item);
 		return item;
 	}
@@ -103,32 +141,57 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 				menuOrder + ".1");
 	}
 
-	/** Seeds default kanban lines and columns for a company. */
+	/** Seeds default kanban lines and columns for a company.
+	 * 
+	 * Creates two example kanban boards with proper agile workflow mappings:
+	 * 1. "Agile Development Board" - Classic Scrum/Kanban workflow
+	 * 2. "Simple Task Board" - Simplified 3-column board
+	 * 
+	 * Each status is assigned to exactly ONE column to prevent status overlap validation errors.
+	 * The column-to-status mapping follows common agile practices:
+	 * - Backlog: Items not yet started
+	 * - In Progress: Active work  
+	 * - Review/QA: Work pending review
+	 * - Done: Completed work (default column for unmapped statuses)
+	 */
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] sampleLines = {
 				{
-						"Default Kanban", "Backlog to done overview"
+						"Agile Development Board", "Classic Scrum/Kanban workflow from backlog to done"
 				}, {
-						"Team Swimlanes", "Single row Kanban board per team"
+						"Simple Task Board", "Simplified 3-column task management board"
 				}
 		};
 		final CProjectItemStatusService statusService =
 				(CProjectItemStatusService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(CProjectItemStatus.class));
+		
+		LOGGER.info("[KanbanInit] Initializing sample kanban lines for company '{}' (ID: {})", 
+			company.getName(), company.getId());
+		
 		initializeCompanyEntity(sampleLines, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
 				company, minimal, (entity, index) -> {
 					Check.instanceOf(entity, CKanbanLine.class, "Expected Kanban line for column initialization");
 					final CKanbanLine line = (CKanbanLine) entity;
+					
 					if (index == 0) {
-						createColumn("Backlog", company, statusService, line);
-						createColumn("In Progress", company, statusService, line);
-						createColumn("In Progress", company, statusService, line);
-						createColumn("Done", company, statusService, line).setDefaultColumn(true);
+						// Agile Development Board: 4-column workflow
+						// Each status is assigned to EXACTLY ONE column to prevent overlap
+						LOGGER.info("[KanbanInit] Creating Agile Development Board with 4 columns");
+						createColumn("Backlog", company, statusService, line, "Not Started");
+						createColumn("In Progress", company, statusService, line, "In Progress");
+						createColumn("On Hold / Review", company, statusService, line, "On Hold");
+						createColumn("Done", company, statusService, line, "Completed", "Cancelled").setDefaultColumn(true);
 					} else {
-						createColumn("To Do", company, statusService, line);
-						createColumn("Doing", company, statusService, line);
-						createColumn("Review", company, statusService, line);
-						createColumn("Done", company, statusService, line).setDefaultColumn(true);
+						// Simple Task Board: 3-column workflow  
+						// Simplified board grouping statuses differently
+						LOGGER.info("[KanbanInit] Creating Simple Task Board with 3 columns");
+						createColumn("To Do", company, statusService, line, "Not Started");
+						createColumn("Doing", company, statusService, line, "In Progress", "On Hold");
+						createColumn("Done", company, statusService, line, "Completed", "Cancelled").setDefaultColumn(true);
 					}
+					
+					LOGGER.info("[KanbanInit] Completed initialization of kanban line '{}' with {} columns",
+						line.getName(), line.getKanbanColumns().size());
 				});
 	}
 }
