@@ -545,5 +545,17 @@ These standards should be enforced through:
 3. Team coding guidelines
 4. Automated checks where possible
 
-**Last Updated:** 2025-11-29
-**Version:** 1.1
+## Related Documentation
+
+### Architecture and Design
+- [Coding Standards](../architecture/coding-standards.md) - General coding standards
+- [UI, CSS, and Layout Coding Standards](../architecture/ui-css-coding-standards.md) - **UI styling and layout patterns**
+- [Service Layer Patterns](../architecture/service-layer-patterns.md)
+- [View Layer Patterns](../architecture/view-layer-patterns.md)
+
+### Development Guidelines
+- [GitHub Copilot Guidelines](copilot-guidelines.md) - AI agent usage patterns
+
+**Last Updated:** 2026-01-01
+**Version:** 1.2
+
