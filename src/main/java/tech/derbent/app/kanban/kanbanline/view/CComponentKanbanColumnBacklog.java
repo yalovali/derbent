@@ -326,6 +326,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	/**
 	 * Sets up drag-drop functionality for backlog items.
 	 * Configures both drag (from backlog) and drop (to backlog) capabilities.
+	 * Also sets up selection notification forwarding to parent components.
 	 */
 	private void setupBacklogDragDrop() {
 		// Enable dragging from backlog grid (backlog component handles this)
@@ -335,6 +336,10 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		// This allows the page service to handle backlog item drags
 		setupChildDragDropForwarding(backlogComponent);
 		
+		// Forward selection events from backlog component to parent (kanban board)
+		// This allows the board to display selected item details in the entity view
+		setupSelectionNotification(backlogComponent);
+		
 		// Set up drop target on the entire backlog column
 		// This allows dropping sprint items onto the backlog to remove them from sprint
 		backlogDropTarget = DropTarget.create(this);
@@ -342,6 +347,6 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		backlogDropTarget.addDropListener(drag_on_backlog_drop());
 		backlogDropTarget.setActive(true);
 		
-		LOGGER.debug("Backlog drag-drop configured");
+		LOGGER.debug("Backlog drag-drop and selection notification configured");
 	}
 }

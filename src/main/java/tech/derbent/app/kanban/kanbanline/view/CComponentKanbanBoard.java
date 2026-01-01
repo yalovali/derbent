@@ -32,6 +32,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
@@ -443,6 +444,32 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		Check.instanceOf(sprintableEntity, CProjectItem.class, "Sprintable item must be a CEntityDB for Kanban board details display");
 		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter, sessionService, this);
 	}
+	
+	/** Handles selection of backlog items to display details in the entity view.
+	 * Similar to postit selection but for items selected from the backlog grid. */
+	private void on_backlog_item_selected(final CSelectEvent selectEvent) {
+		// Get the backlog component from the event source
+		Check.instanceOf(selectEvent.getSource(), CComponentBacklog.class, 
+			"Selection event source must be CComponentBacklog");
+		final CComponentBacklog backlogComponent = (CComponentBacklog) selectEvent.getSource();
+		final CProjectItem<?> selectedItem = backlogComponent.getSelectedBacklogItem();
+		
+		LOGGER.debug("Kanban board backlog item selection changed to {}", selectedItem != null ? selectedItem.getId() : "null");
+		
+		// Clear postit selection when backlog item is selected
+		if (selectedPostit != null) {
+			selectedPostit.setSelected(false);
+			selectedPostit = null;
+		}
+		
+		if (selectedItem == null) {
+			CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService, this);
+			return;
+		}
+		
+		// Display the selected backlog item in the details view
+		CDynamicPageRouter.displayEntityInDynamicOnepager(selectedItem, currentEntityPageRouter, sessionService, this);
+	}
 
 	/** Reacts to kanban line changes by reloading sprints. */
 	@Override
@@ -624,8 +651,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	@Override
 	public void select_checkEventBeforePass(final CEvent event) {
 		Check.notNull(event, "Selection event cannot be null for Kanban board");
-		if (event instanceof final CSelectEvent selectEvent && selectEvent.getSource() instanceof final CComponentKanbanPostit postit) {
-			on_postit_selected(postit);
+		if (event instanceof final CSelectEvent selectEvent) {
+			if (selectEvent.getSource() instanceof final CComponentKanbanPostit postit) {
+				// Selection from kanban postit
+				on_postit_selected(postit);
+			} else if (selectEvent.getSource() instanceof CComponentBacklog) {
+				// Selection from backlog component
+				on_backlog_item_selected(selectEvent);
+			}
 		}
 	}
 

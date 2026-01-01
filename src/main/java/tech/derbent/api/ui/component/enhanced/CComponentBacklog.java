@@ -1,14 +1,18 @@
 package tech.derbent.api.ui.component.enhanced;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.ComponentEventListener;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.interfaces.CSelectEvent;
+import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CEvent;
@@ -21,10 +25,13 @@ import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.projects.domain.CProject;
 
-public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable {
+public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable, IHasSelectionNotification {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
+	
+	/** Selection listeners for notification pattern */
+	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 
 	/** Creates the list of entity type configurations for the backlog.
 	 * @return list of entity type configs (CActivity, CMeeting) */
@@ -77,6 +84,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	private final CActivityService activityService;
 	private final boolean compactMode;
 	private final CMeetingService meetingService;
+	/** Currently selected backlog item for detail display */
+	private CProjectItem<?> selectedBacklogItem;
 
 	/** Constructor for backlog component.
 	 * @param project project to load backlog items for (required) */
@@ -183,6 +192,50 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		pageService.registerComponent(componentName, this);
 		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())",
 				getClass().getSimpleName(), componentName);
+	}
+	
+	/** Overridden to propagate selection events to listeners (e.g., kanban board).
+	 * When an item is selected in the backlog grid, this notifies the parent container
+	 * to display the item details in the entity detail view. */
+	@Override
+	protected void on_gridItems_singleSelectionChanged(final CProjectItem<?> value) {
+		super.on_gridItems_singleSelectionChanged(value);
+		
+		// Store selected item for retrieval by parent
+		selectedBacklogItem = value;
+		
+		// Propagate selection event to listeners (following kanban postit pattern)
+		if (value != null) {
+			LOGGER.debug("Backlog item selected: {} ({})", value.getId(), value.getClass().getSimpleName());
+			select_notifyEvents(new CSelectEvent(this, true));
+		} else {
+			LOGGER.debug("Backlog selection cleared");
+			select_notifyEvents(new CSelectEvent(this, true));
+		}
+	}
+	
+	/** Gets the currently selected backlog item.
+	 * @return The selected project item or null if no selection */
+	public CProjectItem<?> getSelectedBacklogItem() {
+		return selectedBacklogItem;
+	}
+	
+	// IHasSelectionNotification implementation
+	
+	@Override
+	public void select_checkEventAfterPass(final CEvent event) {
+		LOGGER.debug("[BacklogSelect] Selection event propagated");
+	}
+	
+	@Override
+	public void select_checkEventBeforePass(final CEvent event) {
+		Check.notNull(event, "Selection event cannot be null for backlog");
+		LOGGER.debug("[BacklogSelect] Processing selection event from backlog");
+	}
+	
+	@Override
+	public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners() {
+		return selectListeners;
 	}
 
 	private void saveStoryPoint(final ISprintableItem item) {
