@@ -30,6 +30,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
+	
+	/** ThreadLocal to pass compactMode to create_gridSearchToolbar() during constructor initialization.
+	 * This is necessary because create_gridSearchToolbar() is called from the parent constructor
+	 * (via setupComponent()) before the compactMode field is initialized in this class. */
+	private static final ThreadLocal<Boolean> COMPACT_MODE_INIT = new ThreadLocal<>();
 
 	/** Creates the list of entity type configurations for the backlog.
 	 * @return list of entity type configs (CActivity, CMeeting) */
@@ -41,6 +46,15 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		entityTypes.add(new EntityTypeConfig<>("CActivity", CActivity.class, activityService));
 		entityTypes.add(new EntityTypeConfig<>("CMeeting", CMeeting.class, meetingService));
 		return entityTypes;
+	}
+	
+	/** Helper method to set up ThreadLocal for compact mode initialization.
+	 * This is called inline in super() constructor call to set the ThreadLocal before setupComponent() executes.
+	 * @param compactMode the compact mode flag to store
+	 * @return the same entity types list (for chaining in super() call) */
+	private static List<EntityTypeConfig<?>> createEntityTypesWithCompactMode(final boolean compactMode) {
+		COMPACT_MODE_INIT.set(compactMode);
+		return createEntityTypes();
 	}
 
 	/** Creates the items provider that loads all project items ordered by sprint order.
@@ -97,13 +111,22 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param project     project to load backlog items for (required)
 	 * @param compactMode true for compact display (only name column in grid, only type selector in toolbar), false for full display */
 	public CComponentBacklog(final CProject project, final boolean compactMode) {
-		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
-		Check.notNull(project, "Project cannot be null");
-		this.compactMode = compactMode;
-		activityService = CSpringContext.getBean(CActivityService.class);
-		meetingService = CSpringContext.getBean(CMeetingService.class);
-		setDynamicHeight("600px");
-		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
+		// CRITICAL: Store compactMode in ThreadLocal BEFORE calling super()
+		// Use helper method that sets ThreadLocal and returns entity types
+		// The parent constructor calls setupComponent() which calls create_gridSearchToolbar()
+		// At that point, the compactMode field hasn't been initialized yet, so we use ThreadLocal
+		super(createEntityTypesWithCompactMode(compactMode), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+		try {
+			Check.notNull(project, "Project cannot be null");
+			this.compactMode = compactMode;
+			activityService = CSpringContext.getBean(CActivityService.class);
+			meetingService = CSpringContext.getBean(CMeetingService.class);
+			setDynamicHeight("600px");
+			LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
+		} finally {
+			// Always clean up ThreadLocal to prevent memory leaks
+			COMPACT_MODE_INIT.remove();
+		}
 	}
 
 	@Override
@@ -130,17 +153,32 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		}
 	}
 
-	/** Factory method for search toolbar - overridden to support compact mode configuration. */
+	/** Factory method for search toolbar - overridden to support compact mode configuration.
+	 * <p>
+	 * NOTE: This method is called from the parent's constructor (via setupComponent()) before 
+	 * the compactMode field is initialized. Therefore, we retrieve the value from ThreadLocal 
+	 * storage instead of using the field directly.
+	 * </p> */
 	@Override
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
+		// Retrieve compactMode from ThreadLocal (set before super() call in constructor)
+		// This is necessary because this method is called during parent constructor initialization
+		final Boolean compactModeFromInit = COMPACT_MODE_INIT.get();
+		final boolean isCompactMode = (compactModeFromInit != null) ? compactModeFromInit : false;
+		
+		LOGGER.debug("create_gridSearchToolbar called with compactMode: {} (from ThreadLocal: {})", 
+			isCompactMode, compactModeFromInit != null ? "yes" : "no (using default false)");
+		
 		// Create toolbar with compact config if needed
 		final CComponentGridSearchToolbar.ToolbarConfig config = new CComponentGridSearchToolbar.ToolbarConfig();
-		if (compactMode) {
+		if (isCompactMode) {
 			// Compact mode: hide all filters, leaving only the type selector combobox
 			config.setIdFilter(false).setNameFilter(false).setDescriptionFilter(false).setStatusFilter(false).setClearButton(false);
+			LOGGER.debug("Configured toolbar for COMPACT mode - all filters hidden");
 		} else {
 			// Normal mode: show all filters
 			config.showAll();
+			LOGGER.debug("Configured toolbar for NORMAL mode - all filters visible");
 		}
 		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar(config);
 		return toolbar;
