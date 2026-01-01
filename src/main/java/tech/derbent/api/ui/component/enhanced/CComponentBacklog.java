@@ -75,26 +75,76 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	private final CActivityService activityService;
+	private final boolean compactMode;
 	private final CMeetingService meetingService;
 
 	/** Constructor for backlog component.
 	 * @param project project to load backlog items for (required) */
 	public CComponentBacklog(final CProject project) {
+		this(project, false);
+	}
+	
+	/** Constructor for backlog component with compact mode option.
+	 * @param project project to load backlog items for (required)
+	 * @param compactMode true for compact display (only name column and type/name filters), false for full display */
+	public CComponentBacklog(final CProject project, final boolean compactMode) {
 		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
 		Check.notNull(project, "Project cannot be null");
+		this.compactMode = compactMode;
 		activityService = CSpringContext.getBean(CActivityService.class);
 		meetingService = CSpringContext.getBean(CMeetingService.class);
 		setDynamicHeight("600px");
-		LOGGER.debug("CComponentBacklog created for project: {}", project.getId());
+		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
 	}
 
 	@Override
 	public void configureGrid(final CGrid<CProjectItem<?>> grid) {
-		super.configureGrid(grid);
-		grid.addStoryPointColumn(item -> {
-			Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
-			return (ISprintableItem) item;
-		}, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
+		// Clear existing columns first
+		grid.getColumns().forEach(grid::removeColumn);
+		
+		// In compact mode, only show name column
+		if (compactMode) {
+			grid.addShortTextColumn(item -> {
+				if (item instanceof tech.derbent.api.entity.domain.CEntityNamed) {
+					return ((tech.derbent.api.entity.domain.CEntityNamed<?>) item).getName();
+				}
+				return item.toString();
+			}, "Name", "name");
+			LOGGER.debug("Configured backlog grid in compact mode - only name column visible");
+		} else {
+			// In normal mode, call parent to configure standard columns
+			super.configureGrid(grid);
+			// Add story point column
+			grid.addStoryPointColumn(item -> {
+				Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
+				return (ISprintableItem) item;
+			}, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
+		}
+	}
+	
+	/** Factory method for search toolbar - overridden to support compact mode configuration. */
+	@Override
+	protected tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar create_gridSearchToolbar() {
+		// Create toolbar with compact config if needed
+		final tech.derbent.api.ui.component.enhanced.CComponentGridSearchToolbar.ToolbarConfig config = 
+			new tech.derbent.api.ui.component.enhanced.CComponentGridSearchToolbar.ToolbarConfig();
+		
+		if (compactMode) {
+			// Compact mode: only show name filter and clear button
+			config.setIdFilter(false)
+				.setNameFilter(true)
+				.setDescriptionFilter(false)
+				.setStatusFilter(false)
+				.setClearButton(true);
+		} else {
+			// Normal mode: show all filters
+			config.showAll();
+		}
+		
+		final tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar toolbar = 
+			new tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar(config);
+		toolbar.addFilterChangeListener(criteria -> refreshGrid());
+		return toolbar;
 	}
 
 	@Override

@@ -79,7 +79,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	private static final long serialVersionUID = 1L;
 
 	/** Backlog component embedded in this column */
-	private final CComponentBacklog backlogComponent;
+	private CComponentBacklog backlogComponent;
 	
 	/** Toolbar for backlog-specific controls (compact mode toggle, etc.) */
 	private final CHorizontalLayout backlogToolbar;
@@ -109,10 +109,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		
 		LOGGER.debug("Creating backlog kanban column for project: {}", project.getName());
 		
-		// Create backlog component with project context
-		backlogComponent = new CComponentBacklog(project);
-		
-		// Create toolbar for backlog controls
+		// Create toolbar for backlog controls first
 		backlogToolbar = new CHorizontalLayout();
 		backlogToolbar.setSpacing(true);
 		backlogToolbar.setPadding(false);
@@ -122,8 +119,14 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		buttonCompactMode = create_buttonCompactMode();
 		backlogToolbar.add(buttonCompactMode);
 		
-		// Add toolbar and backlog component to the column
-		add(backlogToolbar, backlogComponent);
+		// Add toolbar first
+		add(backlogToolbar);
+		
+		// Create backlog component with initial compact mode (false)
+		backlogComponent = new CComponentBacklog(project, compactMode);
+		
+		// Add backlog component to the column
+		add(backlogComponent);
 		
 		// Configure column styling for backlog
 		applyBacklogStyling();
@@ -292,8 +295,13 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	 * @param compact true to enable compact mode, false for normal mode
 	 */
 	public void setCompactMode(final boolean compact) {
+		if (this.compactMode == compact) {
+			return; // No change needed
+		}
+		
 		this.compactMode = compact;
 		
+		// Update button icon and tooltip
 		if (compact) {
 			// Narrow width for compact display
 			setWidth("220px");
@@ -307,6 +315,12 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 			buttonCompactMode.setTooltipText("Compact backlog");
 			LOGGER.debug("Backlog column set to normal mode");
 		}
+		
+		// Recreate backlog component with new compact mode
+		remove(backlogComponent);
+		backlogComponent = new CComponentBacklog(project, compact);
+		setupBacklogDragDrop();
+		add(backlogComponent);
 	}
 
 	/**
