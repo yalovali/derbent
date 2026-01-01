@@ -336,6 +336,10 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 	 * 
 	 * This method throws CValidationException immediately when overlap is detected (fail-fast pattern).
 	 * 
+	 * IMPORTANT: This validation checks BOTH persisted columns (from database) AND in-memory columns
+	 * (from the parent line's collection). This catches overlaps during batch initialization when
+	 * multiple columns are created simultaneously before any are saved.
+	 * 
 	 * @param entity The column being validated
 	 * @throws CValidationException if any status in this column is already mapped to another column
 	 */
@@ -347,13 +351,29 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		}
 		
 		final CKanbanLine line = entity.getKanbanLine();
-		final List<CKanbanColumn> allColumns = findByMaster(line);
+		
+		// CRITICAL: Check BOTH persisted columns AND in-memory columns from parent line
+		// This catches overlaps during batch initialization when multiple columns are created together
+		final List<CKanbanColumn> persistedColumns = findByMaster(line);
+		final Set<CKanbanColumn> allColumns = new HashSet<>(persistedColumns);
+		
+		// Add in-memory columns from the parent line's collection (may not be persisted yet)
+		if (line.getKanbanColumns() != null) {
+			allColumns.addAll(line.getKanbanColumns());
+			LOGGER.debug("[KanbanValidation] Checking {} total columns ({} persisted + {} in-memory) for status overlap",
+				allColumns.size(), persistedColumns.size(), line.getKanbanColumns().size());
+		}
 		
 		// Build map of status ID -> column name for debugging and error reporting
 		final Map<Long, String> statusToColumnMap = new HashMap<>();
 		
 		for (final CKanbanColumn column : allColumns) {
 			// Skip the current column being validated
+			if (entity.equals(column)) {
+				continue;
+			}
+			
+			// Skip if same ID (for persisted entities)
 			if (entity.getId() != null && column.getId() != null && column.getId().equals(entity.getId())) {
 				continue;
 			}
