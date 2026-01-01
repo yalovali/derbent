@@ -129,7 +129,12 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		if (column == null || column.getIncludedStatuses() == null) {
 			return false;
 		}
-		return column.getIncludedStatuses().stream().anyMatch(status -> status.getId().equals(sprintItem.getStatus().getId()));
+		// FIXED: Allow drop to any column - workflow validation is handled by CPageServiceKanbanLine.handleKanbanDrop()
+		// Previous logic was: column.getIncludedStatuses().stream().anyMatch(status -> status.getId().equals(sprintItem.getStatus().getId()))
+		// This incorrectly required the CURRENT status to be in the column, rather than checking for valid transitions.
+		// The proper workflow transition validation happens in the drop handler, which will show appropriate warnings
+		// if no valid transition exists while still allowing the visual column assignment.
+		return true;
 	}
 
 	private ComponentEventListener<DropEvent<CVerticalLayout>> drag_on_column_drop() {
