@@ -74,6 +74,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	private List<CSprintItem> allSprintItems;
 	private List<CSprint> availableSprints;
+	private CComponentKanbanColumnBacklog backlogColumn;
 	private final CDynamicPageRouter currentEntityPageRouter;
 	private CSprint currentSprint;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
@@ -180,6 +181,29 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		}
 		return filtered;
 	}
+	
+	/** Creates and configures a backlog column for the kanban board.
+	 * 
+	 * The backlog column is automatically created as the first column in the kanban board
+	 * and displays items from the project that are not assigned to any sprint.
+	 * 
+	 * @param project The project whose backlog items should be displayed
+	 * @return Configured backlog column component
+	 */
+	private CComponentKanbanColumnBacklog createBacklogColumn(final CProject project) {
+		LOGGER.debug("Creating backlog column for project: {}", project.getName());
+		final CComponentKanbanColumnBacklog column = new CComponentKanbanColumnBacklog(project);
+		
+		// Enable drag-drop for backlog items
+		column.drag_setDragEnabled(true);
+		column.drag_setDropEnabled(true);
+		
+		// Set up event forwarding for selection and drag-drop
+		setupSelectionNotification(column);
+		setupChildDragDropForwarding(column);
+		
+		return column;
+	}
 
 	/** Assigns each sprint item to a kanban column id before rendering.
 	 * 
@@ -282,6 +306,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	@Override
 	public String getComponentName() { return "kanbanBoard"; }
+	
+	/** Gets the backlog column component if it exists.
+	 * 
+	 * @return The backlog column or null if not yet created
+	 */
+	public CComponentKanbanColumnBacklog getBacklogColumn() {
+		return backlogColumn;
+	}
 
 	/** Returns the current line id as string. */
 	@Override
@@ -495,6 +527,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			layoutColumns.add(div);
 			return;
 		}
+		
+		// Create backlog column as first column if we have a current sprint
+		if (currentSprint != null && currentSprint.getProject() != null) {
+			backlogColumn = createBacklogColumn(currentSprint.getProject());
+			layoutColumns.add(backlogColumn);
+		}
+		
+		// Create regular kanban columns from the kanban line configuration
 		final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
 		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
 		assignKanbanColumns(sprintItems, columns);
