@@ -314,6 +314,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	public CComponentKanbanColumnBacklog getBacklogColumn() {
 		return backlogColumn;
 	}
+	
+	/** Gets the current sprint selected in the filter toolbar.
+	 * 
+	 * @return The current sprint or null if no sprint selected
+	 */
+	public CSprint getCurrentSprint() {
+		return currentSprint;
+	}
 
 	/** Returns the current line id as string. */
 	@Override

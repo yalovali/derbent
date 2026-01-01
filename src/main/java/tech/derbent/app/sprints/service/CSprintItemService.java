@@ -135,6 +135,17 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		loadItems(sprintItems);
 		return sprintItems;
 	}
+	
+	/** Get next item order for new sprint items in a sprint.
+	 * 
+	 * @param master The sprint to get next order for
+	 * @return Next available order number (max order + 1, or 1 if no items)
+	 */
+	@Transactional (readOnly = true)
+	public Integer getNextItemOrder(final CSprint master) {
+		Check.notNull(master, "Sprint (master) cannot be null");
+		return getTypedRepository().getNextItemOrder(master);
+	}
 
 	@Override
 	public Class<CSprintItem> getEntityClass() { return CSprintItem.class; }
