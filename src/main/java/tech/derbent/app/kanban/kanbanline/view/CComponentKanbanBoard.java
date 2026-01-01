@@ -168,31 +168,68 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		refreshComponent();
 	}
 
-	/** Assigns each sprint item to a kanban column id before rendering. */
+	/** Assigns each sprint item to a kanban column id before rendering.
+	 * 
+	 * This is the core status-to-column mapping algorithm for kanban board display.
+	 * 
+	 * Mapping Logic:
+	 * 1. Build a status ID -> column ID map from all kanban columns
+	 * 2. For each sprint item:
+	 *    a. If item already has kanbanColumnId set: skip auto-mapping (manual override)
+	 *    b. Otherwise: look up item's status ID in the map
+	 *    c. If status found in map: assign corresponding column ID
+	 *    d. If status not found: assign default column ID (if exists), otherwise -1
+	 * 
+	 * Status Uniqueness Assumption:
+	 * This algorithm assumes each status is mapped to AT MOST ONE column.
+	 * If a status is mapped to multiple columns (status overlap), the first mapping wins
+	 * due to Map.putIfAbsent() behavior. However, such overlap is prevented by validation
+	 * in CKanbanColumnService.validateStatusUniqueness().
+	 * 
+	 * Default Column Handling:
+	 * The default column (marked with defaultColumn=true) serves as a fallback for:
+	 * - Items whose status is not explicitly mapped to any column
+	 * - Items with null or unmapped statuses
+	 * It's stored in the map with key=-1L for easy lookup.
+	 */
 	private void assignKanbanColumns(final List<CSprintItem> items, final List<CKanbanColumn> columns) {
 		LOGGER.debug("Assigning Kanban columns to sprint items for board display");
 		if (items == null || items.isEmpty() || columns == null || columns.isEmpty()) {
 			return;
 		}
+		
+		// Build status ID -> column ID mapping from all columns
 		final Map<Long, Long> statusToColumnId = prepareStatusToColumnIdMap(columns);
+		
 		for (final CSprintItem sprintItem : items) {
 			if (sprintItem == null) {
 				continue;
 			}
+			
+			// Respect manual column assignment: skip auto-mapping if column already set
 			if (sprintItem.getKanbanColumnId() != null) {
 				LOGGER.debug("Kanban column already assigned for item {}, skipping auto-mapping", sprintItem.getId());
 				continue;
 			}
+			
+			// Get item's current status and map to column
 			final ISprintableItem sprintableItem = sprintItem.getItem();
 			final Long statusId = sprintableItem.getStatus().getId();
+			
+			// Lookup: try explicit status mapping first, fall back to default column
 			final Long columnId = statusToColumnId.computeIfAbsent(statusId, key -> statusToColumnId.getOrDefault(-1L, -1L));
-			// dump result
+			
+			// Debug logging for troubleshooting status-to-column mappings
 			LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company id:{}", statusId, sprintableItem.getStatus().getName(),
 					statusToColumnId.get(statusId), columnId, sprintableItem.getStatus().getCompany().getId());
+			
+			// No column found: log warning (indicates configuration issue)
 			if (columnId == -1L) {
 				LOGGER.warn("No kanban column found for status id {} in line {}", statusId, getValue() != null ? getValue().getName() : "null");
 				continue;
 			}
+			
+			// Assign the resolved column ID to the sprint item
 			sprintItem.setKanbanColumnId(columnId);
 		}
 	}
@@ -372,15 +409,46 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		refreshComponent();
 	}
 
+	/** Prepares a status ID -> column ID mapping for efficient kanban column assignment.
+	 * 
+	 * This method builds a lookup map used by assignKanbanColumns() to determine which
+	 * column should display each sprint item based on its status.
+	 * 
+	 * Map Structure:
+	 * - Key: Status ID (Long) - the ID of a CProjectItemStatus
+	 * - Value: Column ID (Long) - the ID of the CKanbanColumn that should display this status
+	 * - Special key -1L: Default column ID (fallback for unmapped statuses)
+	 * 
+	 * Mapping Rules:
+	 * 1. Default column (if exists): maps to key=-1L for fallback lookup
+	 * 2. For each column's included statuses: maps status ID -> column ID
+	 * 3. Uses Map.putIfAbsent() to respect first mapping when status overlap exists
+	 * 
+	 * Status Overlap Handling:
+	 * If a status appears in multiple columns (should not happen due to validation),
+	 * putIfAbsent() ensures the FIRST column mapping wins. However, this is a safeguard;
+	 * the primary defense against overlap is CKanbanColumnService.validateStatusUniqueness().
+	 * 
+	 * Debug Logging:
+	 * Logs each status -> column mapping for troubleshooting kanban board display issues.
+	 * 
+	 * @param columns The kanban columns to build mappings from
+	 * @return Map of status ID -> column ID (includes special key -1L for default column)
+	 */
 	Map<Long, Long> prepareStatusToColumnIdMap(final List<CKanbanColumn> columns) {
 		final Map<Long, Long> statusToColumnId = new LinkedHashMap<>();
+		
 		for (final CKanbanColumn column : columns) {
 			if (column == null || column.getId() == null) {
 				continue;
 			}
+			
+			// Register default column with special key -1L for fallback lookup
 			if (Boolean.TRUE.equals(column.getDefaultColumn())) {
 				statusToColumnId.putIfAbsent(-1L, column.getId());
 			}
+			
+			// Map each included status to this column
 			if (column.getIncludedStatuses() == null) {
 				continue;
 			}
@@ -388,8 +456,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 				if (status == null || status.getId() == null) {
 					continue;
 				}
+				
+				// putIfAbsent: first mapping wins if status appears in multiple columns
+				// This should not happen due to validateStatusUniqueness(), but acts as safeguard
 				statusToColumnId.putIfAbsent(status.getId(), column.getId());
-				// dump for debug purposes
+				
+				// Debug logging for troubleshooting status-to-column mappings
 				LOGGER.debug("Mapping status id {}:{} to column id {} company id:{}", status.getId(), status.getName(), column.getId(),
 						status.getCompany().getId());
 			}

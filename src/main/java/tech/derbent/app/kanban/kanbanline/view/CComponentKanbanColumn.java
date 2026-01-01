@@ -159,9 +159,16 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		dropTarget = DropTarget.create(this);
 		dropTarget.setDropEffect(DropEffect.MOVE);
 		dropTarget.addDropListener(drag_on_column_drop());
-		// TODO later check hover examples to fix this
-		// there is no addDragOverListener in Vaadin DropTarget
-		// columnDropTarget.addDragOverListener(on_column_dragOver());
+		
+		// Note: Vaadin Flow 24.8 does not provide addDragOverListener or addDragLeaveListener in the Java API.
+		// These events are managed client-side in HTML5 DnD but not exposed server-side by Vaadin.
+		// For visual feedback during drag-over, we can use CSS hover states or implement custom
+		// client-side JavaScript integration if needed. The main drag-drop logic uses the drop event.
+		// 
+		// Alternative: Use CSS for visual feedback:
+		// .kanban-column:has([draggable="true"]:hover) { background-color: #e0e0e0; }
+		// Or client-side JavaScript for more complex interactions.
+		
 		dropTarget.setActive(true);
 	}
 

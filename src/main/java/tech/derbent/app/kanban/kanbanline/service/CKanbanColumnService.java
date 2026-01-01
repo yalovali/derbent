@@ -3,8 +3,10 @@ package tech.derbent.app.kanban.kanbanline.service;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -35,7 +37,20 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		this.kanbanLineService = kanbanLineService;
 	}
 
-	/** Enforces unique default column and status ownership across a line. */
+	/** Enforces unique default column and status ownership across a line. 
+	 * 
+	 * This method ensures that:
+	 * 1. Only one column can be marked as the default column (fallback for unmapped statuses)
+	 * 2. Each status is mapped to at most ONE column (prevents status overlap/duplication)
+	 * 
+	 * When a column is saved with statuses or default flag, this method automatically:
+	 * - Removes the default flag from other columns if this column becomes default
+	 * - Removes any overlapping statuses from other columns to maintain status uniqueness
+	 * 
+	 * This is a critical business rule: status overlap would cause ambiguity in kanban board
+	 * display and drag-drop operations, as the system wouldn't know which column should 
+	 * display an item with a given status.
+	 */
 	private void applyStatusAndDefaultConstraints(final CKanbanColumn saved) {
 		Check.notNull(saved, "Kanban column cannot be null when applying constraints");
 		Check.notNull(saved.getId(), "Kanban column must be saved before enforcing constraints");
@@ -46,19 +61,33 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 				: saved.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null).map(status -> status.getId())
 						.collect(Collectors.toCollection(HashSet::new));
 		final boolean isDefaultColumn = saved.getDefaultColumn();
+		
+		// Track status removals for debug logging
+		int statusRemovalCount = 0;
+		
 		for (final CKanbanColumn column : columns) {
 			if (column.getId().equals(saved.getId())) {
 				continue;
 			}
 			boolean changed = false;
+			
+			// Enforce single default column rule
 			if (isDefaultColumn && column.getDefaultColumn()) {
+				LOGGER.debug("[KanbanValidation] Removing default flag from column '{}' (ID: {}) because column '{}' (ID: {}) is now the default",
+					column.getName(), column.getId(), saved.getName(), saved.getId());
 				column.setDefaultColumn(false);
 				changed = true;
 			}
+			
+			// Enforce status uniqueness: remove overlapping statuses from other columns
 			if (!includedStatusIds.isEmpty() && column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
 				final List<Long> remainingStatusIds = column.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null)
 						.map(status -> status.getId()).filter(id -> !includedStatusIds.contains(id)).collect(Collectors.toList());
 				if (remainingStatusIds.size() != column.getIncludedStatuses().size()) {
+					final int removedCount = column.getIncludedStatuses().size() - remainingStatusIds.size();
+					statusRemovalCount += removedCount;
+					LOGGER.debug("[KanbanValidation] Removing {} overlapping status(es) from column '{}' (ID: {}) to maintain status uniqueness",
+						removedCount, column.getName(), column.getId());
 					final List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> remainingStatuses = column.getIncludedStatuses().stream()
 							.filter(status -> status != null && status.getId() != null && remainingStatusIds.contains(status.getId()))
 							.collect(Collectors.toList());
@@ -69,6 +98,11 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 			if (changed) {
 				repository.save(column);
 			}
+		}
+		
+		if (statusRemovalCount > 0) {
+			LOGGER.info("[KanbanValidation] Enforced status uniqueness: removed {} overlapping status mapping(s) from other columns in kanban line '{}'",
+				statusRemovalCount, line.getName());
 		}
 	}
 
@@ -259,7 +293,15 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		return saved;
 	}
 
-	/** Validates column naming and uniqueness within the line. */
+	/** Validates column naming and uniqueness within the line.
+	 * 
+	 * Also performs critical validation to detect status overlap across columns in the same kanban line.
+	 * Status overlap is considered a data error because it creates ambiguity: if a status is mapped to
+	 * multiple columns, the system cannot determine which column should display items with that status.
+	 * 
+	 * This validation is fail-fast: it throws CValidationException immediately when overlap is detected,
+	 * preventing the invalid configuration from being saved to the database.
+	 */
 	@Override
 	protected void validateEntity(final CKanbanColumn entity) {
 		super.validateEntity(entity);
@@ -267,14 +309,111 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		final CKanbanLine line = entity.getKanbanLine();
 		Check.notNull(line, "Kanban line cannot be null for column validation");
 		Check.notNull(line.getId(), "Kanban line ID cannot be null for column validation");
+		
+		// Validate name uniqueness within the kanban line
 		final String trimmedName = entity.getName().trim();
 		final CKanbanColumn existing = getTypedRepository().findByMasterAndNameIgnoreCase(line, trimmedName).orElse(null);
 		if (existing == null) {
+			// No name conflict, continue with status overlap validation
+		} else if (entity.getId() != null && entity.getId().equals(existing.getId())) {
+			// Same entity, no conflict
+		} else {
+			throw new CValidationException("Kanban column name must be unique within the kanban line");
+		}
+		
+		// CRITICAL VALIDATION: Check for status overlap across columns
+		// This is a fail-fast check to prevent data errors where a single status is mapped to multiple columns.
+		// Such overlap would cause ambiguity in kanban board display and drag-drop operations.
+		validateStatusUniqueness(entity);
+	}
+	
+	/** Validates that no status in this column is already mapped to another column in the same kanban line.
+	 * 
+	 * This is a critical business rule validation. Status overlap across columns would cause:
+	 * 1. Ambiguity in kanban board display (which column should show items with overlapping status?)
+	 * 2. Incorrect drag-drop behavior (which column should accept drops for overlapping status?)
+	 * 3. Data inconsistency (items could appear in multiple columns simultaneously)
+	 * 
+	 * This method throws CValidationException immediately when overlap is detected (fail-fast pattern).
+	 * 
+	 * IMPORTANT: This validation checks BOTH persisted columns (from database) AND in-memory columns
+	 * (from the parent line's collection). This catches overlaps during batch initialization when
+	 * multiple columns are created simultaneously before any are saved.
+	 * 
+	 * @param entity The column being validated
+	 * @throws CValidationException if any status in this column is already mapped to another column
+	 */
+	private void validateStatusUniqueness(final CKanbanColumn entity) {
+		// Skip validation if column has no statuses mapped
+		if (entity.getIncludedStatuses() == null || entity.getIncludedStatuses().isEmpty()) {
+			LOGGER.debug("[KanbanValidation] Column '{}' has no statuses, skipping overlap validation", entity.getName());
 			return;
 		}
-		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
-			return;
+		
+		final CKanbanLine line = entity.getKanbanLine();
+		
+		// CRITICAL: Check BOTH persisted columns AND in-memory columns from parent line
+		// This catches overlaps during batch initialization when multiple columns are created together
+		final List<CKanbanColumn> persistedColumns = findByMaster(line);
+		final Set<CKanbanColumn> allColumns = new HashSet<>(persistedColumns);
+		
+		// Add in-memory columns from the parent line's collection (may not be persisted yet)
+		if (line.getKanbanColumns() != null) {
+			allColumns.addAll(line.getKanbanColumns());
+			LOGGER.debug("[KanbanValidation] Checking {} total columns ({} persisted + {} in-memory) for status overlap",
+				allColumns.size(), persistedColumns.size(), line.getKanbanColumns().size());
 		}
-		throw new CValidationException("Kanban column name must be unique within the kanban line");
+		
+		// Build map of status ID -> column name for debugging and error reporting
+		final Map<Long, String> statusToColumnMap = new HashMap<>();
+		
+		for (final CKanbanColumn column : allColumns) {
+			// Skip the current column being validated
+			if (entity.equals(column)) {
+				continue;
+			}
+			
+			// Skip if same ID (for persisted entities)
+			if (entity.getId() != null && column.getId() != null && column.getId().equals(entity.getId())) {
+				continue;
+			}
+			
+			// Check each status in the existing column
+			if (column.getIncludedStatuses() != null) {
+				for (final var status : column.getIncludedStatuses()) {
+					if (status != null && status.getId() != null) {
+						statusToColumnMap.put(status.getId(), column.getName());
+					}
+				}
+			}
+		}
+		
+		// Now check if any status in the entity being validated is already in the map (overlap detected)
+		final List<String> overlappingStatuses = new ArrayList<>();
+		for (final var status : entity.getIncludedStatuses()) {
+			if (status != null && status.getId() != null) {
+				final String existingColumnName = statusToColumnMap.get(status.getId());
+				if (existingColumnName != null) {
+					overlappingStatuses.add(String.format("'%s' (already in column '%s')", status.getName(), existingColumnName));
+					LOGGER.warn("[KanbanValidation] Status overlap detected: status '{}' (ID: {}) is mapped to both column '{}' and column '{}'",
+						status.getName(), status.getId(), existingColumnName, entity.getName());
+				}
+			}
+		}
+		
+		// Fail-fast: throw exception if any overlap detected
+		if (!overlappingStatuses.isEmpty()) {
+			final String errorMessage = String.format(
+				"Status overlap detected in kanban line '%s': The following statuses are already mapped to other columns: %s. " +
+				"Each status must be mapped to exactly one column to avoid ambiguity in kanban board display.",
+				line.getName(),
+				String.join(", ", overlappingStatuses)
+			);
+			LOGGER.error("[KanbanValidation] FAIL-FAST: {}", errorMessage);
+			throw new CValidationException(errorMessage);
+		}
+		
+		LOGGER.debug("[KanbanValidation] Status uniqueness validated successfully for column '{}' with {} status(es)",
+			entity.getName(), entity.getIncludedStatuses().size());
 	}
 }

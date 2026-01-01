@@ -65,17 +65,20 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		// Status data: [name, description, color, isFinalStatus, sortOrder]
+		// Following standard Agile/Scrum terminology
 		final String[][] data = {
 				{
-						"Not Started", "Activity has not been started yet", "#95a5a6", "false", "1"
+						"To Do", "Work item is ready to be started", "#95a5a6", "false", "1"
 				}, {
-						"In Progress", "Activity is currently in progress", "#3498db", "false", "2"
+						"In Progress", "Work item is actively being worked on", "#3498db", "false", "2"
 				}, {
-						"On Hold", "Activity is temporarily on hold", "#f39c12", "false", "3"
+						"In Review", "Work item is being reviewed or tested", "#9b59b6", "false", "3"
 				}, {
-						"Completed", "Activity has been completed", "#27ae60", "true", "4"
+						"Blocked", "Work item is blocked by dependencies or issues", "#e67e22", "false", "4"
 				}, {
-						"Cancelled", "Activity has been cancelled", "#e74c3c", "true", "5"
+						"Done", "Work item has been completed successfully", "#27ae60", "true", "5"
+				}, {
+						"Cancelled", "Work item has been cancelled or abandoned", "#e74c3c", "true", "6"
 				}
 		};
 		initializeCompanyEntity(data, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company,
