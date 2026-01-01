@@ -4,6 +4,115 @@
 
 This document defines the coding standards, naming conventions, and best practices for the Derbent project. Following these standards ensures consistency, maintainability, and optimal performance.
 
+**Target Audience**: Developers, AI agents (GitHub Copilot, Codex), code reviewers
+
+## Meta-Guidelines: Using This Documentation
+
+### For AI Agents (MANDATORY)
+
+This section defines how AI agents (GitHub Copilot, Codex, etc.) MUST use and reference the project documentation.
+
+#### Rule 1: Documentation Hierarchy (MANDATORY)
+
+When generating code, AI agents MUST consult documentation in this order:
+
+1. **Specific Guidelines First**: Check specialized documents for the task at hand
+   - UI/CSS work → [UI, CSS, and Layout Coding Standards](ui-css-coding-standards.md)
+   - Component development → [Component Coding Standards](../development/component-coding-standards.md)
+   - Testing → [Playwright Testing Guidelines](../testing/)
+   
+2. **General Coding Standards**: This document (coding-standards.md)
+   
+3. **Pattern Documents**: For specific implementation patterns
+   - [Service Layer Patterns](service-layer-patterns.md)
+   - [View Layer Patterns](view-layer-patterns.md)
+   - [Entity Inheritance Patterns](entity-inheritance-patterns.md)
+
+4. **AI-Specific Guidelines**: For agent-specific best practices
+   - [GitHub Copilot Guidelines](../development/copilot-guidelines.md)
+
+#### Rule 2: Cross-Referencing Requirements (MANDATORY)
+
+When creating or updating guidelines:
+
+1. **Add Cross-References**: Every guideline document MUST link to related documents
+2. **Use Consistent Paths**: Use relative paths from the current document
+3. **Reference by Section**: Link to specific sections when possible
+4. **Avoid Duplication**: Don't copy guidelines between documents—reference them instead
+
+**Example**:
+```markdown
+For UI component styling patterns, see [UI, CSS, and Layout Coding Standards](ui-css-coding-standards.md#button-creation-patterns).
+
+For entity color application, refer to [Color and Icon Standards](ui-css-coding-standards.md#color-and-icon-standards).
+```
+
+#### Rule 3: Guideline Discoverability (MANDATORY)
+
+All guideline documents MUST include:
+
+1. **Clear Title**: Describes document scope
+2. **Target Audience**: Who should use this document
+3. **Overview Section**: Brief description of content
+4. **Table of Contents**: For documents > 500 lines (optional but recommended)
+5. **Related Documentation**: Links to related guidelines at the end
+6. **AI Agent Guidelines Section**: Specific instructions for code generation
+
+#### Rule 4: Pattern Recognition Format (MANDATORY)
+
+When documenting patterns for AI agents, use this format:
+
+```markdown
+### Pattern: [Pattern Name]
+
+**When to Use**: [Describe scenario]
+
+**✅ CORRECT**:
+```java
+// Example code
+```
+
+**❌ INCORRECT**:
+```java
+// Anti-pattern code
+```
+
+**Rule**: [Explicit rule statement]
+```
+
+#### Rule 5: Update Procedures (MANDATORY)
+
+When updating guidelines:
+
+1. **Version Number**: Increment version at bottom of document
+2. **Last Updated Date**: Update date stamp
+3. **Change Log** (for major updates): Document significant changes
+4. **Cross-Check References**: Ensure all cross-references still valid
+5. **AI Agent Validation**: Test with AI agents to ensure patterns work
+
+### Documentation Structure
+
+The Derbent project documentation is organized as follows:
+
+```
+docs/
+├── architecture/          # Architecture and design patterns
+│   ├── coding-standards.md              # THIS FILE - General coding standards
+│   ├── ui-css-coding-standards.md       # UI, CSS, and layout patterns
+│   ├── entity-inheritance-patterns.md   # Entity class hierarchies
+│   ├── service-layer-patterns.md        # Service class patterns
+│   └── view-layer-patterns.md           # View/UI class patterns
+├── development/          # Development workflows and guidelines
+│   ├── copilot-guidelines.md            # AI agent usage guidelines
+│   ├── component-coding-standards.md    # Component development
+│   └── multi-user-development-checklist.md
+├── implementation/       # Specific implementation patterns
+├── testing/              # Testing guidelines and patterns
+└── features/             # Feature-specific documentation
+```
+
+**Rule for AI Agents**: When asked about a specific topic, search for the most specific guideline document first, then fall back to general guidelines.
+
 ## Core Principles
 
 ### 1. **C-Prefix Convention** (Mandatory)
@@ -1199,12 +1308,17 @@ public class CSprintItemService extends CAbstractService<CSprintItem>
 
 ## Related Documentation
 
+### Architecture and Design
+- [UI, CSS, and Layout Coding Standards](ui-css-coding-standards.md) - **UI component styling and layout patterns**
 - [Entity Inheritance Patterns](entity-inheritance-patterns.md)
 - [Service Layer Patterns](service-layer-patterns.md)
 - [View Layer Patterns](view-layer-patterns.md)
 - [Multi-User Singleton Advisory](multi-user-singleton-advisory.md) - **CRITICAL for service development**
+
+### Development Guidelines
+- [Component Coding Standards](../development/component-coding-standards.md) - Component development rules
+- [GitHub Copilot Guidelines](../development/copilot-guidelines.md) - AI agent usage patterns
 - [Multi-User Development Checklist](../development/multi-user-development-checklist.md)
-- [GitHub Copilot Guidelines](../development/copilot-guidelines.md)
 
 ## Multi-User Web Application Patterns (CRITICAL)
 

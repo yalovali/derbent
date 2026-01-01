@@ -490,13 +490,20 @@ These files demonstrate Copilot-friendly patterns:
 2. **Service**: `src/main/java/tech/derbent/activities/service/CActivityService.java`
 3. **Repository**: `src/main/java/tech/derbent/activities/service/IActivityRepository.java`
 4. **View**: `src/main/java/tech/derbent/kanban/CKanbanView.java`
+5. **Button Factory**: `src/main/java/tech/derbent/api/ui/component/basic/CButton.java`
+6. **Color Utilities**: `src/main/java/tech/derbent/api/utils/CColorUtils.java`
 
 ### Documentation References
 
+#### Architecture and Design
+- [Coding Standards](../architecture/coding-standards.md) - General coding standards
+- [UI, CSS, and Layout Coding Standards](../architecture/ui-css-coding-standards.md) - **UI component styling patterns**
 - [Entity Inheritance Patterns](../architecture/entity-inheritance-patterns.md)
 - [Service Layer Patterns](../architecture/service-layer-patterns.md)
 - [View Layer Patterns](../architecture/view-layer-patterns.md)
-- [Coding Standards](../architecture/coding-standards.md)
+
+#### Development Guidelines
+- [Component Coding Standards](component-coding-standards.md) - Component development rules
 
 ## Quick Reference
 
