@@ -723,87 +723,14 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleWorkflow(final String name, final CProject project, final List<CProjectItemStatus> statuses,
-			final List<CUserProjectRole> roles) {
-		Check.notNull(name, "Workflow name cannot be null");
-		Check.notNull(project, "Project cannot be null");
-		Check.notNull(statuses, "Statuses list cannot be null");
-		Check.notNull(roles, "Roles list cannot be null");
-		Check.notEmpty(statuses, "Statuses list cannot be empty");
-		Check.notEmpty(roles, "Roles list cannot be empty");
-		final List<CProjectItemStatus> filteredStatuses =
-				statuses.stream().filter(status -> status != null).peek(status -> Check.isSameCompany(project, status))
-						.sorted(Comparator.comparing(CProjectItemStatus::getSortOrder, Comparator.nullsLast(Integer::compareTo))
-								.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
-						.toList();
-		Check.notEmpty(filteredStatuses, "No statuses available for workflow " + name + " in project " + project.getName());
-		final List<CUserProjectRole> filteredRoles = roles.stream().filter(role -> role != null && role.getProject() != null
-				&& role.getProject().getId() != null && role.getProject().getId().equals(project.getId())).toList();
-		Check.notEmpty(filteredRoles, "No roles available for workflow " + name + " in project " + project.getName());
-		final CWorkflowEntity activityWorkflow = new CWorkflowEntity(name, project);
-		activityWorkflow.setDescription("Defines status transitions for activities based on user roles");
-		activityWorkflow.setIsActive(true);
-		workflowEntityService.save(activityWorkflow);
-		// Add status relations to the activity workflow
-		for (int i = 0; i < Math.min(filteredStatuses.size() - 1, 3); i++) {
-			final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
-			relation.setWorkflowEntity(activityWorkflow);
-			relation.setFromStatus(filteredStatuses.get(i));
-			relation.setToStatus(filteredStatuses.get(i + 1));
-			// Mark the first status (Not Started) as initial
-			if (i == 0) {
-				relation.setInitialStatus(true);
-			}
-			// Add first role to the transition
-			if (!filteredRoles.isEmpty()) {
-				relation.getRoles().add(filteredRoles.get(0));
-			}
-			workflowStatusRelationService.save(relation);
-			if (i > 0) {
-				// Also add a backward transition for demonstration
-				final CWorkflowStatusRelation backRelation = new CWorkflowStatusRelation();
-				backRelation.setWorkflowEntity(activityWorkflow);
-				backRelation.setFromStatus(filteredStatuses.get(i + 1));
-				backRelation.setToStatus(filteredStatuses.get(i));
-				// Add second role to the backward transition if available
-				if (filteredRoles.size() > 1) {
-					backRelation.getRoles().add(filteredRoles.get(1));
-				}
-				workflowStatusRelationService.save(backRelation);
-			}
-		}
-		// for the last status:
-		final CWorkflowStatusRelation finalRelation = new CWorkflowStatusRelation();
-		finalRelation.setWorkflowEntity(activityWorkflow);
-		finalRelation.setFromStatus(filteredStatuses.get(filteredStatuses.size() - 1));
-		finalRelation.setToStatus(filteredStatuses.get(0)); // No next status
-		workflowStatusRelationService.save(finalRelation);
-	}
-
 	/** Initialize sample workflow entities to demonstrate workflow management.
 	 * @param project the project to create workflow entities for
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleWorkflowEntities(final CProject project, final boolean minimal) {
-		try {
-			// Get available statuses for this project
-			final List<CProjectItemStatus> statuses = projectItemStatusService.listByCompany(project.getCompany()).stream()
-					.sorted(Comparator.comparing(CProjectItemStatus::getSortOrder, Comparator.nullsLast(Integer::compareTo))
-							.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
-					.toList();
-			Check.notEmpty(statuses, "No project item statuses found for project: " + project.getName());
-			final List<CUserProjectRole> roles = userProjectRoleService.listByProject(project).stream()
-					.filter(role -> role.getProject() != null && project.getId().equals(role.getProject().getId())).toList();
-			Check.notEmpty(roles, "No user project roles found for project: " + project.getName());
-			initializeSampleWorkflow("Activity Status Workflow", project, statuses, roles);
-			initializeSampleWorkflow("Decision Status Workflow", project, statuses, roles);
-			initializeSampleWorkflow("Meeting Status Workflow", project, statuses, roles);
-			initializeSampleWorkflow("Risk Status Workflow", project, statuses, roles);
-			initializeSampleWorkflow("Project Status Workflow", project, statuses, roles);
-			LOGGER.debug("Created sample workflow entities with status relations for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample workflow entities for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample workflow entities for project: " + project.getName(), e);
-		}
+		// Delegate to CWorkflowEntityInitializerService for workflow initialization
+		CWorkflowEntityInitializerService.initializeSampleWorkflowEntities(
+			project, minimal, projectItemStatusService, userProjectRoleService, 
+			workflowEntityService, workflowStatusRelationService);
 	}
 
 	public boolean isDatabaseEmpty() {
