@@ -12,8 +12,10 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import tech.derbent.api.interfaces.IHasSelectedValueStorage;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 
 /**
@@ -35,7 +37,7 @@ import tech.derbent.api.utils.Check;
  * <li>Callback-based filter notification</li>
  * </ul>
  */
-public class CComponentGridSearchToolbar extends CHorizontalLayout {
+public class CComponentGridSearchToolbar extends CHorizontalLayout implements IHasSelectedValueStorage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridSearchToolbar.class);
 	private static final long serialVersionUID = 1L;
@@ -328,5 +330,57 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout {
 			statusFilter.setItems(statuses);
 			LOGGER.debug("Set {} status options", statuses.size());
 		}
+	}
+
+	// ==================== IHasSelectedValueStorage Implementation ====================
+
+	/**
+	 * Enables automatic value persistence for all filter fields.
+	 * <p>
+	 * This method should be called by the parent component to enable
+	 * automatic saving and restoring of filter values across refreshes.
+	 * </p>
+	 */
+	public void enableValuePersistence() {
+		// Enable persistence for ID filter
+		if (idFilter != null) {
+			CValueStorageHelper.enableAutoPersistence(idFilter, getStorageId() + "_id");
+		}
+		// Enable persistence for Name filter
+		if (nameFilter != null) {
+			CValueStorageHelper.enableAutoPersistence(nameFilter, getStorageId() + "_name");
+		}
+		// Enable persistence for Description filter
+		if (descriptionFilter != null) {
+			CValueStorageHelper.enableAutoPersistence(descriptionFilter, getStorageId() + "_description");
+		}
+		// Enable persistence for Status filter
+		if (statusFilter != null) {
+			CValueStorageHelper.enableAutoPersistence(statusFilter, getStorageId() + "_status", value -> value, value -> value);
+		}
+	}
+
+	@Override
+	public String getStorageId() {
+		return "gridSearchToolbar_" + getId().orElse(generateId());
+	}
+
+	/**
+	 * Generates a unique ID for this component instance.
+	 */
+	private String generateId() {
+		return getClass().getSimpleName() + "_" + System.identityHashCode(this);
+	}
+
+	@Override
+	public void restoreCurrentValue() {
+		// Restoration is handled automatically by CValueStorageHelper when components attach
+		// This method is here for interface compliance
+	}
+
+	@Override
+	public void saveCurrentValue() {
+		// Saving is handled automatically by CValueStorageHelper on value changes
+		// This method is here for interface compliance
 	}
 }

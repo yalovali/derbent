@@ -12,9 +12,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.interfaces.IHasSelectedValueStorage;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.services.CValueStorageService;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar;
+import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
@@ -24,7 +27,7 @@ import tech.derbent.app.sprints.domain.CSprintItem;
  * Supports filtering by responsible user and entity type.
  * </p>
  */
-public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar {
+public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar implements IHasSelectedValueStorage {
 
 	public static class FilterCriteria {
 
@@ -255,5 +258,81 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 			comboType.setValue(typeAllOption);
 			currentCriteria.setEntityType(null);
 		}
+	}
+
+	// ==================== IHasSelectedValueStorage Implementation ====================
+
+	/**
+	 * Enables automatic value persistence for all filter ComboBoxes.
+	 * <p>
+	 * This method should be called by the parent component (kanban board) to enable
+	 * automatic saving and restoring of filter selections:
+	 * <ul>
+	 * <li>Sprint filter</li>
+	 * <li>Type filter</li>
+	 * <li>Responsible mode filter</li>
+	 * </ul>
+	 * </p>
+	 */
+	public void enableValuePersistence() {
+		// Enable persistence for Sprint ComboBox
+		CValueStorageHelper.enableAutoPersistence(comboSprint, getStorageId() + "_sprint", sprint -> {
+			// Converter: find sprint by ID
+			if (sprint == null || sprint.isBlank()) {
+				return null;
+			}
+			try {
+				final Long sprintId = Long.parseLong(sprint);
+				return comboSprint.getListDataView().getItems()
+						.filter(s -> s.getId() != null && s.getId().equals(sprintId))
+						.findFirst()
+						.orElse(null);
+			} catch (final NumberFormatException e) {
+				return null;
+			}
+		});
+
+		// Enable persistence for Type ComboBox
+		CValueStorageHelper.enableAutoPersistence(comboType, getStorageId() + "_type", label -> {
+			// Converter: find TypeOption by label
+			return comboType.getListDataView().getItems()
+					.filter(option -> option.getLabel().equals(label))
+					.findFirst()
+					.orElse(null);
+		});
+
+		// Enable persistence for Responsible Mode ComboBox
+		CValueStorageHelper.enableAutoPersistence(comboResponsibleMode, getStorageId() + "_responsible", modeName -> {
+			// Converter: find ResponsibleFilterMode by name
+			try {
+				return ResponsibleFilterMode.valueOf(modeName);
+			} catch (final IllegalArgumentException e) {
+				return ResponsibleFilterMode.ALL;
+			}
+		});
+	}
+
+	@Override
+	public String getStorageId() {
+		return "kanbanBoardFilter_" + getId().orElse(generateId());
+	}
+
+	/**
+	 * Generates a unique ID for this component instance.
+	 */
+	private String generateId() {
+		return getClass().getSimpleName() + "_" + System.identityHashCode(this);
+	}
+
+	@Override
+	public void restoreCurrentValue() {
+		// Restoration is handled automatically by CValueStorageHelper when components attach
+		// This method is here for interface compliance
+	}
+
+	@Override
+	public void saveCurrentValue() {
+		// Saving is handled automatically by CValueStorageHelper on value changes
+		// This method is here for interface compliance
 	}
 }
