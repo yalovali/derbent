@@ -498,6 +498,19 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		on_postit_selected(null);
 	}
 
+	/** Reloads sprint items from database to reflect persisted changes.
+	 * 
+	 * This method is called after drag-drop operations to ensure the UI displays
+	 * the latest data from the database. Without reloading, the in-memory list
+	 * contains stale objects that don't reflect recent kanbanColumnId or status changes.
+	 */
+	public void reloadSprintItems() {
+		LOGGER.debug("Reloading sprint items from database for Kanban board");
+		if (currentSprint != null && currentSprint.getId() != null) {
+			loadSprintItemsForSprint(currentSprint);
+		}
+	}
+
 	@Override
 	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
 		Check.notNull(pageService, "Page service cannot be null when registering Kanban board");

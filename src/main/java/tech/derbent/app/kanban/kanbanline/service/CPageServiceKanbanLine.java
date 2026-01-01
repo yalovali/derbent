@@ -155,7 +155,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				// This was a bug - returning early without save caused drag-drop to appear broken
 				saveSprintItemOnly(sprintItem);
 				
-				// Refresh board to show new column assignment
+				// Reload sprint items from database to get updated data, then refresh board
+				componentKanbanBoard.reloadSprintItems();
 				componentKanbanBoard.refreshComponent();
 				
 				// Warn user that status couldn't be changed
@@ -209,7 +210,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			final CProjectItemService<?> projectItemService = (CProjectItemService<?>) CSpringContext.getBean(projectItemServiceClass);
 			projectItemService.revokeSave(item);  // revokeSave = save bypassing some validations for system updates
 			
-			// Refresh kanban board to reflect changes
+			// Reload sprint items from database to get updated data, then refresh board
+			componentKanbanBoard.reloadSprintItems();
 			componentKanbanBoard.refreshComponent();
 			
 			// Show success notification
@@ -220,6 +222,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			LOGGER.error("Failed to apply status and save project item", e);
 			CNotificationService.showError("Failed to update status: " + e.getMessage());
 			// Refresh board anyway to reset visual state
+			componentKanbanBoard.reloadSprintItems();
 			componentKanbanBoard.refreshComponent();
 			throw e;
 		}
@@ -293,7 +296,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					// Still save sprint item to persist kanbanColumnId change
 					saveSprintItemOnly(sprintItem);
 					
-					// Refresh board to show the item in the new column (even though status didn't change)
+					// Reload sprint items from database to get updated data, then refresh board
+					componentKanbanBoard.reloadSprintItems();
 					componentKanbanBoard.refreshComponent();
 					
 					CNotificationService.showInfo("Item moved to '" + targetColumn.getName() + 
