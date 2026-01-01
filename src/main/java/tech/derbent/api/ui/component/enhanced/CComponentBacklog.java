@@ -143,7 +143,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			config.showAll();
 		}
 		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar(config);
-		toolbar.addFilterChangeListener(criteria -> refreshGrid());
 		return toolbar;
 	}
 

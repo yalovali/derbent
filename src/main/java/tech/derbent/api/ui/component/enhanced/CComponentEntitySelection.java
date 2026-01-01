@@ -387,8 +387,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Factory method for search toolbar layout using CComponentFilterToolbar. */
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
 		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar();
-		// Add filter change listener to trigger grid filtering
-		toolbar.addFilterChangeListener(criteria -> applyFilters());
 		return toolbar;
 	}
 
@@ -437,6 +435,24 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Override
 	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
 		return dropListeners;
+	}
+
+	@Override
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void drag_setDragEnabled(final boolean enabled) {
+		grid.drag_setDragEnabled(enabled);
+		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
+	}
+
+	@Override
+	public void drag_setDropEnabled(final boolean enabled) {
+		grid.drag_setDropEnabled(enabled);
+		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 
 	/** Returns the list of already selected items.
@@ -490,12 +506,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return Set of currently selected items (never null) */
 	@Override
 	public Set<EntityClass> getValue() { return new HashSet<>(selectedItems); }
-
-	@Override
-	public boolean drag_isDropAllowed(CDragStartEvent event) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 	/** Checks if the selection is empty.
 	 * @return true if no items are selected, false otherwise */
@@ -711,18 +721,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	@Override
-	public void drag_setDragEnabled(final boolean enabled) {
-		grid.drag_setDragEnabled(enabled);
-		LOGGER.debug("[DragDebug] Drag {} for entity selection", enabled ? "enabled" : "disabled");
-	}
-
-	@Override
-	public void drag_setDropEnabled(final boolean enabled) {
-		grid.drag_setDropEnabled(enabled);
-		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
-	}
-
 	public void setDynamicHeight(final String maxHeight) {
 		getContent().setSizeUndefined();
 		getContent().setWidthFull();
@@ -772,6 +770,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		// Entity type selector
 		create_combobox_typeSelector();
 		gridSearchToolbar = create_gridSearchToolbar();
+		// Add filter change listener to trigger grid filtering
+		gridSearchToolbar.addFilterChangeListener(criteria -> applyFilters());
 		gridSearchToolbar.addComponentAsFirst(comboBoxEntityType);
 		mainLayout.add(gridSearchToolbar);
 		// Selection indicator and reset (only for multi-select mode)
