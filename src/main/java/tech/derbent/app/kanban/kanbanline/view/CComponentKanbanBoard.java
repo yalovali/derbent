@@ -157,6 +157,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	/** Filters sprint items based on the provided criteria.
 	 * 
+	 * Applies the following filters:
+	 * - Entity type filter (if specified in criteria)
+	 * - Responsible user filter (if specified in criteria)
+	 * 
 	 * @param criteria The filter criteria to apply
 	 * @return Filtered list of sprint items matching the criteria
 	 */
