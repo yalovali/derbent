@@ -503,11 +503,29 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	 * This method is called after drag-drop operations to ensure the UI displays
 	 * the latest data from the database. Without reloading, the in-memory list
 	 * contains stale objects that don't reflect recent kanbanColumnId or status changes.
+	 * 
+	 * After reloading, filters are reapplied to maintain the current filter state.
 	 */
 	public void reloadSprintItems() {
 		LOGGER.debug("Reloading sprint items from database for Kanban board");
 		if (currentSprint != null && currentSprint.getId() != null) {
 			loadSprintItemsForSprint(currentSprint);
+			// Reapply filters to maintain filter state after reload
+			final CComponentKanbanBoardFilterToolbar.FilterCriteria criteria = filterToolbar.getCurrentCriteria();
+			final List<CSprintItem> filtered = new ArrayList<>();
+			for (final CSprintItem sprintItem : allSprintItems) {
+				if (sprintItem == null || sprintItem.getItem() == null) {
+					continue;
+				}
+				if (!matchesTypeFilter(sprintItem, criteria.getEntityType())) {
+					continue;
+				}
+				if (!matchesResponsibleFilter(sprintItem, criteria)) {
+					continue;
+				}
+				filtered.add(sprintItem);
+			}
+			sprintItems = filtered;
 		}
 	}
 
