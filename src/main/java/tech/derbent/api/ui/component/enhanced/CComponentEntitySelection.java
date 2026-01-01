@@ -173,9 +173,15 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @param multiSelect             True for multi-select, false for single-select
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
 	 * @param alreadySelectedMode     Mode for handling already-selected items */
-	public CComponentEntitySelection(final List<EntityTypeConfig<?>> entityTypes, final ItemsProvider<EntityClass> itemsProvider,
+	private CComponentEntitySelection(final List<EntityTypeConfig<?>> entityTypes, final ItemsProvider<EntityClass> itemsProvider,
 			final Consumer<Set<EntityClass>> onSelectionChanged, final boolean multiSelect, final ItemsProvider<EntityClass> alreadySelectedProvider,
 			final AlreadySelectedMode alreadySelectedMode) {
+		this(entityTypes, itemsProvider, onSelectionChanged, multiSelect, alreadySelectedProvider, alreadySelectedMode, true);
+	}
+
+	public CComponentEntitySelection(final List<EntityTypeConfig<?>> entityTypes, final ItemsProvider<EntityClass> itemsProvider,
+			final Consumer<Set<EntityClass>> onSelectionChanged, final boolean multiSelect, final ItemsProvider<EntityClass> alreadySelectedProvider,
+			final AlreadySelectedMode alreadySelectedMode, boolean runSetupComponent) {
 		super();
 		Check.notEmpty(entityTypes, "Entity types cannot be empty");
 		Check.notNull(itemsProvider, "Items provider cannot be null");
@@ -187,15 +193,17 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		this.multiSelect = multiSelect;
 		this.alreadySelectedProvider = alreadySelectedProvider;
 		this.alreadySelectedMode = alreadySelectedMode;
-		try {
-			setupComponent();
-			// Select first entity type if available
-			if (!entityTypes.isEmpty()) {
-				comboBoxEntityType.setValue(entityTypes.get(0));
+		if (runSetupComponent) {
+			try {
+				setupComponent();
+				// Select first entity type if available
+				if (!entityTypes.isEmpty()) {
+					comboBoxEntityType.setValue(entityTypes.get(0));
+				}
+			} catch (final Exception e) {
+				LOGGER.error("Error setting up entity selection component", e);
+				CNotificationService.showException("Error creating component", e);
 			}
-		} catch (final Exception e) {
-			LOGGER.error("Error setting up entity selection component", e);
-			CNotificationService.showException("Error creating component", e);
 		}
 	}
 

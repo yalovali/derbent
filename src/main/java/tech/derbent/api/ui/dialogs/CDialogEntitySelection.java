@@ -192,7 +192,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 		final CComponentEntitySelection.AlreadySelectedMode componentMode = alreadySelectedMode.toComponentMode();
 		// Create the entity selection component with all configuration
 		componentEntitySelection = new CComponentEntitySelection<EntityClass>(componentEntityTypes, componentItemsProvider,
-				this::on_componentEntitySelection_selectionChanged, multiSelect, componentAlreadySelectedProvider, componentMode);
+				this::on_componentEntitySelection_selectionChanged, multiSelect, componentAlreadySelectedProvider, componentMode, true);
 		// Also register as a HasSelection listener so creators can observe selection set changes
 		componentEntitySelection.addValueChangeListener(event -> on_componentEntitySelection_selectionChanged(event.getValue()));
 		// Add component to main layout

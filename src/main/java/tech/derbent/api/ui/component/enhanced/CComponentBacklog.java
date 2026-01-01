@@ -97,11 +97,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param project     project to load backlog items for (required)
 	 * @param compactMode true for compact display (only name column in grid, only type selector in toolbar), false for full display */
 	public CComponentBacklog(final CProject project, final boolean compactMode) {
-		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED);
+		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED,
+				false);
 		Check.notNull(project, "Project cannot be null");
 		this.compactMode = compactMode;
 		activityService = CSpringContext.getBean(CActivityService.class);
 		meetingService = CSpringContext.getBean(CMeetingService.class);
+		setupComponent();
 		setDynamicHeight("600px");
 		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
 	}
