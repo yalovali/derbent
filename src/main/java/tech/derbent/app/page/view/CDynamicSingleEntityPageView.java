@@ -115,28 +115,31 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 	@Override
 	public void onEntityDeleted(CEntityDB entity) throws Exception {
 		loadAndDisplaySingleEntity();
-		// Notify parent content owner (e.g., kanban board) to refresh after deletion
-		if (getContentOwner() != null) {
-			try {
-				getContentOwner().refreshGrid();
-				LOGGER.debug("Notified parent content owner to refresh after entity deletion");
-			} catch (final Exception e) {
-				LOGGER.warn("Failed to notify parent content owner after entity deletion: {}", e.getMessage());
-			}
-		}
+		notifyParentOfEntityChange("deletion");
 	}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
 	public void onEntitySaved(CEntityDB entity) throws Exception {
 		onEntitySelected(entity);
-		// Notify parent content owner (e.g., kanban board) to refresh after save
+		notifyParentOfEntityChange("save");
+	}
+
+	/** Notifies the parent content owner (e.g., kanban board) to refresh after entity changes.
+	 * 
+	 * This method is called after entity save or delete operations to ensure parent components
+	 * are updated to reflect the changes. For example, when an activity's status is changed
+	 * via the CRUD toolbar, the kanban board will automatically refresh to show the item
+	 * in the correct column.
+	 * 
+	 * @param operation Description of the operation (e.g., "save", "deletion") for logging */
+	private void notifyParentOfEntityChange(final String operation) {
 		if (getContentOwner() != null) {
 			try {
 				getContentOwner().refreshGrid();
-				LOGGER.debug("Notified parent content owner to refresh after entity save");
+				LOGGER.debug("Notified parent content owner to refresh after entity {}", operation);
 			} catch (final Exception e) {
-				LOGGER.warn("Failed to notify parent content owner after entity save: {}", e.getMessage());
+				LOGGER.warn("Failed to notify parent content owner after entity {}: {}", operation, e.getMessage());
 			}
 		}
 	}
