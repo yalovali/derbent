@@ -33,4 +33,10 @@ public interface ISprintItemRepository extends IAbstractRepository<CSprintItem> 
 	List<CSprintItem> findByMaster(@Param ("master") CSprint master);
 	@Query ("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.sprint WHERE e.sprint.id = :masterId ORDER BY e.itemOrder ASC")
 	List<CSprintItem> findByMasterId(@Param ("masterId") Long masterId);
+	
+	/** Get next item order for new sprint items in a sprint.
+	 * @param master The sprint to get next order for
+	 * @return Next available order number (max order + 1, or 1 if no items) */
+	@Query ("SELECT COALESCE(MAX(e.itemOrder), 0) + 1 FROM #{#entityName} e WHERE e.sprint = :master")
+	Integer getNextItemOrder(@Param ("master") CSprint master);
 }

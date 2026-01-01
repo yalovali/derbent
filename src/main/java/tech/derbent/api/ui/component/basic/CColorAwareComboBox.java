@@ -249,7 +249,10 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	}
 
 	/** Sets up a value change listener to update the prefix component with the selected item's icon and applies styling to show the color. This
-	 * ensures the selected value also displays with color and icon, not just the dropdown items. */
+	 * ensures the selected value also displays with color and icon, not just the dropdown items. 
+	 * 
+	 * **IMPORTANT**: Text color is applied only to the input field, not the dropdown overlay, to prevent
+	 * white-on-white text visibility issues when dropdown items have their own background colors. */
 	@SuppressWarnings ("unused")
 	private void setupSelectedValueDisplay() {
 		addValueChangeListener(event -> {
@@ -259,7 +262,8 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				if (selectedItem == null) {
 					setPrefixComponent(null);
 					getElement().getStyle().remove("--vaadin-input-field-background");
-					getElement().getStyle().remove("color");
+					// Remove color from input field only (use part selector)
+					getElement().executeJs("this.inputElement.style.color = ''");
 					return;
 				}
 				if (selectedItem instanceof IHasIcon) {
@@ -279,7 +283,9 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 						getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
 						if (autoContrast) {
 							final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
-							getElement().getStyle().set("color", textColor);
+							// Apply text color only to the input field, not the dropdown overlay
+							// This prevents white-on-white text issues in the dropdown
+							getElement().executeJs("this.inputElement.style.color = $0", textColor);
 						}
 					}
 				}

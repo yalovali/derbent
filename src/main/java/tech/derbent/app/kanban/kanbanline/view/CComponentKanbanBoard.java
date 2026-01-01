@@ -32,6 +32,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
@@ -74,6 +75,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	private List<CSprintItem> allSprintItems;
 	private List<CSprint> availableSprints;
+	private CComponentKanbanColumnBacklog backlogColumn;
 	private final CDynamicPageRouter currentEntityPageRouter;
 	private CSprint currentSprint;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
@@ -180,6 +182,29 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		}
 		return filtered;
 	}
+	
+	/** Creates and configures a backlog column for the kanban board.
+	 * 
+	 * The backlog column is automatically created as the first column in the kanban board
+	 * and displays items from the project that are not assigned to any sprint.
+	 * 
+	 * @param project The project whose backlog items should be displayed
+	 * @return Configured backlog column component
+	 */
+	private CComponentKanbanColumnBacklog createBacklogColumn(final CProject project) {
+		LOGGER.debug("Creating backlog column for project: {}", project.getName());
+		final CComponentKanbanColumnBacklog column = new CComponentKanbanColumnBacklog(project);
+		
+		// Enable drag-drop for backlog items
+		column.drag_setDragEnabled(true);
+		column.drag_setDropEnabled(true);
+		
+		// Set up event forwarding for selection and drag-drop
+		setupSelectionNotification(column);
+		setupChildDragDropForwarding(column);
+		
+		return column;
+	}
 
 	/** Assigns each sprint item to a kanban column id before rendering.
 	 * 
@@ -282,6 +307,22 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	@Override
 	public String getComponentName() { return "kanbanBoard"; }
+	
+	/** Gets the backlog column component if it exists.
+	 * 
+	 * @return The backlog column or null if not yet created
+	 */
+	public CComponentKanbanColumnBacklog getBacklogColumn() {
+		return backlogColumn;
+	}
+	
+	/** Gets the current sprint selected in the filter toolbar.
+	 * 
+	 * @return The current sprint or null if no sprint selected
+	 */
+	public CSprint getCurrentSprint() {
+		return currentSprint;
+	}
 
 	/** Returns the current line id as string. */
 	@Override
@@ -403,6 +444,32 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		Check.instanceOf(sprintableEntity, CProjectItem.class, "Sprintable item must be a CEntityDB for Kanban board details display");
 		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter, sessionService, this);
 	}
+	
+	/** Handles selection of backlog items to display details in the entity view.
+	 * Similar to postit selection but for items selected from the backlog grid. */
+	private void on_backlog_item_selected(final CSelectEvent selectEvent) {
+		// Get the backlog component from the event source
+		Check.instanceOf(selectEvent.getSource(), CComponentBacklog.class, 
+			"Selection event source must be CComponentBacklog");
+		final CComponentBacklog backlogComponent = (CComponentBacklog) selectEvent.getSource();
+		final CProjectItem<?> selectedItem = backlogComponent.getSelectedBacklogItem();
+		
+		LOGGER.debug("Kanban board backlog item selection changed to {}", selectedItem != null ? selectedItem.getId() : "null");
+		
+		// Clear postit selection when backlog item is selected
+		if (selectedPostit != null) {
+			selectedPostit.setSelected(false);
+			selectedPostit = null;
+		}
+		
+		if (selectedItem == null) {
+			CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService, this);
+			return;
+		}
+		
+		// Display the selected backlog item in the details view
+		CDynamicPageRouter.displayEntityInDynamicOnepager(selectedItem, currentEntityPageRouter, sessionService, this);
+	}
 
 	/** Reacts to kanban line changes by reloading sprints. */
 	@Override
@@ -495,6 +562,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			layoutColumns.add(div);
 			return;
 		}
+		
+		// Create backlog column as first column if we have a current sprint
+		if (currentSprint != null && currentSprint.getProject() != null) {
+			backlogColumn = createBacklogColumn(currentSprint.getProject());
+			layoutColumns.add(backlogColumn);
+		}
+		
+		// Create regular kanban columns from the kanban line configuration
 		final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
 		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
 		assignKanbanColumns(sprintItems, columns);
@@ -576,8 +651,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	@Override
 	public void select_checkEventBeforePass(final CEvent event) {
 		Check.notNull(event, "Selection event cannot be null for Kanban board");
-		if (event instanceof final CSelectEvent selectEvent && selectEvent.getSource() instanceof final CComponentKanbanPostit postit) {
-			on_postit_selected(postit);
+		if (event instanceof final CSelectEvent selectEvent) {
+			if (selectEvent.getSource() instanceof final CComponentKanbanPostit postit) {
+				// Selection from kanban postit
+				on_postit_selected(postit);
+			} else if (selectEvent.getSource() instanceof CComponentBacklog) {
+				// Selection from backlog component
+				on_backlog_item_selected(selectEvent);
+			}
 		}
 	}
 
