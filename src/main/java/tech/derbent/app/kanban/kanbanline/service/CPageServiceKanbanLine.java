@@ -102,8 +102,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * 4. Resolve valid status(es) for target column (workflow-aware status mapping)
 	 * 5a. If ONE valid status: automatically set it and save
 	 * 5b. If MULTIPLE valid statuses: show selection dialog for user choice
-	 * 5c. If NO valid statuses: show warning, kanban column updates but status doesn't change
-	 * 6. Save project item to database
+	 * 5c. If NO valid statuses: save kanban column assignment without status change
+	 * 6. Save changes to database
 	 * 7. Refresh kanban board to reflect changes
 	 * 
 	 * Status Resolution Logic:
@@ -111,7 +111,12 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * - Intersects with workflow-valid transitions (getValidNextStatuses())
 	 * - Single status: automatic transition
 	 * - Multiple statuses: user selection via dialog
-	 * - No statuses: warning notification
+	 * - No statuses: warning notification, but still saves column assignment
+	 * 
+	 * CRITICAL BUG FIX: Always save sprint item to persist kanbanColumnId changes,
+	 * even when no valid status transition exists. Previously, returning early
+	 * without save caused drag-drop to appear broken (item visually moved but 
+	 * position not persisted to database).
 	 * 
 	 * This ensures drag-drop respects both kanban column mappings AND workflow transition rules.
 	 */
@@ -143,12 +148,21 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			// Step 5: Handle status transition based on number of valid statuses
 			if (targetStatuses.isEmpty()) {
 				// Case 1: No valid status for this column - update column assignment but not status
-				LOGGER.warn("No statuses mapped to target column {}, sprint item {} status not changed.", targetColumn.getName(), sprintItem.getId());
-				CNotificationService.showWarning("The target column has no statuses mapped. Sprint item status was not changed.");
-				return;
-			}
-			
-			if (targetStatuses.size() == 1) {
+				LOGGER.warn("No valid workflow transitions to target column {}, sprint item {} status not changed.", 
+					targetColumn.getName(), sprintItem.getId());
+				
+				// CRITICAL: Still save the sprint item to persist kanbanColumnId change
+				// This was a bug - returning early without save caused drag-drop to appear broken
+				saveSprintItemOnly(sprintItem);
+				
+				// Refresh board to show new column assignment
+				componentKanbanBoard.refreshComponent();
+				
+				// Warn user that status couldn't be changed
+				CNotificationService.showWarning(
+					"Item moved to '" + targetColumn.getName() + "' column, but status remains '" + 
+					((ISprintableItem) item).getStatus().getName() + "' (no valid workflow transition available).");
+			} else if (targetStatuses.size() == 1) {
 				// Case 2: Exactly one valid status - automatically apply it
 				final CProjectItemStatus newStatus = targetStatuses.get(0);
 				LOGGER.info("Single status available for column {}, automatically setting status to {} for sprint item {}",
@@ -211,6 +225,38 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		}
 	}
 	
+	/** Saves sprint item to persist kanbanColumnId without changing the project item status.
+	 * 
+	 * This method is used when drag-drop updates the visual column assignment but there
+	 * is no valid workflow transition available. The sprint item must still be saved to
+	 * persist the kanbanColumnId change, otherwise the drag-drop appears broken (item
+	 * visually moves but position is lost on refresh).
+	 * 
+	 * CRITICAL: This fixes a bug where returning early without save caused inconsistent
+	 * behavior - sometimes drag-drop worked (when status transition was valid), sometimes
+	 * it didn't (when no valid transition).
+	 * 
+	 * @param sprintItem The sprint item to save (only kanbanColumnId is modified)
+	 */
+	private void saveSprintItemOnly(final CSprintItem sprintItem) {
+		try {
+			Check.notNull(sprintItem, "Sprint item cannot be null");
+			Check.notNull(sprintItem.getId(), "Sprint item must have ID to save");
+			
+			// Get sprint item service and save
+			final tech.derbent.app.sprints.service.CSprintItemService sprintItemService = 
+				CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
+			sprintItemService.save(sprintItem);
+			
+			LOGGER.info("Saved sprint item {} with kanbanColumnId {} (no status change)", 
+				sprintItem.getId(), sprintItem.getKanbanColumnId());
+		} catch (final Exception e) {
+			LOGGER.error("Failed to save sprint item kanban column assignment", e);
+			CNotificationService.showError("Failed to save column assignment: " + e.getMessage());
+			throw e;
+		}
+	}
+	
 	/** Shows a dialog for the user to select which status to apply when multiple valid statuses exist.
 	 * 
 	 * This dialog displays all valid statuses with their colors and icons, allowing the user
@@ -242,10 +288,16 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					applyStatusAndSave(item, sprintItem, selectedStatus);
 				} else {
 					// User cancelled: keep kanban column assignment but don't change status
-					LOGGER.info("User cancelled status selection for sprint item {}, keeping current status", sprintItem.getId());
-					CNotificationService.showInfo("Column changed but status remained the same.");
+					LOGGER.info("User cancelled status selection for sprint item {}, saving column change only", sprintItem.getId());
+					
+					// Still save sprint item to persist kanbanColumnId change
+					saveSprintItemOnly(sprintItem);
+					
 					// Refresh board to show the item in the new column (even though status didn't change)
 					componentKanbanBoard.refreshComponent();
+					
+					CNotificationService.showInfo("Item moved to '" + targetColumn.getName() + 
+						"' column, status remained '" + ((ISprintableItem) item).getStatus().getName() + "'.");
 				}
 				// Clear active drag state after dialog closes
 				setActiveDragStartEvent(null);

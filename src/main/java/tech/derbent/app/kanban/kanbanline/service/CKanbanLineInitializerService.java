@@ -143,23 +143,26 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 
 	/** Seeds default kanban lines and columns for a company.
 	 * 
-	 * Creates two example kanban boards with proper agile workflow mappings:
-	 * 1. "Agile Development Board" - Classic Scrum/Kanban workflow
-	 * 2. "Simple Task Board" - Simplified 3-column board
+	 * Creates two example kanban boards following standard Agile/Scrum methodology:
+	 * 1. "Scrum Board" - Standard Scrum workflow with 5 columns
+	 * 2. "Simple Kanban" - Basic 3-column Kanban workflow
 	 * 
 	 * Each status is assigned to exactly ONE column to prevent status overlap validation errors.
-	 * The column-to-status mapping follows common agile practices:
-	 * - Backlog: Items not yet started
-	 * - In Progress: Active work  
-	 * - Review/QA: Work pending review
+	 * The column-to-status mapping follows Agile best practices:
+	 * - Backlog/To Do: Items ready to start
+	 * - In Progress: Active work in development
+	 * - Review/Testing: Work being reviewed or tested
+	 * - Blocked: Work waiting on dependencies
 	 * - Done: Completed work (default column for unmapped statuses)
+	 * 
+	 * IMPORTANT: All columns MUST have at least one status mapped to prevent display issues.
 	 */
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] sampleLines = {
 				{
-						"Agile Development Board", "Classic Scrum/Kanban workflow from backlog to done"
+						"Scrum Board", "Standard Scrum workflow: Backlog → In Progress → In Review → Blocked → Done"
 				}, {
-						"Simple Task Board", "Simplified 3-column task management board"
+						"Simple Kanban", "Basic Kanban workflow: To Do → Doing → Done"
 				}
 		};
 		final CProjectItemStatusService statusService =
@@ -174,20 +177,38 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 					final CKanbanLine line = (CKanbanLine) entity;
 					
 					if (index == 0) {
-						// Agile Development Board: 4-column workflow
+						// Scrum Board: 5-column standard Scrum workflow
 						// Each status is assigned to EXACTLY ONE column to prevent overlap
-						LOGGER.info("[KanbanInit] Creating Agile Development Board with 4 columns");
-						createColumn("Backlog", company, statusService, line, "Not Started");
+						LOGGER.info("[KanbanInit] Creating Scrum Board with 5 columns");
+						createColumn("Backlog", company, statusService, line, "To Do");
 						createColumn("In Progress", company, statusService, line, "In Progress");
-						createColumn("On Hold / Review", company, statusService, line, "On Hold");
-						createColumn("Done", company, statusService, line, "Completed", "Cancelled").setDefaultColumn(true);
+						createColumn("In Review", company, statusService, line, "In Review");
+						createColumn("Blocked", company, statusService, line, "Blocked");
+						createColumn("Done", company, statusService, line, "Done", "Cancelled").setDefaultColumn(true);
 					} else {
-						// Simple Task Board: 3-column workflow  
-						// Simplified board grouping statuses differently
-						LOGGER.info("[KanbanInit] Creating Simple Task Board with 3 columns");
-						createColumn("To Do", company, statusService, line, "Not Started");
-						createColumn("Doing", company, statusService, line, "In Progress", "On Hold");
-						createColumn("Done", company, statusService, line, "Completed", "Cancelled").setDefaultColumn(true);
+						// Simple Kanban: 3-column simplified workflow
+						// Groups multiple statuses into broader categories
+						LOGGER.info("[KanbanInit] Creating Simple Kanban with 3 columns");
+						createColumn("To Do", company, statusService, line, "To Do", "Blocked");
+						createColumn("Doing", company, statusService, line, "In Progress", "In Review");
+						createColumn("Done", company, statusService, line, "Done", "Cancelled").setDefaultColumn(true);
+					}
+					
+					// Validate that no columns have empty status lists
+					for (final CKanbanColumn column : line.getKanbanColumns()) {
+						if (column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
+							LOGGER.error("[KanbanInit] VALIDATION ERROR: Column '{}' in line '{}' has NO statuses mapped!",
+								column.getName(), line.getName());
+							throw new IllegalStateException("Kanban column '" + column.getName() + 
+								"' must have at least one status mapped. Empty status lists cause display issues.");
+						} else {
+							LOGGER.debug("[KanbanInit] Column '{}' has {} status(es) mapped: {}",
+								column.getName(), 
+								column.getIncludedStatuses().size(),
+								column.getIncludedStatuses().stream()
+									.map(s -> s.getName())
+									.collect(java.util.stream.Collectors.joining(", ")));
+						}
 					}
 					
 					LOGGER.info("[KanbanInit] Completed initialization of kanban line '{}' with {} columns",
