@@ -249,10 +249,9 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	}
 
 	/** Sets up a value change listener to update the prefix component with the selected item's icon and applies styling to show the color. This
-	 * ensures the selected value also displays with color and icon, not just the dropdown items. 
-	 * 
-	 * **IMPORTANT**: Text color is applied only to the input field, not the dropdown overlay, to prevent
-	 * white-on-white text visibility issues when dropdown items have their own background colors. */
+	 * ensures the selected value also displays with color and icon, not just the dropdown items. **IMPORTANT**: Text color is applied only to the
+	 * input field, not the dropdown overlay, to prevent white-on-white text visibility issues when dropdown items have their own background
+	 * colors. */
 	@SuppressWarnings ("unused")
 	private void setupSelectedValueDisplay() {
 		addValueChangeListener(event -> {
@@ -261,49 +260,41 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				if (selectedItem == null) {
 					setPrefixComponent(null);
 					getElement().getStyle().remove("--vaadin-input-field-background");
-					// Remove color from input field only (use part selector)
 					getElement().executeJs("this.inputElement.style.color = ''");
 					return;
 				}
-				
-				// Try to get and apply background color (works for any entity with getColor() method)
 				String backgroundColor = null;
 				try {
 					backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
 				} catch (final Exception e) {
-					// Entity doesn't have color support - skip color styling
+					backgroundColor = "#1F3FcF";
 				}
-				
-				if (backgroundColor != null && !backgroundColor.isEmpty()) {
-					getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
-					if (autoContrast) {
-						final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
-						// Apply text color to input field
-						getElement().executeJs("this.inputElement.style.color = $0", textColor);
-					}
-				} else {
-					// No background color - clear any previous color
-					getElement().getStyle().remove("--vaadin-input-field-background");
-					getElement().executeJs("this.inputElement.style.color = ''");
-				}
-				
-				// Set up icon if entity has one
+				final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
+				getElement().executeJs("this.inputElement.style.color = $0", textColor);
+				getElement().executeJs("this.inputElement.style.background = $0", backgroundColor);
 				if (selectedItem instanceof IHasIcon) {
 					final Icon icon = CColorUtils.getIconForEntity(selectedItem);
 					if (icon != null) {
-						CColorUtils.styleIcon(icon);
+						// CColorUtils.styleIcon(icon);
 						setPrefixComponent(icon);
 						// Apply text color to icon as well if we have a background color
-						if (backgroundColor != null && !backgroundColor.isEmpty() && autoContrast) {
-							final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
-							icon.getElement().getStyle().set("color", textColor);
-						}
+						icon.getElement().getStyle().set("color", textColor);
+						icon.getElement().getStyle().set("background", backgroundColor);
+						icon.getElement().getStyle().set("height", "100%");
+						icon.getElement().getStyle().remove("margin-right");
+						icon.getElement().getStyle().remove("width");
+						// must have to have alignment with input field color with real border radius
+						icon.getElement().getStyle().set("border-top-left-radius", "4px");
+						icon.getElement().getStyle().set("border-bottom-left-radius", "4px");
+					} else {
+						setPrefixComponent(null);
 					}
 				} else {
-					setPrefixComponent(null);
+					getElement().executeJs("this.inputElement.style['border-top-left-radius'] = $0", "4px");
+					getElement().executeJs("this.inputElement.style['border-bottom-left-radius'] = $0", "4px");
 				}
 			} catch (final Exception e) {
-				e.printStackTrace();
+				LOGGER.error("Error updating selected value display in CColorAwareComboBox: {}", e.getMessage());
 			}
 		});
 	}

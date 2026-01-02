@@ -75,42 +75,15 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		Check.notNull(project, "Project cannot be null for backlog column");
 		this.project = project;
 		LOGGER.debug("Creating backlog kanban column for project: {}", project.getName());
-		
 		// Set the backlog column header title to make it visible
 		setBacklogColumnHeader();
-		
-		// Apply backlog-specific background color for visual distinction
-		applyBacklogBackgroundColor();
-		
 		// Create backlog component in compact mode (always true for narrow display in kanban board)
 		backlogComponent = new CComponentBacklog(project, true);
 		// Add backlog component to the column
 		add(backlogComponent);
 		// Set up drag-drop for backlog items
 		setupBacklogDragDrop();
-	}
-	
-	/** Sets the header title for the backlog column to make it visible. */
-	private void setBacklogColumnHeader() {
-		// Set the title to "Backlog" and hide story points total for backlog
-		title.setText("Backlog");
-		statusesLabel.setText("");
-	}
-	
-	/** Applies a distinctive background color to the backlog column.
-	 * Uses a light blue-gray color (#F0F4F8) to visually distinguish the backlog from regular kanban columns. */
-	private void applyBacklogBackgroundColor() {
-		// Apply a soft blue-gray background color to distinguish backlog from regular columns
-		// This helps users identify the backlog area at a glance
 		getStyle().set("background-color", "#F0F4F8");
-		LOGGER.debug("Applied backlog background color");
-	}
-	
-	/** Override to prevent story point total display in backlog column. */
-	@Override
-	protected void refreshStoryPointTotal() {
-		// Backlog column does not display story point totals
-		// Items in backlog are not part of sprint planning yet
 	}
 
 	/** Hook executed after drag-drop events are processed. Used to refresh the backlog display after items are added/removed. */
@@ -180,6 +153,20 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		// Don't call super.refreshComponent() as we don't use the itemsLayout
 		// Instead, refresh the embedded backlog component
 		refreshBacklog();
+	}
+
+	/** Override to prevent story point total display in backlog column. */
+	@Override
+	protected void refreshStoryPointTotal() {
+		// Backlog column does not display story point totals
+		// Items in backlog are not part of sprint planning yet
+	}
+
+	/** Sets the header title for the backlog column to make it visible. */
+	private void setBacklogColumnHeader() {
+		// Set the title to "Backlog" and hide story points total for backlog
+		title.setText("Backlog");
+		statusesLabel.setText("");
 	}
 
 	/** Overrides parent refreshItems to use backlog component. Regular kanban columns filter sprint items; backlog shows non-sprint items. */
