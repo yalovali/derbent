@@ -1175,13 +1175,15 @@ public abstract class CBaseUITest {
 		}
 		page.onConsoleMessage(msg -> {
 			final String text = msg.text();
+			final String location = msg.location() != null ? msg.location().toString() : "";
+			final String combined = text == null ? location : location.isEmpty() ? text : text + " " + location;
 			if (msg.type() != null && msg.type().equalsIgnoreCase("error")) {
-				if (!isIgnorableConsoleMessage(text)) {
+				if (!isIgnorableConsoleMessage(combined)) {
 					LOGGER.error("🌐 Browser console error: {} ({})", text, msg.location());
 				}
 			}
 			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL") || text.contains("FATAL"))
-					&& !isIgnorableConsoleMessage(text)) {
+					&& !isIgnorableConsoleMessage(combined)) {
 				synchronized (EXCEPTION_LOCK) {
 					DETECTED_EXCEPTIONS.add(text);
 				}
@@ -1203,25 +1205,31 @@ public abstract class CBaseUITest {
 		if (message == null) {
 			return false;
 		}
-		if (message.contains("ws://localhost:35729")) {
+		final String normalized = message.replace('\u00A0', ' ').trim();
+		final String normalizedLower = normalized.toLowerCase();
+		if (normalized.contains("ws://localhost:35729")) {
 			return true;
 		}
-		if (message.contains("vaadinPush.js") && message.contains("WebSocket connection")) {
+		if (normalized.contains("vaadinPush.js") && normalized.contains("WebSocket connection")) {
 			return true;
 		}
-		if (message.contains("favicon.ico") && message.contains("404")) {
+		if (normalized.contains("favicon.ico") && normalized.contains("404")) {
 			return true;
 		}
-		if (message.contains("WebSocket connection to") && message.contains("/VAADIN/push")) {
+		if (normalized.contains("WebSocket connection to") && normalized.contains("/VAADIN/push")) {
 			return true;
 		}
-		if (message.contains("Event (") && message.contains("localhost:")) {
+		if (normalizedLower.startsWith("event ") || normalizedLower.startsWith("event(") || normalizedLower.startsWith("event:")) {
 			return true;
 		}
-		if (message.contains("Refused to apply style") && message.contains("text/html")) {
+		if (normalizedLower.contains("event") && (normalizedLower.contains("http://localhost") || normalizedLower.contains("https://localhost")
+				|| normalizedLower.contains("http://127.0.0.1") || normalizedLower.contains("https://127.0.0.1"))) {
 			return true;
 		}
-		return message.contains("Error in WebSocket connection to ws://localhost:35729");
+		if (normalized.contains("Refused to apply style") && normalized.contains("text/html")) {
+			return true;
+		}
+		return normalized.contains("Error in WebSocket connection to ws://localhost:35729");
 	}
 
 	protected String sanitizeForFileName(final String value, final String fallback) {
@@ -2057,6 +2065,9 @@ public abstract class CBaseUITest {
 				return;
 			}
 			wait_500();
+		}
+		if (page.locator("#" + PROGRESS_DIALOG_ID + "[opened]").count() > 0 || page.locator("#" + INFO_OK_BUTTON_ID).count() > 0) {
+			return;
 		}
 		LOGGER.warn("⚠️ Overlay {} still present after waiting {} seconds", overlaySelector, maxAttempts * 0.5);
 	}

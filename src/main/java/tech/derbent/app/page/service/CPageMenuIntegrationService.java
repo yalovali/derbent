@@ -56,13 +56,44 @@ public class CPageMenuIntegrationService {
 		if (menuOrderStr == null || menuOrderStr.trim().isEmpty()) {
 			return DEFAULT_ORDER;
 		}
+		final String trimmed = menuOrderStr.trim();
 		try {
 			// Try to parse as a simple Double first
-			return Double.parseDouble(menuOrderStr.trim());
+			return Double.parseDouble(trimmed);
 		} catch (final NumberFormatException e) {
+			final String[] parts = trimmed.split("\\.");
+			if (parts.length > 1 && isNumeric(parts[0])) {
+				final StringBuilder decimals = new StringBuilder();
+				for (int i = 1; i < parts.length; i++) {
+					if (!isNumeric(parts[i])) {
+						LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER, e.getMessage());
+						return DEFAULT_ORDER;
+					}
+					decimals.append(parts[i]);
+				}
+				final String composed = parts[0] + "." + decimals;
+				try {
+					return Double.parseDouble(composed);
+				} catch (final NumberFormatException composedError) {
+					LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER, composedError.getMessage());
+					return DEFAULT_ORDER;
+				}
+			}
 			LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER, e.getMessage());
 			return DEFAULT_ORDER;
 		}
+	}
+
+	private static boolean isNumeric(final String value) {
+		if (value == null || value.isEmpty()) {
+			return false;
+		}
+		for (int i = 0; i < value.length(); i++) {
+			if (!Character.isDigit(value.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private final CPageEntityService pageEntityService;

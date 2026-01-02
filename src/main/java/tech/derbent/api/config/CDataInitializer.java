@@ -1,7 +1,9 @@
 package tech.derbent.api.config;
 
+import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.List;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -272,26 +274,30 @@ public class CDataInitializer {
 		LOGGER.debug("Clearing sample data from database (forced)");
 		try {
 			// ---- 1) PostgreSQL yolu: public şemadaki tabloları topla ve TRUNCATE et
-			try {
-				final List<String> tableNames = jdbcTemplate.queryForList("""
-						SELECT tablename
-						FROM pg_tables
-						WHERE schemaname = 'public'
-						  AND tablename NOT IN ('flyway_schema_history')
-						""", String.class);
-				if (!tableNames.isEmpty()) {
-					// Tabloları güvenli biçimde tırnakla ve join et
-					final List<String> quoted = tableNames.stream().map(t -> "\"" + t + "\"").toList();
-					final String joined = String.join(", ", quoted);
-					final String sql = "TRUNCATE TABLE " + joined + " RESTART IDENTITY CASCADE";
-					LOGGER.debug("Executing: {}", sql);
-					jdbcTemplate.execute(sql);
-					LOGGER.info("All public tables truncated (PostgreSQL).");
-					return; // İş bitti
+			if (isPostgreSql(jdbcTemplate.getDataSource())) {
+				try {
+					final List<String> tableNames = jdbcTemplate.queryForList("""
+							SELECT tablename
+							FROM pg_tables
+							WHERE schemaname = 'public'
+							  AND tablename NOT IN ('flyway_schema_history')
+							""", String.class);
+					if (!tableNames.isEmpty()) {
+						// Tabloları güvenli biçimde tırnakla ve join et
+						final List<String> quoted = tableNames.stream().map(t -> "\"" + t + "\"").toList();
+						final String joined = String.join(", ", quoted);
+						final String sql = "TRUNCATE TABLE " + joined + " RESTART IDENTITY CASCADE";
+						LOGGER.debug("Executing: {}", sql);
+						jdbcTemplate.execute(sql);
+						LOGGER.info("All public tables truncated (PostgreSQL).");
+						return; // İş bitti
+					}
+					LOGGER.warn("No user tables found to truncate in public schema.");
+				} catch (final Exception pgEx) {
+					LOGGER.warn("PostgreSQL truncate path failed. Falling back to JPA deletes. Cause: {}", pgEx.getMessage());
 				}
-				LOGGER.warn("No user tables found to truncate in public schema.");
-			} catch (final Exception pgEx) {
-				LOGGER.warn("PostgreSQL truncate path failed or DB is not PostgreSQL. Falling back to JPA deletes. Cause: {}", pgEx.getMessage());
+			} else {
+				LOGGER.debug("Skipping PostgreSQL truncate path; database is not PostgreSQL.");
 			}
 			// ---- 2) Fallback: JPA batch silme (FK sırasına dikkat)
 			commentService.deleteAllInBatch();
@@ -323,6 +329,19 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data cleanup", e);
 			throw e;
+		}
+	}
+
+	private boolean isPostgreSql(final DataSource dataSource) {
+		if (dataSource == null) {
+			return false;
+		}
+		try (Connection connection = dataSource.getConnection()) {
+			final String product = connection.getMetaData().getDatabaseProductName();
+			return product != null && product.toLowerCase().contains("postgresql");
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
+			return false;
 		}
 	}
 
@@ -647,23 +666,35 @@ public class CDataInitializer {
 		try {
 			final CCompany company = project.getCompany();
 			final CUser user1 = userService.getRandom(project.getCompany());
-			final CTeam team1 = new CTeam("Development Team", company);
-			team1.setDescription("Core development team responsible for implementation");
-			team1.setTeamManager(user1);
-			teamService.save(team1);
+			final String team1Name = "Development Team";
+			if (!teamExistsInCompany(company, team1Name)) {
+				final CTeam team1 = new CTeam(team1Name, company);
+				team1.setDescription("Core development team responsible for implementation");
+				team1.setTeamManager(user1);
+				teamService.save(team1);
+			}
 			if (minimal) {
 				return;
 			}
 			final CUser user2 = userService.getRandom(project.getCompany());
-			final CTeam team2 = new CTeam("QA Team", company);
-			team2.setDescription("Quality assurance and testing team");
-			team2.setTeamManager(user2);
-			teamService.save(team2);
+			final String team2Name = "QA Team";
+			if (!teamExistsInCompany(company, team2Name)) {
+				final CTeam team2 = new CTeam(team2Name, company);
+				team2.setDescription("Quality assurance and testing team");
+				team2.setTeamManager(user2);
+				teamService.save(team2);
+			}
 			// LOGGER.debug("Created sample teams for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample teams for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample teams for project: " + project.getName(), e);
 		}
+	}
+
+	private boolean teamExistsInCompany(final CCompany company, final String teamName) {
+		Check.notNull(company, "Company cannot be null when checking team names");
+		Check.notNull(teamName, "Team name cannot be null when checking team names");
+		return teamService.findByCompany(company).stream().anyMatch(team -> teamName.equalsIgnoreCase(team.getName()));
 	}
 
 	private void initializeSampleTickets(final CProject project, final boolean minimal) {
