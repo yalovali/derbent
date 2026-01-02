@@ -29,13 +29,13 @@ import java.util.Optional;
  *     public void saveCurrentValue() {
  *         EntityTypeConfig&lt;?&gt; currentValue = comboBoxEntityType.getValue();
  *         if (currentValue != null) {
- *             CValueStorageService.storeValue(getStorageId(), currentValue.getDisplayName());
+ *             sessionService.setSessionValue(getStorageId(), currentValue.getDisplayName());
  *         }
  *     }
  *
  *     &#64;Override
  *     public void restoreCurrentValue() {
- *         Optional&lt;String&gt; storedValue = CValueStorageService.retrieveValue(getStorageId());
+ *         Optional&lt;String&gt; storedValue = sessionService.getSessionValue(getStorageId());
  *         if (storedValue.isPresent()) {
  *             // Find matching entity type and set it
  *             entityTypes.stream()
@@ -47,7 +47,8 @@ import java.util.Optional;
  * }
  * </pre>
  * 
- * @see tech.derbent.api.services.CValueStorageService
+ * @see tech.derbent.api.utils.CValueStorageHelper
+ * @see tech.derbent.base.session.service.ISessionService
  */
 public interface IHasSelectedValueStorage {
 

@@ -14,7 +14,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.interfaces.IHasSelectedValueStorage;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.services.CValueStorageService;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar;
 import tech.derbent.api.utils.CValueStorageHelper;

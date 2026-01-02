@@ -41,6 +41,7 @@ public class CWebSessionService implements ISessionService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private static final String PROJECT_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectChangeListeners";
 	private static final String PROJECT_LIST_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectListChangeListeners";
+	private static final String SESSION_VALUES_KEY = CWebSessionService.class.getName() + ".sessionValues";
 
 	@SuppressWarnings ("unchecked")
 	private static Set<String> getActiveIdAttributesIfPresent(final VaadinSession session) {
@@ -136,6 +137,12 @@ public class CWebSessionService implements ISessionService {
 			final Set<IProjectListChangeListener> projectListListeners = getProjectListChangeListenersIfPresent(session);
 			if (projectListListeners != null) {
 				projectListListeners.clear();
+			}
+			// Clear generic session values (component filters, selections, etc.)
+			final java.util.Map<String, Object> sessionValues = getSessionValuesIfPresent(session);
+			if (sessionValues != null) {
+				sessionValues.clear();
+				LOGGER.debug("Cleared session values map");
 			}
 		} else {
 			LOGGER.debug("clearSession called without active VaadinSession");
@@ -379,4 +386,112 @@ public class CWebSessionService implements ISessionService {
 	/** Sets the layout service. This is called after bean creation to avoid circular dependency. */
 	@Override
 	public void setLayoutService(final CLayoutService layoutService) { this.layoutService = layoutService; }
+
+	// ==================== Generic Session Storage Implementation ====================
+
+	/**
+	 * Gets or creates the session values map for storing generic component values.
+	 * Thread-safe using ConcurrentHashMap.
+	 */
+	@SuppressWarnings("unchecked")
+	private static java.util.Map<String, Object> getOrCreateSessionValues(final VaadinSession session) {
+		Check.notNull(session, "VaadinSession cannot be null");
+		java.util.Map<String, Object> values = (java.util.Map<String, Object>) session.getAttribute(SESSION_VALUES_KEY);
+		if (values == null) {
+			values = new ConcurrentHashMap<>();
+			session.setAttribute(SESSION_VALUES_KEY, values);
+			LOGGER.debug("Created new session values map");
+		}
+		return values;
+	}
+
+	/**
+	 * Gets the session values map if it exists.
+	 */
+	@SuppressWarnings("unchecked")
+	private static java.util.Map<String, Object> getSessionValuesIfPresent(final VaadinSession session) {
+		return (java.util.Map<String, Object>) session.getAttribute(SESSION_VALUES_KEY);
+	}
+
+	/**
+	 * Retrieves a value from session storage.
+	 * <p>
+	 * This method provides generic storage for component values that need to persist
+	 * across refreshes and page reloads within a user's session.
+	 * </p>
+	 * 
+	 * @param <T> The expected type of the stored value
+	 * @param key The storage key (must not be null or blank)
+	 * @return Optional containing the stored value, or empty if not found
+	 * @throws ClassCastException if the stored value cannot be cast to type T
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> Optional<T> getSessionValue(final String key) {
+		Check.notBlank(key, "Storage key cannot be null or blank");
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.debug("No active VaadinSession, cannot retrieve value for key: {}", key);
+			return Optional.empty();
+		}
+		final java.util.Map<String, Object> values = getSessionValuesIfPresent(session);
+		if (values == null) {
+			return Optional.empty();
+		}
+		final Object value = values.get(key);
+		if (value != null) {
+			LOGGER.debug("Retrieved session value for key: {}", key);
+			return Optional.of((T) value);
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * Stores a value in session storage.
+	 * <p>
+	 * The value is stored in the VaadinSession and will be available until the session ends
+	 * or the value is explicitly removed. The value should be serializable to support
+	 * session serialization in cluster environments.
+	 * </p>
+	 * 
+	 * @param key   The storage key (must not be null or blank)
+	 * @param value The value to store (can be null to clear the value)
+	 */
+	@Override
+	public void setSessionValue(final String key, final Object value) {
+		Check.notBlank(key, "Storage key cannot be null or blank");
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.warn("No active VaadinSession, cannot store value for key: {}", key);
+			return;
+		}
+		final java.util.Map<String, Object> values = getOrCreateSessionValues(session);
+		if (value == null) {
+			values.remove(key);
+			LOGGER.debug("Removed session value for key: {}", key);
+		} else {
+			values.put(key, value);
+			LOGGER.debug("Stored session value for key: {}", key);
+		}
+	}
+
+	/**
+	 * Removes a value from session storage.
+	 * 
+	 * @param key The storage key (must not be null or blank)
+	 */
+	@Override
+	public void removeSessionValue(final String key) {
+		Check.notBlank(key, "Storage key cannot be null or blank");
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.warn("No active VaadinSession, cannot remove value for key: {}", key);
+			return;
+		}
+		final java.util.Map<String, Object> values = getSessionValuesIfPresent(session);
+		if (values != null) {
+			values.remove(key);
+			LOGGER.debug("Removed session value for key: {}", key);
+		}
+	}
 }

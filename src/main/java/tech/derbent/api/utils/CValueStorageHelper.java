@@ -10,8 +10,9 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.TextField;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.interfaces.IHasSelectedValueStorage;
-import tech.derbent.api.services.CValueStorageService;
+import tech.derbent.base.session.service.ISessionService;
 
 /**
  * CValueStorageHelper - Utility for enabling automatic value persistence on UI components.
@@ -45,7 +46,7 @@ import tech.derbent.api.services.CValueStorageService;
  * </pre>
  * 
  * @see IHasSelectedValueStorage
- * @see CValueStorageService
+ * @see ISessionService
  */
 public class CValueStorageHelper {
 
@@ -141,6 +142,8 @@ public class CValueStorageHelper {
 			throw new IllegalArgumentException("Component must extend Vaadin Component class");
 		}
 		final Component vaadinComponent = (Component) component;
+		// Get session service
+		final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
 		// Mark component as having auto-persistence enabled
 		ComponentUtil.setData(vaadinComponent, STORAGE_ENABLED_KEY, true);
 		// Add value change listener to save on change
@@ -154,11 +157,11 @@ public class CValueStorageHelper {
 				if (value != null) {
 					final String serialized = serializer.toString(value);
 					if (serialized != null) {
-						CValueStorageService.storeValue(storageId, serialized);
+						sessionService.setSessionValue(storageId, serialized);
 						LOGGER.debug("Auto-saved value for storage ID: {}", storageId);
 					}
 				} else {
-					CValueStorageService.removeValue(storageId);
+					sessionService.removeSessionValue(storageId);
 					LOGGER.debug("Cleared stored value for storage ID: {}", storageId);
 				}
 			} catch (final Exception e) {
@@ -166,7 +169,7 @@ public class CValueStorageHelper {
 			}
 		});
 		// Add attach listener to restore value when component is added to UI
-		vaadinComponent.addAttachListener(event -> restoreValue(component, storageId, converter));
+		vaadinComponent.addAttachListener(event -> restoreValue(component, storageId, converter, sessionService));
 		// Add detach listener to clean up (optional - could be removed if values should persist)
 		vaadinComponent.addDetachListener(event -> {
 			LOGGER.debug("Component detached, stored value remains for storage ID: {}", storageId);
@@ -208,10 +211,12 @@ public class CValueStorageHelper {
 	 * @param component The component to restore value for
 	 * @param storageId The storage identifier
 	 * @param converter Function to convert storage string back to component value
+	 * @param sessionService The session service for retrieving stored values
 	 */
-	private static <T> void restoreValue(final HasValue<?, T> component, final String storageId, final ValueConverter<T> converter) {
+	private static <T> void restoreValue(final HasValue<?, T> component, final String storageId, final ValueConverter<T> converter,
+			final ISessionService sessionService) {
 		try {
-			final Optional<String> storedValue = CValueStorageService.retrieveValue(storageId);
+			final Optional<String> storedValue = sessionService.getSessionValue(storageId);
 			if (storedValue.isPresent()) {
 				final T value = converter.fromString(storedValue.get());
 				if (value != null) {

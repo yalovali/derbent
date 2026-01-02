@@ -13,7 +13,7 @@ The solution follows the **Context Owner Pattern**:
 1. Reusable components implement `IHasSelectedValueStorage` interface
 2. Parent components (context owners) decide which child components need persistence
 3. Parent calls `enableValuePersistence()` on child components that should persist values
-4. `CValueStorageHelper` handles automatic save/restore using VaadinSession
+4. `CValueStorageHelper` handles automatic save/restore using existing session infrastructure
 
 ### Key Components
 
@@ -27,12 +27,13 @@ public interface IHasSelectedValueStorage {
 }
 ```
 
-#### 2. CValueStorageService
-Session-based storage service that stores values in VaadinSession:
-- Thread-safe using ConcurrentHashMap
-- Type-safe retrieval with generics
-- Automatic cleanup on session end
-- Supports any serializable value type
+#### 2. ISessionService (Extended)
+The existing `ISessionService` has been extended with generic value storage methods:
+- `<T> Optional<T> getSessionValue(String key)` - Type-safe retrieval
+- `void setSessionValue(String key, Object value)` - Store any serializable value
+- `void removeSessionValue(String key)` - Remove stored value
+- Thread-safe using ConcurrentHashMap in VaadinSession
+- Automatic cleanup on session end (clearSession)
 
 #### 3. CValueStorageHelper
 Utility for enabling automatic persistence on components:
@@ -228,11 +229,11 @@ public class ParentComponent {
 - `void restoreCurrentValue()` - Restores value from session
 - `void preserveValue()` - Convenience method (save + restore)
 
-### CValueStorageService
-- `static void storeValue(String key, Object value)` - Store value
-- `static <T> Optional<T> retrieveValue(String key)` - Retrieve value
-- `static void removeValue(String key)` - Remove value
-- `static void clearAll()` - Clear all stored values
+### ISessionService (Generic Value Storage Methods)
+- `<T> Optional<T> getSessionValue(String key)` - Retrieve typed value from session
+- `void setSessionValue(String key, Object value)` - Store value in session
+- `void removeSessionValue(String key)` - Remove value from session
+- Values are stored in VaadinSession with automatic cleanup on logout
 
 ### CValueStorageHelper
 - `static <T> void enableAutoPersistence(HasValue<?, T> component, String storageId, ValueConverter<T> converter)` - Enable automatic persistence

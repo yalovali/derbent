@@ -30,4 +30,9 @@ public interface ISessionService {
 	void setActiveProject(CProject project);
 	void setActiveUser(CUser user);
 	void setLayoutService(CLayoutService layoutService);
+
+	// Generic session storage for component values
+	<T> Optional<T> getSessionValue(String key);
+	void setSessionValue(String key, Object value);
+	void removeSessionValue(String key);
 }

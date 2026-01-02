@@ -33,7 +33,6 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
-import tech.derbent.api.services.CValueStorageService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -42,6 +41,7 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.base.session.service.ISessionService;
 
 /** CComponentEntitySelection - Reusable component for selecting entities from a grid with search/filter capabilities.
  * <p>
@@ -951,7 +951,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Override
 	public void restoreCurrentValue() {
 		try {
-			final java.util.Optional<String> storedDisplayName = CValueStorageService.retrieveValue(getStorageId());
+			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
+			final java.util.Optional<String> storedDisplayName = sessionService.getSessionValue(getStorageId());
 			if (storedDisplayName.isPresent() && comboBoxEntityType != null) {
 				// Find the entity type config that matches the stored display name
 				final EntityTypeConfig<?> matchingConfig = entityTypes.stream()
@@ -981,10 +982,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Override
 	public void saveCurrentValue() {
 		try {
+			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
 			if (comboBoxEntityType != null) {
 				final EntityTypeConfig<?> currentValue = comboBoxEntityType.getValue();
 				if (currentValue != null) {
-					CValueStorageService.storeValue(getStorageId(), currentValue.getDisplayName());
+					sessionService.setSessionValue(getStorageId(), currentValue.getDisplayName());
 					LOGGER.debug("Saved entity type selection: {}", currentValue.getDisplayName());
 				}
 			}
