@@ -206,6 +206,11 @@ public class CValueStorageHelper {
 
 	/**
 	 * Restores a component's value from storage.
+	 * <p>
+	 * This method sets the value without triggering user-facing side effects by checking
+	 * if the value change event is from the client. This prevents cascading updates like
+	 * SQL queries and form population during automatic restoration.
+	 * </p>
 	 * 
 	 * @param <T>       The type of values in the component
 	 * @param component The component to restore value for
@@ -220,6 +225,8 @@ public class CValueStorageHelper {
 			if (storedValue.isPresent()) {
 				final T value = converter.fromString(storedValue.get());
 				if (value != null) {
+					// Set value programmatically - this will NOT trigger isFromClient() listeners
+					// Components should check event.isFromClient() to distinguish user actions from programmatic updates
 					component.setValue(value);
 					LOGGER.debug("Auto-restored value for storage ID: {}", storageId);
 				} else {

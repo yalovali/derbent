@@ -110,6 +110,41 @@ public class CComponentBacklog extends CComponentEntitySelection {
 }
 ```
 
+#### Example 4: Avoiding Cascading Updates
+```java
+public class CKanbanBoardComponent {
+    private ComboBox<CSprint> sprintFilter;
+    
+    private void setupFilters() {
+        sprintFilter = new ComboBox<>("Sprint");
+        
+        // Add value change listener that checks if change is from user
+        sprintFilter.addValueChangeListener(event -> {
+            // Check if this is a user action or programmatic change
+            if (!event.isFromClient()) {
+                // Programmatic change (e.g., during restore from session)
+                // Skip expensive operations to avoid cascading updates
+                LOGGER.debug("Sprint filter changed programmatically, skipping refresh");
+                return;
+            }
+            
+            // User manually changed the filter - proceed with full processing
+            LOGGER.debug("Sprint filter changed by user, refreshing board");
+            refreshKanbanBoard();  // Expensive: queries database
+            updateStatistics();     // Expensive: calculates aggregates
+            notifyListeners();      // May trigger more updates
+        });
+        
+        // Enable persistence - this will restore value on attach
+        CValueStorageHelper.enableAutoPersistence(
+            sprintFilter, 
+            "kanbanBoard_sprint",
+            sprintId -> findSprintById(Long.parseLong(sprintId))
+        );
+    }
+}
+```
+
 ### Usage Guidelines
 
 #### When to Use
@@ -130,6 +165,35 @@ public class CComponentBacklog extends CComponentEntitySelection {
 3. **Validate restored values**: Check if option still exists before setting
 4. **Document persistence behavior**: Add comments explaining what persists
 5. **Test across refreshes**: Verify values persist after component recreation
+6. **Prevent cascading updates**: Check `event.isFromClient()` in value change listeners to distinguish user actions from programmatic updates
+
+### Handling Programmatic Value Changes
+
+When restoring values automatically, you want to avoid triggering database queries, form population, and other side effects. The solution is to check if the value change came from the user or from code:
+
+```java
+// In your component's value change listener
+comboBox.addValueChangeListener(event -> {
+    // Check if this is a user action or programmatic change
+    if (!event.isFromClient()) {
+        // This is a programmatic change (e.g., during restore)
+        // Skip expensive operations like database queries
+        return;
+    }
+    
+    // This is a user action - proceed with full processing
+    performDatabaseQuery();
+    populateRelatedForms();
+    notifyListeners();
+});
+```
+
+**Key Points:**
+- `setValue()` calls from code will have `event.isFromClient() == false`
+- User interactions (clicks, typing) will have `event.isFromClient() == true`
+- Always check this flag before triggering expensive operations
+- The persistence helper already filters programmatic changes when saving (lines 151-154 in CValueStorageHelper)
+- Your application code should also filter programmatic changes when reacting to value changes
 
 ### Storage ID Patterns
 - Entity selection: `"entitySelection_" + componentId`
