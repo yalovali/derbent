@@ -1,7 +1,5 @@
 package tech.derbent.api.interfaces;
 
-import java.util.Optional;
-
 /**
  * IHasSelectedValueStorage - Interface for components that need session-based value persistence.
  * <p>

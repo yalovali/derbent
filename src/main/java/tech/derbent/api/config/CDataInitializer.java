@@ -1,7 +1,6 @@
 package tech.derbent.api.config;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +114,6 @@ import tech.derbent.app.risks.risk.service.CRiskInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskService;
 import tech.derbent.app.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.app.risks.risktype.service.CRiskTypeService;
-import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
@@ -132,7 +130,6 @@ import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
 import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
@@ -728,9 +725,8 @@ public class CDataInitializer {
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleWorkflowEntities(final CProject project, final boolean minimal) {
 		// Delegate to CWorkflowEntityInitializerService for workflow initialization
-		CWorkflowEntityInitializerService.initializeSampleWorkflowEntities(
-			project, minimal, projectItemStatusService, userProjectRoleService, 
-			workflowEntityService, workflowStatusRelationService);
+		CWorkflowEntityInitializerService.initializeSampleWorkflowEntities(project, minimal, projectItemStatusService, userProjectRoleService,
+				workflowEntityService, workflowStatusRelationService);
 	}
 
 	public boolean isDatabaseEmpty() {

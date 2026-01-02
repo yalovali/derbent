@@ -84,7 +84,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			relation.getRoles().addAll(roles);
 		}
 		workflowStatusRelationService.save(relation);
-		LOGGER.debug("Created workflow transition: {} -> {} (initial: {})", startStatusName, destinationStatusName, isInitialStatus);
+		// LOGGER.debug("Created workflow transition: {} -> {} (initial: {})", startStatusName, destinationStatusName, isInitialStatus);
 	}
 
 	/** Helper overload without isInitialStatus parameter (defaults to false). */
@@ -171,7 +171,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			// Note: This creates a duplicate of the "done" transition, but that's OK for clarity
 			// In practice, the done transition above already handles this case
 		}
-		LOGGER.debug("Created workflow '{}' with complete cancel/done/restart transitions for project: {}", name, project.getName());
+		// LOGGER.debug("Created workflow '{}' with complete cancel/done/restart transitions for project: {}", name, project.getName());
 	}
 
 	/** Initialize sample workflow entities to demonstrate workflow management. Creates multiple workflow entities with complete status transitions
