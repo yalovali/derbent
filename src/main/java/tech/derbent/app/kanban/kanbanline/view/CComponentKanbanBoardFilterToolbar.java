@@ -253,9 +253,12 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
 		typeOptions.add(0, typeAllOption);
 		comboType.setItems(typeOptions);
-		if (comboType.getValue() != null && !typeOptions.contains(comboType.getValue())) {
-			comboType.setValue(typeAllOption);
-			currentCriteria.setEntityType(null);
+		// If current value is invalid or null, select first available type option
+		if (comboType.getValue() == null || !typeOptions.contains(comboType.getValue())) {
+			// Set to first non-"All" option if available, otherwise "All types"
+			final TypeOption defaultOption = typeOptions.size() > 1 ? typeOptions.get(1) : typeAllOption;
+			comboType.setValue(defaultOption);
+			currentCriteria.setEntityType(defaultOption.getEntityClass());
 		}
 	}
 

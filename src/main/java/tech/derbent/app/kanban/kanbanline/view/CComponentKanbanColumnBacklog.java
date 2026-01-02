@@ -79,6 +79,9 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		// Set the backlog column header title to make it visible
 		setBacklogColumnHeader();
 		
+		// Apply backlog-specific background color for visual distinction
+		applyBacklogBackgroundColor();
+		
 		// Create backlog component in compact mode (always true for narrow display in kanban board)
 		backlogComponent = new CComponentBacklog(project, true);
 		// Add backlog component to the column
@@ -92,6 +95,15 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		// Set the title to "Backlog" and hide story points total for backlog
 		title.setText("Backlog");
 		statusesLabel.setText("");
+	}
+	
+	/** Applies a distinctive background color to the backlog column.
+	 * Uses a light blue-gray color (#F0F4F8) to visually distinguish the backlog from regular kanban columns. */
+	private void applyBacklogBackgroundColor() {
+		// Apply a soft blue-gray background color to distinguish backlog from regular columns
+		// This helps users identify the backlog area at a glance
+		getStyle().set("background-color", "#F0F4F8");
+		LOGGER.debug("Applied backlog background color");
 	}
 	
 	/** Override to prevent story point total display in backlog column. */

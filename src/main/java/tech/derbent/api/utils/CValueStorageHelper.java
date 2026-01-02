@@ -174,6 +174,10 @@ public class CValueStorageHelper {
 		vaadinComponent.addDetachListener(event -> {
 			LOGGER.debug("Component detached, stored value remains for storage ID: {}", storageId);
 		});
+		// If component is already attached, restore value immediately
+		if (vaadinComponent.isAttached()) {
+			restoreValue(component, storageId, converter, sessionService);
+		}
 		LOGGER.debug("Enabled auto-persistence for component with storage ID: {}", storageId);
 	}
 
@@ -211,6 +215,10 @@ public class CValueStorageHelper {
 	 * if the value change event is from the client. This prevents cascading updates like
 	 * SQL queries and form population during automatic restoration.
 	 * </p>
+	 * <p>
+	 * If no stored value exists but the component has a current value, that value is
+	 * saved as the initial default to ensure persistence works on subsequent refreshes.
+	 * </p>
 	 * 
 	 * @param <T>       The type of values in the component
 	 * @param component The component to restore value for
@@ -231,6 +239,16 @@ public class CValueStorageHelper {
 					LOGGER.debug("Auto-restored value for storage ID: {}", storageId);
 				} else {
 					LOGGER.debug("Could not convert stored value for storage ID: {}", storageId);
+				}
+			} else {
+				// No stored value exists - check if component has a current value and save it as initial default
+				final T currentValue = component.getValue();
+				if (currentValue != null) {
+					final String serialized = currentValue.toString();
+					if (serialized != null && !serialized.isBlank()) {
+						sessionService.setSessionValue(storageId, serialized);
+						LOGGER.debug("Saved initial value as default for storage ID: {}", storageId);
+					}
 				}
 			}
 		} catch (final Exception e) {
