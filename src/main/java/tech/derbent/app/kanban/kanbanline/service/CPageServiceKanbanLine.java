@@ -630,7 +630,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		LOGGER.debug("Kanban board drag end event received. Active drag item name is {}.",
 				getActiveDragStartEvent() != null && !getActiveDragStartEvent().getDraggedItems().isEmpty()
 						? getActiveDragStartEvent().getDraggedItems().get(0).toString() : "None");
-		setActiveDragStartEvent(null);
+		// DO NOT clear activeDragStartEvent here - it's needed by the drop handler
+		// The drop event fires AFTER drag end, so clearing here causes null pointer errors
+		// activeDragStartEvent is cleared in handleKanbanDrop() after being used
 	}
 
 	public void on_kanbanBoard_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
