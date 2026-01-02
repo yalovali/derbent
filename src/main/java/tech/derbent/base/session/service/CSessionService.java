@@ -159,4 +159,34 @@ public class CSessionService implements ISessionService {
 
 	@Override
 	public void setLayoutService(final CLayoutService layoutService) { /*****/ }
+
+	// ==================== Generic Session Storage Implementation ====================
+
+	/**
+	 * Retrieves a value from session storage.
+	 * In reset-db mode, this is a no-op and always returns empty.
+	 */
+	@Override
+	public <T> Optional<T> getSessionValue(final String key) {
+		// No-op in reset mode - no persistent storage needed
+		return Optional.empty();
+	}
+
+	/**
+	 * Stores a value in session storage.
+	 * In reset-db mode, this is a no-op.
+	 */
+	@Override
+	public void setSessionValue(final String key, final Object value) {
+		// No-op in reset mode - no persistent storage needed
+	}
+
+	/**
+	 * Removes a value from session storage.
+	 * In reset-db mode, this is a no-op.
+	 */
+	@Override
+	public void removeSessionValue(final String key) {
+		// No-op in reset mode - no persistent storage needed
+	}
 }

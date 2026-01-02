@@ -105,6 +105,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		meetingService = CSpringContext.getBean(CMeetingService.class);
 		setupComponent();
 		setDynamicHeight("600px");
+		// Enable value persistence for entity type selection in backlog
+		enableValuePersistence();
 		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
 	}
 

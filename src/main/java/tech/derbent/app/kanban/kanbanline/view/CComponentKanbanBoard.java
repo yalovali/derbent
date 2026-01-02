@@ -122,6 +122,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 						.thenComparing(CSprint::getId, Comparator.nullsLast(Long::compareTo));
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
 		filterToolbar.addKanbanFilterChangeListener(criteria -> applyFilters());
+		// Enable value persistence for kanban board filters
+		filterToolbar.enableValuePersistence();
 		setSizeFull();
 		setPadding(false);
 		setSpacing(false);
