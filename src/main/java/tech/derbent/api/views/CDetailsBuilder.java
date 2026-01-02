@@ -143,6 +143,17 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		}
 	}
 
+	/** Populates the form with entity data using the unified binder pattern. This method handles both regular bound fields (via binder.setBean) and
+	 * IContentOwner custom components (via setValue + populateForm).
+	 * <p>
+	 * This is the PREFERRED method to use instead of calling setValue() and populateForm() separately.
+	 * @param entity the entity to populate the form with */
+	public void populateForm(final CEntityDB<?> entity) {
+		if (getFormBuilder() != null) {
+			getFormBuilder().populateForm(entity);
+		}
+	}
+
 	/** Sets the application context and initializes the data provider resolver. This method is called automatically by Spring.
 	 * @param context the Spring application context */
 	@Override
@@ -151,6 +162,11 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		CDetailsBuilder.applicationContext = context;
 	}
 
+	/** Sets the entity value for IContentOwner custom components. This method is typically not needed when using populateForm(entity) which handles
+	 * both binder updates and setValue propagation.
+	 * @param entity the entity to set
+	 * @deprecated Use {@link #populateForm(CEntityDB)} instead for unified binder pattern */
+	@Deprecated
 	public void setValue(final CEntityDB<?> entity) {
 		Check.notNull(getFormBuilder(), "Form builder cannot be null, first initialize it");
 		getFormBuilder().setValue(entity);

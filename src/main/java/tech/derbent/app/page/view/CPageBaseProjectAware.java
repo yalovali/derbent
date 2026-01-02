@@ -204,17 +204,14 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	@Override
 	public void populateForm() throws Exception {
 		try {
-			detailsBuilder.setValue(currentEntity);
-			// Default implementation - populate current binder if available
-			if (currentBinder != null && getValue() != null) {
+			// Use unified binder pattern: populateForm(entity) handles both:
+			// 1. Bound fields via binder.setBean(entity)
+			// 2. IContentOwner components via setValue(entity) + populateForm()
+			if (detailsBuilder != null && getValue() != null) {
 				LOGGER.debug("Populating form for entity: {}", getValue());
-				currentBinder.setBean(getValue());
-			} else if (currentBinder != null) {
+				detailsBuilder.populateForm(getValue());
+			} else if (detailsBuilder != null) {
 				LOGGER.debug("Clearing form - no current entity");
-				currentBinder.setBean(null);
-			}
-			// Also populate details builder if available
-			if (detailsBuilder != null) {
 				detailsBuilder.populateForm();
 			}
 		} catch (final Exception e) {
