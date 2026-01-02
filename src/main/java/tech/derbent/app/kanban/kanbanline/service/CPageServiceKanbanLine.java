@@ -203,22 +203,22 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			final ISprintableItem item = sprintItem.getItem();
 			Objects.requireNonNull(item, "Sprint item must have an underlying item");
 			
-			// Reset the item's state - it's returning to backlog (not in sprint anymore)
-			// 1. Clear status - item is no longer in any workflow state
-			item.setStatus(null);
-			LOGGER.debug("Reset status to null for item {}", item.getId());
+			// Remove item from sprint but PRESERVE its status
+			// Status should be kept as-is so the item retains its workflow state
+			// when returned to backlog (e.g., "In Progress" stays "In Progress")
 			
-			// 2. Clear sprint item reference from the underlying item
+			// 1. Clear sprint item reference from the underlying item
 			item.setSprintItem(null);
-			LOGGER.debug("Cleared sprint item reference for item {}", item.getId());
+			LOGGER.debug("Cleared sprint item reference for item {} (status preserved: {})", 
+				item.getId(), item.getStatus() != null ? item.getStatus().getName() : "null");
 			
-			// 3. Save the underlying item with reset state
+			// 2. Save the underlying item with updated state
 			final CProjectItemService<?> itemService = getProjectItemService(item);
 			// Use revokeSave which accepts CProjectItem<?> through type erasure
 			itemService.revokeSave((CProjectItem<?>) item);
-			LOGGER.debug("Saved reset state for item {}", item.getId());
+			LOGGER.debug("Saved item {} with preserved status", item.getId());
 			
-			// 4. Delete the sprint item record (removes from sprint)
+			// 3. Delete the sprint item record (removes from sprint)
 			sprintItemService.delete(sprintItem);
 			LOGGER.debug("Deleted sprint item record {}", sprintItem.getId());
 			
@@ -231,8 +231,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				backlogColumn.refreshBacklog();
 			}
 			
-			CNotificationService.showSuccess("Item removed from sprint and returned to backlog (status reset)");
-			LOGGER.info("Successfully removed sprint item {} from sprint and reset item state", sprintItem.getId());
+			CNotificationService.showSuccess("Item removed from sprint and returned to backlog");
+			LOGGER.info("Successfully removed sprint item {} from sprint (status preserved)", sprintItem.getId());
 		} catch (final Exception e) {
 			LOGGER.error("Failed to remove sprint item from sprint", e);
 			CNotificationService.showError("Failed to remove item from sprint: " + e.getMessage());
@@ -310,9 +310,12 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					backlogColumn.refreshBacklog();
 				}
 				
+				// Get current status safely (might be null for backlog items)
+				final CProjectItemStatus currentStatus = ((ISprintableItem) projectItem).getStatus();
+				final String statusName = currentStatus != null ? currentStatus.getName() : "no status";
 				CNotificationService.showWarning(
 					"Item added to sprint in '" + targetColumn.getName() + "' column, but status remains '" + 
-					((ISprintableItem) projectItem).getStatus().getName() + "' (no valid workflow transition available).");
+					statusName + "' (no valid workflow transition available).");
 			} else if (targetStatuses.size() == 1) {
 				// Single status: automatically apply it
 				final CProjectItemStatus newStatus = targetStatuses.get(0);
