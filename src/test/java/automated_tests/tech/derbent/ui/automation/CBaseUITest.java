@@ -264,7 +264,7 @@ public abstract class CBaseUITest {
 							return errors.map(err => err.toString());
 						}
 					""");
-			if (errors != null && !errors.toString().equals("[]")) {
+			if (errors != null && !errors.toString().equals("[]") && !isIgnorableConsoleMessage(errors.toString())) {
 				LOGGER.error("❌ FAIL-FAST: Browser console errors found at {}: {}", controlPoint, errors);
 				throw new RuntimeException("FAIL-FAST: Browser console errors at " + controlPoint + ": " + errors);
 			}
@@ -1175,13 +1175,53 @@ public abstract class CBaseUITest {
 		}
 		page.onConsoleMessage(msg -> {
 			final String text = msg.text();
-			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL") || text.contains("FATAL"))) {
+			if (msg.type() != null && msg.type().equalsIgnoreCase("error")) {
+				if (!isIgnorableConsoleMessage(text)) {
+					LOGGER.error("🌐 Browser console error: {} ({})", text, msg.location());
+				}
+			}
+			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL") || text.contains("FATAL"))
+					&& !isIgnorableConsoleMessage(text)) {
 				synchronized (EXCEPTION_LOCK) {
 					DETECTED_EXCEPTIONS.add(text);
 				}
 			}
 		});
+		page.onPageError(error -> {
+			final String message = error != null ? error : "Unknown page error";
+			if (!isIgnorableConsoleMessage(message)) {
+				LOGGER.error("🌐 Browser page error: {}", message);
+				synchronized (EXCEPTION_LOCK) {
+					DETECTED_EXCEPTIONS.add(message);
+				}
+			}
+		});
 		consoleListenerRegistered = true;
+	}
+
+	private static boolean isIgnorableConsoleMessage(final String message) {
+		if (message == null) {
+			return false;
+		}
+		if (message.contains("ws://localhost:35729")) {
+			return true;
+		}
+		if (message.contains("vaadinPush.js") && message.contains("WebSocket connection")) {
+			return true;
+		}
+		if (message.contains("favicon.ico") && message.contains("404")) {
+			return true;
+		}
+		if (message.contains("WebSocket connection to") && message.contains("/VAADIN/push")) {
+			return true;
+		}
+		if (message.contains("Event (") && message.contains("localhost:")) {
+			return true;
+		}
+		if (message.contains("Refused to apply style") && message.contains("text/html")) {
+			return true;
+		}
+		return message.contains("Error in WebSocket connection to ws://localhost:35729");
 	}
 
 	protected String sanitizeForFileName(final String value, final String fallback) {

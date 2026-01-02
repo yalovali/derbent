@@ -569,7 +569,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			}
 			// Force UI refresh to apply changes immediately
 			getUI().ifPresent(ui -> ui.access(() -> {
-				splitLayout.getElement().callJsFunction("$server.requestUpdate");
+				splitLayout.getElement().executeJs(
+						"if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
+								+ " else if (this && this.requestUpdate) { this.requestUpdate(); }");
 			}));
 		} else {
 			// Default fallback when no layout service is available

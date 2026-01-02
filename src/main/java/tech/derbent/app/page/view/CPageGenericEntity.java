@@ -374,7 +374,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		}
 		// Force UI refresh to apply changes immediately
 		getUI().ifPresent(ui -> ui.access(() -> {
-			splitLayout.getElement().callJsFunction("$server.requestUpdate");
+			splitLayout.getElement().executeJs(
+					"if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
+							+ " else if (this && this.requestUpdate) { this.requestUpdate(); }");
 		}));
 	}
 }
