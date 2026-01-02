@@ -19,23 +19,74 @@ public class CAuxillaries {
 		return i + "px";
 	}
 
+	/**
+	 * Generates a stable, human-readable ID for a component based on its text content.
+	 * <p>
+	 * The ID is stable only if the component's text content doesn't change.
+	 * For components requiring value persistence across recreations, prefer setting
+	 * an explicit ID using component.setId("uniqueId") instead.
+	 * </p>
+	 * <p>
+	 * ID Format:
+	 * - If component has text: "classname-sanitized-text"
+	 * - If component has no text: "classname-tag" (no timestamp - stable for same tag)
+	 * - Last resort: "classname-default" (stable fallback)
+	 * </p>
+	 * 
+	 * @param component The component to generate an ID for
+	 * @return A stable ID string based on component class and content
+	 */
 	public static String generateId(final Component component) {
 		final String prefix = component.getClass().getSimpleName().toLowerCase();
 		String suffix;
 		final String text = getComponentText(component);
 		if ((text != null) && !text.trim().isEmpty()) {
+			// Text-based ID: stable as long as text doesn't change
 			suffix = text.toLowerCase().trim().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
 		} else {
+			// No text: use tag as stable identifier
 			final String tag = component.getElement().getTag();
 			if ((tag != null) && !tag.trim().isEmpty()) {
-				suffix = tag.toLowerCase() + "-" + System.currentTimeMillis();
+				suffix = tag.toLowerCase();
 			} else {
-				suffix = String.valueOf(System.currentTimeMillis());
+				// Last resort: use generic "default" suffix (stable)
+				suffix = "default";
 			}
 		}
 		return prefix + "-" + suffix;
 	}
-
+	
+	/**
+	 * Sets a stable ID on a component for use with value persistence.
+	 * <p>
+	 * This method is suitable for components that need persistence ONLY if:
+	 * - Component has stable text content that doesn't change
+	 * - Component is unique within its context
+	 * </p>
+	 * <p>
+	 * For components implementing IHasSelectedValueStorage, prefer setting
+	 * an explicit ID manually in the constructor to guarantee stability:
+	 * <pre>
+	 * public MyComponent() {
+	 *     setId("mycomponent-uniquecontext");
+	 *     // ... rest of initialization
+	 * }
+	 * </pre>
+	 * </p>
+	 * 
+	 * @param component The component to set an ID on
+	 */
+	public static void setId(final Component component) {
+		Check.notNull(component, "component is null");
+		// Only set ID if not already set
+		if (component.getId().isEmpty()) {
+			final String id = generateId(component);
+			component.setId(id);
+		}
+		// Always add class name as CSS class for styling
+		component.addClassName(component.getClass().getSimpleName().toLowerCase());
+	}
+	
 	/** Get available entity types for screen configuration.
 	 * @return list of entity types */
 	public static List<String> getAvailableEntityTypes() {
@@ -231,14 +282,5 @@ public class CAuxillaries {
 		// Trim at a valid Unicode code point boundary
 		final int endIndex = text.offsetByCodePoints(0, maxLength);
 		return text.substring(0, endIndex) + "...";
-	}
-
-	public static void setId(final Component component) {
-		Check.notNull(component, "component is null");
-		// set this class name to lower case and set as class name
-		final String id = generateId(component);
-		component.setId(id);
-		// component.setClassName(id);
-		component.addClassName(component.getClass().getSimpleName().toLowerCase());
 	}
 }

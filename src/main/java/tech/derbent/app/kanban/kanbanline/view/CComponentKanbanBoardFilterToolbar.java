@@ -136,6 +136,9 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 	/** Builds the filter toolbar and its components. */
         public CComponentKanbanBoardFilterToolbar() {
                 super(new ToolbarConfig().hideAll());
+                // Set explicit ID for value persistence across component recreations
+                setId("kanbanBoardFilterToolbar");
+                
                 currentCriteria = new FilterCriteria();
                 listeners = new ArrayList<>();
                 typeAllOption = new TypeOption("All types", null);
@@ -354,9 +357,16 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 
 	@Override
 	public String getStorageId() {
-		// Use a stable, deterministic ID that persists across component refreshes
-		// This ensures value persistence works correctly when the component is recreated
-		return "kanbanBoardFilter_stable";
+		// Use the explicitly set component ID for stable persistence
+		// ID is set in constructor to "kanbanBoardFilterToolbar"
+		final String componentId = getId().orElse(null);
+		if (componentId == null || componentId.isBlank()) {
+			throw new IllegalStateException(
+				"Component ID must be set in constructor for value persistence. " +
+				"This should never happen for " + getClass().getSimpleName()
+			);
+		}
+		return componentId;
 	}
 
 	@Override

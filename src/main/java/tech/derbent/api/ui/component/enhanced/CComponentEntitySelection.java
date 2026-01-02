@@ -491,11 +491,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		LOGGER.debug("Value persistence enabled for entity selection with storage ID: {}", getStorageId());
 	}
 
-	/** Generates a unique ID for this component instance. */
-	private String generateId() {
-		return getClass().getSimpleName() + "_" + System.identityHashCode(this);
-	}
-
 	/** Returns the list of already selected items.
 	 * @return List of already selected items (can be empty, never null) */
 	public List<EntityClass> getAlreadySelectedItems() {
@@ -551,8 +546,17 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return The storage identifier (never null) */
 	@Override
 	public String getStorageId() {
-		// Use component ID if set, otherwise generate one based on class name
-		return "entitySelection_" + getId().orElse(generateId());
+		// CRITICAL: Component ID must be set explicitly for value persistence to work
+		// If ID is not set, persistence will fail across component recreations
+		final String componentId = getId().orElse(null);
+		if (componentId == null || componentId.isBlank()) {
+			throw new IllegalStateException(
+				"Component ID must be set explicitly for value persistence. " +
+				"Call setId(\"uniqueId\") in the constructor or use CAuxillaries.setId(this) " +
+				"to enable automatic value persistence for " + getClass().getSimpleName()
+			);
+		}
+		return "entitySelection_" + componentId;
 	}
 
 	/** Gets the current value of this component (the selected items).

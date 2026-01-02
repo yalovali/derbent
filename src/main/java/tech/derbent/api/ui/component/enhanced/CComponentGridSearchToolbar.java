@@ -362,14 +362,17 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 
 	@Override
 	public String getStorageId() {
-		return "gridSearchToolbar_" + getId().orElse(generateId());
-	}
-
-	/**
-	 * Generates a unique ID for this component instance.
-	 */
-	private String generateId() {
-		return getClass().getSimpleName() + "_" + System.identityHashCode(this);
+		// CRITICAL: Component ID must be set explicitly for value persistence to work
+		// If ID is not set, persistence will fail across component recreations
+		final String componentId = getId().orElse(null);
+		if (componentId == null || componentId.isBlank()) {
+			throw new IllegalStateException(
+				"Component ID must be set explicitly for value persistence. " +
+				"Call setId(\"uniqueId\") in the constructor or use CAuxillaries.setId(this) " +
+				"to enable automatic value persistence for " + getClass().getSimpleName()
+			);
+		}
+		return "gridSearchToolbar_" + componentId;
 	}
 
 	@Override
