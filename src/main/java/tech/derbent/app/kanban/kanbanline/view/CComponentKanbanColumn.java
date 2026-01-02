@@ -44,6 +44,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private final CVerticalLayout itemsLayout;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 	private List<CSprintItem> sprintItems = List.of();
+	// Cache filtered items to avoid repeated filtering operations
+	private List<CSprintItem> cachedFilteredItems = List.of();
 	protected final CLabelEntity statusesLabel;
 	private Span storyPointTotalLabel;
 	protected final CH3 title;
@@ -182,7 +184,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		dropTarget.setActive(true);
 	}
 
-	/** Filters items that should appear in this column. */
+	/** Filters items that should appear in this column and caches the result. */
 	private List<CSprintItem> filterItems(final List<CSprintItem> items) {
 		LOGGER.debug("Filtering items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		if (items == null || items.isEmpty()) {
@@ -198,6 +200,21 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 			return itemColumnId != null && itemColumnId.equals(columnId);
 		}).toList();
 	}
+	
+	/** Gets the cached filtered items for this column. Updates cache if needed. */
+	private List<CSprintItem> getFilteredItems() {
+		// Recompute cache if sprint items changed or column value changed
+		final CKanbanColumn column = getValue();
+		if (cachedFilteredItems.isEmpty() || column == null) {
+			cachedFilteredItems = filterItems(sprintItems);
+		}
+		return cachedFilteredItems;
+	}
+	
+	/** Invalidates the cached filtered items. Called when sprintItems or column value changes. */
+	private void invalidateCache() {
+		cachedFilteredItems = List.of();
+	}
 
 	/** Updates the column UI when its value changes. */
 	@Override
@@ -208,10 +225,15 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 			return;
 		}
 		binder.setBean(newValue);
-		applyBackgroundColor();
-		refreshHeader();
-		refreshStatuses();
-		refreshItems();
+		// Invalidate cache since column changed
+		invalidateCache();
+		// Only refresh if we have items - avoid refreshing during initialization
+		if (!sprintItems.isEmpty()) {
+			applyBackgroundColor();
+			refreshHeader();
+			refreshStatuses();
+			refreshItems();
+		}
 	}
 
 	/** Refreshes the column UI components. */
@@ -242,7 +264,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	
 	/** Calculates and displays the total story points for items in this column. */
 	protected void refreshStoryPointTotal() {
-		final List<CSprintItem> columnItems = filterItems(sprintItems);
+		final List<CSprintItem> columnItems = getFilteredItems(); // Use cached filtered items
 		long totalStoryPoints = 0;
 		for (final CSprintItem item : columnItems) {
 			if (item != null && item.getItem() != null && item.getItem().getStoryPoint() != null) {
@@ -264,7 +286,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private void refreshItems() {
 		LOGGER.debug("Refreshing items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		itemsLayout.removeAll();
-		for (final CSprintItem item : filterItems(sprintItems)) {
+		for (final CSprintItem item : getFilteredItems()) { // Use cached filtered items
 			final CComponentKanbanPostit postit = new CComponentKanbanPostit(item);
 			postit.drag_setDragEnabled(true);
 			postit.drag_setDropEnabled(true);
@@ -309,6 +331,11 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	public void setItems(final List<CSprintItem> items) {
 		LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		sprintItems = items == null ? List.of() : List.copyOf(items);
-		refreshItems();
+		// Invalidate cache when items change
+		invalidateCache();
+		// Only refresh if column value is set - avoid premature refresh during initialization
+		if (getValue() != null) {
+			refreshItems();
+		}
 	}
 }

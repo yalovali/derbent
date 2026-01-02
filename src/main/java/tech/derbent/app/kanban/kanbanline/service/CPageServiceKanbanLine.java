@@ -188,7 +188,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * @param event The drop event
 	 */
 	private void handleDropOnBacklog(final Object draggedItem, final CDragDropEvent event) {
-		LOGGER.info("Handling drop on backlog column - removing item from sprint");
+		LOGGER.info("Handling drop on backlog column - removing item from sprint and resetting state");
 		
 		// Only sprint items can be removed from sprint
 		Check.instanceOf(draggedItem, CSprintItem.class, 
@@ -199,8 +199,28 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
 		
 		try {
-			// Remove the sprint item (deletes the sprint membership)
+			// Get the underlying item (Activity or Meeting) before deleting sprint item
+			final ISprintableItem item = sprintItem.getItem();
+			Objects.requireNonNull(item, "Sprint item must have an underlying item");
+			
+			// Reset the item's state - it's returning to backlog (not in sprint anymore)
+			// 1. Clear status - item is no longer in any workflow state
+			item.setStatus(null);
+			LOGGER.debug("Reset status to null for item {}", item.getId());
+			
+			// 2. Clear sprint item reference from the underlying item
+			item.setSprintItem(null);
+			LOGGER.debug("Cleared sprint item reference for item {}", item.getId());
+			
+			// 3. Save the underlying item with reset state
+			final CProjectItemService<?> itemService = getProjectItemService(item);
+			// Use revokeSave which accepts CProjectItem<?> through type erasure
+			itemService.revokeSave((CProjectItem<?>) item);
+			LOGGER.debug("Saved reset state for item {}", item.getId());
+			
+			// 4. Delete the sprint item record (removes from sprint)
 			sprintItemService.delete(sprintItem);
+			LOGGER.debug("Deleted sprint item record {}", sprintItem.getId());
 			
 			// Refresh both board and backlog
 			componentKanbanBoard.reloadSprintItems();
@@ -211,13 +231,25 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				backlogColumn.refreshBacklog();
 			}
 			
-			CNotificationService.showSuccess("Item removed from sprint and returned to backlog");
-			LOGGER.info("Successfully removed sprint item {} from sprint", sprintItem.getId());
+			CNotificationService.showSuccess("Item removed from sprint and returned to backlog (status reset)");
+			LOGGER.info("Successfully removed sprint item {} from sprint and reset item state", sprintItem.getId());
 		} catch (final Exception e) {
 			LOGGER.error("Failed to remove sprint item from sprint", e);
 			CNotificationService.showError("Failed to remove item from sprint: " + e.getMessage());
 			throw e;
 		}
+	}
+	
+	/** Gets the appropriate service for saving the underlying project item.
+	 * @param item The sprintable item (Activity or Meeting)
+	 * @return The service that can save this item type */
+	@SuppressWarnings("unchecked")
+	private CProjectItemService<?> getProjectItemService(final ISprintableItem item) {
+		Objects.requireNonNull(item, "Item cannot be null");
+		final Class<?> entityClass = item.getClass();
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+		Objects.requireNonNull(serviceClass, "Service class not found for entity: " + entityClass.getName());
+		return (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
 	}
 	
 	/** Handles dragging a backlog item (CProjectItem) to a kanban column (adds to sprint).

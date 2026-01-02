@@ -581,8 +581,11 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			columnComponent.drag_setDropEnabled(true);
 			setupSelectionNotification(columnComponent);
 			setupChildDragDropForwarding(columnComponent);
-			columnComponent.setItems(sprintItems);
+			// IMPORTANT: Set value BEFORE items to avoid double refresh
+			// setValue triggers onValueChanged which will skip refresh if items are empty
+			// Then setItems will trigger the actual refresh once
 			columnComponent.setValue(column);
+			columnComponent.setItems(sprintItems);
 			layoutColumns.add(columnComponent);
 		}
 		on_postit_selected(null);
