@@ -11,6 +11,9 @@ import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
@@ -24,6 +27,7 @@ import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.base.users.domain.CUser;
 
 /** CComponentPostit - A compact post-it style widget for displaying project items inside kanban columns. */
 public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> implements IHasSelectionNotification {
@@ -64,12 +68,60 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		if (item == null) {
 			return;
 		}
+		
+		// Create a compact horizontal layout for status and story points
+		layoutLineTwo.setWidthFull();
+		layoutLineTwo.setJustifyContentMode(JustifyContentMode.BETWEEN);
+		layoutLineTwo.setAlignItems(Alignment.CENTER);
+		
+		// Left side: Status label
 		if (item.getStatus() != null) {
-			layoutLineTwo.add(new CLabelEntity(item.getStatus()));
+			final CLabelEntity statusLabel = new CLabelEntity(item.getStatus());
+			statusLabel.getStyle().set("font-size", "11px");
+			layoutLineTwo.add(statusLabel);
 		}
+		
+		// Right side: Story points badge (if available)
+		if (item.getStoryPoint() != null && item.getStoryPoint() > 0) {
+			final Span storyPointBadge = new Span(item.getStoryPoint() + " SP");
+			storyPointBadge.getStyle()
+				.set("background-color", "#E8F5E9")
+				.set("color", "#2E7D32")
+				.set("padding", "2px 6px")
+				.set("border-radius", "4px")
+				.set("font-size", "11px")
+				.set("font-weight", "600")
+				.set("white-space", "nowrap");
+			layoutLineTwo.add(storyPointBadge);
+		}
+		
+		// Third line: Compact responsible user label
 		if (item.getResponsible() != null) {
-			layoutLineTwo.add(CLabelEntity.createUserLabel(item.getResponsible()));
+			final Span userLabel = createCompactUserLabel(item.getResponsible());
+			layoutLineThree.add(userLabel);
 		}
+	}
+	
+	/** Creates a compact user label with just first name. */
+	private Span createCompactUserLabel(final CUser user) {
+		if (user == null) {
+			return new Span();
+		}
+		
+		// Use only first name for compactness
+		String displayName = user.getName();
+		if (displayName != null && displayName.length() > 15) {
+			displayName = displayName.substring(0, 12) + "...";
+		}
+		final Span userSpan = new Span("👤 " + displayName);
+		userSpan.getStyle()
+			.set("font-size", "11px")
+			.set("color", "#666")
+			.set("display", "inline-flex")
+			.set("align-items", "center")
+			.set("gap", "2px");
+		
+		return userSpan;
 	}
 
 	/** Builds the date range line when available. */
