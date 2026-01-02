@@ -256,7 +256,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	@SuppressWarnings ("unused")
 	private void setupSelectedValueDisplay() {
 		addValueChangeListener(event -> {
-			Icon icon;
 			try {
 				final T selectedItem = event.getValue();
 				if (selectedItem == null) {
@@ -266,21 +265,42 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 					getElement().executeJs("this.inputElement.style.color = ''");
 					return;
 				}
+				
+				// Try to get and apply background color (works for any entity with getColor() method)
+				String backgroundColor = null;
+				try {
+					backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
+				} catch (final Exception e) {
+					// Entity doesn't have color support - skip color styling
+				}
+				
+				if (backgroundColor != null && !backgroundColor.isEmpty()) {
+					getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
+					if (autoContrast) {
+						final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
+						// Apply text color to input field
+						getElement().executeJs("this.inputElement.style.color = $0", textColor);
+					}
+				} else {
+					// No background color - clear any previous color
+					getElement().getStyle().remove("--vaadin-input-field-background");
+					getElement().executeJs("this.inputElement.style.color = ''");
+				}
+				
+				// Set up icon if entity has one
 				if (selectedItem instanceof IHasIcon) {
-					icon = CColorUtils.getIconForEntity(selectedItem);
-					CColorUtils.styleIcon(icon);
-					setPrefixComponent(icon);
-					final String backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
-					if (backgroundColor != null && !backgroundColor.isEmpty()) {
-						getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
-						if (autoContrast) {
+					final Icon icon = CColorUtils.getIconForEntity(selectedItem);
+					if (icon != null) {
+						CColorUtils.styleIcon(icon);
+						setPrefixComponent(icon);
+						// Apply text color to icon as well if we have a background color
+						if (backgroundColor != null && !backgroundColor.isEmpty() && autoContrast) {
 							final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
-							// Apply text color to both the input field and the icon for consistent display
-							// This matches the dropdown list item rendering where icon and text both use contrast color
-							getElement().executeJs("this.inputElement.style.color = $0", textColor);
 							icon.getElement().getStyle().set("color", textColor);
 						}
 					}
+				} else {
+					setPrefixComponent(null);
 				}
 			} catch (final Exception e) {
 				e.printStackTrace();

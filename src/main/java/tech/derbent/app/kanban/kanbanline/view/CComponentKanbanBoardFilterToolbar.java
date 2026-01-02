@@ -261,19 +261,35 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		typeOptions.add(0, typeAllOption);
 		comboType.setItems(typeOptions);
 		
-		// Only update value if current value is invalid (not in the new options list)
-		// If current value is null or invalid, default to "All types"
+		// Handle value selection based on current state
 		final TypeOption currentValue = comboType.getValue();
-		if (currentValue == null || !typeOptions.contains(currentValue)) {
-			// Current value is invalid, set to "All types" (don't trigger filter if already null)
-			if (currentValue != null) {
+		
+		if (currentValue == null) {
+			// No value selected - select first entity type (not "All types")
+			// This happens on initial load before persistence restores value
+			if (typeOptions.size() > 1) {
+				// Select first entity type (index 1, since index 0 is "All types")
+				final TypeOption defaultOption = typeOptions.get(1);
+				comboType.setValue(defaultOption);
+				currentCriteria.setEntityType(defaultOption.getEntityClass());
+			} else {
+				// Only "All types" available
 				comboType.setValue(typeAllOption);
 				currentCriteria.setEntityType(null);
+			}
+		} else if (!typeOptions.contains(currentValue)) {
+			// Current value is invalid (entity type no longer in list)
+			// Revert to first entity type or "All types" if none available
+			if (typeOptions.size() > 1) {
+				final TypeOption defaultOption = typeOptions.get(1);
+				comboType.setValue(defaultOption);
+				currentCriteria.setEntityType(defaultOption.getEntityClass());
 			} else {
-				// Value is null, just ensure criteria is updated
+				comboType.setValue(typeAllOption);
 				currentCriteria.setEntityType(null);
 			}
 		}
+		// If current value is valid and in the list, keep it (persistence will restore it)
 	}
 
 	// ==================== IHasSelectedValueStorage Implementation ====================
