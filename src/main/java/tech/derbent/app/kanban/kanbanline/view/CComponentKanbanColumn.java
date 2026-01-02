@@ -40,12 +40,13 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
 	private DropTarget<CVerticalLayout> dropTarget;
-	private final CHorizontalLayout headerLayout;
+	protected final CHorizontalLayout headerLayout;
 	private final CVerticalLayout itemsLayout;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 	private List<CSprintItem> sprintItems = List.of();
-	private final CLabelEntity statusesLabel;
-	private final CH3 title;
+	protected final CLabelEntity statusesLabel;
+	private Span storyPointTotalLabel;
+	protected final CH3 title;
 
 	/** Creates the kanban column component and its layout. */
 	public CComponentKanbanColumn() {
@@ -60,11 +61,15 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		headerLayout = new CHorizontalLayout();
 		headerLayout.setWidthFull();
 		headerLayout.setSpacing(true);
+		headerLayout.setAlignItems(Alignment.CENTER);
 		title = new CH3("");
-		title.getStyle().set("margin", "0");
+		title.getStyle().set("margin", "0").set("flex-grow", "1");
 		defaultBadge = new Span("Default");
 		defaultBadge.getStyle().set("background-color", "#E3F2FD").set("color", "#0D47A1").set("padding", "2px 6px").set("border-radius", "6px")
 				.set("font-size", "10px").set("font-weight", "600");
+		storyPointTotalLabel = new Span();
+		storyPointTotalLabel.getStyle().set("background-color", "#E8F5E9").set("color", "#2E7D32").set("padding", "4px 8px")
+				.set("border-radius", "6px").set("font-size", "12px").set("font-weight", "700").set("white-space", "nowrap");
 		headerLayout.add(title);
 		add(headerLayout);
 		statusesLabel = new CLabelEntity();
@@ -230,6 +235,29 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		} else {
 			headerLayout.remove(defaultBadge);
 		}
+		
+		// Calculate and display total story points
+		refreshStoryPointTotal();
+	}
+	
+	/** Calculates and displays the total story points for items in this column. */
+	protected void refreshStoryPointTotal() {
+		final List<CSprintItem> columnItems = filterItems(sprintItems);
+		long totalStoryPoints = 0;
+		for (final CSprintItem item : columnItems) {
+			if (item != null && item.getItem() != null && item.getItem().getStoryPoint() != null) {
+				totalStoryPoints += item.getItem().getStoryPoint();
+			}
+		}
+		
+		if (totalStoryPoints > 0) {
+			storyPointTotalLabel.setText(totalStoryPoints + " SP");
+			if (!headerLayout.getChildren().anyMatch(component -> component == storyPointTotalLabel)) {
+				headerLayout.add(storyPointTotalLabel);
+			}
+		} else {
+			headerLayout.remove(storyPointTotalLabel);
+		}
 	}
 
 	/** Refreshes the item cards inside the column. */
@@ -244,6 +272,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 			setupChildDragDropForwarding(postit);
 			itemsLayout.add(postit);
 		}
+		// Refresh story point total after items change
+		refreshStoryPointTotal();
 	}
 
 	/** Refreshes the status summary label. */

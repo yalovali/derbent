@@ -312,6 +312,12 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		
 		// Validate name uniqueness within the kanban line
 		final String trimmedName = entity.getName().trim();
+		
+		// Prevent creating columns named "Backlog" (reserved name)
+		if ("backlog".equalsIgnoreCase(trimmedName)) {
+			throw new CValidationException("Column name 'Backlog' is reserved and cannot be used. Please choose a different name.");
+		}
+		
 		final CKanbanColumn existing = getTypedRepository().findByMasterAndNameIgnoreCase(line, trimmedName).orElse(null);
 		if (existing == null) {
 			// No name conflict, continue with status overlap validation

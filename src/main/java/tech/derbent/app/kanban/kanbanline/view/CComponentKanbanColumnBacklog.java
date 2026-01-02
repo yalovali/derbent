@@ -75,12 +75,30 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		Check.notNull(project, "Project cannot be null for backlog column");
 		this.project = project;
 		LOGGER.debug("Creating backlog kanban column for project: {}", project.getName());
+		
+		// Set the backlog column header title to make it visible
+		setBacklogColumnHeader();
+		
 		// Create backlog component in compact mode (always true for narrow display in kanban board)
 		backlogComponent = new CComponentBacklog(project, true);
 		// Add backlog component to the column
 		add(backlogComponent);
 		// Set up drag-drop for backlog items
 		setupBacklogDragDrop();
+	}
+	
+	/** Sets the header title for the backlog column to make it visible. */
+	private void setBacklogColumnHeader() {
+		// Set the title to "Backlog" and hide story points total for backlog
+		title.setText("Backlog");
+		statusesLabel.setText("");
+	}
+	
+	/** Override to prevent story point total display in backlog column. */
+	@Override
+	protected void refreshStoryPointTotal() {
+		// Backlog column does not display story point totals
+		// Items in backlog are not part of sprint planning yet
 	}
 
 	/** Hook executed after drag-drop events are processed. Used to refresh the backlog display after items are added/removed. */
