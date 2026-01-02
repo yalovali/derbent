@@ -269,23 +269,16 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				if (selectedItem instanceof IHasIcon) {
 					icon = CColorUtils.getIconForEntity(selectedItem);
 					CColorUtils.styleIcon(icon);
-					try {
-						final String color = CColorUtils.getColorFromEntity(selectedItem);
-						if (color != null && !color.isEmpty()) {
-							icon.getElement().getStyle().set("color", color);
-						}
-					} catch (final Exception colorEx) {
-						// Entity doesn't have color, ignore
-					}
 					setPrefixComponent(icon);
 					final String backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
 					if (backgroundColor != null && !backgroundColor.isEmpty()) {
 						getElement().getStyle().set("--vaadin-input-field-background", backgroundColor);
 						if (autoContrast) {
 							final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
-							// Apply text color only to the input field, not the dropdown overlay
-							// This prevents white-on-white text issues in the dropdown
+							// Apply text color to both the input field and the icon for consistent display
+							// This matches the dropdown list item rendering where icon and text both use contrast color
 							getElement().executeJs("this.inputElement.style.color = $0", textColor);
+							icon.getElement().getStyle().set("color", textColor);
 						}
 					}
 				}
