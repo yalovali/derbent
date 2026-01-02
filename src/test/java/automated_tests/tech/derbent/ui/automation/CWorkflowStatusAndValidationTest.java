@@ -23,14 +23,14 @@ import java.util.List;
  * 3. Save button is disabled when name field is empty
  * 4. Save button is enabled when name field has content
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource(properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb",
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver",
 		"spring.jpa.hibernate.ddl-auto=create-drop",
-		"server.port=0"
+		"server.port=8081"
 })
 @DisplayName("🔄 Workflow Status and Name Validation Test Suite")
 public class CWorkflowStatusAndValidationTest extends CBaseUITest {

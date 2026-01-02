@@ -85,6 +85,13 @@ PLAYWRIGHT_HEADLESS=true ./run-playwright-tests.sh all
 ls -lh target/screenshots/
 ```
 
+### Reporting Rule (Mandatory)
+
+When running Playwright tests, always capture and report a concise error summary that includes:
+- The failing test class and scenario.
+- The first meaningful browser console error (if any).
+- The first meaningful server-side exception or fail-fast message (if any).
+
 ## Migration from Old Scripts
 
 **Removed scripts** (functionality now in `run-playwright-tests.sh`):

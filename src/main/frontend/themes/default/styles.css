@@ -5,8 +5,7 @@
 @import url("project-details.css");
 @import url("accordion.css");
 @import url("basedetails.css");
-@import url("grid.css");
-@import url("gannt.css");
+@import url("gantt.css");
 
 /* ============================================
    GLOBAL FONT SIZE OVERRIDES
@@ -22,6 +21,16 @@
     --lumo-font-size-s: 0.75rem;      /* Was 0.875rem */
     --lumo-font-size-xs: 0.6875rem;   /* Was 0.8125rem */
     --lumo-font-size-xxs: 0.625rem;   /* Was 0.75rem */
+}
+
+vaadin-text-field::part(input-field),
+vaadin-password-field::part(input-field),
+vaadin-text-area::part(input-field),
+vaadin-number-field::part(input-field),
+vaadin-date-picker::part(input-field),
+vaadin-combo-box::part(input-field),
+vaadin-select::part(input-field) {
+    background-image: none;
 }
 
 /* Hide checkmark indicator in CComponentFieldSelection ListBox items */
@@ -179,5 +188,3 @@ vaadin-scroller{
     flex-wrap: wrap;
     gap: var(--lumo-space-xs);
 }
-
-

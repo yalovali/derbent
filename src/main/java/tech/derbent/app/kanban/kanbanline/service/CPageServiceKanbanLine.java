@@ -188,7 +188,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * @param event The drop event
 	 */
 	private void handleDropOnBacklog(final Object draggedItem, final CDragDropEvent event) {
-		LOGGER.info("Handling drop on backlog column - removing item from sprint");
+		LOGGER.info("Handling drop on backlog column - removing item from sprint and resetting state");
 		
 		// Only sprint items can be removed from sprint
 		Check.instanceOf(draggedItem, CSprintItem.class, 
@@ -199,8 +199,28 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
 		
 		try {
-			// Remove the sprint item (deletes the sprint membership)
+			// Get the underlying item (Activity or Meeting) before deleting sprint item
+			final ISprintableItem item = sprintItem.getItem();
+			Objects.requireNonNull(item, "Sprint item must have an underlying item");
+			
+			// Remove item from sprint but PRESERVE its status
+			// Status should be kept as-is so the item retains its workflow state
+			// when returned to backlog (e.g., "In Progress" stays "In Progress")
+			
+			// 1. Clear sprint item reference from the underlying item
+			item.setSprintItem(null);
+			LOGGER.debug("Cleared sprint item reference for item {} (status preserved: {})", 
+				item.getId(), item.getStatus() != null ? item.getStatus().getName() : "null");
+			
+			// 2. Save the underlying item with updated state
+			final CProjectItemService<?> itemService = getProjectItemService(item);
+			// Use revokeSave which accepts CProjectItem<?> through type erasure
+			itemService.revokeSave((CProjectItem<?>) item);
+			LOGGER.debug("Saved item {} with preserved status", item.getId());
+			
+			// 3. Delete the sprint item record (removes from sprint)
 			sprintItemService.delete(sprintItem);
+			LOGGER.debug("Deleted sprint item record {}", sprintItem.getId());
 			
 			// Refresh both board and backlog
 			componentKanbanBoard.reloadSprintItems();
@@ -212,12 +232,24 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			}
 			
 			CNotificationService.showSuccess("Item removed from sprint and returned to backlog");
-			LOGGER.info("Successfully removed sprint item {} from sprint", sprintItem.getId());
+			LOGGER.info("Successfully removed sprint item {} from sprint (status preserved)", sprintItem.getId());
 		} catch (final Exception e) {
 			LOGGER.error("Failed to remove sprint item from sprint", e);
 			CNotificationService.showError("Failed to remove item from sprint: " + e.getMessage());
 			throw e;
 		}
+	}
+	
+	/** Gets the appropriate service for saving the underlying project item.
+	 * @param item The sprintable item (Activity or Meeting)
+	 * @return The service that can save this item type */
+	@SuppressWarnings("unchecked")
+	private CProjectItemService<?> getProjectItemService(final ISprintableItem item) {
+		Objects.requireNonNull(item, "Item cannot be null");
+		final Class<?> entityClass = item.getClass();
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+		Objects.requireNonNull(serviceClass, "Service class not found for entity: " + entityClass.getName());
+		return (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
 	}
 	
 	/** Handles dragging a backlog item (CProjectItem) to a kanban column (adds to sprint).
@@ -278,9 +310,12 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					backlogColumn.refreshBacklog();
 				}
 				
+				// Get current status safely (might be null for backlog items)
+				final CProjectItemStatus currentStatus = ((ISprintableItem) projectItem).getStatus();
+				final String statusName = currentStatus != null ? currentStatus.getName() : "no status";
 				CNotificationService.showWarning(
 					"Item added to sprint in '" + targetColumn.getName() + "' column, but status remains '" + 
-					((ISprintableItem) projectItem).getStatus().getName() + "' (no valid workflow transition available).");
+					statusName + "' (no valid workflow transition available).");
 			} else if (targetStatuses.size() == 1) {
 				// Single status: automatically apply it
 				final CProjectItemStatus newStatus = targetStatuses.get(0);
@@ -598,7 +633,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		LOGGER.debug("Kanban board drag end event received. Active drag item name is {}.",
 				getActiveDragStartEvent() != null && !getActiveDragStartEvent().getDraggedItems().isEmpty()
 						? getActiveDragStartEvent().getDraggedItems().get(0).toString() : "None");
-		setActiveDragStartEvent(null);
+		// DO NOT clear activeDragStartEvent here - it's needed by the drop handler
+		// The drop event fires AFTER drag end, so clearing here causes null pointer errors
+		// activeDragStartEvent is cleared in handleKanbanDrop() after being used
 	}
 
 	public void on_kanbanBoard_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {

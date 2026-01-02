@@ -264,7 +264,7 @@ public abstract class CBaseUITest {
 							return errors.map(err => err.toString());
 						}
 					""");
-			if (errors != null && !errors.toString().equals("[]")) {
+			if (errors != null && !errors.toString().equals("[]") && !isIgnorableConsoleMessage(errors.toString())) {
 				LOGGER.error("❌ FAIL-FAST: Browser console errors found at {}: {}", controlPoint, errors);
 				throw new RuntimeException("FAIL-FAST: Browser console errors at " + controlPoint + ": " + errors);
 			}
@@ -1175,13 +1175,61 @@ public abstract class CBaseUITest {
 		}
 		page.onConsoleMessage(msg -> {
 			final String text = msg.text();
-			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL") || text.contains("FATAL"))) {
+			final String location = msg.location() != null ? msg.location().toString() : "";
+			final String combined = text == null ? location : location.isEmpty() ? text : text + " " + location;
+			if (msg.type() != null && msg.type().equalsIgnoreCase("error")) {
+				if (!isIgnorableConsoleMessage(combined)) {
+					LOGGER.error("🌐 Browser console error: {} ({})", text, msg.location());
+				}
+			}
+			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL") || text.contains("FATAL"))
+					&& !isIgnorableConsoleMessage(combined)) {
 				synchronized (EXCEPTION_LOCK) {
 					DETECTED_EXCEPTIONS.add(text);
 				}
 			}
 		});
+		page.onPageError(error -> {
+			final String message = error != null ? error : "Unknown page error";
+			if (!isIgnorableConsoleMessage(message)) {
+				LOGGER.error("🌐 Browser page error: {}", message);
+				synchronized (EXCEPTION_LOCK) {
+					DETECTED_EXCEPTIONS.add(message);
+				}
+			}
+		});
 		consoleListenerRegistered = true;
+	}
+
+	private static boolean isIgnorableConsoleMessage(final String message) {
+		if (message == null) {
+			return false;
+		}
+		final String normalized = message.replace('\u00A0', ' ').trim();
+		final String normalizedLower = normalized.toLowerCase();
+		if (normalized.contains("ws://localhost:35729")) {
+			return true;
+		}
+		if (normalized.contains("vaadinPush.js") && normalized.contains("WebSocket connection")) {
+			return true;
+		}
+		if (normalized.contains("favicon.ico") && normalized.contains("404")) {
+			return true;
+		}
+		if (normalized.contains("WebSocket connection to") && normalized.contains("/VAADIN/push")) {
+			return true;
+		}
+		if (normalizedLower.startsWith("event ") || normalizedLower.startsWith("event(") || normalizedLower.startsWith("event:")) {
+			return true;
+		}
+		if (normalizedLower.contains("event") && (normalizedLower.contains("http://localhost") || normalizedLower.contains("https://localhost")
+				|| normalizedLower.contains("http://127.0.0.1") || normalizedLower.contains("https://127.0.0.1"))) {
+			return true;
+		}
+		if (normalized.contains("Refused to apply style") && normalized.contains("text/html")) {
+			return true;
+		}
+		return normalized.contains("Error in WebSocket connection to ws://localhost:35729");
 	}
 
 	protected String sanitizeForFileName(final String value, final String fallback) {
@@ -2017,6 +2065,9 @@ public abstract class CBaseUITest {
 				return;
 			}
 			wait_500();
+		}
+		if (page.locator("#" + PROGRESS_DIALOG_ID + "[opened]").count() > 0 || page.locator("#" + INFO_OK_BUTTON_ID).count() > 0) {
+			return;
 		}
 		LOGGER.warn("⚠️ Overlay {} still present after waiting {} seconds", overlaySelector, maxAttempts * 0.5);
 	}

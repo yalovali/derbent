@@ -78,22 +78,32 @@ public class CEntityLabel extends HorizontalLayout {
 		if (roundedCorners) {
 			getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
 		}
-		if (!(entity instanceof IHasColor)) {
+		
+		// Try to get color from entity using CColorUtils (supports reflection-based color extraction)
+		// This works for entities with getColor() method even if they don't implement IHasColor
+		String backgroundColor = null;
+		try {
+			backgroundColor = CColorUtils.getColorFromEntity(entity);
+		} catch (final Exception e) {
+			// Entity doesn't have color support - skip background color styling
 			return;
 		}
-		final String backgroundColor = CColorUtils.getColorFromEntity(entity);
+		
 		// Apply background color
-		getStyle().set("background-color", backgroundColor);
-		// Apply automatic text contrast
-		if (autoContrast) {
-			final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
-			getStyle().set("color", textColor);
-			// Also apply color to any child icons for consistency
-			getChildren().forEach(component -> {
-				if (component instanceof Icon) {
-					component.getElement().getStyle().set("color", textColor);
-				}
-			});
+		if (backgroundColor != null && !backgroundColor.isBlank()) {
+			getStyle().set("background-color", backgroundColor);
+			
+			// Apply automatic text contrast
+			if (autoContrast) {
+				final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
+				getStyle().set("color", textColor);
+				// Also apply color to any child icons for consistency
+				getChildren().forEach(component -> {
+					if (component instanceof Icon) {
+						component.getElement().getStyle().set("color", textColor);
+					}
+				});
+			}
 		}
 	}
 

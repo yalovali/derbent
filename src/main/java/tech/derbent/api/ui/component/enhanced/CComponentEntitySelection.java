@@ -37,7 +37,6 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
@@ -62,9 +61,9 @@ import tech.derbent.base.session.service.ISessionService;
  * <li>HasValue interface for binder integration and value change events</li>
  * </ul>
  * @param <EntityClass> The entity type being selected */
-public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout> implements IGridComponent<EntityClass>,
-		IGridRefreshListener<EntityClass>, HasValue<HasValue.ValueChangeEvent<Set<EntityClass>>, Set<EntityClass>>, IHasDragControl,
-		IHasSelectedValueStorage {
+public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends Composite<CVerticalLayout>
+		implements IGridComponent<EntityClass>, IGridRefreshListener<EntityClass>,
+		HasValue<HasValue.ValueChangeEvent<Set<EntityClass>>, Set<EntityClass>>, IHasDragControl, IHasSelectedValueStorage {
 
 	/** Mode for handling already selected items - re-exported from CComponentEntitySelection for backward compatibility */
 	public static enum AlreadySelectedMode {
@@ -468,6 +467,56 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		LOGGER.debug("[DragDebug] Drop {} for entity selection", enabled ? "enabled" : "disabled");
 	}
 
+	/** Enables automatic value persistence for the entity type selection.
+	 * <p>
+	 * <strong>IMPORTANT</strong>: Before calling this method, the parent component MUST set an explicit,
+	 * stable ID using {@code setId("contextSpecificId")}. Failure to do so will result in an
+	 * {@link IllegalStateException} being thrown.
+	 * </p>
+	 * <p>
+	 * This method should be called by the parent component/context owner to enable automatic saving and restoring of the entity type selection. Once
+	 * enabled:
+	 * <ul>
+	 * <li>Value is saved on every change</li>
+	 * <li>Value is restored when component is attached to UI</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Example usage in parent dialog:
+	 * <pre>
+	 * componentEntitySelection = new CComponentEntitySelection&lt;&gt;(...);
+	 * componentEntitySelection.setId("entitySelection_sprintItems");  // REQUIRED
+	 * componentEntitySelection.enableValuePersistence();
+	 * </pre>
+	 * </p>
+	 * 
+	 * @throws IllegalStateException if component ID is not set before calling this method
+	 * @see #getStorageId()
+	 */
+	public void enableValuePersistence() {
+		// Validate ID is set before enabling persistence (fail-fast)
+		final String componentId = getId().orElse(null);
+		if (componentId == null || componentId.isBlank()) {
+			throw new IllegalStateException(
+				"Component ID must be set before enabling value persistence. " +
+				"Call setId(\"contextSpecificId\") before calling enableValuePersistence(). " +
+				"Example: componentEntitySelection.setId(\"entitySelection_sprintItems\");"
+			);
+		}
+		
+		LOGGER.debug("Enabling value persistence for entity selection with storage ID: {}", getStorageId());
+		if (comboBoxEntityType == null) {
+			LOGGER.warn("Cannot enable value persistence - comboBox not initialized");
+			return;
+		}
+		// Use helper to enable automatic persistence
+		CValueStorageHelper.enableAutoPersistence(comboBoxEntityType, getStorageId(), displayName -> {
+			// Converter: find entity type by display name
+			return entityTypes.stream().filter(config -> config.getDisplayName().equals(displayName)).findFirst().orElse(null);
+		});
+		LOGGER.debug("Value persistence enabled for entity selection with storage ID: {}", getStorageId());
+	}
+
 	/** Returns the list of already selected items.
 	 * @return List of already selected items (can be empty, never null) */
 	public List<EntityClass> getAlreadySelectedItems() {
@@ -514,6 +563,27 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * items. Use getValue() when working with Vaadin binders, or getSelectedItems() for direct access in application code.
 	 * @return Set of selected items (never null) */
 	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
+
+	/** Gets the unique storage identifier for this component's entity type value.
+	 * <p>
+	 * Uses the component's ID if available, otherwise uses a class-based default. This ensures each instance of CComponentEntitySelection can
+	 * maintain its own stored value independently.
+	 * </p>
+	 * @return The storage identifier (never null) */
+	@Override
+	public String getStorageId() {
+		// CRITICAL: Component ID must be set explicitly for value persistence to work
+		// If ID is not set, persistence will fail across component recreations
+		final String componentId = getId().orElse(null);
+		if (componentId == null || componentId.isBlank()) {
+			throw new IllegalStateException(
+				"Component ID must be set explicitly for value persistence. " +
+				"Call setId(\"uniqueId\") in the constructor or use CAuxillaries.setId(this) " +
+				"to enable automatic value persistence for " + getClass().getSimpleName()
+			);
+		}
+		return "entitySelection_" + componentId;
+	}
 
 	/** Gets the current value of this component (the selected items).
 	 * @return Set of currently selected items (never null) */
@@ -734,6 +804,55 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	/** Restores the entity type selection from session storage.
+	 * <p>
+	 * This method can be called by parent components to manually restore the value, though typically {@link #enableValuePersistence()} is preferred
+	 * for automatic behavior.
+	 * </p>
+	 */
+	@Override
+	public void restoreCurrentValue() {
+		try {
+			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
+			final java.util.Optional<String> storedDisplayName = sessionService.getSessionValue(getStorageId());
+			if (storedDisplayName.isPresent() && comboBoxEntityType != null) {
+				// Find the entity type config that matches the stored display name
+				final EntityTypeConfig<?> matchingConfig =
+						entityTypes.stream().filter(config -> config.getDisplayName().equals(storedDisplayName.get())).findFirst().orElse(null);
+				if (matchingConfig != null) {
+					comboBoxEntityType.setValue(matchingConfig);
+					LOGGER.debug("Restored entity type selection: {}", storedDisplayName.get());
+				} else {
+					LOGGER.debug("Stored entity type '{}' no longer available, using default", storedDisplayName.get());
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error restoring entity type selection", e);
+		}
+	}
+
+	/** Saves the current entity type selection to session storage.
+	 * <p>
+	 * This method is called whenever the entity type changes to preserve the selection across component refreshes. The display name of the selected
+	 * entity type is stored.
+	 * </p>
+	 */
+	@Override
+	public void saveCurrentValue() {
+		try {
+			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
+			if (comboBoxEntityType != null) {
+				final EntityTypeConfig<?> currentValue = comboBoxEntityType.getValue();
+				if (currentValue != null) {
+					sessionService.setSessionValue(getStorageId(), currentValue.getDisplayName());
+					LOGGER.debug("Saved entity type selection: {}", currentValue.getDisplayName());
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error saving entity type selection", e);
+		}
+	}
+
 	public void setDynamicHeight(final String maxHeight) {
 		getContent().setSizeUndefined();
 		getContent().setWidthFull();
@@ -768,6 +887,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		// This could be implemented by adding a visual indicator to the component
 		LOGGER.debug("setRequiredIndicatorVisible({}) called - not currently implemented", requiredIndicatorVisible);
 	}
+	// ==================== IHasSelectedValueStorage Implementation ====================
 
 	/** Sets the selection owner to be notified of selection changes.
 	 * @param owner the selection owner (can be null) */
@@ -890,108 +1010,5 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 		}
 		gridSearchToolbar.setStatusOptions(statuses);
-	}
-
-	// ==================== IHasSelectedValueStorage Implementation ====================
-
-	/**
-	 * Enables automatic value persistence for the entity type selection.
-	 * <p>
-	 * This method should be called by the parent component/context owner to enable
-	 * automatic saving and restoring of the entity type selection. Once enabled:
-	 * <ul>
-	 * <li>Value is saved on every change</li>
-	 * <li>Value is restored when component is attached to UI</li>
-	 * </ul>
-	 * </p>
-	 */
-	public void enableValuePersistence() {
-		if (comboBoxEntityType == null) {
-			LOGGER.warn("Cannot enable value persistence - comboBox not initialized");
-			return;
-		}
-		// Use helper to enable automatic persistence
-		CValueStorageHelper.enableAutoPersistence(comboBoxEntityType, getStorageId(), displayName -> {
-			// Converter: find entity type by display name
-			return entityTypes.stream().filter(config -> config.getDisplayName().equals(displayName)).findFirst().orElse(null);
-		});
-		LOGGER.debug("Value persistence enabled for entity selection with storage ID: {}", getStorageId());
-	}
-
-	/**
-	 * Gets the unique storage identifier for this component's entity type value.
-	 * <p>
-	 * Uses the component's ID if available, otherwise uses a class-based default.
-	 * This ensures each instance of CComponentEntitySelection can maintain its own
-	 * stored value independently.
-	 * </p>
-	 * 
-	 * @return The storage identifier (never null)
-	 */
-	@Override
-	public String getStorageId() {
-		// Use component ID if set, otherwise generate one based on class name
-		return "entitySelection_" + getId().orElse(generateId());
-	}
-
-	/**
-	 * Generates a unique ID for this component instance.
-	 */
-	private String generateId() {
-		return getClass().getSimpleName() + "_" + System.identityHashCode(this);
-	}
-
-	/**
-	 * Restores the entity type selection from session storage.
-	 * <p>
-	 * This method can be called by parent components to manually restore the value,
-	 * though typically {@link #enableValuePersistence()} is preferred for automatic behavior.
-	 * </p>
-	 */
-	@Override
-	public void restoreCurrentValue() {
-		try {
-			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
-			final java.util.Optional<String> storedDisplayName = sessionService.getSessionValue(getStorageId());
-			if (storedDisplayName.isPresent() && comboBoxEntityType != null) {
-				// Find the entity type config that matches the stored display name
-				final EntityTypeConfig<?> matchingConfig = entityTypes.stream()
-						.filter(config -> config.getDisplayName().equals(storedDisplayName.get()))
-						.findFirst()
-						.orElse(null);
-				
-				if (matchingConfig != null) {
-					comboBoxEntityType.setValue(matchingConfig);
-					LOGGER.debug("Restored entity type selection: {}", storedDisplayName.get());
-				} else {
-					LOGGER.debug("Stored entity type '{}' no longer available, using default", storedDisplayName.get());
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error restoring entity type selection", e);
-		}
-	}
-
-	/**
-	 * Saves the current entity type selection to session storage.
-	 * <p>
-	 * This method is called whenever the entity type changes to preserve the selection
-	 * across component refreshes. The display name of the selected entity type is stored.
-	 * </p>
-	 */
-	@Override
-	public void saveCurrentValue() {
-		try {
-			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
-			if (comboBoxEntityType != null) {
-				final EntityTypeConfig<?> currentValue = comboBoxEntityType.getValue();
-				if (currentValue != null) {
-					sessionService.setSessionValue(getStorageId(), currentValue.getDisplayName());
-					LOGGER.debug("Saved entity type selection: {}", currentValue.getDisplayName());
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error saving entity type selection", e);
-		}
 	}
 }

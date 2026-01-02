@@ -74,7 +74,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 				if (statusOpt.isPresent()) {
 					final CProjectItemStatus status = statusOpt.get();
 					statuses.add(status);
-					LOGGER.debug("[KanbanInit] Assigning status '{}' (ID: {}) to column '{}'", statusName, status.getId(), name);
+					// LOGGER.debug("[KanbanInit] Assigning status '{}' (ID: {}) to column '{}'", statusName, status.getId(), name);
 				} else {
 					LOGGER.warn("[KanbanInit] Status '{}' not found for column '{}', skipping", statusName, name);
 				}

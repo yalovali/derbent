@@ -39,10 +39,10 @@ import java.util.List;
  * <li><b>Direct navigation</b>: Uses URL navigation instead of clicking for reliability
  * <li><b>Detailed logging</b>: Clear progress indicators and error messages
  * </ul> */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=0"
+		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @DisplayName ("🧪 CPageTestAuxillary Comprehensive Page Testing")
 public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
