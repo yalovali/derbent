@@ -469,6 +469,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	/** Enables automatic value persistence for the entity type selection.
 	 * <p>
+	 * <strong>IMPORTANT</strong>: Before calling this method, the parent component MUST set an explicit,
+	 * stable ID using {@code setId("contextSpecificId")}. Failure to do so will result in an
+	 * {@link IllegalStateException} being thrown.
+	 * </p>
+	 * <p>
 	 * This method should be called by the parent component/context owner to enable automatic saving and restoring of the entity type selection. Once
 	 * enabled:
 	 * <ul>
@@ -476,8 +481,29 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * <li>Value is restored when component is attached to UI</li>
 	 * </ul>
 	 * </p>
+	 * <p>
+	 * Example usage in parent dialog:
+	 * <pre>
+	 * componentEntitySelection = new CComponentEntitySelection&lt;&gt;(...);
+	 * componentEntitySelection.setId("entitySelection_sprintItems");  // REQUIRED
+	 * componentEntitySelection.enableValuePersistence();
+	 * </pre>
+	 * </p>
+	 * 
+	 * @throws IllegalStateException if component ID is not set before calling this method
+	 * @see #getStorageId()
 	 */
 	public void enableValuePersistence() {
+		// Validate ID is set before enabling persistence (fail-fast)
+		final String componentId = getId().orElse(null);
+		if (componentId == null || componentId.isBlank()) {
+			throw new IllegalStateException(
+				"Component ID must be set before enabling value persistence. " +
+				"Call setId(\"contextSpecificId\") before calling enableValuePersistence(). " +
+				"Example: componentEntitySelection.setId(\"entitySelection_sprintItems\");"
+			);
+		}
+		
 		LOGGER.debug("Enabling value persistence for entity selection with storage ID: {}", getStorageId());
 		if (comboBoxEntityType == null) {
 			LOGGER.warn("Cannot enable value persistence - comboBox not initialized");
