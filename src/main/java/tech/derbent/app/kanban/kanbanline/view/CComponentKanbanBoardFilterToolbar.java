@@ -103,6 +103,13 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		public int hashCode() {
 			return Objects.hash(entityClass, label);
 		}
+		
+		/** Returns entity class name for value persistence (more stable than label). */
+		@Override
+		public String toString() {
+			// Return class name for persistence, or "AllTypes" for the "All types" option
+			return entityClass != null ? entityClass.getName() : "AllTypes";
+		}
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -253,12 +260,19 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
 		typeOptions.add(0, typeAllOption);
 		comboType.setItems(typeOptions);
-		// If current value is invalid or null, select first available type option
-		if (comboType.getValue() == null || !typeOptions.contains(comboType.getValue())) {
-			// Set to first non-"All" option if available, otherwise "All types"
-			final TypeOption defaultOption = typeOptions.size() > 1 ? typeOptions.get(1) : typeAllOption;
-			comboType.setValue(defaultOption);
-			currentCriteria.setEntityType(defaultOption.getEntityClass());
+		
+		// Only update value if current value is invalid (not in the new options list)
+		// If current value is null or invalid, default to "All types"
+		final TypeOption currentValue = comboType.getValue();
+		if (currentValue == null || !typeOptions.contains(currentValue)) {
+			// Current value is invalid, set to "All types" (don't trigger filter if already null)
+			if (currentValue != null) {
+				comboType.setValue(typeAllOption);
+				currentCriteria.setEntityType(null);
+			} else {
+				// Value is null, just ensure criteria is updated
+				currentCriteria.setEntityType(null);
+			}
 		}
 	}
 
@@ -294,11 +308,19 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 			}
 		});
 
-		// Enable persistence for Type ComboBox
-		CValueStorageHelper.enableAutoPersistence(comboType, getStorageId() + "_type", label -> {
-			// Converter: find TypeOption by label
+		// Enable persistence for Type ComboBox using entity class name (more stable than label)
+		CValueStorageHelper.enableAutoPersistence(comboType, getStorageId() + "_type", className -> {
+			// Converter: find TypeOption by entity class name
+			if (className == null || className.isBlank()) {
+				return null;
+			}
 			return comboType.getListDataView().getItems()
-					.filter(option -> option.getLabel().equals(label))
+					.filter(option -> {
+						if (option.getEntityClass() == null) {
+							return "AllTypes".equals(className);  // Special case for "All types" option
+						}
+						return option.getEntityClass().getName().equals(className);
+					})
 					.findFirst()
 					.orElse(null);
 		});
@@ -316,14 +338,9 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 
 	@Override
 	public String getStorageId() {
-		return "kanbanBoardFilter_" + getId().orElse(generateId());
-	}
-
-	/**
-	 * Generates a unique ID for this component instance.
-	 */
-	private String generateId() {
-		return getClass().getSimpleName() + "_" + System.identityHashCode(this);
+		// Use a stable, deterministic ID that persists across component refreshes
+		// This ensures value persistence works correctly when the component is recreated
+		return "kanbanBoardFilter_stable";
 	}
 
 	@Override
