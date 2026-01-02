@@ -201,11 +201,44 @@ public abstract class CPageBaseProjectAware extends CPageBase
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
 	}
 
+	/** Populates the form with entity data using the MANDATORY 3-step pattern.
+	 * <p>
+	 * <b>⚠️ WARNING: DO NOT MODIFY THIS PATTERN</b>
+	 * <p>
+	 * This 3-step sequence is REQUIRED for proper entity lazy field initialization with Hibernate. Each step serves a distinct, critical purpose:
+	 * <ol>
+	 * <li><b>Step 1:</b> {@code detailsBuilder.setValue(currentEntity)} - Initializes lazy fields and propagates to IContentOwner components</li>
+	 * <li><b>Step 2:</b> {@code currentBinder.setBean(getValue())} - Binds the initialized entity to form fields</li>
+	 * <li><b>Step 3:</b> {@code detailsBuilder.populateForm()} - Triggers nested IContentOwner component UI updates</li>
+	 * </ol>
+	 * <p>
+	 * <b>Why this pattern is mandatory:</b>
+	 * <ul>
+	 * <li>Hibernate lazy-loaded relationships must be initialized BEFORE binding</li>
+	 * <li>Page-level {@code setValue()} performs {@code validateLazyFieldsInitialized()} fail-fast check</li>
+	 * <li>IContentOwner components need explicit {@code setValue()} before {@code populateForm()}</li>
+	 * <li>Consolidating steps causes: "Lazy field 'X' is not initialized for Entity" errors</li>
+	 * </ul>
+	 * <p>
+	 * <b>Do NOT attempt to:</b>
+	 * <ul>
+	 * <li>❌ Consolidate to single call like {@code detailsBuilder.populateForm(entity)}</li>
+	 * <li>❌ Remove {@code setValue()} thinking it's redundant with {@code setBean()}</li>
+	 * <li>❌ Reorder steps - the sequence is critical</li>
+	 * <li>❌ "Simplify" - this IS the correct, minimal implementation</li>
+	 * </ul>
+	 * <p>
+	 * See {@code docs/architecture/form-population-pattern.md} for full documentation.
+	 * @throws Exception if form population fails */
 	@Override
 	public void populateForm() throws Exception {
 		try {
+			// STEP 1: Initialize entity lazy fields and propagate to IContentOwner components
+			// This MUST happen before binding to prevent lazy initialization errors
 			detailsBuilder.setValue(currentEntity);
-			// Default implementation - populate current binder if available
+			
+			// STEP 2: Bind initialized entity to form fields via Vaadin binder
+			// Uses getValue() which returns the already-set currentEntity from Step 1
 			if (currentBinder != null && getValue() != null) {
 				LOGGER.debug("Populating form for entity: {}", getValue());
 				currentBinder.setBean(getValue());
@@ -213,7 +246,9 @@ public abstract class CPageBaseProjectAware extends CPageBase
 				LOGGER.debug("Clearing form - no current entity");
 				currentBinder.setBean(null);
 			}
-			// Also populate details builder if available
+			
+			// STEP 3: Trigger nested IContentOwner component UI updates
+			// Components use their stored entity (from Step 1) to update their UI
 			if (detailsBuilder != null) {
 				detailsBuilder.populateForm();
 			}
