@@ -19,7 +19,10 @@ import tech.derbent.base.users.domain.CUser;
 
 /** CTeam - Team entity for grouping users Represents a team of users with a manager, associated with a company */
 @Entity
-@Table (name = "\"cteam\"")
+@Table (name = "\"cteam\"", uniqueConstraints = @jakarta.persistence.UniqueConstraint (
+	name = "uk_team_name_company",
+	columnNames = {"name", "company_id"}
+))
 @AttributeOverride (name = "id", column = @Column (name = "team_id"))
 public class CTeam extends CEntityNamed<CTeam> {
 
