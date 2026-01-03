@@ -1,371 +1,122 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.interfaces.IHasSelectedValueStorage;
-import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
-import tech.derbent.api.ui.component.enhanced.CComponentFilterToolbar;
-import tech.derbent.api.utils.CValueStorageHelper;
-import tech.derbent.api.utils.Check;
+import tech.derbent.api.ui.component.filter.CEntityTypeFilter;
+import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
+import tech.derbent.api.ui.component.filter.CSprintFilter;
+import tech.derbent.api.ui.component.filter.CUniversalFilterToolbar;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
-/** CComponentKanbanBoardFilterToolbar - Filtering toolbar for Kanban board items.
+/**
+ * CComponentKanbanBoardFilterToolbar - Filtering toolbar for Kanban board items.
  * <p>
- * Supports filtering by responsible user and entity type.
+ * Refactored to use the new universal filtering framework with composable filter components.
+ * Automatically discovers all entity types (Activity, Meeting, Sprint, etc.) from sprint items.
+ * </p>
+ * 
+ * <p>
+ * <b>Features:</b>
+ * <ul>
+ * <li>Sprint selection filter</li>
+ * <li>Entity type filter (dynamically populated with Activity, Meeting, Sprint, etc.)</li>
+ * <li>Responsible user filter (All items vs. My items)</li>
+ * <li>Automatic value persistence across refreshes</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>
+ * <b>Design Benefits:</b>
+ * <ul>
+ * <li>Simple, clear code using composition</li>
+ * <li>Automatic entity type discovery (fixes missing Meeting issue)</li>
+ * <li>Reusable filter components</li>
+ * <li>Easy to extend with new filters</li>
+ * </ul>
  * </p>
  */
-public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar implements IHasSelectedValueStorage {
+public class CComponentKanbanBoardFilterToolbar extends CUniversalFilterToolbar<CSprintItem> {
 
-	private static class CTypeOption {
-
-		private final Class<?> entityClass;
-		private final String label;
-
-		/** Creates a type option with label and class. */
-		CTypeOption(final String label, final Class<?> entityClass) {
-			this.label = label;
-			this.entityClass = entityClass;
-		}
-
-		/** Compares type options by class and label. */
-		@Override
-		public boolean equals(final Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof CTypeOption)) {
-				return false;
-			}
-			final CTypeOption option = (CTypeOption) other;
-			return Objects.equals(entityClass, option.entityClass) && Objects.equals(label, option.label);
-		}
-
-		/** Returns the entity class for this option. */
-		public Class<?> getEntityClass() { return entityClass; }
-
-		/** Returns the display label for this option. */
-		public String getLabel() { return label; }
-
-		/** Computes hash based on class and label. */
-		@Override
-		public int hashCode() {
-			return Objects.hash(entityClass, label);
-		}
-
-		/** Returns entity class name for value persistence (more stable than label). */
-		@Override
-		public String toString() {
-			// Return class name for persistence, or "AllTypes" for the "All types" option
-			return entityClass != null ? entityClass.getName() : "AllTypes";
-		}
-	}
-
-	public static class FilterCriteria {
-
-		private Class<?> entityType;
-		private ResponsibleFilterMode responsibleMode = ResponsibleFilterMode.ALL;
-		private CSprint sprint;
-
-		/** Returns the selected entity type filter. */
-		public Class<?> getEntityType() { return entityType; }
-
-		/** Returns the selected responsible filter mode. */
-		public ResponsibleFilterMode getResponsibleMode() { return responsibleMode; }
-
-		/** Returns the selected sprint filter. */
-		public CSprint getSprint() { return sprint; }
-
-		/** Sets the entity type filter. */
-		public void setEntityType(final Class<?> entityType) { this.entityType = entityType; }
-
-		/** Sets the responsible filter mode. */
-		public void setResponsibleMode(final ResponsibleFilterMode responsibleMode) {
-			this.responsibleMode = responsibleMode;
-		}
-
-		/** Sets the sprint filter. */
-		public void setSprint(final CSprint sprint) { this.sprint = sprint; }
-	}
-
-	public enum ResponsibleFilterMode {
-
-		ALL("All items"), CURRENT_USER("My items");
-
-		private final String label;
-
-		/** Creates a responsible filter entry with a label. */
-		ResponsibleFilterMode(final String label) {
-			this.label = label;
-		}
-
-		/** Returns the display label for the mode. */
-		public String getLabel() { return label; }
-	}
-
-	private static final String ALL_TYPES = "All types";
 	private static final long serialVersionUID = 1L;
 
-	/** Resolves a display label for an entity class. */
-	private static String resolveEntityTypeLabel(final Class<?> entityClass) {
-		Check.notNull(entityClass, "Entity class cannot be null");
-		final String registeredTitle = CEntityRegistry.getEntityTitleSingular(entityClass);
-		if (registeredTitle != null && !registeredTitle.isBlank()) {
-			return registeredTitle;
-		}
-		return entityClass.getSimpleName();
-	}
+	private final CSprintFilter sprintFilter;
+	private final CEntityTypeFilter entityTypeFilter;
+	private final CResponsibleUserFilter responsibleUserFilter;
 
-	private final Button clearButton;
-	private final FilterCriteria currentCriteria;
-	private final ComboBox<ResponsibleFilterMode> comboResponsibleMode;
-	private final CColorAwareComboBox<CSprint> comboSprint;
-	private final ComboBox<CTypeOption> comboType;
-	private CSprint defaultSprint;
-	private final List<Consumer<FilterCriteria>> listeners;
-	private final CTypeOption typeAllOption;
-
-	/** Builds the filter toolbar and its components. */
+	/**
+	 * Builds the filter toolbar and its components using composition.
+	 */
 	public CComponentKanbanBoardFilterToolbar() {
-		super(new ToolbarConfig().hideAll());
+		super();
 		// Set explicit ID for value persistence across component recreations
 		setId("kanbanBoardFilterToolbar");
-		currentCriteria = new FilterCriteria();
-		listeners = new ArrayList<>();
-		typeAllOption = new CTypeOption(ALL_TYPES, null);
-		comboSprint = buildSprintCombo();
-		comboResponsibleMode = buildResponsibleModeCombo();
-		comboType = buildTypeCombo();
-		clearButton = buildClearButton();
-		addFilterComponents(comboSprint, comboResponsibleMode, comboType, clearButton);
-		setAlignItems(Alignment.CENTER);
+
+		// Create filter components
+		sprintFilter = new CSprintFilter();
+		entityTypeFilter = new CEntityTypeFilter();
+		responsibleUserFilter = new CResponsibleUserFilter();
+
+		// Add filters to toolbar (order matters for display)
+		addFilterComponent(sprintFilter);
+		addFilterComponent(entityTypeFilter);
+		addFilterComponent(responsibleUserFilter);
+
+		// Build clear button
+		build();
 	}
 
-	/** Registers a listener that reacts to filter changes. */
-	public void addKanbanFilterChangeListener(final Consumer<FilterCriteria> listener) {
-		Check.notNull(listener, "Filter listener cannot be null");
-		listeners.add(listener);
-	}
-
-	/** Builds the clear button for the toolbar. */
-	private Button buildClearButton() {
-		final Button button = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
-		button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-		button.addClickListener(event -> clearFilters());
-		button.setTooltipText("Clear Kanban filters");
-		return button;
-	}
-
-	/** Builds the responsible filter combo box. */
-	private ComboBox<ResponsibleFilterMode> buildResponsibleModeCombo() {
-		final ComboBox<ResponsibleFilterMode> combo = new ComboBox<>("Responsible");
-		combo.setItems(ResponsibleFilterMode.values());
-		combo.setItemLabelGenerator(ResponsibleFilterMode::getLabel);
-		combo.setValue(ResponsibleFilterMode.ALL);
-		combo.addValueChangeListener(event -> {
-			final ResponsibleFilterMode value = event.getValue() != null ? event.getValue() : ResponsibleFilterMode.ALL;
-			currentCriteria.setResponsibleMode(value);
-			notifyListeners();
-		});
-		return combo;
-	}
-
-	/** Builds the sprint filter combo box. */
-	private CColorAwareComboBox<CSprint> buildSprintCombo() {
-		final CColorAwareComboBox<CSprint> combo = new CColorAwareComboBox<>(CSprint.class, "Sprint");
-		combo.addValueChangeListener(event -> {
-			currentCriteria.setSprint(event.getValue());
-			notifyListeners();
-		});
-		return combo;
-	}
-
-	/** Builds the entity type filter combo box. */
-	private ComboBox<CTypeOption> buildTypeCombo() {
-		final ComboBox<CTypeOption> combo = new ComboBox<>("Type");
-		combo.setItemLabelGenerator(CTypeOption::getLabel);
-		combo.setItems(typeAllOption);
-		combo.setValue(typeAllOption);
-		combo.addValueChangeListener(event -> {
-			final CTypeOption option = event.getValue() != null ? event.getValue() : typeAllOption;
-			currentCriteria.setEntityType(option.getEntityClass());
-			notifyListeners();
-		});
-		return combo;
-	}
-
-	/** Resets filters to defaults and notifies listeners. */
-	@Override
-	public void clearFilters() {
-		comboSprint.setValue(defaultSprint);
-		currentCriteria.setSprint(defaultSprint);
-		comboResponsibleMode.setValue(ResponsibleFilterMode.ALL);
-		comboType.setValue(typeAllOption);
-		currentCriteria.setResponsibleMode(ResponsibleFilterMode.ALL);
-		currentCriteria.setEntityType(null);
-		notifyListeners();
-	}
-
-	/** Returns the active filter criteria. */
-	public FilterCriteria getCurrentCriteria() { return currentCriteria; }
-
-	@Override
-	public String getStorageId() {
-		// Use the explicitly set component ID for stable persistence
-		// ID is set in constructor to "kanbanBoardFilterToolbar"
-		final String componentId = getId().orElse(null);
-		if (componentId == null || componentId.isBlank()) {
-			throw new IllegalStateException(
-					"Component ID must be set in constructor for value persistence. " + "This should never happen for " + getClass().getSimpleName());
-		}
-		return componentId;
-	}
-
-	/** Notifies listeners of a filter change. */
-	private void notifyListeners() {
-		for (final Consumer<FilterCriteria> listener : listeners) {
-			listener.accept(currentCriteria);
-		}
-	}
-
-	@Override
-	public void restoreCurrentValue() {
-		// Restoration is handled automatically by CValueStorageHelper when components attach
-		// This method is here for interface compliance
-	}
-	// ==================== IHasSelectedValueStorage Implementation ====================
-
-	@Override
-	public void saveCurrentValue() {
-		// Saving is handled automatically by CValueStorageHelper on value changes
-		// This method is here for interface compliance
-	}
-
-	/** Updates available type options based on item list. */
-	public void setAvailableItems(final List<CSprintItem> items) {
-		Check.notNull(items, "Items cannot be null");
-		updateTypeOptions(items);
-	}
-
-	/** Updates sprint options and selects a default. */
-	public void setAvailableSprints(final List<CSprint> sprints, final CSprint defaultSprint) {
-		comboSprint.setItems(sprints);
-		this.defaultSprint = defaultSprint;
-		if (defaultSprint != null && sprints.contains(defaultSprint)) {
-			comboSprint.setValue(defaultSprint);
-			currentCriteria.setSprint(defaultSprint);
-		} else if (comboSprint.getValue() != null && !sprints.contains(comboSprint.getValue())) {
-			comboSprint.clear();
-			currentCriteria.setSprint(null);
-		}
-		if (comboSprint.getValue() == null && !sprints.isEmpty()) {
-			comboSprint.setValue(sprints.get(0));
-			currentCriteria.setSprint(sprints.get(0));
-		}
-		notifyListeners();
-	}
-
-	/** Refreshes the type options list. */
-	private void updateTypeOptions(final List<CSprintItem> items) {
-		final Map<Class<?>, CTypeOption> options = new LinkedHashMap<>();
-		for (final CSprintItem sprintItem : items) {
-			if (sprintItem == null || sprintItem.getItem() == null) {
-				continue;
-			}
-			final Class<?> entityClass = sprintItem.getItem().getClass();
-			options.putIfAbsent(entityClass, new CTypeOption(resolveEntityTypeLabel(entityClass), entityClass));
-		}
-		final List<CTypeOption> typeOptions =
-				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
-		typeOptions.add(0, typeAllOption);
-		comboType.setItems(typeOptions);
-		// Handle value selection based on current state
-		final CTypeOption currentValue = comboType.getValue();
-		if (currentValue == null) {
-			// No value selected - select first entity type (not "All types")
-			// This happens on initial load before persistence restores value
-			if (typeOptions.size() > 1) {
-				// Select first entity type (index 1, since index 0 is "All types")
-				final CTypeOption defaultOption = typeOptions.get(1);
-				comboType.setValue(defaultOption);
-				currentCriteria.setEntityType(defaultOption.getEntityClass());
-			} else {
-				// Only "All types" available
-				comboType.setValue(typeAllOption);
-				currentCriteria.setEntityType(null);
-			}
-		} else if (!typeOptions.contains(currentValue)) {
-			// Current value is invalid (entity type no longer in list)
-			// Revert to first entity type or "All types" if none available
-			if (typeOptions.size() > 1) {
-				final CTypeOption defaultOption = typeOptions.get(1);
-				comboType.setValue(defaultOption);
-				currentCriteria.setEntityType(defaultOption.getEntityClass());
-			} else {
-				comboType.setValue(typeAllOption);
-				currentCriteria.setEntityType(null);
-			}
-		}
-		// If current value is valid and in the list, keep it (persistence will restore it)
-	}
-
-	/** Enables automatic value persistence for all filter ComboBoxes.
-	 * <p>
-	 * This method should be called by the parent component (kanban board) to enable automatic saving and restoring of filter selections:
-	 * <ul>
-	 * <li>Sprint filter</li>
-	 * <li>Type filter</li>
-	 * <li>Responsible mode filter</li>
-	 * </ul>
-	 * </p>
+	/**
+	 * Updates available sprint options and selects a default.
+	 * 
+	 * @param sprints Available sprints
+	 * @param defaultSprint Default sprint to select
 	 */
-	@Override
-	public void valuePersist_enable() {
-		// Enable persistence for Sprint ComboBox
-		CValueStorageHelper.valuePersist_enable(comboSprint, getStorageId() + "_sprint", sprint -> {
-			// Converter: find sprint by ID
-			if (sprint == null || sprint.isBlank()) {
-				return null;
-			}
-			try {
-				final Long sprintId = Long.parseLong(sprint);
-				return comboSprint.getListDataView().getItems().filter(s -> s.getId() != null && s.getId().equals(sprintId)).findFirst().orElse(null);
-			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
-				return null;
-			}
-		});
-		// Enable persistence for Type ComboBox using entity class name (more stable than label)
-		CValueStorageHelper.valuePersist_enable(comboType, getStorageId() + "_type", className -> {
-			// Converter: find TypeOption by entity class name
-			if (className == null || className.isBlank()) {
-				return null;
-			}
-			return comboType.getListDataView().getItems().filter(option -> {
-				if (option.getEntityClass() == null) {
-					return ALL_TYPES.equals(className); // Special case for "All types" option
-				}
-				return option.getEntityClass().getName().equals(className);
-			}).findFirst().orElse(null);
-		});
-		// Enable persistence for Responsible Mode ComboBox
-		CValueStorageHelper.valuePersist_enable(comboResponsibleMode, getStorageId() + "_responsible", modeName -> {
-			// Converter: find ResponsibleFilterMode by name
-			try {
-				return ResponsibleFilterMode.valueOf(modeName);
-			} catch (@SuppressWarnings ("unused") final IllegalArgumentException e) {
-				return ResponsibleFilterMode.ALL;
-			}
-		});
+	public void setAvailableSprints(final List<CSprint> sprints, final CSprint defaultSprint) {
+		sprintFilter.setAvailableSprints(sprints, defaultSprint);
+	}
+
+	/**
+	 * Updates available entity type options based on sprint item list.
+	 * <p>
+	 * This method automatically discovers all unique entity types (Activity, Meeting, Sprint, etc.)
+	 * from the provided sprint items and populates the entity type filter dropdown.
+	 * </p>
+	 * 
+	 * @param items Sprint items to analyze for entity types
+	 */
+	public void setAvailableItems(final List<CSprintItem> items) {
+		// Extract actual entities from sprint items
+		final List<Object> entities = items.stream().map(CSprintItem::getItem).filter(item -> item != null).map(item -> (Object) item)
+				.toList();
+
+		// Update entity type filter with discovered types
+		entityTypeFilter.setAvailableEntityTypes(entities);
+	}
+
+	/**
+	 * Gets the sprint filter component.
+	 * 
+	 * @return The sprint filter
+	 */
+	public CSprintFilter getSprintFilter() {
+		return sprintFilter;
+	}
+
+	/**
+	 * Gets the entity type filter component.
+	 * 
+	 * @return The entity type filter
+	 */
+	public CEntityTypeFilter getEntityTypeFilter() {
+		return entityTypeFilter;
+	}
+
+	/**
+	 * Gets the responsible user filter component.
+	 * 
+	 * @return The responsible user filter
+	 */
+	public CResponsibleUserFilter getResponsibleUserFilter() {
+		return responsibleUserFilter;
 	}
 }
