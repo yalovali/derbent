@@ -11,7 +11,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.CSelectEvent;
@@ -23,6 +22,7 @@ import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.utils.Check;
@@ -35,7 +35,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumn.class);
 	private static final long serialVersionUID = 1L;
 	private final Binder<CKanbanColumn> binder;
-	private final Span defaultBadge;
+	private final CSpan defaultBadge;
 	private final Set<ComponentEventListener<CDragDropEvent>> dragDropListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
@@ -52,7 +52,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	// Cache is invalidated when sprintItems or column value changes.
 	private List<CSprintItem> cachedFilteredItems = List.of();
 	protected final CLabelEntity statusesLabel;
-	private Span storyPointTotalLabel;
+	private CSpan storyPointTotalLabel;
 	protected final CH3 title;
 
 	/** Creates the kanban column component and its layout. */
@@ -71,10 +71,10 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		headerLayout.setAlignItems(Alignment.CENTER);
 		title = new CH3("");
 		title.getStyle().set("margin", "0").set("flex-grow", "1");
-		defaultBadge = new Span("Default");
+		defaultBadge = new CSpan("Default");
 		defaultBadge.getStyle().set("background-color", "#E3F2FD").set("color", "#0D47A1").set("padding", "2px 6px").set("border-radius", "6px")
 				.set("font-size", "10px").set("font-weight", "600");
-		storyPointTotalLabel = new Span();
+		storyPointTotalLabel = new CSpan();
 		storyPointTotalLabel.getStyle().set("background-color", "#E8F5E9").set("color", "#2E7D32").set("padding", "4px 8px")
 				.set("border-radius", "6px").set("font-size", "12px").set("font-weight", "700").set("white-space", "nowrap");
 		headerLayout.add(title);

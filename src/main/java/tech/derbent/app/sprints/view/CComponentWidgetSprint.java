@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.config.CSpringContext;
@@ -18,6 +17,7 @@ import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -61,7 +61,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	private CDiv containerSprintItems;
 	private DropTarget<CComponentWidgetSprint> dropTarget;
 	private CLabelEntity itemCountLabel;
-	private Span itemCountText;
+	private CSpan itemCountText;
 	private boolean sprintItemsVisible = false;
 
 	/** Creates a new sprint widget for the specified sprint.
@@ -100,7 +100,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		// Add count text with story points
 		final String countText = (itemCount != null ? itemCount : 0) + " item" + (itemCount != null && itemCount != 1 ? "s" : "");
 		final String storyPointsText = totalStoryPoints != null && totalStoryPoints > 0 ? " (" + totalStoryPoints + " SP)" : "";
-		itemCountText = new Span(countText + storyPointsText);
+		itemCountText = new CSpan(countText + storyPointsText);
 		label.add(itemCountText);
 		return label;
 	}
