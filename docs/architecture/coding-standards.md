@@ -17,6 +17,8 @@ This section defines how AI agents (GitHub Copilot, Codex, etc.) MUST use and re
 When generating code, AI agents MUST consult documentation in this order:
 
 1. **Specific Guidelines First**: Check specialized documents for the task at hand
+   - **Method placement** → [Method Placement Guidelines](method-placement-guidelines.md) ⭐ **NEW - CHECK FIRST**
+   - **Component/utility reference** → [Component and Utility Reference](component-utility-reference.md) ⭐ **NEW - CHECK FIRST**
    - UI/CSS work → [UI, CSS, and Layout Coding Standards](ui-css-coding-standards.md)
    - Component development → [Component Coding Standards](../development/component-coding-standards.md)
    - Testing → [Playwright Testing Guidelines](../testing/)
@@ -98,6 +100,8 @@ The Derbent project documentation is organized as follows:
 docs/
 ├── architecture/          # Architecture and design patterns
 │   ├── coding-standards.md              # THIS FILE - General coding standards
+│   ├── method-placement-guidelines.md   # ⭐ NEW - Where methods belong
+│   ├── component-utility-reference.md   # ⭐ NEW - Complete component index
 │   ├── ui-css-coding-standards.md       # UI, CSS, and layout patterns
 │   ├── entity-inheritance-patterns.md   # Entity class hierarchies
 │   ├── service-layer-patterns.md        # Service class patterns
@@ -112,6 +116,66 @@ docs/
 ```
 
 **Rule for AI Agents**: When asked about a specific topic, search for the most specific guideline document first, then fall back to general guidelines.
+
+## ⭐ MANDATORY: Method Placement and Component Usage (NEW)
+
+**CRITICAL RULES** - These MUST be followed by all developers and AI agents:
+
+### Rule 1: Check Before Creating Methods
+
+Before creating ANY new method, you MUST:
+
+1. **Check existing code** - Search for similar functionality
+2. **Consult references** - Check [Component and Utility Reference](component-utility-reference.md)
+3. **Verify placement** - Use [Method Placement Guidelines](method-placement-guidelines.md) decision tree
+4. **Use existing utilities** - Don't duplicate what exists
+
+**Complete Guidelines**: See [Method Placement Guidelines](method-placement-guidelines.md)
+
+### Rule 2: NEVER Use Raw Vaadin Components
+
+**MANDATORY**: Always use C-prefixed components instead of raw Vaadin components.
+
+| ❌ FORBIDDEN | ✅ USE INSTEAD |
+|--------------|----------------|
+| `new Span()` | `new CSpan()` |
+| `new Div()` | `new CDiv()` |
+| `new Button()` | `new CButton()` |
+| `new VerticalLayout()` | `new CVerticalLayout()` |
+| `new HorizontalLayout()` | `new CHorizontalLayout()` |
+
+**Why**: C-prefixed components provide consistent styling, framework-specific behavior, and better maintainability.
+
+**Complete Reference**: See [Component and Utility Reference](component-utility-reference.md)
+
+### Rule 3: Use Existing Utility Classes
+
+Common utilities that MUST be used instead of creating custom methods:
+
+| Need | Use | NOT |
+|------|-----|-----|
+| Display entity label | `CLabelEntity.createLabel(entity)` | Custom label creation |
+| Display user | `CLabelEntity.createUserLabel(user)` | Custom user display |
+| Get entity color | `CColorUtils.getColorFromEntity(entity)` | Private getColor methods |
+| Get contrast color | `CColorUtils.getContrastTextColor(bg)` | Private color calculation |
+| Create icon | `CColorUtils.createStyledIcon(icon)` | Custom icon creation |
+| Validate not null | `Check.notNull(obj, msg)` | Manual if checks |
+| Validate not blank | `Check.notBlank(str, msg)` | Manual string checks |
+| Show notification | `CNotificationService.show*()` | `Notification.show()` |
+
+**Complete List**: See [Component and Utility Reference](component-utility-reference.md)
+
+### Quick Decision Tree
+
+```
+Before creating a method, ask:
+├─ Does CColorUtils have this? (colors, icons, contrast)
+├─ Does CLabelEntity have this? (entity display, labels)
+├─ Does Check have this? (validation)
+├─ Does CNotificationService have this? (notifications)
+├─ Is this component-specific? → Keep in component
+└─ General utility? → Add to appropriate utility class
+```
 
 ## Core Principles
 
