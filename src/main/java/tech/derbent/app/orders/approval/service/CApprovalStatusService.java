@@ -51,4 +51,12 @@ public class CApprovalStatusService extends CStatusService<CApprovalStatus> impl
 		super.initializeNewEntity(entity);
 		setNameOfEntity(entity, "Approval Status");
 	}
+
+	@Override
+	@Transactional
+	public CApprovalStatus save(final CApprovalStatus entity) {
+		final CApprovalStatus saved = super.save(entity);
+		final IApprovalStatusRepository approvalStatusRepository = (IApprovalStatusRepository) repository;
+		return approvalStatusRepository.findByIdWithCompany(saved.getId()).orElse(saved);
+	}
 }

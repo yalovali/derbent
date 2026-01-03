@@ -40,6 +40,12 @@ import tech.derbent.app.projects.domain.CProject;
 public abstract class CBaseUITest {
 
 	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
+	private static final String CRUD_CANCEL_BUTTON_ID = "cbutton-cancel";
+	private static final String CRUD_DELETE_BUTTON_ID = "cbutton-delete";
+	private static final String CRUD_EDIT_BUTTON_ID = "cbutton-edit";
+	private static final String CRUD_NEW_BUTTON_ID = "cbutton-new";
+	private static final String CRUD_REFRESH_BUTTON_ID = "cbutton-refresh";
+	private static final String CRUD_SAVE_BUTTON_ID = "cbutton-save";
 	// Exception detection for fail-fast behavior
 	private static final List<String> DETECTED_EXCEPTIONS = new ArrayList<>();
 	private static final String EXCEPTION_DETAILS_DIALOG_ID = "custom-exception-details-dialog";
@@ -309,22 +315,33 @@ public abstract class CBaseUITest {
 	/** Clicks the "Cancel" button to cancel the current operation. */
 	protected void clickCancel() {
 		LOGGER.info("❌ Clicking Cancel button");
-		page.locator("vaadin-button:has-text('Cancel')").click();
+		locateButtonByIdOrText(CRUD_CANCEL_BUTTON_ID, "Cancel").click();
 		wait_500();
 	}
 
 	/** Clicks the "Delete" button to delete the selected entity. */
 	protected void clickDelete() {
 		LOGGER.info("🗑️ Clicking Delete button");
-		page.locator("vaadin-button:has-text('Delete')").click();
+		locateButtonByIdOrText(CRUD_DELETE_BUTTON_ID, "Delete").click();
 		wait_500();
 	}
 
 	/** Clicks the "Edit" button to edit the selected entity. */
 	protected void clickEdit() {
 		LOGGER.info("✏️ Clicking Edit button");
-		page.locator("vaadin-button:has-text('Edit')").click();
+		locateButtonByIdOrText(CRUD_EDIT_BUTTON_ID, "Edit").click();
 		wait_500();
+	}
+
+	/** Resolves a button locator by ID, falling back to text when needed. */
+	protected Locator locateButtonByIdOrText(final String elementId, final String buttonText) {
+		Check.notBlank(elementId, "Button ID cannot be blank");
+		final Locator byId = page.locator("#" + elementId);
+		if (byId.count() > 0) {
+			return byId.first();
+		}
+		Check.notBlank(buttonText, "Button text fallback cannot be blank");
+		return page.locator("vaadin-button:has-text('" + buttonText + "')").first();
 	}
 	// ===========================================
 	// GRID INTERACTION METHODS
@@ -355,15 +372,22 @@ public abstract class CBaseUITest {
 	/** Clicks the "New" button to create a new entity. */
 	protected void clickNew() {
 		LOGGER.info("➕ Clicking New button");
-		page.locator("vaadin-button:has-text('New')").click();
+		locateButtonByIdOrText(CRUD_NEW_BUTTON_ID, "New").click();
 		wait_500();
 	}
 
 	/** Clicks the "Save" button to save the current entity. */
 	protected void clickSave() {
 		LOGGER.info("💾 Clicking Save button");
-		page.locator("vaadin-button:has-text('Save')").click();
+		locateButtonByIdOrText(CRUD_SAVE_BUTTON_ID, "Save").click();
 		wait_1000(); // Save operations may take longer
+	}
+
+	/** Clicks the "Refresh" button to refresh the current entity view. */
+	protected void clickRefresh() {
+		LOGGER.info("🔄 Clicking Refresh button");
+		locateButtonByIdOrText(CRUD_REFRESH_BUTTON_ID, "Refresh").click();
+		wait_500();
 	}
 
 	/** Closes the informational dialog that appears after sample data reload completion. */
@@ -1061,7 +1085,7 @@ public abstract class CBaseUITest {
 			LOGGER.info("➕ Testing CREATE operation for: {}", entityName);
 			clickNew();
 			wait_1000();
-			final String testData = "Test " + entityName + " " + System.currentTimeMillis();
+			final String testData = "Test " + entityName;
 			fillFirstTextField(testData);
 			// Try to fill other fields if present
 			final Locator textAreas = page.locator("vaadin-text-area");
@@ -1086,7 +1110,7 @@ public abstract class CBaseUITest {
 			wait_500();
 			clickEdit();
 			wait_1000();
-			final String updatedData = "Updated " + entityName + " " + System.currentTimeMillis();
+			final String updatedData = "Updated " + entityName;
 			fillFirstTextField(updatedData);
 			clickSave();
 			wait_1000();
@@ -1156,7 +1180,12 @@ public abstract class CBaseUITest {
 
 	/** Reads the current value from a bound field by entity class and field name. */
 	protected String readFieldValueById(final Class<?> entityClass, final String fieldName) {
-		final Locator host = locatorById(computeFieldId(entityClass, fieldName));
+		return readFieldValueById(computeFieldId(entityClass, fieldName));
+	}
+
+	/** Reads the current value from a bound field by DOM ID. */
+	protected String readFieldValueById(final String elementId) {
+		final Locator host = locatorById(elementId);
 		if (host.locator("input").count() > 0) {
 			return host.locator("input").first().inputValue();
 		}
@@ -1260,9 +1289,17 @@ public abstract class CBaseUITest {
 	protected void selectFirstComboBoxOptionById(final String elementId) {
 		Check.notBlank(elementId, "Element ID cannot be blank when selecting ComboBox option");
 		final Locator combo = locatorById(elementId);
+		try {
+			combo.scrollIntoViewIfNeeded();
+		} catch (final PlaywrightException e) {
+			LOGGER.debug("Unable to scroll combo box {} into view: {}", elementId, e.getMessage());
+		}
 		combo.click();
-		wait_500();
 		Locator options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
+		for (int attempt = 0; attempt < 5 && options.count() == 0; attempt++) {
+			wait_500();
+			options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
+		}
 		if (options.count() == 0) {
 			options = page.locator("vaadin-combo-box-item");
 		}
@@ -1537,7 +1574,7 @@ public abstract class CBaseUITest {
 			newButton.click();
 			wait_1000();
 			// Fill in form fields
-			final String testName = "Test " + entityType + " " + System.currentTimeMillis();
+			final String testName = "Test " + entityType;
 			fillFormFieldsForEntity(entityType, testName);
 			// Save the entity
 			clickSave();
@@ -1613,7 +1650,7 @@ public abstract class CBaseUITest {
 			clickEdit();
 			wait_1000();
 			// Update fields
-			final String updatedName = "Updated " + entityType + " " + System.currentTimeMillis();
+			final String updatedName = "Updated " + entityType;
 			fillFormFieldsForEntity(entityType, updatedName);
 			// Save changes
 			clickSave();
@@ -1776,7 +1813,7 @@ public abstract class CBaseUITest {
 				clickEdit();
 				wait_1000();
 				// Make a change to test tracking
-				fillFirstTextField("Test Change " + System.currentTimeMillis());
+				fillFirstTextField("Test Change");
 				clickSave();
 				wait_1000();
 				takeScreenshot("project-change-tracking", false);

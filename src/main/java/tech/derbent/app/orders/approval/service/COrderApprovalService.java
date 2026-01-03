@@ -1,14 +1,22 @@
 package tech.derbent.app.orders.approval.service;
 
 import java.time.Clock;
+import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
+import tech.derbent.app.orders.order.domain.COrder;
+import tech.derbent.app.orders.order.service.COrderService;
+import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -49,6 +57,27 @@ public class COrderApprovalService extends CEntityNamedService<COrderApproval> i
 		entity.setApprover(currentUser);
 		if (entity.getApprovalLevel() == null) {
 			entity.setApprovalLevel(1);
+		}
+		if (entity.getApprovalStatus() == null) {
+			final CCompany company = sessionService.getActiveCompany()
+					.orElseThrow(() -> new CInitializationException("No active company in session - cannot initialize approval status"));
+			final CApprovalStatusService approvalStatusService = CSpringContext.getBean(CApprovalStatusService.class);
+			final List<CApprovalStatus> statuses =
+					approvalStatusService.listByCompanyForPageView(company, PageRequest.of(0, 1), "").getContent();
+			if (statuses.isEmpty()) {
+				throw new CInitializationException("No approval statuses available for company - cannot initialize order approval");
+			}
+			entity.setApprovalStatus(statuses.get(0));
+		}
+		if (entity.getOrder() == null) {
+			final CProject project = sessionService.getActiveProject()
+					.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order approval"));
+			final COrderService orderService = CSpringContext.getBean(COrderService.class);
+			final List<COrder> orders = orderService.listByProject(project);
+			if (orders.isEmpty()) {
+				throw new CInitializationException("No orders available for project - cannot initialize order approval");
+			}
+			entity.setOrder(orders.get(0));
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package tech.derbent.app.orders.approval.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
@@ -19,4 +20,11 @@ public interface IApprovalStatusRepository extends IEntityOfCompanyRepository<CA
 			ORDER BY s.name ASC
 			""")
 	List<CApprovalStatus> listByCompanyForPageView(@Param ("company") CCompany company);
+
+	@Query ("""
+			SELECT s FROM #{#entityName} s
+			LEFT JOIN FETCH s.company
+			WHERE s.id = :id
+			""")
+	Optional<CApprovalStatus> findByIdWithCompany(@Param ("id") Long id);
 }

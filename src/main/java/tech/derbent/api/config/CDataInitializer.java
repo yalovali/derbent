@@ -901,6 +901,7 @@ public class CDataInitializer {
 					CProjectComponentInitializerService.initializeSample(project, minimal);
 					initializeSampleProjectExpenses(project, minimal);
 					initializeSampleProjectIncomes(project, minimal);
+					COrderInitializerService.initializeSample(project, minimal);
 					COrderApprovalInitializerService.initializeSample(project, minimal);
 					initializeSampleTeams(project, minimal);
 					CRiskInitializerService.initializeSample(project, minimal);

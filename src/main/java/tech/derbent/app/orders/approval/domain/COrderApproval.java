@@ -65,6 +65,10 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	)
 	private COrder order;
 
+	public COrderApproval() {
+		super();
+	}
+
 	/** Constructor with name and order.
 	 * @param name  the name of this approval step
 	 * @param order the order this approval belongs to */
