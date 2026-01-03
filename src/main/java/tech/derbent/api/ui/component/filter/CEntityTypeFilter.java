@@ -171,35 +171,56 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
 		typeOptions.add(0, allTypesOption);
 
-		// Update ComboBox items
+		// CRITICAL FIX: Preserve entity class BEFORE setItems() clears the ComboBox value
+		// comboBox.setItems() clears the current value, so we must save the entity class first
+		final TypeOption oldValue = comboBox.getValue();
+		final Class<?> selectedEntityClass = oldValue != null ? oldValue.getEntityClass() : null;
+
+		// Update ComboBox items (this clears the current value)
 		comboBox.setItems(typeOptions);
 
-		// Handle value selection based on current state
-		final TypeOption currentValue = comboBox.getValue();
-		if (currentValue == null) {
-			// No value selected - select first entity type (not "All types")
-			if (typeOptions.size() > 1) {
-				final TypeOption defaultOption = typeOptions.get(1);
-				comboBox.setValue(defaultOption);
-				notifyChangeListeners(defaultOption.getEntityClass());
-			} else {
-				// Only "All types" available
+		// Restore the previously selected entity class by finding matching TypeOption
+		if (selectedEntityClass == null) {
+			// No previous selection - check if "All types" was selected
+			if (oldValue != null && oldValue.equals(allTypesOption)) {
+				// User had "All types" selected, restore it
 				comboBox.setValue(allTypesOption);
-				notifyChangeListeners(null);
+			} else {
+				// No value selected - select first entity type (not "All types")
+				if (typeOptions.size() > 1) {
+					final TypeOption defaultOption = typeOptions.get(1);
+					comboBox.setValue(defaultOption);
+					notifyChangeListeners(defaultOption.getEntityClass());
+				} else {
+					// Only "All types" available
+					comboBox.setValue(allTypesOption);
+					notifyChangeListeners(null);
+				}
 			}
-		} else if (!typeOptions.contains(currentValue)) {
-			// Current value is invalid (entity type no longer in list)
-			// Revert to first entity type or "All types" if none available
-			if (typeOptions.size() > 1) {
-				final TypeOption defaultOption = typeOptions.get(1);
-				comboBox.setValue(defaultOption);
-				notifyChangeListeners(defaultOption.getEntityClass());
+		} else {
+			// Previous selection existed - try to restore it
+			final TypeOption matchingOption = typeOptions.stream()
+					.filter(option -> selectedEntityClass.equals(option.getEntityClass()))
+					.findFirst()
+					.orElse(null);
+			
+			if (matchingOption != null) {
+				// Entity class still exists in new options - restore selection
+				comboBox.setValue(matchingOption);
+				// Don't notify listeners - value hasn't actually changed from user's perspective
 			} else {
-				comboBox.setValue(allTypesOption);
-				notifyChangeListeners(null);
+				// Entity class no longer in list (e.g., all Activities removed from sprint)
+				// Revert to first entity type or "All types" if none available
+				if (typeOptions.size() > 1) {
+					final TypeOption defaultOption = typeOptions.get(1);
+					comboBox.setValue(defaultOption);
+					notifyChangeListeners(defaultOption.getEntityClass());
+				} else {
+					comboBox.setValue(allTypesOption);
+					notifyChangeListeners(null);
+				}
 			}
 		}
-		// If current value is valid and in the list, keep it (persistence will restore it)
 	}
 
 	/**
