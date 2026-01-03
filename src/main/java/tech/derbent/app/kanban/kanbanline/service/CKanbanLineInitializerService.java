@@ -155,7 +155,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 					if (index == 0) {
 						// Scrum Board: 5-column standard Scrum workflow
 						// Each status is assigned to EXACTLY ONE column to prevent overlap
-						LOGGER.info("[KanbanInit] Creating Scrum Board with 5 columns");
+						// LOGGER.info("[KanbanInit] Creating Scrum Board with 5 columns");
 						// createColumn("Backlog", company, statusService, line, "To Do");
 						createColumn("In Progress", company, statusService, line, "In Progress");
 						createColumn("In Review", company, statusService, line, "In Review");
@@ -164,7 +164,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 					} else {
 						// Simple Kanban: 3-column simplified workflow
 						// Groups multiple statuses into broader categories
-						LOGGER.info("[KanbanInit] Creating Simple Kanban with 3 columns");
+						// LOGGER.info("[KanbanInit] Creating Simple Kanban with 3 columns");
 						createColumn("To Do", company, statusService, line, "To Do", "Blocked");
 						createColumn("Doing", company, statusService, line, "In Progress", "In Review");
 						createColumn("Done", company, statusService, line, "Done", "Cancelled").setDefaultColumn(true);

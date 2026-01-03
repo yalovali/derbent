@@ -125,8 +125,11 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	public static <T> Column<T> styleColumnHeader(final Column<T> column, final String header) {
+		if (header == null || header.isBlank()) {
+			// dont configure header if blank
+			return column;
+		}
 		Check.notNull(column, "Column cannot be null when styling header");
-		Check.notBlank(header, "Header text cannot be blank when styling header");
 		column.setHeader(CColorUtils.createStyledHeader(header, CColorUtils.CRUD_READ_COLOR));
 		column.setResizable(true);
 		return column;
@@ -267,7 +270,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public Column<EntityClass> addCustomColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String width,
 			final String key, final int flexGrow) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		Check.notBlank(width, "Width cannot be null or blank");
 		Check.isTrue(flexGrow >= 0, "Flex grow must be non-negative");
 		final Column<EntityClass> column = addColumn(valueProvider).setWidth(width).setFlexGrow(flexGrow).setSortable(true).setResizable(true);
@@ -280,20 +282,17 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 
 	public Column<EntityClass> addDateColumn(final ValueProvider<EntityClass, LocalDate> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
 	}
 
 	public Column<EntityClass> addDateTimeColumn(final ValueProvider<EntityClass, LocalDateTime> valueProvider, final String header,
 			final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
 	}
 
 	public Column<EntityClass> addDecimalColumn(final ValueProvider<EntityClass, BigDecimal> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_DECIMAL, key, 0);
 	}
 
@@ -334,7 +333,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 			@SuppressWarnings ("unused") final Class<?> returnType) throws Exception {
 		try {
 			Check.notNull(valueProvider, "Value provider cannot be null");
-			Check.notBlank(header, "Header cannot be null or blank");
 			Field field;
 			// final Method applyMethod = valueProvider.getClass().getMethod("apply", Object.class);
 			// final Class<?> returnType = applyMethod.getReturnType();
@@ -373,7 +371,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public Column<EntityClass> addExpandingLongTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header,
 			final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		final Column<EntityClass> column = addColumn(valueProvider).setFlexGrow(1).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {
@@ -390,7 +387,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public Column<EntityClass> addExpandingShortTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header,
 			final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		final Column<EntityClass> column = addColumn(valueProvider).setFlexGrow(1).setSortable(true).setResizable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {
@@ -401,7 +397,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 
 	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			try {
 				final Object idValue = valueProvider.apply(entity);
@@ -448,25 +443,21 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 
 	public Column<EntityClass> addIntegerColumn(final ValueProvider<EntityClass, Integer> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_INTEGER, key, 0);
 	}
 
 	public Column<EntityClass> addLongTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_LONG_TEXT, key, 0);
 	}
 
 	public Column<EntityClass> addReferenceColumn(final ValueProvider<EntityClass, String> valueProvider, final String header) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_REFERENCE, null, 0);
 	}
 
 	public Column<EntityClass> addShortTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
-		Check.notBlank(header, "Header cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
 	}
 
@@ -587,6 +578,27 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 	// ==================== IStateOwnerComponent Implementation ====================
 
+	@Override
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void drag_setDragEnabled(final boolean enabled) {
+		setRowsDraggable(enabled);
+	}
+
+	@Override
+	public void drag_setDropEnabled(final boolean enabled) {
+		if (enabled) {
+			setDropMode(GridDropMode.BETWEEN);
+		} else {
+			setDropMode(null);
+		}
+		// LOGGER.debug("[DragDebug] CGrid: Drop {} for grid id:{}", enabled ? "enabled" : "disabled", getId());
+	}
+
 	/** Ensures that the grid has a selected row when data is available. This method is called automatically when data changes and follows the coding
 	 * guideline that grids should always have a selected row. */
 	public void ensureSelectionWhenDataAvailable() {
@@ -631,12 +643,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		// Note: Do NOT call setupChildDragDropForwarding() here - CGrid already forwards
 		// Vaadin Grid events to IHasDragControl listeners via on_grid_dragStart(), on_grid_dragEnd(), on_grid_dragDrop()
 		// Calling setupChildDragDropForwarding() would create an infinite loop
-	}
-
-	@Override
-	public boolean drag_isDropAllowed(CDragStartEvent event) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	private Long normalizeId(final Object value) {
@@ -729,21 +735,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 
 	@SuppressWarnings ("unchecked")
 	public void setClazz(Class<?> class1) { clazz = (Class<EntityClass>) class1; }
-
-	@Override
-	public void drag_setDragEnabled(final boolean enabled) {
-		setRowsDraggable(enabled);
-	}
-
-	@Override
-	public void drag_setDropEnabled(final boolean enabled) {
-		if (enabled) {
-			setDropMode(GridDropMode.BETWEEN);
-		} else {
-			setDropMode(null);
-		}
-		// LOGGER.debug("[DragDebug] CGrid: Drop {} for grid id:{}", enabled ? "enabled" : "disabled", getId());
-	}
 
 	public void setDynamicHeight() {
 		setSizeUndefined();
