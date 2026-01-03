@@ -1901,3 +1901,243 @@ All services implementing this pattern MUST be tested for:
 - **Fail-fast validation** - Throw exceptions immediately when constraints violated
 - **Defensive cleanup** - Remove violations after save as safeguard
 - **Debug logging** - Use consistent prefixes like `[Validation]` for troubleshooting
+
+## Universal Filter Toolbar Pattern (Mandatory)
+
+### Overview
+
+The Universal Filter Toolbar Framework provides a composable, type-safe filtering system used throughout the application. This pattern MUST be used for all filtering UIs including kanban boards, grids, master-detail views, asset management, and budget filtering.
+
+**Location**: `tech.derbent.api.ui.component.filter` package
+
+**Documentation**: See `docs/development/universal-filter-toolbar-framework.md` for comprehensive usage guide.
+
+### Core Principles
+
+1. **Composition over Inheritance** - Build toolbars from reusable filter components
+2. **Automatic Value Persistence** - Filter selections persist across refreshes (enabled by default)
+3. **Fail-Fast Validation** - Component ID MUST be set before building toolbar
+4. **Dynamic Discovery** - Entity types auto-detected from data
+5. **Prefix Support** - Multiple toolbars in same view use storage ID prefixes to avoid conflicts
+
+### Mandatory Pattern
+
+#### ✅ CORRECT - Composable Filter Toolbar
+
+```java
+public class CMyFilterToolbar extends CUniversalFilterToolbar<MyEntity> {
+    
+    private final CSprintFilter sprintFilter;
+    private final CEntityTypeFilter entityTypeFilter;
+    private final CResponsibleUserFilter responsibleUserFilter;
+    
+    public CMyFilterToolbar() {
+        super();
+        
+        // CRITICAL: Set ID BEFORE adding filters (fail-fast check)
+        setId("myFilterToolbar");
+        
+        // Optional: Set prefix if multiple toolbars exist in same view
+        // setStorageIdPrefix("left_");  
+        
+        // Create and add filter components
+        sprintFilter = new CSprintFilter();
+        entityTypeFilter = new CEntityTypeFilter();
+        responsibleUserFilter = new CResponsibleUserFilter();
+        
+        addFilterComponent(sprintFilter);
+        addFilterComponent(entityTypeFilter);
+        addFilterComponent(responsibleUserFilter);
+        
+        // Build toolbar (automatically enables value persistence)
+        build();
+    }
+    
+    // Provide methods to update filter options dynamically
+    public void setAvailableSprints(List<CSprint> sprints, CSprint defaultSprint) {
+        Objects.requireNonNull(sprints, "Sprints list cannot be null");
+        sprintFilter.setAvailableSprints(sprints, defaultSprint);
+    }
+    
+    public void setAvailableItems(List<MyEntity> items) {
+        Objects.requireNonNull(items, "Items list cannot be null");
+        // Extract entities for type discovery
+        entityTypeFilter.setAvailableEntityTypes(items);
+    }
+}
+```
+
+#### ❌ INCORRECT - Old Complex Pattern
+
+```java
+// DON'T create custom filter toolbars with inner classes and manual logic
+public class CMyFilterToolbar extends CHorizontalLayout {
+    
+    // ❌ Inner class for type options
+    private static class TypeOption { }
+    
+    // ❌ Manual FilterCriteria class
+    public static class FilterCriteria {
+        private String type;
+        private String status;
+        // Manual getters/setters...
+    }
+    
+    // ❌ Manual ComboBox creation and wiring
+    private ComboBox<TypeOption> comboType;
+    private ComboBox<String> comboStatus;
+    
+    // ❌ 200+ lines of custom logic
+}
+```
+
+### Using Filter Criteria
+
+```java
+// In parent component
+filterToolbar.addFilterChangeListener(criteria -> {
+    // Get filter values using filter keys
+    Class<?> entityType = criteria.getValue(CEntityTypeFilter.FILTER_KEY);
+    CSprint sprint = criteria.getValue(CSprintFilter.FILTER_KEY);
+    ResponsibleFilterMode mode = criteria.getValue(CResponsibleUserFilter.FILTER_KEY);
+    
+    // Apply filters
+    List<MyEntity> filtered = applyFilters(allItems, entityType, sprint, mode);
+    refreshDisplay(filtered);
+});
+```
+
+### Multiple Toolbars in Same View
+
+When multiple filter toolbars exist in the same view (e.g., split screen), use storage ID prefixes:
+
+```java
+// Left toolbar
+leftToolbar = new CMyFilterToolbar();
+leftToolbar.setId("myFilterToolbar");
+leftToolbar.setStorageIdPrefix("left_");  // Prefix to avoid ID collision
+leftToolbar.build();
+
+// Right toolbar
+rightToolbar = new CMyFilterToolbar();
+rightToolbar.setId("myFilterToolbar");     // Same ID is OK with different prefix
+rightToolbar.setStorageIdPrefix("right_"); // Different prefix ensures unique storage IDs
+rightToolbar.build();
+```
+
+### Fail-Fast Requirements
+
+Filter toolbars MUST implement fail-fast validation:
+
+1. **Component ID Required**: Call `setId()` BEFORE `build()` - throws `IllegalStateException` if missing
+2. **Non-Null Lists**: All `setAvailable*()` methods throw `IllegalArgumentException` if null
+3. **Non-Null Components**: Filter components checked for null in `addFilterComponent()`
+
+```java
+// ✅ Fail-fast examples
+Objects.requireNonNull(items, "Items list cannot be null");
+Objects.requireNonNull(entityClass, "Entity class cannot be null");
+
+// Component ID validation (automatic in getStorageId())
+if (componentId == null || componentId.isBlank()) {
+    throw new IllegalStateException("Component ID must be set before building toolbar");
+}
+```
+
+### Available Filter Components
+
+Pre-built filter components in `tech.derbent.api.ui.component.filter`:
+
+| Component | Filter Key | Value Type | Purpose |
+|-----------|------------|------------|---------|
+| `CEntityTypeFilter` | `"entityType"` | `Class<?>` | Dynamic entity type discovery (Activity, Meeting, Sprint, etc.) |
+| `CSprintFilter` | `"sprint"` | `CSprint` | Sprint selection with color-aware dropdown |
+| `CResponsibleUserFilter` | `"responsibleUser"` | `ResponsibleFilterMode` | Ownership filtering (All items / My items) |
+
+### Creating Custom Filter Components
+
+To create a custom filter component, extend `CAbstractFilterComponent<T>`:
+
+```java
+public class CStatusFilter extends CAbstractFilterComponent<String> {
+    
+    public static final String FILTER_KEY = "status";
+    
+    private final ComboBox<String> comboBox;
+    
+    public CStatusFilter() {
+        super(FILTER_KEY);
+        comboBox = new ComboBox<>("Status");
+        comboBox.addValueChangeListener(event -> {
+            notifyChangeListeners(event.getValue());
+        });
+    }
+    
+    @Override
+    protected Component createComponent() {
+        return comboBox;
+    }
+    
+    @Override
+    protected void updateComponentValue(String value) {
+        comboBox.setValue(value);
+    }
+    
+    @Override
+    public void clearFilter() {
+        comboBox.clear();
+    }
+    
+    @Override
+    public void enableValuePersistence(String storageId) {
+        CValueStorageHelper.valuePersist_enable(
+            comboBox, 
+            storageId + "_" + FILTER_KEY,
+            value -> value,
+            value -> value
+        );
+    }
+    
+    // Custom configuration methods
+    public void setAvailableStatuses(Set<String> statuses) {
+        Objects.requireNonNull(statuses, "Statuses set cannot be null");
+        comboBox.setItems(statuses);
+    }
+}
+```
+
+### Migration from Old Pattern
+
+When migrating existing filter toolbars:
+
+1. **Identify filter needs**: What filters does the toolbar need?
+2. **Choose or create filter components**: Use existing or create custom
+3. **Extend CUniversalFilterToolbar**: Replace custom inheritance
+4. **Set ID in constructor**: Call `setId()` before adding filters
+5. **Add filter components**: Use `addFilterComponent()`
+6. **Call build()**: Replaces manual clear button and persistence setup
+7. **Update parent component**: Use `FilterCriteria.getValue(FILTER_KEY)` instead of custom getters
+
+### Checklist for Filter Toolbar Implementation
+
+- [ ] Extends `CUniversalFilterToolbar<T>` or `CAbstractFilterToolbar<T>`
+- [ ] Calls `setId("uniqueId")` in constructor BEFORE adding filters
+- [ ] Adds prefix if multiple toolbars in same view: `setStorageIdPrefix("prefix_")`
+- [ ] Uses composition: creates filter components and adds with `addFilterComponent()`
+- [ ] Calls `build()` after adding all filters
+- [ ] Provides `setAvailable*()` methods with fail-fast null checks
+- [ ] Uses `Objects.requireNonNull()` for all method parameters that cannot be null
+- [ ] Accesses filter values via `criteria.getValue(FilterKey.FILTER_KEY)`
+- [ ] Does NOT call `valuePersist_enable()` manually (automatic in `build()`)
+
+### Related Documentation
+
+- **Comprehensive Guide**: `docs/development/universal-filter-toolbar-framework.md`
+- **UI Component Standards**: `docs/architecture/ui-css-coding-standards.md`
+- **Value Persistence Pattern**: `docs/architecture/value-persistence-pattern.md`
+
+---
+
+**Version**: 1.1  
+**Last Updated**: 2026-01-03  
+**Pattern Added**: Universal Filter Toolbar Framework
