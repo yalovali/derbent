@@ -98,6 +98,51 @@ public abstract class CAbstractFilterComponent<T> implements IFilterComponent<T>
 		}
 	}
 
+	/**
+	 * Enables automatic value persistence for this filter component.
+	 * <p>
+	 * <b>Default Implementation:</b> Does nothing. Subclasses that want to support value
+	 * persistence MUST override this method and delegate to 
+	 * {@link tech.derbent.api.utils.CValueStorageHelper#valuePersist_enable}.
+	 * </p>
+	 * <p>
+	 * <b>Why Override:</b> Value persistence allows filter selections to survive:
+	 * <ul>
+	 * <li>Component refreshes (e.g., when updating available options)</li>
+	 * <li>Page refreshes (browser F5)</li>
+	 * <li>Navigation away and back to the same view</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * <b>Implementation Template:</b>
+	 * <pre>
+	 * &#64;Override
+	 * public void enableValuePersistence(final String storageId) {
+	 *     CValueStorageHelper.valuePersist_enable(
+	 *         myComboBox,
+	 *         storageId + "_" + FILTER_KEY,
+	 *         storedValue -&gt; {
+	 *             // Convert the stored string back to your option type
+	 *             // Return null if the value is no longer valid
+	 *             return findOptionByIdentifier(storedValue);
+	 *         }
+	 *     );
+	 * }
+	 * </pre>
+	 * </p>
+	 * <p>
+	 * <b>Key Points for Implementers:</b>
+	 * <ol>
+	 * <li>Use {@code storageId + "_" + FILTER_KEY} as the persistence key</li>
+	 * <li>The converter function receives the stored string (from toString())</li>
+	 * <li>Return null from converter if the stored value is no longer valid</li>
+	 * <li>CValueStorageHelper handles all the complexity (save on change, restore on attach)</li>
+	 * </ol>
+	 * </p>
+	 * 
+	 * @param storageId The base storage identifier from the parent toolbar
+	 * @see tech.derbent.api.utils.CValueStorageHelper#valuePersist_enable(com.vaadin.flow.component.combobox.ComboBox, String, tech.derbent.api.utils.CValueStorageHelper.ValueConverter)
+	 */
 	@Override
 	public void enableValuePersistence(final String storageId) {
 		// Default implementation does nothing

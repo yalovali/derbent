@@ -14,34 +14,128 @@ import tech.derbent.base.session.service.ISessionService;
 
 /** CValueStorageHelper - Utility for enabling automatic value persistence on UI components.
  * <p>
- * This helper integrates with components that implement IHasSelectedValueStorage to provide transparent, automatic saving and restoring of component
- * values across refreshes and page reloads. Once enabled, the component will automatically:
+ * This helper provides transparent, automatic saving and restoring of component values across
+ * refreshes and page reloads. Once enabled, the component will automatically:
  * <ul>
- * <li>Save its value whenever it changes</li>
+ * <li>Save its value whenever the user changes it (not on programmatic changes)</li>
  * <li>Restore its value when attached to the UI</li>
- * <li>Clean up stored values when detached (optional)</li>
+ * <li>Handle conversion between component values and storage strings</li>
  * </ul>
  * </p>
+ * 
+ * <h3>Key Benefits:</h3>
+ * <ul>
+ * <li><b>Automatic</b> - No manual save/restore calls needed</li>
+ * <li><b>Transparent</b> - Works seamlessly with Vaadin's component lifecycle</li>
+ * <li><b>User-focused</b> - Only saves user changes, not programmatic updates</li>
+ * <li><b>Simple</b> - One method call to enable full persistence</li>
+ * </ul>
+ * 
+ * <h3>When to Use:</h3>
+ * <p>
+ * <b>Use CValueStorageHelper for:</b>
+ * <ul>
+ * <li>Standard Vaadin components (ComboBox, TextField, etc.)</li>
+ * <li>Simple value persistence (single value per component)</li>
+ * <li>Filter components in toolbars</li>
+ * <li>Any component where automatic save-on-change is appropriate</li>
+ * </ul>
+ * </p>
+ * <p>
+ * <b>Use {@link tech.derbent.api.interfaces.IHasSelectedValueStorage} instead for:</b>
+ * <ul>
+ * <li>Complex components with multiple related values</li>
+ * <li>Custom save/restore timing requirements</li>
+ * <li>Non-standard state that doesn't fit the value model</li>
+ * </ul>
+ * </p>
+ * 
  * <h3>Supported Components:</h3>
  * <ul>
- * <li>ComboBox - Stores selected item (by string representation)</li>
- * <li>TextField - Stores entered text value</li>
- * <li>Any component that implements HasValue and IHasSelectedValueStorage</li>
+ * <li><b>ComboBox</b> - Stores selected item (by toString() / custom converter)</li>
+ * <li><b>TextField</b> - Stores entered text value</li>
+ * <li><b>Any HasValue component</b> - With custom serializer/converter</li>
  * </ul>
+ * 
  * <h3>Usage Examples:</h3>
- *
+ * <h4>Example 1: ComboBox with Simple Enum</h4>
  * <pre>
- * // Enable automatic persistence on a ComboBox
- * ComboBox&lt;EntityType&gt; comboBox = new ComboBox&lt;&gt;("Type");
- * CValueStorageHelper.enableAutoPersistence(comboBox, storageId, value -&gt; value.getDisplayName(), // Convert to string
- * 		name -&gt; findEntityType(name)); // Convert from string
- * // Enable automatic persistence on a TextField
- * TextField nameFilter = new TextField("Name");
- * CValueStorageHelper.enableAutoPersistence(nameFilter, "filter_name");
+ * ComboBox&lt;ResponsibleFilterMode&gt; comboBox = new ComboBox&lt;&gt;("Responsible");
+ * comboBox.setItems(ResponsibleFilterMode.values());
+ * 
+ * // Enable persistence - uses toString() for save, valueOf() for restore
+ * CValueStorageHelper.valuePersist_enable(
+ *     comboBox,
+ *     "filter_responsible",
+ *     storedString -&gt; {
+ *         try {
+ *             return ResponsibleFilterMode.valueOf(storedString);
+ *         } catch (IllegalArgumentException e) {
+ *             return ResponsibleFilterMode.ALL; // Safe default
+ *         }
+ *     }
+ * );
  * </pre>
+ * 
+ * <h4>Example 2: ComboBox with Complex Objects</h4>
+ * <pre>
+ * ComboBox&lt;EntityType&gt; comboBox = new ComboBox&lt;&gt;("Type");
+ * comboBox.setItems(availableTypes);
+ * comboBox.setItemLabelGenerator(EntityType::getDisplayName);
+ * 
+ * // Enable persistence - stores by entity class name
+ * CValueStorageHelper.valuePersist_enable(
+ *     comboBox,
+ *     "filter_entityType",
+ *     className -&gt; {
+ *         // Find matching type in current items
+ *         return comboBox.getListDataView().getItems()
+ *             .filter(type -&gt; type.getEntityClass().getName().equals(className))
+ *             .findFirst()
+ *             .orElse(null);
+ *     }
+ * );
+ * </pre>
+ * 
+ * <h4>Example 3: TextField</h4>
+ * <pre>
+ * TextField nameFilter = new TextField("Name");
+ * 
+ * // Enable persistence - simple string storage
+ * CValueStorageHelper.valuePersist_enable(nameFilter, "filter_name");
+ * </pre>
+ * 
+ * <h4>Example 4: Custom Serialization</h4>
+ * <pre>
+ * ComboBox&lt;Project&gt; comboBox = new ComboBox&lt;&gt;("Project");
+ * 
+ * // Enable persistence with custom serializer and converter
+ * CValueStorageHelper.valuePersist_enable(
+ *     comboBox,
+ *     "filter_project",
+ *     project -&gt; project.getId().toString(),  // Save as ID
+ *     idString -&gt; findProjectById(Long.parseLong(idString))  // Restore by ID
+ * );
+ * </pre>
+ * 
+ * <h3>How It Works:</h3>
+ * <ol>
+ * <li><b>Setup:</b> Call valuePersist_enable() with component, storage ID, and converter</li>
+ * <li><b>Save:</b> When user changes value, automatically saves toString() to session</li>
+ * <li><b>Restore:</b> When component attaches, automatically restores using converter</li>
+ * <li><b>Validation:</b> Converter can return null if stored value is no longer valid</li>
+ * </ol>
+ * 
+ * <h3>Important Notes:</h3>
+ * <ul>
+ * <li><b>User Changes Only:</b> Only saves when event.isFromClient() is true</li>
+ * <li><b>Null Handling:</b> Converter should return null for invalid stored values</li>
+ * <li><b>Storage ID:</b> Must be unique per component within the session</li>
+ * <li><b>Initial Value:</b> If no stored value exists, current value is saved as default</li>
+ * </ul>
  *
- * @see IHasSelectedValueStorage
- * @see ISessionService */
+ * @see tech.derbent.api.interfaces.IHasSelectedValueStorage
+ * @see tech.derbent.base.session.service.ISessionService */
 public class CValueStorageHelper {
 
 	/** Converter interface for transforming values to/from storage format.
