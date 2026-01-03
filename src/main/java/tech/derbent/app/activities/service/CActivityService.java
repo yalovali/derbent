@@ -94,25 +94,38 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// Get current project from session
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
+		final CUser currentUser = sessionService.getActiveUser()
+				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize activity"));
+		
 		// Initialize workflow-based status and type
 		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
+		
 		// Initialize activity-specific fields with sensible defaults
 		final List<CActivityPriority> priorities = activityPriorityService.listByProject(currentProject);
 		Check.notEmpty(priorities, "No activity priorities available in project " + currentProject.getName() + " - cannot initialize new activity");
 		entity.setPriority(priorities.get(0));
 		LOGGER.debug("Assigned default priority: {}", priorities.get(0).getName());
-		// Budget tracking defaults
+		
+		// Budget tracking defaults (business event fields stay in CActivity)
 		entity.setActualCost(BigDecimal.ZERO);
 		entity.setEstimatedCost(BigDecimal.ZERO);
 		entity.setHourlyRate(BigDecimal.ZERO);
-		// Time tracking defaults
 		entity.setActualHours(BigDecimal.ZERO);
-		entity.setProgressPercentage(0);
-		// Date defaults: start today, due in 7 days
-		entity.setStartDate(LocalDate.now(clock));
-		entity.setDueDate(LocalDate.now(clock).plusDays(7));
-		entity.setCompletionDate(null); // Not completed yet
-		LOGGER.debug("Activity initialization complete with default values");
+		
+		// Create sprint item for progress tracking (composition pattern)
+		// Progress fields (storyPoint, dates, responsible, progress%) live in CSprintItem
+		final CSprintItem sprintItem = new CSprintItem();
+		sprintItem.setSprint(null); // null = backlog
+		sprintItem.setItemOrder(0); // Will be set properly when added to a sprint
+		sprintItem.setProgressPercentage(0);
+		sprintItem.setStartDate(LocalDate.now(clock));
+		sprintItem.setDueDate(LocalDate.now(clock).plusDays(7));
+		sprintItem.setCompletionDate(null); // Not completed yet
+		sprintItem.setStoryPoint(0L);
+		sprintItem.setResponsible(currentUser);
+		entity.setSprintItem(sprintItem);
+		
+		LOGGER.debug("Activity initialization complete with sprint item for progress tracking");
 	}
 
 	public List<CActivity> listByUser() {
