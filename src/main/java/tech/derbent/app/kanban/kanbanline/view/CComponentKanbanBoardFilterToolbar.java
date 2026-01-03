@@ -1,6 +1,7 @@
 package tech.derbent.app.kanban.kanbanline.view;
 
 import java.util.List;
+import java.util.Objects;
 import tech.derbent.api.ui.component.filter.CEntityTypeFilter;
 import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
 import tech.derbent.api.ui.component.filter.CSprintFilter;
@@ -80,13 +81,21 @@ public class CComponentKanbanBoardFilterToolbar extends CUniversalFilterToolbar<
 	 * <p>
 	 * This method automatically discovers all unique entity types (Activity, Meeting, Sprint, etc.)
 	 * from the provided sprint items and populates the entity type filter dropdown.
+	 * Uses ISprintableItem interface for type-safe entity extraction.
 	 * </p>
 	 * 
 	 * @param items Sprint items to analyze for entity types
 	 */
 	public void setAvailableItems(final List<CSprintItem> items) {
-		// Extract actual entities from sprint items
-		final List<Object> entities = items.stream().map(CSprintItem::getItem).filter(item -> item != null).map(item -> (Object) item)
+		Objects.requireNonNull(items, "Sprint items list cannot be null");
+		
+		// Extract actual ISprintableItem entities from sprint items
+		// Use getItem() which returns ISprintableItem interface
+		final List<Object> entities = items.stream()
+				.filter(Objects::nonNull)
+				.map(CSprintItem::getItem)
+				.filter(Objects::nonNull)
+				.map(item -> (Object) item)
 				.toList();
 
 		// Update entity type filter with discovered types

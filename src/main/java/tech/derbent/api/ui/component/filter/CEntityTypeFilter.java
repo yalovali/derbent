@@ -89,6 +89,10 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 
 	/**
 	 * Creates an entity type filter.
+	 * <p>
+	 * The filter is initialized with "All types" option by default.
+	 * Call {@link #setAvailableEntityTypes(List)} to populate with actual entity types.
+	 * </p>
 	 */
 	public CEntityTypeFilter() {
 		super(FILTER_KEY);
@@ -134,11 +138,15 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 	 * <li>Individual entity type options (Activity, Meeting, Sprint, etc.)</li>
 	 * </ul>
 	 * </p>
+	 * <p>
+	 * <strong>FAIL-FAST</strong>: Throws IllegalArgumentException if items list is null.
+	 * </p>
 	 * 
-	 * @param items List of entities to analyze for types
+	 * @param items List of entities to analyze for types (must not be null)
+	 * @throws IllegalArgumentException if items is null
 	 */
 	public void setAvailableEntityTypes(final List<?> items) {
-		Check.notNull(items, "Items cannot be null");
+		Objects.requireNonNull(items, "Items list cannot be null for entity type discovery");
 		updateTypeOptions(items);
 	}
 
@@ -196,12 +204,21 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 
 	/**
 	 * Resolves a display label for an entity class.
+	 * <p>
+	 * Tries to get the registered entity title from CEntityRegistry first.
+	 * Falls back to simple class name if not registered.
+	 * </p>
+	 * <p>
+	 * <strong>FAIL-FAST</strong>: Throws IllegalArgumentException if entityClass is null.
+	 * </p>
 	 * 
-	 * @param entityClass The entity class
+	 * @param entityClass The entity class (must not be null)
 	 * @return The display label (from entity registry or simple name)
+	 * @throws IllegalArgumentException if entityClass is null
 	 */
 	private static String resolveEntityTypeLabel(final Class<?> entityClass) {
-		Check.notNull(entityClass, "Entity class cannot be null");
+		Objects.requireNonNull(entityClass, "Entity class cannot be null for label resolution");
+		
 		final String registeredTitle = CEntityRegistry.getEntityTitleSingular(entityClass);
 		if (registeredTitle != null && !registeredTitle.isBlank()) {
 			return registeredTitle;

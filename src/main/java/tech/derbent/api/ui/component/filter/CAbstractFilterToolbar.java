@@ -73,8 +73,15 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 	/** Flag to track if clear button should be shown. */
 	private boolean showClearButton = true;
 
+	/** Optional storage ID prefix to avoid conflicts when multiple toolbars exist in same view. */
+	private String storageIdPrefix = "";
+
 	/**
 	 * Creates the abstract filter toolbar.
+	 * <p>
+	 * <strong>CRITICAL</strong>: Subclasses MUST call {@code setId("uniqueId")} in their constructor
+	 * before adding filter components to ensure value persistence works correctly.
+	 * </p>
 	 */
 	protected CAbstractFilterToolbar() {
 		super();
@@ -145,9 +152,21 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 
 	/**
 	 * Builds the clear button after all filter components are added.
-	 * This should be called by concrete implementations after adding all filters.
+	 * <p>
+	 * This method MUST be called by concrete implementations after adding all filters.
+	 * It automatically enables value persistence for all filter components.
+	 * </p>
+	 * <p>
+	 * <strong>FAIL-FAST</strong>: Throws IllegalStateException if component ID is not set.
+	 * </p>
+	 * 
+	 * @throws IllegalStateException if component ID is not set before calling this method
 	 */
 	protected void buildClearButton() {
+		// Always enable value persistence when building the toolbar
+		// This ensures persistence is never forgotten
+		valuePersist_enable();
+		
 		if (!showClearButton) {
 			return;
 		}
@@ -202,31 +221,65 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 		return filterComponents;
 	}
 
+	/**
+	 * Sets an optional prefix for storage IDs to avoid conflicts when multiple filter
+	 * toolbars exist in the same view.
+	 * <p>
+	 * Example: If two filter toolbars exist in a split screen view, use different prefixes:
+	 * <ul>
+	 * <li>toolbar1.setStorageIdPrefix("left_")</li>
+	 * <li>toolbar2.setStorageIdPrefix("right_")</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @param prefix Prefix to add to storage IDs (can be empty string, will be sanitized)
+	 * @return This toolbar for method chaining
+	 */
+	public CAbstractFilterToolbar<T> setStorageIdPrefix(final String prefix) {
+		this.storageIdPrefix = prefix != null ? prefix : "";
+		return this;
+	}
+
+	/**
+	 * Gets the storage ID prefix.
+	 * 
+	 * @return The storage ID prefix (never null, may be empty string)
+	 */
+	public String getStorageIdPrefix() {
+		return storageIdPrefix;
+	}
+
 	@Override
 	public String getStorageId() {
 		final String componentId = getId().orElse(null);
 		if (componentId == null || componentId.isBlank()) {
 			throw new IllegalStateException("Component ID must be set for value persistence. "
-					+ "Call setId(\"uniqueId\") before enabling persistence.");
+					+ "Call setId(\"uniqueId\") in constructor before adding filter components. "
+					+ "Example: setId(\"kanbanBoardFilterToolbar\");");
 		}
-		return "filterToolbar_" + componentId;
+		return "filterToolbar_" + storageIdPrefix + componentId;
 	}
 
 	/**
 	 * Enables automatic value persistence for all filter components.
 	 * <p>
-	 * This method should be called by the parent component to enable automatic
-	 * saving and restoring of filter selections across refreshes.
+	 * This method is called automatically by {@link #buildClearButton()} to ensure
+	 * value persistence is always enabled. It can also be called manually if needed.
 	 * </p>
 	 * <p>
-	 * <strong>IMPORTANT</strong>: Before calling this method, the component ID
-	 * must be set using {@code setId("uniqueId")}.
+	 * <strong>FAIL-FAST</strong>: Throws IllegalStateException if component ID is not set.
 	 * </p>
+	 * 
+	 * @throws IllegalStateException if component ID is not set before calling this method
 	 */
 	public void valuePersist_enable() {
-		// Enable persistence for all filter components
+		// Fail-fast validation (will throw if ID not set)
 		final String storageId = getStorageId();
+		
+		Objects.requireNonNull(filterComponents, "Filter components list cannot be null");
+		
 		for (final IFilterComponent<?> component : filterComponents) {
+			Objects.requireNonNull(component, "Filter component cannot be null in list");
 			component.enableValuePersistence(storageId);
 		}
 		LOGGER.debug("Value persistence enabled for filter toolbar with storage ID: {}", storageId);
