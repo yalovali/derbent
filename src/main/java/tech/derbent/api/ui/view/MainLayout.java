@@ -69,8 +69,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM, Gap.SMALL);
 		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
 		// Original header content (logo and app name) - version removed
-		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CUBES.create(), IconSize.LARGE);
+		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CALENDAR_BRIEFCASE.create(), IconSize.LARGE);
 		icon.getStyle().set("color", "var(--lumo-primary-color)");
+		icon.getStyle().set("min-width", "var(--lumo-icon-size-l)");
+		icon.getStyle().set("min-height", "var(--lumo-icon-size-l)");
 		slidingHeader.add(icon);
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
@@ -206,8 +208,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private Div createHeader() {
 		// Application logo and branding
-		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.HOME.create(), IconSize.LARGE);
+		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CALENDAR_BRIEFCASE.create(), IconSize.LARGE);
 		icon.getStyle().set("color", "var(--lumo-primary-color)");
+		icon.getStyle().set("min-width", "var(--lumo-icon-size-l)");
+		icon.getStyle().set("min-height", "var(--lumo-icon-size-l)");
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 		final var header = new Div(icon, appName);
