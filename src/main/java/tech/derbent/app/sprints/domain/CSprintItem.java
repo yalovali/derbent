@@ -1,5 +1,6 @@
 package tech.derbent.app.sprints.domain;
 
+import java.time.LocalDate;
 import com.vaadin.flow.component.icon.Icon;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -19,9 +20,12 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.IOrderedEntity;
+import tech.derbent.base.users.domain.CUser;
 
-/** CSprintItem - Join entity for Sprint-ProjectItem relationships. Represents an item (Activity, Meeting, etc.) included in a sprint with ordering.
- * Similar to CDetailLines pattern for ordered one-to-many relationships. Stores only the item ID and loads the actual item dynamically at runtime. */
+/** CSprintItem - Progress tracking entity for Sprint-ProjectItem relationships. 
+ * Represents an item (Activity, Meeting, etc.) with its progress-related data (story points, dates, responsible person, progress %).
+ * The business event entity (CActivity, CMeeting) contains event details while CSprintItem contains progress tracking.
+ * When sprint is null, the item is in the backlog. */
 @Entity
 @Table (name = "csprint_items")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_item_id"))
@@ -66,14 +70,65 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	private String itemType;
 	@Transient
 	private Long kanbanColumnId;
+	
+	// Sprint reference - nullable to support backlog items (sprint = null means in backlog)
 	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "sprint_id", nullable = false)
-	@NotNull (message = "Sprint reference is requ`ired")
+	@JoinColumn (name = "sprint_id", nullable = true)
 	@AMetaData (
-			displayName = "Sprint", required = true, readOnly = false, description = "The sprint this item belongs to", hidden = false,
+			displayName = "Sprint", required = false, readOnly = false, 
+			description = "The sprint this item belongs to (null = backlog)", hidden = false,
 			dataProviderBean = "CSprintService"
 	)
 	private CSprint sprint;
+	
+	// Progress tracking fields - moved from CActivity/CMeeting
+	
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Story Points", required = false, readOnly = false, defaultValue = "0",
+			description = "Estimated effort or complexity in story points", hidden = false
+	)
+	private Long storyPoint;
+	
+	@Column (nullable = true)
+	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
+	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
+	@AMetaData (
+			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0", 
+			description = "Completion percentage (0-100)", hidden = false
+	)
+	private Integer progressPercentage = 0;
+	
+	@Column (name = "start_date", nullable = true)
+	@AMetaData (
+			displayName = "Start Date", required = false, readOnly = false, 
+			description = "Planned or actual start date", hidden = false
+	)
+	private LocalDate startDate;
+	
+	@Column (name = "due_date", nullable = true)
+	@AMetaData (
+			displayName = "Due Date", required = false, readOnly = false, 
+			description = "Expected completion date", hidden = false
+	)
+	private LocalDate dueDate;
+	
+	@Column (name = "completion_date", nullable = true)
+	@AMetaData (
+			displayName = "Completion Date", required = false, readOnly = true, 
+			description = "Actual completion date", hidden = false
+	)
+	private LocalDate completionDate;
+	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "responsible_id", nullable = true)
+	@AMetaData (
+			displayName = "Responsible", required = false, readOnly = false,
+			description = "Person responsible for completing this work", hidden = false, 
+			dataProviderBean = "CUserService"
+	)
+	private CUser responsible;
+	
 	@Transient
 	@AMetaData (
 			displayName = "Status", required = false, readOnly = false, description = "Current status of the item", hidden = false,
@@ -174,6 +229,49 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 	}
 
 	public void setSprint(final CSprint sprint) { this.sprint = sprint; }
+	
+	public Long getStoryPoint() { return storyPoint; }
+	
+	public void setStoryPoint(final Long storyPoint) { 
+		this.storyPoint = storyPoint; 
+	}
+	
+	public Integer getProgressPercentage() { return progressPercentage != null ? progressPercentage : 0; }
+	
+	public void setProgressPercentage(final Integer progressPercentage) {
+		this.progressPercentage = progressPercentage != null ? progressPercentage : 0;
+		// Auto-set completion date if progress reaches 100%
+		if (progressPercentage != null && progressPercentage >= 100 && completionDate == null) {
+			completionDate = LocalDate.now();
+		}
+	}
+	
+	public LocalDate getStartDate() { return startDate; }
+	
+	public void setStartDate(final LocalDate startDate) { 
+		this.startDate = startDate; 
+	}
+	
+	public LocalDate getDueDate() { return dueDate; }
+	
+	public void setDueDate(final LocalDate dueDate) { 
+		this.dueDate = dueDate; 
+	}
+	
+	public LocalDate getCompletionDate() { return completionDate; }
+	
+	public void setCompletionDate(final LocalDate completionDate) {
+		this.completionDate = completionDate;
+		if (completionDate != null && progressPercentage != null && progressPercentage < 100) {
+			progressPercentage = 100;
+		}
+	}
+	
+	public CUser getResponsible() { return responsible; }
+	
+	public void setResponsible(final CUser responsible) { 
+		this.responsible = responsible; 
+	}
 
 	@Override
 	public String toString() {
