@@ -55,10 +55,14 @@ public class CLabelEntity extends Div {
 			return;
 		}
 		Check.instanceOf(entity, IHasIcon.class, "Entity must implement IHasIcon to apply icon color");
-		final String color = getColorForEntity(entity);
-		icon.getStyle().set("width", "24px").set("height", "24px").set("flex-shrink", "0");
-		if (color != null && !color.isBlank()) {
-			icon.getStyle().set("color", color);
+		try {
+			final String color = CColorUtils.getColorFromEntity(entity);
+			icon.getStyle().set("width", "24px").set("height", "24px").set("flex-shrink", "0");
+			if (color != null && !color.isBlank()) {
+				icon.getStyle().set("color", color);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not get color for entity icon: {}", e.getMessage());
 		}
 	}
 
@@ -226,23 +230,35 @@ public class CLabelEntity extends Div {
 		return label;
 	}
 
-	/** Gets the color for an entity based on its type and interfaces.
-	 * @param entity the entity
-	 * @return the color hex code or null */
-	private static String getColorForEntity(final CEntityDB<?> entity) {
-		if (entity == null) {
-			return null;
+	/** Creates a compact user label with abbreviated name for space-constrained displays.
+	 * Displays only first name with avatar, truncating long names to 12 characters.
+	 * @param user the user to display (can be null)
+	 * @return a CLabelEntity with compact user display */
+	public static CLabelEntity createCompactUserLabel(final CUser user) {
+		final CLabelEntity label = new CLabelEntity();
+		if (user == null) {
+			label.setText("No user");
+			label.getStyle().set("color", "#666").set("font-style", "italic");
+			return label;
 		}
-		try {
-			// Check IHasIcon interface first
-			if (entity instanceof IHasColor) {
-				return ((IHasColor) entity).getColor();
-			}
-			return "";
-		} catch (final Exception e) {
-			LOGGER.debug("Could not get color for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
-			return null;
+		
+		label.add(createUserAvatar(user, "16px"));
+		
+		String displayName = user.getName();
+		if (displayName != null && displayName.length() > 15) {
+			displayName = displayName.substring(0, 12) + "...";
 		}
+		
+		final Span nameSpan = new Span("👤 " + displayName);
+		nameSpan.getStyle()
+			.set("font-size", "11px")
+			.set("color", "#666")
+			.set("display", "inline-flex")
+			.set("align-items", "center")
+			.set("gap", "2px");
+		label.add(nameSpan);
+		
+		return label;
 	}
 
 	/** Default constructor. */
@@ -308,18 +324,26 @@ public class CLabelEntity extends Div {
 				return;
 			}
 			if (entity instanceof IHasColor && showIconColor) {
-				final String color = getColorForEntity(entity);
-				getStyle().set("background-color", color);
-				getStyle().set("color", CColorUtils.getContrastTextColor(color));
-				getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
+				try {
+					final String color = CColorUtils.getColorFromEntity(entity);
+					getStyle().set("background-color", color);
+					getStyle().set("color", CColorUtils.getContrastTextColor(color));
+					getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
+				} catch (final Exception e) {
+					LOGGER.debug("Could not get color for entity: {}", e.getMessage());
+				}
 			}
 			if (entity instanceof CUser && showIconColor) {
 				add(createUserAvatar((CUser) entity));
 			} else if (entity instanceof IHasIcon && showIconColor) {
 				final Icon icon = CColorUtils.getIconForEntity(entity);
 				CColorUtils.styleIcon(icon);
-				final String color = getColorForEntity(entity);
-				icon.getStyle().set("color", CColorUtils.getContrastTextColor(color));
+				try {
+					final String color = CColorUtils.getColorFromEntity(entity);
+					icon.getStyle().set("color", CColorUtils.getContrastTextColor(color));
+				} catch (final Exception e) {
+					LOGGER.debug("Could not get color for entity icon: {}", e.getMessage());
+				}
 				add(icon);
 			}
 			// Add text content
