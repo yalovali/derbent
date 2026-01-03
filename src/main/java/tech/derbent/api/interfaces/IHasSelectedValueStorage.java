@@ -7,27 +7,56 @@ package tech.derbent.api.interfaces;
  * across refreshes and page reloads. The values are stored in the user's VaadinSession using
  * a unique identifier.
  * </p>
- * <h3>Use Cases:</h3>
+ * 
+ * <h3>When to Use This Interface:</h3>
+ * <p>
+ * <b>Use IHasSelectedValueStorage when:</b>
  * <ul>
- * <li>ComboBox selections in filter toolbars (entity type, status, etc.)</li>
- * <li>TextField filter values that should persist during grid refreshes</li>
- * <li>Any UI component where user selections should be maintained across component refreshes</li>
+ * <li>You need manual control over save/restore logic</li>
+ * <li>You have complex state that can't be reduced to a single value</li>
+ * <li>You need custom timing for save/restore operations</li>
  * </ul>
- * <h3>Usage Pattern:</h3>
+ * </p>
+ * <p>
+ * <b>Use {@link tech.derbent.api.utils.CValueStorageHelper} instead when:</b>
+ * <ul>
+ * <li>You have a standard Vaadin component (ComboBox, TextField)</li>
+ * <li>You want automatic save on change, restore on attach</li>
+ * <li>You can convert your value to/from a String</li>
+ * </ul>
+ * <b>Note:</b> Most filter components should use CValueStorageHelper rather than implementing
+ * this interface directly, as it provides automatic persistence with less code.
+ * </p>
+ * 
+ * <h3>Use Cases for This Interface:</h3>
+ * <ul>
+ * <li>Complex components with multiple sub-components that need coordinated persistence</li>
+ * <li>Components that need to persist non-standard state (e.g., expanded tree nodes)</li>
+ * <li>Components where you need to customize when persistence happens</li>
+ * </ul>
+ * 
+ * <h3>Usage Pattern (Manual Implementation):</h3>
  * <pre>
- * public class CComponentEntitySelection implements IHasSelectedValueStorage {
- *     private ComboBox&lt;EntityTypeConfig&lt;?&gt;&gt; comboBoxEntityType;
+ * public class CComplexComponent implements IHasSelectedValueStorage {
+ *     &#64;Autowired
+ *     private ISessionService sessionService;
+ *     
+ *     private ComboBox&lt;EntityType&gt; comboBoxEntityType;
+ *     private TextField textFieldFilter;
  *
  *     &#64;Override
  *     public String getStorageId() {
- *         return "entitySelection_" + getId().orElse("default");
+ *         return "complexComponent_" + getId().orElse("default");
  *     }
  *
  *     &#64;Override
  *     public void saveCurrentValue() {
- *         EntityTypeConfig&lt;?&gt; currentValue = comboBoxEntityType.getValue();
- *         if (currentValue != null) {
- *             sessionService.setSessionValue(getStorageId(), currentValue.getDisplayName());
+ *         // Save all component state as JSON or delimited string
+ *         EntityType type = comboBoxEntityType.getValue();
+ *         String filter = textFieldFilter.getValue();
+ *         if (type != null) {
+ *             String state = type.getName() + "|" + filter;
+ *             sessionService.setSessionValue(getStorageId(), state);
  *         }
  *     }
  *
@@ -35,12 +64,30 @@ package tech.derbent.api.interfaces;
  *     public void restoreCurrentValue() {
  *         Optional&lt;String&gt; storedValue = sessionService.getSessionValue(getStorageId());
  *         if (storedValue.isPresent()) {
- *             // Find matching entity type and set it
- *             entityTypes.stream()
- *                 .filter(config -&gt; config.getDisplayName().equals(storedValue.get()))
- *                 .findFirst()
- *                 .ifPresent(comboBoxEntityType::setValue);
+ *             String[] parts = storedValue.get().split("\\|");
+ *             // Restore each component's state
+ *             findEntityType(parts[0]).ifPresent(comboBoxEntityType::setValue);
+ *             if (parts.length &gt; 1) {
+ *                 textFieldFilter.setValue(parts[1]);
+ *             }
  *         }
+ *     }
+ * }
+ * </pre>
+ * 
+ * <h3>Usage Pattern (Using CValueStorageHelper - Preferred):</h3>
+ * <pre>
+ * public class CSimpleFilter extends CAbstractFilterComponent&lt;EntityType&gt; {
+ *     private ComboBox&lt;EntityType&gt; comboBox;
+ *     
+ *     &#64;Override
+ *     public void enableValuePersistence(String storageId) {
+ *         // Much simpler - no need to implement IHasSelectedValueStorage
+ *         CValueStorageHelper.valuePersist_enable(
+ *             comboBox,
+ *             storageId + "_entityType",
+ *             name -&gt; findEntityType(name).orElse(null)
+ *         );
  *     }
  * }
  * </pre>

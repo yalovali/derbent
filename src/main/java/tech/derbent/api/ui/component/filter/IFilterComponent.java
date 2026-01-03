@@ -56,9 +56,44 @@ public interface IFilterComponent<T> {
 	void addChangeListener(Consumer<T> listener);
 
 	/**
-	 * Enables value persistence for this filter component.
+	 * Enables automatic value persistence for this filter component.
+	 * <p>
+	 * When enabled, the filter's selected value is automatically:
+	 * <ul>
+	 * <li>Saved to session storage whenever the user changes it</li>
+	 * <li>Restored from session storage when the component is attached to the UI</li>
+	 * <li>Preserved across page refreshes, navigation, and component recreations</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * <b>Implementation Pattern:</b><br>
+	 * Most filter components should delegate to {@link tech.derbent.api.utils.CValueStorageHelper#valuePersist_enable}
+	 * with a converter function that knows how to restore the value from a string.
+	 * </p>
+	 * <p>
+	 * <b>Example Implementation:</b>
+	 * <pre>
+	 * &#64;Override
+	 * public void enableValuePersistence(final String storageId) {
+	 *     CValueStorageHelper.valuePersist_enable(
+	 *         comboBox, 
+	 *         storageId + "_" + FILTER_KEY,
+	 *         storedString -&gt; {
+	 *             // Convert stored string back to the option type
+	 *             return findOptionByString(storedString);
+	 *         }
+	 *     );
+	 * }
+	 * </pre>
+	 * </p>
+	 * <p>
+	 * <b>Storage ID Convention:</b><br>
+	 * The storage ID should be unique within the filter toolbar. Common pattern:
+	 * {@code storageId + "_" + FILTER_KEY}
+	 * </p>
 	 * 
-	 * @param storageId The storage ID for persistence
+	 * @param storageId The base storage identifier from the parent toolbar (must not be null or blank)
+	 * @see tech.derbent.api.utils.CValueStorageHelper
 	 */
 	void enableValuePersistence(String storageId);
 }

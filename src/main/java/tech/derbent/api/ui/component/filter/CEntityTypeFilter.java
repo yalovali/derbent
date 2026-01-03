@@ -171,14 +171,24 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
 		typeOptions.add(0, allTypesOption);
 
-		// Update ComboBox items
+		// Capture current value BEFORE setItems() to check if it's still valid afterwards
+		final TypeOption oldValue = comboBox.getValue();
+		
+		// Update ComboBox items (this clears the current value temporarily)
 		comboBox.setItems(typeOptions);
 
-		// Handle value selection based on current state
-		final TypeOption currentValue = comboBox.getValue();
-		if (currentValue == null) {
-			// No value selected - select first entity type (not "All types")
+		// Check if old value is still valid in new options - if not, clear and select default
+		// Value persistence will restore the saved value automatically if it's still in the list
+		if (oldValue != null && !typeOptions.contains(oldValue)) {
+			// Old value no longer valid - clear it
+			comboBox.clear();
+			notifyChangeListeners(null);
+		}
+		
+		// If no value is currently set, select default (first entity type or "All types")
+		if (comboBox.getValue() == null && !typeOptions.isEmpty()) {
 			if (typeOptions.size() > 1) {
+				// Select first entity type (skip "All types" at index 0)
 				final TypeOption defaultOption = typeOptions.get(1);
 				comboBox.setValue(defaultOption);
 				notifyChangeListeners(defaultOption.getEntityClass());
@@ -187,19 +197,8 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 				comboBox.setValue(allTypesOption);
 				notifyChangeListeners(null);
 			}
-		} else if (!typeOptions.contains(currentValue)) {
-			// Current value is invalid (entity type no longer in list)
-			// Revert to first entity type or "All types" if none available
-			if (typeOptions.size() > 1) {
-				final TypeOption defaultOption = typeOptions.get(1);
-				comboBox.setValue(defaultOption);
-				notifyChangeListeners(defaultOption.getEntityClass());
-			} else {
-				comboBox.setValue(allTypesOption);
-				notifyChangeListeners(null);
-			}
 		}
-		// If current value is valid and in the list, keep it (persistence will restore it)
+		// Value persistence will restore saved value after this method completes
 	}
 
 	/**
