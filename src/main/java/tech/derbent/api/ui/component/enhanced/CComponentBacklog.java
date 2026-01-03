@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.grid.Grid.Column;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -117,14 +116,14 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		grid.getColumns().forEach(grid::removeColumn);
 		// In compact mode, only show name column
 		if (compactMode) {
-			final Column<CProjectItem<?>> column = grid.addExpandingShortTextColumn(item -> {
+			/* final Column<CProjectItem<?>> column = */
+			grid.addExpandingShortTextColumn(item -> {
 				if (item instanceof CEntityNamed) {
 					return ((CEntityNamed<?>) item).getName();
 				}
 				return item.toString();
 			}, null, "name");
-			// consume all width
-			// column.setFlexGrow(1);
+			grid.setHeightFull();
 		} else {
 			// In normal mode, call parent to configure standard columns
 			super.configureGrid(grid);

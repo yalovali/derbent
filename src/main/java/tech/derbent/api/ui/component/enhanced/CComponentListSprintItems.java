@@ -79,7 +79,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		Check.notNull(grid1, "Grid cannot be null");
 		grid1.hideHeader();
 		grid1.addIdColumn(CSprintItem::getId, "ID", "id");
-		// grid.addShortTextColumn(CSprintItem::getItemType, "Type", "type");
 		// Use expanding column for Name to fill remaining width
 		grid1.addShortTextColumn(item -> {
 			return item.getItem().getName();
@@ -130,6 +129,12 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				dropEvent.setTargetItem(getChildValue());
 			}
 		}
+	}
+
+	@Override
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
@@ -263,12 +268,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	private void handleStoryPointError(final Exception exception) {
 		Check.notNull(exception, "Exception cannot be null when handling story point errors");
 		CNotificationService.showException("Error saving story points", exception);
-	}
-
-	@Override
-	public boolean drag_isDropAllowed(CDragStartEvent event) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override

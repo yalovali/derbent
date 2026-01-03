@@ -28,30 +28,76 @@ import tech.derbent.app.sprints.domain.CSprintItem;
  */
 public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar implements IHasSelectedValueStorage {
 
+	private static class CTypeOption {
+
+		private final Class<?> entityClass;
+		private final String label;
+
+		/** Creates a type option with label and class. */
+		CTypeOption(final String label, final Class<?> entityClass) {
+			this.label = label;
+			this.entityClass = entityClass;
+		}
+
+		/** Compares type options by class and label. */
+		@Override
+		public boolean equals(final Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof CTypeOption)) {
+				return false;
+			}
+			final CTypeOption option = (CTypeOption) other;
+			return Objects.equals(entityClass, option.entityClass) && Objects.equals(label, option.label);
+		}
+
+		/** Returns the entity class for this option. */
+		public Class<?> getEntityClass() { return entityClass; }
+
+		/** Returns the display label for this option. */
+		public String getLabel() { return label; }
+
+		/** Computes hash based on class and label. */
+		@Override
+		public int hashCode() {
+			return Objects.hash(entityClass, label);
+		}
+
+		/** Returns entity class name for value persistence (more stable than label). */
+		@Override
+		public String toString() {
+			// Return class name for persistence, or "AllTypes" for the "All types" option
+			return entityClass != null ? entityClass.getName() : "AllTypes";
+		}
+	}
+
 	public static class FilterCriteria {
 
-                private Class<?> entityType;
-                private ResponsibleFilterMode responsibleMode = ResponsibleFilterMode.ALL;
-                private CSprint sprint;
+		private Class<?> entityType;
+		private ResponsibleFilterMode responsibleMode = ResponsibleFilterMode.ALL;
+		private CSprint sprint;
 
 		/** Returns the selected entity type filter. */
-                public Class<?> getEntityType() { return entityType; }
+		public Class<?> getEntityType() { return entityType; }
 
 		/** Returns the selected responsible filter mode. */
-                public ResponsibleFilterMode getResponsibleMode() { return responsibleMode; }
+		public ResponsibleFilterMode getResponsibleMode() { return responsibleMode; }
 
 		/** Returns the selected sprint filter. */
-                public CSprint getSprint() { return sprint; }
+		public CSprint getSprint() { return sprint; }
 
 		/** Sets the entity type filter. */
-                public void setEntityType(final Class<?> entityType) { this.entityType = entityType; }
+		public void setEntityType(final Class<?> entityType) { this.entityType = entityType; }
 
 		/** Sets the responsible filter mode. */
-                public void setResponsibleMode(final ResponsibleFilterMode responsibleMode) { this.responsibleMode = responsibleMode; }
+		public void setResponsibleMode(final ResponsibleFilterMode responsibleMode) {
+			this.responsibleMode = responsibleMode;
+		}
 
 		/** Sets the sprint filter. */
-                public void setSprint(final CSprint sprint) { this.sprint = sprint; }
-        }
+		public void setSprint(final CSprint sprint) { this.sprint = sprint; }
+	}
 
 	public enum ResponsibleFilterMode {
 
@@ -68,50 +114,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		public String getLabel() { return label; }
 	}
 
-	private static class TypeOption {
-
-		private final Class<?> entityClass;
-		private final String label;
-
-		/** Creates a type option with label and class. */
-		TypeOption(final String label, final Class<?> entityClass) {
-			this.label = label;
-			this.entityClass = entityClass;
-		}
-
-		/** Compares type options by class and label. */
-		@Override
-		public boolean equals(final Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof TypeOption)) {
-				return false;
-			}
-			final TypeOption option = (TypeOption) other;
-			return Objects.equals(entityClass, option.entityClass) && Objects.equals(label, option.label);
-		}
-
-		/** Returns the entity class for this option. */
-		public Class<?> getEntityClass() { return entityClass; }
-
-		/** Returns the display label for this option. */
-		public String getLabel() { return label; }
-
-		/** Computes hash based on class and label. */
-		@Override
-		public int hashCode() {
-			return Objects.hash(entityClass, label);
-		}
-		
-		/** Returns entity class name for value persistence (more stable than label). */
-		@Override
-		public String toString() {
-			// Return class name for persistence, or "AllTypes" for the "All types" option
-			return entityClass != null ? entityClass.getName() : "AllTypes";
-		}
-	}
-
+	private static final String ALL_TYPES = "All types";
 	private static final long serialVersionUID = 1L;
 
 	/** Resolves a display label for an entity class. */
@@ -124,31 +127,30 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		return entityClass.getSimpleName();
 	}
 
-        private final Button clearButton;
-        private final FilterCriteria currentCriteria;
-        private final ComboBox<ResponsibleFilterMode> comboResponsibleMode;
-        private final CColorAwareComboBox<CSprint> comboSprint;
-        private final ComboBox<TypeOption> comboType;
-        private CSprint defaultSprint;
-        private final List<Consumer<FilterCriteria>> listeners;
-        private final TypeOption typeAllOption;
+	private final Button clearButton;
+	private final FilterCriteria currentCriteria;
+	private final ComboBox<ResponsibleFilterMode> comboResponsibleMode;
+	private final CColorAwareComboBox<CSprint> comboSprint;
+	private final ComboBox<CTypeOption> comboType;
+	private CSprint defaultSprint;
+	private final List<Consumer<FilterCriteria>> listeners;
+	private final CTypeOption typeAllOption;
 
 	/** Builds the filter toolbar and its components. */
-        public CComponentKanbanBoardFilterToolbar() {
-                super(new ToolbarConfig().hideAll());
-                // Set explicit ID for value persistence across component recreations
-                setId("kanbanBoardFilterToolbar");
-                
-                currentCriteria = new FilterCriteria();
-                listeners = new ArrayList<>();
-                typeAllOption = new TypeOption("All types", null);
-                comboSprint = buildSprintCombo();
-                comboResponsibleMode = buildResponsibleModeCombo();
-                comboType = buildTypeCombo();
-                clearButton = buildClearButton();
-                addFilterComponents(comboSprint, comboResponsibleMode, comboType, clearButton);
-                setAlignItems(Alignment.CENTER);
-        }
+	public CComponentKanbanBoardFilterToolbar() {
+		super(new ToolbarConfig().hideAll());
+		// Set explicit ID for value persistence across component recreations
+		setId("kanbanBoardFilterToolbar");
+		currentCriteria = new FilterCriteria();
+		listeners = new ArrayList<>();
+		typeAllOption = new CTypeOption(ALL_TYPES, null);
+		comboSprint = buildSprintCombo();
+		comboResponsibleMode = buildResponsibleModeCombo();
+		comboType = buildTypeCombo();
+		clearButton = buildClearButton();
+		addFilterComponents(comboSprint, comboResponsibleMode, comboType, clearButton);
+		setAlignItems(Alignment.CENTER);
+	}
 
 	/** Registers a listener that reacts to filter changes. */
 	public void addKanbanFilterChangeListener(final Consumer<FilterCriteria> listener) {
@@ -157,17 +159,17 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 	}
 
 	/** Builds the clear button for the toolbar. */
-        private Button buildClearButton() {
-                final Button button = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
-                button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-                button.addClickListener(event -> clearFilters());
+	private Button buildClearButton() {
+		final Button button = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
+		button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+		button.addClickListener(event -> clearFilters());
 		button.setTooltipText("Clear Kanban filters");
 		return button;
 	}
 
 	/** Builds the responsible filter combo box. */
-        private ComboBox<ResponsibleFilterMode> buildResponsibleModeCombo() {
-                final ComboBox<ResponsibleFilterMode> combo = new ComboBox<>("Responsible");
+	private ComboBox<ResponsibleFilterMode> buildResponsibleModeCombo() {
+		final ComboBox<ResponsibleFilterMode> combo = new ComboBox<>("Responsible");
 		combo.setItems(ResponsibleFilterMode.values());
 		combo.setItemLabelGenerator(ResponsibleFilterMode::getLabel);
 		combo.setValue(ResponsibleFilterMode.ALL);
@@ -176,27 +178,27 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 			currentCriteria.setResponsibleMode(value);
 			notifyListeners();
 		});
-                return combo;
-        }
+		return combo;
+	}
 
 	/** Builds the sprint filter combo box. */
-        private CColorAwareComboBox<CSprint> buildSprintCombo() {
-                final CColorAwareComboBox<CSprint> combo = new CColorAwareComboBox<>(CSprint.class, "Sprint");
-                combo.addValueChangeListener(event -> {
-                        currentCriteria.setSprint(event.getValue());
-                        notifyListeners();
-                });
-                return combo;
-        }
+	private CColorAwareComboBox<CSprint> buildSprintCombo() {
+		final CColorAwareComboBox<CSprint> combo = new CColorAwareComboBox<>(CSprint.class, "Sprint");
+		combo.addValueChangeListener(event -> {
+			currentCriteria.setSprint(event.getValue());
+			notifyListeners();
+		});
+		return combo;
+	}
 
 	/** Builds the entity type filter combo box. */
-	private ComboBox<TypeOption> buildTypeCombo() {
-		final ComboBox<TypeOption> combo = new ComboBox<>("Type");
-		combo.setItemLabelGenerator(TypeOption::getLabel);
+	private ComboBox<CTypeOption> buildTypeCombo() {
+		final ComboBox<CTypeOption> combo = new ComboBox<>("Type");
+		combo.setItemLabelGenerator(CTypeOption::getLabel);
 		combo.setItems(typeAllOption);
 		combo.setValue(typeAllOption);
 		combo.addValueChangeListener(event -> {
-			final TypeOption option = event.getValue() != null ? event.getValue() : typeAllOption;
+			final CTypeOption option = event.getValue() != null ? event.getValue() : typeAllOption;
 			currentCriteria.setEntityType(option.getEntityClass());
 			notifyListeners();
 		});
@@ -204,19 +206,31 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 	}
 
 	/** Resets filters to defaults and notifies listeners. */
-        @Override
-        public void clearFilters() {
-                comboSprint.setValue(defaultSprint);
-                currentCriteria.setSprint(defaultSprint);
-                comboResponsibleMode.setValue(ResponsibleFilterMode.ALL);
-                comboType.setValue(typeAllOption);
-                currentCriteria.setResponsibleMode(ResponsibleFilterMode.ALL);
-                currentCriteria.setEntityType(null);
-                notifyListeners();
-        }
+	@Override
+	public void clearFilters() {
+		comboSprint.setValue(defaultSprint);
+		currentCriteria.setSprint(defaultSprint);
+		comboResponsibleMode.setValue(ResponsibleFilterMode.ALL);
+		comboType.setValue(typeAllOption);
+		currentCriteria.setResponsibleMode(ResponsibleFilterMode.ALL);
+		currentCriteria.setEntityType(null);
+		notifyListeners();
+	}
 
 	/** Returns the active filter criteria. */
-        public FilterCriteria getCurrentCriteria() { return currentCriteria; }
+	public FilterCriteria getCurrentCriteria() { return currentCriteria; }
+
+	@Override
+	public String getStorageId() {
+		// Use the explicitly set component ID for stable persistence
+		// ID is set in constructor to "kanbanBoardFilterToolbar"
+		final String componentId = getId().orElse(null);
+		if (componentId == null || componentId.isBlank()) {
+			throw new IllegalStateException(
+					"Component ID must be set in constructor for value persistence. " + "This should never happen for " + getClass().getSimpleName());
+		}
+		return componentId;
+	}
 
 	/** Notifies listeners of a filter change. */
 	private void notifyListeners() {
@@ -225,54 +239,65 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		}
 	}
 
+	@Override
+	public void restoreCurrentValue() {
+		// Restoration is handled automatically by CValueStorageHelper when components attach
+		// This method is here for interface compliance
+	}
+	// ==================== IHasSelectedValueStorage Implementation ====================
+
+	@Override
+	public void saveCurrentValue() {
+		// Saving is handled automatically by CValueStorageHelper on value changes
+		// This method is here for interface compliance
+	}
+
 	/** Updates available type options based on item list. */
-        public void setAvailableItems(final List<CSprintItem> items) {
-                Check.notNull(items, "Items cannot be null");
-                updateTypeOptions(items);
-        }
+	public void setAvailableItems(final List<CSprintItem> items) {
+		Check.notNull(items, "Items cannot be null");
+		updateTypeOptions(items);
+	}
 
 	/** Updates sprint options and selects a default. */
-        public void setAvailableSprints(final List<CSprint> sprints, final CSprint defaultSprint) {
-                comboSprint.setItems(sprints);
-                this.defaultSprint = defaultSprint;
-                if (defaultSprint != null && sprints.contains(defaultSprint)) {
-                        comboSprint.setValue(defaultSprint);
-                        currentCriteria.setSprint(defaultSprint);
-                } else if (comboSprint.getValue() != null && !sprints.contains(comboSprint.getValue())) {
-                        comboSprint.clear();
-                        currentCriteria.setSprint(null);
-                }
-                if (comboSprint.getValue() == null && !sprints.isEmpty()) {
-                        comboSprint.setValue(sprints.get(0));
-                        currentCriteria.setSprint(sprints.get(0));
-                }
-                notifyListeners();
-        }
+	public void setAvailableSprints(final List<CSprint> sprints, final CSprint defaultSprint) {
+		comboSprint.setItems(sprints);
+		this.defaultSprint = defaultSprint;
+		if (defaultSprint != null && sprints.contains(defaultSprint)) {
+			comboSprint.setValue(defaultSprint);
+			currentCriteria.setSprint(defaultSprint);
+		} else if (comboSprint.getValue() != null && !sprints.contains(comboSprint.getValue())) {
+			comboSprint.clear();
+			currentCriteria.setSprint(null);
+		}
+		if (comboSprint.getValue() == null && !sprints.isEmpty()) {
+			comboSprint.setValue(sprints.get(0));
+			currentCriteria.setSprint(sprints.get(0));
+		}
+		notifyListeners();
+	}
 
 	/** Refreshes the type options list. */
 	private void updateTypeOptions(final List<CSprintItem> items) {
-		final Map<Class<?>, TypeOption> options = new LinkedHashMap<>();
+		final Map<Class<?>, CTypeOption> options = new LinkedHashMap<>();
 		for (final CSprintItem sprintItem : items) {
 			if (sprintItem == null || sprintItem.getItem() == null) {
 				continue;
 			}
 			final Class<?> entityClass = sprintItem.getItem().getClass();
-			options.putIfAbsent(entityClass, new TypeOption(resolveEntityTypeLabel(entityClass), entityClass));
+			options.putIfAbsent(entityClass, new CTypeOption(resolveEntityTypeLabel(entityClass), entityClass));
 		}
-		final List<TypeOption> typeOptions =
+		final List<CTypeOption> typeOptions =
 				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
 		typeOptions.add(0, typeAllOption);
 		comboType.setItems(typeOptions);
-		
 		// Handle value selection based on current state
-		final TypeOption currentValue = comboType.getValue();
-		
+		final CTypeOption currentValue = comboType.getValue();
 		if (currentValue == null) {
 			// No value selected - select first entity type (not "All types")
 			// This happens on initial load before persistence restores value
 			if (typeOptions.size() > 1) {
 				// Select first entity type (index 1, since index 0 is "All types")
-				final TypeOption defaultOption = typeOptions.get(1);
+				final CTypeOption defaultOption = typeOptions.get(1);
 				comboType.setValue(defaultOption);
 				currentCriteria.setEntityType(defaultOption.getEntityClass());
 			} else {
@@ -284,7 +309,7 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 			// Current value is invalid (entity type no longer in list)
 			// Revert to first entity type or "All types" if none available
 			if (typeOptions.size() > 1) {
-				final TypeOption defaultOption = typeOptions.get(1);
+				final CTypeOption defaultOption = typeOptions.get(1);
 				comboType.setValue(defaultOption);
 				currentCriteria.setEntityType(defaultOption.getEntityClass());
 			} else {
@@ -295,13 +320,9 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 		// If current value is valid and in the list, keep it (persistence will restore it)
 	}
 
-	// ==================== IHasSelectedValueStorage Implementation ====================
-
-	/**
-	 * Enables automatic value persistence for all filter ComboBoxes.
+	/** Enables automatic value persistence for all filter ComboBoxes.
 	 * <p>
-	 * This method should be called by the parent component (kanban board) to enable
-	 * automatic saving and restoring of filter selections:
+	 * This method should be called by the parent component (kanban board) to enable automatic saving and restoring of filter selections:
 	 * <ul>
 	 * <li>Sprint filter</li>
 	 * <li>Type filter</li>
@@ -309,75 +330,42 @@ public class CComponentKanbanBoardFilterToolbar extends CComponentFilterToolbar 
 	 * </ul>
 	 * </p>
 	 */
-	public void enableValuePersistence() {
+	@Override
+	public void valuePersist_enable() {
 		// Enable persistence for Sprint ComboBox
-		CValueStorageHelper.enableAutoPersistence(comboSprint, getStorageId() + "_sprint", sprint -> {
+		CValueStorageHelper.valuePersist_enable(comboSprint, getStorageId() + "_sprint", sprint -> {
 			// Converter: find sprint by ID
 			if (sprint == null || sprint.isBlank()) {
 				return null;
 			}
 			try {
 				final Long sprintId = Long.parseLong(sprint);
-				return comboSprint.getListDataView().getItems()
-						.filter(s -> s.getId() != null && s.getId().equals(sprintId))
-						.findFirst()
-						.orElse(null);
-			} catch (final NumberFormatException e) {
+				return comboSprint.getListDataView().getItems().filter(s -> s.getId() != null && s.getId().equals(sprintId)).findFirst().orElse(null);
+			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
 				return null;
 			}
 		});
-
 		// Enable persistence for Type ComboBox using entity class name (more stable than label)
-		CValueStorageHelper.enableAutoPersistence(comboType, getStorageId() + "_type", className -> {
+		CValueStorageHelper.valuePersist_enable(comboType, getStorageId() + "_type", className -> {
 			// Converter: find TypeOption by entity class name
 			if (className == null || className.isBlank()) {
 				return null;
 			}
-			return comboType.getListDataView().getItems()
-					.filter(option -> {
-						if (option.getEntityClass() == null) {
-							return "AllTypes".equals(className);  // Special case for "All types" option
-						}
-						return option.getEntityClass().getName().equals(className);
-					})
-					.findFirst()
-					.orElse(null);
+			return comboType.getListDataView().getItems().filter(option -> {
+				if (option.getEntityClass() == null) {
+					return ALL_TYPES.equals(className); // Special case for "All types" option
+				}
+				return option.getEntityClass().getName().equals(className);
+			}).findFirst().orElse(null);
 		});
-
 		// Enable persistence for Responsible Mode ComboBox
-		CValueStorageHelper.enableAutoPersistence(comboResponsibleMode, getStorageId() + "_responsible", modeName -> {
+		CValueStorageHelper.valuePersist_enable(comboResponsibleMode, getStorageId() + "_responsible", modeName -> {
 			// Converter: find ResponsibleFilterMode by name
 			try {
 				return ResponsibleFilterMode.valueOf(modeName);
-			} catch (final IllegalArgumentException e) {
+			} catch (@SuppressWarnings ("unused") final IllegalArgumentException e) {
 				return ResponsibleFilterMode.ALL;
 			}
 		});
-	}
-
-	@Override
-	public String getStorageId() {
-		// Use the explicitly set component ID for stable persistence
-		// ID is set in constructor to "kanbanBoardFilterToolbar"
-		final String componentId = getId().orElse(null);
-		if (componentId == null || componentId.isBlank()) {
-			throw new IllegalStateException(
-				"Component ID must be set in constructor for value persistence. " +
-				"This should never happen for " + getClass().getSimpleName()
-			);
-		}
-		return componentId;
-	}
-
-	@Override
-	public void restoreCurrentValue() {
-		// Restoration is handled automatically by CValueStorageHelper when components attach
-		// This method is here for interface compliance
-	}
-
-	@Override
-	public void saveCurrentValue() {
-		// Saving is handled automatically by CValueStorageHelper on value changes
-		// This method is here for interface compliance
 	}
 }

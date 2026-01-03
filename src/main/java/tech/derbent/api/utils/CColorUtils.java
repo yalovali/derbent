@@ -112,7 +112,7 @@ public final class CColorUtils {
 		final Avatar avatar = new Avatar();
 		Check.notNull(user, "User cannot be null when creating avatar");
 		avatar.setName(user.getName() + " " + (user.getLastname() != null ? user.getLastname() : ""));
-		if ((user.getProfilePictureData() != null) && (user.getProfilePictureData().length > 0)) {
+		if (user.getProfilePictureData() != null && user.getProfilePictureData().length > 0) {
 			// TODO: Convert byte array to StreamResource for avatar For now, just use
 			// initials
 		}
@@ -142,7 +142,7 @@ public final class CColorUtils {
 		final int g = Integer.parseInt(hex.substring(3, 5), 16);
 		final int b = Integer.parseInt(hex.substring(5, 7), 16);
 		// relative luminance formula (per W3C)
-		return ((0.2126 * r) + (0.7152 * g) + (0.0722 * b)) / 255.0;
+		return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
 	}
 
 	public static String getColorFromEntity(final CEntity<?> entity) throws Exception {
@@ -165,7 +165,7 @@ public final class CColorUtils {
 					return color;
 				}
 			}
-		} catch (final NoSuchMethodException e) {
+		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
 			// No getColor() available; fall back to static icon color if present.
 		} catch (final Exception e) {
 			LOGGER.warn("Error invoking getColor() on entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
@@ -198,7 +198,7 @@ public final class CColorUtils {
 				final int g = Integer.parseInt(color.substring(2, 4), 16);
 				final int b = Integer.parseInt(color.substring(4, 6), 16);
 				// Calculate brightness using relative luminance formula
-				final double brightness = ((0.299 * r) + (0.587 * g) + (0.114 * b)) / 255;
+				final double brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 				// Return white text for dark backgrounds, black text for light backgrounds
 				return brightness < 0.5 ? DEFAULT_LIGHT_TEXT : DEFAULT_DARK_TEXT;
 			}
@@ -277,10 +277,10 @@ public final class CColorUtils {
 	private static String getInitials(final CUser user) {
 		Check.notNull(user, "User cannot be null when generating initials");
 		final StringBuilder initials = new StringBuilder();
-		if ((user.getName() != null) && !user.getName().isEmpty()) {
+		if (user.getName() != null && !user.getName().isEmpty()) {
 			initials.append(user.getName().charAt(0));
 		}
-		if ((user.getLastname() != null) && !user.getLastname().isEmpty()) {
+		if (user.getLastname() != null && !user.getLastname().isEmpty()) {
 			initials.append(user.getLastname().charAt(0));
 		}
 		return initials.length() > 0 ? initials.toString().toUpperCase() : "?";
@@ -303,7 +303,7 @@ public final class CColorUtils {
 		if (dark) {
 			for (final String hex : colors) {
 				final double brightness = getBrightness(hex);
-				if (dark && (brightness < 0.7)) { // dark colors
+				if (dark && brightness < 0.7) { // dark colors
 					filtered.add(hex);
 				}
 			}

@@ -4,7 +4,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.api.interfaces.IHasColor;
 import tech.derbent.api.utils.CColorUtils;
 
 /** CEntityLabel - Base label component for displaying entities with both icons and colors.
@@ -78,21 +77,18 @@ public class CEntityLabel extends HorizontalLayout {
 		if (roundedCorners) {
 			getStyle().set("border-radius", DEFAULT_BORDER_RADIUS);
 		}
-		
 		// Try to get color from entity using CColorUtils (supports reflection-based color extraction)
 		// This works for entities with getColor() method even if they don't implement IHasColor
 		String backgroundColor = null;
 		try {
 			backgroundColor = CColorUtils.getColorFromEntity(entity);
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Entity doesn't have color support - skip background color styling
 			return;
 		}
-		
 		// Apply background color
 		if (backgroundColor != null && !backgroundColor.isBlank()) {
 			getStyle().set("background-color", backgroundColor);
-			
 			// Apply automatic text contrast
 			if (autoContrast) {
 				final String textColor = CColorUtils.getContrastTextColor(backgroundColor);

@@ -74,7 +74,7 @@ public class CValueStorageHelper {
 	 * This method removes the persistence behavior and cleans up the stored value.
 	 * </p>
 	 * @param component The component to disable persistence for */
-	public static void disableAutoPersistence(final Component component) {
+	public static void valuePersist_disable(final Component component) {
 		Check.notNull(component, "Component cannot be null");
 		ComponentUtil.setData(component, STORAGE_ENABLED_KEY, null);
 		LOGGER.debug("Disabled auto-persistence for component: {}", component.getId().orElse("unknown"));
@@ -88,11 +88,11 @@ public class CValueStorageHelper {
 	 * @param comboBox  The ComboBox to enable persistence for
 	 * @param storageId The unique storage identifier
 	 * @param converter Converter to transform stored string back to item type */
-	public static <T> void enableAutoPersistence(final ComboBox<T> comboBox, final String storageId, final ValueConverter<T> converter) {
+	public static <T> void valuePersist_enable(final ComboBox<T> comboBox, final String storageId, final ValueConverter<T> converter) {
 		Check.notNull(comboBox, "ComboBox cannot be null");
 		Check.notBlank(storageId, "Storage ID cannot be blank");
 		Check.notNull(converter, "Converter cannot be null");
-		enableAutoPersistence(comboBox, storageId, value -> value != null ? value.toString() : null, converter);
+		valuePersist_enable(comboBox, storageId, value -> value != null ? value.toString() : null, converter);
 	}
 
 	/** Enables automatic value persistence for a component with custom serialization.
@@ -104,7 +104,7 @@ public class CValueStorageHelper {
 	 * @param storageId  The unique storage identifier
 	 * @param serializer Function to convert component value to storage string
 	 * @param converter  Function to convert storage string back to component value */
-	public static <T> void enableAutoPersistence(final HasValue<?, T> component, final String storageId, final ValueSerializer<T> serializer,
+	public static <T> void valuePersist_enable(final HasValue<?, T> component, final String storageId, final ValueSerializer<T> serializer,
 			final ValueConverter<T> converter) {
 		Check.notNull(component, "Component cannot be null");
 		Check.notBlank(storageId, "Storage ID cannot be blank");
@@ -141,14 +141,14 @@ public class CValueStorageHelper {
 			}
 		});
 		// Add attach listener to restore value when component is added to UI
-		vaadinComponent.addAttachListener(event -> restoreValue(component, storageId, converter, sessionService));
+		vaadinComponent.addAttachListener(event -> valuePersist_restoreValue(component, storageId, converter, sessionService));
 		// Add detach listener to clean up (optional - could be removed if values should persist)
 		vaadinComponent.addDetachListener(event -> {
 			LOGGER.debug("Component detached, stored value remains for storage ID: {}", storageId);
 		});
 		// If component is already attached, restore value immediately
 		if (vaadinComponent.isAttached()) {
-			restoreValue(component, storageId, converter, sessionService);
+			valuePersist_restoreValue(component, storageId, converter, sessionService);
 		}
 		LOGGER.debug("Enabled auto-persistence for component with storage ID: {}", storageId);
 	}
@@ -159,16 +159,16 @@ public class CValueStorageHelper {
 	 * </p>
 	 * @param textField The TextField to enable persistence for
 	 * @param storageId The unique storage identifier */
-	public static void enableAutoPersistence(final TextField textField, final String storageId) {
+	public static void valuePersist_enable(final TextField textField, final String storageId) {
 		Check.notNull(textField, "TextField cannot be null");
 		Check.notBlank(storageId, "Storage ID cannot be blank");
-		enableAutoPersistence(textField, storageId, value -> value, value -> value);
+		valuePersist_enable(textField, storageId, value -> value, value -> value);
 	}
 
 	/** Checks if a component has auto-persistence enabled.
 	 * @param component The component to check
 	 * @return true if auto-persistence is enabled, false otherwise */
-	public static boolean isAutoPersistenceEnabled(final Component component) {
+	public static boolean valuePersist_isAutoPersistenceEnabled(final Component component) {
 		Check.notNull(component, "Component cannot be null");
 		final Object enabled = ComponentUtil.getData(component, STORAGE_ENABLED_KEY);
 		return Boolean.TRUE.equals(enabled);
@@ -188,7 +188,7 @@ public class CValueStorageHelper {
 	 * @param storageId      The storage identifier
 	 * @param converter      Function to convert storage string back to component value
 	 * @param sessionService The session service for retrieving stored values */
-	private static <T> void restoreValue(final HasValue<?, T> component, final String storageId, final ValueConverter<T> converter,
+	private static <T> void valuePersist_restoreValue(final HasValue<?, T> component, final String storageId, final ValueConverter<T> converter,
 			final ISessionService sessionService) {
 		try {
 			final Optional<String> storedValue = sessionService.getSessionValue(storageId);

@@ -58,7 +58,6 @@ public abstract class CBaseUITest {
 	private static final String LOGIN_BUTTON_ID = "cbutton-login";
 	private static final String PROGRESS_DIALOG_ID = "custom-progress-dialog";
 	private static final String RESET_DB_FULL_BUTTON_ID = "cbutton-db-full";
-	private static final String RESET_DB_MIN_BUTTON_ID = "cbutton-db-min";
 	private static final AtomicBoolean SAMPLE_DATA_INITIALIZED = new AtomicBoolean(false);
 	private static final Object SAMPLE_DATA_LOCK = new Object();
 	protected static final String SCREENSHOT_FAILURE_SUFFIX = "failure";
@@ -112,6 +111,37 @@ public abstract class CBaseUITest {
 				entityType, // CUser, CActivity, CProject
 				entityType.toLowerCase() // cuser, cactivity, cproject
 		};
+	}
+
+	private static boolean isIgnorableConsoleMessage(final String message) {
+		if (message == null) {
+			return false;
+		}
+		final String normalized = message.replace('\u00A0', ' ').trim();
+		final String normalizedLower = normalized.toLowerCase();
+		if (normalized.contains("ws://localhost:35729")) {
+			return true;
+		}
+		if (normalized.contains("vaadinPush.js") && normalized.contains("WebSocket connection")) {
+			return true;
+		}
+		if (normalized.contains("favicon.ico") && normalized.contains("404")) {
+			return true;
+		}
+		if (normalized.contains("WebSocket connection to") && normalized.contains("/VAADIN/push")) {
+			return true;
+		}
+		if (normalizedLower.startsWith("event ") || normalizedLower.startsWith("event(") || normalizedLower.startsWith("event:")) {
+			return true;
+		}
+		if (normalizedLower.contains("event") && (normalizedLower.contains("http://localhost") || normalizedLower.contains("https://localhost")
+				|| normalizedLower.contains("http://127.0.0.1") || normalizedLower.contains("https://127.0.0.1"))) {
+			return true;
+		}
+		if (normalized.contains("Refused to apply style") && normalized.contains("text/html")) {
+			return true;
+		}
+		return normalized.contains("Error in WebSocket connection to ws://localhost:35729");
 	}
 
 	/** Attempts to resolve the fully-qualified entity class for a given entity type string. */
@@ -333,20 +363,6 @@ public abstract class CBaseUITest {
 		wait_500();
 	}
 
-	/** Resolves a button locator by ID, falling back to text when needed. */
-	protected Locator locateButtonByIdOrText(final String elementId, final String buttonText) {
-		Check.notBlank(elementId, "Button ID cannot be blank");
-		final Locator byId = page.locator("#" + elementId);
-		if (byId.count() > 0) {
-			return byId.first();
-		}
-		Check.notBlank(buttonText, "Button text fallback cannot be blank");
-		return page.locator("vaadin-button:has-text('" + buttonText + "')").first();
-	}
-	// ===========================================
-	// GRID INTERACTION METHODS
-	// ===========================================
-
 	/** Clicks the first row in the first grid found on the page. */
 	protected void clickFirstGridRow() {
 		LOGGER.info("📊 Clicking first grid row");
@@ -376,18 +392,18 @@ public abstract class CBaseUITest {
 		wait_500();
 	}
 
-	/** Clicks the "Save" button to save the current entity. */
-	protected void clickSave() {
-		LOGGER.info("💾 Clicking Save button");
-		locateButtonByIdOrText(CRUD_SAVE_BUTTON_ID, "Save").click();
-		wait_1000(); // Save operations may take longer
-	}
-
 	/** Clicks the "Refresh" button to refresh the current entity view. */
 	protected void clickRefresh() {
 		LOGGER.info("🔄 Clicking Refresh button");
 		locateButtonByIdOrText(CRUD_REFRESH_BUTTON_ID, "Refresh").click();
 		wait_500();
+	}
+
+	/** Clicks the "Save" button to save the current entity. */
+	protected void clickSave() {
+		LOGGER.info("💾 Clicking Save button");
+		locateButtonByIdOrText(CRUD_SAVE_BUTTON_ID, "Save").click();
+		wait_1000(); // Save operations may take longer
 	}
 
 	/** Closes the informational dialog that appears after sample data reload completion. */
@@ -736,6 +752,20 @@ public abstract class CBaseUITest {
 			return false;
 		}
 	}
+
+	/** Resolves a button locator by ID, falling back to text when needed. */
+	protected Locator locateButtonByIdOrText(final String elementId, final String buttonText) {
+		Check.notBlank(elementId, "Button ID cannot be blank");
+		final Locator byId = page.locator("#" + elementId);
+		if (byId.count() > 0) {
+			return byId.first();
+		}
+		Check.notBlank(buttonText, "Button text fallback cannot be blank");
+		return page.locator("vaadin-button:has-text('" + buttonText + "')").first();
+	}
+	// ===========================================
+	// GRID INTERACTION METHODS
+	// ===========================================
 
 	/** Resolves a Playwright locator for an element by ID, waiting for it to be present. */
 	protected Locator locatorById(final String elementId) {
@@ -1225,37 +1255,6 @@ public abstract class CBaseUITest {
 			}
 		});
 		consoleListenerRegistered = true;
-	}
-
-	private static boolean isIgnorableConsoleMessage(final String message) {
-		if (message == null) {
-			return false;
-		}
-		final String normalized = message.replace('\u00A0', ' ').trim();
-		final String normalizedLower = normalized.toLowerCase();
-		if (normalized.contains("ws://localhost:35729")) {
-			return true;
-		}
-		if (normalized.contains("vaadinPush.js") && normalized.contains("WebSocket connection")) {
-			return true;
-		}
-		if (normalized.contains("favicon.ico") && normalized.contains("404")) {
-			return true;
-		}
-		if (normalized.contains("WebSocket connection to") && normalized.contains("/VAADIN/push")) {
-			return true;
-		}
-		if (normalizedLower.startsWith("event ") || normalizedLower.startsWith("event(") || normalizedLower.startsWith("event:")) {
-			return true;
-		}
-		if (normalizedLower.contains("event") && (normalizedLower.contains("http://localhost") || normalizedLower.contains("https://localhost")
-				|| normalizedLower.contains("http://127.0.0.1") || normalizedLower.contains("https://127.0.0.1"))) {
-			return true;
-		}
-		if (normalized.contains("Refused to apply style") && normalized.contains("text/html")) {
-			return true;
-		}
-		return normalized.contains("Error in WebSocket connection to ws://localhost:35729");
 	}
 
 	protected String sanitizeForFileName(final String value, final String fallback) {

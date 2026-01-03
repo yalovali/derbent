@@ -123,7 +123,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
 		filterToolbar.addKanbanFilterChangeListener(criteria -> applyFilters());
 		// Enable value persistence for kanban board filters
-		filterToolbar.enableValuePersistence();
+		filterToolbar.valuePersist_enable();
 		setSizeFull();
 		setPadding(false);
 		setSpacing(false);

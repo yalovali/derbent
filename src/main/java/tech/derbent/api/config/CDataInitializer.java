@@ -155,6 +155,20 @@ import tech.derbent.base.users.service.CUserService;
 public class CDataInitializer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataInitializer.class);
+
+	private static boolean isPostgreSql(final DataSource dataSource) {
+		if (dataSource == null) {
+			return false;
+		}
+		try (Connection connection = dataSource.getConnection()) {
+			final String product = connection.getMetaData().getDatabaseProductName();
+			return product != null && product.toLowerCase().contains("postgresql");
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
+			return false;
+		}
+	}
+
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityService activityService;
 	private final CProjectItemStatusService activityStatusService;
@@ -329,19 +343,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data cleanup", e);
 			throw e;
-		}
-	}
-
-	private boolean isPostgreSql(final DataSource dataSource) {
-		if (dataSource == null) {
-			return false;
-		}
-		try (Connection connection = dataSource.getConnection()) {
-			final String product = connection.getMetaData().getDatabaseProductName();
-			return product != null && product.toLowerCase().contains("postgresql");
-		} catch (final Exception e) {
-			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
-			return false;
 		}
 	}
 
@@ -691,12 +692,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private boolean teamExistsInCompany(final CCompany company, final String teamName) {
-		Check.notNull(company, "Company cannot be null when checking team names");
-		Check.notNull(teamName, "Team name cannot be null when checking team names");
-		return teamService.findByCompany(company).stream().anyMatch(team -> teamName.equalsIgnoreCase(team.getName()));
-	}
-
 	private void initializeSampleTickets(final CProject project, final boolean minimal) {
 		try {
 			final CTicketType type1 = ticketTypeService.getRandom(project);
@@ -927,5 +922,11 @@ public class CDataInitializer {
 		clearSampleData(); // <<<<< ÖNCE TEMİZLE
 		loadSampleData(minimal); // <<<<< SONRA YENİDEN OLUŞTUR
 		LOGGER.info("Sample data reload (forced) finished");
+	}
+
+	private boolean teamExistsInCompany(final CCompany company, final String teamName) {
+		Check.notNull(company, "Company cannot be null when checking team names");
+		Check.notNull(teamName, "Team name cannot be null when checking team names");
+		return teamService.findByCompany(company).stream().anyMatch(team -> teamName.equalsIgnoreCase(team.getName()));
 	}
 }

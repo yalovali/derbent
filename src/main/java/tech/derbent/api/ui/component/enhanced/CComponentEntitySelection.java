@@ -510,7 +510,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			return;
 		}
 		// Use helper to enable automatic persistence
-		CValueStorageHelper.enableAutoPersistence(comboBoxEntityType, getStorageId(), displayName -> {
+		CValueStorageHelper.valuePersist_enable(comboBoxEntityType, getStorageId(), displayName -> {
 			// Converter: find entity type by display name
 			return entityTypes.stream().filter(config -> config.getDisplayName().equals(displayName)).findFirst().orElse(null);
 		});
