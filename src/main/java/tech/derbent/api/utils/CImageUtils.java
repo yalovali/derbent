@@ -243,9 +243,8 @@ public final class CImageUtils {
 			graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 			graphics2D.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			// Scale and draw the image
-			final Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
-			graphics2D.drawImage(scaledImage, 0, 0, null);
+			// Draw the image directly with scaling
+			graphics2D.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
 			graphics2D.dispose();
 			// Convert to byte array in JPEG format
 			final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

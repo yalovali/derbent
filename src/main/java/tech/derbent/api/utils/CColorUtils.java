@@ -486,10 +486,12 @@ public final class CColorUtils {
 	public static byte[] resizeImage(byte[] originalData, int width, int height) throws Exception {
 		final ByteArrayInputStream bais = new ByteArrayInputStream(originalData);
 		final BufferedImage original = ImageIO.read(bais);
-		final Image scaled = original.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 		final BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D g2d = resized.createGraphics();
-		g2d.drawImage(scaled, 0, 0, null);
+		g2d.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g2d.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+		g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.drawImage(original, 0, 0, width, height, null);
 		g2d.dispose();
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ImageIO.write(resized, "png", baos);
