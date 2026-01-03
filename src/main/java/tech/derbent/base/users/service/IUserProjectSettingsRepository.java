@@ -2,6 +2,7 @@ package tech.derbent.base.users.service;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,9 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 /** Repository interface for CUserProjectSettings entity. Provides data access methods for user-project relationships. */
 @Repository
 public interface IUserProjectSettingsRepository extends IUserRelationshipRepository<CUserProjectSettings> {
+
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.project LEFT JOIN FETCH r.role")
+	List<CUserProjectSettings> findAllForPageView(Sort sort);
 
 	/** Find all user project settings for a specific user with eager loading of project, user, and role. Overrides the base method to include role
 	 * fetching which is specific to project settings. */

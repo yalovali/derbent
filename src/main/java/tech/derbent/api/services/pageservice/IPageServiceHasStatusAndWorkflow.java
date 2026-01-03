@@ -76,6 +76,10 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 			LOGGER.warn("No current entity for retrieving available statuses");
 			return List.of();
 		}
+		if (!(entity instanceof IHasStatusAndWorkflow)) {
+			LOGGER.warn("Entity {} does not implement IHasStatusAndWorkflow; skipping status lookup", entity.getClass().getSimpleName());
+			return List.of();
+		}
 		Check.notNull(getProjectItemStatusService(), "CProjectItemStatusService cannot be null");
 		return getProjectItemStatusService().getValidNextStatuses((IHasStatusAndWorkflow<?>) entity);
 	}

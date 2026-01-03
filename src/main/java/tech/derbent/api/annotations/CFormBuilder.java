@@ -643,8 +643,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			comboBox.setWidth(fieldInfo.getWidth());
 		}
 		// Get list of all Vaadin icons
-		final List<String> iconNames = getVaadinIconNames();
-		comboBox.setItems(iconNames);
+		final List<String> iconItems = new ArrayList<>(getVaadinIconNames());
+		final com.vaadin.flow.data.provider.ListDataProvider<String> dataProvider =
+				new com.vaadin.flow.data.provider.ListDataProvider<>(iconItems);
+		comboBox.setItems(dataProvider);
 		// Set up custom renderer to show icon with name
 		comboBox.setRenderer(new ComponentRenderer<>(iconName -> {
 			if (iconName == null || iconName.isEmpty()) {
@@ -675,19 +677,42 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
 		if (hasDefaultValue) {
 			final String defaultIcon = fieldInfo.getDefaultValue();
-			if (iconNames.contains(defaultIcon)) {
+			if (iconItems.contains(defaultIcon)) {
 				comboBox.setValue(defaultIcon);
 				LOGGER.debug("Set Icon ComboBox default value for field '{}': '{}'", fieldInfo.getFieldName(), defaultIcon);
 			} else {
 				LOGGER.warn("Default icon '{}' not found in available icons for field '{}'", defaultIcon, fieldInfo.getFieldName());
 			}
-		} else if (fieldInfo.isAutoSelectFirst() && !iconNames.isEmpty()) {
+		} else if (fieldInfo.isAutoSelectFirst() && !iconItems.isEmpty()) {
 			// Auto-select first item if configured
-			comboBox.setValue(iconNames.get(0));
-			LOGGER.debug("Auto-selected first icon for field '{}': '{}'", fieldInfo.getFieldName(), iconNames.get(0));
+			comboBox.setValue(iconItems.get(0));
+			LOGGER.debug("Auto-selected first icon for field '{}': '{}'", fieldInfo.getFieldName(), iconItems.get(0));
 		}
-		// Bind to field
-		safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "Icon ComboBox");
+		comboBox.addCustomValueSetListener(event -> {
+			final String customValue = event.getDetail();
+			if ((customValue != null) && !customValue.isBlank() && !iconItems.contains(customValue)) {
+				iconItems.add(customValue);
+				dataProvider.refreshAll();
+			}
+			comboBox.setValue(customValue);
+		});
+		// Bind to field with a converter that accepts non-standard icons already stored in the database.
+		final com.vaadin.flow.data.converter.Converter<String, String> iconConverter = new com.vaadin.flow.data.converter.Converter<>() {
+			@Override
+			public com.vaadin.flow.data.binder.Result<String> convertToModel(final String value, final com.vaadin.flow.data.binder.ValueContext context) {
+				return com.vaadin.flow.data.binder.Result.ok(value);
+			}
+
+			@Override
+			public String convertToPresentation(final String value, final com.vaadin.flow.data.binder.ValueContext context) {
+				if ((value != null) && !value.isBlank() && !iconItems.contains(value)) {
+					iconItems.add(value);
+					dataProvider.refreshAll();
+				}
+				return value;
+			}
+		};
+		binder.forField(comboBox).withConverter(iconConverter).bind(fieldInfo.getFieldName());
 		return comboBox;
 	}
 

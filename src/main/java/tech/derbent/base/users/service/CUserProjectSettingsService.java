@@ -7,11 +7,17 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -108,6 +114,22 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	public List<CUserProjectSettings> findByUser(final CUser user) {
 		Check.notNull(user, "User cannot be null");
 		return findByParentEntityId(user.getId());
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CUserProjectSettings> listForPageView(final Pageable pageable, final String searchText) throws Exception {
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final String term = searchText == null ? "" : searchText.trim();
+		final Sort defaultSort = getDefaultSort();
+		final List<CUserProjectSettings> all = ((IUserProjectSettingsRepository) repository).findAllForPageView(defaultSort);
+		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
+		final List<CUserProjectSettings> filtered =
+				term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+		final List<CUserProjectSettings> content = filtered.subList(start, end);
+		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
 	@Override

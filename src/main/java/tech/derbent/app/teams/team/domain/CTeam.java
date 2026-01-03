@@ -65,6 +65,10 @@ public class CTeam extends CEntityNamed<CTeam> {
 		super();
 	}
 
+	public CTeam(final String name) {
+		super(CTeam.class, name);
+	}
+
 	public CTeam(final String name, final CCompany company) {
 		super(CTeam.class, name);
 		this.company = company;

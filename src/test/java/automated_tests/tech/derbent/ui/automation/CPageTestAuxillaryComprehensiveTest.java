@@ -170,7 +170,11 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			}
 			String targetUrl = "http://localhost:" + port + "/" + button.route;
 			page.navigate(targetUrl);
-			wait_2000(); // Wait for navigation and page load
+			try {
+				wait_2000(); // Wait for navigation and page load
+			} catch (final AssertionError e) {
+				throw new AssertionError("Exception dialog detected while navigating to: " + button.title + " (" + button.route + ")", e);
+			}
 			pagesVisited++;
 			// Take initial screenshot
 			String pageNameSafe = sanitizeForFileName(button.title, "page-" + button.index);

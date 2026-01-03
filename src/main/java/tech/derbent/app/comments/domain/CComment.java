@@ -94,7 +94,9 @@ public class CComment extends CEventEntity<CComment> {
 	public CActivity getActivity() { return activity; }
 
 	public String getActivityName() {
-		Check.notNull(activity, "Activity cannot be null");
+		if (activity == null) {
+			return "Activity (unset)";
+		}
 		try {
 			// Safe access to avoid LazyInitializationException
 			return activity.getName();
@@ -137,8 +139,7 @@ public class CComment extends CEventEntity<CComment> {
 	}
 
 	public void setCommentText(final String commentText) {
-		Check.notBlank(commentText, "Comment text cannot be null or empty");
-		this.commentText = commentText;
+		this.commentText = commentText == null ? "" : commentText;
 	}
 
 	public void setImportant(final Boolean important) { this.important = important; }

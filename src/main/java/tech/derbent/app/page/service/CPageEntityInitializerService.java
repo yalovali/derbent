@@ -35,7 +35,7 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuTitle"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "pageTitle"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "icon"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "iconString"));
    
 			detailSection.addScreenLine(CDetailLinesService.createSection("Layout Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridEntity"));

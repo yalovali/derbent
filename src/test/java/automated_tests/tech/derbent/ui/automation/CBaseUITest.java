@@ -622,14 +622,11 @@ public abstract class CBaseUITest {
 			try {
 				wait_loginscreen();
 				final Locator fullButton = page.locator("#" + RESET_DB_FULL_BUTTON_ID);
-				final Locator minimalButton = page.locator("#" + RESET_DB_MIN_BUTTON_ID);
-				final Locator targetButton = fullButton.count() > 0 ? fullButton.first() : minimalButton.count() > 0 ? minimalButton.first() : null;
-				if (targetButton == null) {
-					throw new AssertionError("Database reset button not found on login page");
+				if (fullButton.count() == 0) {
+					throw new AssertionError("DB Full reset button not found on login page");
 				}
-				final String buttonType = fullButton.count() > 0 ? "DB Full" : "DB Min";
-				LOGGER.info("📥 Loading sample data via login screen button ({})", buttonType);
-				final Locator button = targetButton;
+				LOGGER.info("📥 Loading sample data via login screen button (DB Full)");
+				final Locator button = fullButton.first();
 				try {
 					final String buttonText = button.textContent();
 					LOGGER.info("🔍 Found database reset button: '{}'", buttonText);

@@ -74,13 +74,13 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 			dataProviderParamMethod = "getActiveProject"
 	)
 	private CGridEntity gridEntity;
-	@Column (nullable = true, length = 100)
+	@Column (name = "icon", nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Icon", required = true, readOnly = false, defaultValue = "vaadin:file", description = "Icon for the page menu item",
 			hidden = false, maxLength = 100, useIcon = true
 	)
-	private String icon;
+	private String iconString;
 	@Column (nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
@@ -143,7 +143,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	public CGridEntity getGridEntity() { return gridEntity; }
 
 	@Override
-	public String getIconString() { return icon != null ? icon : DEFAULT_ICON; }
+	public String getIconString() { return iconString != null ? iconString : DEFAULT_ICON; }
 
 	public String getMenuOrder() { return menuOrder; }
 
@@ -160,7 +160,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		icon = DEFAULT_ICON;
+		iconString = DEFAULT_ICON;
 		menuOrder = "10.110";
 		menuTitle = "System.New Page";
 		pageTitle = "New Dynamic Page";
@@ -192,7 +192,9 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 
 	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
 
-	public void setIcon(String icon) { this.icon = icon; }
+	public void setIcon(String icon) { this.iconString = icon; }
+
+	public void setIconString(String iconString) { this.iconString = iconString; }
 
 	public void setMenuOrder(String menuOrder) { this.menuOrder = menuOrder; }
 

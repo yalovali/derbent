@@ -877,7 +877,9 @@ public class CDataInitializer {
 					CTicketTypeInitializerService.initializeSample(project, minimal);
 					CProviderTypeInitializerService.initializeSample(project, minimal);
 					CProductTypeInitializerService.initializeSample(project, minimal);
+					CProductVersionTypeInitializerService.initializeSample(project, minimal);
 					CProjectComponentTypeInitializerService.initializeSample(project, minimal);
+					CProjectComponentVersionTypeInitializerService.initializeSample(project, minimal);
 					CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
 					CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
 					CGanntViewEntityInitializerService.initializeSample(project, minimal);
