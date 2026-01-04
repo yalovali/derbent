@@ -27,6 +27,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
+			LEFT JOIN FETCH a.sprintItem si
+			LEFT JOIN FETCH si.sprint
 			WHERE a.id = :id
 			""")
 	Optional<CActivity> findById(@Param ("id") Long id);
@@ -39,6 +41,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
+			LEFT JOIN FETCH a.sprintItem si
+			LEFT JOIN FETCH si.sprint
 			WHERE a.project = :project
 			ORDER BY a.id DESC
 			""")
@@ -52,6 +56,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
+			LEFT JOIN FETCH a.sprintItem si
+			LEFT JOIN FETCH si.sprint
 			WHERE a.project = :project
 			ORDER BY a.id DESC
 			""")
@@ -60,14 +66,16 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 	@Query ("""
 				SELECT a FROM #{#entityName} a
 				LEFT JOIN FETCH a.project p
+				LEFT JOIN FETCH a.sprintItem si
+				LEFT JOIN FETCH si.sprint
 				WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
-				and a.sprintItem IS NULL
 				ORDER BY a.id DESC
 				""")
 	List<CActivity> listByUser(@Param ("user") CUser user);
-	/** Find all activities by project ordered by sprint order for sprint-aware components. Null sprintOrder values will appear last.
+	/** Find all activities that are in the backlog (not assigned to any sprint).
+	 * In the new composition pattern, backlog items have sprintItem.sprint = null (not in any sprint).
 	 * @param project the project
-	 * @return list of activities ordered by sprintOrder ASC, id DESC */
+	 * @return list of activities in backlog ordered by sprint item order */
 	@Query ("""
 			SELECT a FROM #{#entityName} a
 			LEFT JOIN FETCH a.project
@@ -76,9 +84,10 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
+			LEFT JOIN FETCH a.sprintItem si
 			WHERE a.project = :project
-			and a.sprintItem IS NULL
-			ORDER BY a.sprintOrder ASC NULLS LAST, a.id DESC
+			and (si.sprint IS NULL OR si.sprint.id IS NULL)
+			ORDER BY si.itemOrder ASC NULLS LAST, a.id DESC
 			""")
 	List<CActivity> listForProjectBacklog(@Param ("project") CProject project);
 

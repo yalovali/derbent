@@ -210,17 +210,19 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			final CSprint currentSprint = componentKanbanBoard != null ? componentKanbanBoard.getCurrentSprint() : null;
 			Check.notNull(currentSprint, "No sprint selected - cannot add backlog item to sprint");
 			Check.notNull(currentSprint.getId(), "Current sprint must be persisted");
-			// Create sprint item for the backlog item
+			// Update the existing sprint item owned by the parent (Activity/Meeting)
 			final tech.derbent.app.sprints.service.CSprintItemService sprintItemService =
 					tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
-			final CSprintItem newSprintItem = new CSprintItem();
-			newSprintItem.setSprint(currentSprint);
-			newSprintItem.setItemType(projectItem.getClass().getSimpleName());
-			newSprintItem.setItemId(projectItem.getId());
-			newSprintItem.setKanbanColumnId(targetColumn.getId());
+			// Get the sprint item from the sprintable item (Activity/Meeting)
+			final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) projectItem;
+			final CSprintItem existingSprintItem = sprintableItem.getSprintItem();
+			Check.notNull(existingSprintItem, "Sprint item must exist for sprintable item");
+			// Update sprint assignment and ordering
+			existingSprintItem.setSprint(currentSprint);
+			existingSprintItem.setKanbanColumnId(targetColumn.getId());
 			// Get next item order for proper ordering in sprint
 			final Integer nextOrder = sprintItemService.getNextItemOrder(currentSprint);
-			newSprintItem.setItemOrder(nextOrder);
+			existingSprintItem.setItemOrder(nextOrder);
 			// Resolve valid statuses for target column
 			final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final List<CProjectItemStatus> targetStatuses =
@@ -229,8 +231,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			if (targetStatuses.isEmpty()) {
 				// No valid status: add to sprint but warn about status
 				LOGGER.warn("No valid workflow transitions to target column {}, adding to sprint without status change", targetColumn.getName());
-				// Save the sprint item
-				sprintItemService.save(newSprintItem);
+				// Save the sprint item (cascades from parent save)
+				sprintItemService.save(existingSprintItem);
 				// CRITICAL: Defer UI refresh until after Vaadin drop event completes
 				componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> {
 					// Refresh both board and backlog
@@ -257,8 +259,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				final Class<?> projectItemServiceClass = CEntityRegistry.getServiceClassForEntity(projectItem.getClass());
 				final CProjectItemService<?> projectItemService = (CProjectItemService<?>) CSpringContext.getBean(projectItemServiceClass);
 				projectItemService.revokeSave(projectItem);
-				// Save the sprint item
-				sprintItemService.save(newSprintItem);
+				// Save the sprint item (cascades from parent save)
+				sprintItemService.save(existingSprintItem);
 				// CRITICAL: Defer UI refresh until after Vaadin drop event completes
 				componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> {
 					// Refresh both board and backlog
@@ -275,9 +277,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				LOGGER.info("Multiple statuses ({}) available for column {}, showing selection dialog for backlog item {}", targetStatuses.size(),
 						targetColumn.getName(), projectItem.getId());
 				// Save sprint item first (without status change)
-				sprintItemService.save(newSprintItem);
+				sprintItemService.save(existingSprintItem);
 				// Show dialog for status selection
-				showStatusSelectionDialogForBacklog(projectItem, newSprintItem, targetColumn, targetStatuses);
+				showStatusSelectionDialogForBacklog(projectItem, existingSprintItem, targetColumn, targetStatuses);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Failed to add backlog item to sprint", e);

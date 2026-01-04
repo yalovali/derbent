@@ -64,15 +64,11 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		}
 		// One sprintable item can be in at most one sprint (sprintItem is a single FK).
 		final CSprintItem existing = item.getSprintItem();
-		if (existing != null) {
-			// If it's already linked, move it to the new sprint instead of creating a duplicate.
-			existing.setSprint(sprint);
-			existing.setItemOrder(nextOrderForSprint(sprint));
-			sprintItemService.save(existing);
-			return;
-		}
-		final CSprintItem sprintItem = sprintItemService.newSprintItem(sprint, item);
-		sprintItemService.save(sprintItem);
+		Check.notNull(existing, "Sprint item must exist for sprintable item");
+		// Update existing sprint item to point to new sprint
+		existing.setSprint(sprint);
+		existing.setItemOrder(nextOrderForSprint(sprint));
+		sprintItemService.save(existing);
 	}
 
 	@Override
@@ -86,14 +82,16 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		LOGGER.debug("Deleting sprint {}", sprint);
 		Check.notNull(sprint, "Sprint cannot be null");
 		Check.notNull(sprint.getId(), "Sprint ID cannot be null");
-		// Ensure sprint items are detached from their underlying items before the sprint (and its sprint items) are deleted.
-		// Otherwise the FK on sprintable items (sprintitem_id) can block deleting CSprintItem rows.
+		// Move sprint items to backlog by setting sprint to null
+		// Sprint items should NOT be deleted - they are owned by Activity/Meeting
 		final List<CSprintItem> sprintItems = sprintItemService.findByMasterIdWithItems(sprint.getId());
 		for (final CSprintItem sprintItem : sprintItems) {
 			try {
-				sprintItemService.delete(sprintItem);
+				// Move to backlog instead of deleting
+				sprintItem.setSprint(null);
+				sprintItemService.save(sprintItem);
 			} catch (final Exception e) {
-				LOGGER.error("Failed to delete sprint item {} while deleting sprint {}: {}", sprintItem.getId(), sprint.getId(), e.getMessage(), e);
+				LOGGER.error("Failed to move sprint item {} to backlog while deleting sprint {}: {}", sprintItem.getId(), sprint.getId(), e.getMessage(), e);
 				throw e;
 			}
 		}

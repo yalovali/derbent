@@ -361,12 +361,11 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				insertIndex = 0;
 			}
 			insertIndex = Math.max(0, Math.min(insertIndex, existingItems.size()));
-			final CSprintItem newItem = new CSprintItem();
-			newItem.setSprint(targetSprint);
-			newItem.setItemId(itemToAdd.getId());
-			newItem.setItemType(itemToAdd.getClass().getSimpleName());
-			newItem.setItem(itemToAdd);
-			existingItems.add(insertIndex, newItem);
+			// Get the existing sprint item from the sprintable item (Activity/Meeting)
+			final CSprintItem existingSprintItem = itemToAdd.getSprintItem();
+			Check.notNull(existingSprintItem, "Sprint item must exist for sprintable item");
+			existingSprintItem.setSprint(targetSprint);
+			existingItems.add(insertIndex, existingSprintItem);
 			LOGGER.info("[SprintInsert] Calculated insert index {} (existing: {})", insertIndex + 1, existingItems.size());
 			for (int i = 0; i < existingItems.size(); i++) {
 				final CSprintItem item = existingItems.get(i);

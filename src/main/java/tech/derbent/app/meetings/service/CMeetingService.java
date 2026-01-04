@@ -92,14 +92,31 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize meeting"));
 		final CUser currentUser = sessionService.getActiveUser()
 				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize meeting"));
+		
 		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, meetingTypeService, projectItemStatusService);
+		
+		// Business event fields stay in CMeeting
 		entity.setLocation("To be decided");
-		entity.setStartDate(LocalDate.now(clock)); // Default: now
-		entity.setStartTime(LocalTime.of(12, 00)); // Default: 10 AM
-		entity.setEndDate(LocalDate.now(clock)); // Default: 1 hour duration
-		entity.setStartTime(entity.getStartTime().plusHours(2));
+		entity.setStartDate(LocalDate.now(clock));
+		entity.setStartTime(LocalTime.of(12, 00));
+		entity.setEndDate(LocalDate.now(clock));
+		entity.setEndTime(LocalTime.of(14, 00)); // 2 hour duration
 		entity.setResponsible(currentUser);
-		LOGGER.debug("Meeting initialization complete with default start time and responsible user: {}", currentUser.getName());
+		
+		// Create sprint item for progress tracking (composition pattern)
+		// Progress fields (storyPoint, dates, responsible, progress%) live in CSprintItem
+		final CSprintItem sprintItem = new CSprintItem();
+		sprintItem.setSprint(null); // null = backlog
+		sprintItem.setProgressPercentage(0);
+		sprintItem.setStartDate(LocalDate.now(clock));
+		sprintItem.setDueDate(LocalDate.now(clock));
+		sprintItem.setCompletionDate(null);
+		sprintItem.setStoryPoint(0L);
+		sprintItem.setResponsible(currentUser);
+		sprintItem.setItemOrder(1); // Default order
+		entity.setSprintItem(sprintItem);
+		
+		LOGGER.debug("Meeting initialization complete with sprint item for progress tracking");
 	}
 
 	/** Lists meetings by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.

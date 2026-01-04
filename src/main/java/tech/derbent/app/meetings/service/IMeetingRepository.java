@@ -24,6 +24,8 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
+			   LEFT JOIN FETCH m.sprintItem si
+			   LEFT JOIN FETCH si.sprint
 			   WHERE m.id = :id
 			""")
 	Optional<CMeeting> findById(@Param ("id") Long id);
@@ -38,6 +40,8 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
+			   LEFT JOIN FETCH m.sprintItem si
+			   LEFT JOIN FETCH si.sprint
 			   WHERE m.project = :project
 			   ORDER BY m.id DESC
 			""")
@@ -53,13 +57,16 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
+			   LEFT JOIN FETCH m.sprintItem si
+			   LEFT JOIN FETCH si.sprint
 			   WHERE m.project = :project
 			   ORDER BY m.id DESC
 			""")
 	List<CMeeting> listByProjectForPageView(@Param ("project") CProject project);
-	/** Find all meetings by project ordered by sprint order for sprint-aware components. Null sprintOrder values will appear last.
+	/** Find all meetings that are in the backlog (not assigned to any sprint).
+	 * In the new composition pattern, backlog items have sprintItem.sprint = null (not in any sprint).
 	 * @param project the project
-	 * @return list of meetings ordered by sprintOrder ASC, id DESC */
+	 * @return list of meetings in backlog ordered by sprint item order */
 	@Query ("""
 			   SELECT m FROM #{#entityName} m
 			   LEFT JOIN FETCH m.project
@@ -70,8 +77,9 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
-			   WHERE m.project = :project and m.sprintItem IS NULL
-			   ORDER BY m.sprintOrder ASC NULLS LAST, m.id DESC
+			   LEFT JOIN FETCH m.sprintItem si
+			   WHERE m.project = :project and (si.sprint IS NULL OR si.sprint.id IS NULL)
+			   ORDER BY si.itemOrder ASC NULLS LAST, m.id DESC
 			""")
 	List<CMeeting> listForProjectBacklog(@Param ("project") CProject project);
 

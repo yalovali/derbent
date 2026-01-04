@@ -105,8 +105,16 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		meetingService = CSpringContext.getBean(CMeetingService.class);
 		setupComponent();
 		setDynamicHeight("600px");
+		// Set component ID before enabling value persistence
+		setId("backlog_" + project.getId());
 		// Enable value persistence for entity type selection in backlog
-		enableValuePersistence();
+		// Note: If no persisted value exists, the parent class will select the first entity type by default
+		try {
+			enableValuePersistence();
+		} catch (final Exception e) {
+			LOGGER.warn("Could not enable value persistence for backlog: {}", e.getMessage());
+			// Parent class already handles defaulting to first entity type
+		}
 		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
 	}
 

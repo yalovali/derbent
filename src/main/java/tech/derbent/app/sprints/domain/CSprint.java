@@ -47,8 +47,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CSprint.class);
 	public static final String VIEW_NAME = "Sprints View";
 
-	private static boolean isSameSprintable(final Long itemId, final String itemType, final CSprintItem sprintItem) {
-		return itemId.equals(sprintItem.getItemId()) && itemType.equals(sprintItem.getItemType());
+	private static boolean isSameSprintable(final ISprintableItem item, final CSprintItem sprintItem) {
+		return sprintItem.getParentItem() != null && sprintItem.getParentItem().equals(item);
 	}
 
 	@Transient
@@ -103,14 +103,13 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			createComponentMethod = "createItemDetailsComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private final int itemDetails = 0;
-	// Sprint Items - Ordered collection of activities and meetings included in this sprint
-	// Uses OneToMany pattern with CSprintItem join entity for proper ordering
-	// Similar to CDetailLines pattern in CDetailSection
-	@OneToMany (mappedBy = "sprint", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@OrderBy ("itemOrder ASC")
+	// Sprint Items - Collection of progress tracking items for activities/meetings in this sprint
+	// Sprint items are owned by CActivity/CMeeting, sprint is just a reference
+	// Query items via: SELECT a FROM CActivity a WHERE a.sprintItem.sprint = :sprint
+	@OneToMany (mappedBy = "sprint", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Sprint Items", required = false, readOnly = false,
-			description = "Items (activities, meetings, etc.) included in this sprint", hidden = false,
+			description = "Progress tracking items for activities/meetings in this sprint", hidden = false,
 			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private List<CSprintItem> sprintItems = new ArrayList<>();
@@ -155,22 +154,22 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		initializeDefaults();
 	}
 
-	/** Add a project item to this sprint. This method determines the type and adds to the appropriate collection.
-	 * @param item the project item to add */
+	/** Add a project item to this sprint by setting its sprintItem.sprint reference.
+	 * @param item the project item (CActivity/CMeeting) to add to sprint */
 	public void addItem(final ISprintableItem item) {
-		if (item == null || item.getId() == null) {
+		if (item == null || item.getSprintItem() == null) {
 			return;
 		}
+		// Check if already in sprint
 		if (sprintItems != null) {
-			final String itemType = item.getClass().getSimpleName();
-			final Long itemId = item.getId();
-			final boolean alreadyPresent = sprintItems.stream().anyMatch(si -> itemId.equals(si.getItemId()) && itemType.equals(si.getItemType()));
+			final boolean alreadyPresent = sprintItems.stream()
+					.anyMatch(si -> isSameSprintable(item, si));
 			if (alreadyPresent) {
 				return;
 			}
 		}
-		final CSprintItem sprintItem = new CSprintItem(this, item, sprintItems.size() + 1);
-		sprintItems.add(sprintItem);
+		// Set sprint reference - item remains owned by parent
+		item.getSprintItem().setSprint(this);
 		updateLastModified();
 	}
 
@@ -179,10 +178,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public void addSprintItem(final CSprintItem sprintItem) {
 		if (sprintItem != null) {
 			sprintItem.setSprint(this);
-			if (sprintItem.getItemOrder() == null || sprintItem.getItemOrder() == 0) {
-				sprintItem.setItemOrder(sprintItems.size() + 1);
-			}
-			sprintItems.add(sprintItem);
 			updateLastModified();
 		}
 	}
@@ -193,8 +188,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		final List<CActivity> activities = new ArrayList<>();
 		if (sprintItems != null) {
 			for (final CSprintItem sprintItem : sprintItems) {
-				if (sprintItem.getItem() instanceof CActivity) {
-					activities.add((CActivity) sprintItem.getItem());
+				if (sprintItem.getParentItem() instanceof CActivity) {
+					activities.add((CActivity) sprintItem.getParentItem());
 				}
 			}
 		}
@@ -232,8 +227,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		final List<ISprintableItem> allItems = new ArrayList<>();
 		if (sprintItems != null) {
 			for (final CSprintItem sprintItem : sprintItems) {
-				if (sprintItem.getItem() != null) {
-					allItems.add(sprintItem.getItem());
+				if (sprintItem.getParentItem() != null) {
+					allItems.add(sprintItem.getParentItem());
 				}
 			}
 		}
@@ -246,8 +241,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		final List<CMeeting> meetings = new ArrayList<>();
 		if (sprintItems != null) {
 			for (final CSprintItem sprintItem : sprintItems) {
-				if (sprintItem.getItem() instanceof CMeeting) {
-					meetings.add((CMeeting) sprintItem.getItem());
+				if (sprintItem.getParentItem() instanceof CMeeting) {
+					meetings.add((CMeeting) sprintItem.getParentItem());
 				}
 			}
 		}
@@ -290,11 +285,9 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		}
 		long total = 0L;
 		for (final CSprintItem sprintItem : sprintItems) {
-			if (sprintItem.getItem() != null) {
-				final Long itemStoryPoint = sprintItem.getItem().getStoryPoint();
-				if (itemStoryPoint != null) {
-					total += itemStoryPoint;
-				}
+			final Long itemStoryPoint = sprintItem.getStoryPoint();
+			if (itemStoryPoint != null) {
+				total += itemStoryPoint;
 			}
 		}
 		return total;
@@ -387,42 +380,42 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		}
 	}
 
-	/** Remove an activity from this sprint.
+	/** Remove an activity from this sprint by setting its sprintItem.sprint to null.
 	 * @param activity the activity to remove */
 	public void removeActivity(final CActivity activity) {
-		if (activity != null && sprintItems != null) {
-			sprintItems.removeIf(item -> item.getItem() != null && item.getItem().equals(activity));
+		if (activity != null && activity.getSprintItem() != null) {
+			activity.getSprintItem().setSprint(null);
 			updateLastModified();
 		}
 	}
 
-	/** Remove a project item from this sprint. This method determines the type and removes from the appropriate collection.
+	/** Remove a project item from this sprint by setting its sprintItem.sprint to null.
 	 * @param item the project item to remove */
 	public void removeItem(final ISprintableItem item) {
-		if (item == null || item.getId() == null || sprintItems == null) {
+		if (item == null || item.getSprintItem() == null) {
 			return;
 		}
-		final String itemType = item.getClass().getSimpleName();
-		final Long itemId = item.getId();
-		sprintItems.removeIf(sprintItem -> isSameSprintable(itemId, itemType, sprintItem));
-		item.setSprintItem(null);
+		item.getSprintItem().setSprint(null);
 		updateLastModified();
 	}
 
 	/** Sets the activities in this sprint.
 	 * @param activities the activities to set */
 	public void setActivities(final List<CActivity> activities) {
-		if (sprintItems == null) {
-			sprintItems = new ArrayList<>();
+		// Remove all current activities from sprint
+		if (sprintItems != null) {
+			for (final CSprintItem si : new ArrayList<>(sprintItems)) {
+				if (si.getParentItem() instanceof CActivity) {
+					si.setSprint(null);
+				}
+			}
 		}
-		// Remove existing activities
-		sprintItems.removeIf(item -> item.getItem() instanceof CActivity);
 		// Add new activities
 		if (activities != null) {
-			int order = 1;
 			for (final CActivity activity : activities) {
-				final CSprintItem sprintItem = new CSprintItem(this, activity, order++);
-				sprintItems.add(sprintItem);
+				if (activity.getSprintItem() != null) {
+					activity.getSprintItem().setSprint(this);
+				}
 			}
 		}
 		updateLastModified();
@@ -456,16 +449,18 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	// IHasStatusAndWorkflow implementation
 
 	public void setItems(final List<ISprintableItem> items) {
-		if (sprintItems == null) {
-			sprintItems = new ArrayList<>();
-		} else {
-			sprintItems.clear();
+		// Remove all current items from sprint
+		if (sprintItems != null) {
+			for (final CSprintItem si : new ArrayList<>(sprintItems)) {
+				si.setSprint(null);
+			}
 		}
+		// Add new items
 		if (items != null) {
-			int order = 1;
 			for (final ISprintableItem item : items) {
-				final CSprintItem sprintItem = new CSprintItem(this, item, order++);
-				sprintItems.add(sprintItem);
+				if (item.getSprintItem() != null) {
+					item.getSprintItem().setSprint(this);
+				}
 			}
 		}
 		updateLastModified();
@@ -474,17 +469,20 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	/** Sets the meetings in this sprint.
 	 * @param meetings the meetings to set */
 	public void setMeetings(final List<CMeeting> meetings) {
-		if (sprintItems == null) {
-			sprintItems = new ArrayList<>();
+		// Remove all current meetings from sprint
+		if (sprintItems != null) {
+			for (final CSprintItem si : new ArrayList<>(sprintItems)) {
+				if (si.getParentItem() instanceof CMeeting) {
+					si.setSprint(null);
+				}
+			}
 		}
-		// Remove existing meetings
-		sprintItems.removeIf(item -> item.getItem() instanceof CMeeting);
 		// Add new meetings
 		if (meetings != null) {
-			int order = sprintItems.size() + 1;
 			for (final CMeeting meeting : meetings) {
-				final CSprintItem sprintItem = new CSprintItem(this, meeting, order++);
-				sprintItems.add(sprintItem);
+				if (meeting.getSprintItem() != null) {
+					meeting.getSprintItem().setSprint(this);
+				}
 			}
 		}
 		updateLastModified();

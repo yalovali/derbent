@@ -116,11 +116,15 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			description = "Person responsible for organizing and leading the meeting", hidden = false, dataProviderBean = "CUserService"
 	)
 	private CUser responsible;
-	// Sprint Item relationship
-	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn (name = "sprintitem_id", nullable = true)
-	@AMetaData (displayName = "Sprint Item", required = false, readOnly = true, description = "Associated sprint item for this item", hidden = true)
-	private CSprintItem sprintItem = null;
+	// Sprint Item relationship - REQUIRED: every meeting must have a sprint item for progress tracking
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "sprintitem_id", nullable = false)
+	@jakarta.validation.constraints.NotNull (message = "Sprint item is required for progress tracking")
+	@AMetaData (
+			displayName = "Sprint Item", required = true, readOnly = true, 
+			description = "Progress tracking for this meeting", hidden = true
+	)
+	private CSprintItem sprintItem;
 	@Column (name = "sprint_order", nullable = true)
 	@jakarta.validation.constraints.Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -149,10 +153,26 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		super();
 		attendees = new HashSet<>();
 		participants = new HashSet<>();
+		// Ensure sprint item is always created for composition pattern
+		if (sprintItem == null) {
+			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+		}
+		// Set back-reference so sprintItem can access parent for display
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
 	}
 
 	public CMeeting(final String name, final CProject project) {
 		super(CMeeting.class, name, project);
+		// Ensure sprint item is always created for composition pattern
+		if (sprintItem == null) {
+			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+		}
+		// Set back-reference so sprintItem can access parent for display
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
 	}
 
 	/** Constructor to create a meeting with name, project and meeting type.
@@ -162,6 +182,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public CMeeting(final String name, final CProject project, final CMeetingType meetingType) {
 		super(CMeeting.class, name, project);
 		entityType = meetingType;
+		// Ensure sprint item is always created for composition pattern
+		if (sprintItem == null) {
+			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+		}
+		// Set back-reference so sprintItem can access parent for display
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
 	}
 
 	/** Convenience method to add an attendee to the meeting.
@@ -212,12 +240,18 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Set<CUser> getParticipants() { return participants == null ? new HashSet<>() : new HashSet<>(participants); }
 
 	@Override
-	public Integer getProgressPercentage() { return 21; }
+	public Integer getProgressPercentage() { 
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getProgressPercentage();
+	}
 
 	public CActivity getRelatedActivity() { return relatedActivity; }
 
 	@Override
-	public CUser getResponsible() { return responsible; }
+	public CUser getResponsible() { 
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getResponsible();
+	}
 
 	@Override
 	public CSprintItem getSprintItem() { return sprintItem; }
@@ -226,12 +260,18 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Integer getSprintOrder() { return sprintOrder; }
 
 	@Override
-	public LocalDate getStartDate() { return startDate; }
+	public LocalDate getStartDate() { 
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getStartDate();
+	}
 
 	public LocalTime getStartTime() { return startTime; }
 
 	@Override
-	public Long getStoryPoint() { return storyPoint; }
+	public Long getStoryPoint() { 
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getStoryPoint();
+	}
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
@@ -329,7 +369,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
-	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
+	public void setResponsible(final CUser responsible) { 
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		this.responsible = responsible; // Set both for backward compatibility during migration
+		sprintItem.setResponsible(responsible);
+	}
 
 	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
@@ -337,10 +381,18 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
-	public void setStartDate(final LocalDate startDate) { this.startDate = startDate; }
+	public void setStartDate(final LocalDate startDate) { 
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		this.startDate = startDate;
+		sprintItem.setStartDate(startDate);
+	}
 
 	public void setStartTime(final LocalTime startTime) { this.startTime = startTime; }
 
 	@Override
-	public void setStoryPoint(final Long storyPoint) { this.storyPoint = storyPoint; }
+	public void setStoryPoint(final Long storyPoint) {
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		this.storyPoint = storyPoint; // Keep for backward compatibility
+		sprintItem.setStoryPoint(storyPoint);
+	}
 }
