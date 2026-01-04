@@ -27,6 +27,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
+			LEFT JOIN FETCH a.sprintItem si
+			LEFT JOIN FETCH si.sprint
 			WHERE a.id = :id
 			""")
 	Optional<CActivity> findById(@Param ("id") Long id);
@@ -39,6 +41,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
+			LEFT JOIN FETCH a.sprintItem si
+			LEFT JOIN FETCH si.sprint
 			WHERE a.project = :project
 			ORDER BY a.id DESC
 			""")
@@ -52,6 +56,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
+			LEFT JOIN FETCH a.sprintItem si
+			LEFT JOIN FETCH si.sprint
 			WHERE a.project = :project
 			ORDER BY a.id DESC
 			""")
@@ -60,8 +66,9 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 	@Query ("""
 				SELECT a FROM #{#entityName} a
 				LEFT JOIN FETCH a.project p
+				LEFT JOIN FETCH a.sprintItem si
+				LEFT JOIN FETCH si.sprint
 				WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
-				and a.sprintItem IS NULL
 				ORDER BY a.id DESC
 				""")
 	List<CActivity> listByUser(@Param ("user") CUser user);

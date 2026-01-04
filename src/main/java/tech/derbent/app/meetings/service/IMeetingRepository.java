@@ -24,6 +24,8 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
+			   LEFT JOIN FETCH m.sprintItem si
+			   LEFT JOIN FETCH si.sprint
 			   WHERE m.id = :id
 			""")
 	Optional<CMeeting> findById(@Param ("id") Long id);
@@ -38,6 +40,8 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
+			   LEFT JOIN FETCH m.sprintItem si
+			   LEFT JOIN FETCH si.sprint
 			   WHERE m.project = :project
 			   ORDER BY m.id DESC
 			""")
@@ -53,6 +57,8 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
+			   LEFT JOIN FETCH m.sprintItem si
+			   LEFT JOIN FETCH si.sprint
 			   WHERE m.project = :project
 			   ORDER BY m.id DESC
 			""")
