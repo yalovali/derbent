@@ -116,7 +116,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// Progress fields (storyPoint, dates, responsible, progress%) live in CSprintItem
 		final CSprintItem sprintItem = new CSprintItem();
 		sprintItem.setSprint(null); // null = backlog
-		sprintItem.setItemOrder(0); // Will be set properly when added to a sprint
 		sprintItem.setProgressPercentage(0);
 		sprintItem.setStartDate(LocalDate.now(clock));
 		sprintItem.setDueDate(LocalDate.now(clock).plusDays(7));

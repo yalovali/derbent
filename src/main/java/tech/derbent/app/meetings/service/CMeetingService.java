@@ -107,7 +107,6 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		// Progress fields (storyPoint, dates, responsible, progress%) live in CSprintItem
 		final CSprintItem sprintItem = new CSprintItem();
 		sprintItem.setSprint(null); // null = backlog
-		sprintItem.setItemOrder(0);
 		sprintItem.setProgressPercentage(0);
 		sprintItem.setStartDate(LocalDate.now(clock));
 		sprintItem.setDueDate(LocalDate.now(clock));
