@@ -26,7 +26,6 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		super(repository, clock, sessionService);
 	}
 	
-	@Override
 	protected ISprintItemRepository getTypedRepository() {
 		return (ISprintItemRepository) repository;
 	}

@@ -20,8 +20,8 @@ public class CComponentStoryPoint extends CLabelEntity {
 
 	private static ISprintableItem extractSprintableItem(final CSprintItem sprintItem) {
 		Check.notNull(sprintItem, "Sprint item cannot be null");
-		Check.notNull(sprintItem.getItem(), "Sprint item must have a loaded project item");
-		return sprintItem.getItem();
+		Check.notNull(sprintItem.getParentItem(), "Sprint item must have a parent item");
+		return sprintItem.getParentItem();
 	}
 
 	private static String formatValue(final Long value) {

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.ISprintableItem;
-import tech.derbent.api.ui.component.CEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.domain.CSprint;
 
