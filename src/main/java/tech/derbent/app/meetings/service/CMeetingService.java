@@ -49,7 +49,9 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	public void delete(final CMeeting meeting) {
 		Check.notNull(meeting, "Meeting cannot be null");
 		Check.notNull(meeting.getId(), "Meeting ID cannot be null");
-		detachSprintItemIfPresent(meeting);
+		// The OneToOne relationship with cascade = CascadeType.ALL and orphanRemoval = true
+		// will automatically delete the sprint item when the meeting is deleted.
+		// No need to manually detach and save, which would violate @NotNull constraint.
 		super.delete(meeting);
 	}
 
@@ -60,16 +62,6 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		final CMeeting meeting =
 				repository.findById(id).orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Meeting not found: " + id));
 		delete(meeting);
-	}
-
-	private void detachSprintItemIfPresent(final CMeeting meeting) {
-		final CSprintItem sprintItem = meeting.getSprintItem();
-		if (sprintItem == null || sprintItem.getId() == null) {
-			return;
-		}
-		meeting.setSprintItem(null);
-		repository.saveAndFlush(meeting);
-		sprintItemService.delete(sprintItem.getId());
 	}
 
 	@Override
