@@ -153,10 +153,18 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		super();
 		attendees = new HashSet<>();
 		participants = new HashSet<>();
+		// Ensure sprint item is always created for composition pattern
+		if (sprintItem == null) {
+			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+		}
 	}
 
 	public CMeeting(final String name, final CProject project) {
 		super(CMeeting.class, name, project);
+		// Ensure sprint item is always created for composition pattern
+		if (sprintItem == null) {
+			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+		}
 	}
 
 	/** Constructor to create a meeting with name, project and meeting type.
@@ -166,6 +174,10 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public CMeeting(final String name, final CProject project, final CMeetingType meetingType) {
 		super(CMeeting.class, name, project);
 		entityType = meetingType;
+		// Ensure sprint item is always created for composition pattern
+		if (sprintItem == null) {
+			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+		}
 	}
 
 	/** Convenience method to add an attendee to the meeting.
@@ -217,15 +229,16 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	@Override
 	public Integer getProgressPercentage() { 
-		return sprintItem != null ? sprintItem.getProgressPercentage() : 0;
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getProgressPercentage();
 	}
 
 	public CActivity getRelatedActivity() { return relatedActivity; }
 
 	@Override
 	public CUser getResponsible() { 
-		// Delegate to sprint item if present, otherwise use meeting's responsible field
-		return sprintItem != null ? sprintItem.getResponsible() : responsible;
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getResponsible();
 	}
 
 	@Override
@@ -236,15 +249,16 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	@Override
 	public LocalDate getStartDate() { 
-		// Delegate to sprint item if present for progress tracking
-		return sprintItem != null ? sprintItem.getStartDate() : startDate;
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getStartDate();
 	}
 
 	public LocalTime getStartTime() { return startTime; }
 
 	@Override
 	public Long getStoryPoint() { 
-		return sprintItem != null ? sprintItem.getStoryPoint() : storyPoint;
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getStoryPoint();
 	}
 
 	@Override
@@ -344,11 +358,9 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
 	public void setResponsible(final CUser responsible) { 
-		// Set both for backward compatibility during migration
-		this.responsible = responsible;
-		if (sprintItem != null) {
-			sprintItem.setResponsible(responsible);
-		}
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		this.responsible = responsible; // Set both for backward compatibility during migration
+		sprintItem.setResponsible(responsible);
 	}
 
 	@Override
@@ -358,19 +370,17 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
 	public void setStartDate(final LocalDate startDate) { 
+		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.startDate = startDate;
-		if (sprintItem != null) {
-			sprintItem.setStartDate(startDate);
-		}
+		sprintItem.setStartDate(startDate);
 	}
 
 	public void setStartTime(final LocalTime startTime) { this.startTime = startTime; }
 
 	@Override
 	public void setStoryPoint(final Long storyPoint) {
+		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.storyPoint = storyPoint; // Keep for backward compatibility
-		if (sprintItem != null) {
-			sprintItem.setStoryPoint(storyPoint);
-		}
+		sprintItem.setStoryPoint(storyPoint);
 	}
 }

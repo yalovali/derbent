@@ -284,7 +284,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	@Override
 	public Integer getProgressPercentage() { 
-		return sprintItem != null ? sprintItem.getProgressPercentage() : 0;
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getProgressPercentage();
 	}
 
 	public BigDecimal getRemainingHours() { return remainingHours; }
@@ -293,7 +294,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	 * @return the responsible user from sprint item */
 	@Override
 	public CUser getResponsible() { 
-		return sprintItem != null ? sprintItem.getResponsible() : getAssignedTo();
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getResponsible();
 	}
 
 	public String getResults() { return results; }
@@ -306,12 +308,14 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	@Override
 	public LocalDate getStartDate() { 
-		return sprintItem != null ? sprintItem.getStartDate() : startDate;
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getStartDate();
 	}
 
 	@Override
 	public Long getStoryPoint() { 
-		return sprintItem != null ? sprintItem.getStoryPoint() : storyPoint;
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		return sprintItem.getStoryPoint();
 	}
 
 	@Override
@@ -353,6 +357,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		}
 		if (completionDate == null) {
 			completionDate = null; // No completion date by default
+		}
+		// Ensure sprint item is always created for composition pattern
+		if (sprintItem == null) {
+			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
 		}
 	}
 
@@ -496,11 +504,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	public void setProgressPercentage(final Integer progressPercentage) {
-		if (sprintItem != null) {
-			sprintItem.setProgressPercentage(progressPercentage);
-		} else {
-			LOGGER.warn("setProgressPercentage - Sprint item is null for activity id={}", getId());
-		}
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		sprintItem.setProgressPercentage(progressPercentage);
 		updateLastModified();
 	}
 
@@ -524,9 +529,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
 	public void setStartDate(final LocalDate startDate) {
-		if (sprintItem != null) {
-			sprintItem.setStartDate(startDate);
-		}
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		sprintItem.setStartDate(startDate);
 		this.startDate = startDate; // Keep for backward compatibility during migration
 		updateLastModified();
 	}
@@ -535,7 +539,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public void setStatus(final CProjectItemStatus status) {
 		super.setStatus(status);
 		// Auto-set completion date in sprint item if status is final
-		if (status != null && status.getFinalStatus() && sprintItem != null && sprintItem.getCompletionDate() == null) {
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		if (status != null && status.getFinalStatus() && sprintItem.getCompletionDate() == null) {
 			sprintItem.setCompletionDate(LocalDate.now());
 			if (sprintItem.getProgressPercentage() < 100) {
 				sprintItem.setProgressPercentage(100);
@@ -545,9 +550,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	@Override
 	public void setStoryPoint(final Long storyPoint) {
-		if (sprintItem != null) {
-			sprintItem.setStoryPoint(storyPoint);
-		}
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		sprintItem.setStoryPoint(storyPoint);
 		this.storyPoint = storyPoint; // Keep for backward compatibility during migration
 		updateLastModified();
 	}

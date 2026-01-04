@@ -59,6 +59,22 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		this.meetingRepository = meetingRepository;
 	}
 
+	/** Create a default sprint item for backlog (sprint = null).
+	 * This is used when creating new sprintable items without a specific sprint.
+	 * @return a new CSprintItem with default values for backlog items */
+	public static CSprintItem createDefaultSprintItem() {
+		final CSprintItem sprintItem = new CSprintItem();
+		sprintItem.setSprint(null); // null = backlog
+		sprintItem.setItemOrder(0); // Will be set properly when added to a sprint
+		sprintItem.setProgressPercentage(0);
+		sprintItem.setStoryPoint(0L);
+		sprintItem.setStartDate(null); // Will be set when initialized
+		sprintItem.setDueDate(null); // Will be set when initialized
+		sprintItem.setCompletionDate(null); // Not completed yet
+		sprintItem.setResponsible(null); // Will be set when initialized
+		return sprintItem;
+	}
+
 	private void bindSprintableItemToSprintItem(final CSprintItem sprintItem) {
 		if (sprintItem == null || sprintItem.getId() == null) {
 			return;
