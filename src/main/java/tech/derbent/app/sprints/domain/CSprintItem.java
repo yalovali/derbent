@@ -20,6 +20,7 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.IOrderedEntity;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
 
 /** CSprintItem - Progress tracking component owned by CActivity/CMeeting. 
@@ -150,8 +151,14 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	
 	/** Get the parent sprintable item (CActivity/CMeeting).
 	 * This is a transient back-reference set by the parent after loading.
-	 * @return the parent item, or null if not set */
-	public ISprintableItem getParentItem() { return parentItem; }
+	 * @return the parent item
+	 * @throws IllegalStateException if parentItem is null (indicates architectural violation) */
+	public ISprintableItem getParentItem() { 
+		Check.notNull(parentItem, "parentItem is @Transient and must be set by CActivity/CMeeting "
+				+ "after construction or loading from database. "
+				+ "This is a composition pattern requirement where parent owns child.");
+		return parentItem; 
+	}
 	
 	/** Set the parent sprintable item (CActivity/CMeeting).
 	 * Called by parent entity after it's loaded to enable widget display.
@@ -232,14 +239,12 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	}
 	
 	/** Get the parent item - alias for getParentItem() for compatibility.
-	 * Returns null if parentItem is not set (transient field not initialized).
-	 * @return the parent sprintable item, or null if not set */
+	 * @return the parent sprintable item
+	 * @throws IllegalStateException if parentItem is null (indicates architectural violation) */
 	public ISprintableItem getItem() {
-		if (parentItem == null) {
-			// Log warning - this should not happen in normal operation
-			// Parent should set this reference after loading
-			// LOGGER.debug("parentItem is null for CSprintItem id={}", getId());
-		}
+		Check.notNull(parentItem, "parentItem must be set by parent entity (CActivity/CMeeting) after loading. "
+				+ "This is a transient back-reference in the composition pattern. "
+				+ "Parent entity owns this CSprintItem via @OneToOne CASCADE.ALL.");
 		return parentItem;
 	}
 

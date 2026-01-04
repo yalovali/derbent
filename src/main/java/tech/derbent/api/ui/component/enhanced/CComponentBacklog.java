@@ -108,16 +108,12 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		// Set component ID before enabling value persistence
 		setId("backlog_" + project.getId());
 		// Enable value persistence for entity type selection in backlog
-		// Note: If no persisted value exists, the first entity type will be selected by default
+		// Note: If no persisted value exists, the parent class will select the first entity type by default
 		try {
 			enableValuePersistence();
 		} catch (final Exception e) {
 			LOGGER.warn("Could not enable value persistence for backlog: {}", e.getMessage());
-			// Fallback: set first entity type as default if no value is persisted
-			if (getSelectedEntityType() == null && !entityTypes.isEmpty()) {
-				setSelectedEntityType(entityTypes.get(0));
-				LOGGER.debug("Set default entity type: {}", entityTypes.get(0).getDisplayName());
-			}
+			// Parent class already handles defaulting to first entity type
 		}
 		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
 	}
