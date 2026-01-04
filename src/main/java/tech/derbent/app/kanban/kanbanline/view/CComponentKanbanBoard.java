@@ -366,7 +366,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	/** Loads items bound to the selected sprint. */
 	private void loadSprintItemsForSprint(final CSprint sprint) {
+		LOGGER.info("[DragDrop] loadSprintItemsForSprint called for sprint: {}", sprint != null ? sprint.getId() : "null");
 		if (sprint == null || sprint.getId() == null) {
+			LOGGER.info("[DragDrop] Sprint is null or has no ID, clearing items");
 			allSprintItems = new ArrayList<>();
 			sprintItems = new ArrayList<>();
 			filterToolbar.setAvailableItems(allSprintItems);
@@ -376,11 +378,13 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			// Sprint items already encode the project scope; use them as the single source of truth
 			// for the board cards to keep project selection aligned with the sprint filter.
 			final List<CSprintItem> sprintItemsRaw = sprintItemService.findByMasterIdWithItems(sprint.getId());
+			LOGGER.info("[DragDrop] Loaded {} sprint items from database for sprint {}", sprintItemsRaw != null ? sprintItemsRaw.size() : 0, sprint.getId());
 			allSprintItems = new ArrayList<>(sprintItemsRaw);
 			sprintItems = new ArrayList<>(allSprintItems);
+			LOGGER.info("[DragDrop] Set sprintItems list to {} items", sprintItems.size());
 			filterToolbar.setAvailableItems(allSprintItems);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load sprint items for Kanban board", e);
+			LOGGER.error("[DragDrop] Failed to load sprint items for Kanban board", e);
 			allSprintItems = new ArrayList<>();
 			sprintItems = new ArrayList<>();
 			filterToolbar.setAvailableItems(allSprintItems);
@@ -558,6 +562,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Rebuilds the column layout with current items. */
 	@Override
 	public void refreshComponent() {
+		LOGGER.info("[DragDrop] refreshComponent called - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
 		LOGGER.debug("Refreshing Kanban board component");
 		layoutColumns.removeAll();
 		selectedPostit = null;
@@ -602,6 +607,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			// With 5 columns: 10 refreshes → 5 refreshes = significant performance gain
 			// With 10 columns: 20 refreshes → 10 refreshes = 50% less CPU time
 			columnComponent.setValue(column);
+			LOGGER.info("[DragDrop] Setting {} items to column {}", sprintItems != null ? sprintItems.size() : "null", column.getName());
 			columnComponent.setItems(sprintItems);
 			layoutColumns.add(columnComponent);
 		}
@@ -617,12 +623,17 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	 * After reloading, filters are reapplied to maintain the current filter state.
 	 */
 	public void reloadSprintItems() {
+		LOGGER.info("[DragDrop] reloadSprintItems called");
 		LOGGER.debug("Reloading sprint items from database for Kanban board");
 		if (currentSprint != null && currentSprint.getId() != null) {
 			loadSprintItemsForSprint(currentSprint);
+			LOGGER.info("[DragDrop] After loadSprintItemsForSprint - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
 			// Reapply filters to maintain filter state after reload
 			final tech.derbent.api.ui.component.filter.CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
 			sprintItems = filterSprintItems(criteria);
+			LOGGER.info("[DragDrop] After filterSprintItems - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
+		} else {
+			LOGGER.warn("[DragDrop] reloadSprintItems called but currentSprint is null or has no ID");
 		}
 	}
 
