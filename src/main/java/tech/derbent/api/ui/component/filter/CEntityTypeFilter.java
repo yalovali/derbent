@@ -100,8 +100,9 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		comboBox = new ComboBox<>("Type");
 		comboBox.setItemLabelGenerator(TypeOption::getLabel);
 		comboBox.setItems(allTypesOption);
-		// DO NOT set value in constructor - let updateTypeOptions() handle initial value
-		// This allows persistence to work correctly by not overwriting saved values
+		// Set initial value BEFORE persistence is enabled (in parent's build() method)
+		// This ensures the default is set but can be overridden by persistence restoration
+		comboBox.setValue(allTypesOption);
 		comboBox.addValueChangeListener(event -> {
 			final TypeOption option = event.getValue() != null ? event.getValue() : allTypesOption;
 			notifyChangeListeners(option.getEntityClass());
