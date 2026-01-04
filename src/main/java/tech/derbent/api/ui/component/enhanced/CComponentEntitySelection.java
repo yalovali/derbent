@@ -525,6 +525,21 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		LOGGER.info("[ValuePersistence] CComponentEntitySelection: Value persistence enabled successfully with storage ID: {}", storageId);
 	}
 
+	/**
+	 * Selects the first entity type if no entity type is currently selected.
+	 * <p>
+	 * This method should be called BEFORE enabling value persistence to ensure
+	 * a default value is set. The persistence system will then save this as the
+	 * initial default on first load, and restore the user's selection on subsequent loads.
+	 * </p>
+	 */
+	protected void selectFirstEntityTypeIfNoneSelected() {
+		if (comboBoxEntityType != null && comboBoxEntityType.getValue() == null && !entityTypes.isEmpty()) {
+			LOGGER.info("[ValuePersistence] CComponentEntitySelection: Selecting first entity type as initial default: {}", entityTypes.get(0).getDisplayName());
+			comboBoxEntityType.setValue(entityTypes.get(0));
+		}
+	}
+
 	/** Returns the list of already selected items.
 	 * @return List of already selected items (can be empty, never null) */
 	public List<EntityClass> getAlreadySelectedItems() {

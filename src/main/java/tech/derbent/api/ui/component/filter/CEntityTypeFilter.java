@@ -152,6 +152,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 
 	/**
 	 * Refreshes the type options list from the provided items.
+	 * Also ensures Activity and Meeting types are always included.
 	 * 
 	 * @param items List of entities to analyze
 	 */
@@ -164,6 +165,25 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			}
 			final Class<?> entityClass = item.getClass();
 			options.putIfAbsent(entityClass, new TypeOption(resolveEntityTypeLabel(entityClass), entityClass));
+		}
+
+		// CRITICAL: Always include Activity and Meeting types even if not present in items
+		// This ensures these core types are always available in kanban board filters
+		try {
+			final Class<?> activityClass = Class.forName("tech.derbent.app.activities.domain.CActivity");
+			if (!options.containsKey(activityClass)) {
+				options.put(activityClass, new TypeOption(resolveEntityTypeLabel(activityClass), activityClass));
+			}
+		} catch (final ClassNotFoundException e) {
+			// Activity class not available - skip
+		}
+		try {
+			final Class<?> meetingClass = Class.forName("tech.derbent.app.meetings.domain.CMeeting");
+			if (!options.containsKey(meetingClass)) {
+				options.put(meetingClass, new TypeOption(resolveEntityTypeLabel(meetingClass), meetingClass));
+			}
+		} catch (final ClassNotFoundException e) {
+			// Meeting class not available - skip
 		}
 
 		// Build sorted list with "All types" first
@@ -185,18 +205,10 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			notifyChangeListeners(null);
 		}
 		
-		// If no value is currently set, select default (first entity type or "All types")
-		if (comboBox.getValue() == null && !typeOptions.isEmpty()) {
-			if (typeOptions.size() > 1) {
-				// Select first entity type (skip "All types" at index 0)
-				final TypeOption defaultOption = typeOptions.get(1);
-				comboBox.setValue(defaultOption);
-				notifyChangeListeners(defaultOption.getEntityClass());
-			} else {
-				// Only "All types" available
-				comboBox.setValue(allTypesOption);
-				notifyChangeListeners(null);
-			}
+		// If no value is currently set, select "All types" as default
+		if (comboBox.getValue() == null) {
+			comboBox.setValue(allTypesOption);
+			notifyChangeListeners(null);
 		}
 		// Value persistence will restore saved value after this method completes
 	}
