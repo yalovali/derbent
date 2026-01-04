@@ -122,6 +122,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		sprintItem.setCompletionDate(null); // Not completed yet
 		sprintItem.setStoryPoint(0L);
 		sprintItem.setResponsible(currentUser);
+		sprintItem.setItemOrder(1); // Default order
 		entity.setSprintItem(sprintItem);
 		
 		LOGGER.debug("Activity initialization complete with sprint item for progress tracking");

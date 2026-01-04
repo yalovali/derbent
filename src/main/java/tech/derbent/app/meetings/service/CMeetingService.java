@@ -113,6 +113,7 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		sprintItem.setCompletionDate(null);
 		sprintItem.setStoryPoint(0L);
 		sprintItem.setResponsible(currentUser);
+		sprintItem.setItemOrder(1); // Default order
 		entity.setSprintItem(sprintItem);
 		
 		LOGGER.debug("Meeting initialization complete with sprint item for progress tracking");

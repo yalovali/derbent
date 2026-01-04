@@ -19,15 +19,17 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.base.users.domain.CUser;
 
 /** CSprintItem - Progress tracking component owned by CActivity/CMeeting. 
  * Stores progress-related data (story points, dates, responsible person, progress %).
- * When sprint is null, the item is in the backlog. */
+ * When sprint is null, the item is in the backlog.
+ * Implements IOrderedEntity for ordering within sprints/backlog. */
 @Entity
 @Table (name = "csprint_items")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_item_id"))
-public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon {
+public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOrderedEntity {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - sprint items
 	public static final String DEFAULT_ICON = "vaadin:list-ol";
@@ -44,6 +46,18 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon {
 	// Set by parent after loading to enable display in widgets/grids
 	@Transient
 	private ISprintableItem parentItem;
+	
+	// Transient field for kanban board display - temporary column assignment
+	@Transient
+	private Long kanbanColumnId;
+	
+	// Item order within sprint or backlog
+	@Column (name = "item_order", nullable = true)
+	@AMetaData (
+			displayName = "Order", required = false, readOnly = false,
+			description = "Display order within sprint or backlog", hidden = false
+	)
+	private Integer itemOrder;
 	
 	// Sprint reference - nullable to support backlog items (sprint = null means in backlog)
 	@ManyToOne (fetch = FetchType.LAZY)
@@ -192,6 +206,35 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon {
 	
 	public void setResponsible(final CUser responsible) { 
 		this.responsible = responsible; 
+	}
+	
+	// IOrderedEntity implementation
+	
+	@Override
+	public Integer getItemOrder() { return itemOrder; }
+	
+	@Override
+	public void setItemOrder(final Integer itemOrder) { 
+		this.itemOrder = itemOrder; 
+	}
+	
+	// Kanban display support
+	
+	/** Get the kanban column ID for transient display purposes.
+	 * @return the kanban column ID, or null if not set */
+	public Long getKanbanColumnId() { return kanbanColumnId; }
+	
+	/** Set the kanban column ID for transient display purposes.
+	 * Used to track which kanban column this item is displayed in.
+	 * @param kanbanColumnId the kanban column ID */
+	public void setKanbanColumnId(final Long kanbanColumnId) { 
+		this.kanbanColumnId = kanbanColumnId; 
+	}
+	
+	/** Get the parent item - alias for getParentItem() for compatibility.
+	 * @return the parent sprintable item */
+	public ISprintableItem getItem() { 
+		return getParentItem(); 
 	}
 
 	@Override

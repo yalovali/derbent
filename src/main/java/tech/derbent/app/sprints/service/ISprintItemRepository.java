@@ -24,6 +24,12 @@ public interface ISprintItemRepository extends IAbstractRepository<CSprintItem> 
 	/** Find all sprint items by sprint ID.
 	 * @param masterId the sprint ID
 	 * @return list of sprint items */
-	@Query ("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.sprint WHERE e.sprint.id = :masterId")
+	@Query ("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.sprint WHERE e.sprint.id = :masterId ORDER BY e.itemOrder ASC NULLS LAST, e.id DESC")
 	List<CSprintItem> findByMasterId(@Param ("masterId") Long masterId);
+	
+	/** Find all sprint items by sprint (including null for backlog).
+	 * @param sprint the sprint (can be null for backlog items)
+	 * @return list of sprint items */
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.sprint = :sprint OR (e.sprint IS NULL AND :sprint IS NULL) ORDER BY e.itemOrder ASC NULLS LAST, e.id DESC")
+	List<CSprintItem> findBySprint(@Param ("sprint") tech.derbent.app.sprints.domain.CSprint sprint);
 }

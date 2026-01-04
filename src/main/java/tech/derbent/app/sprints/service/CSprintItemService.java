@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
@@ -15,10 +16,12 @@ import tech.derbent.base.session.service.ISessionService;
 /** CSprintItemService - Service class for managing sprint items. 
  * Sprint items are progress tracking components owned by CActivity/CMeeting.
  * They store progress data (story points, dates, responsible person, progress %).
+ * Implements IOrderedEntityService for reordering within sprints/backlog.
  */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable {
+public class CSprintItemService extends CAbstractService<CSprintItem> 
+		implements IEntityRegistrable, IOrderedEntityService<CSprintItem> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintItemService.class);
 
@@ -42,6 +45,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		sprintItem.setDueDate(null); // Will be set when initialized
 		sprintItem.setCompletionDate(null); // Not completed yet
 		sprintItem.setResponsible(null); // Will be set when initialized
+		sprintItem.setItemOrder(1); // Default order
 		return sprintItem;
 	}
 	
@@ -51,6 +55,71 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	public List<CSprintItem> findByMasterId(final Long masterId) {
 		Check.notNull(masterId, "Master ID cannot be null");
 		return getTypedRepository().findByMasterId(masterId);
+	}
+	
+	// IOrderedEntityService implementation
+	
+	@Override
+	public void moveItemUp(final CSprintItem item) {
+		Check.notNull(item, "Sprint item cannot be null");
+		final List<CSprintItem> items = getSiblingItems(item);
+		
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(item.getId()) && i > 0) {
+				final CSprintItem previousItem = items.get(i - 1);
+				final Integer currentOrder = item.getItemOrder();
+				final Integer previousOrder = previousItem.getItemOrder();
+				item.setItemOrder(previousOrder);
+				previousItem.setItemOrder(currentOrder);
+				save(item);
+				save(previousItem);
+				break;
+			}
+		}
+	}
+	
+	@Override
+	public void moveItemDown(final CSprintItem item) {
+		Check.notNull(item, "Sprint item cannot be null");
+		final List<CSprintItem> items = getSiblingItems(item);
+		
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getId().equals(item.getId()) && i < items.size() - 1) {
+				final CSprintItem nextItem = items.get(i + 1);
+				final Integer currentOrder = item.getItemOrder();
+				final Integer nextOrder = nextItem.getItemOrder();
+				item.setItemOrder(nextOrder);
+				nextItem.setItemOrder(currentOrder);
+				save(item);
+				save(nextItem);
+				break;
+			}
+		}
+	}
+	
+	/** Get sibling items (items in same sprint or backlog) sorted by itemOrder.
+	 * @param item the reference item
+	 * @return list of sibling items sorted by order */
+	private List<CSprintItem> getSiblingItems(final CSprintItem item) {
+		final List<CSprintItem> siblings;
+		
+		if (item.getSprint() == null) {
+			// Backlog items - find all items with no sprint
+			siblings = getTypedRepository().findBySprint(null);
+		} else {
+			// Sprint items - find all items in same sprint
+			siblings = getTypedRepository().findByMasterId(item.getSprint().getId());
+		}
+		
+		// Sort by itemOrder, nulls last
+		siblings.sort((a, b) -> {
+			if (a.getItemOrder() == null && b.getItemOrder() == null) return 0;
+			if (a.getItemOrder() == null) return 1;
+			if (b.getItemOrder() == null) return -1;
+			return a.getItemOrder().compareTo(b.getItemOrder());
+		});
+		
+		return siblings;
 	}
 
 	@Override
