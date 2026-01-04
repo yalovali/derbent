@@ -102,4 +102,23 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   ORDER BY si.itemOrder ASC
 			""")
 	List<CMeeting> listForSprint(@Param ("sprint") CSprint sprint);
+
+	/** Find meeting by sprint item ID.
+	 * @param sprintItemId the sprint item ID
+	 * @return the meeting if found */
+	@Query ("""
+			   SELECT m FROM #{#entityName} m
+			   LEFT JOIN FETCH m.project
+			   LEFT JOIN FETCH m.entityType et
+			   LEFT JOIN FETCH et.workflow
+			   LEFT JOIN FETCH m.status
+			   LEFT JOIN FETCH m.responsible
+			   LEFT JOIN FETCH m.relatedActivity
+			   LEFT JOIN FETCH m.attendees
+			   LEFT JOIN FETCH m.participants
+			   LEFT JOIN FETCH m.sprintItem si
+			   LEFT JOIN FETCH si.sprint
+			   WHERE si.id = :sprintItemId
+			""")
+	Optional<CMeeting> findBySprintItemId(@Param ("sprintItemId") Long sprintItemId);
 }

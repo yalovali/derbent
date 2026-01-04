@@ -146,17 +146,32 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	/** Applies current filters and refreshes the board. */
 	private void applyFilters() {
+		LOGGER.info("[Performance] applyFilters() called - stack trace to identify caller");
 		LOGGER.debug("Applying filters to Kanban board component");
 		final CKanbanLine currentLine = getValue();
 		Check.notNull(currentLine, "Kanban line must be set before applying filters");
 		final tech.derbent.api.ui.component.filter.CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
 		final CSprint sprint = criteria.getValue(tech.derbent.api.ui.component.filter.CSprintFilter.FILTER_KEY);
-		if (!isSameSprint(sprint)) {
+		
+		// PERFORMANCE OPTIMIZATION: Check if sprint changed before reloading from database
+		final boolean sprintChanged = !isSameSprint(sprint);
+		if (sprintChanged) {
+			LOGGER.info("[Performance] Sprint changed, reloading items from database");
 			currentSprint = sprint;
 			loadSprintItemsForSprint(currentSprint);
 		}
-		sprintItems = filterSprintItems(criteria);
-		refreshComponent();
+		
+		// PERFORMANCE OPTIMIZATION: Only filter and refresh if something actually changed
+		final List<CSprintItem> newFilteredItems = filterSprintItems(criteria);
+		final boolean itemsChanged = !newFilteredItems.equals(sprintItems);
+		
+		if (sprintChanged || itemsChanged) {
+			LOGGER.info("[Performance] Items changed, refreshing component");
+			sprintItems = newFilteredItems;
+			refreshComponent();
+		} else {
+			LOGGER.info("[Performance] No changes detected, skipping refresh");
+		}
 	}
 
 	/** Filters sprint items based on the provided criteria.
