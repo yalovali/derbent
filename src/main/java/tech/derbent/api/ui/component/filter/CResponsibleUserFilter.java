@@ -1,8 +1,9 @@
 package tech.derbent.api.ui.component.filter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.ui.component.basic.CComboBox;
-import tech.derbent.api.utils.CValueStorageHelper;
 
 /**
  * CResponsibleUserFilter - Responsible user/ownership filter component.
@@ -16,6 +17,7 @@ import tech.derbent.api.utils.CValueStorageHelper;
  */
 public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibleUserFilter.ResponsibleFilterMode> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CResponsibleUserFilter.class);
 	public static final String FILTER_KEY = "responsibleUser";
 
 	/**
@@ -47,6 +49,21 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 		comboBox.setItems(ResponsibleFilterMode.values());
 		comboBox.setItemLabelGenerator(ResponsibleFilterMode::getLabel);
 		comboBox.setValue(ResponsibleFilterMode.ALL);
+		
+		// Enable automatic persistence in CComboBox
+		comboBox.enablePersistence(
+			"responsibleUserFilter_" + FILTER_KEY,
+			modeName -> {
+				// Convert stored enum name back to enum value
+				try {
+					return ResponsibleFilterMode.valueOf(modeName);
+				} catch (final IllegalArgumentException e) {
+					return ResponsibleFilterMode.ALL; // Safe default
+				}
+			}
+		);
+		
+		// Notify listeners on value change
 		comboBox.addValueChangeListener(event -> {
 			final ResponsibleFilterMode value = event.getValue() != null ? event.getValue() : ResponsibleFilterMode.ALL;
 			notifyChangeListeners(value);
@@ -70,14 +87,8 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 
 	@Override
 	public void enableValuePersistence(final String storageId) {
-		// Enable persistence for Responsible Mode ComboBox
-		CValueStorageHelper.valuePersist_enable(comboBox, storageId + "_" + FILTER_KEY, modeName -> {
-			// Converter: find ResponsibleFilterMode by name
-			try {
-				return ResponsibleFilterMode.valueOf(modeName);
-			} catch (@SuppressWarnings("unused") final IllegalArgumentException e) {
-				return ResponsibleFilterMode.ALL;
-			}
-		});
+		// Persistence is now handled automatically by CComboBox.enablePersistence()
+		// This method remains for interface compatibility but does nothing
+		LOGGER.debug("[FilterPersistence] enableValuePersistence called with storageId: {} (CComboBox handles persistence)", storageId);
 	}
 }

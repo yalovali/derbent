@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CComboBox;
-import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 
 /**
@@ -36,6 +37,7 @@ import tech.derbent.api.utils.Check;
  */
 public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityTypeFilter.class);
 	public static final String FILTER_KEY = "entityType";
 	private static final String ALL_TYPES_LABEL = "All types";
 
@@ -100,9 +102,29 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		comboBox = new CComboBox<>("Type");
 		comboBox.setItemLabelGenerator(TypeOption::getLabel);
 		comboBox.setItems(allTypesOption);
-		// Set initial value BEFORE persistence is enabled (in parent's build() method)
-		// This ensures the default is set but can be overridden by persistence restoration
 		comboBox.setValue(allTypesOption);
+		
+		// Enable automatic persistence in CComboBox
+		comboBox.enablePersistence(
+			"entityTypeFilter_" + FILTER_KEY,
+			className -> {
+				// Find matching TypeOption by entity class name
+				if (className == null || className.isBlank()) {
+					return null;
+				}
+				return comboBox.getListDataView().getItems()
+					.filter(option -> {
+						if (option.getEntityClass() == null) {
+							return "AllTypes".equals(className);
+						}
+						return option.getEntityClass().getName().equals(className);
+					})
+					.findFirst()
+					.orElse(null);
+			}
+		);
+		
+		// Notify listeners on value change
 		comboBox.addValueChangeListener(event -> {
 			final TypeOption option = event.getValue() != null ? event.getValue() : allTypesOption;
 			notifyChangeListeners(option.getEntityClass());
@@ -241,18 +263,8 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 
 	@Override
 	public void enableValuePersistence(final String storageId) {
-		// Enable persistence for Type ComboBox using entity class name (more stable than label)
-		CValueStorageHelper.valuePersist_enable(comboBox, storageId + "_" + FILTER_KEY, className -> {
-			// Converter: find TypeOption by entity class name
-			if (className == null || className.isBlank()) {
-				return null;
-			}
-			return comboBox.getListDataView().getItems().filter(option -> {
-				if (option.getEntityClass() == null) {
-					return "AllTypes".equals(className); // Special case for "All types" option
-				}
-				return option.getEntityClass().getName().equals(className);
-			}).findFirst().orElse(null);
-		});
+		// Persistence is now handled automatically by CComboBox.enablePersistence()
+		// This method remains for interface compatibility but does nothing
+		LOGGER.debug("[FilterPersistence] enableValuePersistence called with storageId: {} (CComboBox handles persistence)", storageId);
 	}
 }
