@@ -494,7 +494,7 @@ public abstract class CBaseUITest {
 		}
 		final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID + "[opened], #" + EXCEPTION_DETAILS_DIALOG_ID + "[opened]");
 		if (exceptionDialog.count() > 0) {
-			throw new AssertionError("Exception dialog detected at " + controlPoint + "; failing fast.");
+			throw new AssertionError(buildExceptionDialogMessage(controlPoint, exceptionDialog.first()));
 		}
 		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
 		if (overlay.count() == 0) {
@@ -504,7 +504,32 @@ public abstract class CBaseUITest {
 				.or(overlay.filter(new Locator.FilterOptions().setHasText("Exception")))
 				.or(overlay.filter(new Locator.FilterOptions().setHasText("Error handling")));
 		if (errorOverlay.count() > 0) {
-			throw new AssertionError("Exception dialog detected at " + controlPoint + "; failing fast.");
+			throw new AssertionError(buildExceptionDialogMessage(controlPoint, errorOverlay.first()));
+		}
+	}
+
+	private String buildExceptionDialogMessage(final String controlPoint, final Locator dialog) {
+		final StringBuilder message = new StringBuilder("Exception dialog detected at ")
+				.append(controlPoint)
+				.append(" (url: ")
+				.append(safePageUrl())
+				.append(")");
+		try {
+			final String dialogText = dialog.textContent();
+			if (dialogText != null && !dialogText.trim().isEmpty()) {
+				message.append(": ").append(dialogText.trim());
+			}
+		} catch (final PlaywrightException e) {
+			message.append("; failed to read dialog text: ").append(e.getMessage());
+		}
+		return message.toString();
+	}
+
+	private String safePageUrl() {
+		try {
+			return page.url();
+		} catch (final PlaywrightException e) {
+			return "<unknown>";
 		}
 	}
 
@@ -1287,22 +1312,70 @@ public abstract class CBaseUITest {
 	/** Selects the first option from a Vaadin ComboBox identified by its DOM ID. */
 	protected void selectFirstComboBoxOptionById(final String elementId) {
 		Check.notBlank(elementId, "Element ID cannot be blank when selecting ComboBox option");
-		final Locator combo = locatorById(elementId);
+		final Locator host = locatorById(elementId);
+		Locator combo = host;
+		final Locator embeddedCombo = host.locator("vaadin-combo-box, c-navigable-combo-box, c-combo-box");
+		if (embeddedCombo.count() > 0) {
+			combo = embeddedCombo.first();
+		}
 		try {
 			combo.scrollIntoViewIfNeeded();
 		} catch (final PlaywrightException e) {
 			LOGGER.debug("Unable to scroll combo box {} into view: {}", elementId, e.getMessage());
 		}
-		combo.click();
+		final Locator input = combo.locator("input");
+		if (input.count() > 0) {
+			input.first().click();
+		} else {
+			combo.click();
+		}
 		Locator options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
 		for (int attempt = 0; attempt < 5 && options.count() == 0; attempt++) {
 			wait_500();
 			options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
 		}
 		if (options.count() == 0) {
+			try {
+				combo.press("ArrowDown");
+			} catch (final PlaywrightException e) {
+				LOGGER.debug("Unable to open combo box {} via ArrowDown: {}", elementId, e.getMessage());
+			}
+			wait_500();
+			options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
+		}
+		if (options.count() == 0) {
+			final Locator toggle = page.locator("#" + elementId + "::part(toggle-button)");
+			if (toggle.count() > 0) {
+				toggle.first().click();
+				wait_500();
+				options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
+			}
+		}
+		if (options.count() == 0) {
 			options = page.locator("vaadin-combo-box-item");
 		}
 		if (options.count() == 0) {
+			if (input.count() > 0) {
+				try {
+					input.first().fill("a");
+					wait_500();
+					options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
+				} catch (final PlaywrightException e) {
+					LOGGER.debug("Unable to filter combo box {} via input: {}", elementId, e.getMessage());
+				}
+			}
+		}
+		if (options.count() == 0) {
+			if (input.count() > 0) {
+				try {
+					input.first().press("ArrowDown");
+					input.first().press("Enter");
+					wait_500();
+					return;
+				} catch (final PlaywrightException e) {
+					LOGGER.debug("Unable to select combo box {} via keyboard: {}", elementId, e.getMessage());
+				}
+			}
 			throw new AssertionError("No options available for combo-box with id '" + elementId + "'");
 		}
 		options.first().click();

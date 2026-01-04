@@ -108,6 +108,16 @@ public class CCommentService extends CAbstractService<CComment> implements IEnti
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
+	@Transactional
+	public CComment save(final CComment entity) {
+		final CComment saved = super.save(entity);
+		if (saved.getId() == null) {
+			return saved;
+		}
+		return ((ICommentRepository) repository).findById(saved.getId()).orElse(saved);
+	}
+
+	@Override
 	public void initializeNewEntity(final CComment entity) {
 		super.initializeNewEntity(entity);
 		// Get current user from session

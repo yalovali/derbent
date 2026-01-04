@@ -57,10 +57,13 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private static final String CRUD_REFRESH_BUTTON_ID = "cbutton-refresh";
 	private static final String CRUD_SAVE_BUTTON_ID = "cbutton-save";
 	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
+	private static final String FIELD_ID_PREFIX = "field-";
 	private int screenshotCounter = 1;
 	private int pagesVisited = 0;
 	private int gridPagesFound = 0;
 	private int crudPagesFound = 0;
+	private final java.util.Map<String, String> lastCreatedValues = new java.util.HashMap<>();
+	private final java.util.Map<String, String> lastCreatedFieldIds = new java.util.HashMap<>();
 
 	@Test
 	@DisplayName ("✅ Comprehensive test of all CPageTestAuxillary navigation buttons")
@@ -72,15 +75,44 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("📝 Step 1: Logging into application...");
 			loginToApplication();
 			takeScreenshot(String.format("%03d-after-login", screenshotCounter++), false);
-			// Step 2: Navigate to CPageTestAuxillary
-			LOGGER.info("🧭 Step 2: Navigating to CPageTestAuxillary page...");
-			navigateToTestAuxillaryPage();
-			wait_2000(); // Give time for buttons to be populated
-			takeScreenshot(String.format("%03d-test-auxillary-page", screenshotCounter++), false);
-			// Step 3: Discover all navigation buttons dynamically
-			LOGGER.info("🔍 Step 3: Discovering navigation buttons...");
-			List<ButtonInfo> buttons = discoverNavigationButtons();
+			// Step 2: Discover navigation targets
+			final String targetRoute = System.getProperty("test.targetRoute");
+			final String targetButtonId = System.getProperty("test.targetButtonId");
+			final String routeKeyword = System.getProperty("test.routeKeyword");
+			List<ButtonInfo> buttons;
+			if (targetRoute != null && !targetRoute.isBlank()) {
+				LOGGER.info("🎯 Targeting single route from test.targetRoute: {}", targetRoute);
+				ButtonInfo info = new ButtonInfo();
+				info.index = 0;
+				info.id = targetButtonId != null ? targetButtonId : "direct-route";
+				info.title = targetRoute;
+				info.route = targetRoute;
+				buttons = List.of(info);
+			} else {
+				LOGGER.info("🧭 Step 2: Navigating to CPageTestAuxillary page...");
+				navigateToTestAuxillaryPage();
+				wait_2000(); // Give time for buttons to be populated
+				takeScreenshot(String.format("%03d-test-auxillary-page", screenshotCounter++), false);
+				// Step 3: Discover all navigation buttons dynamically
+				LOGGER.info("🔍 Step 3: Discovering navigation buttons...");
+				buttons = discoverNavigationButtons();
+				if (routeKeyword != null && !routeKeyword.isBlank()) {
+					final String keyword = routeKeyword.toLowerCase();
+					buttons = buttons.stream()
+							.filter(b -> (b.route != null && b.route.toLowerCase().contains(keyword))
+									|| (b.title != null && b.title.toLowerCase().contains(keyword)))
+							.toList();
+					LOGGER.info("🎯 Filtered buttons by test.routeKeyword: {}", routeKeyword);
+				}
+				if (targetButtonId != null && !targetButtonId.isBlank()) {
+					buttons = buttons.stream().filter(b -> targetButtonId.equals(b.id)).toList();
+					LOGGER.info("🎯 Filtered buttons by test.targetButtonId: {}", targetButtonId);
+				}
+			}
 			LOGGER.info("📊 Found {} navigation buttons to test", buttons.size());
+			if (buttons.isEmpty()) {
+				throw new AssertionError("No navigation buttons found for provided target parameters");
+			}
 			// Step 4: Test each button's target page
 			LOGGER.info("🧪 Step 4: Testing each navigation button's target page...");
 			LOGGER.info("Will test {} buttons by navigating directly to their routes", buttons.size());
@@ -114,7 +146,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			String url = "http://localhost:" + port + "/" + TEST_AUX_PAGE_ROUTE;
 			LOGGER.debug("Navigating to: {}", url);
 			page.navigate(url);
-			wait_1000();
+			wait_500();
 			// Verify page loaded
 			page.waitForSelector(BUTTON_SELECTOR + ", " + METADATA_SELECTOR, new Page.WaitForSelectorOptions().setTimeout(5000));
 			LOGGER.info("✅ Successfully navigated to CPageTestAuxillary page");
@@ -177,7 +209,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			String targetUrl = "http://localhost:" + port + "/" + button.route;
 			page.navigate(targetUrl);
 			try {
-				wait_2000(); // Wait for navigation and page load
+				wait_1000(); // Wait for navigation and page load
 			} catch (final AssertionError e) {
 				throw new AssertionError("Exception dialog detected while navigating to: " + button.title + " (" + button.route + ")", e);
 			}
@@ -419,8 +451,8 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("   ➕ Testing New button...");
 			Locator newButton = page.locator("#" + CRUD_NEW_BUTTON_ID);
 			if (newButton.count() > 0) {
-				newButton.first().click();
-				wait_1000();
+				locatorById(CRUD_NEW_BUTTON_ID).click();
+				wait_500();
 				LOGGER.info("      ✓ Clicked New button");
 				takeScreenshot(String.format("%03d-page-%s-new-clicked", screenshotCounter++, pageName), false);
 				// Check if a form or dialog appeared
@@ -450,7 +482,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("   🔄 Testing Refresh button...");
 			Locator refreshButton = page.locator("#" + CRUD_REFRESH_BUTTON_ID);
 			if (refreshButton.count() > 0) {
-				refreshButton.first().click();
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
 				wait_500();
 				performFailFastCheck("CRUD Refresh");
 				takeScreenshot(String.format("%03d-page-%s-refresh-clicked", screenshotCounter++, pageName), false);
@@ -468,12 +500,33 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			if (newButton.count() == 0) {
 				return;
 			}
-			newButton.first().click();
-			wait_1000();
-			populateEditableFields(pageName);
+			final boolean hasGrid = checkGridExists();
+			final int beforeCount = hasGrid ? getGridRowCountSafe() : -1;
+			locatorById(CRUD_NEW_BUTTON_ID).click();
+			wait_500();
+			final FieldValueResult createdResult = populateEditableFields(pageName);
+			final String createdMarker = createdResult.value;
+			if (createdMarker != null && !createdMarker.isBlank()) {
+				lastCreatedValues.put(pageName, createdMarker);
+			}
+			if (createdResult.fieldId != null && !createdResult.fieldId.isBlank()) {
+				lastCreatedFieldIds.put(pageName, createdResult.fieldId);
+			}
 			locatorById(CRUD_SAVE_BUTTON_ID).click();
-			wait_1000();
+			wait_500();
 			performFailFastCheck("CRUD Save New");
+			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
+				wait_500();
+			}
+			if (hasGrid) {
+				final int afterCount = getGridRowCountSafe();
+				if (afterCount <= beforeCount) {
+					LOGGER.warn("      ⚠️ Create did not increase grid row count ({} -> {})", beforeCount, afterCount);
+				} else {
+					LOGGER.info("      ✓ Created row ({} -> {})", beforeCount, afterCount);
+				}
+			}
 			takeScreenshot(String.format("%03d-page-%s-created", screenshotCounter++, pageName), false);
 		} catch (Exception e) {
 			LOGGER.warn("⚠️  Create + Save test failed: {}", e.getMessage());
@@ -492,6 +545,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				LOGGER.warn("      ⚠️ No editable field found for update workflow");
 				return;
 			}
+			final String beforeValue = readFieldValueById(fieldId);
 			if (isComboBoxById(fieldId)) {
 				selectFirstComboBoxOptionById(fieldId);
 			} else {
@@ -500,8 +554,18 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				LOGGER.info("      ✓ Updated field {} with {}", fieldId, updateValue);
 			}
 			locatorById(CRUD_SAVE_BUTTON_ID).click();
-			wait_1000();
+			wait_500();
 			performFailFastCheck("CRUD Save Update");
+			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
+				wait_500();
+			}
+			final String afterValue = readFieldValueById(fieldId);
+			if (afterValue != null && beforeValue != null && afterValue.trim().equals(beforeValue.trim())) {
+				LOGGER.warn("      ⚠️ Update value did not change for {}", fieldId);
+			} else {
+				LOGGER.info("      ✓ Updated value for {} ({} -> {})", fieldId, beforeValue, afterValue);
+			}
 			takeScreenshot(String.format("%03d-page-%s-updated", screenshotCounter++, pageName), false);
 		} catch (Exception e) {
 			LOGGER.warn("⚠️  Update + Save test failed: {}", e.getMessage());
@@ -510,7 +574,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 
 	private void testStatusChangeIfPresent(String pageName) {
 		try {
-			Locator statusFields = page.locator("[id^='field-'][id*='status']");
+			Locator statusFields = page.locator("[id^='" + FIELD_ID_PREFIX + "'][id*='status']");
 			if (statusFields.count() == 0) {
 				return;
 			}
@@ -526,10 +590,16 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				return;
 			}
 			locatorById(CRUD_SAVE_BUTTON_ID).click();
-			wait_1000();
+			wait_500();
+			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
+				wait_500();
+			}
 			final String after = readFieldValueById(statusFieldId);
-			if (after != null && !after.isBlank()) {
+			if (after != null && !after.isBlank() && !after.trim().equals(before == null ? "" : before.trim())) {
 				LOGGER.info("      ✓ Status updated: {} -> {}", before, after);
+			} else {
+				LOGGER.warn("      ⚠️ Status value did not change after save for {}", statusFieldId);
 			}
 			performFailFastCheck("CRUD Status Save");
 			takeScreenshot(String.format("%03d-page-%s-status-updated", screenshotCounter++, pageName), false);
@@ -541,21 +611,38 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private void testDeleteButton(String pageName) {
 		try {
 			LOGGER.info("   🗑️ Testing Delete button...");
-			final int beforeCount = getGridRowCount();
+			final int beforeCount = getGridRowCountSafe();
 			if (beforeCount == 0) {
 				LOGGER.warn("      ⚠️ No rows available to delete");
 				return;
 			}
-			testGridRowSelection(pageName);
+			final String createdMarker = lastCreatedValues.get(pageName);
+			if (createdMarker == null || createdMarker.isBlank()) {
+				LOGGER.warn("      ⚠️ No created marker found for {}, skipping delete to avoid removing sample data", pageName);
+				return;
+			}
+			final boolean selected = selectGridRowByCellText(createdMarker);
+			if (!selected) {
+				LOGGER.warn("      ⚠️ Created row not found for {}, skipping delete", pageName);
+				return;
+			}
+			final String createdFieldId = lastCreatedFieldIds.get(pageName);
+			if (createdFieldId != null && !createdFieldId.isBlank()) {
+				final String currentValue = readFieldValueById(createdFieldId);
+				if (currentValue == null || !currentValue.trim().equals(createdMarker.trim())) {
+					LOGGER.warn("      ⚠️ Form selection mismatch for {}, skipping delete", pageName);
+					return;
+				}
+			}
 			locatorById(CRUD_DELETE_BUTTON_ID).click();
 			wait_500();
 			confirmDialogIfPresent();
-			wait_1000();
+			wait_500();
 			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
 				locatorById(CRUD_REFRESH_BUTTON_ID).click();
 				wait_500();
 			}
-			final int afterCount = getGridRowCount();
+			final int afterCount = getGridRowCountSafe();
 			if (afterCount >= beforeCount) {
 				LOGGER.warn("      ⚠️ Delete did not reduce grid row count ({} -> {})", beforeCount, afterCount);
 			} else {
@@ -581,14 +668,14 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	}
 
 	private String findEditableFieldId() {
-		final Locator fields = page.locator("[id^='field-']");
+		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
 		for (int i = 0; i < fields.count(); i++) {
 			final Locator field = fields.nth(i);
 			final String fieldId = field.getAttribute("id");
 			if (fieldId == null || fieldId.isBlank()) {
 				continue;
 			}
-			if (isNonEditableFieldId(fieldId)) {
+			if (isSystemFieldId(fieldId) || isEntityIdField(fieldId)) {
 				continue;
 			}
 			if (field.locator("input, textarea").count() > 0) {
@@ -602,10 +689,12 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		return null;
 	}
 
-	private void populateEditableFields(final String pageName) {
+	private FieldValueResult populateEditableFields(final String pageName) {
 		final String baseValue = "Test-" + pageName;
-		final Locator fields = page.locator("[id^='field-']");
+		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
 		int textIndex = 0;
+		String primaryValue = null;
+		String primaryFieldId = null;
 		if (pageName.toLowerCase().contains("approval")) {
 			LOGGER.info("      🔎 Field IDs on {}:", pageName);
 			for (int i = 0; i < fields.count(); i++) {
@@ -615,13 +704,40 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				}
 			}
 		}
+		primaryFieldId = findPreferredFieldId();
+		if (primaryFieldId != null) {
+			final Locator primaryField = locatorById(primaryFieldId);
+			if (isFieldEditable(primaryField)) {
+				final String currentValue = readFieldValueById(primaryFieldId);
+				if (currentValue == null || currentValue.isBlank()) {
+					fillFieldById(primaryFieldId, baseValue);
+					LOGGER.info("      ✓ Filled primary {} with {}", primaryFieldId, baseValue);
+					primaryValue = baseValue;
+					textIndex++;
+				}
+			}
+		}
 		for (int i = 0; i < fields.count(); i++) {
 			final Locator field = fields.nth(i);
 			final String fieldId = field.getAttribute("id");
 			if (fieldId == null || fieldId.isBlank()) {
 				continue;
 			}
-			if (isNonEditableFieldId(fieldId)) {
+			if (fieldId.equals(primaryFieldId)) {
+				continue;
+			}
+			if (isSystemFieldId(fieldId)) {
+				continue;
+			}
+			if (isEntityIdField(fieldId)) {
+				if (isFieldEditable(field)) {
+					final String currentValue = readFieldValueById(fieldId);
+					if (currentValue == null || currentValue.isBlank()) {
+						final String idValue = baseValue + "-id";
+						fillFieldById(fieldId, idValue);
+						LOGGER.info("      ✓ Filled entity id {} with {}", fieldId, idValue);
+					}
+				}
 				continue;
 			}
 			if (isComboBoxById(fieldId)) {
@@ -639,6 +755,9 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 					final String value = textIndex == 0 ? baseValue : baseValue + "-" + textIndex;
 					fillFieldById(fieldId, value);
 					LOGGER.info("      ✓ Filled {} with {}", fieldId, value);
+					if (primaryValue == null) {
+						primaryValue = value;
+					}
 					textIndex++;
 				}
 			}
@@ -648,10 +767,15 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			if (fallbackField != null && !isComboBoxById(fallbackField)) {
 				fillFieldById(fallbackField, baseValue);
 				LOGGER.info("      ✓ Filled fallback {} with {}", fallbackField, baseValue);
+				primaryValue = baseValue;
+				primaryFieldId = fallbackField;
 			}
 		}
 		selectComboFieldByIdSubstring("approval-status");
 		selectComboFieldByIdSuffix("-order");
+		selectComboFieldByIdSuffix("-activity");
+		ensureRequiredComboSelections();
+		return new FieldValueResult(primaryFieldId, primaryValue);
 	}
 
 	private void selectComboFieldByIdSubstring(final String fragment) {
@@ -695,6 +819,10 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private boolean isComboBoxById(final String fieldId) {
 		try {
 			final Locator field = locatorById(fieldId);
+			final Locator embeddedCombo = field.locator("vaadin-combo-box, c-navigable-combo-box, c-combo-box");
+			if (embeddedCombo.count() > 0) {
+				return true;
+			}
 			final String tagName = field.evaluate("el => el.tagName.toLowerCase()").toString();
 			return tagName.contains("combo-box");
 		} catch (Exception e) {
@@ -702,14 +830,155 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
-	private boolean isNonEditableFieldId(final String fieldId) {
+	private boolean isSystemFieldId(final String fieldId) {
 		final String lower = fieldId.toLowerCase();
-		return lower.endsWith("-id") || lower.contains("-created") || lower.contains("-updated") || lower.contains("-version")
-				|| lower.contains("-createdby") || lower.contains("-modified");
+		return lower.contains("-created") || lower.contains("-updated") || lower.contains("-version") || lower.contains("-createdby")
+				|| lower.contains("-modified");
+	}
+
+	private boolean isEntityIdField(final String fieldId) {
+		return fieldId != null && fieldId.toLowerCase().endsWith("-id");
+	}
+
+	private boolean isFieldEditable(final Locator field) {
+		try {
+			if (!field.isEnabled()) {
+				return false;
+			}
+			if (field.getAttribute("readonly") != null || field.getAttribute("disabled") != null) {
+				return false;
+			}
+			final Locator input = field.locator("input, textarea");
+			if (input.count() > 0) {
+				if (!input.first().isEnabled()) {
+					return false;
+				}
+				final Object readonly = input.first().evaluate("el => el.hasAttribute('readonly') || el.hasAttribute('disabled')");
+				return readonly == null || Boolean.FALSE.equals(readonly);
+			}
+			return true;
+		} catch (Exception e) {
+			return true;
+		}
+	}
+
+	private void ensureRequiredComboSelections() {
+		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
+		for (int i = 0; i < fields.count(); i++) {
+			final Locator field = fields.nth(i);
+			final String fieldId = field.getAttribute("id");
+			if (fieldId == null || fieldId.isBlank()) {
+				continue;
+			}
+			if (!isComboBoxById(fieldId) || !isFieldEditable(field) || !isFieldRequired(field)) {
+				continue;
+			}
+			final String currentValue = readFieldValueById(fieldId);
+			if (currentValue != null && !currentValue.isBlank()) {
+				continue;
+			}
+			try {
+				selectFirstComboBoxOptionById(fieldId);
+				final String afterValue = readFieldValueById(fieldId);
+				if (afterValue == null || afterValue.isBlank()) {
+					LOGGER.warn("      ⚠️ Required combo {} still empty after selection", fieldId);
+				} else {
+					LOGGER.info("      ✓ Selected required combo {}", fieldId);
+				}
+			} catch (Exception e) {
+				LOGGER.warn("      ⚠️ Failed to select required combo {}: {}", fieldId, e.getMessage());
+			}
+		}
+	}
+
+	private boolean isFieldRequired(final Locator field) {
+		try {
+			final Object required = field.evaluate("el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true'");
+			if (Boolean.TRUE.equals(required)) {
+				return true;
+			}
+			final Locator input = field.locator("input");
+			if (input.count() > 0) {
+				final Object inputRequired = input.first()
+						.evaluate("el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true'");
+				return Boolean.TRUE.equals(inputRequired);
+			}
+			return Boolean.TRUE.equals(required);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private int getGridRowCountSafe() {
+		final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
+		if (grid.count() == 0) {
+			return 0;
+		}
+		final Locator rows = grid.locator("[part='row'], tr");
+		if (rows.count() > 0) {
+			return rows.count();
+		}
+		return grid.locator("vaadin-grid-cell-content, [part='cell']").count();
+	}
+
+	private boolean selectGridRowByCellText(final String text) {
+		if (text == null || text.isBlank()) {
+			return false;
+		}
+		try {
+			final Locator cells =
+					page.locator("vaadin-grid-cell-content, [part='cell']").filter(new Locator.FilterOptions().setHasText(text));
+			if (cells.count() == 0) {
+				return false;
+			}
+			cells.first().click();
+			wait_500();
+			LOGGER.info("      ✓ Selected row containing '{}'", text);
+			return true;
+		} catch (Exception e) {
+			LOGGER.debug("      ⚠️ Failed selecting row by '{}': {}", text, e.getMessage());
+			return false;
+		}
+	}
+
+	private static final class FieldValueResult {
+		private final String fieldId;
+		private final String value;
+
+		private FieldValueResult(final String fieldId, final String value) {
+			this.fieldId = fieldId;
+			this.value = value;
+		}
+	}
+
+	private String findPreferredFieldId() {
+		final String[] preferredSuffixes = { "-name", "-title", "-code" };
+		for (final String suffix : preferredSuffixes) {
+			final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "'][id$='" + suffix + "']");
+			if (fields.count() == 0) {
+				continue;
+			}
+			for (int i = 0; i < fields.count(); i++) {
+				final String fieldId = fields.nth(i).getAttribute("id");
+				if (fieldId == null || fieldId.isBlank()) {
+					continue;
+				}
+				if (isSystemFieldId(fieldId) || isEntityIdField(fieldId)) {
+					continue;
+				}
+				return fieldId;
+			}
+		}
+		return null;
 	}
 
 	private String selectDifferentComboBoxOptionById(final String elementId, final String currentValue) {
-		Locator combo = locatorById(elementId);
+		final Locator host = locatorById(elementId);
+		Locator combo = host;
+		final Locator embeddedCombo = host.locator("vaadin-combo-box, c-navigable-combo-box, c-combo-box");
+		if (embeddedCombo.count() > 0) {
+			combo = embeddedCombo.first();
+		}
 		combo.click();
 		wait_500();
 		Locator options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");

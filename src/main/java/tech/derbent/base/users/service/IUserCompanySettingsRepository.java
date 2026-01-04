@@ -3,6 +3,8 @@ package tech.derbent.base.users.service;
 import java.util.List;
 import java.util.Optional;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,10 @@ import tech.derbent.base.users.domain.CUserCompanySetting;
 /** Repository interface for CUserCompanySetting entity. Provides data access methods for user-company relationships. */
 @Repository
 public interface IUserCompanySettingsRepository extends IUserRelationshipRepository<CUserCompanySetting> {
+
+	@EntityGraph (attributePaths = { "user", "company", "role" })
+	@Query ("SELECT r FROM #{#entityName} r")
+	List<CUserCompanySetting> findAllForPageView(Sort sort);
 
 	@Override
 	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.id = :id")

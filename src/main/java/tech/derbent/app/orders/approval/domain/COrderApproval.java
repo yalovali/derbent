@@ -57,7 +57,7 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 			maxLength = 1000
 	)
 	private String comments;
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "order_id", nullable = false)
 	@AMetaData (
 			displayName = "Order", required = true, readOnly = false, description = "The order this approval belongs to", hidden = false,

@@ -275,7 +275,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			final String term = searchText == null ? "" : searchText.trim();
 			// For search queries, fetch all data with default sorting from database
 			final Sort defaultSort = getDefaultSort();
-			final List<EntityClass> all = repository.findAll(defaultSort);
+			final List<EntityClass> all = repository.findAllForPageView(defaultSort);
 			final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
 			final List<EntityClass> filtered =
 					term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();

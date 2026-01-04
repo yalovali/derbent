@@ -80,4 +80,14 @@ public class COrderApprovalService extends CEntityNamedService<COrderApproval> i
 			entity.setOrder(orders.get(0));
 		}
 	}
+
+	@Override
+	@Transactional
+	public COrderApproval save(final COrderApproval entity) {
+		final COrderApproval saved = super.save(entity);
+		if (saved.getId() == null) {
+			return saved;
+		}
+		return ((IOrderApprovalRepository) repository).findById(saved.getId()).orElse(saved);
+	}
 }

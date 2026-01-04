@@ -350,10 +350,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 					} else {
 						labelEntity.setText(value != null ? value.toString() : "");
 					}
-				} catch (final Exception e) {
-					LOGGER.error("Error setting entity column value: {}", e.getMessage());
-					labelEntity.setText("Error");
-				}
+					} catch (final Exception e) {
+						LOGGER.error("Error setting entity column value for {}.{}: {}", clazz.getSimpleName(), key, e.getMessage());
+						labelEntity.setText("Error");
+					}
 				return labelEntity;
 			}).setWidth(width).setFlexGrow(0).setSortable(true).setResizable(true);
 			return styleColumnHeader(column, header);
