@@ -232,9 +232,15 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	}
 	
 	/** Get the parent item - alias for getParentItem() for compatibility.
-	 * @return the parent sprintable item */
-	public ISprintableItem getItem() { 
-		return getParentItem(); 
+	 * Returns null if parentItem is not set (transient field not initialized).
+	 * @return the parent sprintable item, or null if not set */
+	public ISprintableItem getItem() {
+		if (parentItem == null) {
+			// Log warning - this should not happen in normal operation
+			// Parent should set this reference after loading
+			// LOGGER.debug("parentItem is null for CSprintItem id={}", getId());
+		}
+		return parentItem;
 	}
 
 	@Override
