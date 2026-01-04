@@ -195,19 +195,28 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	 * Now called only once, with results cached until items or column value changes.
 	 */
 	private List<CSprintItem> filterItems(final List<CSprintItem> items) {
-		LOGGER.debug("Filtering items for kanban column {}", getValue() != null ? getValue().getName() : "null");
+		LOGGER.debug("[DragDrop] Filtering items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		if (items == null || items.isEmpty()) {
+			LOGGER.debug("[DragDrop] No items to filter (items null or empty)");
 			return List.of();
 		}
 		final CKanbanColumn column = getValue();
 		if (column == null || column.getId() == null) {
+			LOGGER.debug("[DragDrop] Column value is null or has no ID");
 			return List.of();
 		}
 		final Long columnId = column.getId();
-		return items.stream().filter(Objects::nonNull).filter(item -> {
+		LOGGER.debug("[DragDrop] Filtering {} items for column ID {}", items.size(), columnId);
+		final List<CSprintItem> filtered = items.stream().filter(Objects::nonNull).filter(item -> {
 			final Long itemColumnId = item.getKanbanColumnId();
-			return itemColumnId != null && itemColumnId.equals(columnId);
+			final boolean matches = itemColumnId != null && itemColumnId.equals(columnId);
+			if (!matches && itemColumnId != null) {
+				LOGGER.debug("[DragDrop] Item {} has kanbanColumnId {} (not matching column {})", item.getId(), itemColumnId, columnId);
+			}
+			return matches;
 		}).toList();
+		LOGGER.info("[DragDrop] Column {} (id {}) filtered to {} items out of {} total", column.getName(), columnId, filtered.size(), items.size());
+		return filtered;
 	}
 	
 	/** Gets the cached filtered items for this column. Updates cache if needed.
