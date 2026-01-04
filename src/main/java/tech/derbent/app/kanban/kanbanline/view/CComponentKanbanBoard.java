@@ -204,8 +204,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			// Lookup: try explicit status mapping first, fall back to default column
 			final Long columnId = statusToColumnId.computeIfAbsent(statusId, key -> statusToColumnId.getOrDefault(-1L, -1L));
 			// Debug logging for troubleshooting status-to-column mappings
-			LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company id:{}", statusId, sprintableItem.getStatus().getName(),
-					statusToColumnId.get(statusId), columnId, sprintableItem.getStatus().getCompany().getId());
+			// LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company id:{}", statusId, sprintableItem.getStatus().getName(),
+			// statusToColumnId.get(statusId), columnId, sprintableItem.getStatus().getCompany().getId());
 			// No column found: log warning (indicates configuration issue)
 			if (columnId == -1L) {
 				LOGGER.warn("No kanban column found for status id {} in line {}", statusId, getValue() != null ? getValue().getName() : "null");
@@ -409,7 +409,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Filters items by responsible mode. */
 	private boolean matchesResponsibleFilter(final CSprintItem sprintItem,
 			final tech.derbent.api.ui.component.filter.CResponsibleUserFilter.ResponsibleFilterMode mode) {
-		LOGGER.debug("Checking responsible filter for Kanban board item {}", sprintItem != null ? sprintItem.getId() : "null");
+		// LOGGER.debug("Checking responsible filter for Kanban board item {}", sprintItem != null ? sprintItem.getId() : "null");
 		if (mode == null || mode == tech.derbent.api.ui.component.filter.CResponsibleUserFilter.ResponsibleFilterMode.ALL) {
 			return true;
 		}
@@ -510,8 +510,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 				// This should not happen due to validateStatusUniqueness(), but acts as safeguard
 				statusToColumnId.putIfAbsent(status.getId(), column.getId());
 				// Debug logging for troubleshooting status-to-column mappings
-				LOGGER.debug("Mapping status id {}:{} to column id {} company id:{}", status.getId(), status.getName(), column.getId(),
-						status.getCompany().getId());
+				// LOGGER.debug("Mapping status id {}:{} to column id {} company id:{}", status.getId(), status.getName(), column.getId(),
+				// status.getCompany().getId());
 			}
 		}
 		return statusToColumnId;
