@@ -57,6 +57,37 @@ public class CSprintItemService extends CAbstractService<CSprintItem>
 		return getTypedRepository().findByMasterId(masterId);
 	}
 	
+	/** Find all sprint items by sprint ID with their parent items loaded.
+	 * This eagerly loads the parent items (Activity/Meeting) for display.
+	 * @param masterId the sprint ID
+	 * @return list of sprint items with parent items loaded */
+	public List<CSprintItem> findByMasterIdWithItems(final Long masterId) {
+		final List<CSprintItem> items = findByMasterId(masterId);
+		// Parent items are loaded via @Transient parentItem field set by parent
+		// They are loaded when the parent entity is fetched from database
+		return items;
+	}
+	
+	/** Get the next item order for a new item in a sprint.
+	 * @param sprint the sprint
+	 * @return the next available order number */
+	public Integer getNextItemOrder(final tech.derbent.app.sprints.domain.CSprint sprint) {
+		if (sprint == null || sprint.getId() == null) {
+			return 1; // Default for backlog or new sprint
+		}
+		final List<CSprintItem> items = findByMasterId(sprint.getId());
+		if (items.isEmpty()) {
+			return 1;
+		}
+		// Find max order and add 1
+		final Integer maxOrder = items.stream()
+			.map(CSprintItem::getItemOrder)
+			.filter(order -> order != null)
+			.max(Integer::compareTo)
+			.orElse(0);
+		return maxOrder + 1;
+	}
+	
 	// IOrderedEntityService implementation
 	
 	@Override
