@@ -106,13 +106,17 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		setupComponent();
 		setDynamicHeight("600px");
 		// Set component ID before enabling value persistence
-		setId("backlog_" + project.getId());
+		final String componentId = "backlog_" + project.getId();
+		setId(componentId);
+		LOGGER.info("[ValuePersistence] CComponentBacklog: Setting component ID to '{}' for project {}", componentId, project.getId());
 		// Enable value persistence for entity type selection in backlog
 		// Note: If no persisted value exists, the parent class will select the first entity type by default
 		try {
+			LOGGER.info("[ValuePersistence] CComponentBacklog: Enabling value persistence for backlog with ID '{}'", componentId);
 			enableValuePersistence();
+			LOGGER.info("[ValuePersistence] CComponentBacklog: Value persistence enabled successfully for backlog with ID '{}'", componentId);
 		} catch (final Exception e) {
-			LOGGER.warn("Could not enable value persistence for backlog: {}", e.getMessage());
+			LOGGER.error("[ValuePersistence] CComponentBacklog: Failed to enable value persistence for backlog: {}", e.getMessage(), e);
 			// Parent class already handles defaulting to first entity type
 		}
 		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);

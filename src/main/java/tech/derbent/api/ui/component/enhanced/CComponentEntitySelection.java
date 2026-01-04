@@ -504,17 +504,25 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			);
 		}
 		
-		LOGGER.debug("Enabling value persistence for entity selection with storage ID: {}", getStorageId());
+		final String storageId = getStorageId();
+		LOGGER.info("[ValuePersistence] CComponentEntitySelection: Enabling value persistence with storage ID: {}", storageId);
 		if (comboBoxEntityType == null) {
-			LOGGER.warn("Cannot enable value persistence - comboBox not initialized");
+			LOGGER.warn("[ValuePersistence] CComponentEntitySelection: Cannot enable value persistence - comboBox not initialized");
 			return;
 		}
 		// Use helper to enable automatic persistence
-		CValueStorageHelper.valuePersist_enable(comboBoxEntityType, getStorageId(), displayName -> {
+		CValueStorageHelper.valuePersist_enable(comboBoxEntityType, storageId, displayName -> {
 			// Converter: find entity type by display name
-			return entityTypes.stream().filter(config -> config.getDisplayName().equals(displayName)).findFirst().orElse(null);
+			LOGGER.info("[ValuePersistence] CComponentEntitySelection: Converting stored displayName '{}' to EntityTypeConfig", displayName);
+			final EntityTypeConfig<?> result = entityTypes.stream().filter(config -> config.getDisplayName().equals(displayName)).findFirst().orElse(null);
+			if (result != null) {
+				LOGGER.info("[ValuePersistence] CComponentEntitySelection: Converted displayName '{}' to EntityTypeConfig: {}", displayName, result.getDisplayName());
+			} else {
+				LOGGER.warn("[ValuePersistence] CComponentEntitySelection: Failed to convert displayName '{}' - no matching EntityTypeConfig found", displayName);
+			}
+			return result;
 		});
-		LOGGER.debug("Value persistence enabled for entity selection with storage ID: {}", getStorageId());
+		LOGGER.info("[ValuePersistence] CComponentEntitySelection: Value persistence enabled successfully with storage ID: {}", storageId);
 	}
 
 	/** Returns the list of already selected items.
