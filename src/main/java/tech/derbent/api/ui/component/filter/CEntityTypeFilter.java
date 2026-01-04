@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.combobox.ComboBox;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 
@@ -84,7 +84,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		}
 	}
 
-	private final ComboBox<TypeOption> comboBox;
+	private final CComboBox<TypeOption> comboBox;
 	private final TypeOption allTypesOption;
 
 	/**
@@ -97,7 +97,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 	public CEntityTypeFilter() {
 		super(FILTER_KEY);
 		allTypesOption = new TypeOption(ALL_TYPES_LABEL, null);
-		comboBox = new ComboBox<>("Type");
+		comboBox = new CComboBox<>("Type");
 		comboBox.setItemLabelGenerator(TypeOption::getLabel);
 		comboBox.setItems(allTypesOption);
 		// Set initial value BEFORE persistence is enabled (in parent's build() method)

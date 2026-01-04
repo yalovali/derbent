@@ -1,7 +1,7 @@
 package tech.derbent.api.ui.component.filter;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.combobox.ComboBox;
+import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.utils.CValueStorageHelper;
 
 /**
@@ -36,14 +36,14 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 		}
 	}
 
-	private final ComboBox<ResponsibleFilterMode> comboBox;
+	private final CComboBox<ResponsibleFilterMode> comboBox;
 
 	/**
 	 * Creates a responsible user filter.
 	 */
 	public CResponsibleUserFilter() {
 		super(FILTER_KEY);
-		comboBox = new ComboBox<>("Responsible");
+		comboBox = new CComboBox<>("Responsible");
 		comboBox.setItems(ResponsibleFilterMode.values());
 		comboBox.setItemLabelGenerator(ResponsibleFilterMode::getLabel);
 		comboBox.setValue(ResponsibleFilterMode.ALL);
