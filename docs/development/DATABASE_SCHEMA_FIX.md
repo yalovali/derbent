@@ -1,53 +1,44 @@
-# Database Schema Fix for Composition Pattern Refactoring
+# Database Reset for Development
 
 ## Problem
 
-After refactoring CActivity/CMeeting to use composition pattern with CSprintItem, the PostgreSQL database still has the old `item_id` column with a NOT NULL constraint. This causes data initialization errors:
+After major refactoring (like the composition pattern changes), the PostgreSQL database may have old columns or constraints that cause errors:
 
 ```
 ERROR: null value in column "item_id" of relation "csprint_items" violates not-null constraint
 ```
 
-## Simple Solution: Drop and Recreate Database
+## Solution: Drop and Recreate Database
 
-**EASIEST FIX**: Use the reset-db profile to drop and recreate the entire PostgreSQL database:
+**Simple fix**: Let Hibernate drop and recreate the entire database:
 
 ```bash
 # WARNING: This will DELETE ALL DATA and recreate schema!
 mvn spring-boot:run -Dspring-boot.run.profiles=reset-db
 ```
 
-This uses `spring.jpa.hibernate.ddl-auto=create-drop` to:
-1. Drop all tables
-2. Recreate schema from current entities
-3. Initialize sample data
-4. No old columns remain
+**What happens**:
+1. Hibernate drops ALL tables
+2. Hibernate recreates schema from entities
+3. Sample data is initialized automatically
+4. Clean database with correct schema
 
-**When to use**: Development environment when you want a clean database with the new schema.
+**That's it!** No SQL scripts, no migrations, just Hibernate doing its job.
 
-## Alternative: Manual SQL Commands (Keep Data)
+## When to Use
 
-If you need to preserve existing data:
+✅ **Development**: After major code changes, testing, or when schema is broken  
+❌ **Production**: Never! Use proper migration tools (Flyway/Liquibase)
 
-```sql
--- Connect to your database and run:
-ALTER TABLE csprint_items DROP COLUMN IF EXISTS item_id CASCADE;
-ALTER TABLE csprint_items DROP COLUMN IF EXISTS item_type CASCADE;
-ALTER TABLE csprint_items ALTER COLUMN sprint_id DROP NOT NULL;
-```
+## Configuration
 
-## Temporary Change (One-Time Reset)
-
-Edit `application.properties` temporarily:
+The `reset-db` profile in `application-reset-db.properties`:
 ```properties
-# Change from:
-spring.jpa.hibernate.ddl-auto=update
-
-# To (temporarily):
-spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.hibernate.ddl-auto=create-drop  # Drop and recreate
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 ```
 
-Run the application once, then change it back to `update`.
+That's all you need!
 
 ## What Changed in the Refactoring
 
