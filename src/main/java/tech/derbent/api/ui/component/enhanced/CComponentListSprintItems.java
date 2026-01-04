@@ -81,15 +81,18 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		grid1.addIdColumn(CSprintItem::getId, "ID", "id");
 		// Use expanding column for Name to fill remaining width
 		grid1.addShortTextColumn(item -> {
-			return item.getItem().getName();
+			final ISprintableItem parent = item.getItem();
+			return parent != null ? parent.getName() : "<no parent>";
 		}, "Name", "name");
 		grid1.addExpandingLongTextColumn(item -> {
-			return item.getItem().getDescriptionShort();
+			final ISprintableItem parent = item.getItem();
+			return parent != null ? parent.getDescriptionShort() : "";
 		}, "description", "Description");
-		grid1.addStoryPointColumn(CSprintItem::getItem, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
+		grid1.addStoryPointColumn(item -> item.getItem(), this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
 		try {
 			grid1.addEntityColumn(item -> {
-				return item.getItem().getStatus();
+				final ISprintableItem parent = item.getItem();
+				return parent != null ? parent.getStatus() : null;
 			}, "Status", "status", CSprintItem.class);
 		} catch (final Exception e) {
 			LOGGER.error("Error adding status column: {}", e.getMessage(), e);
