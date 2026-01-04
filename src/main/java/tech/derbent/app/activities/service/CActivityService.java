@@ -52,7 +52,9 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public void delete(final CActivity activity) {
 		Check.notNull(activity, "Activity cannot be null");
 		Check.notNull(activity.getId(), "Activity ID cannot be null");
-		detachSprintItemIfPresent(activity);
+		// The OneToOne relationship with cascade = CascadeType.ALL and orphanRemoval = true
+		// will automatically delete the sprint item when the activity is deleted.
+		// No need to manually detach and save, which would violate @NotNull constraint.
 		super.delete(activity);
 	}
 
@@ -63,16 +65,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		final CActivity activity =
 				repository.findById(id).orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Activity not found: " + id));
 		delete(activity);
-	}
-
-	private void detachSprintItemIfPresent(final CActivity activity) {
-		final CSprintItem sprintItem = activity.getSprintItem();
-		if (sprintItem == null || sprintItem.getId() == null) {
-			return;
-		}
-		activity.setSprintItem(null);
-		repository.saveAndFlush(activity);
-		sprintItemService.delete(sprintItem.getId());
 	}
 
 	@Override
