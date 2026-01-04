@@ -362,6 +362,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		if (sprintItem == null) {
 			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
 		}
+		// Set back-reference so sprintItem can access parent for display
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
 	}
 
 	/** Check if the activity is completed.

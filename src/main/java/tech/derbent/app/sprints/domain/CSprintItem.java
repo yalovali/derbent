@@ -2,6 +2,7 @@ package tech.derbent.app.sprints.domain;
 
 import java.time.LocalDate;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,24 +13,21 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
-import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.base.users.domain.CUser;
 
-/** CSprintItem - Progress tracking entity for Sprint-ProjectItem relationships. 
- * Represents an item (Activity, Meeting, etc.) with its progress-related data (story points, dates, responsible person, progress %).
- * The business event entity (CActivity, CMeeting) contains event details while CSprintItem contains progress tracking.
+/** CSprintItem - Progress tracking component owned by CActivity/CMeeting. 
+ * Stores progress-related data (story points, dates, responsible person, progress %).
  * When sprint is null, the item is in the backlog. */
 @Entity
 @Table (name = "csprint_items")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_item_id"))
-public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntity, IHasIcon {
+public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - sprint items
 	public static final String DEFAULT_ICON = "vaadin:list-ol";
@@ -41,35 +39,11 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprintItem> componentWidget = null;
-	// Transient field - loaded dynamically at runtime from itemId and itemType
+	
+	// Transient back-reference to parent entity (CActivity/CMeeting)
+	// Set by parent after loading to enable display in widgets/grids
 	@Transient
-	private ISprintableItem item;
-	// Store only the ID of the project item - loaded dynamically at runtime
-	@Column (name = "item_id", nullable = false)
-	@NotNull (message = "Project item ID is required")
-	@AMetaData (
-			displayName = "Item ID", required = true, readOnly = false, description = "ID of the project item (activity, meeting, etc.)",
-			hidden = false
-	)
-	private Long itemId;
-	@Column (name = "itemOrder", nullable = false)
-	@Min (value = 1, message = "Line order must be at least 1")
-	@Max (value = 999, message = "Line order cannot exceed 999")
-	@NotNull (message = "Item order is required")
-	@AMetaData (
-			displayName = "Order", required = true, readOnly = false, description = "Display order of this item in the sprint", hidden = false,
-			defaultValue = "0"
-	)
-	private Integer itemOrder = 0;
-	@Column (name = "item_type", nullable = false, length = 50)
-	@NotNull (message = "Item type is required")
-	@AMetaData (
-			displayName = "Item Type", required = true, readOnly = false, description = "Type of the project item (CActivity, CMeeting, etc.)",
-			hidden = false, maxLength = 50
-	)
-	private String itemType;
-	@Transient
-	private Long kanbanColumnId;
+	private ISprintableItem parentItem;
 	
 	// Sprint reference - nullable to support backlog items (sprint = null means in backlog)
 	@ManyToOne (fetch = FetchType.LAZY)
@@ -141,91 +115,38 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 		super();
 	}
 
-	/** Constructor with sprint and item (for backward compatibility).
-	 * @param sprint the sprint
-	 * @param item   the project item */
-	public CSprintItem(final CSprint sprint, final ISprintableItem item) {
-		super();
-		this.sprint = sprint;
-		itemId = item.getId();
-		itemType = item.getClass().getSimpleName();
-		this.item = item;
-		status = item.getStatus();
-		item.setSprintItem(this);
-	}
-
-	/** Constructor with sprint, item, and order (for backward compatibility).
-	 * @param sprint    the sprint
-	 * @param item      the project item
-	 * @param itemOrder the display order */
-	public CSprintItem(final CSprint sprint, final ISprintableItem item, final Integer itemOrder) {
-		this(sprint, item);
-		this.itemOrder = itemOrder;
-	}
-
 	@Override
-	public String getColor() { // TODO Auto-generated method stub
-		return ((IHasIcon) getItem()).getColor();
+	public String getColor() { 
+		return DEFAULT_COLOR;
 	}
 
 	public CComponentWidgetEntity<CSprintItem> getComponentWidget() { return componentWidget; }
 
 	@Override
-	public Icon getIcon() { return ((IHasIcon) getItem()).getIcon(); }
-
-	@Override
-	public String getIconString() { // TODO Auto-generated method stub
-		return ((IHasIcon) getItem()).getIconString();
+	public Icon getIcon() { 
+		return new Icon(VaadinIcon.LIST_OL);
 	}
 
-	/** Get the project item. This is a transient field that must be loaded at runtime. Use CSprintItemService.loadItem() to populate this field.
-	 * @return the project item, or null if not loaded */
-	public ISprintableItem getItem() { return item; }
-
-	public Long getItemId() { return itemId; }
-
 	@Override
-	public Integer getItemOrder() { return itemOrder; }
-
-	public String getItemType() { return itemType; }
-
-	/** Returns the assigned kanban column id for UI placement. */
-	public Long getKanbanColumnId() { return kanbanColumnId; }
+	public String getIconString() { 
+		return DEFAULT_ICON;
+	}
 
 	public CSprint getSprint() { return sprint; }
-
-	public CProjectItemStatus getStatus() {
-		if (item == null) {
-			return null;
-		}
-		return item.getStatus();
-	}
+	
+	/** Get the parent sprintable item (CActivity/CMeeting).
+	 * This is a transient back-reference set by the parent after loading.
+	 * @return the parent item, or null if not set */
+	public ISprintableItem getParentItem() { return parentItem; }
+	
+	/** Set the parent sprintable item (CActivity/CMeeting).
+	 * Called by parent entity after it's loaded to enable widget display.
+	 * @param parentItem the parent item */
+	public void setParentItem(final ISprintableItem parentItem) { this.parentItem = parentItem; }
 
 	@Override
 	public void setColor(String color) {
-		// TODO Auto-generated method stub
-	}
-
-	/** Set the project item. This also updates itemId and itemType.
-	 * @param item the project item */
-	public void setItem(final ISprintableItem item) {
-		this.item = item;
-		if (item != null) {
-			itemId = item.getId();
-			itemType = item.getClass().getSimpleName();
-		}
-	}
-
-	public void setItemId(final Long itemId) { this.itemId = itemId; }
-
-	@Override
-	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
-
-	public void setItemType(final String itemType) { this.itemType = itemType; }
-
-	/** Sets the assigned kanban column id for UI placement. */
-	public void setKanbanColumnId(final Long kanbanColumnId) {
-		this.kanbanColumnId = kanbanColumnId;
+		// Not used
 	}
 
 	public void setSprint(final CSprint sprint) { this.sprint = sprint; }
@@ -275,7 +196,10 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IOrderedEntit
 
 	@Override
 	public String toString() {
-		return String.format("CSprintItem{id=%d, sprint=%s, itemId=%d, itemType=%s, order=%d}", getId(), sprint != null ? sprint.getName() : "null",
-				itemId, itemType, itemOrder);
+		return String.format("CSprintItem{id=%d, sprint=%s, storyPoint=%d, progress=%d%%}", 
+				getId(), 
+				sprint != null ? sprint.getName() : "backlog",
+				storyPoint != null ? storyPoint : 0,
+				progressPercentage != null ? progressPercentage : 0);
 	}
 }

@@ -157,6 +157,10 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		if (sprintItem == null) {
 			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
 		}
+		// Set back-reference so sprintItem can access parent for display
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
 	}
 
 	public CMeeting(final String name, final CProject project) {
@@ -164,6 +168,10 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		// Ensure sprint item is always created for composition pattern
 		if (sprintItem == null) {
 			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+		}
+		// Set back-reference so sprintItem can access parent for display
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
 		}
 	}
 
@@ -177,6 +185,10 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		// Ensure sprint item is always created for composition pattern
 		if (sprintItem == null) {
 			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+		}
+		// Set back-reference so sprintItem can access parent for display
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
 		}
 	}
 
