@@ -63,8 +63,38 @@ public class CSprintItemService extends CAbstractService<CSprintItem>
 	 * @return list of sprint items with parent items loaded */
 	public List<CSprintItem> findByMasterIdWithItems(final Long masterId) {
 		final List<CSprintItem> items = findByMasterId(masterId);
-		// Parent items are loaded via @Transient parentItem field set by parent
-		// They are loaded when the parent entity is fetched from database
+		
+		// CRITICAL: Load parent items and set the transient back-reference
+		// Sprint items have a transient @Transient parentItem field that must be populated
+		// after loading from database for the composition pattern to work correctly
+		final tech.derbent.app.activities.service.IActivityRepository activityRepo = 
+			tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.activities.service.IActivityRepository.class);
+		final tech.derbent.app.meetings.service.IMeetingRepository meetingRepo = 
+			tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.meetings.service.IMeetingRepository.class);
+		
+		for (final CSprintItem sprintItem : items) {
+			if (sprintItem.getId() != null) {
+				try {
+					// Try to find activity first
+					final java.util.Optional<tech.derbent.app.activities.domain.CActivity> activity = 
+						activityRepo.findBySprintItemId(sprintItem.getId());
+					if (activity.isPresent()) {
+						sprintItem.setParentItem(activity.get());
+						continue;
+					}
+					
+					// If not an activity, try meeting
+					final java.util.Optional<tech.derbent.app.meetings.domain.CMeeting> meeting = 
+						meetingRepo.findBySprintItemId(sprintItem.getId());
+					if (meeting.isPresent()) {
+						sprintItem.setParentItem(meeting.get());
+					}
+				} catch (final Exception e) {
+					LOGGER.error("[DragDrop] Failed to load parent item for sprint item {}", sprintItem.getId(), e);
+				}
+			}
+		}
+		
 		return items;
 	}
 	

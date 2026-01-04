@@ -108,4 +108,21 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			ORDER BY si.itemOrder ASC
 			""")
 	List<CActivity> listForSprint(@Param ("sprint") CSprint sprint);
+
+	/** Find activity by sprint item ID.
+	 * @param sprintItemId the sprint item ID
+	 * @return the activity if found */
+	@Query ("""
+			SELECT a FROM #{#entityName} a
+			LEFT JOIN FETCH a.project
+			LEFT JOIN FETCH a.assignedTo
+			LEFT JOIN FETCH a.createdBy
+			LEFT JOIN FETCH a.entityType et
+			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH a.status
+			LEFT JOIN FETCH a.sprintItem si
+			LEFT JOIN FETCH si.sprint
+			WHERE si.id = :sprintItemId
+			""")
+	Optional<CActivity> findBySprintItemId(@Param ("sprintItemId") Long sprintItemId);
 }

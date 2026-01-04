@@ -212,39 +212,46 @@ public class CValueStorageHelper {
 		final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
 		// Mark component as having auto-persistence enabled
 		ComponentUtil.setData(vaadinComponent, STORAGE_ENABLED_KEY, true);
+		LOGGER.info("[ValuePersistence] CValueStorageHelper: Enabling persistence for storage ID: {}", storageId);
 		// Add value change listener to save on change
 		component.addValueChangeListener(event -> {
 			if (!event.isFromClient()) {
 				// Skip programmatic changes to avoid saving during restore
+				LOGGER.debug("[ValuePersistence] CValueStorageHelper: Skipping save for storage ID '{}' - change not from client", storageId);
 				return;
 			}
 			try {
 				final T value = event.getValue();
+				LOGGER.info("[ValuePersistence] CValueStorageHelper: Value changed from client for storage ID '{}', value: {}", storageId, value);
 				if (value != null) {
 					final String serialized = serializer.toString(value);
 					if (serialized != null) {
 						sessionService.setSessionValue(storageId, serialized);
-						LOGGER.debug("Auto-saved value for storage ID: {}", storageId);
+						LOGGER.info("[ValuePersistence] CValueStorageHelper: Auto-saved value '{}' for storage ID: {}", serialized, storageId);
 					}
 				} else {
 					sessionService.removeSessionValue(storageId);
-					LOGGER.debug("Cleared stored value for storage ID: {}", storageId);
+					LOGGER.info("[ValuePersistence] CValueStorageHelper: Cleared stored value for storage ID: {}", storageId);
 				}
 			} catch (final Exception e) {
-				LOGGER.error("Error auto-saving value for storage ID: {}", storageId, e);
+				LOGGER.error("[ValuePersistence] CValueStorageHelper: Error auto-saving value for storage ID: {}", storageId, e);
 			}
 		});
 		// Add attach listener to restore value when component is added to UI
-		vaadinComponent.addAttachListener(event -> valuePersist_restoreValue(component, storageId, converter, sessionService));
+		vaadinComponent.addAttachListener(event -> {
+			LOGGER.info("[ValuePersistence] CValueStorageHelper: Component attached for storage ID '{}', restoring value", storageId);
+			valuePersist_restoreValue(component, storageId, converter, sessionService);
+		});
 		// Add detach listener to clean up (optional - could be removed if values should persist)
 		vaadinComponent.addDetachListener(event -> {
-			LOGGER.debug("Component detached, stored value remains for storage ID: {}", storageId);
+			LOGGER.info("[ValuePersistence] CValueStorageHelper: Component detached for storage ID '{}', stored value remains", storageId);
 		});
 		// If component is already attached, restore value immediately
 		if (vaadinComponent.isAttached()) {
+			LOGGER.info("[ValuePersistence] CValueStorageHelper: Component already attached for storage ID '{}', restoring value immediately", storageId);
 			valuePersist_restoreValue(component, storageId, converter, sessionService);
 		}
-		LOGGER.debug("Enabled auto-persistence for component with storage ID: {}", storageId);
+		LOGGER.info("[ValuePersistence] CValueStorageHelper: Enabled auto-persistence for component with storage ID: {}", storageId);
 	}
 
 	/** Enables automatic value persistence for a TextField.
@@ -286,29 +293,32 @@ public class CValueStorageHelper {
 			final ISessionService sessionService) {
 		try {
 			final Optional<String> storedValue = sessionService.getSessionValue(storageId);
+			LOGGER.info("[ValuePersistence] CValueStorageHelper: Restoring value for storage ID '{}', storedValue present: {}", storageId, storedValue.isPresent());
 			if (storedValue.isPresent()) {
+				LOGGER.info("[ValuePersistence] CValueStorageHelper: Found stored value '{}' for storage ID '{}'", storedValue.get(), storageId);
 				final T value = converter.fromString(storedValue.get());
 				if (value != null) {
 					// Set value programmatically - this will NOT trigger isFromClient() listeners
 					// Components should check event.isFromClient() to distinguish user actions from programmatic updates
 					component.setValue(value);
-					LOGGER.debug("Auto-restored value for storage ID: {}", storageId);
+					LOGGER.info("[ValuePersistence] CValueStorageHelper: Auto-restored value '{}' for storage ID: {}", value, storageId);
 				} else {
-					LOGGER.debug("Could not convert stored value for storage ID: {}", storageId);
+					LOGGER.warn("[ValuePersistence] CValueStorageHelper: Could not convert stored value '{}' for storage ID: {}", storedValue.get(), storageId);
 				}
 			} else {
 				// No stored value exists - check if component has a current value and save it as initial default
 				final T currentValue = component.getValue();
+				LOGGER.info("[ValuePersistence] CValueStorageHelper: No stored value for storage ID '{}', current value: {}", storageId, currentValue);
 				if (currentValue != null) {
 					final String serialized = currentValue.toString();
 					if (serialized != null && !serialized.isBlank()) {
 						sessionService.setSessionValue(storageId, serialized);
-						LOGGER.debug("Saved initial value as default for storage ID: {}", storageId);
+						LOGGER.info("[ValuePersistence] CValueStorageHelper: Saved initial value '{}' as default for storage ID: {}", serialized, storageId);
 					}
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error auto-restoring value for storage ID: {}", storageId, e);
+			LOGGER.error("[ValuePersistence] CValueStorageHelper: Error auto-restoring value for storage ID: {}", storageId, e);
 		}
 	}
 }
