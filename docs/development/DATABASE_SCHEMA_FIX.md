@@ -8,42 +8,26 @@ After refactoring CActivity/CMeeting to use composition pattern with CSprintItem
 ERROR: null value in column "item_id" of relation "csprint_items" violates not-null constraint
 ```
 
-## Solution Options
+## Simple Solution: Drop and Recreate Database
 
-### Option 1: Run SQL Fix Script (Recommended for Development)
-
-Run the provided SQL script to fix the existing schema:
+**EASIEST FIX**: Use the reset-db profile to drop and recreate the entire PostgreSQL database:
 
 ```bash
-# Connect to PostgreSQL
-psql -U postgres -d derbent -f src/main/resources/db/fix-sprintitem-schema.sql
-
-# Or using pgAdmin, DBeaver, or any PostgreSQL client:
-# 1. Open the file: src/main/resources/db/fix-sprintitem-schema.sql
-# 2. Execute the script against your derbent database
-```
-
-This script will:
-- Remove the old `item_id` column and constraint
-- Remove the old `item_type` column
-- Ensure `sprint_id` is nullable (for backlog support)
-- Add all progress tracking fields if missing
-- Add foreign key to responsible user
-
-### Option 2: Drop and Recreate Database (Clean Slate)
-
-Use the reset-db profile to drop and recreate the entire database:
-
-```bash
-# WARNING: This will DELETE ALL DATA!
+# WARNING: This will DELETE ALL DATA and recreate schema!
 mvn spring-boot:run -Dspring-boot.run.profiles=reset-db
 ```
 
-This uses `spring.jpa.hibernate.ddl-auto=create-drop` to completely rebuild the schema.
+This uses `spring.jpa.hibernate.ddl-auto=create-drop` to:
+1. Drop all tables
+2. Recreate schema from current entities
+3. Initialize sample data
+4. No old columns remain
 
-### Option 3: Manual SQL Commands (Quick Fix)
+**When to use**: Development environment when you want a clean database with the new schema.
 
-If you just want to remove the problematic columns:
+## Alternative: Manual SQL Commands (Keep Data)
+
+If you need to preserve existing data:
 
 ```sql
 -- Connect to your database and run:
@@ -52,11 +36,9 @@ ALTER TABLE csprint_items DROP COLUMN IF EXISTS item_type CASCADE;
 ALTER TABLE csprint_items ALTER COLUMN sprint_id DROP NOT NULL;
 ```
 
-### Option 4: Change Hibernate DDL Auto (Temporary for Development)
+## Temporary Change (One-Time Reset)
 
-**CAUTION**: This will drop all data on next startup!
-
-Edit `application.properties`:
+Edit `application.properties` temporarily:
 ```properties
 # Change from:
 spring.jpa.hibernate.ddl-auto=update
@@ -65,7 +47,7 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.hibernate.ddl-auto=create-drop
 ```
 
-Then run the application once, and change it back to `update`.
+Run the application once, then change it back to `update`.
 
 ## What Changed in the Refactoring
 
