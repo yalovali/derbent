@@ -25,6 +25,11 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	public CSprintItemService(final ISprintItemRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
+	
+	@Override
+	protected ISprintItemRepository getTypedRepository() {
+		return (ISprintItemRepository) repository;
+	}
 
 	/** Create a default sprint item for backlog (sprint = null).
 	 * This is used when creating new sprintable items without a specific sprint.

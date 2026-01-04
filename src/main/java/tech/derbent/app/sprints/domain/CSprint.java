@@ -227,8 +227,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		final List<ISprintableItem> allItems = new ArrayList<>();
 		if (sprintItems != null) {
 			for (final CSprintItem sprintItem : sprintItems) {
-				if (sprintItem.getItem() != null) {
-					allItems.add(sprintItem.getItem());
+				if (sprintItem.getParentItem() != null) {
+					allItems.add(sprintItem.getParentItem());
 				}
 			}
 		}
@@ -241,8 +241,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		final List<CMeeting> meetings = new ArrayList<>();
 		if (sprintItems != null) {
 			for (final CSprintItem sprintItem : sprintItems) {
-				if (sprintItem.getItem() instanceof CMeeting) {
-					meetings.add((CMeeting) sprintItem.getItem());
+				if (sprintItem.getParentItem() instanceof CMeeting) {
+					meetings.add((CMeeting) sprintItem.getParentItem());
 				}
 			}
 		}
