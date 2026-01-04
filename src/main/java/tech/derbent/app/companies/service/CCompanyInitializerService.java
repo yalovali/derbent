@@ -16,7 +16,6 @@ import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
-
 	private record CompanySeed(String name, String description, String address, String phone, String email, String website, String taxNumber,
 			String theme, String logoUrl, String primaryColor, String workingHoursStart, String workingHoursEnd, String timezone, String language,
 			boolean notificationsEnabled, String notificationEmail) {}
@@ -97,6 +96,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 						"Merkez Mahallesi, Gülbahar Sokağı No:7, Of/Trabzon", "+90-462-751-0303", "merhaba@ofdanismanlik.com.tr",
 						"https://www.ofdanismanlik.com.tr", "TR-456789123", "lumo-light", "/assets/logos/consulting-logo.svg", "#4caf50", "08:30",
 						"17:30", "Europe/Istanbul", "tr", true, "bildirim@ofdanismanlik.com.tr"));
+		final boolean skipSecond = true;
 		for (final CompanySeed seed : seeds) {
 			final CCompany company = new CCompany(seed.name());
 			company.setDescription(seed.description());
@@ -116,6 +116,9 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 			company.setNotificationEmail(seed.notificationEmail());
 			company.setActive(true);
 			companyService.save(company);
+			if (skipSecond) {
+				break;
+			}
 			if (minimal) {
 				break;
 			}
