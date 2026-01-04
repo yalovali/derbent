@@ -168,6 +168,16 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		}
 	}
 
+	@Override
+	@Transactional
+	public CKanbanLine save(final CKanbanLine entity) {
+		final CKanbanLine saved = super.save(entity);
+		if (saved.getId() == null) {
+			return saved;
+		}
+		return ((IKanbanLineRepository) repository).findById(saved.getId()).orElse(saved);
+	}
+
 	/** Picks the most recently modified line as default. */
 	private Optional<CKanbanLine> resolveDefaultLine(final List<CKanbanLine> lines) {
 		if (lines == null || lines.isEmpty()) {
