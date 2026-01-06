@@ -139,6 +139,7 @@ public class CWebSessionService implements ISessionService {
 	/** Clears session data on logout. */
 	@Override
 	public void clearSession() {
+		LOGGER.debug("Clearing session data");
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session != null) {
 			session.setAttribute(ACTIVE_PROJECT_KEY, null);
@@ -436,13 +437,15 @@ public class CWebSessionService implements ISessionService {
 	 * @param user    the user to set as active (must be a member of the company) */
 	@Override
 	public void setActiveUser(final CUser user) {
-		// LOGGER.debug("setActiveUser called");
 		Check.notNull(user, "User must not be null");
-		clearSession(); // Clear session data before setting new user
+		// Only clear session if changing user
+		final CUser existing = (CUser) VaadinSession.getCurrent().getAttribute(ACTIVE_USER_KEY);
+		if (existing != null && !existing.getId().equals(user.getId())) {
+			clearSession(); // only if switching users
+		}
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
 		session.setAttribute(ACTIVE_USER_KEY, user);
-		// Set first available project
 		final List<CProject> availableProjects = getAvailableProjects();
 		if (!availableProjects.isEmpty()) {
 			final CProject activeProject = availableProjects.get(0);
