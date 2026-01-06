@@ -395,4 +395,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		this.storyPoint = storyPoint; // Keep for backward compatibility
 		sprintItem.setStoryPoint(storyPoint);
 	}
+	
+	@jakarta.persistence.PostLoad
+	protected void ensureSprintItemParent() {
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
+	}
 }

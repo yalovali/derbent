@@ -374,6 +374,28 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 				field.setAccessible(true);
 				field.set(this, value);
 			}
+			
+			if (sprintItems != null && !sprintItems.isEmpty()) {
+				final tech.derbent.app.activities.service.IActivityRepository activityRepo = 
+					CSpringContext.getBean(tech.derbent.app.activities.service.IActivityRepository.class);
+				final tech.derbent.app.meetings.service.IMeetingRepository meetingRepo = 
+					CSpringContext.getBean(tech.derbent.app.meetings.service.IMeetingRepository.class);
+				
+				for (final CSprintItem sprintItem : sprintItems) {
+					if (sprintItem.getId() != null) {
+						final var activity = activityRepo.findBySprintItemId(sprintItem.getId());
+						if (activity.isPresent()) {
+							sprintItem.setParentItem(activity.get());
+							continue;
+						}
+						
+						final var meeting = meetingRepo.findBySprintItemId(sprintItem.getId());
+						if (meeting.isPresent()) {
+							sprintItem.setParentItem(meeting.get());
+						}
+					}
+				}
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Error in @PostLoad calculateTransientFields: {}", e.getMessage());
 			throw e;

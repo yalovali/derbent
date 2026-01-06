@@ -103,7 +103,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			""")
 	List<CMeeting> listForSprint(@Param ("sprint") CSprint sprint);
 
-	/** Find meeting by sprint item ID.
+	/** Find meeting by sprint item ID - loads without sprint item to prevent circular loading.
 	 * @param sprintItemId the sprint item ID
 	 * @return the meeting if found */
 	@Query ("""
@@ -116,9 +116,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
-			   LEFT JOIN FETCH m.sprintItem si
-			   LEFT JOIN FETCH si.sprint
-			   WHERE si.id = :sprintItemId
+			   WHERE m.sprintItem.id = :sprintItemId
 			""")
 	Optional<CMeeting> findBySprintItemId(@Param ("sprintItemId") Long sprintItemId);
 }

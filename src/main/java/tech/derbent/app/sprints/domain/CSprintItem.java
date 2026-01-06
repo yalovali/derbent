@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -36,6 +38,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public static final String DEFAULT_ICON = "vaadin:list-ol";
 	public static final String ENTITY_TITLE_PLURAL = "Sprint Items";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint Item";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintItem.class);
 	public static final String VIEW_NAME = "Sprint Items View";
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
