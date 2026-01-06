@@ -51,6 +51,7 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		}
 	}
 
+	@SuppressWarnings ("static-method")
 	public boolean checkStatusTransitionAllowed(ISprintableItem item, CProjectItemStatus status, CProjectItemStatus newStatus) {
 		// 1️⃣ Basic sanity checks
 		if (item == null || status == null || newStatus == null) {

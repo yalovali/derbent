@@ -79,7 +79,7 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 	}
 
 	@Override
-	public void enableValuePersistence(final String storageId) {
+	public void valuePersist_enable(final String storageId) {
 		// Enable persistence for Sprint ComboBox
 		CValueStorageHelper.valuePersist_enable(comboBox, storageId + "_" + FILTER_KEY, sprint -> {
 			// Converter: find sprint by ID

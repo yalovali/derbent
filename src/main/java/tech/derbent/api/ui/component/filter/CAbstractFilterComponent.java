@@ -144,7 +144,7 @@ public abstract class CAbstractFilterComponent<T> implements IFilterComponent<T>
 	 * @see tech.derbent.api.utils.CValueStorageHelper#valuePersist_enable(com.vaadin.flow.component.combobox.ComboBox, String, tech.derbent.api.utils.CValueStorageHelper.ValueConverter)
 	 */
 	@Override
-	public void enableValuePersistence(final String storageId) {
+	public void valuePersist_enable(final String storageId) {
 		// Default implementation does nothing
 		// Subclasses can override to enable persistence for their specific component
 	}

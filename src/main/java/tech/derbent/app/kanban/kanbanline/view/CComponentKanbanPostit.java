@@ -25,7 +25,6 @@ import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.base.users.domain.CUser;
 
 /** CComponentPostit - A compact post-it style widget for displaying project items inside kanban columns. */
 public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> implements IHasSelectionNotification {
@@ -66,33 +65,23 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		if (item == null) {
 			return;
 		}
-		
 		// Create a compact horizontal layout for status and story points
 		layoutLineTwo.setWidthFull();
 		layoutLineTwo.setJustifyContentMode(JustifyContentMode.BETWEEN);
 		layoutLineTwo.setAlignItems(Alignment.CENTER);
-		
 		// Left side: Status label
 		if (item.getStatus() != null) {
 			final CLabelEntity statusLabel = new CLabelEntity(item.getStatus());
 			statusLabel.getStyle().set("font-size", "11px");
 			layoutLineTwo.add(statusLabel);
 		}
-		
 		// Right side: Story points badge (if available)
 		if (item.getStoryPoint() != null && item.getStoryPoint() > 0) {
 			final CSpan storyPointBadge = new CSpan(item.getStoryPoint() + " SP");
-			storyPointBadge.getStyle()
-				.set("background-color", "#E8F5E9")
-				.set("color", "#2E7D32")
-				.set("padding", "2px 6px")
-				.set("border-radius", "4px")
-				.set("font-size", "11px")
-				.set("font-weight", "600")
-				.set("white-space", "nowrap");
+			storyPointBadge.getStyle().set("background-color", "#E8F5E9").set("color", "#2E7D32").set("padding", "2px 6px")
+					.set("border-radius", "4px").set("font-size", "11px").set("font-weight", "600").set("white-space", "nowrap");
 			layoutLineTwo.add(storyPointBadge);
 		}
-		
 		// Third line: Compact responsible user label
 		if (item.getResponsible() != null) {
 			final CLabelEntity userLabel = CLabelEntity.createCompactUserLabel(item.getResponsible());
@@ -117,6 +106,27 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	@Override
 	public void drag_checkEventBeforePass(final CEvent event) {
 		// LOGGER.debug("[KanbanDrag] Passing drag event {} for sprint item {}", event.getClass().getSimpleName(), entity.getId());
+	}
+
+	@Override
+	public void drag_setDragEnabled(final boolean enabled) {
+		if (enabled) {
+			initializeDragSource();
+		} else if (dragSource != null) {
+			dragSource.setDraggable(false);
+		}
+	}
+
+	@Override
+	public void drag_setDropEnabled(final boolean enabled) {
+		dropEnabled = enabled;
+		if (enabled) {
+			initializeDropTarget();
+			return;
+		}
+		if (dropTarget != null) {
+			dropTarget.setActive(false);
+		}
 	}
 
 	private void initializeDragSource() {
@@ -179,27 +189,6 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	@Override
 	public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners() {
 		return selectListeners;
-	}
-
-	@Override
-	public void drag_setDragEnabled(final boolean enabled) {
-		if (enabled) {
-			initializeDragSource();
-		} else if (dragSource != null) {
-			dragSource.setDraggable(false);
-		}
-	}
-
-	@Override
-	public void drag_setDropEnabled(final boolean enabled) {
-		dropEnabled = enabled;
-		if (enabled) {
-			initializeDropTarget();
-			return;
-		}
-		if (dropTarget != null) {
-			dropTarget.setActive(false);
-		}
 	}
 
 	/** Sets selected styles for the post-it. */

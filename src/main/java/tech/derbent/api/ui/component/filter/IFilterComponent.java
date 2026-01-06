@@ -95,5 +95,5 @@ public interface IFilterComponent<T> {
 	 * @param storageId The base storage identifier from the parent toolbar (must not be null or blank)
 	 * @see tech.derbent.api.utils.CValueStorageHelper
 	 */
-	void enableValuePersistence(String storageId);
+	void valuePersist_enable(String storageId);
 }

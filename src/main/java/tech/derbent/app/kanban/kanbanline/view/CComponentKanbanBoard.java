@@ -488,6 +488,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	 * Logging: Logs each status -> column mapping for troubleshooting kanban board display issues.
 	 * @param columns The kanban columns to build mappings from
 	 * @return Map of status ID -> column ID (includes special key -1L for default column) */
+	@SuppressWarnings ("static-method")
 	Map<Long, Long> prepareStatusToColumnIdMap(final List<CKanbanColumn> columns) {
 		final Map<Long, Long> statusToColumnId = new LinkedHashMap<>();
 		for (final CKanbanColumn column : columns) {

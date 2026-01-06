@@ -84,9 +84,7 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize meeting"));
 		final CUser currentUser = sessionService.getActiveUser()
 				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize meeting"));
-		
 		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, meetingTypeService, projectItemStatusService);
-		
 		// Business event fields stay in CMeeting
 		entity.setLocation("To be decided");
 		entity.setStartDate(LocalDate.now(clock));
@@ -94,7 +92,6 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		entity.setEndDate(LocalDate.now(clock));
 		entity.setEndTime(LocalTime.of(14, 00)); // 2 hour duration
 		entity.setResponsible(currentUser);
-		
 		// Create sprint item for progress tracking (composition pattern)
 		// Progress fields (storyPoint, dates, responsible, progress%) live in CSprintItem
 		final CSprintItem sprintItem = new CSprintItem();
@@ -107,7 +104,6 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		sprintItem.setResponsible(currentUser);
 		sprintItem.setItemOrder(1); // Default order
 		entity.setSprintItem(sprintItem);
-		
 		LOGGER.debug("Meeting initialization complete with sprint item for progress tracking");
 	}
 

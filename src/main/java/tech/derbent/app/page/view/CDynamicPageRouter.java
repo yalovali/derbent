@@ -15,7 +15,6 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
@@ -42,6 +41,17 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	 * @param onepagerEntity the entity to show, can be null to clear the view
 	 * @param pageRouter     the router responsible for rendering the one-pager
 	 * @param sessionService session service used to resolve the active project
+	 * @deprecated Use {@link #displayEntityInDynamicOnepager(CProjectItem, CDynamicPageRouter, ISessionService, IContentOwner)} instead */
+	@Deprecated
+	public static void displayEntityInDynamicOnepager(final CProjectItem<?> onepagerEntity, final CDynamicPageRouter pageRouter,
+			final ISessionService sessionService) {
+		displayEntityInDynamicOnepager(onepagerEntity, pageRouter, sessionService, null);
+	}
+
+	/** Displays the provided project item in the dynamic one-pager slider using the configured router.
+	 * @param onepagerEntity the entity to show, can be null to clear the view
+	 * @param pageRouter     the router responsible for rendering the one-pager
+	 * @param sessionService session service used to resolve the active project
 	 * @param contentOwner   optional content owner to be notified of entity changes, can be null */
 	public static void displayEntityInDynamicOnepager(final CProjectItem<?> onepagerEntity, final CDynamicPageRouter pageRouter,
 			final ISessionService sessionService, final IContentOwner contentOwner) {
@@ -62,17 +72,6 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 		} catch (final Exception e) {
 			CNotificationService.showException("Error creating dynamic page for entity", e);
 		}
-	}
-
-	/** Displays the provided project item in the dynamic one-pager slider using the configured router.
-	 * @param onepagerEntity the entity to show, can be null to clear the view
-	 * @param pageRouter     the router responsible for rendering the one-pager
-	 * @param sessionService session service used to resolve the active project
-	 * @deprecated Use {@link #displayEntityInDynamicOnepager(CProjectItem, CDynamicPageRouter, ISessionService, IContentOwner)} instead */
-	@Deprecated
-	public static void displayEntityInDynamicOnepager(final CProjectItem<?> onepagerEntity, final CDynamicPageRouter pageRouter,
-			final ISessionService sessionService) {
-		displayEntityInDynamicOnepager(onepagerEntity, pageRouter, sessionService, null);
 	}
 
 	private CPageEntity currentPageEntity = null;
@@ -114,6 +113,12 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 		return currentPageEntity.getPageTitle();
 	}
 
+	/** @deprecated Use {@link #loadSpecificPage(Long, Long, boolean, IContentOwner)} instead */
+	@Deprecated
+	public void loadSpecificPage(Long pageEntityId1, Long pageItemId1, boolean AsDetailComponent) throws Exception {
+		loadSpecificPage(pageEntityId1, pageItemId1, AsDetailComponent, null);
+	}
+
 	/** Load a specific page by entity ID.
 	 * @param pageItemId1
 	 * @throws Exception */
@@ -143,8 +148,8 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			}
 			Check.notNull(page, "Dynamic page view cannot be null after instantiation");
 			// Set content owner if provided to enable parent notification on entity changes
-			if (contentOwner != null && page instanceof IHasContentOwner) {
-				((IHasContentOwner) page).setContentOwner(contentOwner);
+			if (contentOwner != null) {
+				page.setContentOwner(contentOwner);
 				LOGGER.debug("Set content owner for dynamic page: {}", contentOwner.getClass().getSimpleName());
 			}
 			if (pageItemId1 != null) {
@@ -160,12 +165,6 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			LOGGER.error("Failed to create dynamic page view for: {}", currentPageEntity.getPageTitle(), e);
 			throw e;
 		}
-	}
-
-	/** @deprecated Use {@link #loadSpecificPage(Long, Long, boolean, IContentOwner)} instead */
-	@Deprecated
-	public void loadSpecificPage(Long pageEntityId1, Long pageItemId1, boolean AsDetailComponent) throws Exception {
-		loadSpecificPage(pageEntityId1, pageItemId1, AsDetailComponent, null);
 	}
 
 	@Override

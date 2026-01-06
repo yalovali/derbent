@@ -17,19 +17,20 @@ import tech.derbent.base.users.domain.CUserCompanySetting;
 @Repository
 public interface IUserCompanySettingsRepository extends IUserRelationshipRepository<CUserCompanySetting> {
 
-	@EntityGraph (attributePaths = { "user", "company", "role" })
-	@Query ("SELECT r FROM #{#entityName} r")
-	List<CUserCompanySetting> findAllForPageView(Sort sort);
-
-	@Override
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.id = :id")
-	Optional<CUserCompanySetting> findById(Long id);
-	@Override
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.user.id = :userId")
-	List<CUserCompanySetting> findByUserId(@Param ("userId") Long userId);
 	/** Count users for a specific company using generic pattern */
 	@Query ("SELECT COUNT(r) FROM #{#entityName} r WHERE r.company.id = :company_id")
 	long countByCompany_Id(@Param ("company_id") Long company_id);
+	/** Delete all settings for a specific company. Used for cleanup when a company is deleted. */
+	@Modifying
+	@Transactional
+	@Query ("DELETE FROM #{#entityName} r WHERE r.company.id = :company_id")
+	void deleteByCompanyId(@Param ("company_id") Long company_id);
+	/** Delete all settings for a specific user. Used for cleanup when a user is deleted. */
+	@Override
+	@Modifying
+	@Transactional
+	@Query ("DELETE FROM #{#entityName} r WHERE r.user.id = :userId")
+	void deleteByUserId(@Param ("userId") Long userId);
 	@Modifying
 	@Transactional
 	@Query ("DELETE FROM #{#entityName} r WHERE r.user.id = :userId AND r.company.id = :company_id")
@@ -43,9 +44,21 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 		return existsByUserIdAndCompanyId(userId, entityId);
 	}
 
+	@Override
+	@EntityGraph (attributePaths = {
+			"user", "company", "role"
+	})
+	@Query ("SELECT r FROM #{#entityName} r")
+	List<CUserCompanySetting> findAllForPageView(Sort sort);
 	/** Find all user company settings for a specific company with eager loading */
 	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.company.id = :company_id")
 	List<CUserCompanySetting> findByCompany_Id(@Param ("company_id") Long company_id);
+	@Override
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.id = :id")
+	Optional<CUserCompanySetting> findById(Long id);
+	@Override
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.user.id = :userId")
+	List<CUserCompanySetting> findByUserId(@Param ("userId") Long userId);
 	/** Find a specific user company setting by user and company using generic pattern */
 	@Query (
 		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.user.id = :userId AND r.company.id = :company_id"
@@ -64,15 +77,4 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.user.id = :userId ORDER BY r.id ASC"
 	)
 	List<CUserCompanySetting> findSingleByUserId(@Param ("userId") Long userId);
-	/** Delete all settings for a specific company. Used for cleanup when a company is deleted. */
-	@Modifying
-	@Transactional
-	@Query ("DELETE FROM #{#entityName} r WHERE r.company.id = :company_id")
-	void deleteByCompanyId(@Param ("company_id") Long company_id);
-	/** Delete all settings for a specific user. Used for cleanup when a user is deleted. */
-	@Override
-	@Modifying
-	@Transactional
-	@Query ("DELETE FROM #{#entityName} r WHERE r.user.id = :userId")
-	void deleteByUserId(@Param ("userId") Long userId);
 }

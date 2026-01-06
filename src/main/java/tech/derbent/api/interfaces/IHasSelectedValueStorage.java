@@ -111,7 +111,7 @@ public interface IHasSelectedValueStorage {
 	 * 
 	 * @return The unique storage identifier (never null or blank)
 	 */
-	String getStorageId();
+	String getValuePersistId();
 
 	/**
 	 * Restores the component's value from session storage.

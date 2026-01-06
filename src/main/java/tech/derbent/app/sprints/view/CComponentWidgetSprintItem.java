@@ -6,15 +6,15 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CEvent;
-import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.domain.CSprint;
+import tech.derbent.app.sprints.domain.CSprintItem;
 
-/** CComponentWidgetSprintItem - Widget component for displaying SprintItem entities in grids. 
- * Shows progress tracking information (story points, progress %, dates, responsible user).
- */
+/** CComponentWidgetSprintItem - Widget component for displaying SprintItem entities in grids. Shows progress tracking information (story points,
+ * progress %, dates, responsible user). */
 public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintItem> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentWidgetSprintItem.class);
+	private static final long serialVersionUID = 1L;
 
 	public CComponentWidgetSprintItem(final CSprintItem sprintItem) {
 		super(sprintItem);
@@ -50,7 +50,6 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 		}
 		sprintLabel.getStyle().set("font-size", "10pt").set("color", "#666");
 		layoutLineTwo.add(sprintLabel);
-		
 		// Show progress
 		final CLabelEntity progressLabel = new CLabelEntity();
 		progressLabel.setText("Progress: " + getEntity().getProgressPercentage() + "%");
@@ -68,7 +67,6 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 			storyPointLabel.getStyle().set("font-size", "10pt").set("color", "#666");
 			layoutLineThree.add(storyPointLabel);
 		}
-		
 		// Show dates
 		if (getEntity().getStartDate() != null) {
 			final CLabelEntity dateLabel = new CLabelEntity();
@@ -76,7 +74,6 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 			dateLabel.getStyle().set("font-size", "10pt").set("color", "#666").set("margin-left", "8px");
 			layoutLineThree.add(dateLabel);
 		}
-		
 		// Show responsible user
 		if (getEntity().getResponsible() != null) {
 			final CLabelEntity userLabel = CLabelEntity.createUserLabel(getEntity().getResponsible());

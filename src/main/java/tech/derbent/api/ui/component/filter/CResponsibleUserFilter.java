@@ -5,8 +5,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.ui.component.basic.CComboBox;
 
-/**
- * CResponsibleUserFilter - Responsible user/ownership filter component.
+/** CResponsibleUserFilter - Responsible user/ownership filter component.
  * <p>
  * Provides filtering by item ownership with modes:
  * <ul>
@@ -17,12 +16,7 @@ import tech.derbent.api.ui.component.basic.CComboBox;
  */
 public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibleUserFilter.ResponsibleFilterMode> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CResponsibleUserFilter.class);
-	public static final String FILTER_KEY = "responsibleUser";
-
-	/**
-	 * Responsible filter mode enum.
-	 */
+	/** Responsible filter mode enum. */
 	public enum ResponsibleFilterMode {
 
 		ALL("All items"), CURRENT_USER("My items");
@@ -33,41 +27,40 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 			this.label = label;
 		}
 
-		public String getLabel() {
-			return label;
-		}
+		public String getLabel() { return label; }
 	}
 
+	public static final String FILTER_KEY = "responsibleUser";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CResponsibleUserFilter.class);
 	private final CComboBox<ResponsibleFilterMode> comboBox;
 
-	/**
-	 * Creates a responsible user filter.
-	 */
+	/** Creates a responsible user filter. */
+	@SuppressWarnings ("unused")
 	public CResponsibleUserFilter() {
 		super(FILTER_KEY);
 		comboBox = new CComboBox<>("Responsible");
 		comboBox.setItems(ResponsibleFilterMode.values());
 		comboBox.setItemLabelGenerator(ResponsibleFilterMode::getLabel);
 		comboBox.setValue(ResponsibleFilterMode.ALL);
-		
 		// Enable automatic persistence in CComboBox
-		comboBox.enablePersistence(
-			"responsibleUserFilter_" + FILTER_KEY,
-			modeName -> {
-				// Convert stored enum name back to enum value
-				try {
-					return ResponsibleFilterMode.valueOf(modeName);
-				} catch (final IllegalArgumentException e) {
-					return ResponsibleFilterMode.ALL; // Safe default
-				}
+		comboBox.enablePersistence("responsibleUserFilter_" + FILTER_KEY, modeName -> {
+			// Convert stored enum name back to enum value
+			try {
+				return ResponsibleFilterMode.valueOf(modeName);
+			} catch (final IllegalArgumentException e) {
+				return ResponsibleFilterMode.ALL; // Safe default
 			}
-		);
-		
+		});
 		// Notify listeners on value change
 		comboBox.addValueChangeListener(event -> {
 			final ResponsibleFilterMode value = event.getValue() != null ? event.getValue() : ResponsibleFilterMode.ALL;
 			notifyChangeListeners(value);
 		});
+	}
+
+	@Override
+	public void clearFilter() {
+		comboBox.setValue(ResponsibleFilterMode.ALL);
 	}
 
 	@Override
@@ -81,12 +74,7 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 	}
 
 	@Override
-	public void clearFilter() {
-		comboBox.setValue(ResponsibleFilterMode.ALL);
-	}
-
-	@Override
-	public void enableValuePersistence(final String storageId) {
+	public void valuePersist_enable(final String storageId) {
 		// Persistence is now handled automatically by CComboBox.enablePersistence()
 		// This method remains for interface compatibility but does nothing
 		LOGGER.debug("[FilterPersistence] enableValuePersistence called with storageId: {} (CComboBox handles persistence)", storageId);

@@ -1,7 +1,10 @@
 package automated_tests.tech.derbent.ui.automation;
 
-import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.Page;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -9,10 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 
 /** Comprehensive test suite for CPageTestAuxillary that dynamically tests all pages accessible via navigation buttons.
  * <p>
@@ -38,7 +39,8 @@ import java.util.List;
  * <li><b>Generic testing</b>: Reusable functions work with any page type
  * <li><b>Direct navigation</b>: Uses URL navigation instead of clicking for reliability
  * <li><b>Detailed logging</b>: Clear progress indicators and error messages
- * </ul> */
+ * </ul>
+ */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
@@ -47,132 +49,165 @@ import java.util.List;
 @DisplayName ("🧪 CPageTestAuxillary Comprehensive Page Testing")
 public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillaryComprehensiveTest.class);
-	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
+	// ==========================================
+	// HELPER CLASS
+	// ==========================================
+	/** Helper class to store button information. */
+	private static class ButtonInfo {
+
+		String id;
+		int index;
+		String route;
+		String title;
+	}
+
+	private static final class FieldValueResult {
+
+		private final String fieldId;
+		private final String value;
+
+		private FieldValueResult(final String fieldId, final String value) {
+			this.fieldId = fieldId;
+			this.value = value;
+		}
+	}
+
 	private static final String BUTTON_SELECTOR = "[id^='test-aux-btn-']";
-	private static final String METADATA_SELECTOR = "#test-auxillary-metadata";
+	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
 	private static final String CRUD_CANCEL_BUTTON_ID = "cbutton-cancel";
 	private static final String CRUD_DELETE_BUTTON_ID = "cbutton-delete";
 	private static final String CRUD_NEW_BUTTON_ID = "cbutton-new";
 	private static final String CRUD_REFRESH_BUTTON_ID = "cbutton-refresh";
 	private static final String CRUD_SAVE_BUTTON_ID = "cbutton-save";
-	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
 	private static final String FIELD_ID_PREFIX = "field-";
-	private int screenshotCounter = 1;
-	private int pagesVisited = 0;
-	private int gridPagesFound = 0;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillaryComprehensiveTest.class);
+	private static final String METADATA_SELECTOR = "#test-auxillary-metadata";
+	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
 	private int crudPagesFound = 0;
-	private final java.util.Map<String, String> lastCreatedValues = new java.util.HashMap<>();
-	private final java.util.Map<String, String> lastCreatedFieldIds = new java.util.HashMap<>();
+	private int gridPagesFound = 0;
+	private final Map<String, String> lastCreatedFieldIds = new java.util.HashMap<>();
+	private final Map<String, String> lastCreatedValues = new java.util.HashMap<>();
+	private int pagesVisited = 0;
+	private int screenshotCounter = 1;
 
-	@Test
-	@DisplayName ("✅ Comprehensive test of all CPageTestAuxillary navigation buttons")
-	void testAllAuxillaryPages() {
-		LOGGER.info("🚀 Starting comprehensive CPageTestAuxillary test suite...");
+	/** Check if a specific CRUD button exists.
+	 * @param buttonText Button text to check for
+	 * @return true if button exists */
+	private boolean checkCrudButtonExists(String buttonId) {
 		try {
-			Files.createDirectories(Paths.get("target/screenshots"));
-			// Step 1: Login to application
-			LOGGER.info("📝 Step 1: Logging into application...");
-			loginToApplication();
-			takeScreenshot(String.format("%03d-after-login", screenshotCounter++), false);
-			// Step 2: Discover navigation targets
-			final String targetRoute = System.getProperty("test.targetRoute");
-			final String targetButtonId = System.getProperty("test.targetButtonId");
-			final String routeKeyword = System.getProperty("test.routeKeyword");
-			List<ButtonInfo> buttons;
-			if (targetRoute != null && !targetRoute.isBlank()) {
-				LOGGER.info("🎯 Targeting single route from test.targetRoute: {}", targetRoute);
-				ButtonInfo info = new ButtonInfo();
-				info.index = 0;
-				info.id = targetButtonId != null ? targetButtonId : "direct-route";
-				info.title = targetRoute;
-				info.route = targetRoute;
-				buttons = List.of(info);
-			} else {
-				LOGGER.info("🧭 Step 2: Navigating to CPageTestAuxillary page...");
-				navigateToTestAuxillaryPage();
-				wait_2000(); // Give time for buttons to be populated
-				takeScreenshot(String.format("%03d-test-auxillary-page", screenshotCounter++), false);
-				// Step 3: Discover all navigation buttons dynamically
-				LOGGER.info("🔍 Step 3: Discovering navigation buttons...");
-				buttons = discoverNavigationButtons();
-				if (routeKeyword != null && !routeKeyword.isBlank()) {
-					final String keyword = routeKeyword.toLowerCase();
-					buttons = buttons.stream()
-							.filter(b -> (b.route != null && b.route.toLowerCase().contains(keyword))
-									|| (b.title != null && b.title.toLowerCase().contains(keyword)))
-							.toList();
-					LOGGER.info("🎯 Filtered buttons by test.routeKeyword: {}", routeKeyword);
-				}
-				if (targetButtonId != null && !targetButtonId.isBlank()) {
-					buttons = buttons.stream().filter(b -> targetButtonId.equals(b.id)).toList();
-					LOGGER.info("🎯 Filtered buttons by test.targetButtonId: {}", targetButtonId);
-				}
-			}
-			LOGGER.info("📊 Found {} navigation buttons to test", buttons.size());
-			if (buttons.isEmpty()) {
-				throw new AssertionError("No navigation buttons found for provided target parameters");
-			}
-			// Step 4: Test each button's target page
-			LOGGER.info("🧪 Step 4: Testing each navigation button's target page...");
-			LOGGER.info("Will test {} buttons by navigating directly to their routes", buttons.size());
-			for (int i = 0; i < buttons.size(); i++) {
-				ButtonInfo button = buttons.get(i);
-				LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-				LOGGER.info("🎯 Testing button {}/{}: {}", i + 1, buttons.size(), button.title);
-				LOGGER.info("   Route: {}", button.route);
-				LOGGER.info("   Button ID: {}", button.id);
-				testNavigationButton(button, i + 1, buttons.size());
-			}
-			// Step 5: Summary
-			LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-			LOGGER.info("✅ Test suite completed successfully!");
-			LOGGER.info("📊 Summary:");
-			LOGGER.info("   Total buttons tested: {}", buttons.size());
-			LOGGER.info("   Pages visited: {}", pagesVisited);
-			LOGGER.info("   Pages with grids: {}", gridPagesFound);
-			LOGGER.info("   Pages with CRUD toolbars: {}", crudPagesFound);
-			LOGGER.info("   Screenshots captured: {}", screenshotCounter - 1);
-		} catch (Exception e) {
-			LOGGER.error("❌ Test suite failed: {}", e.getMessage(), e);
-			takeScreenshot("error-comprehensive-test", true);
-			throw new AssertionError("Comprehensive test suite failed", e);
+			final Locator button = page.locator("#" + buttonId);
+			return button.count() > 0;
+		} catch (final Exception e) {
+			LOGGER.debug("Error checking for {} button: {}", buttonId, e.getMessage());
+			return false;
 		}
 	}
 
-	/** Navigate to the CPageTestAuxillary page. */
-	private void navigateToTestAuxillaryPage() {
+	/** Check if a CRUD toolbar exists on the current page.
+	 * @return true if CRUD toolbar is present */
+	private boolean checkCrudToolbarExists() {
 		try {
-			String url = "http://localhost:" + port + "/" + TEST_AUX_PAGE_ROUTE;
-			LOGGER.debug("Navigating to: {}", url);
-			page.navigate(url);
+			// Look for common CRUD buttons by deterministic IDs
+			final Locator newButton = page.locator("#" + CRUD_NEW_BUTTON_ID);
+			final Locator deleteButton = page.locator("#" + CRUD_DELETE_BUTTON_ID);
+			final Locator saveButton = page.locator("#" + CRUD_SAVE_BUTTON_ID);
+			final Locator refreshButton = page.locator("#" + CRUD_REFRESH_BUTTON_ID);
+			// If we have at least 2 of these buttons, consider it a CRUD toolbar
+			int count = 0;
+			if (newButton.count() > 0) {
+				count++;
+			}
+			if (deleteButton.count() > 0) {
+				count++;
+			}
+			if (saveButton.count() > 0) {
+				count++;
+			}
+			if (refreshButton.count() > 0) {
+				count++;
+			}
+			return count >= 2;
+		} catch (final Exception e) {
+			LOGGER.debug("Error checking for CRUD toolbar: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	// ==========================================
+	// GENERIC CHECK FUNCTIONS
+	// ==========================================
+	/** Check if a grid exists on the current page.
+	 * @return true if grid is present */
+	private boolean checkGridExists() {
+		try {
+			final Locator grids = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid");
+			return grids.count() > 0;
+		} catch (final Exception e) {
+			LOGGER.debug("Error checking for grid: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	/** Check if grid has data.
+	 * @return true if grid contains data */
+	private boolean checkGridHasData() {
+		try {
+			final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
+			if (grid.count() == 0) {
+				return false;
+			}
+			final Locator cells = grid.locator("vaadin-grid-cell-content, [part='cell']");
+			final int cellCount = cells.count();
+			LOGGER.debug("Grid has {} cells", cellCount);
+			return cellCount > 0;
+		} catch (final Exception e) {
+			LOGGER.debug("Error checking if grid has data: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	/** Check if grid is sortable.
+	 * @return true if grid has sortable columns */
+	private boolean checkGridIsSortable() {
+		try {
+			final Locator sorters = page.locator("vaadin-grid-sorter");
+			return sorters.count() > 0;
+		} catch (final Exception e) {
+			LOGGER.debug("Error checking if grid is sortable: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	private void confirmDialogIfPresent() {
+		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
+		if (overlay.count() == 0) {
+			return;
+		}
+		final Locator confirmButton = page.locator("#" + CONFIRM_YES_BUTTON_ID);
+		if (confirmButton.count() > 0) {
+			confirmButton.first().click();
 			wait_500();
-			// Verify page loaded
-			page.waitForSelector(BUTTON_SELECTOR + ", " + METADATA_SELECTOR, new Page.WaitForSelectorOptions().setTimeout(5000));
-			LOGGER.info("✅ Successfully navigated to CPageTestAuxillary page");
-		} catch (Exception e) {
-			throw new AssertionError("Failed to navigate to CPageTestAuxillary page: " + e.getMessage(), e);
 		}
 	}
 
 	/** Discover all navigation buttons on the CPageTestAuxillary page dynamically.
 	 * @return List of button information */
 	private List<ButtonInfo> discoverNavigationButtons() {
-		List<ButtonInfo> buttons = new ArrayList<>();
+		final List<ButtonInfo> buttons = new ArrayList<>();
 		try {
 			// Try to read button count from metadata
-			Locator metadataDiv = page.locator(METADATA_SELECTOR);
+			final Locator metadataDiv = page.locator(METADATA_SELECTOR);
 			if (metadataDiv.count() > 0) {
-				String buttonCountStr = metadataDiv.getAttribute("data-button-count");
+				final String buttonCountStr = metadataDiv.getAttribute("data-button-count");
 				LOGGER.debug("Metadata indicates {} buttons", buttonCountStr);
 			}
 			// Discover all buttons with the test-aux-btn- prefix
-			Locator buttonLocators = page.locator(BUTTON_SELECTOR);
-			int buttonCount = buttonLocators.count();
+			final Locator buttonLocators = page.locator(BUTTON_SELECTOR);
+			final int buttonCount = buttonLocators.count();
 			LOGGER.info("🔍 Discovered {} navigation buttons", buttonCount);
 			for (int i = 0; i < buttonCount; i++) {
-				Locator button = buttonLocators.nth(i);
-				ButtonInfo info = new ButtonInfo();
+				final Locator button = buttonLocators.nth(i);
+				final ButtonInfo info = new ButtonInfo();
 				info.index = i;
 				info.id = button.getAttribute("id");
 				info.title = button.getAttribute("data-title");
@@ -188,482 +223,37 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				LOGGER.debug("   Button {}: {} -> {}", i, info.title, info.route);
 			}
 			return buttons;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new AssertionError("Failed to discover navigation buttons: " + e.getMessage(), e);
 		}
 	}
 
-	/** Test a single navigation button and its target page.
-	 * @param button      Button information
-	 * @param buttonNum   Button number (1-based)
-	 * @param totalButtons Total number of buttons */
-	private void testNavigationButton(ButtonInfo button, int buttonNum, int totalButtons) {
-		try {
-			// Navigate directly to the route instead of clicking the button
-			// This is more reliable than clicking Vaadin buttons with JavaScript handlers
-			LOGGER.info("🧭 Navigating to: {} (button: {})", button.route, button.title);
-			if (button.route == null || button.route.isEmpty()) {
-				LOGGER.warn("⚠️  Button has no route: {}", button.title);
-				return;
+	private void ensureRequiredComboSelections() {
+		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
+		for (int i = 0; i < fields.count(); i++) {
+			final Locator field = fields.nth(i);
+			final String fieldId = field.getAttribute("id");
+			if (fieldId == null || fieldId.isBlank()) {
+				continue;
 			}
-			String targetUrl = "http://localhost:" + port + "/" + button.route;
-			page.navigate(targetUrl);
+			if (!isComboBoxById(fieldId) || !isFieldEditable(field) || !isFieldRequired(field)) {
+				continue;
+			}
+			final String currentValue = readFieldValueById(fieldId);
+			if (currentValue != null && !currentValue.isBlank()) {
+				continue;
+			}
 			try {
-				wait_1000(); // Wait for navigation and page load
-			} catch (final AssertionError e) {
-				throw new AssertionError("Exception dialog detected while navigating to: " + button.title + " (" + button.route + ")", e);
-			}
-			pagesVisited++;
-			// Take initial screenshot
-			String pageNameSafe = sanitizeForFileName(button.title, "page-" + button.index);
-			takeScreenshot(String.format("%03d-page-%s-initial", screenshotCounter++, pageNameSafe), false);
-			// Check what's on the page and run appropriate tests
-			LOGGER.info("🔍 Analyzing page content...");
-			boolean hasGrid = checkGridExists();
-			boolean hasCrudToolbar = checkCrudToolbarExists();
-			LOGGER.info("   Grid present: {}", hasGrid);
-			LOGGER.info("   CRUD toolbar present: {}", hasCrudToolbar);
-			// Run conditional tests based on page content
-			if (hasGrid) {
-				LOGGER.info("📊 Running grid tests...");
-				runGridTests(pageNameSafe);
-				gridPagesFound++;
-			} else {
-				LOGGER.info("ℹ️  No grid found, skipping grid tests");
-			}
-			if (hasCrudToolbar) {
-				LOGGER.info("🔧 Running CRUD toolbar tests...");
-				runCrudToolbarTests(pageNameSafe);
-				crudPagesFound++;
-			} else {
-				LOGGER.info("ℹ️  No CRUD toolbar found, skipping CRUD tests");
-			}
-			// Take final screenshot
-			takeScreenshot(String.format("%03d-page-%s-final", screenshotCounter++, pageNameSafe), false);
-			LOGGER.info("✅ Completed testing button {}/{}: {}", buttonNum, totalButtons, button.title);
-		} catch (Exception e) {
-			LOGGER.error("❌ Failed to test button: {} - {}", button.title, e.getMessage(), e);
-			takeScreenshot("error-button-" + button.index, true);
-			// Don't throw - continue with next button
-		}
-	}
-
-	// ==========================================
-	// GENERIC CHECK FUNCTIONS
-	// ==========================================
-	/** Check if a grid exists on the current page.
-	 * @return true if grid is present */
-	private boolean checkGridExists() {
-		try {
-			Locator grids = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid");
-			return grids.count() > 0;
-		} catch (Exception e) {
-			LOGGER.debug("Error checking for grid: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	/** Check if a CRUD toolbar exists on the current page.
-	 * @return true if CRUD toolbar is present */
-	private boolean checkCrudToolbarExists() {
-		try {
-			// Look for common CRUD buttons by deterministic IDs
-			Locator newButton = page.locator("#" + CRUD_NEW_BUTTON_ID);
-			Locator deleteButton = page.locator("#" + CRUD_DELETE_BUTTON_ID);
-			Locator saveButton = page.locator("#" + CRUD_SAVE_BUTTON_ID);
-			Locator refreshButton = page.locator("#" + CRUD_REFRESH_BUTTON_ID);
-			// If we have at least 2 of these buttons, consider it a CRUD toolbar
-			int count = 0;
-			if (newButton.count() > 0)
-				count++;
-			if (deleteButton.count() > 0)
-				count++;
-			if (saveButton.count() > 0)
-				count++;
-			if (refreshButton.count() > 0)
-				count++;
-			return count >= 2;
-		} catch (Exception e) {
-			LOGGER.debug("Error checking for CRUD toolbar: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	/** Check if grid has data.
-	 * @return true if grid contains data */
-	private boolean checkGridHasData() {
-		try {
-			Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
-			if (grid.count() == 0) {
-				return false;
-			}
-			Locator cells = grid.locator("vaadin-grid-cell-content, [part='cell']");
-			int cellCount = cells.count();
-			LOGGER.debug("Grid has {} cells", cellCount);
-			return cellCount > 0;
-		} catch (Exception e) {
-			LOGGER.debug("Error checking if grid has data: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	/** Check if grid is sortable.
-	 * @return true if grid has sortable columns */
-	private boolean checkGridIsSortable() {
-		try {
-			Locator sorters = page.locator("vaadin-grid-sorter");
-			return sorters.count() > 0;
-		} catch (Exception e) {
-			LOGGER.debug("Error checking if grid is sortable: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	/** Check if a specific CRUD button exists.
-	 * @param buttonText Button text to check for
-	 * @return true if button exists */
-	private boolean checkCrudButtonExists(String buttonId) {
-		try {
-			Locator button = page.locator("#" + buttonId);
-			return button.count() > 0;
-		} catch (Exception e) {
-			LOGGER.debug("Error checking for {} button: {}", buttonId, e.getMessage());
-			return false;
-		}
-	}
-
-	// ==========================================
-	// GRID TEST FUNCTIONS
-	// ==========================================
-	/** Run comprehensive grid tests on the current page.
-	 * @param pageName Page name for screenshots */
-	private void runGridTests(String pageName) {
-		try {
-			// Test 1: Check if grid has data
-			boolean hasData = checkGridHasData();
-			LOGGER.info("   ✓ Grid has data: {}", hasData);
-			// Test 2: Check if grid is sortable
-			boolean isSortable = checkGridIsSortable();
-			LOGGER.info("   ✓ Grid is sortable: {}", isSortable);
-			if (isSortable) {
-				// Test sorting on first column
-				testGridSorting(pageName);
-			}
-			// Test 3: Count grid rows
-			int rowCount = getGridRowCount();
-			LOGGER.info("   ✓ Grid row count: {}", rowCount);
-			// Test 4: Try to select first row if data exists
-			if (hasData && rowCount > 0) {
-				testGridRowSelection(pageName);
-			}
-			takeScreenshot(String.format("%03d-page-%s-grid-tested", screenshotCounter++, pageName), false);
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  Grid tests encountered error: {}", e.getMessage());
-		}
-	}
-
-	/** Test grid sorting functionality.
-	 * @param pageName Page name for screenshots */
-	private void testGridSorting(String pageName) {
-		try {
-			LOGGER.info("   🔄 Testing grid sorting...");
-			Locator sorters = page.locator("vaadin-grid-sorter");
-			if (sorters.count() > 0) {
-				// Click first sorter to sort ascending
-				sorters.first().click();
-				wait_500();
-				LOGGER.info("      ✓ Sorted ascending");
-				// Click again to sort descending
-				sorters.first().click();
-				wait_500();
-				LOGGER.info("      ✓ Sorted descending");
-				takeScreenshot(String.format("%03d-page-%s-sorted", screenshotCounter++, pageName), false);
-			}
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  Grid sorting test failed: {}", e.getMessage());
-		}
-	}
-
-	/** Test grid row selection.
-	 * @param pageName Page name for screenshots */
-	private void testGridRowSelection(String pageName) {
-		try {
-			LOGGER.info("   🖱️  Testing grid row selection...");
-			Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
-			Locator cells = grid.locator("vaadin-grid-cell-content, [part='cell']");
-			if (cells.count() > 0) {
-				cells.first().click();
-				wait_500();
-				LOGGER.info("      ✓ Selected first row");
-				takeScreenshot(String.format("%03d-page-%s-row-selected", screenshotCounter++, pageName), false);
-			}
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  Grid row selection test failed: {}", e.getMessage());
-		}
-	}
-
-	// ==========================================
-	// CRUD TOOLBAR TEST FUNCTIONS
-	// ==========================================
-	/** Run comprehensive CRUD toolbar tests on the current page.
-	 * @param pageName Page name for screenshots */
-	private void runCrudToolbarTests(String pageName) {
-		try {
-			// Test what buttons are available
-			boolean hasNew = checkCrudButtonExists(CRUD_NEW_BUTTON_ID);
-			boolean hasDelete = checkCrudButtonExists(CRUD_DELETE_BUTTON_ID);
-			boolean hasSave = checkCrudButtonExists(CRUD_SAVE_BUTTON_ID);
-			boolean hasRefresh = checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID);
-			boolean hasCancel = checkCrudButtonExists(CRUD_CANCEL_BUTTON_ID);
-			LOGGER.info("   CRUD Buttons available:");
-			LOGGER.info("      New: {}", hasNew);
-			LOGGER.info("      Delete: {}", hasDelete);
-			LOGGER.info("      Save: {}", hasSave);
-			LOGGER.info("      Refresh: {}", hasRefresh);
-			LOGGER.info("      Cancel: {}", hasCancel);
-			if (hasRefresh) {
-				testRefreshButton(pageName);
-			}
-			if (hasNew && hasSave) {
-				testCreateAndSave(pageName);
-			} else if (hasNew) {
-				testNewButton(pageName);
-			}
-			if (hasSave && checkGridHasData()) {
-				testUpdateAndSave(pageName);
-			}
-			if (hasSave) {
-				testStatusChangeIfPresent(pageName);
-			}
-			if (hasDelete && checkGridHasData()) {
-				testDeleteButton(pageName);
-			}
-			takeScreenshot(String.format("%03d-page-%s-crud-tested", screenshotCounter++, pageName), false);
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  CRUD toolbar tests encountered error: {}", e.getMessage());
-		}
-	}
-
-	/** Test the New button functionality.
-	 * @param pageName Page name for screenshots */
-	private void testNewButton(String pageName) {
-		try {
-			LOGGER.info("   ➕ Testing New button...");
-			Locator newButton = page.locator("#" + CRUD_NEW_BUTTON_ID);
-			if (newButton.count() > 0) {
-				locatorById(CRUD_NEW_BUTTON_ID).click();
-				wait_500();
-				LOGGER.info("      ✓ Clicked New button");
-				takeScreenshot(String.format("%03d-page-%s-new-clicked", screenshotCounter++, pageName), false);
-				// Check if a form or dialog appeared
-				boolean hasDialog = page.locator("vaadin-dialog, vaadin-dialog-overlay").count() > 0;
-				boolean hasFormLayout = page.locator("vaadin-form-layout").count() > 0;
-				LOGGER.info("      Dialog/Form appeared: {}", hasDialog || hasFormLayout);
-				// Try to close dialog/form if opened
-				if (hasDialog || hasFormLayout) {
-					// Look for Cancel button to close
-					Locator cancelButton = page.locator("#" + CRUD_CANCEL_BUTTON_ID);
-					if (cancelButton.count() > 0) {
-						cancelButton.first().click();
-						wait_500();
-						LOGGER.info("      ✓ Closed form via Cancel button");
-					}
-				}
-			}
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  New button test failed: {}", e.getMessage());
-		}
-	}
-
-	/** Test the Edit button functionality.
-	 * @param pageName Page name for screenshots */
-	private void testRefreshButton(String pageName) {
-		try {
-			LOGGER.info("   🔄 Testing Refresh button...");
-			Locator refreshButton = page.locator("#" + CRUD_REFRESH_BUTTON_ID);
-			if (refreshButton.count() > 0) {
-				locatorById(CRUD_REFRESH_BUTTON_ID).click();
-				wait_500();
-				performFailFastCheck("CRUD Refresh");
-				takeScreenshot(String.format("%03d-page-%s-refresh-clicked", screenshotCounter++, pageName), false);
-				LOGGER.info("      ✓ Clicked Refresh button");
-			}
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  Refresh button test failed: {}", e.getMessage());
-		}
-	}
-
-	private void testCreateAndSave(String pageName) {
-		try {
-			LOGGER.info("   🧾 Testing New + Save workflow...");
-			Locator newButton = page.locator("#" + CRUD_NEW_BUTTON_ID);
-			if (newButton.count() == 0) {
-				return;
-			}
-			final boolean hasGrid = checkGridExists();
-			final int beforeCount = hasGrid ? getGridRowCountSafe() : -1;
-			locatorById(CRUD_NEW_BUTTON_ID).click();
-			wait_500();
-			final FieldValueResult createdResult = populateEditableFields(pageName);
-			final String createdMarker = createdResult.value;
-			if (createdMarker != null && !createdMarker.isBlank()) {
-				lastCreatedValues.put(pageName, createdMarker);
-			}
-			if (createdResult.fieldId != null && !createdResult.fieldId.isBlank()) {
-				lastCreatedFieldIds.put(pageName, createdResult.fieldId);
-			}
-			locatorById(CRUD_SAVE_BUTTON_ID).click();
-			wait_500();
-			performFailFastCheck("CRUD Save New");
-			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
-				locatorById(CRUD_REFRESH_BUTTON_ID).click();
-				wait_500();
-			}
-			if (hasGrid) {
-				final int afterCount = getGridRowCountSafe();
-				if (afterCount <= beforeCount) {
-					LOGGER.warn("      ⚠️ Create did not increase grid row count ({} -> {})", beforeCount, afterCount);
-				} else {
-					LOGGER.info("      ✓ Created row ({} -> {})", beforeCount, afterCount);
-				}
-			}
-			takeScreenshot(String.format("%03d-page-%s-created", screenshotCounter++, pageName), false);
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  Create + Save test failed: {}", e.getMessage());
-		}
-	}
-
-	private void testUpdateAndSave(String pageName) {
-		try {
-			LOGGER.info("   ✏️  Testing Update + Save workflow...");
-			if (!checkGridHasData()) {
-				return;
-			}
-			testGridRowSelection(pageName);
-			final String fieldId = findEditableFieldId();
-			if (fieldId == null) {
-				LOGGER.warn("      ⚠️ No editable field found for update workflow");
-				return;
-			}
-			final String beforeValue = readFieldValueById(fieldId);
-			if (isComboBoxById(fieldId)) {
 				selectFirstComboBoxOptionById(fieldId);
-			} else {
-				final String updateValue = "Updated-" + pageName;
-				fillFieldById(fieldId, updateValue);
-				LOGGER.info("      ✓ Updated field {} with {}", fieldId, updateValue);
-			}
-			locatorById(CRUD_SAVE_BUTTON_ID).click();
-			wait_500();
-			performFailFastCheck("CRUD Save Update");
-			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
-				locatorById(CRUD_REFRESH_BUTTON_ID).click();
-				wait_500();
-			}
-			final String afterValue = readFieldValueById(fieldId);
-			if (afterValue != null && beforeValue != null && afterValue.trim().equals(beforeValue.trim())) {
-				LOGGER.warn("      ⚠️ Update value did not change for {}", fieldId);
-			} else {
-				LOGGER.info("      ✓ Updated value for {} ({} -> {})", fieldId, beforeValue, afterValue);
-			}
-			takeScreenshot(String.format("%03d-page-%s-updated", screenshotCounter++, pageName), false);
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  Update + Save test failed: {}", e.getMessage());
-		}
-	}
-
-	private void testStatusChangeIfPresent(String pageName) {
-		try {
-			Locator statusFields = page.locator("[id^='" + FIELD_ID_PREFIX + "'][id*='status']");
-			if (statusFields.count() == 0) {
-				return;
-			}
-			String statusFieldId = statusFields.first().getAttribute("id");
-			if (statusFieldId == null || statusFieldId.isBlank()) {
-				return;
-			}
-			LOGGER.info("   🟣 Testing status field update via {}", statusFieldId);
-			final String before = readFieldValueById(statusFieldId);
-			final String selected = selectDifferentComboBoxOptionById(statusFieldId, before);
-			if (selected == null) {
-				LOGGER.warn("      ⚠️ No alternate status value available for {}", statusFieldId);
-				return;
-			}
-			locatorById(CRUD_SAVE_BUTTON_ID).click();
-			wait_500();
-			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
-				locatorById(CRUD_REFRESH_BUTTON_ID).click();
-				wait_500();
-			}
-			final String after = readFieldValueById(statusFieldId);
-			if (after != null && !after.isBlank() && !after.trim().equals(before == null ? "" : before.trim())) {
-				LOGGER.info("      ✓ Status updated: {} -> {}", before, after);
-			} else {
-				LOGGER.warn("      ⚠️ Status value did not change after save for {}", statusFieldId);
-			}
-			performFailFastCheck("CRUD Status Save");
-			takeScreenshot(String.format("%03d-page-%s-status-updated", screenshotCounter++, pageName), false);
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  Status change test failed: {}", e.getMessage());
-		}
-	}
-
-	private void testDeleteButton(String pageName) {
-		try {
-			LOGGER.info("   🗑️ Testing Delete button...");
-			final int beforeCount = getGridRowCountSafe();
-			if (beforeCount == 0) {
-				LOGGER.warn("      ⚠️ No rows available to delete");
-				return;
-			}
-			final String createdMarker = lastCreatedValues.get(pageName);
-			if (createdMarker == null || createdMarker.isBlank()) {
-				LOGGER.warn("      ⚠️ No created marker found for {}, skipping delete to avoid removing sample data", pageName);
-				return;
-			}
-			final boolean selected = selectGridRowByCellText(createdMarker);
-			if (!selected) {
-				LOGGER.warn("      ⚠️ Created row not found for {}, skipping delete", pageName);
-				return;
-			}
-			final String createdFieldId = lastCreatedFieldIds.get(pageName);
-			if (createdFieldId != null && !createdFieldId.isBlank()) {
-				final String currentValue = readFieldValueById(createdFieldId);
-				if (currentValue == null || !currentValue.trim().equals(createdMarker.trim())) {
-					LOGGER.warn("      ⚠️ Form selection mismatch for {}, skipping delete", pageName);
-					return;
+				final String afterValue = readFieldValueById(fieldId);
+				if (afterValue == null || afterValue.isBlank()) {
+					LOGGER.warn("      ⚠️ Required combo {} still empty after selection", fieldId);
+				} else {
+					LOGGER.info("      ✓ Selected required combo {}", fieldId);
 				}
+			} catch (final Exception e) {
+				LOGGER.warn("      ⚠️ Failed to select required combo {}: {}", fieldId, e.getMessage());
 			}
-			locatorById(CRUD_DELETE_BUTTON_ID).click();
-			wait_500();
-			confirmDialogIfPresent();
-			wait_500();
-			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
-				locatorById(CRUD_REFRESH_BUTTON_ID).click();
-				wait_500();
-			}
-			final int afterCount = getGridRowCountSafe();
-			if (afterCount >= beforeCount) {
-				LOGGER.warn("      ⚠️ Delete did not reduce grid row count ({} -> {})", beforeCount, afterCount);
-			} else {
-				LOGGER.info("      ✓ Deleted row ({} -> {})", beforeCount, afterCount);
-			}
-			performFailFastCheck("CRUD Delete");
-			takeScreenshot(String.format("%03d-page-%s-deleted", screenshotCounter++, pageName), false);
-		} catch (Exception e) {
-			LOGGER.warn("⚠️  Delete button test failed: {}", e.getMessage());
-		}
-	}
-
-	private void confirmDialogIfPresent() {
-		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
-		if (overlay.count() == 0) {
-			return;
-		}
-		final Locator confirmButton = page.locator("#" + CONFIRM_YES_BUTTON_ID);
-		if (confirmButton.count() > 0) {
-			confirmButton.first().click();
-			wait_500();
 		}
 	}
 
@@ -687,6 +277,124 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			}
 		}
 		return null;
+	}
+
+	private String findPreferredFieldId() {
+		final String[] preferredSuffixes = {
+				"-name", "-title", "-code"
+		};
+		for (final String suffix : preferredSuffixes) {
+			final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "'][id$='" + suffix + "']");
+			if (fields.count() == 0) {
+				continue;
+			}
+			for (int i = 0; i < fields.count(); i++) {
+				final String fieldId = fields.nth(i).getAttribute("id");
+				if (fieldId == null || fieldId.isBlank()) {
+					continue;
+				}
+				if (isSystemFieldId(fieldId) || isEntityIdField(fieldId)) {
+					continue;
+				}
+				return fieldId;
+			}
+		}
+		return null;
+	}
+
+	private int getGridRowCountSafe() {
+		final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
+		if (grid.count() == 0) {
+			return 0;
+		}
+		final Locator rows = grid.locator("[part='row'], tr");
+		if (rows.count() > 0) {
+			return rows.count();
+		}
+		return grid.locator("vaadin-grid-cell-content, [part='cell']").count();
+	}
+
+	private boolean isComboBoxById(final String fieldId) {
+		try {
+			final Locator field = locatorById(fieldId);
+			final Locator embeddedCombo = field.locator("vaadin-combo-box, c-navigable-combo-box, c-combo-box");
+			if (embeddedCombo.count() > 0) {
+				return true;
+			}
+			final String tagName = field.evaluate("el => el.tagName.toLowerCase()").toString();
+			return tagName.contains("combo-box");
+		} catch (@SuppressWarnings ("unused") final Exception e) {
+			return false;
+		}
+	}
+
+	@SuppressWarnings ("static-method")
+	private boolean isEntityIdField(final String fieldId) {
+		return fieldId != null && fieldId.toLowerCase().endsWith("-id");
+	}
+
+	@SuppressWarnings ("static-method")
+	private boolean isFieldEditable(final Locator field) {
+		try {
+			if (!field.isEnabled()) {
+				return false;
+			}
+			if (field.getAttribute("readonly") != null || field.getAttribute("disabled") != null) {
+				return false;
+			}
+			final Locator input = field.locator("input, textarea");
+			if (input.count() > 0) {
+				if (!input.first().isEnabled()) {
+					return false;
+				}
+				final Object readonly = input.first().evaluate("el => el.hasAttribute('readonly') || el.hasAttribute('disabled')");
+				return readonly == null || Boolean.FALSE.equals(readonly);
+			}
+			return true;
+		} catch (@SuppressWarnings ("unused") final Exception e) {
+			return true;
+		}
+	}
+
+	@SuppressWarnings ("static-method")
+	private boolean isFieldRequired(final Locator field) {
+		try {
+			final Object required = field.evaluate("el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true'");
+			if (Boolean.TRUE.equals(required)) {
+				return true;
+			}
+			final Locator input = field.locator("input");
+			if (input.count() > 0) {
+				final Object inputRequired =
+						input.first().evaluate("el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true'");
+				return Boolean.TRUE.equals(inputRequired);
+			}
+			return Boolean.TRUE.equals(required);
+		} catch (@SuppressWarnings ("unused") final Exception e) {
+			return false;
+		}
+	}
+
+	@SuppressWarnings ("static-method")
+	private boolean isSystemFieldId(final String fieldId) {
+		final String lower = fieldId.toLowerCase();
+		return lower.contains("-created") || lower.contains("-updated") || lower.contains("-version") || lower.contains("-createdby")
+				|| lower.contains("-modified");
+	}
+
+	/** Navigate to the CPageTestAuxillary page. */
+	private void navigateToTestAuxillaryPage() {
+		try {
+			final String url = "http://localhost:" + port + "/" + TEST_AUX_PAGE_ROUTE;
+			LOGGER.debug("Navigating to: {}", url);
+			page.navigate(url);
+			wait_500();
+			// Verify page loaded
+			page.waitForSelector(BUTTON_SELECTOR + ", " + METADATA_SELECTOR, new Page.WaitForSelectorOptions().setTimeout(5000));
+			LOGGER.info("✅ Successfully navigated to CPageTestAuxillary page");
+		} catch (final Exception e) {
+			throw new AssertionError("Failed to navigate to CPageTestAuxillary page: " + e.getMessage(), e);
+		}
 	}
 
 	private FieldValueResult populateEditableFields(final String pageName) {
@@ -744,7 +452,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				try {
 					selectFirstComboBoxOptionById(fieldId);
 					LOGGER.info("      ✓ Selected first option for {}", fieldId);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.debug("      ⚠️ Could not select combo option for {}: {}", fieldId, e.getMessage());
 				}
 				continue;
@@ -778,6 +486,78 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		return new FieldValueResult(primaryFieldId, primaryValue);
 	}
 
+	// ==========================================
+	// CRUD TOOLBAR TEST FUNCTIONS
+	// ==========================================
+	/** Run comprehensive CRUD toolbar tests on the current page.
+	 * @param pageName Page name for screenshots */
+	private void runCrudToolbarTests(String pageName) {
+		try {
+			// Test what buttons are available
+			final boolean hasNew = checkCrudButtonExists(CRUD_NEW_BUTTON_ID);
+			final boolean hasDelete = checkCrudButtonExists(CRUD_DELETE_BUTTON_ID);
+			final boolean hasSave = checkCrudButtonExists(CRUD_SAVE_BUTTON_ID);
+			final boolean hasRefresh = checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID);
+			final boolean hasCancel = checkCrudButtonExists(CRUD_CANCEL_BUTTON_ID);
+			LOGGER.info("   CRUD Buttons available:");
+			LOGGER.info("      New: {}", hasNew);
+			LOGGER.info("      Delete: {}", hasDelete);
+			LOGGER.info("      Save: {}", hasSave);
+			LOGGER.info("      Refresh: {}", hasRefresh);
+			LOGGER.info("      Cancel: {}", hasCancel);
+			if (hasRefresh) {
+				testRefreshButton(pageName);
+			}
+			if (hasNew && hasSave) {
+				testCreateAndSave(pageName);
+			} else if (hasNew) {
+				testNewButton(pageName);
+			}
+			if (hasSave && checkGridHasData()) {
+				testUpdateAndSave(pageName);
+			}
+			if (hasSave) {
+				testStatusChangeIfPresent(pageName);
+			}
+			if (hasDelete && checkGridHasData()) {
+				testDeleteButton(pageName);
+			}
+			takeScreenshot(String.format("%03d-page-%s-crud-tested", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  CRUD toolbar tests encountered error: {}", e.getMessage());
+		}
+	}
+
+	// ==========================================
+	// GRID TEST FUNCTIONS
+	// ==========================================
+	/** Run comprehensive grid tests on the current page.
+	 * @param pageName Page name for screenshots */
+	private void runGridTests(String pageName) {
+		try {
+			// Test 1: Check if grid has data
+			final boolean hasData = checkGridHasData();
+			LOGGER.info("   ✓ Grid has data: {}", hasData);
+			// Test 2: Check if grid is sortable
+			final boolean isSortable = checkGridIsSortable();
+			LOGGER.info("   ✓ Grid is sortable: {}", isSortable);
+			if (isSortable) {
+				// Test sorting on first column
+				testGridSorting(pageName);
+			}
+			// Test 3: Count grid rows
+			final int rowCount = getGridRowCount();
+			LOGGER.info("   ✓ Grid row count: {}", rowCount);
+			// Test 4: Try to select first row if data exists
+			if (hasData && rowCount > 0) {
+				testGridRowSelection(pageName);
+			}
+			takeScreenshot(String.format("%03d-page-%s-grid-tested", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Grid tests encountered error: {}", e.getMessage());
+		}
+	}
+
 	private void selectComboFieldByIdSubstring(final String fragment) {
 		final Locator fields = page.locator("[id^='field-'][id*='" + fragment + "']");
 		if (fields.count() == 0) {
@@ -791,7 +571,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			try {
 				selectFirstComboBoxOptionById(fieldId);
 				LOGGER.info("      ✓ Selected required combo {}", fieldId);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.debug("      ⚠️ Failed to select combo {}: {}", fieldId, e.getMessage());
 			}
 		}
@@ -810,166 +590,10 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			try {
 				selectFirstComboBoxOptionById(fieldId);
 				LOGGER.info("      ✓ Selected required combo {}", fieldId);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.debug("      ⚠️ Failed to select combo {}: {}", fieldId, e.getMessage());
 			}
 		}
-	}
-
-	private boolean isComboBoxById(final String fieldId) {
-		try {
-			final Locator field = locatorById(fieldId);
-			final Locator embeddedCombo = field.locator("vaadin-combo-box, c-navigable-combo-box, c-combo-box");
-			if (embeddedCombo.count() > 0) {
-				return true;
-			}
-			final String tagName = field.evaluate("el => el.tagName.toLowerCase()").toString();
-			return tagName.contains("combo-box");
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	private boolean isSystemFieldId(final String fieldId) {
-		final String lower = fieldId.toLowerCase();
-		return lower.contains("-created") || lower.contains("-updated") || lower.contains("-version") || lower.contains("-createdby")
-				|| lower.contains("-modified");
-	}
-
-	private boolean isEntityIdField(final String fieldId) {
-		return fieldId != null && fieldId.toLowerCase().endsWith("-id");
-	}
-
-	private boolean isFieldEditable(final Locator field) {
-		try {
-			if (!field.isEnabled()) {
-				return false;
-			}
-			if (field.getAttribute("readonly") != null || field.getAttribute("disabled") != null) {
-				return false;
-			}
-			final Locator input = field.locator("input, textarea");
-			if (input.count() > 0) {
-				if (!input.first().isEnabled()) {
-					return false;
-				}
-				final Object readonly = input.first().evaluate("el => el.hasAttribute('readonly') || el.hasAttribute('disabled')");
-				return readonly == null || Boolean.FALSE.equals(readonly);
-			}
-			return true;
-		} catch (Exception e) {
-			return true;
-		}
-	}
-
-	private void ensureRequiredComboSelections() {
-		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
-		for (int i = 0; i < fields.count(); i++) {
-			final Locator field = fields.nth(i);
-			final String fieldId = field.getAttribute("id");
-			if (fieldId == null || fieldId.isBlank()) {
-				continue;
-			}
-			if (!isComboBoxById(fieldId) || !isFieldEditable(field) || !isFieldRequired(field)) {
-				continue;
-			}
-			final String currentValue = readFieldValueById(fieldId);
-			if (currentValue != null && !currentValue.isBlank()) {
-				continue;
-			}
-			try {
-				selectFirstComboBoxOptionById(fieldId);
-				final String afterValue = readFieldValueById(fieldId);
-				if (afterValue == null || afterValue.isBlank()) {
-					LOGGER.warn("      ⚠️ Required combo {} still empty after selection", fieldId);
-				} else {
-					LOGGER.info("      ✓ Selected required combo {}", fieldId);
-				}
-			} catch (Exception e) {
-				LOGGER.warn("      ⚠️ Failed to select required combo {}: {}", fieldId, e.getMessage());
-			}
-		}
-	}
-
-	private boolean isFieldRequired(final Locator field) {
-		try {
-			final Object required = field.evaluate("el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true'");
-			if (Boolean.TRUE.equals(required)) {
-				return true;
-			}
-			final Locator input = field.locator("input");
-			if (input.count() > 0) {
-				final Object inputRequired = input.first()
-						.evaluate("el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true'");
-				return Boolean.TRUE.equals(inputRequired);
-			}
-			return Boolean.TRUE.equals(required);
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	private int getGridRowCountSafe() {
-		final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
-		if (grid.count() == 0) {
-			return 0;
-		}
-		final Locator rows = grid.locator("[part='row'], tr");
-		if (rows.count() > 0) {
-			return rows.count();
-		}
-		return grid.locator("vaadin-grid-cell-content, [part='cell']").count();
-	}
-
-	private boolean selectGridRowByCellText(final String text) {
-		if (text == null || text.isBlank()) {
-			return false;
-		}
-		try {
-			final Locator cells =
-					page.locator("vaadin-grid-cell-content, [part='cell']").filter(new Locator.FilterOptions().setHasText(text));
-			if (cells.count() == 0) {
-				return false;
-			}
-			cells.first().click();
-			wait_500();
-			LOGGER.info("      ✓ Selected row containing '{}'", text);
-			return true;
-		} catch (Exception e) {
-			LOGGER.debug("      ⚠️ Failed selecting row by '{}': {}", text, e.getMessage());
-			return false;
-		}
-	}
-
-	private static final class FieldValueResult {
-		private final String fieldId;
-		private final String value;
-
-		private FieldValueResult(final String fieldId, final String value) {
-			this.fieldId = fieldId;
-			this.value = value;
-		}
-	}
-
-	private String findPreferredFieldId() {
-		final String[] preferredSuffixes = { "-name", "-title", "-code" };
-		for (final String suffix : preferredSuffixes) {
-			final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "'][id$='" + suffix + "']");
-			if (fields.count() == 0) {
-				continue;
-			}
-			for (int i = 0; i < fields.count(); i++) {
-				final String fieldId = fields.nth(i).getAttribute("id");
-				if (fieldId == null || fieldId.isBlank()) {
-					continue;
-				}
-				if (isSystemFieldId(fieldId) || isEntityIdField(fieldId)) {
-					continue;
-				}
-				return fieldId;
-			}
-		}
-		return null;
 	}
 
 	private String selectDifferentComboBoxOptionById(final String elementId, final String currentValue) {
@@ -1001,15 +625,401 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		return null;
 	}
 
-	// ==========================================
-	// HELPER CLASS
-	// ==========================================
-	/** Helper class to store button information. */
-	private static class ButtonInfo {
+	private boolean selectGridRowByCellText(final String text) {
+		if (text == null || text.isBlank()) {
+			return false;
+		}
+		try {
+			final Locator cells = page.locator("vaadin-grid-cell-content, [part='cell']").filter(new Locator.FilterOptions().setHasText(text));
+			if (cells.count() == 0) {
+				return false;
+			}
+			cells.first().click();
+			wait_500();
+			LOGGER.info("      ✓ Selected row containing '{}'", text);
+			return true;
+		} catch (final Exception e) {
+			LOGGER.debug("      ⚠️ Failed selecting row by '{}': {}", text, e.getMessage());
+			return false;
+		}
+	}
 
-		String id;
-		int index;
-		String route;
-		String title;
+	@Test
+	@DisplayName ("✅ Comprehensive test of all CPageTestAuxillary navigation buttons")
+	void testAllAuxillaryPages() {
+		LOGGER.info("🚀 Starting comprehensive CPageTestAuxillary test suite...");
+		try {
+			Files.createDirectories(Paths.get("target/screenshots"));
+			// Step 1: Login to application
+			LOGGER.info("📝 Step 1: Logging into application...");
+			loginToApplication();
+			takeScreenshot(String.format("%03d-after-login", screenshotCounter++), false);
+			// Step 2: Discover navigation targets
+			final String targetRoute = System.getProperty("test.targetRoute");
+			final String targetButtonId = System.getProperty("test.targetButtonId");
+			final String routeKeyword = System.getProperty("test.routeKeyword");
+			List<ButtonInfo> buttons;
+			if (targetRoute != null && !targetRoute.isBlank()) {
+				LOGGER.info("🎯 Targeting single route from test.targetRoute: {}", targetRoute);
+				final ButtonInfo info = new ButtonInfo();
+				info.index = 0;
+				info.id = targetButtonId != null ? targetButtonId : "direct-route";
+				info.title = targetRoute;
+				info.route = targetRoute;
+				buttons = List.of(info);
+			} else {
+				LOGGER.info("🧭 Step 2: Navigating to CPageTestAuxillary page...");
+				navigateToTestAuxillaryPage();
+				wait_2000(); // Give time for buttons to be populated
+				takeScreenshot(String.format("%03d-test-auxillary-page", screenshotCounter++), false);
+				// Step 3: Discover all navigation buttons dynamically
+				LOGGER.info("🔍 Step 3: Discovering navigation buttons...");
+				buttons = discoverNavigationButtons();
+				if (routeKeyword != null && !routeKeyword.isBlank()) {
+					final String keyword = routeKeyword.toLowerCase();
+					buttons = buttons.stream().filter(b -> b.route != null && b.route.toLowerCase().contains(keyword)
+							|| b.title != null && b.title.toLowerCase().contains(keyword)).toList();
+					LOGGER.info("🎯 Filtered buttons by test.routeKeyword: {}", routeKeyword);
+				}
+				if (targetButtonId != null && !targetButtonId.isBlank()) {
+					buttons = buttons.stream().filter(b -> targetButtonId.equals(b.id)).toList();
+					LOGGER.info("🎯 Filtered buttons by test.targetButtonId: {}", targetButtonId);
+				}
+			}
+			LOGGER.info("📊 Found {} navigation buttons to test", buttons.size());
+			if (buttons.isEmpty()) {
+				throw new AssertionError("No navigation buttons found for provided target parameters");
+			}
+			// Step 4: Test each button's target page
+			LOGGER.info("🧪 Step 4: Testing each navigation button's target page...");
+			LOGGER.info("Will test {} buttons by navigating directly to their routes", buttons.size());
+			for (int i = 0; i < buttons.size(); i++) {
+				final ButtonInfo button = buttons.get(i);
+				LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+				LOGGER.info("🎯 Testing button {}/{}: {}", i + 1, buttons.size(), button.title);
+				LOGGER.info("   Route: {}", button.route);
+				LOGGER.info("   Button ID: {}", button.id);
+				testNavigationButton(button, i + 1, buttons.size());
+			}
+			// Step 5: Summary
+			LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+			LOGGER.info("✅ Test suite completed successfully!");
+			LOGGER.info("📊 Summary:");
+			LOGGER.info("   Total buttons tested: {}", buttons.size());
+			LOGGER.info("   Pages visited: {}", pagesVisited);
+			LOGGER.info("   Pages with grids: {}", gridPagesFound);
+			LOGGER.info("   Pages with CRUD toolbars: {}", crudPagesFound);
+			LOGGER.info("   Screenshots captured: {}", screenshotCounter - 1);
+		} catch (final Exception e) {
+			LOGGER.error("❌ Test suite failed: {}", e.getMessage(), e);
+			takeScreenshot("error-comprehensive-test", true);
+			throw new AssertionError("Comprehensive test suite failed", e);
+		}
+	}
+
+	private void testCreateAndSave(String pageName) {
+		try {
+			LOGGER.info("   🧾 Testing New + Save workflow...");
+			final Locator newButton = page.locator("#" + CRUD_NEW_BUTTON_ID);
+			if (newButton.count() == 0) {
+				return;
+			}
+			final boolean hasGrid = checkGridExists();
+			final int beforeCount = hasGrid ? getGridRowCountSafe() : -1;
+			locatorById(CRUD_NEW_BUTTON_ID).click();
+			wait_500();
+			final FieldValueResult createdResult = populateEditableFields(pageName);
+			final String createdMarker = createdResult.value;
+			if (createdMarker != null && !createdMarker.isBlank()) {
+				lastCreatedValues.put(pageName, createdMarker);
+			}
+			if (createdResult.fieldId != null && !createdResult.fieldId.isBlank()) {
+				lastCreatedFieldIds.put(pageName, createdResult.fieldId);
+			}
+			locatorById(CRUD_SAVE_BUTTON_ID).click();
+			wait_500();
+			performFailFastCheck("CRUD Save New");
+			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
+				wait_500();
+			}
+			if (hasGrid) {
+				final int afterCount = getGridRowCountSafe();
+				if (afterCount <= beforeCount) {
+					LOGGER.warn("      ⚠️ Create did not increase grid row count ({} -> {})", beforeCount, afterCount);
+				} else {
+					LOGGER.info("      ✓ Created row ({} -> {})", beforeCount, afterCount);
+				}
+			}
+			takeScreenshot(String.format("%03d-page-%s-created", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Create + Save test failed: {}", e.getMessage());
+		}
+	}
+
+	private void testDeleteButton(String pageName) {
+		try {
+			LOGGER.info("   🗑️ Testing Delete button...");
+			final int beforeCount = getGridRowCountSafe();
+			if (beforeCount == 0) {
+				LOGGER.warn("      ⚠️ No rows available to delete");
+				return;
+			}
+			final String createdMarker = lastCreatedValues.get(pageName);
+			if (createdMarker == null || createdMarker.isBlank()) {
+				LOGGER.warn("      ⚠️ No created marker found for {}, skipping delete to avoid removing sample data", pageName);
+				return;
+			}
+			final boolean selected = selectGridRowByCellText(createdMarker);
+			if (!selected) {
+				LOGGER.warn("      ⚠️ Created row not found for {}, skipping delete", pageName);
+				return;
+			}
+			final String createdFieldId = lastCreatedFieldIds.get(pageName);
+			if (createdFieldId != null && !createdFieldId.isBlank()) {
+				final String currentValue = readFieldValueById(createdFieldId);
+				if (currentValue == null || !currentValue.trim().equals(createdMarker.trim())) {
+					LOGGER.warn("      ⚠️ Form selection mismatch for {}, skipping delete", pageName);
+					return;
+				}
+			}
+			locatorById(CRUD_DELETE_BUTTON_ID).click();
+			wait_500();
+			confirmDialogIfPresent();
+			wait_500();
+			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
+				wait_500();
+			}
+			final int afterCount = getGridRowCountSafe();
+			if (afterCount >= beforeCount) {
+				LOGGER.warn("      ⚠️ Delete did not reduce grid row count ({} -> {})", beforeCount, afterCount);
+			} else {
+				LOGGER.info("      ✓ Deleted row ({} -> {})", beforeCount, afterCount);
+			}
+			performFailFastCheck("CRUD Delete");
+			takeScreenshot(String.format("%03d-page-%s-deleted", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Delete button test failed: {}", e.getMessage());
+		}
+	}
+
+	/** Test grid row selection.
+	 * @param pageName Page name for screenshots */
+	private void testGridRowSelection(String pageName) {
+		try {
+			LOGGER.info("   🖱️  Testing grid row selection...");
+			final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
+			final Locator cells = grid.locator("vaadin-grid-cell-content, [part='cell']");
+			if (cells.count() > 0) {
+				cells.first().click();
+				wait_500();
+				LOGGER.info("      ✓ Selected first row");
+				takeScreenshot(String.format("%03d-page-%s-row-selected", screenshotCounter++, pageName), false);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Grid row selection test failed: {}", e.getMessage());
+		}
+	}
+
+	/** Test grid sorting functionality.
+	 * @param pageName Page name for screenshots */
+	private void testGridSorting(String pageName) {
+		try {
+			LOGGER.info("   🔄 Testing grid sorting...");
+			final Locator sorters = page.locator("vaadin-grid-sorter");
+			if (sorters.count() > 0) {
+				// Click first sorter to sort ascending
+				sorters.first().click();
+				wait_500();
+				LOGGER.info("      ✓ Sorted ascending");
+				// Click again to sort descending
+				sorters.first().click();
+				wait_500();
+				LOGGER.info("      ✓ Sorted descending");
+				takeScreenshot(String.format("%03d-page-%s-sorted", screenshotCounter++, pageName), false);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Grid sorting test failed: {}", e.getMessage());
+		}
+	}
+
+	/** Test a single navigation button and its target page.
+	 * @param button       Button information
+	 * @param buttonNum    Button number (1-based)
+	 * @param totalButtons Total number of buttons */
+	private void testNavigationButton(ButtonInfo button, int buttonNum, int totalButtons) {
+		try {
+			// Navigate directly to the route instead of clicking the button
+			// This is more reliable than clicking Vaadin buttons with JavaScript handlers
+			LOGGER.info("🧭 Navigating to: {} (button: {})", button.route, button.title);
+			if (button.route == null || button.route.isEmpty()) {
+				LOGGER.warn("⚠️  Button has no route: {}", button.title);
+				return;
+			}
+			final String targetUrl = "http://localhost:" + port + "/" + button.route;
+			page.navigate(targetUrl);
+			try {
+				wait_1000(); // Wait for navigation and page load
+			} catch (final AssertionError e) {
+				throw new AssertionError("Exception dialog detected while navigating to: " + button.title + " (" + button.route + ")", e);
+			}
+			pagesVisited++;
+			// Take initial screenshot
+			final String pageNameSafe = sanitizeForFileName(button.title, "page-" + button.index);
+			takeScreenshot(String.format("%03d-page-%s-initial", screenshotCounter++, pageNameSafe), false);
+			// Check what's on the page and run appropriate tests
+			LOGGER.info("🔍 Analyzing page content...");
+			final boolean hasGrid = checkGridExists();
+			final boolean hasCrudToolbar = checkCrudToolbarExists();
+			LOGGER.info("   Grid present: {}", hasGrid);
+			LOGGER.info("   CRUD toolbar present: {}", hasCrudToolbar);
+			// Run conditional tests based on page content
+			if (hasGrid) {
+				LOGGER.info("📊 Running grid tests...");
+				runGridTests(pageNameSafe);
+				gridPagesFound++;
+			} else {
+				LOGGER.info("ℹ️  No grid found, skipping grid tests");
+			}
+			if (hasCrudToolbar) {
+				LOGGER.info("🔧 Running CRUD toolbar tests...");
+				runCrudToolbarTests(pageNameSafe);
+				crudPagesFound++;
+			} else {
+				LOGGER.info("ℹ️  No CRUD toolbar found, skipping CRUD tests");
+			}
+			// Take final screenshot
+			takeScreenshot(String.format("%03d-page-%s-final", screenshotCounter++, pageNameSafe), false);
+			LOGGER.info("✅ Completed testing button {}/{}: {}", buttonNum, totalButtons, button.title);
+		} catch (final Exception e) {
+			LOGGER.error("❌ Failed to test button: {} - {}", button.title, e.getMessage(), e);
+			takeScreenshot("error-button-" + button.index, true);
+			// Don't throw - continue with next button
+		}
+	}
+
+	/** Test the New button functionality.
+	 * @param pageName Page name for screenshots */
+	private void testNewButton(String pageName) {
+		try {
+			LOGGER.info("   ➕ Testing New button...");
+			final Locator newButton = page.locator("#" + CRUD_NEW_BUTTON_ID);
+			if (newButton.count() > 0) {
+				locatorById(CRUD_NEW_BUTTON_ID).click();
+				wait_500();
+				LOGGER.info("      ✓ Clicked New button");
+				takeScreenshot(String.format("%03d-page-%s-new-clicked", screenshotCounter++, pageName), false);
+				// Check if a form or dialog appeared
+				final boolean hasDialog = page.locator("vaadin-dialog, vaadin-dialog-overlay").count() > 0;
+				final boolean hasFormLayout = page.locator("vaadin-form-layout").count() > 0;
+				LOGGER.info("      Dialog/Form appeared: {}", hasDialog || hasFormLayout);
+				// Try to close dialog/form if opened
+				if (hasDialog || hasFormLayout) {
+					// Look for Cancel button to close
+					final Locator cancelButton = page.locator("#" + CRUD_CANCEL_BUTTON_ID);
+					if (cancelButton.count() > 0) {
+						cancelButton.first().click();
+						wait_500();
+						LOGGER.info("      ✓ Closed form via Cancel button");
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  New button test failed: {}", e.getMessage());
+		}
+	}
+
+	/** Test the Edit button functionality.
+	 * @param pageName Page name for screenshots */
+	private void testRefreshButton(String pageName) {
+		try {
+			LOGGER.info("   🔄 Testing Refresh button...");
+			final Locator refreshButton = page.locator("#" + CRUD_REFRESH_BUTTON_ID);
+			if (refreshButton.count() > 0) {
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
+				wait_500();
+				performFailFastCheck("CRUD Refresh");
+				takeScreenshot(String.format("%03d-page-%s-refresh-clicked", screenshotCounter++, pageName), false);
+				LOGGER.info("      ✓ Clicked Refresh button");
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Refresh button test failed: {}", e.getMessage());
+		}
+	}
+
+	private void testStatusChangeIfPresent(String pageName) {
+		try {
+			final Locator statusFields = page.locator("[id^='" + FIELD_ID_PREFIX + "'][id*='status']");
+			if (statusFields.count() == 0) {
+				return;
+			}
+			final String statusFieldId = statusFields.first().getAttribute("id");
+			if (statusFieldId == null || statusFieldId.isBlank()) {
+				return;
+			}
+			LOGGER.info("   🟣 Testing status field update via {}", statusFieldId);
+			final String before = readFieldValueById(statusFieldId);
+			final String selected = selectDifferentComboBoxOptionById(statusFieldId, before);
+			if (selected == null) {
+				LOGGER.warn("      ⚠️ No alternate status value available for {}", statusFieldId);
+				return;
+			}
+			locatorById(CRUD_SAVE_BUTTON_ID).click();
+			wait_500();
+			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
+				wait_500();
+			}
+			final String after = readFieldValueById(statusFieldId);
+			if (after != null && !after.isBlank() && !after.trim().equals(before == null ? "" : before.trim())) {
+				LOGGER.info("      ✓ Status updated: {} -> {}", before, after);
+			} else {
+				LOGGER.warn("      ⚠️ Status value did not change after save for {}", statusFieldId);
+			}
+			performFailFastCheck("CRUD Status Save");
+			takeScreenshot(String.format("%03d-page-%s-status-updated", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Status change test failed: {}", e.getMessage());
+		}
+	}
+
+	private void testUpdateAndSave(String pageName) {
+		try {
+			LOGGER.info("   ✏️  Testing Update + Save workflow...");
+			if (!checkGridHasData()) {
+				return;
+			}
+			testGridRowSelection(pageName);
+			final String fieldId = findEditableFieldId();
+			if (fieldId == null) {
+				LOGGER.warn("      ⚠️ No editable field found for update workflow");
+				return;
+			}
+			final String beforeValue = readFieldValueById(fieldId);
+			if (isComboBoxById(fieldId)) {
+				selectFirstComboBoxOptionById(fieldId);
+			} else {
+				final String updateValue = "Updated-" + pageName;
+				fillFieldById(fieldId, updateValue);
+				LOGGER.info("      ✓ Updated field {} with {}", fieldId, updateValue);
+			}
+			locatorById(CRUD_SAVE_BUTTON_ID).click();
+			wait_500();
+			performFailFastCheck("CRUD Save Update");
+			if (checkCrudButtonExists(CRUD_REFRESH_BUTTON_ID)) {
+				locatorById(CRUD_REFRESH_BUTTON_ID).click();
+				wait_500();
+			}
+			final String afterValue = readFieldValueById(fieldId);
+			if (afterValue != null && beforeValue != null && afterValue.trim().equals(beforeValue.trim())) {
+				LOGGER.warn("      ⚠️ Update value did not change for {}", fieldId);
+			} else {
+				LOGGER.info("      ✓ Updated value for {} ({} -> {})", fieldId, beforeValue, afterValue);
+			}
+			takeScreenshot(String.format("%03d-page-%s-updated", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Update + Save test failed: {}", e.getMessage());
+		}
 	}
 }

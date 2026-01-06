@@ -1,7 +1,6 @@
 package tech.derbent.api.utils;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -17,12 +16,12 @@ import tech.derbent.api.exceptions.CImageProcessingException;
 public final class CImageUtils {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CImageUtils.class);
-	/** Standard profile picture width in pixels */
-	public static final int PROFILE_PICTURE_WIDTH = 100;
-	/** Standard profile picture height in pixels */
-	public static final int PROFILE_PICTURE_HEIGHT = 100;
 	/** Maximum allowed image file size in bytes (5MB) */
 	public static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+	/** Standard profile picture height in pixels */
+	public static final int PROFILE_PICTURE_HEIGHT = 100;
+	/** Standard profile picture width in pixels */
+	public static final int PROFILE_PICTURE_WIDTH = 100;
 	/** Supported image formats */
 	public static final String[] SUPPORTED_FORMATS = {
 			"jpg", "jpeg", "png", "gif", "svg"

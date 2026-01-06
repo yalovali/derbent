@@ -397,6 +397,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Factory method for search toolbar layout using CComponentFilterToolbar. */
+	@SuppressWarnings ("static-method")
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
 		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar();
 		return toolbar;
@@ -469,9 +470,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	/** Enables automatic value persistence for the entity type selection.
 	 * <p>
-	 * <strong>IMPORTANT</strong>: Before calling this method, the parent component MUST set an explicit,
-	 * stable ID using {@code setId("contextSpecificId")}. Failure to do so will result in an
-	 * {@link IllegalStateException} being thrown.
+	 * <strong>IMPORTANT</strong>: Before calling this method, the parent component MUST set an explicit, stable ID using
+	 * {@code setId("contextSpecificId")}. Failure to do so will result in an {@link IllegalStateException} being thrown.
 	 * </p>
 	 * <p>
 	 * This method should be called by the parent component/context owner to enable automatic saving and restoring of the entity type selection. Once
@@ -483,28 +483,24 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * </p>
 	 * <p>
 	 * Example usage in parent dialog:
+	 *
 	 * <pre>
 	 * componentEntitySelection = new CComponentEntitySelection&lt;&gt;(...);
 	 * componentEntitySelection.setId("entitySelection_sprintItems");  // REQUIRED
 	 * componentEntitySelection.enableValuePersistence();
 	 * </pre>
 	 * </p>
-	 * 
 	 * @throws IllegalStateException if component ID is not set before calling this method
-	 * @see #getStorageId()
-	 */
+	 * @see #getValuePersistId() */
 	public void enableValuePersistence() {
 		// Validate ID is set before enabling persistence (fail-fast)
 		final String componentId = getId().orElse(null);
 		if (componentId == null || componentId.isBlank()) {
-			throw new IllegalStateException(
-				"Component ID must be set before enabling value persistence. " +
-				"Call setId(\"contextSpecificId\") before calling enableValuePersistence(). " +
-				"Example: componentEntitySelection.setId(\"entitySelection_sprintItems\");"
-			);
+			throw new IllegalStateException("Component ID must be set before enabling value persistence. "
+					+ "Call setId(\"contextSpecificId\") before calling enableValuePersistence(). "
+					+ "Example: componentEntitySelection.setId(\"entitySelection_sprintItems\");");
 		}
-		
-		final String storageId = getStorageId();
+		final String storageId = getValuePersistId();
 		LOGGER.info("[ValuePersistence] CComponentEntitySelection: Enabling value persistence with storage ID: {}", storageId);
 		if (comboBoxEntityType == null) {
 			LOGGER.warn("[ValuePersistence] CComponentEntitySelection: Cannot enable value persistence - comboBox not initialized");
@@ -514,30 +510,18 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		CValueStorageHelper.valuePersist_enable(comboBoxEntityType, storageId, displayName -> {
 			// Converter: find entity type by display name
 			LOGGER.info("[ValuePersistence] CComponentEntitySelection: Converting stored displayName '{}' to EntityTypeConfig", displayName);
-			final EntityTypeConfig<?> result = entityTypes.stream().filter(config -> config.getDisplayName().equals(displayName)).findFirst().orElse(null);
+			final EntityTypeConfig<?> result =
+					entityTypes.stream().filter(config -> config.getDisplayName().equals(displayName)).findFirst().orElse(null);
 			if (result != null) {
-				LOGGER.info("[ValuePersistence] CComponentEntitySelection: Converted displayName '{}' to EntityTypeConfig: {}", displayName, result.getDisplayName());
+				LOGGER.info("[ValuePersistence] CComponentEntitySelection: Converted displayName '{}' to EntityTypeConfig: {}", displayName,
+						result.getDisplayName());
 			} else {
-				LOGGER.warn("[ValuePersistence] CComponentEntitySelection: Failed to convert displayName '{}' - no matching EntityTypeConfig found", displayName);
+				LOGGER.warn("[ValuePersistence] CComponentEntitySelection: Failed to convert displayName '{}' - no matching EntityTypeConfig found",
+						displayName);
 			}
 			return result;
 		});
 		LOGGER.info("[ValuePersistence] CComponentEntitySelection: Value persistence enabled successfully with storage ID: {}", storageId);
-	}
-
-	/**
-	 * Selects the first entity type if no entity type is currently selected.
-	 * <p>
-	 * This method should be called BEFORE enabling value persistence to ensure
-	 * a default value is set. The persistence system will then save this as the
-	 * initial default on first load, and restore the user's selection on subsequent loads.
-	 * </p>
-	 */
-	protected void selectFirstEntityTypeIfNoneSelected() {
-		if (comboBoxEntityType != null && comboBoxEntityType.getValue() == null && !entityTypes.isEmpty()) {
-			LOGGER.info("[ValuePersistence] CComponentEntitySelection: Selecting first entity type as initial default: {}", entityTypes.get(0).getDisplayName());
-			comboBoxEntityType.setValue(entityTypes.get(0));
-		}
 	}
 
 	/** Returns the list of already selected items.
@@ -587,6 +571,11 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * @return Set of selected items (never null) */
 	public Set<EntityClass> getSelectedItems() { return new HashSet<>(selectedItems); }
 
+	/** Gets the current value of this component (the selected items).
+	 * @return Set of currently selected items (never null) */
+	@Override
+	public Set<EntityClass> getValue() { return new HashSet<>(selectedItems); }
+
 	/** Gets the unique storage identifier for this component's entity type value.
 	 * <p>
 	 * Uses the component's ID if available, otherwise uses a class-based default. This ensures each instance of CComponentEntitySelection can
@@ -594,24 +583,17 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	 * </p>
 	 * @return The storage identifier (never null) */
 	@Override
-	public String getStorageId() {
+	public String getValuePersistId() {
 		// CRITICAL: Component ID must be set explicitly for value persistence to work
 		// If ID is not set, persistence will fail across component recreations
 		final String componentId = getId().orElse(null);
 		if (componentId == null || componentId.isBlank()) {
-			throw new IllegalStateException(
-				"Component ID must be set explicitly for value persistence. " +
-				"Call setId(\"uniqueId\") in the constructor or use CAuxillaries.setId(this) " +
-				"to enable automatic value persistence for " + getClass().getSimpleName()
-			);
+			throw new IllegalStateException("Component ID must be set explicitly for value persistence. "
+					+ "Call setId(\"uniqueId\") in the constructor or use CAuxillaries.setId(this) " + "to enable automatic value persistence for "
+					+ getClass().getSimpleName());
 		}
 		return "entitySelection_" + componentId;
 	}
-
-	/** Gets the current value of this component (the selected items).
-	 * @return Set of currently selected items (never null) */
-	@Override
-	public Set<EntityClass> getValue() { return new HashSet<>(selectedItems); }
 
 	/** Checks if the selection is empty.
 	 * @return true if no items are selected, false otherwise */
@@ -837,7 +819,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	public void restoreCurrentValue() {
 		try {
 			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
-			final java.util.Optional<String> storedDisplayName = sessionService.getSessionValue(getStorageId());
+			final java.util.Optional<String> storedDisplayName = sessionService.getSessionValue(getValuePersistId());
 			if (storedDisplayName.isPresent() && comboBoxEntityType != null) {
 				// Find the entity type config that matches the stored display name
 				final EntityTypeConfig<?> matchingConfig =
@@ -867,12 +849,26 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			if (comboBoxEntityType != null) {
 				final EntityTypeConfig<?> currentValue = comboBoxEntityType.getValue();
 				if (currentValue != null) {
-					sessionService.setSessionValue(getStorageId(), currentValue.getDisplayName());
+					sessionService.setSessionValue(getValuePersistId(), currentValue.getDisplayName());
 					LOGGER.debug("Saved entity type selection: {}", currentValue.getDisplayName());
 				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error saving entity type selection", e);
+		}
+	}
+
+	/** Selects the first entity type if no entity type is currently selected.
+	 * <p>
+	 * This method should be called BEFORE enabling value persistence to ensure a default value is set. The persistence system will then save this as
+	 * the initial default on first load, and restore the user's selection on subsequent loads.
+	 * </p>
+	 */
+	protected void selectFirstEntityTypeIfNoneSelected() {
+		if (comboBoxEntityType != null && comboBoxEntityType.getValue() == null && !entityTypes.isEmpty()) {
+			LOGGER.info("[ValuePersistence] CComponentEntitySelection: Selecting first entity type as initial default: {}",
+					entityTypes.get(0).getDisplayName());
+			comboBoxEntityType.setValue(entityTypes.get(0));
 		}
 	}
 

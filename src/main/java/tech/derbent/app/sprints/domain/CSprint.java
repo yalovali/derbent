@@ -12,7 +12,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -106,7 +105,9 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	// Sprint Items - Collection of progress tracking items for activities/meetings in this sprint
 	// Sprint items are owned by CActivity/CMeeting, sprint is just a reference
 	// Query items via: SELECT a FROM CActivity a WHERE a.sprintItem.sprint = :sprint
-	@OneToMany (mappedBy = "sprint", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+	@OneToMany (mappedBy = "sprint", cascade = {
+			CascadeType.PERSIST, CascadeType.MERGE
+	}, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Sprint Items", required = false, readOnly = false,
 			description = "Progress tracking items for activities/meetings in this sprint", hidden = false,
@@ -162,8 +163,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		}
 		// Check if already in sprint
 		if (sprintItems != null) {
-			final boolean alreadyPresent = sprintItems.stream()
-					.anyMatch(si -> isSameSprintable(item, si));
+			final boolean alreadyPresent = sprintItems.stream().anyMatch(si -> isSameSprintable(item, si));
 			if (alreadyPresent) {
 				return;
 			}

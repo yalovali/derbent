@@ -242,26 +242,20 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			int addedCount = 0;
 			for (final ISprintableItem item : selectedItems) {
 				try {
-					// Determine item type
-					final String itemType = item.getClass().getSimpleName();
 					// Get the item's existing sprint item and update its sprint
-					if (item instanceof tech.derbent.api.interfaces.ISprintableItem) {
-						final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) item;
-						final CSprintItem sprintItem = sprintableItem.getSprintItem();
-						if (sprintItem != null) {
-							sprintItem.setSprint(getMasterEntity());
-							sprintItem.setItemOrder(getNextOrder() + addedCount);
-							sprintItem.setParentItem(sprintableItem);
-							// Save parent item (cascade will save sprint item)
-							// We need to cast and save through appropriate service
-							// For now, just log that this needs proper service call
-							LOGGER.debug("Updated sprint item for {} to sprint {}", item.getId(), getMasterEntity().getName());
-							addedCount++;
-						} else {
-							LOGGER.warn("Item {} has no sprint item - cannot add to sprint", item.getId());
-						}
+					final ISprintableItem sprintableItem = item;
+					final CSprintItem sprintItem = sprintableItem.getSprintItem();
+					if (sprintItem != null) {
+						sprintItem.setSprint(getMasterEntity());
+						sprintItem.setItemOrder(getNextOrder() + addedCount);
+						sprintItem.setParentItem(sprintableItem);
+						// Save parent item (cascade will save sprint item)
+						// We need to cast and save through appropriate service
+						// For now, just log that this needs proper service call
+						LOGGER.debug("Updated sprint item for {} to sprint {}", item.getId(), getMasterEntity().getName());
+						addedCount++;
 					} else {
-						LOGGER.warn("Item {} is not a sprintable item", item.getId());
+						LOGGER.warn("Item {} has no sprint item - cannot add to sprint", item.getId());
 					}
 				} catch (final Exception e) {
 					LOGGER.error("Error adding item {} to sprint", item.getId(), e);

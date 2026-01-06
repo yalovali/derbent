@@ -9,20 +9,18 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.interfaces.IHasSelectedValueStorage;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CValueStorageHelper - Utility for enabling automatic value persistence on UI components.
  * <p>
- * This helper provides transparent, automatic saving and restoring of component values across
- * refreshes and page reloads. Once enabled, the component will automatically:
+ * This helper provides transparent, automatic saving and restoring of component values across refreshes and page reloads. Once enabled, the component
+ * will automatically:
  * <ul>
  * <li>Save its value whenever the user changes it (not on programmatic changes)</li>
  * <li>Restore its value when attached to the UI</li>
  * <li>Handle conversion between component values and storage strings</li>
  * </ul>
  * </p>
- * 
  * <h3>Key Benefits:</h3>
  * <ul>
  * <li><b>Automatic</b> - No manual save/restore calls needed</li>
@@ -30,7 +28,6 @@ import tech.derbent.base.session.service.ISessionService;
  * <li><b>User-focused</b> - Only saves user changes, not programmatic updates</li>
  * <li><b>Simple</b> - One method call to enable full persistence</li>
  * </ul>
- * 
  * <h3>When to Use:</h3>
  * <p>
  * <b>Use CValueStorageHelper for:</b>
@@ -49,75 +46,59 @@ import tech.derbent.base.session.service.ISessionService;
  * <li>Non-standard state that doesn't fit the value model</li>
  * </ul>
  * </p>
- * 
  * <h3>Supported Components:</h3>
  * <ul>
  * <li><b>ComboBox</b> - Stores selected item (by toString() / custom converter)</li>
  * <li><b>TextField</b> - Stores entered text value</li>
  * <li><b>Any HasValue component</b> - With custom serializer/converter</li>
  * </ul>
- * 
  * <h3>Usage Examples:</h3>
  * <h4>Example 1: ComboBox with Simple Enum</h4>
+ *
  * <pre>
  * ComboBox&lt;ResponsibleFilterMode&gt; comboBox = new ComboBox&lt;&gt;("Responsible");
  * comboBox.setItems(ResponsibleFilterMode.values());
- * 
  * // Enable persistence - uses toString() for save, valueOf() for restore
- * CValueStorageHelper.valuePersist_enable(
- *     comboBox,
- *     "filter_responsible",
- *     storedString -&gt; {
- *         try {
- *             return ResponsibleFilterMode.valueOf(storedString);
- *         } catch (IllegalArgumentException e) {
- *             return ResponsibleFilterMode.ALL; // Safe default
- *         }
- *     }
- * );
+ * CValueStorageHelper.valuePersist_enable(comboBox, "filter_responsible", storedString -&gt; {
+ * 	try {
+ * 		return ResponsibleFilterMode.valueOf(storedString);
+ * 	} catch (IllegalArgumentException e) {
+ * 		return ResponsibleFilterMode.ALL; // Safe default
+ * 	}
+ * });
  * </pre>
- * 
+ *
  * <h4>Example 2: ComboBox with Complex Objects</h4>
+ *
  * <pre>
  * ComboBox&lt;EntityType&gt; comboBox = new ComboBox&lt;&gt;("Type");
  * comboBox.setItems(availableTypes);
  * comboBox.setItemLabelGenerator(EntityType::getDisplayName);
- * 
  * // Enable persistence - stores by entity class name
- * CValueStorageHelper.valuePersist_enable(
- *     comboBox,
- *     "filter_entityType",
- *     className -&gt; {
- *         // Find matching type in current items
- *         return comboBox.getListDataView().getItems()
- *             .filter(type -&gt; type.getEntityClass().getName().equals(className))
- *             .findFirst()
- *             .orElse(null);
- *     }
- * );
+ * CValueStorageHelper.valuePersist_enable(comboBox, "filter_entityType", className -&gt; {
+ * 	// Find matching type in current items
+ * 	return comboBox.getListDataView().getItems().filter(type -&gt; type.getEntityClass().getName().equals(className)).findFirst().orElse(null);
+ * });
  * </pre>
- * 
+ *
  * <h4>Example 3: TextField</h4>
+ *
  * <pre>
  * TextField nameFilter = new TextField("Name");
- * 
  * // Enable persistence - simple string storage
  * CValueStorageHelper.valuePersist_enable(nameFilter, "filter_name");
  * </pre>
- * 
+ *
  * <h4>Example 4: Custom Serialization</h4>
+ *
  * <pre>
  * ComboBox&lt;Project&gt; comboBox = new ComboBox&lt;&gt;("Project");
- * 
  * // Enable persistence with custom serializer and converter
- * CValueStorageHelper.valuePersist_enable(
- *     comboBox,
- *     "filter_project",
- *     project -&gt; project.getId().toString(),  // Save as ID
- *     idString -&gt; findProjectById(Long.parseLong(idString))  // Restore by ID
+ * CValueStorageHelper.valuePersist_enable(comboBox, "filter_project", project -&gt; project.getId().toString(), // Save as ID
+ * 		idString -&gt; findProjectById(Long.parseLong(idString)) // Restore by ID
  * );
  * </pre>
- * 
+ *
  * <h3>How It Works:</h3>
  * <ol>
  * <li><b>Setup:</b> Call valuePersist_enable() with component, storage ID, and converter</li>
@@ -125,7 +106,6 @@ import tech.derbent.base.session.service.ISessionService;
  * <li><b>Restore:</b> When component attaches, automatically restores using converter</li>
  * <li><b>Validation:</b> Converter can return null if stored value is no longer valid</li>
  * </ol>
- * 
  * <h3>Important Notes:</h3>
  * <ul>
  * <li><b>User Changes Only:</b> Only saves when event.isFromClient() is true</li>
@@ -133,7 +113,6 @@ import tech.derbent.base.session.service.ISessionService;
  * <li><b>Storage ID:</b> Must be unique per component within the session</li>
  * <li><b>Initial Value:</b> If no stored value exists, current value is saved as default</li>
  * </ul>
- *
  * @see tech.derbent.api.interfaces.IHasSelectedValueStorage
  * @see tech.derbent.base.session.service.ISessionService */
 public class CValueStorageHelper {
@@ -248,7 +227,8 @@ public class CValueStorageHelper {
 		});
 		// If component is already attached, restore value immediately
 		if (vaadinComponent.isAttached()) {
-			LOGGER.info("[ValuePersistence] CValueStorageHelper: Component already attached for storage ID '{}', restoring value immediately", storageId);
+			LOGGER.info("[ValuePersistence] CValueStorageHelper: Component already attached for storage ID '{}', restoring value immediately",
+					storageId);
 			valuePersist_restoreValue(component, storageId, converter, sessionService);
 		}
 		LOGGER.info("[ValuePersistence] CValueStorageHelper: Enabled auto-persistence for component with storage ID: {}", storageId);
@@ -293,7 +273,8 @@ public class CValueStorageHelper {
 			final ISessionService sessionService) {
 		try {
 			final Optional<String> storedValue = sessionService.getSessionValue(storageId);
-			LOGGER.info("[ValuePersistence] CValueStorageHelper: Restoring value for storage ID '{}', storedValue present: {}", storageId, storedValue.isPresent());
+			LOGGER.info("[ValuePersistence] CValueStorageHelper: Restoring value for storage ID '{}', storedValue present: {}", storageId,
+					storedValue.isPresent());
 			if (storedValue.isPresent()) {
 				LOGGER.info("[ValuePersistence] CValueStorageHelper: Found stored value '{}' for storage ID '{}'", storedValue.get(), storageId);
 				final T value = converter.fromString(storedValue.get());
@@ -303,17 +284,20 @@ public class CValueStorageHelper {
 					component.setValue(value);
 					LOGGER.info("[ValuePersistence] CValueStorageHelper: Auto-restored value '{}' for storage ID: {}", value, storageId);
 				} else {
-					LOGGER.warn("[ValuePersistence] CValueStorageHelper: Could not convert stored value '{}' for storage ID: {}", storedValue.get(), storageId);
+					LOGGER.warn("[ValuePersistence] CValueStorageHelper: Could not convert stored value '{}' for storage ID: {}", storedValue.get(),
+							storageId);
 				}
 			} else {
 				// No stored value exists - check if component has a current value and save it as initial default
 				final T currentValue = component.getValue();
-				LOGGER.info("[ValuePersistence] CValueStorageHelper: No stored value for storage ID '{}', current value: {}", storageId, currentValue);
+				LOGGER.info("[ValuePersistence] CValueStorageHelper: No stored value for storage ID '{}', current value: {}", storageId,
+						currentValue);
 				if (currentValue != null) {
 					final String serialized = currentValue.toString();
 					if (serialized != null && !serialized.isBlank()) {
 						sessionService.setSessionValue(storageId, serialized);
-						LOGGER.info("[ValuePersistence] CValueStorageHelper: Saved initial value '{}' as default for storage ID: {}", serialized, storageId);
+						LOGGER.info("[ValuePersistence] CValueStorageHelper: Saved initial value '{}' as default for storage ID: {}", serialized,
+								storageId);
 					}
 				}
 			}

@@ -15,16 +15,20 @@ import tech.derbent.app.comments.domain.CComment;
  * comment entities with support for: - Activity-based queries - Author-based queries - Chronological ordering - Pagination support */
 public interface ICommentRepository extends IAbstractRepository<CComment> {
 
-	@EntityGraph (attributePaths = { "activity", "author", "priority" })
+	long countByActivity(CActivity activity);
+	@Override
+	@EntityGraph (attributePaths = {
+			"activity", "author", "priority"
+	})
 	@Query ("SELECT c FROM CComment c")
 	List<CComment> findAllForPageView(Sort sort);
-	@EntityGraph (attributePaths = { "activity", "author", "priority" })
-	@Override
-	java.util.Optional<CComment> findById(Long id);
-
-	long countByActivity(CActivity activity);
 	@Query ("SELECT c FROM CComment c WHERE c.activity = :activity ORDER BY c.eventDate ASC")
 	List<CComment> findByActivity(@Param ("activity") CActivity activity);
 	@Query ("SELECT c FROM CComment c WHERE c.activity = :activity ORDER BY c.eventDate ASC")
 	Page<CComment> findByActivity(@Param ("activity") CActivity activity, Pageable pageable);
+	@EntityGraph (attributePaths = {
+			"activity", "author", "priority"
+	})
+	@Override
+	java.util.Optional<CComment> findById(Long id);
 }

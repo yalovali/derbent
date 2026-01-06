@@ -15,17 +15,17 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -48,13 +48,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 
 	private CDragStartEvent activeDragStartEvent = null;
 	// Custom components registered for method binding (outside of FormBuilder)
-        private final Map<String, Component> customComponents = new HashMap<>();
-        protected CDetailsBuilder detailsBuilder = null;
-        private final Map<String, ComponentEventListener<CDragEndEvent>> dragEndListenerRegistry = new HashMap<>();
-        private final Map<String, ComponentEventListener<CDragStartEvent>> dragStartListenerRegistry = new HashMap<>();
-        private final Map<String, ComponentEventListener<CDragDropEvent>> dropListenerRegistry = new HashMap<>();
-        private final Map<String, ComponentEventListener<CSelectEvent>> selectListenerRegistry = new HashMap<>();
+	private final Map<String, Component> customComponents = new HashMap<>();
+	protected CDetailsBuilder detailsBuilder = null;
+	private final Map<String, ComponentEventListener<CDragEndEvent>> dragEndListenerRegistry = new HashMap<>();
+	private final Map<String, ComponentEventListener<CDragStartEvent>> dragStartListenerRegistry = new HashMap<>();
+	private final Map<String, ComponentEventListener<CDragDropEvent>> dropListenerRegistry = new HashMap<>();
 	private EntityClass previousEntity;
+	private final Map<String, ComponentEventListener<CSelectEvent>> selectListenerRegistry = new HashMap<>();
 	private final IPageServiceImplementer<EntityClass> view;
 
 	public CPageService(final IPageServiceImplementer<EntityClass> view) {
@@ -68,7 +68,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	 * method to implement workflow-aware status validation.
 	 * @param newStatus the new status selected by the user
 	 * @throws Exception if the status change fails */
-	
+	@Override
 	public void actionChangeStatus(final CProjectItemStatus newStatus) {
 		LOGGER.debug("Base actionChangeStatus called - entity type does not support workflow status changes");
 	}
@@ -272,29 +272,29 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 						componentName, component.getClass().getSimpleName(), methodName));
 			}
 		}
-                case "drop" -> {
-                        if (component instanceof IHasDragControl) {
-                                LOGGER.debug("[DragDebug] Component {} implements IHasDrop, binding drop event", componentName);
-                                bindIHasDropEvent((IHasDragControl) component, method, methodName);
-                        } else {
-                                // Fail-fast: Drop handler defined but component doesn't support drops
-                                throw new IllegalArgumentException(
-                                                String.format("Drop action requires Grid or IHasDrop interface. Component '%s' is %s which doesn't support drops. "
-                                                                + "Handler method '%s' cannot be bound.", componentName, component.getClass().getSimpleName(), methodName));
-                        }
-                }
-                case "selected", "clicked" -> {
-                        if (component instanceof IHasSelectionNotification) {
-                                bindSelection((IHasSelectionNotification) component, method, methodName);
-                        } else {
-                                throw new IllegalArgumentException(String.format(
-                                                "Selection action requires IHasSelectionNotification. Component '%s' is %s which doesn't support selection events. "
-                                                                + "Handler method '%s' cannot be bound.", componentName, component.getClass().getSimpleName(), methodName));
-                        }
-                }
-                // add more actions as needed
-                default -> Check.warn("Action {" + action + "} not recognized for binding.");
-                }
+		case "drop" -> {
+			if (component instanceof IHasDragControl) {
+				LOGGER.debug("[DragDebug] Component {} implements IHasDrop, binding drop event", componentName);
+				bindIHasDropEvent((IHasDragControl) component, method, methodName);
+			} else {
+				// Fail-fast: Drop handler defined but component doesn't support drops
+				throw new IllegalArgumentException(
+						String.format("Drop action requires Grid or IHasDrop interface. Component '%s' is %s which doesn't support drops. "
+								+ "Handler method '%s' cannot be bound.", componentName, component.getClass().getSimpleName(), methodName));
+			}
+		}
+		case "selected", "clicked" -> {
+			if (component instanceof IHasSelectionNotification) {
+				bindSelection((IHasSelectionNotification) component, method, methodName);
+			} else {
+				throw new IllegalArgumentException(String
+						.format("Selection action requires IHasSelectionNotification. Component '%s' is %s which doesn't support selection events. "
+								+ "Handler method '%s' cannot be bound.", componentName, component.getClass().getSimpleName(), methodName));
+			}
+		}
+		// add more actions as needed
+		default -> Check.warn("Action {" + action + "} not recognized for binding.");
+		}
 		LOGGER.debug("[BindDebug] Successfully bound method {} to component {} for action {}", methodName, componentName, action);
 	}
 
@@ -342,11 +342,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	 * @param component  the component implementing IHasDrop
 	 * @param method     the handler method to invoke
 	 * @param methodName the name of the handler method */
-        private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
-                // Aynı component + aynı handler → aynı listener
-                final String key = component.getClass().getName() + "#" + methodName;
-                final ComponentEventListener<CDragDropEvent> listener = dropListenerRegistry.computeIfAbsent(key, k -> {
-                        // LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
+	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
+		// Aynı component + aynı handler → aynı listener
+		final String key = component.getClass().getName() + "#" + methodName;
+		final ComponentEventListener<CDragDropEvent> listener = dropListenerRegistry.computeIfAbsent(key, k -> {
+			// LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
 			return event -> {
 				try {
 					// LOGGER.info("[DragDebug] Drop event received, invoking {}", methodName);
@@ -357,25 +357,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				}
 			};
 		});
-                component.addEventListener_dragDrop(listener);
-                LOGGER.debug("[BindDebug] Bound IHasDrop drop event to method {} (cached={})", methodName, dropListenerRegistry.containsKey(key));
-        }
-
-        private void bindSelection(final IHasSelectionNotification component, final Method method, final String methodName) {
-                final String key = component.getClass().getName() + "#SELECT#" + methodName;
-                final ComponentEventListener<CSelectEvent> listener = selectListenerRegistry.computeIfAbsent(key, k -> {
-                        LOGGER.debug("[BindDebug] Creating select listener for {}", k);
-                        return event -> {
-                                try {
-                                        method.invoke(this, component, event);
-                                } catch (final Exception ex) {
-                                        LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
-                                }
-                        };
-                });
-                component.addEventListener_select(listener);
-                LOGGER.debug("[BindDebug] Bound selection event to method {} (cached={})", methodName, selectListenerRegistry.containsKey(key));
-        }
+		component.addEventListener_dragDrop(listener);
+		LOGGER.debug("[BindDebug] Bound IHasDrop drop event to method {} (cached={})", methodName, dropListenerRegistry.containsKey(key));
+	}
 
 	public void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
@@ -400,6 +384,22 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 					component.getClass().getSimpleName(), action);
 			bindComponent(method, component, method.getName(), componentName, action);
 		}
+	}
+
+	private void bindSelection(final IHasSelectionNotification component, final Method method, final String methodName) {
+		final String key = component.getClass().getName() + "#SELECT#" + methodName;
+		final ComponentEventListener<CSelectEvent> listener = selectListenerRegistry.computeIfAbsent(key, k -> {
+			LOGGER.debug("[BindDebug] Creating select listener for {}", k);
+			return event -> {
+				try {
+					method.invoke(this, component, event);
+				} catch (final Exception ex) {
+					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
+				}
+			};
+		});
+		component.addEventListener_select(listener);
+		LOGGER.debug("[BindDebug] Bound selection event to method {} (cached={})", methodName, selectListenerRegistry.containsKey(key));
 	}
 
 	protected CDragStartEvent getActiveDragStartEvent() { return activeDragStartEvent; }
@@ -484,12 +484,16 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 
 	protected Class<?> getEntityClass() { return getView().getEntityClass(); }
 
+	@Override
 	public CAbstractService<EntityClass> getEntityService() {
 		Check.notNull(getView(), "View is not set in page service");
 		return getView().getEntityService();
 	}
 
 	public EntityClass getPreviousEntity() { return previousEntity; }
+
+	@Override
+	public CProjectItemStatusService getProjectItemStatusService() { return CSpringContext.getBean(CProjectItemStatusService.class); }
 
 	protected ISessionService getSessionService() { return getView().getSessionService(); }
 
@@ -503,12 +507,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 
 	protected EntityClass getValue() { return getView().getValue(); }
 
-	public IPageServiceImplementer<EntityClass> getView() { return view; }
-
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() {
-		return CSpringContext.getBean(CProjectItemStatusService.class);
-	}
+	public IPageServiceImplementer<EntityClass> getView() { return view; }
 
 	protected void on_dragEnd(@SuppressWarnings ("unused") CDragDropEvent event) {
 		setActiveDragStartEvent(null);
@@ -576,6 +576,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 
 	public void setPreviousEntity(final EntityClass previousEntity) { this.previousEntity = previousEntity; }
 
+	@Override
 	public void setValue(final EntityClass entity) {
 		getView().setValue(entity);
 	}

@@ -80,6 +80,7 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	}
 
 	/** Returns the column background color. */
+	@Override
 	public String getColor() { return color; }
 
 	/** Returns true when this column is the fallback/default bucket. */
@@ -96,9 +97,8 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	public CKanbanLine getKanbanLine() { return kanbanLine; }
 
 	/** Sets the background color, defaulting when blank. */
-	public void setColor(final String color) {
-		this.color = color == null || color.isBlank() ? DEFAULT_COLOR : color;
-	}
+	@Override
+	public void setColor(final String color) { this.color = color == null || color.isBlank() ? DEFAULT_COLOR : color; }
 
 	/** Sets whether this column is the fallback/default bucket. */
 	public void setDefaultColumn(final boolean defaultColumn) {

@@ -281,6 +281,20 @@ public abstract class CBaseUITest {
 		}
 	}
 
+	private String buildExceptionDialogMessage(final String controlPoint, final Locator dialog) {
+		final StringBuilder message =
+				new StringBuilder("Exception dialog detected at ").append(controlPoint).append(" (url: ").append(safePageUrl()).append(")");
+		try {
+			final String dialogText = dialog.textContent();
+			if (dialogText != null && !dialogText.trim().isEmpty()) {
+				message.append(": ").append(dialogText.trim());
+			}
+		} catch (final PlaywrightException e) {
+			message.append("; failed to read dialog text: ").append(e.getMessage());
+		}
+		return message.toString();
+	}
+
 	/** Builds a screenshot name in the format view-scenario-success|failure using deterministic components. */
 	protected String buildViewScreenshotName(final Class<?> viewClass, final String scenario, final boolean success) {
 		final String identifier = sanitizeForFileName(resolveViewIdentifier(viewClass), "pageservice");
@@ -505,31 +519,6 @@ public abstract class CBaseUITest {
 				.or(overlay.filter(new Locator.FilterOptions().setHasText("Error handling")));
 		if (errorOverlay.count() > 0) {
 			throw new AssertionError(buildExceptionDialogMessage(controlPoint, errorOverlay.first()));
-		}
-	}
-
-	private String buildExceptionDialogMessage(final String controlPoint, final Locator dialog) {
-		final StringBuilder message = new StringBuilder("Exception dialog detected at ")
-				.append(controlPoint)
-				.append(" (url: ")
-				.append(safePageUrl())
-				.append(")");
-		try {
-			final String dialogText = dialog.textContent();
-			if (dialogText != null && !dialogText.trim().isEmpty()) {
-				message.append(": ").append(dialogText.trim());
-			}
-		} catch (final PlaywrightException e) {
-			message.append("; failed to read dialog text: ").append(e.getMessage());
-		}
-		return message.toString();
-	}
-
-	private String safePageUrl() {
-		try {
-			return page.url();
-		} catch (final PlaywrightException e) {
-			return "<unknown>";
 		}
 	}
 
@@ -1280,6 +1269,15 @@ public abstract class CBaseUITest {
 			}
 		});
 		consoleListenerRegistered = true;
+	}
+
+	@SuppressWarnings ("unused")
+	private String safePageUrl() {
+		try {
+			return page.url();
+		} catch (final PlaywrightException e) {
+			return "<unknown>";
+		}
 	}
 
 	protected String sanitizeForFileName(final String value, final String fallback) {

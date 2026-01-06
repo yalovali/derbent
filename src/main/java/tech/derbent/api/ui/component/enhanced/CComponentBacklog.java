@@ -79,13 +79,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		};
 	}
 
-	/** Selection listeners for notification pattern */
-	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 	private final CActivityService activityService;
 	private final boolean compactMode;
 	private final CMeetingService meetingService;
 	/** Currently selected backlog item for detail display */
 	private CProjectItem<?> selectedBacklogItem;
+	/** Selection listeners for notification pattern */
+	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 
 	/** Constructor for backlog component.
 	 * @param project project to load backlog items for (required) */
@@ -133,10 +133,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		if (compactMode) {
 			/* final Column<CProjectItem<?>> column = */
 			grid.addExpandingShortTextColumn(item -> {
-				if (item instanceof CEntityNamed) {
-					return ((CEntityNamed<?>) item).getName();
-				}
-				return item.toString();
+				return ((CEntityNamed<?>) item).getName();
 			}, null, "name");
 			grid.setHeightFull();
 		} else {

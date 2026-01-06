@@ -136,6 +136,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	/** Gets the appropriate service for saving the underlying project item.
 	 * @param item The sprintable item (Activity or Meeting)
 	 * @return The service that can save this item type */
+	@SuppressWarnings ("static-method")
 	private CProjectItemService<?> getProjectItemService(final ISprintableItem item) {
 		Objects.requireNonNull(item, "Item cannot be null");
 		final Class<?> entityClass = item.getClass();
@@ -219,18 +220,16 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) projectItem;
 			final CSprintItem existingSprintItem = sprintableItem.getSprintItem();
 			Check.notNull(existingSprintItem, "Sprint item must exist for sprintable item");
-			LOGGER.info("[DragDrop] Existing sprint item id: {}, current sprint: {}, kanbanColumnId: {}", 
-				existingSprintItem.getId(), 
-				existingSprintItem.getSprint() != null ? existingSprintItem.getSprint().getId() : "null",
-				existingSprintItem.getKanbanColumnId());
+			LOGGER.info("[DragDrop] Existing sprint item id: {}, current sprint: {}, kanbanColumnId: {}", existingSprintItem.getId(),
+					existingSprintItem.getSprint() != null ? existingSprintItem.getSprint().getId() : "null", existingSprintItem.getKanbanColumnId());
 			// Update sprint assignment and ordering
 			existingSprintItem.setSprint(currentSprint);
 			existingSprintItem.setKanbanColumnId(targetColumn.getId());
 			// Get next item order for proper ordering in sprint
 			final Integer nextOrder = sprintItemService.getNextItemOrder(currentSprint);
 			existingSprintItem.setItemOrder(nextOrder);
-			LOGGER.info("[DragDrop] Updated sprint item - sprint: {}, kanbanColumnId: {}, itemOrder: {}", 
-				currentSprint.getId(), targetColumn.getId(), nextOrder);
+			LOGGER.info("[DragDrop] Updated sprint item - sprint: {}, kanbanColumnId: {}, itemOrder: {}", currentSprint.getId(), targetColumn.getId(),
+					nextOrder);
 			// Resolve valid statuses for target column
 			final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final List<CProjectItemStatus> targetStatuses =
@@ -239,7 +238,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			// Handle status assignment based on number of valid statuses
 			if (targetStatuses.isEmpty()) {
 				// No valid status: add to sprint but warn about status
-				LOGGER.warn("[DragDrop] No valid workflow transitions to target column {}, adding to sprint without status change", targetColumn.getName());
+				LOGGER.warn("[DragDrop] No valid workflow transitions to target column {}, adding to sprint without status change",
+						targetColumn.getName());
 				// Save the sprint item (cascades from parent save)
 				sprintItemService.save(existingSprintItem);
 				LOGGER.info("[DragDrop] Sprint item {} saved to database", existingSprintItem.getId());
@@ -262,8 +262,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			} else if (targetStatuses.size() == 1) {
 				// Single status: automatically apply it
 				final CProjectItemStatus newStatus = targetStatuses.get(0);
-				LOGGER.info("[DragDrop] Single status available for column {}, automatically setting status to {} for backlog item {}", targetColumn.getName(),
-						newStatus.getName(), projectItem.getId());
+				LOGGER.info("[DragDrop] Single status available for column {}, automatically setting status to {} for backlog item {}",
+						targetColumn.getName(), newStatus.getName(), projectItem.getId());
 				// Update project item status
 				((ISprintableItem) projectItem).setStatus(newStatus);
 				// Save project item first (to persist status change)
@@ -288,8 +288,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				}));
 			} else {
 				// Multiple statuses: show selection dialog
-				LOGGER.info("[DragDrop] Multiple statuses ({}) available for column {}, showing selection dialog for backlog item {}", targetStatuses.size(),
-						targetColumn.getName(), projectItem.getId());
+				LOGGER.info("[DragDrop] Multiple statuses ({}) available for column {}, showing selection dialog for backlog item {}",
+						targetStatuses.size(), targetColumn.getName(), projectItem.getId());
 				// Save sprint item first (without status change)
 				sprintItemService.save(existingSprintItem);
 				LOGGER.info("[DragDrop] Sprint item {} saved to database (before status dialog)", existingSprintItem.getId());
@@ -403,6 +403,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	/** Checks if the drop event targets the backlog column.
 	 * @param event The drop event to check
 	 * @return true if dropping on backlog column, false otherwise */
+	@SuppressWarnings ("static-method")
 	private boolean isDropOnBacklog(final CDragDropEvent event) {
 		// Check if drop target is the backlog column component
 		if (event.getDropTarget() instanceof CComponentKanbanColumnBacklog) {
@@ -477,6 +478,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * returning early without save caused inconsistent behavior - sometimes drag-drop worked (when status transition was valid), sometimes it didn't
 	 * (when no valid transition).
 	 * @param sprintItem The sprint item to save (only kanbanColumnId is modified) */
+	@SuppressWarnings ("static-method")
 	private void saveSprintItemOnly(final CSprintItem sprintItem) {
 		try {
 			Check.notNull(sprintItem, "Sprint item cannot be null");
