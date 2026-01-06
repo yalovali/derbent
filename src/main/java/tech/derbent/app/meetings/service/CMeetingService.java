@@ -94,6 +94,8 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		entity.setResponsible(currentUser);
 		// Create sprint item for progress tracking (composition pattern)
 		// Progress fields (storyPoint, dates, responsible, progress%) live in CSprintItem
+		// CRITICAL: This is the ONLY place where setSprintItem() should be called
+		// Sprint items are created ONCE during entity initialization and NEVER replaced
 		final CSprintItem sprintItem = new CSprintItem();
 		sprintItem.setSprint(null); // null = backlog
 		sprintItem.setProgressPercentage(0);

@@ -85,6 +85,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	private CMeetingService meetingService;
 	private CProjectItemStatusService projectItemStatusService;
 	private CSprintItemService sprintItemService;
+	private CSprintItemDragDropService dragDropService;
 
 	public CPageServiceSprint(final IPageServiceImplementer<CSprint> view) {
 		super(view);
@@ -94,8 +95,9 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			activityService = CSpringContext.getBean(CActivityService.class);
 			meetingService = CSpringContext.getBean(CMeetingService.class);
 			sprintItemService = CSpringContext.getBean(CSprintItemService.class);
+			dragDropService = CSpringContext.getBean(CSprintItemDragDropService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
+			LOGGER.error("Failed to initialize services - drag-drop operations may fail", e);
 		}
 	}
 
@@ -381,15 +383,24 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Moves a sprint item back to the backlog with position-based ordering.
+	 * 
+	 * <p><strong>CRITICAL FIX:</strong> This method now correctly uses the unified drag-drop service
+	 * instead of deleting the sprint item. Sprint items are owned by Activity/Meeting with
+	 * CASCADE.ALL orphanRemoval=true, so deleting them would delete the parent entity.</p>
+	 * 
 	 * @param sprintItem the sprint item to move
 	 * @param event      the drop event containing target and location */
 	private void drag_moveSprintItemToBacklog(final CSprintItem sprintItem, final CDragDropEvent event) {
 		final ISprintableItem item = sprintItem.getItem();
 		Check.notNull(item, "Sprint item must have an associated project item");
+		
 		// Update sprint order if dropped at specific position
 		updateBacklogItemOrder(item, event);
-		// Delete sprint item (removes from sprint)
-		sprintItemService.delete(sprintItem);
+		
+		// CRITICAL FIX: Move to backlog by setting sprint to NULL (do NOT delete)
+		// The old code called sprintItemService.delete(sprintItem) which is WRONG
+		// because sprint items are owned by their parent entities with CASCADE.ALL
+		dragDropService.moveSprintItemToBacklog(sprintItem);
 	}
 
 	/** Creates a widget component for displaying the given sprint entity.

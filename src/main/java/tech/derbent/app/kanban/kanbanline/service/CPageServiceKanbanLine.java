@@ -40,6 +40,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	private CComponentListKanbanColumns componentKanbanColumns;
 	private CKanbanColumnService kanbanColumnService;
 	private CKanbanLineService kanbanLineService;
+	private tech.derbent.app.sprints.service.CSprintItemDragDropService dragDropService;
 
 	/** Creates the page service and resolves kanban dependencies. */
 	public CPageServiceKanbanLine(final IPageServiceImplementer<CKanbanLine> view) {
@@ -47,6 +48,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		try {
 			kanbanColumnService = CSpringContext.getBean(CKanbanColumnService.class);
 			kanbanLineService = CSpringContext.getBean(CKanbanLineService.class);
+			dragDropService = CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemDragDropService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize Kanban services", e);
 		}
@@ -304,34 +306,39 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	}
 
 	/** Handles dropping a sprint item onto the backlog column (removes from sprint).
+	 * 
+	 * <p><strong>CRITICAL FIX:</strong> This method now correctly uses the unified drag-drop service
+	 * instead of manually deleting the sprint item. Sprint items are owned by Activity/Meeting with
+	 * CASCADE.ALL orphanRemoval=true.</p>
+	 * 
+	 * <p><strong>Key Changes:</strong></p>
+	 * <ul>
+	 *   <li>Removed incorrect item.setSprintItem(null) call (violates ownership pattern)</li>
+	 *   <li>Removed incorrect sprintItemService.delete(sprintItem) call (causes cascade delete)</li>
+	 *   <li>Now uses dragDropService.moveSprintItemToBacklog() which sets sprint to NULL</li>
+	 * </ul>
+	 * 
 	 * @param draggedItem The item being dropped (must be CSprintItem)
 	 * @param event       The drop event */
 	private void handleDropOnBacklog(final Object draggedItem, final CDragDropEvent event) {
-		LOGGER.info("Handling drop on backlog column - removing item from sprint and resetting state");
+		LOGGER.info("Handling drop on backlog column - removing item from sprint");
 		// Only sprint items can be removed from sprint
 		Check.instanceOf(draggedItem, CSprintItem.class, "Only sprint items can be removed from sprint by dropping on backlog");
 		final CSprintItem sprintItem = (CSprintItem) draggedItem;
-		final tech.derbent.app.sprints.service.CSprintItemService sprintItemService =
-				tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
+		
 		try {
-			// Get the underlying item (Activity or Meeting) before deleting sprint item
+			// Get the underlying item (Activity or Meeting) for logging
 			final ISprintableItem item = sprintItem.getItem();
 			Objects.requireNonNull(item, "Sprint item must have an underlying item");
-			// Remove item from sprint but PRESERVE its status
-			// Status should be kept as-is so the item retains its workflow state
-			// when returned to backlog (e.g., "In Progress" stays "In Progress")
-			// 1. Clear sprint item reference from the underlying item
-			item.setSprintItem(null);
-			LOGGER.debug("Cleared sprint item reference for item {} (status preserved: {})", item.getId(),
-					item.getStatus() != null ? item.getStatus().getName() : "null");
-			// 2. Save the underlying item with updated state
-			final CProjectItemService<?> itemService = getProjectItemService(item);
-			// Use revokeSave which accepts CProjectItem<?> through type erasure
-			itemService.revokeSave((CProjectItem<?>) item);
-			LOGGER.debug("Saved item {} with preserved status", item.getId());
-			// 3. Delete the sprint item record (removes from sprint)
-			sprintItemService.delete(sprintItem);
-			LOGGER.debug("Deleted sprint item record {}", sprintItem.getId());
+			
+			LOGGER.info("[BacklogDrop] Moving sprint item {} (parent: {}) from sprint to backlog (status preserved)", 
+				sprintItem.getId(), item.getId());
+			
+			// CRITICAL FIX: Use unified service instead of manual delete
+			// Old code deleted sprint item which caused cascade delete of parent entity
+			// New code sets sprint to NULL which correctly moves item to backlog
+			dragDropService.moveSprintItemToBacklog(sprintItem);
+			
 			// CRITICAL: Defer UI refresh until after Vaadin drop event completes
 			// If we refresh immediately, layoutColumns.removeAll() detaches the backlog column
 			// WHILE Vaadin is still processing the drop event, causing:

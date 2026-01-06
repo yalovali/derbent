@@ -107,6 +107,11 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	// Query items via: SELECT a FROM CActivity a WHERE a.sprintItem.sprint = :sprint
 	@OneToMany (mappedBy = "sprint", cascade = {
 			CascadeType.PERSIST, CascadeType.MERGE
+		// Sprint Items - Collection of progress tracking items for activities/meetings in this sprint
+	// Sprint items are owned by CActivity/CMeeting, sprint is just a reference
+	// Query items via: SELECT a FROM CActivity a WHERE a.sprintItem.sprint = :sprint
+	@OneToMany (mappedBy = "sprint", cascade = {
+			CascadeType.PERSIST, CascadeType.MERGE
 	}, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Sprint Items", required = false, readOnly = false,
@@ -156,6 +161,10 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	}
 
 	/** Add a project item to this sprint by setting its sprintItem.sprint reference.
+	 * 
+	 * <p><strong>CORRECT PATTERN:</strong> This method uses item.getSprintItem().setSprint(this)
+	 * to modify the existing sprint item's sprint reference. It does NOT create a new sprint item.</p>
+	 * 
 	 * @param item the project item (CActivity/CMeeting) to add to sprint */
 	public void addItem(final ISprintableItem item) {
 		if (item == null || item.getSprintItem() == null) {
@@ -168,12 +177,17 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 				return;
 			}
 		}
-		// Set sprint reference - item remains owned by parent
+		// CORRECT PATTERN: Set sprint reference on existing sprint item
+		// This modifies the sprint item owned by the parent entity
 		item.getSprintItem().setSprint(this);
 		updateLastModified();
 	}
 
-	/** Add a sprint item to this sprint.
+	/** Add a sprint item to this sprint by setting its sprint reference.
+	 * 
+	 * <p><strong>CORRECT PATTERN:</strong> This method sets the sprint reference on an
+	 * existing sprint item. It does NOT take ownership of the sprint item.</p>
+	 * 
 	 * @param sprintItem the sprint item to add */
 	public void addSprintItem(final CSprintItem sprintItem) {
 		if (sprintItem != null) {
@@ -400,21 +414,31 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		}
 	}
 
-	/** Remove an activity from this sprint by setting its sprintItem.sprint to null.
+	/** Remove an activity from this sprint by setting its sprintItem.sprint to null (moves to backlog).
+	 * 
+	 * <p><strong>CORRECT PATTERN:</strong> This method sets the sprint reference to NULL
+	 * to move the item to backlog. It does NOT delete the sprint item.</p>
+	 * 
 	 * @param activity the activity to remove */
 	public void removeActivity(final CActivity activity) {
 		if (activity != null && activity.getSprintItem() != null) {
+			// CORRECT PATTERN: Set sprint to NULL to move to backlog
 			activity.getSprintItem().setSprint(null);
 			updateLastModified();
 		}
 	}
 
-	/** Remove a project item from this sprint by setting its sprintItem.sprint to null.
+	/** Remove a project item from this sprint by setting its sprintItem.sprint to null (moves to backlog).
+	 * 
+	 * <p><strong>CORRECT PATTERN:</strong> This method sets the sprint reference to NULL
+	 * to move the item to backlog. It does NOT delete the sprint item.</p>
+	 * 
 	 * @param item the project item to remove */
 	public void removeItem(final ISprintableItem item) {
 		if (item == null || item.getSprintItem() == null) {
 			return;
 		}
+		// CORRECT PATTERN: Set sprint to NULL to move to backlog
 		item.getSprintItem().setSprint(null);
 		updateLastModified();
 	}
