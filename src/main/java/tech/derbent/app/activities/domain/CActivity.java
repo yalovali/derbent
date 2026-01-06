@@ -559,4 +559,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		this.storyPoint = storyPoint; // Keep for backward compatibility during migration
 		updateLastModified();
 	}
+	
+	@jakarta.persistence.PostLoad
+	protected void ensureSprintItemParent() {
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
+	}
 }

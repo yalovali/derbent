@@ -109,7 +109,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			""")
 	List<CActivity> listForSprint(@Param ("sprint") CSprint sprint);
 
-	/** Find activity by sprint item ID.
+	/** Find activity by sprint item ID - loads without sprint item to prevent circular loading.
 	 * @param sprintItemId the sprint item ID
 	 * @return the activity if found */
 	@Query ("""
@@ -120,9 +120,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
-			LEFT JOIN FETCH a.sprintItem si
-			LEFT JOIN FETCH si.sprint
-			WHERE si.id = :sprintItemId
+			WHERE a.sprintItem.id = :sprintItemId
 			""")
 	Optional<CActivity> findBySprintItemId(@Param ("sprintItemId") Long sprintItemId);
 }
