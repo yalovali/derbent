@@ -1,6 +1,7 @@
 package tech.derbent.api.ui.component.basic;
 
 import java.util.List;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
@@ -157,5 +158,33 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 				layout.add(navigateButton);
 			}
 		}
+	}
+
+	/** Enables automatic persistence for the internal ComboBox.
+	 * <p>
+	 * This is a convenience method that delegates to the internal CColorAwareComboBox's enablePersistence method.
+	 * </p>
+	 * @param storageKey The unique key to use for storing the value in session storage
+	 * @param converter  Function to convert stored ID back to entity (return null if not found)
+	 * @throws IllegalArgumentException if storageKey is null/blank or converter is null
+	 * @see CColorAwareComboBox#enablePersistence(String, Function) */
+	public void enablePersistence(final String storageKey, final Function<String, T> converter) {
+		comboBox.enablePersistence(storageKey, converter);
+	}
+
+	/** Disables automatic persistence for the internal ComboBox.
+	 * <p>
+	 * This is a convenience method that delegates to the internal CColorAwareComboBox's disablePersistence method.
+	 * </p>
+	 * @see CColorAwareComboBox#disablePersistence() */
+	public void disablePersistence() {
+		comboBox.disablePersistence();
+	}
+
+	/** Checks if persistence is enabled for the internal ComboBox.
+	 * @return true if persistence is enabled, false otherwise
+	 * @see CColorAwareComboBox#isPersistenceEnabled() */
+	public boolean isPersistenceEnabled() {
+		return comboBox.isPersistenceEnabled();
 	}
 }
