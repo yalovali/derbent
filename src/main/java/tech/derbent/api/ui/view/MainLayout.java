@@ -283,7 +283,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		userMenuItem.setId("user-menu-item");
 		userMenuItem.getSubMenu().addItem("Edit Profile", e -> openUserProfileDialog());
 		// Additional user menu items could be added here (preferences, settings, etc.)
-		final MenuItem menuItem = userMenuItem.getSubMenu().addItem("Logout", e -> authenticationContext.logout());
+		final MenuItem menuItem = userMenuItem.getSubMenu().addItem("Logout", e -> {
+			sessionService.clearSession(); // Clear session on logout
+			authenticationContext.logout();
+		});
 		menuItem.setId("logout-menu-item");
 		return userMenu;
 	}
