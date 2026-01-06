@@ -120,13 +120,19 @@ public class CMyFilterToolbar extends CAbstractFilterToolbar<MyEntity> {
 
 ## Component Comparison
 
-| Component | Pattern | Complexity | Automatic? |
-|-----------|---------|------------|------------|
-| CComboBox | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes |
-| CTextField | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes |
-| CValueStorageHelper | Utility method | ⭐⭐ Moderate | ✅ Yes |
-| CComponentGridSearchToolbar | Composite | ⭐ Simple | ✅ Yes |
-| CAbstractFilterToolbar | Framework | ⭐ Simple | ✅ Yes |
+| Component | Pattern | Complexity | Automatic? | Status |
+|-----------|---------|------------|------------|--------|
+| CComboBox | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes | ✅ Existing |
+| CTextField | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes | ✅ Enhanced |
+| CTextArea | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes | ✨ NEW |
+| CDatePicker | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes | ✨ NEW |
+| CCheckbox | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes | ✨ NEW |
+| CColorAwareComboBox | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes | ✅ Enhanced |
+| CNavigableComboBox | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes | ✅ Enhanced |
+| CColorPickerComboBox | Built-in `enablePersistence()` | ⭐ Simple | ✅ Yes | ✅ Enhanced |
+| CValueStorageHelper | Utility method | ⭐⭐ Moderate | ✅ Yes | ✅ Existing |
+| CComponentGridSearchToolbar | Composite | ⭐ Simple | ✅ Yes | ✅ Existing |
+| CAbstractFilterToolbar | Framework | ⭐ Simple | ✅ Yes | ✅ Existing |
 
 ## Best Practices
 

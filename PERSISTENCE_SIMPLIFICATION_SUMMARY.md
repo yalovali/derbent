@@ -111,7 +111,25 @@ textField.enablePersistence("myView_nameFilter");
 2. `src/main/java/tech/derbent/api/ui/component/basic/CTextField.java`
    - Added automatic persistence support (following CComboBox pattern)
 
-3. `src/main/java/tech/derbent/api/ui/component/basic/IHasValuePersistence.java` (NEW)
+3. `src/main/java/tech/derbent/api/ui/component/basic/CTextArea.java` (NEW)
+   - New component with automatic persistence for multi-line text
+
+4. `src/main/java/tech/derbent/api/ui/component/basic/CDatePicker.java` (NEW)
+   - New component with automatic persistence for date selection
+
+5. `src/main/java/tech/derbent/api/ui/component/basic/CCheckbox.java` (NEW)
+   - New component with automatic persistence for boolean values
+
+6. `src/main/java/tech/derbent/api/ui/component/basic/CColorAwareComboBox.java`
+   - Added automatic persistence support for entity selection
+
+7. `src/main/java/tech/derbent/api/ui/component/basic/CNavigableComboBox.java`
+   - Added persistence delegation methods
+
+8. `src/main/java/tech/derbent/api/ui/component/basic/CColorPickerComboBox.java`
+   - Added automatic persistence support for color selection
+
+9. `src/main/java/tech/derbent/api/ui/component/basic/IHasValuePersistence.java` (NEW)
    - Reusable interface for automatic persistence
    - Default implementations reduce boilerplate
 
