@@ -381,19 +381,17 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 				final tech.derbent.app.meetings.service.IMeetingRepository meetingRepo = 
 					CSpringContext.getBean(tech.derbent.app.meetings.service.IMeetingRepository.class);
 				
-				for (final CSprintItem sprintItem : sprintItems) {
-					if (sprintItem.getId() != null) {
-						final var activity = activityRepo.findBySprintItemId(sprintItem.getId());
-						if (activity.isPresent()) {
-							sprintItem.setParentItem(activity.get());
-							continue;
-						}
-						
-						final var meeting = meetingRepo.findBySprintItemId(sprintItem.getId());
-						if (meeting.isPresent()) {
-							sprintItem.setParentItem(meeting.get());
-						}
+				for (final CSprintItem item : sprintItems) {
+					if (item.getId() == null) continue;
+					
+					final var activity = activityRepo.findBySprintItemId(item.getId());
+					if (activity.isPresent()) {
+						item.setParentItem(activity.get());
+						continue;
 					}
+					
+					final var meeting = meetingRepo.findBySprintItemId(item.getId());
+					meeting.ifPresent(item::setParentItem);
 				}
 			}
 		} catch (final Exception e) {

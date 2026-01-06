@@ -153,18 +153,14 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public CSprint getSprint() { return sprint; }
 	
 	/** Get the parent sprintable item (CActivity/CMeeting).
-	 * This is a transient back-reference set by the parent after loading.
 	 * @return the parent item
-	 * @throws IllegalStateException if parentItem is null (indicates architectural violation) */
+	 * @throws IllegalStateException if parentItem is null */
 	public ISprintableItem getParentItem() { 
-		Check.notNull(parentItem, "parentItem is @Transient and must be set by CActivity/CMeeting "
-				+ "after construction or loading from database. "
-				+ "This is a composition pattern requirement where parent owns child.");
+		Check.notNull(parentItem, "parentItem must be set by parent entity after loading");
 		return parentItem; 
 	}
 	
 	/** Set the parent sprintable item (CActivity/CMeeting).
-	 * Called by parent entity after it's loaded to enable widget display.
 	 * @param parentItem the parent item */
 	public void setParentItem(final ISprintableItem parentItem) { this.parentItem = parentItem; }
 
@@ -241,13 +237,11 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 		this.kanbanColumnId = kanbanColumnId; 
 	}
 	
-	/** Get the parent item - alias for getParentItem() for compatibility.
+	/** Get the parent item - alias for getParentItem().
 	 * @return the parent sprintable item
-	 * @throws IllegalStateException if parentItem is null (indicates architectural violation) */
+	 * @throws IllegalStateException if parentItem is null */
 	public ISprintableItem getItem() {
-		Check.notNull(parentItem, "parentItem must be set by parent entity (CActivity/CMeeting) after loading. "
-				+ "This is a transient back-reference in the composition pattern. "
-				+ "Parent entity owns this CSprintItem via @OneToOne CASCADE.ALL.");
+		Check.notNull(parentItem, "parentItem must be set by parent entity after loading");
 		return parentItem;
 	}
 
