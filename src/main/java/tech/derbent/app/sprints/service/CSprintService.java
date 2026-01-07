@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
@@ -76,32 +77,31 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		return super.checkDeleteAllowed(sprint);
 	}
 
-	/**
-	 * Deletes a sprint and moves all its items back to the backlog.
-	 * 
-	 * <p><strong>BACKLOG SEMANTICS:</strong> Sprint items are NOT deleted when a sprint is deleted.
-	 * Instead, their sprint reference is set to NULL, which moves them to the backlog.</p>
-	 * 
-	 * <p><strong>CRITICAL PATTERN:</strong> This method demonstrates the correct pattern for
-	 * moving items to backlog:</p>
+	/** Deletes a sprint and moves all its items back to the backlog.
+	 * <p>
+	 * <strong>BACKLOG SEMANTICS:</strong> Sprint items are NOT deleted when a sprint is deleted. Instead, their sprint reference is set to NULL,
+	 * which moves them to the backlog.
+	 * </p>
+	 * <p>
+	 * <strong>CRITICAL PATTERN:</strong> This method demonstrates the correct pattern for moving items to backlog:
+	 * </p>
+	 *
 	 * <pre>
-	 * sprintItem.setSprint(null);  // Move to backlog
-	 * sprintItemService.save(sprintItem);  // Persist the change
+	 * sprintItem.setSprint(null); // Move to backlog
+	 * sprintItemService.save(sprintItem); // Persist the change
 	 * </pre>
-	 * 
-	 * <p>Sprint items are owned by Activity/Meeting with CASCADE.ALL orphanRemoval=true,
-	 * so deleting them would cause the parent entities to be deleted as well.</p>
-	 * 
+	 * <p>
+	 * Sprint items are owned by Activity/Meeting with CASCADE.ALL orphanRemoval=true, so deleting them would cause the parent entities to be deleted
+	 * as well.
+	 * </p>
 	 * @param sprint The sprint to delete (must not be null and must be persisted)
-	 * @throws IllegalArgumentException if sprint is null or not persisted
-	 */
+	 * @throws IllegalArgumentException if sprint is null or not persisted */
 	@Override
 	@Transactional
 	public void delete(final CSprint sprint) {
 		LOGGER.debug("Deleting sprint {}", sprint);
 		Check.notNull(sprint, "Sprint cannot be null");
 		Check.notNull(sprint.getId(), "Sprint ID cannot be null");
-		
 		// Move sprint items to backlog by setting sprint to null
 		// CRITICAL: Sprint items are NOT deleted - they are owned by Activity/Meeting
 		final List<CSprintItem> sprintItems = sprintItemService.findByMasterIdWithItems(sprint.getId());
@@ -112,16 +112,14 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 				sprintItemService.save(sprintItem);
 				LOGGER.debug("Moved sprint item {} to backlog (sprint reference set to null)", sprintItem.getId());
 			} catch (final Exception e) {
-				LOGGER.error("Failed to move sprint item {} to backlog while deleting sprint {}: {}", 
-					sprintItem.getId(), sprint.getId(), e.getMessage(), e);
+				LOGGER.error("Failed to move sprint item {} to backlog while deleting sprint {}: {}", sprintItem.getId(), sprint.getId(),
+						e.getMessage(), e);
 				throw e;
 			}
 		}
-		
 		// Now delete the sprint itself (items are safely in backlog)
 		super.delete(sprint);
-		LOGGER.info("Successfully deleted sprint {} and moved {} items to backlog", 
-			sprint.getId(), sprintItems.size());
+		LOGGER.info("Successfully deleted sprint {} and moved {} items to backlog", sprint.getId(), sprintItems.size());
 	}
 
 	@Override
@@ -129,7 +127,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	public void delete(final Long id) {
 		LOGGER.debug("Deleting sprint by ID {}", id);
 		Check.notNull(id, "Sprint ID cannot be null");
-		final CSprint sprint = getById(id).orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Sprint not found with id: " + id));
+		final CSprint sprint = getById(id).orElseThrow(() -> new EntityNotFoundException("Sprint not found with id: " + id));
 		delete(sprint);
 	}
 

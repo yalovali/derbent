@@ -172,7 +172,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	/** Resolves the sprintable item for display. */
 	public ISprintableItem resolveSprintableItem() {
 		final CSprintItem sprintItem = entity;
-		return sprintItem != null ? sprintItem.getItem() : null;
+		return sprintItem != null ? sprintItem.getParentItem() : null;
 	}
 
 	@Override

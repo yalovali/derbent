@@ -98,6 +98,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 					getEntityService().delete(entity.getId());
 					LOGGER.info("Entity deleted successfully with ID: {}", entity.getId());
 					getView().onEntityDeleted(entity);
+					actionRefresh();
 				} catch (final Exception ex) {
 					CNotificationService.showException("Error deleting entity with ID:" + entity.getId(), ex);
 				}

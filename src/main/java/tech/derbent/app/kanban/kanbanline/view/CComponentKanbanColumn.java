@@ -330,8 +330,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		final List<CSprintItem> columnItems = getFilteredItems(); // Use cached filtered items
 		long totalStoryPoints = 0;
 		for (final CSprintItem item : columnItems) {
-			if (item != null && item.getItem() != null && item.getItem().getStoryPoint() != null) {
-				totalStoryPoints += item.getItem().getStoryPoint();
+			if (item != null && item.getParentItem() != null && item.getParentItem().getStoryPoint() != null) {
+				totalStoryPoints += item.getParentItem().getStoryPoint();
 			}
 		}
 		if (totalStoryPoints > 0) {

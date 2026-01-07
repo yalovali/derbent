@@ -57,7 +57,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	/** Returns true when the sprint item is owned by the target user. */
 	private static boolean matchesResponsibleUser(final CSprintItem sprintItem, final CUser targetUser) {
-		final ISprintableItem item = sprintItem.getItem();
+		final ISprintableItem item = sprintItem.getParentItem();
 		if (item == null || item.getResponsible() == null || item.getResponsible().getId() == null || targetUser.getId() == null) {
 			return false;
 		}
@@ -69,7 +69,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		if (entityClass == null) {
 			return true;
 		}
-		final ISprintableItem item = sprintItem.getItem();
+		final ISprintableItem item = sprintItem.getParentItem();
 		return item != null && entityClass.isAssignableFrom(item.getClass());
 	}
 
@@ -199,7 +199,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 				continue;
 			}
 			// Get item's current status and map to column
-			final ISprintableItem sprintableItem = sprintItem.getItem();
+			final ISprintableItem sprintableItem = sprintItem.getParentItem();
 			final Long statusId = sprintableItem.getStatus().getId();
 			// Lookup: try explicit status mapping first, fall back to default column
 			final Long columnId = statusToColumnId.computeIfAbsent(statusId, key -> statusToColumnId.getOrDefault(-1L, -1L));
@@ -294,7 +294,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		final tech.derbent.api.ui.component.filter.CResponsibleUserFilter.ResponsibleFilterMode responsibleMode =
 				criteria.getValue(tech.derbent.api.ui.component.filter.CResponsibleUserFilter.FILTER_KEY);
 		for (final CSprintItem sprintItem : allSprintItems) {
-			if (sprintItem == null || sprintItem.getItem() == null) {
+			if (sprintItem == null || sprintItem.getParentItem() == null) {
 				continue;
 			}
 			if (!matchesTypeFilter(sprintItem, entityType)) {

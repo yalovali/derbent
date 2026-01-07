@@ -78,20 +78,20 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	public void configureGrid(final CGrid<CSprintItem> grid1) {
 		Check.notNull(grid1, "Grid cannot be null");
 		grid1.hideHeader();
-		grid1.addIdColumn(CSprintItem::getId, "ID", "id");
+		grid1.addIdColumn(CSprintItem::getItemId, "ID", "id");
 		// Use expanding column for Name to fill remaining width
 		grid1.addShortTextColumn(item -> {
-			final ISprintableItem parent = item.getItem();
+			final ISprintableItem parent = item.getParentItem();
 			return parent != null ? parent.getName() : "<no parent>";
 		}, "Name", "name");
 		grid1.addExpandingLongTextColumn(item -> {
-			final ISprintableItem parent = item.getItem();
+			final ISprintableItem parent = item.getParentItem();
 			return parent != null ? parent.getDescriptionShort() : "";
 		}, "description", "Description");
-		grid1.addStoryPointColumn(item -> item.getItem(), this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
+		grid1.addStoryPointColumn(item -> item.getParentItem(), this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
 		try {
 			grid1.addEntityColumn(item -> {
-				final ISprintableItem parent = item.getItem();
+				final ISprintableItem parent = item.getParentItem();
 				return parent != null ? parent.getStatus() : null;
 			}, "Status", "status", CSprintItem.class);
 		} catch (final Exception e) {
@@ -166,8 +166,8 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				final List<CProjectItem<?>> result = new ArrayList<>();
 				final String targetType = config.getEntityClass().getSimpleName();
 				for (final CSprintItem sprintItem : sprintItems) {
-					if (sprintItem.getItem() != null && targetType.equals(sprintItem.getItem().getClass().getSimpleName())) {
-						result.add((CProjectItem<?>) sprintItem.getItem());
+					if (sprintItem.getParentItem() != null && targetType.equals(sprintItem.getParentItem().getClass().getSimpleName())) {
+						result.add((CProjectItem<?>) sprintItem.getParentItem());
 					}
 				}
 				LOGGER.debug("Found {} already selected items of type {}", result.size(), targetType);

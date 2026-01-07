@@ -157,7 +157,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * @param event      The drop event */
 	private void handleDragBetweenColumns(final CSprintItem sprintItem, final CDragDropEvent event) {
 		LOGGER.info("Handling drag between kanban columns");
-		final CProjectItem<?> item = (CProjectItem<?>) sprintItem.getItem();
+		final CProjectItem<?> item = (CProjectItem<?>) sprintItem.getParentItem();
 		// Step 2: Resolve target kanban column from drop event (column, post-it, or component)
 		final CKanbanColumn targetColumn = resolveTargetColumn(event);
 		Check.notNull(targetColumn, "Target column cannot be resolved for Kanban drop");
@@ -327,7 +327,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		final CSprintItem sprintItem = (CSprintItem) draggedItem;
 		try {
 			// Get the underlying item (Activity or Meeting) for logging
-			final ISprintableItem item = sprintItem.getItem();
+			final ISprintableItem item = sprintItem.getParentItem();
 			Objects.requireNonNull(item, "Sprint item must have an underlying item");
 			LOGGER.info("[BacklogDrop] Moving sprint item {} (parent: {}) from sprint to backlog (status preserved)", sprintItem.getId(),
 					item.getId());

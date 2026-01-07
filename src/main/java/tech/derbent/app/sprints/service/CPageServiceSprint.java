@@ -151,6 +151,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			updateBacklogItemOrder(projectItem, event);
 			// Refresh backlog grid to show new order
 			componentBacklogItems.refreshGrid();
+			event.setHandled(true);
 			CNotificationService.showSuccess("Backlog item reordered");
 		} catch (final Exception e) {
 			LOGGER.error("Error reordering backlog item", e);
@@ -182,6 +183,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// componentBacklogItems.refreshGrid();
 			// drag_refreshForEvent(event);
 			// refreshAfterSprintChange();
+			event.setHandled(true);
 			CNotificationService.showSuccess("Item added to sprint " + targetSprint.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error adding backlog item to sprint", e);
@@ -260,6 +262,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			// refreshAfterSprintChange();
 			// drag_refreshForEvent(event);
+			event.setHandled(true);
 			CNotificationService.showSuccess("Sprint items reordered");
 		} catch (final Exception e) {
 			LOGGER.error("Error reordering sprint items", e);
@@ -285,6 +288,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// Refresh grids with state preservation (selection, widget states)
 			// refreshAfterBacklogDrop();
 			// drag_refreshForEvent(event);
+			event.setHandled(true);
 			CNotificationService.showSuccess("Item removed from sprint");
 		} catch (final Exception e) {
 			LOGGER.error("Error moving item to backlog", e);
@@ -333,6 +337,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// Refresh grids
 			// refreshAfterSprintChange();
 			// drag_refreshForEvent(event);
+			event.setHandled(true);
 			CNotificationService.showSuccess("Sprint item moved to " + targetSprint.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error moving sprint item to sprint", e);
@@ -383,24 +388,22 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Moves a sprint item back to the backlog with position-based ordering.
-	 * 
-	 * <p><strong>CRITICAL FIX:</strong> This method now correctly uses the unified drag-drop service
-	 * instead of deleting the sprint item. Sprint items are owned by Activity/Meeting with
-	 * CASCADE.ALL orphanRemoval=true, so deleting them would delete the parent entity.</p>
-	 * 
+	 * <p>
+	 * <strong>CRITICAL FIX:</strong> This method now correctly uses the unified drag-drop service instead of deleting the sprint item. Sprint items
+	 * are owned by Activity/Meeting with CASCADE.ALL orphanRemoval=true, so deleting them would delete the parent entity.
+	 * </p>
 	 * @param sprintItem the sprint item to move
 	 * @param event      the drop event containing target and location */
 	private void drag_moveSprintItemToBacklog(final CSprintItem sprintItem, final CDragDropEvent event) {
-		final ISprintableItem item = sprintItem.getItem();
+		final ISprintableItem item = sprintItem.getParentItem();
 		Check.notNull(item, "Sprint item must have an associated project item");
-		
 		// Update sprint order if dropped at specific position
 		updateBacklogItemOrder(item, event);
-		
 		// CRITICAL FIX: Move to backlog by setting sprint to NULL (do NOT delete)
 		// The old code called sprintItemService.delete(sprintItem) which is WRONG
 		// because sprint items are owned by their parent entities with CASCADE.ALL
 		dragDropService.moveSprintItemToBacklog(sprintItem);
+		event.setHandled(true);
 	}
 
 	/** Creates a widget component for displaying the given sprint entity.

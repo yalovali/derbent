@@ -167,10 +167,15 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
+		// if (!event.isHandled()) {
+		// return;
+		// }
 		if (event instanceof CDragStartEvent) {
 			return;
 		}
 		if (event instanceof CDragEndEvent) {
+			// we started from backlog to somewhere else, so just refresh backlog
+			refreshComponent();
 			return;
 		}
 		LOGGER.debug("[BacklogDrag] Drag event processed, refreshing backlog component");
