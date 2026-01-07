@@ -25,10 +25,54 @@ import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
 
-/** CSprintItem - Progress tracking component owned by CActivity/CMeeting. 
- * Stores progress-related data (story points, dates, responsible person, progress %).
- * When sprint is null, the item is in the backlog.
- * Implements IOrderedEntity for ordering within sprints/backlog. */
+/** CSprintItem - Progress tracking component owned by CActivity/CMeeting.
+ * 
+ * <p><strong>OWNERSHIP AND LIFECYCLE:</strong></p>
+ * <p>Sprint items are OWNED by their parent entities (CActivity/CMeeting) via @OneToOne with
+ * CASCADE.ALL and orphanRemoval=true. This means:</p>
+ * <ul>
+ *   <li>Sprint items are created ONCE when Activity/Meeting is created</li>
+ *   <li>Sprint items are NEVER deleted independently - only when parent is deleted</li>
+ *   <li>Sprint items are NEVER replaced - only their properties are modified</li>
+ *   <li>Deleting a sprint item will CASCADE DELETE its parent entity</li>
+ * </ul>
+ * 
+ * <p><strong>BACKLOG SEMANTICS:</strong></p>
+ * <p>The sprint field determines whether an item is in backlog or assigned to a sprint:</p>
+ * <ul>
+ *   <li><strong>sprint = NULL</strong>: Item is in the backlog (not assigned to any sprint)</li>
+ *   <li><strong>sprint = CSprint</strong>: Item is assigned to that specific sprint</li>
+ * </ul>
+ * 
+ * <p><strong>CORRECT USAGE PATTERNS:</strong></p>
+ * <pre>
+ * // ✅ CORRECT: Modify sprint reference to move between backlog and sprint
+ * activity.getSprintItem().setSprint(targetSprint);  // Add to sprint
+ * activity.getSprintItem().setSprint(null);          // Move to backlog
+ * 
+ * // ❌ WRONG: These patterns violate ownership and cause data loss
+ * activity.setSprintItem(new CSprintItem());         // Creates orphaned sprint item
+ * sprintItemService.delete(sprintItem);              // Deletes parent Activity/Meeting
+ * activity.setSprintItem(null);                      // Orphans sprint item, causes constraint violation
+ * </pre>
+ * 
+ * <p><strong>DRAG-DROP OPERATIONS:</strong></p>
+ * <p>All drag-drop operations that move items between backlog and sprint MUST:</p>
+ * <ul>
+ *   <li>Use CSprintItemDragDropService for unified handling</li>
+ *   <li>Set sprint field to NULL for backlog, or target sprint for sprint assignment</li>
+ *   <li>NEVER delete sprint items during drag-drop</li>
+ *   <li>NEVER call item.setSprintItem() to replace the sprint item</li>
+ * </ul>
+ * 
+ * <p><strong>DATA STORAGE:</strong></p>
+ * <p>Stores progress-related data (story points, dates, responsible person, progress %).
+ * Implements IOrderedEntity for ordering within sprints/backlog.</p>
+ * 
+ * @see CActivity
+ * @see tech.derbent.app.meetings.domain.CMeeting
+ * @see tech.derbent.app.sprints.service.CSprintItemDragDropService
+ */
 @Entity
 @Table (name = "csprint_items")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_item_id"))
