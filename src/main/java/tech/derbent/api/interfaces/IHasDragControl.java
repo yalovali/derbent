@@ -44,6 +44,8 @@ public interface IHasDragControl {
 	public Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners();
 	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners();
 	public boolean drag_isDropAllowed(CDragStartEvent event);
+	void drag_setDragEnabled(boolean enabled);
+	void drag_setDropEnabled(boolean enabled);
 
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
@@ -109,6 +111,7 @@ public interface IHasDragControl {
 			} else if (event instanceof CDragEndEvent) {
 				notifyDragEndListeners((CDragEndEvent) event);
 			}
+			drag_checkEventAfterPass(event);
 		} catch (final Exception e) {
 			LOGGER.error("Error in notifyEvents for event: {}", event.toString(), e);
 			throw e;
@@ -131,9 +134,6 @@ public interface IHasDragControl {
 	default void on_dragStart(CDragStartEvent event) {
 		notifyEvents(event);
 	}
-
-	void drag_setDragEnabled(boolean enabled);
-	void drag_setDropEnabled(boolean enabled);
 
 	@SuppressWarnings ({})
 	default void setupChildDragDropForwarding(final IHasDragControl child) {

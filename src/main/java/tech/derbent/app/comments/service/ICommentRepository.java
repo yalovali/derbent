@@ -17,13 +17,16 @@ public interface ICommentRepository extends IAbstractRepository<CComment> {
 
 	long countByActivity(CActivity activity);
 	@Override
+	@Query ("SELECT DISTINCT c FROM CComment c LEFT JOIN FETCH c.activity")
+	List<CComment> findAllForPageView(Sort sort);
 	@EntityGraph (attributePaths = {
 			"activity", "author", "priority"
 	})
-	@Query ("SELECT c FROM CComment c")
-	List<CComment> findAllForPageView(Sort sort);
 	@Query ("SELECT c FROM CComment c WHERE c.activity = :activity ORDER BY c.eventDate ASC")
 	List<CComment> findByActivity(@Param ("activity") CActivity activity);
+	@EntityGraph (attributePaths = {
+			"activity", "author", "priority"
+	})
 	@Query ("SELECT c FROM CComment c WHERE c.activity = :activity ORDER BY c.eventDate ASC")
 	Page<CComment> findByActivity(@Param ("activity") CActivity activity, Pageable pageable);
 	@EntityGraph (attributePaths = {

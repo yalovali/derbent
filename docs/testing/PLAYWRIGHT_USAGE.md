@@ -85,6 +85,17 @@ PLAYWRIGHT_HEADLESS=true ./run-playwright-tests.sh all
 ls -lh target/screenshots/
 ```
 
+### Focused Rerun Rule (Mandatory)
+
+When the comprehensive suite fails and you need to edit code, rerun the suite
+by filtering to the edited page using a route/title substring. This reduces the
+feedback loop while keeping the same test coverage path.
+
+Use `test.routeKeyword` to filter pages:
+```bash
+MAVEN_OPTS="-Dtest.routeKeyword=comments" ./run-playwright-tests.sh comprehensive
+```
+
 ### Reporting Rule (Mandatory)
 
 When running Playwright tests, always capture and report a concise error summary that includes:

@@ -393,7 +393,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		// Set up drag-drop event forwarding from grid to this component
 		setupChildDragDropForwarding(grid);
 		// Note: configureGrid() is called later when entity type is selected
-		LOGGER.debug("Grid created for entity selection component");
+		// LOGGER.debug("Grid created for entity selection component");
 	}
 
 	/** Factory method for search toolbar layout using CComponentFilterToolbar. */
@@ -427,11 +427,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("Drag event check after pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 	}
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
+		if (event instanceof CDragStartEvent) {
+			return;
+		}
 		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 	}
 

@@ -83,12 +83,18 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("Drag event check after pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
 	}
 
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
 		LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
+	}
+
+	@Override
+	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
@@ -99,12 +105,6 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 		final Integer nextOrder = service.getNextItemOrder(master);
 		LOGGER.debug("Next line order for section {}: {}", master.getId() != null ? master.getId() : "null", nextOrder);
 		return nextOrder;
-	}
-
-	@Override
-	public boolean drag_isDropAllowed(CDragStartEvent event) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override

@@ -364,7 +364,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	public void bindMethods(final CPageService<?> page) {
 		Check.notNull(page, "PageService instance must not be null to bind methods.");
 		final Map<String, Component> allComponents = getAllComponents();
-		LOGGER.debug("[BindDebug] Total components available for binding: {} - {}", allComponents.size(), allComponents.keySet());
+		// LOGGER.debug("[BindDebug] Total components available for binding: {} - {}", allComponents.size(), allComponents.keySet());
 		// Scan for handler methods matching on_{componentName}_{action} pattern
 		final var methods = page.getClass().getDeclaredMethods();
 		for (final var method : methods) {
@@ -380,8 +380,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 						method.getName(), allComponents.keySet());
 				continue;
 			}
-			LOGGER.debug("[BindDebug] Binding method '{}' to component '{}' (type: {}) for action '{}'", method.getName(), componentName,
-					component.getClass().getSimpleName(), action);
+			// LOGGER.debug("[BindDebug] Binding method '{}' to component '{}' (type: {}) for action '{}'", method.getName(),
+			// componentName,component.getClass().getSimpleName(), action);
 			bindComponent(method, component, method.getName(), componentName, action);
 		}
 	}

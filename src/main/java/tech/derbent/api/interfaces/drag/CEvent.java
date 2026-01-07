@@ -9,6 +9,7 @@ import tech.derbent.api.interfaces.IHasDragControl;
 public abstract class CEvent extends ComponentEvent<Component> {
 
 	private static final long serialVersionUID = 1L;
+	private boolean handled = false;
 	List<IHasDragControl> sourceList = new ArrayList<>();
 	private boolean valid = true;
 
@@ -28,7 +29,11 @@ public abstract class CEvent extends ComponentEvent<Component> {
 
 	public List<IHasDragControl> getSourceList() { return sourceList; }
 
+	public boolean isHandled() { return handled; }
+
 	public boolean isValid() { return valid; }
+
+	public void setHandled(boolean handled) { this.handled = handled; }
 
 	public void setValid(boolean valid) { this.valid = valid; }
 }

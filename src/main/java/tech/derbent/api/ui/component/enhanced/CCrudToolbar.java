@@ -18,6 +18,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 public class CCrudToolbar extends HorizontalLayout {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCrudToolbar.class);
 	private static final long serialVersionUID = 1L;
 	private CButton createButton;
@@ -115,7 +116,7 @@ public class CCrudToolbar extends HorizontalLayout {
 				return;
 			}
 			final List<CProjectItemStatus> statuses = statusProvider.get();
-			if ((statuses == null) || statuses.isEmpty()) {
+			if (statuses == null || statuses.isEmpty()) {
 				LOGGER.debug("No statuses available from provider, cannot create workflow combobox");
 				return;
 			}
@@ -139,8 +140,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	// Expose buttons if the caller needs direct access
 	public CButton getCreateButton() { return createButton; }
 
-	public Object getValue() { return currentEntity; }
-
 	public CButton getDeleteButton() { return deleteButton; }
 
 	public ICrudToolbarOwnerPage getPageBase() { return pageBase; }
@@ -148,6 +147,8 @@ public class CCrudToolbar extends HorizontalLayout {
 	public CButton getRefreshButton() { return refreshButton; }
 
 	public CButton getSaveButton() { return saveButton; }
+
+	public Object getValue() { return currentEntity; }
 
 	public void on_actionCreate() {
 		try {
@@ -189,19 +190,11 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	// Allow the page to inform toolbar about the currently selected entity so the toolbar can update its UI state
-	public void setValue(final Object entity) {
-		// LOGGER.debug("Setting current entity in toolbar: {}", entity);
-		currentEntity = entity;
-		updateButtonStates();
-		createWorkflowStatusComboBox();
-	}
-
 	public void setPageBase(final ICrudToolbarOwnerPage pageBase) {
 		this.pageBase = pageBase;
 		// update them so the `new` button is enabled if appropriate
 		updateButtonStates();
-		LOGGER.debug("Set page base for toolbar: {}", pageBase);
+		// LOGGER.debug("Set page base for toolbar: {}", pageBase);
 	}
 
 	/** Enable or disable the save button. This allows programmatic control from page services for validation purposes.
@@ -212,6 +205,14 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
+	// Allow the page to inform toolbar about the currently selected entity so the toolbar can update its UI state
+	public void setValue(final Object entity) {
+		// LOGGER.debug("Setting current entity in toolbar: {}", entity);
+		currentEntity = entity;
+		updateButtonStates();
+		createWorkflowStatusComboBox();
+	}
+
 	/** Update enabled state of toolbar buttons based on whether callbacks are provided and current entity presence. */
 	private void updateButtonStates() {
 		// LOGGER.debug("Updating toolbar button states");
@@ -220,13 +221,13 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 		final boolean hasEntity = currentEntity != null;
 		if (saveButton != null) {
-			saveButton.setEnabled((pageBase != null) && hasEntity);
+			saveButton.setEnabled(pageBase != null && hasEntity);
 		}
 		if (deleteButton != null) {
-			deleteButton.setEnabled((pageBase != null) && hasEntity);
+			deleteButton.setEnabled(pageBase != null && hasEntity);
 		}
 		if (refreshButton != null) {
-			refreshButton.setEnabled((pageBase != null) && hasEntity);
+			refreshButton.setEnabled(pageBase != null && hasEntity);
 		}
 	}
 }

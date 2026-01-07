@@ -89,15 +89,17 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	/** Hook executed after drag-drop events are processed. Used to refresh the backlog display after items are added/removed. */
 	@Override
 	public void drag_checkEventAfterPass(final CEvent event) {
+		super.drag_checkEventAfterPass(event);
 		LOGGER.debug("[BacklogDrag] Completed drag propagation for backlog column");
 		// Refresh backlog after drag-drop to show updated item list
 		if (event instanceof CDragDropEvent) {
-			refreshBacklog();
+			refreshComponent();
 		}
 	}
 
 	@Override
 	public void drag_checkEventBeforePass(final CEvent event) {
+		super.drag_checkEventBeforePass(event);
 		Check.notNull(event, "Drag event cannot be null for backlog column");
 		// For drop events on backlog, mark the target as the backlog column itself
 		// This allows the page service to identify drops onto backlog vs regular columns
@@ -138,21 +140,16 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	 * @return The project whose backlog is displayed */
 	public CProject getProject() { return project; }
 
-	/** Refreshes the backlog component to reload items from database. Called after drag-drop operations or when sprint items change. */
-	public void refreshBacklog() {
-		LOGGER.debug("Refreshing backlog component");
-		if (backlogComponent != null) {
-			backlogComponent.refreshComponent();
-		}
-	}
-
 	/** Overrides parent refreshComponent to refresh backlog instead of post-its. The backlog column doesn't display traditional post-its but uses the
 	 * backlog grid. */
 	@Override
-	protected void refreshComponent() {
+	public void refreshComponent() {
 		// Don't call super.refreshComponent() as we don't use the itemsLayout
 		// Instead, refresh the embedded backlog component
-		refreshBacklog();
+		LOGGER.debug("Refreshing backlog column component");
+		if (backlogComponent != null) {
+			backlogComponent.refreshComponent();
+		}
 	}
 
 	/** Override to prevent story point total display in backlog column. */

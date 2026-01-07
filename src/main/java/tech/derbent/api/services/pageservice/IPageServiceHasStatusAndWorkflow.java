@@ -1,7 +1,5 @@
 package tech.derbent.api.services.pageservice;
 
-import tech.derbent.api.utils.Check;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +8,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 
 public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<EntityClass>> {
@@ -54,7 +53,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 			LOGGER.info("Status changed from '{}' to '{}' for entity ID: {}", oldStatusName, newStatus.getName(), entity.getId());
 			// Save the entity to persist the status change
 			final EntityClass savedEntity = getEntityService().save(entity);
-			LOGGER.info("Entity saved successfully with new status: {}", newStatus.getName());
+			// LOGGER.info("Entity saved successfully with new status: {}", newStatus.getName());
 			// Update the current entity reference with saved entity
 			setValue(savedEntity);
 			// Notify view that entity was saved to trigger grid refresh
@@ -70,7 +69,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 	}
 
 	default List<CProjectItemStatus> getAvailableStatusesForProjectItem() {
-		LOGGER.debug("Retrieving available statuses for current entity");
+		// LOGGER.debug("Retrieving available statuses for current entity");
 		final EntityClass entity = getView().getValue();
 		if (entity == null) {
 			LOGGER.warn("No current entity for retrieving available statuses");

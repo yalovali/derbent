@@ -38,9 +38,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceKanbanLine.class);
 	private CComponentKanbanBoard componentKanbanBoard;
 	private CComponentListKanbanColumns componentKanbanColumns;
+	private tech.derbent.app.sprints.service.CSprintItemDragDropService dragDropService;
 	private CKanbanColumnService kanbanColumnService;
 	private CKanbanLineService kanbanLineService;
-	private tech.derbent.app.sprints.service.CSprintItemDragDropService dragDropService;
 
 	/** Creates the page service and resolves kanban dependencies. */
 	public CPageServiceKanbanLine(final IPageServiceImplementer<CKanbanLine> view) {
@@ -253,7 +253,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					componentKanbanBoard.refreshComponent();
 					final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
 					if (backlogColumn != null) {
-						backlogColumn.refreshBacklog();
+						backlogColumn.refreshComponent();
 					}
 					// Get current status safely (might be null for backlog items)
 					final CProjectItemStatus currentStatus = ((ISprintableItem) projectItem).getStatus();
@@ -284,7 +284,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					componentKanbanBoard.refreshComponent();
 					final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
 					if (backlogColumn != null) {
-						backlogColumn.refreshBacklog();
+						backlogColumn.refreshComponent();
 					}
 					CNotificationService.showSuccess("Item added to sprint with status '" + newStatus.getName() + "'");
 				}));
@@ -306,18 +306,18 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	}
 
 	/** Handles dropping a sprint item onto the backlog column (removes from sprint).
-	 * 
-	 * <p><strong>CRITICAL FIX:</strong> This method now correctly uses the unified drag-drop service
-	 * instead of manually deleting the sprint item. Sprint items are owned by Activity/Meeting with
-	 * CASCADE.ALL orphanRemoval=true.</p>
-	 * 
-	 * <p><strong>Key Changes:</strong></p>
+	 * <p>
+	 * <strong>CRITICAL FIX:</strong> This method now correctly uses the unified drag-drop service instead of manually deleting the sprint item.
+	 * Sprint items are owned by Activity/Meeting with CASCADE.ALL orphanRemoval=true.
+	 * </p>
+	 * <p>
+	 * <strong>Key Changes:</strong>
+	 * </p>
 	 * <ul>
-	 *   <li>Removed incorrect item.setSprintItem(null) call (violates ownership pattern)</li>
-	 *   <li>Removed incorrect sprintItemService.delete(sprintItem) call (causes cascade delete)</li>
-	 *   <li>Now uses dragDropService.moveSprintItemToBacklog() which sets sprint to NULL</li>
+	 * <li>Removed incorrect item.setSprintItem(null) call (violates ownership pattern)</li>
+	 * <li>Removed incorrect sprintItemService.delete(sprintItem) call (causes cascade delete)</li>
+	 * <li>Now uses dragDropService.moveSprintItemToBacklog() which sets sprint to NULL</li>
 	 * </ul>
-	 * 
 	 * @param draggedItem The item being dropped (must be CSprintItem)
 	 * @param event       The drop event */
 	private void handleDropOnBacklog(final Object draggedItem, final CDragDropEvent event) {
@@ -325,36 +325,26 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		// Only sprint items can be removed from sprint
 		Check.instanceOf(draggedItem, CSprintItem.class, "Only sprint items can be removed from sprint by dropping on backlog");
 		final CSprintItem sprintItem = (CSprintItem) draggedItem;
-		
 		try {
 			// Get the underlying item (Activity or Meeting) for logging
 			final ISprintableItem item = sprintItem.getItem();
 			Objects.requireNonNull(item, "Sprint item must have an underlying item");
-			
-			LOGGER.info("[BacklogDrop] Moving sprint item {} (parent: {}) from sprint to backlog (status preserved)", 
-				sprintItem.getId(), item.getId());
-			
-			// CRITICAL FIX: Use unified service instead of manual delete
+			LOGGER.info("[BacklogDrop] Moving sprint item {} (parent: {}) from sprint to backlog (status preserved)", sprintItem.getId(),
+					item.getId());
+			// CRITICAL FIX: Use unified service instead of= manual delete
 			// Old code deleted sprint item which caused cascade delete of parent entity
 			// New code sets sprint to NULL which correctly moves item to backlog
 			dragDropService.moveSprintItemToBacklog(sprintItem);
-			
 			// CRITICAL: Defer UI refresh until after Vaadin drop event completes
 			// If we refresh immediately, layoutColumns.removeAll() detaches the backlog column
 			// WHILE Vaadin is still processing the drop event, causing:
 			// "Drop target received a drop event but not attached to an UI"
 			// Using UI.access() defers the refresh to after the event completes
-			componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> {
-				// Refresh both board and backlog
-				componentKanbanBoard.reloadSprintItems();
-				componentKanbanBoard.refreshComponent();
-				final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
-				if (backlogColumn != null) {
-					backlogColumn.refreshBacklog();
-				}
-				CNotificationService.showSuccess("Item removed from sprint and returned to backlog");
-				LOGGER.info("Successfully removed sprint item {} from sprint (status preserved)", sprintItem.getId());
-			}));
+			/* componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> { // Refresh both board and backlog
+			 * componentKanbanBoard.reloadSprintItems(); componentKanbanBoard.refreshComponent(); final CComponentKanbanColumnBacklog backlogColumn =
+			 * componentKanbanBoard.getBacklogColumn(); if (backlogColumn != null) { backlogColumn.refreshComponent(); }
+			 * CNotificationService.showSuccess("Item removed from sprint and returned to backlog");
+			 * LOGGER.info("Successfully removed sprint item {} from sprint (status preserved)", sprintItem.getId()); })); */
 		} catch (final Exception e) {
 			LOGGER.error("Failed to remove sprint item from sprint", e);
 			CNotificationService.showError("Failed to remove item from sprint: " + e.getMessage());
@@ -576,7 +566,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 						componentKanbanBoard.refreshComponent();
 						final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
 						if (backlogColumn != null) {
-							backlogColumn.refreshBacklog();
+							backlogColumn.refreshComponent();
 						}
 						CNotificationService.showSuccess("Item added to sprint with status '" + selectedStatus.getName() + "'");
 					}));
@@ -594,7 +584,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					componentKanbanBoard.refreshComponent();
 					final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
 					if (backlogColumn != null) {
-						backlogColumn.refreshBacklog();
+						backlogColumn.refreshComponent();
 					}
 					CNotificationService.showInfo("Item added to sprint in '" + targetColumn.getName() + "' column, status remained '"
 							+ ((ISprintableItem) projectItem).getStatus().getName() + "'.");

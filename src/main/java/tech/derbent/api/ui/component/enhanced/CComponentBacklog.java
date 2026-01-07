@@ -16,6 +16,8 @@ import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -111,14 +113,14 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		// Set component ID before enabling value persistence
 		final String componentId = "backlog_" + project.getId();
 		setId(componentId);
-		LOGGER.info("[ValuePersistence] CComponentBacklog: Setting component ID to '{}' for project {}", componentId, project.getId());
+		// LOGGER.info("[ValuePersistence] CComponentBacklog: Setting component ID to '{}' for project {}", componentId, project.getId());
 		// Enable value persistence for entity type selection in backlog
 		// The persistence system will save the current value (first item) as initial default
 		// On subsequent loads, it will restore the user's last selection
 		try {
-			LOGGER.info("[ValuePersistence] CComponentBacklog: Enabling value persistence for backlog with ID '{}'", componentId);
+			// LOGGER.info("[ValuePersistence] CComponentBacklog: Enabling value persistence for backlog with ID '{}'", componentId);
 			enableValuePersistence();
-			LOGGER.info("[ValuePersistence] CComponentBacklog: Value persistence enabled successfully for backlog with ID '{}'", componentId);
+			// LOGGER.info("[ValuePersistence] CComponentBacklog: Value persistence enabled successfully for backlog with ID '{}'", componentId);
 		} catch (final Exception e) {
 			LOGGER.error("[ValuePersistence] CComponentBacklog: Failed to enable value persistence for backlog: {}", e.getMessage(), e);
 		}
@@ -165,6 +167,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
+		if (event instanceof CDragStartEvent) {
+			return;
+		}
+		if (event instanceof CDragEndEvent) {
+			return;
+		}
+		LOGGER.debug("[BacklogDrag] Drag event processed, refreshing backlog component");
 		super.drag_checkEventAfterPass(event);
 		refreshComponent();
 	}
@@ -210,6 +219,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Refresh the backlog component and underlying grid. */
 	public void refreshComponent() {
+		LOGGER.debug("[BacklogRefresh] Refreshing backlog component and grid");
 		refreshGrid();
 	}
 

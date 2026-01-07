@@ -35,6 +35,12 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumn.class);
 	private static final long serialVersionUID = 1L;
 	private final Binder<CKanbanColumn> binder;
+	// ==================== ONE REFRESH ONLY PATTERN ====================
+	// PERFORMANCE OPTIMIZATION: Cache filtered items to avoid repeated filtering operations.
+	// Without caching: 6-8 filter calls per column (called from refreshItems, refreshStoryPointTotal, etc.)
+	// With caching: 1 filter call per column (85% reduction)
+	// Cache is invalidated when sprintItems or column value changes.
+	private List<CSprintItem> cachedFilteredItems = List.of();
 	private final CSpan defaultBadge;
 	private final Set<ComponentEventListener<CDragDropEvent>> dragDropListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
@@ -44,15 +50,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private final CVerticalLayout itemsLayout;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 	private List<CSprintItem> sprintItems = List.of();
-	
-	// ==================== ONE REFRESH ONLY PATTERN ====================
-	// PERFORMANCE OPTIMIZATION: Cache filtered items to avoid repeated filtering operations.
-	// Without caching: 6-8 filter calls per column (called from refreshItems, refreshStoryPointTotal, etc.)
-	// With caching: 1 filter call per column (85% reduction)
-	// Cache is invalidated when sprintItems or column value changes.
-	private List<CSprintItem> cachedFilteredItems = List.of();
 	protected final CLabelEntity statusesLabel;
-	private CSpan storyPointTotalLabel;
+	private final CSpan storyPointTotalLabel;
 	protected final CH3 title;
 
 	/** Creates the kanban column component and its layout. */
@@ -103,7 +102,17 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 
 	@Override
 	public void drag_checkEventAfterPass(final CEvent event) {
-		// LOGGER.debug("[KanbanDrag] Completed drag propagation for column {}", getValue() != null ? getValue().getName() : "null");
+		LOGGER.debug("Drag event check after pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
+		if (event instanceof CDragDropEvent) {
+			refreshComponent();
+			return;
+		} else if (event instanceof CDragStartEvent) {
+			// No action needed after drag start/end for column itself
+			return;
+		} else if (event instanceof CDragEndEvent) {
+			refreshComponent();
+			return;
+		}
 	}
 
 	@Override
@@ -176,24 +185,19 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		dropTarget = DropTarget.create(this);
 		dropTarget.setDropEffect(DropEffect.MOVE);
 		dropTarget.addDropListener(drag_on_column_drop());
-		
 		// Note: Vaadin Flow 24.8 does not provide addDragOverListener or addDragLeaveListener in the Java API.
 		// These events are managed client-side in HTML5 DnD but not exposed server-side by Vaadin.
 		// For visual feedback during drag-over, we can use CSS hover states or implement custom
 		// client-side JavaScript integration if needed. The main drag-drop logic uses the drop event.
-		// 
+		//
 		// Alternative: Use CSS for visual feedback:
 		// .kanban-column:has([draggable="true"]:hover) { background-color: #e0e0e0; }
 		// Or client-side JavaScript for more complex interactions.
-		
 		dropTarget.setActive(true);
 	}
 
-	/** Filters items that should appear in this column and caches the result.
-	 * 
-	 * This is an expensive operation (stream filter) that was called multiple times per refresh cycle.
-	 * Now called only once, with results cached until items or column value changes.
-	 */
+	/** Filters items that should appear in this column and caches the result. This is an expensive operation (stream filter) that was called multiple
+	 * times per refresh cycle. Now called only once, with results cached until items or column value changes. */
 	private List<CSprintItem> filterItems(final List<CSprintItem> items) {
 		LOGGER.debug("[DragDrop] Filtering items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		if (items == null || items.isEmpty()) {
@@ -218,29 +222,14 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		LOGGER.info("[DragDrop] Column {} (id {}) filtered to {} items out of {} total", column.getName(), columnId, filtered.size(), items.size());
 		return filtered;
 	}
-	
-	/** Gets the cached filtered items for this column. Updates cache if needed.
-	 * 
-	 * ==================== ONE REFRESH ONLY PATTERN - CACHING ====================
-	 * PERFORMANCE OPTIMIZATION: Avoid repeated expensive filtering operations.
-	 * 
-	 * WITHOUT CACHING (old code):
-	 *   - refreshItems() calls filterItems() → 1st filter
-	 *   - refreshStoryPointTotal() calls filterItems() → 2nd filter
-	 *   - Each refresh methods calls filterItems() independently
-	 *   - Result: 6-8 filter operations per column per refresh
-	 * 
-	 * WITH CACHING (optimized):
-	 *   - First call to getFilteredItems() calls filterItems() and caches result
-	 *   - Subsequent calls return cached result (no filtering)
-	 *   - Cache invalidated only when items or column value changes
-	 *   - Result: 1 filter operation per column per refresh (85% reduction)
-	 * 
-	 * Example with 5 columns:
-	 *   - Without caching: 5 columns × 6 filters = 30 filter operations
-	 *   - With caching: 5 columns × 1 filter = 5 filter operations
-	 *   - Improvement: 83% reduction in filtering overhead
-	 */
+
+	/** Gets the cached filtered items for this column. Updates cache if needed. ==================== ONE REFRESH ONLY PATTERN - CACHING
+	 * ==================== PERFORMANCE OPTIMIZATION: Avoid repeated expensive filtering operations. WITHOUT CACHING (old code): - refreshItems()
+	 * calls filterItems() → 1st filter - refreshStoryPointTotal() calls filterItems() → 2nd filter - Each refresh methods calls filterItems()
+	 * independently - Result: 6-8 filter operations per column per refresh WITH CACHING (optimized): - First call to getFilteredItems() calls
+	 * filterItems() and caches result - Subsequent calls return cached result (no filtering) - Cache invalidated only when items or column value
+	 * changes - Result: 1 filter operation per column per refresh (85% reduction) Example with 5 columns: - Without caching: 5 columns × 6 filters =
+	 * 30 filter operations - With caching: 5 columns × 1 filter = 5 filter operations - Improvement: 83% reduction in filtering overhead */
 	private List<CSprintItem> getFilteredItems() {
 		// Recompute cache if sprint items changed or column value changed
 		final CKanbanColumn column = getValue();
@@ -249,24 +238,17 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		}
 		return cachedFilteredItems;
 	}
-	
-	/** Invalidates the cached filtered items. Called when sprintItems or column value changes.
-	 * 
-	 * CACHE INVALIDATION: Clear cache to force recomputation on next access.
-	 * This ensures cached data is always fresh after data or configuration changes.
-	 */
+
+	/** Invalidates the cached filtered items. Called when sprintItems or column value changes. CACHE INVALIDATION: Clear cache to force recomputation
+	 * on next access. This ensures cached data is always fresh after data or configuration changes. */
 	private void invalidateCache() {
 		cachedFilteredItems = List.of();
 	}
 
-	/** Updates the column UI when its value changes.
-	 * 
-	 * ONE REFRESH ONLY PATTERN: This method is part of the refresh optimization strategy.
-	 * Without optimization: setValue() would trigger full refresh even when items not yet set,
-	 * then setItems() would trigger another full refresh = DOUBLE REFRESH.
-	 * With optimization: Skip refresh if items are empty (component not fully initialized).
-	 * This ensures refresh happens only ONCE after both value and items are set.
-	 */
+	/** Updates the column UI when its value changes. ONE REFRESH ONLY PATTERN: This method is part of the refresh optimization strategy. Without
+	 * optimization: setValue() would trigger full refresh even when items not yet set, then setItems() would trigger another full refresh = DOUBLE
+	 * REFRESH. With optimization: Skip refresh if items are empty (component not fully initialized). This ensures refresh happens only ONCE after
+	 * both value and items are set. */
 	@Override
 	protected void onValueChanged(final CKanbanColumn oldValue, final CKanbanColumn newValue, final boolean fromClient) {
 		LOGGER.debug("Kanban column value changed from {} to {}", oldValue != null ? oldValue.getName() : "null",
@@ -291,6 +273,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	/** Refreshes the column UI components. */
 	@Override
 	protected void refreshComponent() {
+		invalidateCache();
 		applyBackgroundColor();
 		refreshHeader();
 		refreshStatuses();
@@ -309,29 +292,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		} else {
 			headerLayout.remove(defaultBadge);
 		}
-		
 		// Calculate and display total story points
 		refreshStoryPointTotal();
-	}
-	
-	/** Calculates and displays the total story points for items in this column. */
-	protected void refreshStoryPointTotal() {
-		final List<CSprintItem> columnItems = getFilteredItems(); // Use cached filtered items
-		long totalStoryPoints = 0;
-		for (final CSprintItem item : columnItems) {
-			if (item != null && item.getItem() != null && item.getItem().getStoryPoint() != null) {
-				totalStoryPoints += item.getItem().getStoryPoint();
-			}
-		}
-		
-		if (totalStoryPoints > 0) {
-			storyPointTotalLabel.setText(totalStoryPoints + " SP");
-			if (!headerLayout.getChildren().anyMatch(component -> component == storyPointTotalLabel)) {
-				headerLayout.add(storyPointTotalLabel);
-			}
-		} else {
-			headerLayout.remove(storyPointTotalLabel);
-		}
 	}
 
 	/** Refreshes the item cards inside the column. */
@@ -363,6 +325,25 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		statusesLabel.setText(statuses);
 	}
 
+	/** Calculates and displays the total story points for items in this column. */
+	protected void refreshStoryPointTotal() {
+		final List<CSprintItem> columnItems = getFilteredItems(); // Use cached filtered items
+		long totalStoryPoints = 0;
+		for (final CSprintItem item : columnItems) {
+			if (item != null && item.getItem() != null && item.getItem().getStoryPoint() != null) {
+				totalStoryPoints += item.getItem().getStoryPoint();
+			}
+		}
+		if (totalStoryPoints > 0) {
+			storyPointTotalLabel.setText(totalStoryPoints + " SP");
+			if (!headerLayout.getChildren().anyMatch(component -> component == storyPointTotalLabel)) {
+				headerLayout.add(storyPointTotalLabel);
+			}
+		} else {
+			headerLayout.remove(storyPointTotalLabel);
+		}
+	}
+
 	@Override
 	public void select_checkEventAfterPass(final CEvent event) {
 		LOGGER.debug("[KanbanSelect] Selection propagated for column {}", getValue() != null ? getValue().getName() : "null");
@@ -379,20 +360,12 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		return selectListeners;
 	}
 
-	/** Sets the items displayed in this column.
-	 * 
-	 * ONE REFRESH ONLY PATTERN: This method is part of the refresh optimization strategy.
-	 * Without optimization: setItems() would trigger full refresh even when value not yet set,
-	 * then setValue() would trigger another full refresh = DOUBLE REFRESH.
-	 * With optimization: Skip refresh if value is null (component not fully initialized).
-	 * This ensures refresh happens only ONCE after both value and items are set.
-	 * 
-	 * CORRECT initialization order in parent (CComponentKanbanBoard):
-	 *   1. columnComponent.setValue(column);     // Sets configuration, skips refresh (items empty)
-	 *   2. columnComponent.setItems(sprintItems); // Triggers SINGLE refresh (value is set)
-	 * 
-	 * Result: ONE refresh per column instead of TWO (50% reduction in refresh calls).
-	 */
+	/** Sets the items displayed in this column. ONE REFRESH ONLY PATTERN: This method is part of the refresh optimization strategy. Without
+	 * optimization: setItems() would trigger full refresh even when value not yet set, then setValue() would trigger another full refresh = DOUBLE
+	 * REFRESH. With optimization: Skip refresh if value is null (component not fully initialized). This ensures refresh happens only ONCE after both
+	 * value and items are set. CORRECT initialization order in parent (CComponentKanbanBoard): 1. columnComponent.setValue(column); // Sets
+	 * configuration, skips refresh (items empty) 2. columnComponent.setItems(sprintItems); // Triggers SINGLE refresh (value is set) Result: ONE
+	 * refresh per column instead of TWO (50% reduction in refresh calls). */
 	public void setItems(final List<CSprintItem> items) {
 		LOGGER.debug("Setting items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		sprintItems = items == null ? List.of() : List.copyOf(items);
