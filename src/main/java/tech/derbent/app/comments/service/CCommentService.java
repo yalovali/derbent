@@ -2,6 +2,7 @@ package tech.derbent.app.comments.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -11,11 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.interfaces.ISearchable;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.utils.CPageableUtils;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.base.session.service.ISessionService;
@@ -82,17 +83,11 @@ public class CCommentService extends CAbstractService<CComment> implements IEnti
 
 	@Override
 	@Transactional (readOnly = true)
-	public Page<CComment> listForPageView(final Pageable pageable, final String searchText) throws Exception {
-		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		final String term = searchText == null ? "" : searchText.trim();
-		final Sort defaultSort = getDefaultSort();
-		final List<CComment> all = ((ICommentRepository) repository).findAllForPageView(defaultSort);
-		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
-		final List<CComment> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
-		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
-		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
-		final List<CComment> content = filtered.subList(start, end);
-		return new PageImpl<>(content, safePage, filtered.size());
+	public Optional<CComment> getById(final Long id) {
+		if (id == null) {
+			return java.util.Optional.empty();
+		}
+		return ((ICommentRepository) repository).findByIdForPageView(id);
 	}
 
 	@Override
@@ -106,16 +101,6 @@ public class CCommentService extends CAbstractService<CComment> implements IEnti
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
-
-	@Override
-	@Transactional
-	public CComment save(final CComment entity) {
-		final CComment saved = super.save(entity);
-		if (saved.getId() == null) {
-			return saved;
-		}
-		return ((ICommentRepository) repository).findById(saved.getId()).orElse(saved);
-	}
 
 	@Override
 	public void initializeNewEntity(final CComment entity) {
@@ -134,6 +119,31 @@ public class CCommentService extends CAbstractService<CComment> implements IEnti
 		// Note: activity is required and must be set before saving (typically done through createComment method)
 		// Note: commentText is required and must be set before saving
 		// Note: priority is optional and can remain null
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CComment> listForPageView(final Pageable pageable, final String searchText) throws Exception {
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final String term = searchText == null ? "" : searchText.trim();
+		final Sort defaultSort = getDefaultSort();
+		final List<CComment> all = ((ICommentRepository) repository).findAllForPageView(defaultSort);
+		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
+		final List<CComment> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+		final List<CComment> content = filtered.subList(start, end);
+		return new PageImpl<>(content, safePage, filtered.size());
+	}
+
+	@Override
+	@Transactional
+	public CComment save(final CComment entity) {
+		final CComment saved = super.save(entity);
+		if (saved.getId() == null) {
+			return saved;
+		}
+		return ((ICommentRepository) repository).findByIdForPageView(saved.getId()).orElse(saved);
 	}
 
 	/** Updates comment text.

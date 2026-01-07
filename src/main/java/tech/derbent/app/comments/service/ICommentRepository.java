@@ -1,6 +1,7 @@
 package tech.derbent.app.comments.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,5 +34,7 @@ public interface ICommentRepository extends IAbstractRepository<CComment> {
 			"activity", "author", "priority"
 	})
 	@Override
-	java.util.Optional<CComment> findById(Long id);
+	Optional<CComment> findById(Long id);
+	@Query ("SELECT c FROM CComment c LEFT JOIN FETCH c.activity WHERE c.id = :id")
+	Optional<CComment> findByIdForPageView(@Param ("id") Long id);
 }

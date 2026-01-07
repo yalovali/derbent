@@ -1,12 +1,13 @@
 package tech.derbent.api.ui.dialogs;
 
-import tech.derbent.api.utils.Check;
-
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -16,6 +17,7 @@ import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.api.utils.Check;
 
 /** Abstract base class for relationship dialogs. This class provides common functionality for dialogs that manage relationships between two entity
  * types. It handles the common patterns of: - Entity selection via ComboBox - Role and permission management - Form validation with proper error
@@ -111,16 +113,16 @@ public abstract class CDialogDBRelation<RelationshipClass extends CEntityDB<Rela
 	 * @param component The component to search */
 	@SuppressWarnings ("unchecked")
 	private void refreshComboBoxesInComponent(final com.vaadin.flow.component.Component component) {
-		if (component instanceof com.vaadin.flow.component.combobox.ComboBox) {
+		if (component instanceof ComboBox) {
 			try {
-				final com.vaadin.flow.component.combobox.ComboBox<Object> comboBox = (com.vaadin.flow.component.combobox.ComboBox<Object>) component;
+				final ComboBox<Object> comboBox = (ComboBox<Object>) component;
 				final Object boundValue = comboBox.getValue();
 				if (boundValue != null && boundValue instanceof CEntityDB) {
 					final CEntityDB<?> boundEntity = (CEntityDB<?>) boundValue;
 					final Long id = boundEntity.getId();
 					if (id != null) {
 						// Find matching item from ComboBox's data provider items
-						final java.util.Optional<Object> matchingItem = comboBox.getListDataView().getItems()
+						final Optional<Object> matchingItem = comboBox.getListDataView().getItems()
 								.filter(item -> item instanceof CEntityDB && id.equals(((CEntityDB<?>) item).getId())).findFirst();
 						if (matchingItem.isPresent()) {
 							// Set the value to the exact instance from the items list
@@ -134,7 +136,7 @@ public abstract class CDialogDBRelation<RelationshipClass extends CEntityDB<Rela
 			} catch (final Exception e) {
 				LOGGER.warn("Failed to refresh ComboBox component: {}", e.getMessage());
 			}
-		} else if (component instanceof com.vaadin.flow.component.HasComponents) {
+		} else if (component instanceof HasComponents) {
 			// Recursively process child components
 			component.getElement().getChildren().forEach(element -> {
 				if (element.getComponent().isPresent()) {
@@ -224,5 +226,6 @@ public abstract class CDialogDBRelation<RelationshipClass extends CEntityDB<Rela
 	}
 
 	@Override
-	protected void validateForm() { /*****/ }
+	protected void validateForm() { /*****/
+	}
 }

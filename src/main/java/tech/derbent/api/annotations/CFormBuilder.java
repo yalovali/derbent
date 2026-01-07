@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -644,8 +646,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 		// Get list of all Vaadin icons
 		final List<String> iconItems = new ArrayList<>(getVaadinIconNames());
-		final com.vaadin.flow.data.provider.ListDataProvider<String> dataProvider =
-				new com.vaadin.flow.data.provider.ListDataProvider<>(iconItems);
+		final com.vaadin.flow.data.provider.ListDataProvider<String> dataProvider = new com.vaadin.flow.data.provider.ListDataProvider<>(iconItems);
 		comboBox.setItems(dataProvider);
 		// Set up custom renderer to show icon with name
 		comboBox.setRenderer(new ComponentRenderer<>(iconName -> {
@@ -690,7 +691,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 		comboBox.addCustomValueSetListener(event -> {
 			final String customValue = event.getDetail();
-			if ((customValue != null) && !customValue.isBlank() && !iconItems.contains(customValue)) {
+			if (customValue != null && !customValue.isBlank() && !iconItems.contains(customValue)) {
 				iconItems.add(customValue);
 				dataProvider.refreshAll();
 			}
@@ -698,14 +699,16 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		});
 		// Bind to field with a converter that accepts non-standard icons already stored in the database.
 		final com.vaadin.flow.data.converter.Converter<String, String> iconConverter = new com.vaadin.flow.data.converter.Converter<>() {
+
 			@Override
-			public com.vaadin.flow.data.binder.Result<String> convertToModel(final String value, final com.vaadin.flow.data.binder.ValueContext context) {
+			public com.vaadin.flow.data.binder.Result<String> convertToModel(final String value,
+					final com.vaadin.flow.data.binder.ValueContext context) {
 				return com.vaadin.flow.data.binder.Result.ok(value);
 			}
 
 			@Override
 			public String convertToPresentation(final String value, final com.vaadin.flow.data.binder.ValueContext context) {
-				if ((value != null) && !value.isBlank() && !iconItems.contains(value)) {
+				if (value != null && !value.isBlank() && !iconItems.contains(value)) {
 					iconItems.add(value);
 					dataProvider.refreshAll();
 				}
@@ -956,8 +959,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					final ComboBox<Object> comboBox = (ComboBox<Object>) component;
 					try {
 						// Get the first item from the ComboBox data provider
-						final java.util.Optional<Object> firstItem =
-								comboBox.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>()).findFirst();
+						final Optional<Object> firstItem = comboBox.getDataProvider().fetch(new Query<>()).findFirst();
 						if (firstItem.isPresent()) {
 							comboBox.setValue(firstItem.get());
 							LOGGER.debug("Reset ComboBox to first item: {}", firstItem.get());

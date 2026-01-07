@@ -106,7 +106,9 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 	@Override
 	public void initializeNewEntity(final CUserCompanyRole entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
+		final CCompany company = sessionService.getActiveCompany()
+				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot initialize role without company context"));
+		entity.setCompany(company);
 	}
 
 	@Override

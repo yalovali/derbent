@@ -3,6 +3,7 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.shared.Registration;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -821,8 +823,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Override
 	public void restoreCurrentValue() {
 		try {
-			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
-			final java.util.Optional<String> storedDisplayName = sessionService.getSessionValue(getValuePersistId());
+			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
+			final Optional<String> storedDisplayName = sessionService.getSessionValue(getValuePersistId());
 			if (storedDisplayName.isPresent() && comboBoxEntityType != null) {
 				// Find the entity type config that matches the stored display name
 				final EntityTypeConfig<?> matchingConfig =
@@ -848,7 +850,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	@Override
 	public void saveCurrentValue() {
 		try {
-			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
+			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
 			if (comboBoxEntityType != null) {
 				final EntityTypeConfig<?> currentValue = comboBoxEntityType.getValue();
 				if (currentValue != null) {

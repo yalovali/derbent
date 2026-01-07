@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hibernate.Hibernate;
@@ -211,7 +212,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				try {
 					final Object f = fieldStatus.getField();
 					if (f instanceof java.util.Optional) {
-						final java.util.Optional<?> opt = (java.util.Optional<?>) f;
+						final Optional<?> opt = (Optional<?>) f;
 						if (opt.isPresent()) {
 							fieldObj = opt.get();
 						}

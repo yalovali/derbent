@@ -31,7 +31,15 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 		Check.notNull(entity, "Grid Entity must not be null");
 		LOGGER.debug("Getting field names for entity: {}", entity.getName());
 		final String beanName = entity.getDataServiceBeanName();
+		if (beanName == null || beanName.isBlank()) {
+			LOGGER.warn("Grid entity {} has no data service bean selected yet", entity.getName());
+			return List.of();
+		}
 		final String entityType = CEntityFieldService.extractEntityTypeFromBeanName(beanName);
+		if (entityType == null || entityType.isBlank()) {
+			LOGGER.warn("Unable to resolve entity type from bean name {}", beanName);
+			return List.of();
+		}
 		Check.notNull(entityType, "Extracted entity type cannot be null");
 		final List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
 		return allFields.stream().map(EntityFieldInfo::getFieldName).toList();
@@ -72,7 +80,26 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 	@Override
 	public void initializeNewEntity(final CGridEntity entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
+		if (entity.getDataServiceBeanName() == null || entity.getDataServiceBeanName().isBlank()) {
+			final List<String> availableBeans = CViewsService.getAvailableBeans();
+			String defaultBean = null;
+			for (final String bean : availableBeans) {
+				if ("CGridEntityService".equals(bean)) {
+					defaultBean = bean;
+					break;
+				}
+			}
+			if (defaultBean == null) {
+				for (final String bean : availableBeans) {
+					if (bean != null && !bean.isBlank()) {
+						defaultBean = bean;
+						break;
+					}
+				}
+			}
+			Check.notBlank(defaultBean, "Data Service Bean default could not be resolved");
+			entity.setDataServiceBeanName(defaultBean);
+		}
 	}
 
 	public List<CGridEntity> listForComboboxSelectorByProject(final Optional<CProject> project) {

@@ -217,7 +217,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			LOGGER.info("[DragDrop] Current sprint: {} (id: {})", currentSprint.getName(), currentSprint.getId());
 			// Update the existing sprint item owned by the parent (Activity/Meeting)
 			final tech.derbent.app.sprints.service.CSprintItemService sprintItemService =
-					tech.derbent.api.config.CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
+					CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
 			// Get the sprint item from the sprintable item (Activity/Meeting)
 			final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) projectItem;
 			final CSprintItem existingSprintItem = sprintableItem.getSprintItem();

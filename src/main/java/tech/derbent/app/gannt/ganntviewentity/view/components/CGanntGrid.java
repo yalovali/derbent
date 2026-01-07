@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import tech.derbent.api.grid.domain.CGrid;
@@ -48,23 +49,23 @@ public class CGanntGrid extends CGrid<CGanntItem> {
 
 	/** Calculate the overall timeline range from all items to properly scale the bars. */
 	private void calculateTimelineRange() {
-		final List<CGanntItem> allItems = dataProvider.fetch(new com.vaadin.flow.data.provider.Query<>()).toList();
+		final List<CGanntItem> allItems = dataProvider.fetch(new Query<>()).toList();
 		timelineStart = null;
 		timelineEnd = null;
 		for (final CGanntItem item : allItems) {
 			if (item.hasDates()) {
 				final LocalDate itemStart = item.getStartDate();
 				final LocalDate itemEnd = item.getEndDate();
-				if ((timelineStart == null) || itemStart.isBefore(timelineStart)) {
+				if (timelineStart == null || itemStart.isBefore(timelineStart)) {
 					timelineStart = itemStart;
 				}
-				if ((timelineEnd == null) || itemEnd.isAfter(timelineEnd)) {
+				if (timelineEnd == null || itemEnd.isAfter(timelineEnd)) {
 					timelineEnd = itemEnd;
 				}
 			}
 		}
 		// Add padding to timeline range for better visualization
-		if ((timelineStart != null) && (timelineEnd != null)) {
+		if (timelineStart != null && timelineEnd != null) {
 			timelineStart = timelineStart.minusDays(7); // Add 1 week before
 			timelineEnd = timelineEnd.plusDays(7); // Add 1 week after
 		} else {
@@ -117,7 +118,7 @@ public class CGanntGrid extends CGrid<CGanntItem> {
 	/** Set the timeline column width and refresh the view.
 	 * @param widthPixels The new width in pixels */
 	public void setTimelineWidth(final int widthPixels) {
-		if ((widthPixels >= MIN_TIMELINE_WIDTH_PIXELS) && (widthPixels <= MAX_TIMELINE_WIDTH_PIXELS)) {
+		if (widthPixels >= MIN_TIMELINE_WIDTH_PIXELS && widthPixels <= MAX_TIMELINE_WIDTH_PIXELS) {
 			timelineWidthPixels = widthPixels;
 			// Recreate columns to apply new width
 			getColumns().forEach(this::removeColumn);

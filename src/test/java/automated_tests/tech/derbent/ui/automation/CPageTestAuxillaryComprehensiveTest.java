@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
+import tech.derbent.app.products.productversion.domain.CProductVersion;
 
 /** Comprehensive test suite for CPageTestAuxillary that dynamically tests all pages accessible via navigation buttons.
  * <p>
@@ -236,6 +238,9 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			if (fieldId == null || fieldId.isBlank()) {
 				continue;
 			}
+			if (isSystemFieldId(fieldId)) {
+				continue;
+			}
 			if (!isComboBoxById(fieldId) || !isFieldEditable(field) || !isFieldRequired(field)) {
 				continue;
 			}
@@ -379,7 +384,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private boolean isSystemFieldId(final String fieldId) {
 		final String lower = fieldId.toLowerCase();
 		return lower.contains("-created") || lower.contains("-updated") || lower.contains("-version") || lower.contains("-createdby")
-				|| lower.contains("-modified");
+				|| lower.contains("-modified") || lower.contains("-company");
 	}
 
 	/** Navigate to the CPageTestAuxillary page. */
@@ -399,11 +404,33 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 
 	private FieldValueResult populateEditableFields(final String pageName) {
 		final String baseValue = "Test-" + pageName;
+		final String emailValue = buildEmailValue(pageName);
 		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
 		int textIndex = 0;
 		String primaryValue = null;
 		String primaryFieldId = null;
 		if (pageName.toLowerCase().contains("approval")) {
+			LOGGER.info("      🔎 Field IDs on {}:", pageName);
+			for (int i = 0; i < fields.count(); i++) {
+				final String fieldId = fields.nth(i).getAttribute("id");
+				if (fieldId != null) {
+					LOGGER.info("         - {}", fieldId);
+				}
+			}
+		}
+		if (pageName.toLowerCase().contains("grid")) {
+			LOGGER.info("      🔎 Field IDs on {}:", pageName);
+			for (int i = 0; i < fields.count(); i++) {
+				final Locator field = fields.nth(i);
+				final String fieldId = field.getAttribute("id");
+				if (fieldId == null) {
+					continue;
+				}
+				final String tagName = field.evaluate("el => el.tagName.toLowerCase()").toString();
+				LOGGER.info("         - {} ({})", fieldId, tagName);
+			}
+		}
+		if (pageName.toLowerCase().contains("component version")) {
 			LOGGER.info("      🔎 Field IDs on {}:", pageName);
 			for (int i = 0; i < fields.count(); i++) {
 				final String fieldId = fields.nth(i).getAttribute("id");
@@ -418,9 +445,10 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			if (isFieldEditable(primaryField)) {
 				final String currentValue = readFieldValueById(primaryFieldId);
 				if (currentValue == null || currentValue.isBlank()) {
-					fillFieldById(primaryFieldId, baseValue);
-					LOGGER.info("      ✓ Filled primary {} with {}", primaryFieldId, baseValue);
-					primaryValue = baseValue;
+					final String value = isEmailField(primaryFieldId) ? emailValue : baseValue;
+					fillFieldById(primaryFieldId, value);
+					LOGGER.info("      ✓ Filled primary {} with {}", primaryFieldId, value);
+					primaryValue = value;
 					textIndex++;
 				}
 			}
@@ -460,7 +488,8 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			if (field.locator("input").count() > 0 || field.locator("textarea").count() > 0) {
 				final String currentValue = readFieldValueById(fieldId);
 				if (currentValue == null || currentValue.isBlank()) {
-					final String value = textIndex == 0 ? baseValue : baseValue + "-" + textIndex;
+					final String value = isEmailField(fieldId) ? emailValue
+							: textIndex == 0 ? baseValue : baseValue + "-" + textIndex;
 					fillFieldById(fieldId, value);
 					LOGGER.info("      ✓ Filled {} with {}", fieldId, value);
 					if (primaryValue == null) {
@@ -473,17 +502,96 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		if (textIndex == 0) {
 			final String fallbackField = findEditableFieldId();
 			if (fallbackField != null && !isComboBoxById(fallbackField)) {
-				fillFieldById(fallbackField, baseValue);
-				LOGGER.info("      ✓ Filled fallback {} with {}", fallbackField, baseValue);
-				primaryValue = baseValue;
+				final String value = isEmailField(fallbackField) ? emailValue : baseValue;
+				fillFieldById(fallbackField, value);
+				LOGGER.info("      ✓ Filled fallback {} with {}", fallbackField, value);
+				primaryValue = value;
 				primaryFieldId = fallbackField;
 			}
 		}
 		selectComboFieldByIdSubstring("approval-status");
+		selectComboFieldByIdSubstring("projectcomponent");
+		selectComboFieldByIdSubstring("project-component");
+		selectComboFieldByLabel("Component");
+		selectComboFieldByLabel("Project Component");
+		selectComboFieldByEntityFieldIfPresent(CProjectComponentVersion.class, "projectComponent");
+		selectComboFieldByEntityFieldIfPresent(CProductVersion.class, "product");
+		selectComboFieldByIdSubstring("data-service");
+		selectComboFieldByIdSubstring("service-bean");
+		selectComboFieldByLabel("Data Service Bean");
 		selectComboFieldByIdSuffix("-order");
 		selectComboFieldByIdSuffix("-activity");
 		ensureRequiredComboSelections();
+		ensureStatusSelections();
 		return new FieldValueResult(primaryFieldId, primaryValue);
+	}
+
+	private void selectComboFieldByLabel(final String label) {
+		try {
+			final Locator combo = page.locator("vaadin-combo-box[label='" + label + "'], c-navigable-combo-box[label='" + label + "']").first();
+			if (combo.count() == 0) {
+				return;
+			}
+			final String fieldId = combo.getAttribute("id");
+			if (fieldId == null || fieldId.isBlank()) {
+				return;
+			}
+			selectFirstComboBoxOptionById(fieldId);
+			LOGGER.info("      ✓ Selected combo with label {}", label);
+		} catch (final Exception e) {
+			LOGGER.warn("      ⚠️ Failed selecting combo with label {}: {}", label, e.getMessage());
+		}
+	}
+
+	private void selectComboFieldByEntityFieldIfPresent(final Class<?> entityClass, final String fieldName) {
+		final String fieldId = computeFieldId(entityClass, fieldName);
+		final Locator field = page.locator("#" + fieldId);
+		if (field.count() == 0 || !isComboBoxById(fieldId)) {
+			return;
+		}
+		final String currentValue = readFieldValueById(fieldId);
+		if (currentValue != null && !currentValue.isBlank()) {
+			return;
+		}
+		try {
+			selectFirstComboBoxOptionById(fieldId);
+			LOGGER.info("      ✓ Selected required combo {}", fieldId);
+		} catch (final Exception e) {
+			LOGGER.warn("      ⚠️ Failed to select required combo {}: {}", fieldId, e.getMessage());
+		}
+	}
+
+	private void ensureStatusSelections() {
+		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "'][id*='status']");
+		for (int i = 0; i < fields.count(); i++) {
+			final String fieldId = fields.nth(i).getAttribute("id");
+			if (fieldId == null || fieldId.isBlank()) {
+				continue;
+			}
+			if (!isComboBoxById(fieldId) || !isFieldEditable(fields.nth(i))) {
+				continue;
+			}
+			final String currentValue = readFieldValueById(fieldId);
+			if (currentValue != null && !currentValue.isBlank()) {
+				continue;
+			}
+			try {
+				selectFirstComboBoxOptionById(fieldId);
+				LOGGER.info("      ✓ Selected status combo {}", fieldId);
+			} catch (final Exception e) {
+				LOGGER.warn("      ⚠️ Failed to select status combo {}: {}", fieldId, e.getMessage());
+			}
+		}
+	}
+
+	private String buildEmailValue(final String pageName) {
+		final String slug = pageName.toLowerCase().replaceAll("[^a-z0-9]+", "-");
+		final String safeSlug = slug.isBlank() ? "page" : slug;
+		return "test-" + safeSlug + "@example.com";
+	}
+
+	private boolean isEmailField(final String fieldId) {
+		return fieldId != null && fieldId.toLowerCase().contains("email");
 	}
 
 	// ==========================================
@@ -559,21 +667,25 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	}
 
 	private void selectComboFieldByIdSubstring(final String fragment) {
-		final Locator fields = page.locator("[id^='field-'][id*='" + fragment + "']");
-		if (fields.count() == 0) {
-			return;
-		}
-		final String fieldId = fields.first().getAttribute("id");
-		if (fieldId == null || fieldId.isBlank()) {
-			return;
-		}
-		if (isComboBoxById(fieldId)) {
-			try {
-				selectFirstComboBoxOptionById(fieldId);
-				LOGGER.info("      ✓ Selected required combo {}", fieldId);
-			} catch (final Exception e) {
-				LOGGER.debug("      ⚠️ Failed to select combo {}: {}", fieldId, e.getMessage());
+		final String fragmentLower = fragment == null ? "" : fragment.toLowerCase();
+		final Locator fields = page.locator("[id^='field-']");
+		for (int i = 0; i < fields.count(); i++) {
+			final String fieldId = fields.nth(i).getAttribute("id");
+			if (fieldId == null || fieldId.isBlank()) {
+				continue;
 			}
+			if (!fieldId.toLowerCase().contains(fragmentLower)) {
+				continue;
+			}
+			if (isComboBoxById(fieldId)) {
+				try {
+					selectFirstComboBoxOptionById(fieldId);
+					LOGGER.info("      ✓ Selected required combo {}", fieldId);
+				} catch (final Exception e) {
+					LOGGER.debug("      ⚠️ Failed to select combo {}: {}", fieldId, e.getMessage());
+				}
+			}
+			return;
 		}
 	}
 
@@ -998,7 +1110,12 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			}
 			final String beforeValue = readFieldValueById(fieldId);
 			if (isComboBoxById(fieldId)) {
-				selectFirstComboBoxOptionById(fieldId);
+				final String selected = selectDifferentComboBoxOptionById(fieldId, beforeValue);
+				if (selected == null) {
+					LOGGER.warn("      ⚠️ No alternate combo value available for {}", fieldId);
+				} else {
+					LOGGER.info("      ✓ Updated combo {} to {}", fieldId, selected);
+				}
 			} else {
 				final String updateValue = "Updated-" + pageName;
 				fillFieldById(fieldId, updateValue);
