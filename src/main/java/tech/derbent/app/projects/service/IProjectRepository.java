@@ -1,6 +1,7 @@
 package tech.derbent.app.projects.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +26,13 @@ public interface IProjectRepository extends IEntityOfCompanyRepository<CProject>
 			ORDER BY p.name
 			""")
 	List<CProject> listByCompanyForPageView(@Param ("company_id") Long company_id);
+	@Query ("""
+			SELECT p FROM CProject p
+			LEFT JOIN FETCH p.company
+			LEFT JOIN FETCH p.kanbanLine
+			WHERE p.id = :id
+			""")
+	Optional<CProject> findByIdForPageView(@Param ("id") Long id);
 	@Query (
 		"SELECT p FROM CProject p WHERE p.id NOT IN (SELECT ups.project.id FROM CUserProjectSettings ups WHERE ups.user.id = :userId) and "
 				+ " p.company.id = (SELECT u.company.id FROM CUser u WHERE u.id = :userId) ORDER BY p.name"

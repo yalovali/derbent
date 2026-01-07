@@ -183,6 +183,6 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
                 final ProjectListChangeEvent.ChangeType changeType =
                                 isNew ? ProjectListChangeEvent.ChangeType.CREATED : ProjectListChangeEvent.ChangeType.UPDATED;
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, savedEntity, changeType));
-		return savedEntity;
+		return ((IProjectRepository) repository).findByIdForPageView(savedEntity.getId()).orElse(savedEntity);
 	}
 }

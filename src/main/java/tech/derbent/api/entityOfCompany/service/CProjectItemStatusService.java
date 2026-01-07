@@ -73,8 +73,13 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	 * @return Optional containing the default status if found */
 	@Transactional (readOnly = true)
 	public Optional<CProjectItemStatus> findDefaultStatus(final CProject project) {
-		final Optional<CProjectItemStatus> status = ((CProjectItemStatusService) repository).findDefaultStatus(project);
-		return status;
+		Check.notNull(project, "Project cannot be null when resolving default status");
+		Check.notNull(project.getCompany(), "Company cannot be null when resolving default status");
+		final List<CProjectItemStatus> statuses = listByCompany(project.getCompany());
+		if (statuses.isEmpty()) {
+			return Optional.empty();
+		}
+		return Optional.of(statuses.get(0));
 	}
 
 	@Override
