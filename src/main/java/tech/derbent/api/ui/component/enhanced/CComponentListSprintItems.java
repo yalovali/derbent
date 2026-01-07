@@ -119,7 +119,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("[SprintItemsDrag] Completed drag propagation, refreshing grid");
+		// Refresh grid after drag-drop to show updated item list (following kanban pattern)
+		refreshComponent();
 	}
 
 	@Override
