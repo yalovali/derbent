@@ -281,7 +281,7 @@ public class CValueStorageHelper {
             valuePersist_restoreValue(component, storageId, converter, sessionService);
         });
         // Add detach listener to clean up (optional - could be removed if values should
-        // persist)
+        // persist) 
         vaadinComponent.addDetachListener(event -> {
             LOGGER.info(
                     "[ValuePersistence] CValueStorageHelper: Component detached for storage ID '{}', stored value remains",
