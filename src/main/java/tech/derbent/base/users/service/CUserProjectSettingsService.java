@@ -3,6 +3,7 @@ package tech.derbent.base.users.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +14,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.utils.CPageableUtils;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -50,8 +52,6 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		final CUserProjectSettings settings = new CUserProjectSettings();
 		settings.setProject(project);
 		settings.setUser(user);
-		// TODO: Update to handle CUserProjectRole instead of String
-		// settings.setRole(role);
 		settings.setPermission(permission);
 		validateRelationship(settings);
 		// Save the entity first
@@ -188,8 +188,6 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 			throw new IllegalArgumentException("User is not assigned to this project");
 		}
 		final CUserProjectSettings settings = settingsOpt.get();
-		// TODO: Update to handle CUserProjectRole instead of String
-		// settings.setRole(role);
 		settings.setPermission(permission);
 		return updateRelationship(settings);
 	}

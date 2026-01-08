@@ -1,10 +1,13 @@
 package tech.derbent.app.page.view;
 
 import java.lang.reflect.Field;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -230,7 +233,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved
 	 * @throws Exception */
-	@SuppressWarnings ("rawtypes")
+	@SuppressWarnings ({ "rawtypes", "null" })
 	@Override
 	public void onEntitySaved(CEntityDB entity) throws Exception {
 		try {

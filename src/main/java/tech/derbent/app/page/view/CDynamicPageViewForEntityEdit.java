@@ -2,6 +2,7 @@ package tech.derbent.app.page.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
@@ -22,7 +23,6 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 	public CDynamicPageViewForEntityEdit(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService)
 			throws Exception {
 		super(pageEntity, sessionService, detailSectionService);
-		// TODO Auto-generated constructor stub
 	}
 
 	/** Get the CRUD toolbar for this view. Used by page services to control button states.

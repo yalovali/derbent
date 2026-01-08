@@ -9,9 +9,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.imageio.ImageIO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Span;
@@ -20,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
+
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -112,8 +116,7 @@ public final class CColorUtils {
 		Check.notNull(user, "User cannot be null when creating avatar");
 		avatar.setName(user.getName() + " " + (user.getLastname() != null ? user.getLastname() : ""));
 		if (user.getProfilePictureData() != null && user.getProfilePictureData().length > 0) {
-			// TODO: Convert byte array to StreamResource for avatar For now, just use
-			// initials
+			/* */
 		}
 		avatar.setAbbreviation(getInitials(user));
 		return avatar;

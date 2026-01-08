@@ -3,7 +3,9 @@ package tech.derbent.app.page.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
@@ -170,7 +172,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 
 	@Override
 	protected void locateFirstEntity() throws Exception {
-		// TODO Auto-generated method stub
+        /* */
 	}
 
 	@Override
@@ -196,7 +198,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 
 	@Override
 	protected void on_after_construct() {
-		// TODO Auto-generated method stub
+        /*   */
 	}
 
 	// Implementation of CEntityUpdateListener
@@ -217,7 +219,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 		}
 	}
 
-	@SuppressWarnings ("rawtypes")
+	@SuppressWarnings ({ "rawtypes", "null" })
 	@Override
 	public void onEntitySaved(final CEntityDB entity) {
 		try {

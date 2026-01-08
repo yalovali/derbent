@@ -3,6 +3,7 @@ package tech.derbent.api.ui.component.basic;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+
 import tech.derbent.api.ui.component.IFormContainerComponent;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
@@ -37,7 +38,6 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 
 	@SuppressWarnings ("static-method")
 	protected String createDeleteConfirmationMessage(@SuppressWarnings ("unused") CUserProjectSettings selected) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

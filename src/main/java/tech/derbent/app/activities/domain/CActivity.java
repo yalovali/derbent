@@ -5,8 +5,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -243,7 +245,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
 	@Override
-	public String getColor() { // TODO Auto-generated method stub
+	public String getColor() { 
+        
 		return DEFAULT_COLOR;
 	}
 

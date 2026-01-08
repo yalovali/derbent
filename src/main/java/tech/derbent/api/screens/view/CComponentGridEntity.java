@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -29,6 +31,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
+
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -647,7 +650,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	@Override
 	public void drag_checkEventAfterPass(CEvent event) {
-		// TODO Auto-generated method stub
 		if (event instanceof CDragEndEvent) {
 			// LOGGER.debug("Drag start event check after pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimple
 		}
@@ -675,7 +677,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	@Override
 	public boolean drag_isDropAllowed(CDragStartEvent event) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

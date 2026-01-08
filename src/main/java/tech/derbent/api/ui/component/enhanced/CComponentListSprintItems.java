@@ -3,11 +3,14 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.icon.VaadinIcon;
+
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IEntitySelectionDialogSupport;
@@ -138,7 +141,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	@Override
 	public boolean drag_isDropAllowed(CDragStartEvent event) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

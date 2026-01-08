@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
@@ -213,7 +214,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
 	@Override
-	public String getColor() { // TODO Auto-generated method stub
+	public String getColor() { 
+        
 		return DEFAULT_COLOR;
 	}
 

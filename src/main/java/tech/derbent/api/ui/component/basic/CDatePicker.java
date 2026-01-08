@@ -2,9 +2,12 @@ package tech.derbent.api.ui.component.basic;
 
 import java.time.LocalDate;
 import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.datepicker.DatePicker;
+
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.base.session.service.ISessionService;
@@ -141,7 +144,7 @@ public class CDatePicker extends DatePicker {
 					final LocalDate date = LocalDate.parse(value);
 					setValue(date);
 					LOGGER.info("[CDatePicker] Restored value for key: {}", persistenceKey);
-				} catch (final Exception e) {
+				} catch (@SuppressWarnings("unused") final Exception e) {
 					LOGGER.warn("[CDatePicker] Could not parse stored date value '{}' for key: {}", value, persistenceKey);
 				}
 			}

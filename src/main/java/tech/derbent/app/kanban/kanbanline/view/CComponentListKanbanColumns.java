@@ -2,8 +2,10 @@ package tech.derbent.app.kanban.kanbanline.view;
 
 import java.util.List;
 import java.util.function.Consumer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
@@ -90,7 +92,7 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 
 	@Override
 	public boolean drag_isDropAllowed(CDragStartEvent event) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 

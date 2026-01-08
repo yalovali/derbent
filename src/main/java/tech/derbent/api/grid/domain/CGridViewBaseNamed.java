@@ -7,22 +7,23 @@ import tech.derbent.api.grid.view.CMasterViewSectionGrid;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.base.session.service.ISessionService;
 
-public abstract class CGridViewBaseNamed<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractNamedEntityPage<EntityClass> {
+public abstract class CGridViewBaseNamed<EntityClass extends CEntityNamed<EntityClass>>
+        extends CAbstractNamedEntityPage<EntityClass> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public CGridViewBaseNamed(final Class<EntityClass> entityClass, final CEntityNamedService<EntityClass> entityService,
-			final ISessionService sessionService, final CDetailSectionService screenService) {
-		super(entityClass, entityService, sessionService, screenService);
-		// TODO Auto-generated constructor stub
-	}
+    public CGridViewBaseNamed(final Class<EntityClass> entityClass,
+            final CEntityNamedService<EntityClass> entityService,
+            final ISessionService sessionService, final CDetailSectionService screenService) {
+        super(entityClass, entityService, sessionService, screenService);
+    }
 
-	@Override
-	protected void createDetailsComponent() throws Exception { /***/
-	}
+    @Override
+    protected void createDetailsComponent() throws Exception { /***/
+    }
 
-	@Override
-	public void createMasterComponent() {
-		masterViewSection = new CMasterViewSectionGrid<EntityClass>(entityClass, this);
-	}
+    @Override
+    public void createMasterComponent() {
+        masterViewSection = new CMasterViewSectionGrid<EntityClass>(entityClass, this);
+    }
 }
