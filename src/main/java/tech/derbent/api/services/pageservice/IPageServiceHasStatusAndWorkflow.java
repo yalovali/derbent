@@ -1,8 +1,10 @@
 package tech.derbent.api.services.pageservice;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -15,7 +17,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 
 	static final Logger LOGGER = LoggerFactory.getLogger(IPageServiceHasStatusAndWorkflow.class);
 
-	default void actionChangeStatus(final CProjectItemStatus newStatus) {
+	default void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
 		try {
 			final EntityClass entity = getView().getValue();
 			if (entity == null) {

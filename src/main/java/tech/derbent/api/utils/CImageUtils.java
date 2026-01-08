@@ -6,9 +6,12 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import tech.derbent.api.exceptions.CImageProcessingException;
 
 /** Utility class for image processing operations including resizing, format conversion, and validation. Follows coding guidelines by using proper
@@ -100,7 +103,7 @@ public final class CImageUtils {
 				+ "font-weight=\"bold\" fill=\"white\" text-anchor=\"middle\" dominant-baseline=\"middle\">", size / 2, size / 2, fontSize));
 		svg.append(initials);
 		svg.append("</text></svg>");
-		LOGGER.debug("Generated SVG avatar with initials '{}' (size: {}x{})", initials, size, size);
+//		LOGGER.debug("Generated SVG avatar with initials '{}' (size: {}x{})", initials, size, size);
 		return svg.toString();
 	}
 

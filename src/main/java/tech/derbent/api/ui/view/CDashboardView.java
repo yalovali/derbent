@@ -3,8 +3,10 @@ package tech.derbent.api.ui.view;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -16,6 +18,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.view.CAbstractPage;
@@ -190,8 +193,7 @@ public final class CDashboardView extends CAbstractPage {
 
 	@Override
 	protected void setupToolbar() {
-		// Dashboard doesn't need a custom toolbar - using default from MainLayout
-		LOGGER.debug("Dashboard using default toolbar");
+		// Dashboard doesn't need a custom toolbar - using default from MainLayout		
 	}
 
 	/** Updates the project details section with per-project metrics.
