@@ -80,19 +80,24 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>>
     @Override
     public void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
         try {
-            LOGGER.debug("Base actionChangeStatus called - entity type does not support workflow status changes");
-            // TODO HANDLE ACTION CHANGES, check has status implementation, save it, trigger
-            // refresh mechanism etc...
             final EntityClass entity = getValue();
+            LOGGER.debug("actionChangeStatus triggered: newStatus={}, entityId={}, entityType={}",
+                    newStatus != null ? newStatus.getName() : "null",
+                    entity != null ? entity.getId() : "null",
+                    entity != null ? entity.getClass().getSimpleName() : "null");
+
             Check.notNull(entity, "No current entity to change status for.");
-            // check entity type
             Check.instanceOf(entity, IHasStatusAndWorkflow.class, "Entity must have status implementation");
+
+            LOGGER.debug("Setting new status '{}' for entity ID: {}", newStatus != null ? newStatus.getName() : "null",
+                    entity.getId());
             ((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
+
             getEntityService().save(entity);
+            LOGGER.debug("Entity saved successfully after status change. Triggering refresh...");
             actionRefresh();
-            // TODO doesnot trigger grid refresh after status change???
-        } catch (Exception e) {
-            LOGGER.error("Error changing status: {}", e.getMessage());
+        } catch (final Exception e) {
+            LOGGER.error("Error changing status: {}", e.getMessage(), e);
             throw e;
         }
 
