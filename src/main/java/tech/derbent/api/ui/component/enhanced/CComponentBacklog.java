@@ -138,10 +138,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			grid.addStoryPointColumn(item -> {
 				Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
 				return (ISprintableItem) item;
-			}, this::saveStoryPoint, this::handleStoryPointError, "SP", "storyPoint");
+			}, this::saveStoryPoint, this::handleStoryPointError, null, "storyPoint");
 			grid.setHeightFull();
-			// Hide header in compact mode for minimalist view
-			grid.hideHeader();
 		} else {
 			// In normal mode, call parent to configure standard columns
 			super.configureGrid(grid);

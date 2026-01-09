@@ -86,6 +86,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		// Set up drag-drop for backlog items
 		setupBacklogDragDrop();
 		getStyle().set("background-color", "#F0F4F8");
+		refreshBacklogStoryPointTotal();
 	}
 
 	/** Hook executed after drag-drop events are processed. Used to refresh the backlog display after items are added/removed. */
@@ -142,26 +143,6 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	 * @return The project whose backlog is displayed */
 	public CProject getProject() { return project; }
 
-	/** Overrides parent refreshComponent to refresh backlog instead of post-its. The backlog column doesn't display traditional post-its but uses the
-	 * backlog grid. */
-	@Override
-	public void refreshComponent() {
-		// Don't call super.refreshComponent() as we don't use the itemsLayout
-		// Instead, refresh the embedded backlog component
-		LOGGER.debug("Refreshing backlog column component");
-		if (backlogComponent != null) {
-			backlogComponent.refreshComponent();
-			refreshBacklogStoryPointTotal();
-		}
-	}
-
-	/** Override to prevent story point total display in backlog column. */
-	@Override
-	protected void refreshStoryPointTotal() {
-		// Delegate to backlog-specific method
-		refreshBacklogStoryPointTotal();
-	}
-
 	/** Refreshes story point total for backlog items. */
 	private void refreshBacklogStoryPointTotal() {
 		if (backlogComponent == null || backlogComponent.getGrid() == null) {
@@ -191,6 +172,24 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		} catch (final Exception e) {
 			LOGGER.error("Error calculating backlog story points", e);
 		}
+	}
+
+	/** Overrides parent refreshComponent to refresh backlog instead of post-its. The backlog column doesn't display traditional post-its but uses the
+	 * backlog grid. */
+	@Override
+	public void refreshComponent() {
+		// Don't call super.refreshComponent() as we don't use the itemsLayout
+		// Instead, refresh the embedded backlog component
+		LOGGER.debug("Refreshing backlog column component");
+		backlogComponent.refreshComponent();
+		refreshBacklogStoryPointTotal();
+	}
+
+	/** Override to prevent story point total display in backlog column. */
+	@Override
+	protected void refreshStoryPointTotal() {
+		// Delegate to backlog-specific method
+		refreshBacklogStoryPointTotal();
 	}
 
 	/** Sets the header title for the backlog column to make it visible. */

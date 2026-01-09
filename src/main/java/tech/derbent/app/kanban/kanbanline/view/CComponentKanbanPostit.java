@@ -57,9 +57,9 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		final ISprintableItem item = resolveSprintableItem();
 		layoutLineOne.setWidthFull();
 		if (item instanceof CEntityDB<?>) {
-			layoutLineOne.add(CLabelEntity.createH4Label((CEntityDB<?>) item));
+			layoutLineOne.add(CLabelEntity.createH6Label((CEntityDB<?>) item));
 		} else {
-			layoutLineOne.add(CLabelEntity.createH4Label(item != null ? item.getName() : ""));
+			layoutLineOne.add(CLabelEntity.createH6Label(item != null ? item.getName() : ""));
 		}
 	}
 
