@@ -357,6 +357,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn>
             final CComponentKanbanPostit postit = new CComponentKanbanPostit(item);
             postit.drag_setDragEnabled(true);
             postit.drag_setDropEnabled(true);
+            postit.setRefreshCallback(() -> refreshStoryPointTotal());
             setupSelectionNotification(postit);
             setupChildDragDropForwarding(postit);
             itemsLayout.add(postit);

@@ -14,6 +14,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CLabelEntity;
+import tech.derbent.api.grid.view.CComponentStoryPoint;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
@@ -22,7 +23,7 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
-import tech.derbent.api.ui.component.basic.CSpan;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
@@ -35,6 +36,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	private boolean dropEnabled;
 	private DropTarget<CComponentKanbanPostit> dropTarget;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
+	private Runnable refreshCallback;
 
 	/** Creates a post-it card for the given sprint item. */
 	public CComponentKanbanPostit(final CSprintItem item) {
@@ -75,13 +77,10 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 			statusLabel.getStyle().set("font-size", "11px");
 			layoutLineTwo.add(statusLabel);
 		}
-		// Right side: Story points badge (if available)
-		if (item.getStoryPoint() != null && item.getStoryPoint() > 0) {
-			final CSpan storyPointBadge = new CSpan(item.getStoryPoint() + " SP");
-			storyPointBadge.getStyle().set("background-color", "#E8F5E9").set("color", "#2E7D32").set("padding", "2px 6px")
-					.set("border-radius", "4px").set("font-size", "11px").set("font-weight", "600").set("white-space", "nowrap");
-			layoutLineTwo.add(storyPointBadge);
-		}
+		// Right side: Editable story points (ALWAYS show, even if 0)
+		final CComponentStoryPoint storyPointComponent = new CComponentStoryPoint(item, this::saveStoryPoint, this::handleStoryPointError);
+		storyPointComponent.getStyle().set("font-size", "11px").set("font-weight", "600");
+		layoutLineTwo.add(storyPointComponent);
 		// Third line: Compact responsible user label
 		if (item.getResponsible() != null) {
 			final CLabelEntity userLabel = CLabelEntity.createCompactUserLabel(item.getResponsible());
@@ -173,6 +172,32 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	public ISprintableItem resolveSprintableItem() {
 		final CSprintItem sprintItem = entity;
 		return sprintItem != null ? sprintItem.getParentItem() : null;
+	}
+
+	/** Sets the refresh callback for notifying parent containers when story points change. */
+	public void setRefreshCallback(final Runnable callback) {
+		this.refreshCallback = callback;
+	}
+
+	/** Saves the story point change and notifies parent containers. */
+	private void saveStoryPoint(final ISprintableItem item) {
+		try {
+			item.saveProjectItem();
+			CNotificationService.showSaveSuccess();
+			if (refreshCallback != null) {
+				refreshCallback.run();
+			}
+			LOGGER.debug("Story point saved successfully for item {}", item.getId());
+		} catch (final Exception e) {
+			LOGGER.error("Error saving story point for item {}", item.getId(), e);
+			throw e;
+		}
+	}
+
+	/** Handles story point validation errors. */
+	private void handleStoryPointError(final Exception e) {
+		LOGGER.error("Story point validation error", e);
+		CNotificationService.showError(e.getMessage());
 	}
 
 	@Override
