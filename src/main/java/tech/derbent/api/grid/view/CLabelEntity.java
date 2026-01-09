@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.HtmlContainer;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -13,6 +14,8 @@ import tech.derbent.api.interfaces.IHasColor;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.ui.component.basic.CH2;
 import tech.derbent.api.ui.component.basic.CH3;
+import tech.derbent.api.ui.component.basic.CH4;
+import tech.derbent.api.ui.component.basic.CH6;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
@@ -64,6 +67,65 @@ public class CLabelEntity extends Div {
 		} catch (final Exception e) {
 			LOGGER.debug("Could not get color for entity icon: {}", e.getMessage());
 		}
+	}
+
+	/** Creates a compact date range label with short date format (e.g., "12/25").
+	 * @param startDate the start date (can be null)
+	 * @param endDate   the end date (can be null)
+	 * @return a CLabelEntity with compact date range display */
+	public static CLabelEntity createCompactDateRangeLabel(final LocalDate startDate, final LocalDate endDate) {
+		final CLabelEntity label = new CLabelEntity();
+		label.getStyle().set("font-size", "10px").set("color", "#666").set("display", "flex").set("align-items", "center").set("gap", "2px");
+		if (startDate == null && endDate == null) {
+			return label;
+		}
+		try {
+			final Icon icon = CColorUtils.createStyledIcon("vaadin:calendar");
+			if (icon != null) {
+				icon.getStyle().set("width", "12px").set("height", "12px").set("color", "#666");
+				label.add(icon);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not create calendar icon: {}", e.getMessage());
+		}
+		final DateTimeFormatter compactFormatter = DateTimeFormatter.ofPattern("MM/dd");
+		final StringBuilder dateRange = new StringBuilder();
+		if (startDate != null) {
+			dateRange.append(startDate.format(compactFormatter));
+		}
+		if (startDate != null && endDate != null) {
+			dateRange.append("-");
+		}
+		if (endDate != null) {
+			dateRange.append(endDate.format(compactFormatter));
+		}
+		final Span dateSpan = new Span(dateRange.toString());
+		dateSpan.getStyle().set("font-size", "10px").set("white-space", "nowrap");
+		label.add(dateSpan);
+		return label;
+	}
+
+	/** Creates a compact user label with abbreviated name for space-constrained displays. Displays only first name with avatar, truncating long names
+	 * to 12 characters.
+	 * @param user the user to display (can be null)
+	 * @return a CLabelEntity with compact user display */
+	public static CLabelEntity createCompactUserLabel(final CUser user) {
+		final CLabelEntity label = new CLabelEntity();
+		if (user == null) {
+			label.setText("No user");
+			label.getStyle().set("color", "#666").set("font-style", "italic");
+			return label;
+		}
+		label.add(createUserAvatar(user, "16px"));
+		String displayName = user.getName();
+		if (displayName != null && displayName.length() > 15) {
+			displayName = displayName.substring(0, 12) + "...";
+		}
+		final Span nameSpan = new Span("👤 " + displayName);
+		nameSpan.getStyle().set("font-size", "11px").set("color", "#666").set("display", "inline-flex").set("align-items", "center").set("gap",
+				"2px");
+		label.add(nameSpan);
+		return label;
 	}
 
 	/** Creates a date label with calendar icon.
@@ -125,70 +187,27 @@ public class CLabelEntity extends Div {
 		return label;
 	}
 
-	/** Creates a compact date range label with short date format (e.g., "12/25").
-	 * @param startDate the start date (can be null)
-	 * @param endDate   the end date (can be null)
-	 * @return a CLabelEntity with compact date range display */
-	public static CLabelEntity createCompactDateRangeLabel(final LocalDate startDate, final LocalDate endDate) {
-		final CLabelEntity label = new CLabelEntity();
-		label.getStyle().set("font-size", "10px").set("color", "#666").set("display", "flex").set("align-items", "center").set("gap", "2px");
-		if (startDate == null && endDate == null) {
-			return label;
-		}
-		try {
-			final Icon icon = CColorUtils.createStyledIcon("vaadin:calendar");
-			if (icon != null) {
-				icon.getStyle().set("width", "12px").set("height", "12px").set("color", "#666");
-				label.add(icon);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not create calendar icon: {}", e.getMessage());
-		}
-		final DateTimeFormatter compactFormatter = DateTimeFormatter.ofPattern("MM/dd");
-		final StringBuilder dateRange = new StringBuilder();
-		if (startDate != null) {
-			dateRange.append(startDate.format(compactFormatter));
-		}
-		if (startDate != null && endDate != null) {
-			dateRange.append("-");
-		}
-		if (endDate != null) {
-			dateRange.append(endDate.format(compactFormatter));
-		}
-		final Span dateSpan = new Span(dateRange.toString());
-		dateSpan.getStyle().set("font-size", "10px").set("white-space", "nowrap");
-		label.add(dateSpan);
-		return label;
-	}
-
 	/** Creates an H2 header label for an entity with icon and color.
 	 * @param entity the entity to display
 	 * @return a Div containing an H2 with entity display
 	 * @throws Exception */
-	public static CLabelEntity createH2Label(final CEntityDB<?> entity) throws Exception {
-		final CLabelEntity container = new CLabelEntity();
-		final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
-		final CH2 header = new CH2(displayText);
-		header.getStyle().set("margin", "0");
+	public static Div createH2Label(final CEntityDB<?> entity) throws Exception {
+		final Div container = createHXLabel(new CH2(""), CColorUtils.getDisplayTextFromEntity(entity));
 		if (entity instanceof IHasIcon) {
 			final Icon icon = CColorUtils.getIconForEntity(entity);
 			if (icon != null) {
 				applyIconColor(icon, entity);
-				container.add(icon);
+				container.addComponentAsFirst(icon);
 			}
 		}
-		container.add(header);
 		return container;
 	}
 
 	/** Creates an H2 header label for text.
 	 * @param text the text to display
 	 * @return a Div containing an H2 */
-	public static CLabelEntity createH2Label(final String text) {
-		final CLabelEntity container = new CLabelEntity();
-		final CH2 header = new CH2(text != null ? text : "");
-		header.getStyle().set("margin", "0");
-		container.add(header);
+	public static Div createH2Label(final String text) {
+		final Div container = createHXLabel(new CH2(""), text != null ? text : "");
 		return container;
 	}
 
@@ -197,18 +216,14 @@ public class CLabelEntity extends Div {
 	 * @return a Div containing an H3 with entity display
 	 * @throws Exception */
 	public static Div createH3Label(final CEntityDB<?> entity) throws Exception {
-		final CLabelEntity container = new CLabelEntity();
-		final String displayText = CColorUtils.getDisplayTextFromEntity(entity);
-		final CH3 header = new CH3(displayText);
-		header.getStyle().set("margin", "0");
+		final Div container = createHXLabel(new CH3(""), CColorUtils.getDisplayTextFromEntity(entity));
 		if (entity instanceof IHasIcon) {
 			final Icon icon = CColorUtils.getIconForEntity(entity);
 			if (icon != null) {
 				applyIconColor(icon, entity);
-				container.add(icon);
+				container.addComponentAsFirst(container);
 			}
 		}
-		container.add(header);
 		return container;
 	}
 
@@ -216,9 +231,47 @@ public class CLabelEntity extends Div {
 	 * @param text the text to display
 	 * @return a Div containing an H3 */
 	public static Div createH3Label(final String text) {
+		final Div container = createHXLabel(new CH3(""), text != null ? text : "");
+		return container;
+	}
+
+	public static Div createH4Label(final CEntityDB<?> entity) throws Exception {
+		final Div container = createHXLabel(new CH4(""), CColorUtils.getDisplayTextFromEntity(entity));
+		if (entity instanceof IHasIcon) {
+			final Icon icon = CColorUtils.getIconForEntity(entity);
+			if (icon != null) {
+				applyIconColor(icon, entity);
+				container.addComponentAsFirst(icon);
+			}
+		}
+		return container;
+	}
+
+	public static Div createH4Label(final String text) {
+		final Div container = createHXLabel(new CH4(""), text != null ? text : "");
+		return container;
+	}
+
+	public static Div createH6Label(final CEntityDB<?> entity) throws Exception {
+		final Div container = createHXLabel(new CH6(""), CColorUtils.getDisplayTextFromEntity(entity));
+		if (entity instanceof IHasIcon) {
+			final Icon icon = CColorUtils.getIconForEntity(entity);
+			if (icon != null) {
+				applyIconColor(icon, entity);
+				container.addComponentAsFirst(icon);
+			}
+		}
+		return container;
+	}
+
+	public static Div createH6Label(final String text) {
+		final Div container = createHXLabel(new CH6(""), text != null ? text : "");
+		return container;
+	}
+
+	private static Div createHXLabel(HtmlContainer header, String displayText) {
 		final CLabelEntity container = new CLabelEntity();
-		container.getStyle().set("display", "flex").set("align-items", "center");
-		final CH3 header = new CH3(text != null ? text : "");
+		header.setText(displayText);
 		header.getStyle().set("margin", "0");
 		container.add(header);
 		return container;
@@ -263,37 +316,6 @@ public class CLabelEntity extends Div {
 		}
 		final Span nameSpan = new Span(displayName);
 		label.add(nameSpan);
-		return label;
-	}
-
-	/** Creates a compact user label with abbreviated name for space-constrained displays.
-	 * Displays only first name with avatar, truncating long names to 12 characters.
-	 * @param user the user to display (can be null)
-	 * @return a CLabelEntity with compact user display */
-	public static CLabelEntity createCompactUserLabel(final CUser user) {
-		final CLabelEntity label = new CLabelEntity();
-		if (user == null) {
-			label.setText("No user");
-			label.getStyle().set("color", "#666").set("font-style", "italic");
-			return label;
-		}
-		
-		label.add(createUserAvatar(user, "16px"));
-		
-		String displayName = user.getName();
-		if (displayName != null && displayName.length() > 15) {
-			displayName = displayName.substring(0, 12) + "...";
-		}
-		
-		final Span nameSpan = new Span("👤 " + displayName);
-		nameSpan.getStyle()
-			.set("font-size", "11px")
-			.set("color", "#666")
-			.set("display", "inline-flex")
-			.set("align-items", "center")
-			.set("gap", "2px");
-		label.add(nameSpan);
-		
 		return label;
 	}
 

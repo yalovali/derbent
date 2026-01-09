@@ -43,7 +43,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		super(item);
 		Check.notNull(item, "Sprint item cannot be null for postit");
 		addClassName("kanban-postit");
-		final String height = "110px";
+		final String height = "120px";
 		getStyle().set("width", "100%").set("height", height).set("min-height", height).set("max-height", height);
 		setPadding(true);
 		setSpacing(false);
@@ -57,9 +57,9 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		final ISprintableItem item = resolveSprintableItem();
 		layoutLineOne.setWidthFull();
 		if (item instanceof CEntityDB<?>) {
-			layoutLineOne.add(CLabelEntity.createH3Label((CEntityDB<?>) item));
+			layoutLineOne.add(CLabelEntity.createH4Label((CEntityDB<?>) item));
 		} else {
-			layoutLineOne.add(CLabelEntity.createH3Label(item != null ? item.getName() : ""));
+			layoutLineOne.add(CLabelEntity.createH4Label(item != null ? item.getName() : ""));
 		}
 	}
 

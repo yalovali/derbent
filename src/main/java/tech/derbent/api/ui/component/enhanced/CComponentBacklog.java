@@ -81,9 +81,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		};
 	}
 
-	private final CActivityService activityService;
 	private final boolean compactMode;
-	private final CMeetingService meetingService;
 	/** Currently selected backlog item for detail display */
 	private CProjectItem<?> selectedBacklogItem;
 	/** Selection listeners for notification pattern */
@@ -103,8 +101,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				false);
 		Check.notNull(project, "Project cannot be null");
 		this.compactMode = compactMode;
-		activityService = CSpringContext.getBean(CActivityService.class);
-		meetingService = CSpringContext.getBean(CMeetingService.class);
+		CSpringContext.getBean(CActivityService.class);
+		CSpringContext.getBean(CMeetingService.class);
 		setupComponent();
 		setDynamicHeight("600px");
 		// CRITICAL: Select first entity type BEFORE enabling persistence
@@ -142,6 +140,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				return (ISprintableItem) item;
 			}, this::saveStoryPoint, this::handleStoryPointError, "SP", "storyPoint");
 			grid.setHeightFull();
+			// Hide header in compact mode for minimalist view
+			grid.hideHeader();
 		} else {
 			// In normal mode, call parent to configure standard columns
 			super.configureGrid(grid);

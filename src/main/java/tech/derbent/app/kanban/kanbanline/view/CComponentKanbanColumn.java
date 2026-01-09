@@ -20,7 +20,7 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
-import tech.derbent.api.ui.component.basic.CH3;
+import tech.derbent.api.ui.component.basic.CH4;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -53,7 +53,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private List<CSprintItem> sprintItems = List.of();
 	protected final CLabelEntity statusesLabel;
 	protected final CSpan storyPointTotalLabel;
-	protected final CH3 title;
+	protected final CH4 title;
 
 	/** Creates the kanban column component and its layout. */
 	public CComponentKanbanColumn() {
@@ -70,7 +70,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		headerLayout.setWidthFull();
 		headerLayout.setSpacing(true);
 		headerLayout.setAlignItems(Alignment.CENTER);
-		title = new CH3("");
+		title = new CH4("");
 		title.getStyle().set("margin", "0").set("flex-grow", "1");
 		storyPointTotalLabel = new CSpan();
 		storyPointTotalLabel.getStyle().set("background-color", "#E8F5E9").set("color", "#2E7D32").set("padding", "4px 8px")
