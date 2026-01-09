@@ -125,6 +125,42 @@ public class CLabelEntity extends Div {
 		return label;
 	}
 
+	/** Creates a compact date range label with short date format (e.g., "12/25").
+	 * @param startDate the start date (can be null)
+	 * @param endDate   the end date (can be null)
+	 * @return a CLabelEntity with compact date range display */
+	public static CLabelEntity createCompactDateRangeLabel(final LocalDate startDate, final LocalDate endDate) {
+		final CLabelEntity label = new CLabelEntity();
+		label.getStyle().set("font-size", "10px").set("color", "#666").set("display", "flex").set("align-items", "center").set("gap", "2px");
+		if (startDate == null && endDate == null) {
+			return label;
+		}
+		try {
+			final Icon icon = CColorUtils.createStyledIcon("vaadin:calendar");
+			if (icon != null) {
+				icon.getStyle().set("width", "12px").set("height", "12px").set("color", "#666");
+				label.add(icon);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not create calendar icon: {}", e.getMessage());
+		}
+		final DateTimeFormatter compactFormatter = DateTimeFormatter.ofPattern("MM/dd");
+		final StringBuilder dateRange = new StringBuilder();
+		if (startDate != null) {
+			dateRange.append(startDate.format(compactFormatter));
+		}
+		if (startDate != null && endDate != null) {
+			dateRange.append("-");
+		}
+		if (endDate != null) {
+			dateRange.append(endDate.format(compactFormatter));
+		}
+		final Span dateSpan = new Span(dateRange.toString());
+		dateSpan.getStyle().set("font-size", "10px").set("white-space", "nowrap");
+		label.add(dateSpan);
+		return label;
+	}
+
 	/** Creates an H2 header label for an entity with icon and color.
 	 * @param entity the entity to display
 	 * @return a Div containing an H2 with entity display

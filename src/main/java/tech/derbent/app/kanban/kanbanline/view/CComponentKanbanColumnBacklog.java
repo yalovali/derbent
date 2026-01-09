@@ -79,6 +79,8 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		setBacklogColumnHeader();
 		// Create backlog component in compact mode (always true for narrow display in kanban board)
 		backlogComponent = new CComponentBacklog(project, true);
+		// Listen for backlog changes to update story point total
+		backlogComponent.addRefreshListener(item -> refreshBacklogStoryPointTotal());
 		// Add backlog component to the column
 		add(backlogComponent);
 		// Set up drag-drop for backlog items
@@ -149,14 +151,46 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		LOGGER.debug("Refreshing backlog column component");
 		if (backlogComponent != null) {
 			backlogComponent.refreshComponent();
+			refreshBacklogStoryPointTotal();
 		}
 	}
 
 	/** Override to prevent story point total display in backlog column. */
 	@Override
 	protected void refreshStoryPointTotal() {
-		// Backlog column does not display story point totals
-		// Items in backlog are not part of sprint planning yet
+		// Delegate to backlog-specific method
+		refreshBacklogStoryPointTotal();
+	}
+
+	/** Refreshes story point total for backlog items. */
+	private void refreshBacklogStoryPointTotal() {
+		if (backlogComponent == null || backlogComponent.getGrid() == null) {
+			return;
+		}
+		try {
+			final List<?> items = backlogComponent.getGrid().getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>())
+					.collect(java.util.stream.Collectors.toList());
+			long totalStoryPoints = 0;
+			for (final Object item : items) {
+				if (item instanceof final tech.derbent.api.interfaces.ISprintableItem sprintableItem) {
+					final Long sp = sprintableItem.getStoryPoint();
+					if (sp != null) {
+						totalStoryPoints += sp;
+					}
+				}
+			}
+			if (totalStoryPoints > 0) {
+				storyPointTotalLabel.setText(totalStoryPoints + " SP");
+				if (!headerLayout.getChildren().anyMatch(c -> c == storyPointTotalLabel)) {
+					headerLayout.add(storyPointTotalLabel);
+				}
+				storyPointTotalLabel.setVisible(true);
+			} else {
+				storyPointTotalLabel.setVisible(false);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error calculating backlog story points", e);
+		}
 	}
 
 	/** Sets the header title for the backlog column to make it visible. */

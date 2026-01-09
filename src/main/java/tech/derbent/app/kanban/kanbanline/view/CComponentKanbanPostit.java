@@ -43,7 +43,9 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		super(item);
 		Check.notNull(item, "Sprint item cannot be null for postit");
 		addClassName("kanban-postit");
-		getStyle().set("width", "100%");
+		getStyle().set("width", "100%").set("height", "90px").set("min-height", "90px").set("max-height", "90px");
+		setPadding(true);
+		setSpacing(false);
 		getElement().setAttribute("tabindex", "0");
 		addClickListener(on_component_click());
 	}
@@ -71,6 +73,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		layoutLineTwo.setWidthFull();
 		layoutLineTwo.setJustifyContentMode(JustifyContentMode.BETWEEN);
 		layoutLineTwo.setAlignItems(Alignment.CENTER);
+		layoutLineTwo.getStyle().set("margin-top", "4px");
 		// Left side: Status label
 		if (item.getStatus() != null) {
 			final CLabelEntity statusLabel = new CLabelEntity(item.getStatus());
@@ -81,19 +84,26 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		final CComponentStoryPoint storyPointComponent = new CComponentStoryPoint(item, this::saveStoryPoint, this::handleStoryPointError);
 		storyPointComponent.getStyle().set("font-size", "11px").set("font-weight", "600");
 		layoutLineTwo.add(storyPointComponent);
-		// Third line: Compact responsible user label
-		if (item.getResponsible() != null) {
-			final CLabelEntity userLabel = CLabelEntity.createCompactUserLabel(item.getResponsible());
-			layoutLineThree.add(userLabel);
-		}
 	}
 
 	/** Builds the date range line when available. */
 	@Override
 	protected void createThirdLine() {
 		final ISprintableItem item = resolveSprintableItem();
+		layoutLineThree.setWidthFull();
+		layoutLineThree.setJustifyContentMode(JustifyContentMode.BETWEEN);
+		layoutLineThree.setAlignItems(Alignment.CENTER);
+		layoutLineThree.getStyle().set("margin-top", "4px");
+		// Left side: Compact user icon
+		if (item != null && item.getResponsible() != null) {
+			final CLabelEntity userLabel = CLabelEntity.createCompactUserLabel(item.getResponsible());
+			userLabel.getStyle().set("font-size", "10px");
+			layoutLineThree.add(userLabel);
+		}
+		// Right side: Compact date range
 		if (item != null && (item.getStartDate() != null || item.getEndDate() != null)) {
-			layoutLineThree.add(CLabelEntity.createDateRangeLabel(item.getStartDate(), item.getEndDate()));
+			final CLabelEntity dateLabel = CLabelEntity.createCompactDateRangeLabel(item.getStartDate(), item.getEndDate());
+			layoutLineThree.add(dateLabel);
 		}
 	}
 

@@ -60,7 +60,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn>
     private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
     private List<CSprintItem> sprintItems = List.of();
     protected final CLabelEntity statusesLabel;
-    private final CSpan storyPointTotalLabel;
+    protected final CSpan storyPointTotalLabel;
     protected final CH3 title;
 
     /** Creates the kanban column component and its layout. */
@@ -91,11 +91,12 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn>
         headerLayout.add(title);
         add(headerLayout);
         statusesLabel = new CLabelEntity();
-        statusesLabel.getStyle().set("font-size", "11px").set("color", "#666");
+        statusesLabel.getStyle().set("font-size", "11px").set("color", "#666").set("margin-bottom", "4px");
         add(statusesLabel);
         itemsLayout = new CVerticalLayout(false, true, false);
         itemsLayout.setPadding(false);
-        itemsLayout.setSpacing(true);
+        itemsLayout.setSpacing(false);
+        itemsLayout.getStyle().set("gap", "6px");
         itemsLayout.setWidthFull();
         itemsLayout.setHeight(null);
         itemsLayout.addClassName("kanban-column-items");

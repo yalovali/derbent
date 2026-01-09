@@ -131,12 +131,16 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	public void configureGrid(final CGrid<CProjectItem<?>> grid) {
 		// Clear existing columns first
 		grid.getColumns().forEach(grid::removeColumn);
-		// In compact mode, only show name column
+		// In compact mode, show name and story points columns
 		if (compactMode) {
-			/* final Column<CProjectItem<?>> column = */
 			grid.addExpandingShortTextColumn(item -> {
 				return ((CEntityNamed<?>) item).getName();
 			}, null, "name");
+			// Add story point column in compact mode
+			grid.addStoryPointColumn(item -> {
+				Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
+				return (ISprintableItem) item;
+			}, this::saveStoryPoint, this::handleStoryPointError, "SP", "storyPoint");
 			grid.setHeightFull();
 		} else {
 			// In normal mode, call parent to configure standard columns
