@@ -120,7 +120,14 @@ public class CCrudToolbar extends HorizontalLayout {
                         // For workflow entities, get valid next statuses based on workflow rules
                         // This ensures only allowed transitions are shown in the combobox
                         if (currentEntity instanceof IHasStatusAndWorkflow) {
-                            return statusService.getValidNextStatuses((IHasStatusAndWorkflow<?>) currentEntity);
+                            try {
+                                return statusService.getValidNextStatuses((IHasStatusAndWorkflow<?>) currentEntity);
+                            } catch (final Exception ex) {
+                                // Handle lazy loading exceptions for detached entities
+                                LOGGER.debug("Could not get valid next statuses (entity may be detached): {}", ex.getMessage());
+                                // Fallback to all statuses if entity is detached
+                                return statusService.findAll();
+                            }
                         }
                         // Fallback for non-workflow entities: return all statuses
                         return statusService.findAll();

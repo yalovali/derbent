@@ -276,8 +276,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 				crudToolbar.setValue(entity);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error setting current entity in toolbar:" + e.getMessage());
-			throw e;
+			LOGGER.error("Error setting current entity in toolbar: {}", e.getMessage());
+			// Don't rethrow - toolbar update failures shouldn't break entity selection
 		}
 	}
 }
