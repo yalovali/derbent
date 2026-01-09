@@ -324,21 +324,22 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			Objects.requireNonNull(item, "Sprint item must have an underlying item");
 			LOGGER.info("[BacklogDrop] Moving sprint item {} (parent: {}) from sprint to backlog (status preserved)", sprintItem.getId(),
 					item.getId());
-			// CRITICAL FIX: Use unified service instead of= manual delete
+			// CRITICAL FIX: Use unified service instead of manual delete
 			// Old code deleted sprint item which caused cascade delete of parent entity
 			// New code sets sprint to NULL which correctly moves item to backlog
 			item.moveSprintItemToBacklog();
 			// CRITICAL: Defer UI refresh until after Vaadin drop event completes
-			// If we refresh immediately, layoutColumns.removeAll() detaches the backlog
-			// column
-			// WHILE Vaadin is still processing the drop event, causing:
-			// "Drop target received a drop event but not attached to an UI"
-			// Using UI.access() defers the refresh to after the event completes
-			/* componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> { // Refresh both board and backlog
-			 * componentKanbanBoard.reloadSprintItems(); componentKanbanBoard.refreshComponent(); final CComponentKanbanColumnBacklog backlogColumn =
-			 * componentKanbanBoard.getBacklogColumn(); if (backlogColumn != null) { backlogColumn.refreshComponent(); } CNotificationService.
-			 * showSuccess("Item removed from sprint and returned to backlog"); LOGGER.
-			 * info("Successfully removed sprint item {} from sprint (status preserved)", sprintItem.getId()); })); */
+			componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> {
+				// Refresh both board and backlog
+				componentKanbanBoard.reloadSprintItems();
+				componentKanbanBoard.refreshComponent();
+				final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
+				if (backlogColumn != null) {
+					backlogColumn.refreshComponent();
+				}
+				CNotificationService.showSuccess("Item removed from sprint and returned to backlog");
+				LOGGER.info("Successfully removed sprint item {} from sprint (status preserved)", sprintItem.getId());
+			}));
 		} catch (final Exception e) {
 			LOGGER.error("Failed to remove sprint item from sprint", e);
 			CNotificationService.showError("Failed to remove item from sprint: " + e.getMessage());

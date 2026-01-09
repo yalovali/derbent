@@ -245,15 +245,15 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	private void saveStoryPoint(final ISprintableItem item) {
 		Check.notNull(item, "Sprintable item cannot be null when saving story points");
 		Check.notNull(item.getId(), "Sprintable item must be persisted before updating story points");
-		if (item instanceof CActivity) {
-			activityService.save((CActivity) item);
-			return;
+		try {
+			item.saveProjectItem();
+			CNotificationService.showSaveSuccess();
+			// Notify listeners that story points changed (for backlog column total refresh)
+			notifyRefreshListeners(null);
+		} catch (final Exception e) {
+			LOGGER.error("Error saving story point", e);
+			throw e;
 		}
-		if (item instanceof CMeeting) {
-			meetingService.save((CMeeting) item);
-			return;
-		}
-		throw new IllegalArgumentException("Unsupported sprintable item type: " + item.getClass().getSimpleName());
 	}
 
 	@Override

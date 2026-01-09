@@ -13,8 +13,8 @@ import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.view.CComponentStoryPoint;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
@@ -43,7 +43,8 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		super(item);
 		Check.notNull(item, "Sprint item cannot be null for postit");
 		addClassName("kanban-postit");
-		getStyle().set("width", "100%").set("height", "90px").set("min-height", "90px").set("max-height", "90px");
+		final String height = "110px";
+		getStyle().set("width", "100%").set("height", height).set("min-height", height).set("max-height", height);
 		setPadding(true);
 		setSpacing(false);
 		getElement().setAttribute("tabindex", "0");
@@ -138,6 +139,12 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		}
 	}
 
+	/** Handles story point validation errors. */
+	private void handleStoryPointError(final Exception e) {
+		LOGGER.error("Story point validation error", e);
+		CNotificationService.showError(e.getMessage());
+	}
+
 	private void initializeDragSource() {
 		if (dragSource != null) {
 			dragSource.setDraggable(true);
@@ -184,11 +191,6 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		return sprintItem != null ? sprintItem.getParentItem() : null;
 	}
 
-	/** Sets the refresh callback for notifying parent containers when story points change. */
-	public void setRefreshCallback(final Runnable callback) {
-		this.refreshCallback = callback;
-	}
-
 	/** Saves the story point change and notifies parent containers. */
 	private void saveStoryPoint(final ISprintableItem item) {
 		try {
@@ -202,12 +204,6 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 			LOGGER.error("Error saving story point for item {}", item.getId(), e);
 			throw e;
 		}
-	}
-
-	/** Handles story point validation errors. */
-	private void handleStoryPointError(final Exception e) {
-		LOGGER.error("Story point validation error", e);
-		CNotificationService.showError(e.getMessage());
 	}
 
 	@Override
@@ -224,6 +220,11 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	@Override
 	public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners() {
 		return selectListeners;
+	}
+
+	/** Sets the refresh callback for notifying parent containers when story points change. */
+	public void setRefreshCallback(final Runnable callback) {
+		refreshCallback = callback;
 	}
 
 	/** Sets selected styles for the post-it. */
