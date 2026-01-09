@@ -51,7 +51,18 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {/**/}
+	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {
+		try {
+			LOGGER.debug("Entity refreshed notification received: {}", reloaded != null ? reloaded.getClass().getSimpleName() : "null");
+			onEntitySelected(reloaded);
+			CNotificationService.showSuccess(getEntityClass().getSimpleName() + " reloaded.");
+		} catch (final Exception e) {
+			LOGGER.error("Error handling entity refreshed notification:" + e.getMessage());
+			CNotificationService.showException("Error handling entity refreshed notification", e);	
+			
+		}
+		
+	}
 
 	protected void onEntitySelected(CEntityDB<?> selectedEntity) throws Exception {
 		try {

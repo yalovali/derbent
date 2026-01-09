@@ -95,7 +95,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>>
 
             getEntityService().save(entity);
             LOGGER.debug("Entity saved successfully after status change. Triggering refresh...");
-            actionRefresh();
+            //actionRefresh();
+            //actionSave();
+            getView().onEntitySaved(entity);
+            getView().populateForm();
         } catch (final Exception e) {
             LOGGER.error("Error changing status: {}", e.getMessage(), e);
             throw e;
