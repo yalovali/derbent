@@ -35,6 +35,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.basic.IHasMultiValuePersistence;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.utils.Check;
@@ -56,10 +57,15 @@ import tech.derbent.base.users.domain.CUser;
  * columns and post-it style project items.
  */
 public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
-        implements IContentOwner, IHasSelectionNotification, IHasDragControl, IPageServiceAutoRegistrable {
+        implements IContentOwner, IHasSelectionNotification, IHasDragControl, IPageServiceAutoRegistrable, IHasMultiValuePersistence {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanBoard.class);
     private static final long serialVersionUID = 1L;
+    
+    // Persistence fields
+    private String persistenceNamespace;
+    private boolean persistenceEnabled;
+    private boolean isRestoring = false; // Flag to prevent save during restore
 
     /** Returns true when the sprint item is owned by the target user. */
     private static boolean matchesResponsibleUser(final CSprintItem sprintItem, final CUser targetUser) {
@@ -438,6 +444,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
             currentSprint = null;
             return;
         }
+        
+        // Enable persistence for this project (only once)
+        if (!isPersistenceEnabled()) {
+            enablePersistenceForProject(project);
+        }
+        
         try {
             // Keep sprint selection constrained to the active project and preselect the
             // newest sprint
@@ -512,6 +524,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
         selectedPostit = postit;
         if (postit == null) {
             CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService, this);
+            if (!isRestoring && isPersistenceEnabled()) {
+                clearPersistedValue("selectedSprintItemId");
+            }
             return;
         }
         selectedPostit.setSelected(true);
@@ -520,6 +535,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
                 "Sprintable item must be a CEntityDB for Kanban board details display");
         CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter,
                 sessionService, this);
+        
+        // Persist selected item ID (only if not restoring)
+        if (!isRestoring && isPersistenceEnabled()) {
+            persistValue("selectedSprintItemId", postit.getEntity().getId());
+            LOGGER.debug("Persisted selected sprint item ID: {}", postit.getEntity().getId());
+        }
     }
 
     /** Reacts to kanban line changes by reloading sprints. */
@@ -756,5 +777,102 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
     @Override
     public void setValue(CEntityDB<?> entity) {
         super.setValue((CKanbanLine) entity);
+    }
+    
+    // ==================== IHasMultiValuePersistence Implementation ====================
+    
+    @Override
+    public Logger getLogger() {
+        return LOGGER;
+    }
+    
+    @Override
+    public String getPersistenceNamespace() {
+        return persistenceNamespace;
+    }
+    
+    @Override
+    public void setPersistenceNamespace(final String namespace) {
+        this.persistenceNamespace = namespace;
+    }
+    
+    @Override
+    public boolean isPersistenceEnabled() {
+        return persistenceEnabled;
+    }
+    
+    @Override
+    public void setPersistenceEnabled(final boolean enabled) {
+        this.persistenceEnabled = enabled;
+    }
+    
+    /**
+     * Restores the selected sprint item from persisted state.
+     * Called automatically when component attaches to UI.
+     */
+    @Override
+    public void onPersistenceRestore() {
+        if (!isPersistenceEnabled()) {
+            return;
+        }
+        
+        getPersistedValue("selectedSprintItemId").ifPresent(sprintItemIdStr -> {
+            try {
+                isRestoring = true; // Prevent saving during restoration
+                final Long sprintItemId = Long.parseLong(sprintItemIdStr);
+                LOGGER.info("[Persistence] Restoring selected sprint item: {}", sprintItemId);
+                
+                // Find the postit with this sprint item ID across all columns
+                findPostitBySprintItemId(sprintItemId).ifPresent(postit -> {
+                    LOGGER.info("[Persistence] Found postit for sprint item {}, selecting it", sprintItemId);
+                    on_postit_selected(postit);
+                });
+            } catch (final Exception e) {
+                LOGGER.error("[Persistence] Error restoring selected sprint item", e);
+            } finally {
+                isRestoring = false;
+            }
+        });
+    }
+    
+    /**
+     * Finds a kanban postit component by its sprint item ID.
+     * Searches through all columns in the kanban board.
+     * 
+     * @param sprintItemId The ID of the sprint item to find
+     * @return Optional containing the postit if found
+     */
+    private java.util.Optional<CComponentKanbanPostit> findPostitBySprintItemId(final Long sprintItemId) {
+        if (sprintItemId == null || layoutColumns == null) {
+            return java.util.Optional.empty();
+        }
+        
+        // Search through all column components
+        return layoutColumns.getChildren()
+            .filter(component -> component instanceof CComponentKanbanColumn)
+            .map(component -> (CComponentKanbanColumn) component)
+            .flatMap(column -> {
+                // Get all postits from this column
+                return column.getChildren()
+                    .filter(child -> child instanceof CComponentKanbanPostit)
+                    .map(child -> (CComponentKanbanPostit) child);
+            })
+            .filter(postit -> postit.getEntity() != null && 
+                            sprintItemId.equals(postit.getEntity().getId()))
+            .findFirst();
+    }
+    
+    /**
+     * Enables persistence for this kanban board with project context.
+     * Should be called after project is set.
+     * 
+     * @param project The project context for persistence namespace
+     */
+    public void enablePersistenceForProject(final CProject project) {
+        if (project != null && project.getId() != null) {
+            final String namespace = "kanbanBoard_project" + project.getId();
+            enableMultiValuePersistence(namespace);
+            LOGGER.info("[Persistence] Enabled for namespace: {}", namespace);
+        }
     }
 }
