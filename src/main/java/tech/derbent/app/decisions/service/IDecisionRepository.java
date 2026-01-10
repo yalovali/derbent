@@ -14,17 +14,17 @@ public interface IDecisionRepository extends IEntityOfProjectRepository<CDecisio
 
 	@Override
 	@Query (
-		"SELECT d FROM #{#entityName} d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.assignedTo LEFT JOIN FETCH d.createdBy LEFT JOIN FETCH d.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH d.status LEFT JOIN FETCH d.accountableUser WHERE d.id = :id"
+		"SELECT d FROM #{#entityName} d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.assignedTo LEFT JOIN FETCH d.createdBy LEFT JOIN FETCH d.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH d.status WHERE d.id = :id"
 	)
 	Optional<CDecision> findById(@Param ("id") Long id);
 	@Override
 	@Query (
-		"SELECT d FROM #{#entityName} d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.assignedTo LEFT JOIN FETCH d.createdBy LEFT JOIN FETCH d.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH d.status LEFT JOIN FETCH d.accountableUser WHERE d.project = :project"
+		"SELECT d FROM #{#entityName} d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.assignedTo LEFT JOIN FETCH d.createdBy LEFT JOIN FETCH d.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH d.status WHERE d.project = :project"
 	)
 	Page<CDecision> listByProject(@Param ("project") CProject project, Pageable pageable);
 	@Override
 	@Query (
-		"SELECT d FROM #{#entityName} d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.assignedTo LEFT JOIN FETCH d.createdBy LEFT JOIN FETCH d.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH d.status LEFT JOIN FETCH d.accountableUser WHERE d.project = :project"
+		"SELECT d FROM #{#entityName} d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.assignedTo LEFT JOIN FETCH d.createdBy LEFT JOIN FETCH d.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH d.status WHERE d.project = :project"
 	)
 	List<CDecision> listByProjectForPageView(@Param ("project") CProject project);
 }
