@@ -124,8 +124,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		kanbanGrid.setName("Kanban Board Grid");
 		kanbanGrid.setAttributeNone(true); // dont show grid
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, kanbanDetailSection, kanbanGrid,
-				menuTitle + " (Kanban Board View)", pageTitle + " (Kanban Board View)", pageDescription + " (Kanban Board View)", true,
-				menuOrder + ".1");
+				menuTitle + "Sprint Board", "Sprint Board", "Sprint Board", true, menuOrder + ".1");
 	}
 
 	/** Seeds default kanban lines and columns for a company. Creates two example kanban boards following standard Agile/Scrum methodology: 1. "Scrum
@@ -173,9 +172,9 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 							throw new IllegalStateException("Kanban column '" + column.getName()
 									+ "' must have at least one status mapped. Empty status lists cause display issues.");
 						} else {
-							LOGGER.debug("[KanbanInit] Column '{}' has {} status(es) mapped: {}", column.getName(),
-									column.getIncludedStatuses().size(),
-									column.getIncludedStatuses().stream().map(s -> s.getName()).collect(java.util.stream.Collectors.joining(", ")));
+							// LOGGER.debug("[KanbanInit] Column '{}' has {} status(es) mapped: {}", column.getName(),
+							// column.getIncludedStatuses().size(),
+							// column.getIncludedStatuses().stream().map(s -> s.getName()).collect(java.util.stream.Collectors.joining(", ")));
 						}
 					}
 					LOGGER.info("[KanbanInit] Completed initialization of kanban line '{}' with {} columns", line.getName(),

@@ -45,7 +45,7 @@ public class CTeamService extends CEntityNamedService<CTeam> implements IEntityR
 	/** Find all teams for a specific company */
 	@Transactional (readOnly = true)
 	public List<CTeam> findByCompany(final CCompany company) {
-		LOGGER.debug("Finding teams for company: {}", company != null ? company.getName() : "null");
+		// LOGGER.debug("Finding teams for company: {}", company != null ? company.getName() : "null");
 		return ((ITeamRepository) repository).findByCompany(company);
 	}
 

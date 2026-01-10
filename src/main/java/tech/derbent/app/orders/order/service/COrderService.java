@@ -74,7 +74,7 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 	@Override
 	public void initializeNewEntity(final COrder entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new order entity");
+		// LOGGER.debug("Initializing new order entity");
 		final CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize order"));
 		final CProject currentProject = sessionService.getActiveProject()

@@ -92,7 +92,8 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 			if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 				getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
 			}
-			createPageHeader();
+			// lets not call this, base windows view already has page header
+			// createPageHeader();
 			createDetailsSection();
 			createPageFooter();
 			Check.notNull(pageEntity.getDetailSection(), "pageEntity detail section cannot be null");

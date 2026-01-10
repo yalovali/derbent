@@ -482,18 +482,18 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	public void setPageTitle(final String title) {
 		Check.notBlank(title, "Title must not be null or empty to set page title");
 		// Get company name and append to title if available
-		String displayTitle = title;
-		try {
-			if (sessionService != null) {
-				final var company = sessionService.getCurrentCompany();
-				if (company != null) {
-					displayTitle = title + " - " + company.getName();
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not get company name for title: {}", e.getMessage());
-		}
-		pageTitle.setText(displayTitle);
+		// final String displayTitle = title;
+		// try {
+		// if (sessionService != null) {
+		// final var company = sessionService.getCurrentCompany();
+		// if (company != null) {
+		// displayTitle = title + " - " + company.getName();
+		// }
+		// }
+		// } catch (final Exception e) {
+		// LOGGER.debug("Could not get company name for title: {}", e.getMessage());
+		// }
+		pageTitle.setText(title);
 	}
 
 	/** Updates the layout toggle button icon based on current layout mode. */
