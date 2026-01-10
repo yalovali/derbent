@@ -80,7 +80,10 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param entityClass The entity class
 	 * @param service     The service for the entity type
 	 * @param <T>         The entity type
-	 * @return EntityTypeConfig instance */
+	 * @return EntityTypeConfig instance
+	 * @deprecated Use {@link CComponentEntitySelection.EntityTypeConfig#createWithRegistryName(Class, CAbstractService)} to get human-friendly names
+	 *             automatically */
+	@Deprecated
 	protected static <T extends CEntityDB<T>> CComponentEntitySelection.EntityTypeConfig<T> createEntityTypeConfig(final String displayName,
 			final Class<T> entityClass, final CAbstractService<T> service) {
 		return new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);

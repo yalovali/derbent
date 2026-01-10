@@ -38,6 +38,7 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -96,6 +97,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		private final Class<E> entityClass;
 		private final CAbstractService<E> service;
 
+		/** Creates an EntityTypeConfig with a custom display name.
+		 * <p>
+		 * <strong>NOTE:</strong> Consider using {@link #createWithRegistryName(Class, CAbstractService)} to automatically use human-friendly names from
+		 * entity registry (e.g., "Activity" instead of "CActivity").
+		 * </p>
+		 * @param displayName Custom display name to show in UI
+		 * @param entityClass Entity class
+		 * @param service     Service for the entity */
 		public EntityTypeConfig(final String displayName, final Class<E> entityClass, final CAbstractService<E> service) {
 			Check.notBlank(displayName, "Display name cannot be blank");
 			Check.notNull(entityClass, "Entity class cannot be null");
@@ -103,6 +112,42 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			this.displayName = displayName;
 			this.entityClass = entityClass;
 			this.service = service;
+		}
+
+		/** Factory method that creates EntityTypeConfig using entity's registered display name from CEntityRegistry.
+		 * <p>
+		 * This is the RECOMMENDED way to create EntityTypeConfig instances as it ensures consistent, human-friendly names throughout the application.
+		 * For example: "Activity" instead of "CActivity", "Meeting" instead of "CMeeting".
+		 * </p>
+		 * <p>
+		 * If the entity class has an ENTITY_TITLE_SINGULAR constant, it will be used. Otherwise, falls back to the simple class name without the "C"
+		 * prefix.
+		 * </p>
+		 * <p>
+		 * <strong>Example:</strong>
+		 *
+		 * <pre>
+		 * EntityTypeConfig&lt;CActivity&gt; config = EntityTypeConfig.createWithRegistryName(CActivity.class, activityService);
+		 * // config.getDisplayName() will be "Activity" (from ENTITY_TITLE_SINGULAR constant)
+		 * </pre>
+		 * </p>
+		 * @param <E>         Entity type
+		 * @param entityClass Entity class (must not be null)
+		 * @param service     Service for the entity (must not be null)
+		 * @return EntityTypeConfig with registry-based display name
+		 * @throws IllegalArgumentException if entityClass or service is null */
+		public static <E extends CEntityDB<E>> EntityTypeConfig<E> createWithRegistryName(final Class<E> entityClass,
+				final CAbstractService<E> service) {
+			Check.notNull(entityClass, "Entity class cannot be null");
+			Check.notNull(service, "Service cannot be null");
+			// Get human-friendly name from entity registry (e.g., "Activity" instead of "CActivity")
+			String displayName = CEntityRegistry.getEntityTitleSingular(entityClass);
+			if (displayName == null || displayName.isBlank()) {
+				// Fallback: use simple class name without C prefix
+				final String simpleName = entityClass.getSimpleName();
+				displayName = simpleName.startsWith("C") && simpleName.length() > 1 ? simpleName.substring(1) : simpleName;
+			}
+			return new EntityTypeConfig<>(displayName, entityClass, service);
 		}
 
 		public String getDisplayName() { return displayName; }

@@ -34,14 +34,19 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	private static final long serialVersionUID = 1L;
 
 	/** Creates the list of entity type configurations for the backlog.
-	 * @return list of entity type configs (CActivity, CMeeting) */
+	 * <p>
+	 * Uses {@link EntityTypeConfig#createWithRegistryName} to automatically get human-friendly names from entity registry (e.g., "Activity" instead of
+	 * "CActivity").
+	 * </p>
+	 * @return list of entity type configs (Activity, Meeting) */
 	private static List<EntityTypeConfig<?>> createEntityTypes() {
 		final List<EntityTypeConfig<?>> entityTypes = new ArrayList<>();
 		// Get services from Spring context
 		final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 		final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
-		entityTypes.add(new EntityTypeConfig<>("CActivity", CActivity.class, activityService));
-		entityTypes.add(new EntityTypeConfig<>("CMeeting", CMeeting.class, meetingService));
+		// Use factory method to get human-friendly names from entity registry
+		entityTypes.add(EntityTypeConfig.createWithRegistryName(CActivity.class, activityService));
+		entityTypes.add(EntityTypeConfig.createWithRegistryName(CMeeting.class, meetingService));
 		return entityTypes;
 	}
 

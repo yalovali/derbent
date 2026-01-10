@@ -49,9 +49,6 @@ import tech.derbent.app.sprints.service.CSprintItemService;
 public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem>
 		implements IEntitySelectionDialogSupport<CProjectItem<?>> {
 
-	// Item type constants
-	private static final String ITEM_TYPE_ACTIVITY = "CActivity";
-	private static final String ITEM_TYPE_MEETING = "CMeeting";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
@@ -189,8 +186,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public List<CComponentEntitySelection.EntityTypeConfig<?>> getDialogEntityTypes() {
 		final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes = new ArrayList<>();
-		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>(ITEM_TYPE_ACTIVITY, CActivity.class, activityService));
-		entityTypes.add(new CComponentEntitySelection.EntityTypeConfig<>(ITEM_TYPE_MEETING, CMeeting.class, meetingService));
+		// Use factory method to get human-friendly names from entity registry
+		entityTypes.add(CComponentEntitySelection.EntityTypeConfig.createWithRegistryName(CActivity.class, activityService));
+		entityTypes.add(CComponentEntitySelection.EntityTypeConfig.createWithRegistryName(CMeeting.class, meetingService));
 		return entityTypes;
 	}
 
