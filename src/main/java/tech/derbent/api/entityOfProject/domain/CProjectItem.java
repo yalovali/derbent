@@ -13,7 +13,6 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.base.users.domain.CUser;
 
 /** CProjectItem - Base class for project items that can be displayed in Gantt charts. Provides hierarchical structure support and Gantt-specific
  * abstract methods for date handling, visual representation, and user assignments. All subclasses must implement the abstract Gantt methods. */
@@ -67,11 +66,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	public Long getParentId() { return parentId; }
 
 	public String getParentType() { return parentType; }
-
-	/** Get the user responsible for this item in Gantt chart display. Subclasses should override this to return the appropriate user field (e.g.,
-	 * assignedTo for activities, responsible for meetings, accountableUser for decisions). Default implementation returns the assignedTo user.
-	 * @return the responsible user, or null if not assigned */
-	public CUser getResponsible() { return getAssignedTo(); }
 
 	/** Get the start date for Gantt chart display. Subclasses should override this to return the appropriate start date field (e.g., startDate for
 	 * activities, meetingDate for meetings, implementationDate for decisions). Default implementation returns null.
@@ -128,11 +122,11 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	public void setParentType(final String parentType) { this.parentType = parentType; }
 
-        public void setStatus(final CProjectItemStatus status) {
-                Check.notNull(status, "Status cannot be null");
-                Check.notNull(getProject(), "Project must be set before applying status");
-                Check.isSameCompany(getProject(), status);
-                this.status = status;
-                updateLastModified();
-        }
+	public void setStatus(final CProjectItemStatus status) {
+		Check.notNull(status, "Status cannot be null");
+		Check.notNull(getProject(), "Project must be set before applying status");
+		Check.isSameCompany(getProject(), status);
+		this.status = status;
+		updateLastModified();
+	}
 }

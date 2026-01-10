@@ -194,7 +194,8 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 		for (final IFilterComponent<?> component : filterComponents) {
 			component.clearFilter();
 		}
-		currentCriteria.clear();
+		// Don't clear criteria - each filter's clearFilter() already sets default values
+		// currentCriteria.clear(); // REMOVED: This was wiping out the default values set by clearFilter()
 		notifyFilterListeners();
 	}
 

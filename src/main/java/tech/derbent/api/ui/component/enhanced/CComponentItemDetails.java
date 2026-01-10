@@ -213,11 +213,10 @@ public class CComponentItemDetails extends CVerticalLayout
      * 
      * @param entity the entity to display, or null to clear the display
      */
-    @SuppressWarnings("deprecation")
     private void locateEntityInDynamicPage(final CEntityNamed<?> entity) {
         try {
             if (entity == null) {
-                currentEntityPageRouter.loadSpecificPage(null, null, true);
+                currentEntityPageRouter.loadSpecificPage(null, null, true, null);
                 return;
             }
             LOGGER.debug("Creating dynamic page for entity: {}", entity.getName());
@@ -230,7 +229,7 @@ public class CComponentItemDetails extends CVerticalLayout
                     .orElseThrow(() -> new IllegalStateException("No page found for view name: " + entityViewName));
             Check.notNull(page, "Page entity cannot be null");
             // Load the specific page with the entity details
-            currentEntityPageRouter.loadSpecificPage(page.getId(), entity.getId(), true);
+            currentEntityPageRouter.loadSpecificPage(page.getId(), entity.getId(), true, null);
             LOGGER.debug("Successfully loaded detail page for entity: {}", entity.getName());
         } catch (final Exception e) {
             LOGGER.error("Error creating dynamic page for entity", e);

@@ -222,33 +222,10 @@ public final class CColorUtils {
 		return item.toString();
 	}
 
-	/** @deprecated Use {@link tech.derbent.api.grid.view.CLabelEntity#createUserLabel(CUser)} or {@link tech.derbent.api.grid.view.CLabelEntity}
-	 *             constructor instead for consistent entity display. */
-	@Deprecated
-	public static HorizontalLayout getEntityWithIcon(final CEntityNamed<?> entity) {
-		Check.notNull(entity, "Entity cannot be null when creating entity with icon display");
-		final HorizontalLayout layout = new HorizontalLayout();
-		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-		layout.setSpacing(true);
-		try {
-			final Icon icon = getIconForEntity(entity);
-			if (icon != null) {
-				icon.setSize("24px");
-				layout.add(icon);
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Could not create icon for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
-		}
-		String displayName = entity.getName();
-		if (entity instanceof CUser) {
-			final CUser user = (CUser) entity;
-			displayName = user.getName() + " " + (user.getLastname() != null ? user.getLastname() : "");
-		}
-		final Span entityName = new Span(displayName);
-		layout.add(entityName);
-		return layout;
-	}
-
+	/** Gets the icon for an entity.
+	 * @param entity The entity to get icon for
+	 * @return Icon component
+	 * @throws Exception if icon cannot be created */
 	public static Icon getIconForEntity(final CEntityDB<?> entity) throws Exception {
 		Check.notNull(entity, "Entity cannot be null");
 		String iconString;

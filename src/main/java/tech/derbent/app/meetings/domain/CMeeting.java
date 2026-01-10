@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
@@ -110,21 +109,11 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			hidden = false, dataProviderBean = "CActivityService"
 	)
 	private CActivity relatedActivity;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "responsible_id", nullable = true)
-	@AMetaData (
-			displayName = "Responsible", required = false, readOnly = false,
-			description = "Person responsible for organizing and leading the meeting", hidden = false, dataProviderBean = "CUserService"
-	)
-	private CUser responsible;
 	// Sprint Item relationship - REQUIRED: every meeting must have a sprint item for progress tracking
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = false)
 	@jakarta.validation.constraints.NotNull (message = "Sprint item is required for progress tracking")
-	@AMetaData (
-			displayName = "Sprint Item", required = true, readOnly = true, 
-			description = "Progress tracking for this meeting", hidden = true
-	)
+	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this meeting", hidden = true)
 	private CSprintItem sprintItem;
 	@Column (name = "sprint_order", nullable = true)
 	@jakarta.validation.constraints.Min (value = 1, message = "Sprint order must be positive")
@@ -209,15 +198,19 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		}
 	}
 
+	@jakarta.persistence.PostLoad
+	protected void ensureSprintItemParent() {
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
+	}
+
 	public String getAgenda() { return agenda; }
 
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
 	@Override
-	public String getColor() { 
-        
-		return DEFAULT_COLOR;
-	}
+	public String getColor() { return DEFAULT_COLOR; }
 
 	@Override
 	public LocalDate getEndDate() { return endDate; }
@@ -242,18 +235,12 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Set<CUser> getParticipants() { return participants == null ? new HashSet<>() : new HashSet<>(participants); }
 
 	@Override
-	public Integer getProgressPercentage() { 
+	public Integer getProgressPercentage() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getProgressPercentage();
 	}
 
 	public CActivity getRelatedActivity() { return relatedActivity; }
-
-	@Override
-	public CUser getResponsible() { 
-		Check.notNull(sprintItem, "Sprint item must not be null");
-		return sprintItem.getResponsible();
-	}
 
 	@Override
 	public CSprintItem getSprintItem() { return sprintItem; }
@@ -262,7 +249,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public Integer getSprintOrder() { return sprintOrder; }
 
 	@Override
-	public LocalDate getStartDate() { 
+	public LocalDate getStartDate() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getStartDate();
 	}
@@ -270,7 +257,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public LocalTime getStartTime() { return startTime; }
 
 	@Override
-	public Long getStoryPoint() { 
+	public Long getStoryPoint() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getStoryPoint();
 	}
@@ -285,25 +272,25 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	 * @param user the user to check
 	 * @return true if the user is an attendee, false otherwise */
 	public boolean isAttendee(final CUser user) {
-		return (user != null) && attendees.contains(user);
+		return user != null && attendees.contains(user);
 	}
 
 	/** Check if a user is a participant in this meeting.
 	 * @param user the user to check
 	 * @return true if the user is a participant, false otherwise */
 	public boolean isParticipant(final CUser user) {
-		return (user != null) && participants.contains(user);
+		return user != null && participants.contains(user);
 	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in
 	 * meeting-specific entity fields.
 	 * @param searchValue the value to search for (case-insensitive)
 	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
-	 *                    fields plus "entityType", "relatedActivity", "responsible"
+	 *                    fields plus "entityType", "relatedActivity",
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
@@ -311,15 +298,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity fields
-		if (fieldNames.remove("entityType") && (getEntityType() != null) && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("entityType") && getEntityType() != null && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("relatedActivity") && (getRelatedActivity() != null)
+		if (fieldNames.remove("relatedActivity") && getRelatedActivity() != null
 				&& getRelatedActivity().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("responsible") && (getResponsible() != null)
-				&& getResponsible().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("assignedTo") && getAssignedTo() != null && getAssignedTo().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
@@ -346,7 +332,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
 
 	@Override
-	public void setColor(String color) { /*****/ }
+	public void setColor(String color) { /*****/
+	}
 
 	public void setEndDate(final LocalDate endDate) { this.endDate = endDate; }
 
@@ -371,19 +358,13 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
-	public void setResponsible(final CUser responsible) { 
-		Check.notNull(sprintItem, "Sprint item must not be null");
-		this.responsible = responsible; // Set both for backward compatibility during migration
-		sprintItem.setResponsible(responsible);
-	}
-
 	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
 
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }
 
-	public void setStartDate(final LocalDate startDate) { 
+	public void setStartDate(final LocalDate startDate) {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.startDate = startDate;
 		sprintItem.setStartDate(startDate);
@@ -396,12 +377,5 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.storyPoint = storyPoint; // Keep for backward compatibility
 		sprintItem.setStoryPoint(storyPoint);
-	}
-	
-	@jakarta.persistence.PostLoad
-	protected void ensureSprintItemParent() {
-		if (sprintItem != null) {
-			sprintItem.setParentItem(this);
-		}
 	}
 }

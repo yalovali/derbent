@@ -221,7 +221,7 @@ public class CLabelEntity extends Div {
 			final Icon icon = CColorUtils.getIconForEntity(entity);
 			if (icon != null) {
 				applyIconColor(icon, entity);
-				container.addComponentAsFirst(container);
+				container.addComponentAsFirst(icon);
 			}
 		}
 		return container;

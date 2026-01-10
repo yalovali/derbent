@@ -20,8 +20,7 @@ import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CSprintItemService - Service class for managing sprint items. Sprint items are progress tracking components owned by CActivity/CMeeting. They
- * store progress data (story points, dates, responsible person, progress %). Implements IOrderedEntityService for reordering within
- * sprints/backlog. */
+ * store progress data (story points, dates, progress %). Implements IOrderedEntityService for reordering within sprints/backlog. */
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable, IOrderedEntityService<CSprintItem> {
@@ -38,7 +37,6 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		sprintItem.setStartDate(null); // Will be set when initialized
 		sprintItem.setDueDate(null); // Will be set when initialized
 		sprintItem.setCompletionDate(null); // Not completed yet
-		sprintItem.setResponsible(null); // Will be set when initialized
 		sprintItem.setItemOrder(1); // Default order
 		return sprintItem;
 	}

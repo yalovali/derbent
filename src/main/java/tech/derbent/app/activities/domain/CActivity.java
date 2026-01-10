@@ -5,10 +5,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -166,10 +164,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = false)
 	@NotNull (message = "Sprint item is required for progress tracking")
-	@AMetaData (
-			displayName = "Sprint Item", required = true, readOnly = true, 
-			description = "Progress tracking for this activity", hidden = true
-	)
+	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this activity", hidden = true)
 	private CSprintItem sprintItem;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
@@ -237,6 +232,13 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		return variance;
 	}
 
+	@jakarta.persistence.PostLoad
+	protected void ensureSprintItemParent() {
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
+	}
+
 	public String getAcceptanceCriteria() { return acceptanceCriteria; }
 
 	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
@@ -245,10 +247,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
 	@Override
-	public String getColor() { 
-        
-		return DEFAULT_COLOR;
-	}
+	public String getColor() { return DEFAULT_COLOR; }
 
 	/** Gets the list of comments associated with this activity.
 	 * @return list of comments, never null */
@@ -286,20 +285,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public CActivityPriority getPriority() { return priority; }
 
 	@Override
-	public Integer getProgressPercentage() { 
+	public Integer getProgressPercentage() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getProgressPercentage();
 	}
 
 	public BigDecimal getRemainingHours() { return remainingHours; }
-
-	/** Gets the responsible user from sprint item for progress tracking.
-	 * @return the responsible user from sprint item */
-	@Override
-	public CUser getResponsible() { 
-		Check.notNull(sprintItem, "Sprint item must not be null");
-		return sprintItem.getResponsible();
-	}
 
 	public String getResults() { return results; }
 
@@ -310,13 +301,13 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public Integer getSprintOrder() { return sprintOrder; }
 
 	@Override
-	public LocalDate getStartDate() { 
+	public LocalDate getStartDate() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getStartDate();
 	}
 
 	@Override
-	public Long getStoryPoint() { 
+	public Long getStoryPoint() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getStoryPoint();
 	}
@@ -561,12 +552,5 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		sprintItem.setStoryPoint(storyPoint);
 		this.storyPoint = storyPoint; // Keep for backward compatibility during migration
 		updateLastModified();
-	}
-	
-	@jakarta.persistence.PostLoad
-	protected void ensureSprintItemParent() {
-		if (sprintItem != null) {
-			sprintItem.setParentItem(this);
-		}
 	}
 }

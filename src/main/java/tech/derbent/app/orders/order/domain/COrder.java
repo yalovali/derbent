@@ -132,13 +132,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 			hidden = false
 	)
 	private LocalDate requiredDate;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "responsible_id", nullable = true)
-	@AMetaData (
-			displayName = "Responsible", required = false, readOnly = false, description = "User responsible for managing this order", hidden = false,
-			dataProviderBean = "CUserService"
-	)
-	private CUser responsible;
 
 	public COrder() {
 		super();
@@ -201,9 +194,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	public CUser getRequestor() { return requestor; }
 
 	public LocalDate getRequiredDate() { return requiredDate; }
-
-	@Override
-	public CUser getResponsible() { return responsible; }
 
 	/** Gets the start date for Gantt chart display. For orders, this is the order date.
 	 * @return the order date */
@@ -294,11 +284,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	public void setRequiredDate(final LocalDate requiredDate) {
 		this.requiredDate = requiredDate;
-		updateLastModified();
-	}
-
-	public void setResponsible(final CUser responsible) {
-		this.responsible = responsible;
 		updateLastModified();
 	}
 }

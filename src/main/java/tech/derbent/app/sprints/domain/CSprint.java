@@ -31,7 +31,6 @@ import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.users.domain.CUser;
 
 // @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "sprint_status_id"))
 @Entity
@@ -265,11 +264,6 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		return (int) (completedCount * 100 / activities.size());
 	}
 
-	/** Gets the responsible user for Gantt chart display.
-	 * @return the assigned user */
-	@Override
-	public CUser getResponsible() { return getAssignedTo(); }
-
 	/** Gets the sprint items collection.
 	 * @return list of sprint items */
 	public List<CSprintItem> getSprintItems() { return sprintItems != null ? sprintItems : new ArrayList<>(); }
@@ -374,22 +368,20 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 				field.setAccessible(true);
 				field.set(this, value);
 			}
-			
 			if (sprintItems != null && !sprintItems.isEmpty()) {
-				final tech.derbent.app.activities.service.IActivityRepository activityRepo = 
-					CSpringContext.getBean(tech.derbent.app.activities.service.IActivityRepository.class);
-				final tech.derbent.app.meetings.service.IMeetingRepository meetingRepo = 
-					CSpringContext.getBean(tech.derbent.app.meetings.service.IMeetingRepository.class);
-				
+				final tech.derbent.app.activities.service.IActivityRepository activityRepo =
+						CSpringContext.getBean(tech.derbent.app.activities.service.IActivityRepository.class);
+				final tech.derbent.app.meetings.service.IMeetingRepository meetingRepo =
+						CSpringContext.getBean(tech.derbent.app.meetings.service.IMeetingRepository.class);
 				for (final CSprintItem item : sprintItems) {
-					if (item.getId() == null) continue;
-					
+					if (item.getId() == null) {
+						continue;
+					}
 					final var activity = activityRepo.findBySprintItemId(item.getId());
 					if (activity.isPresent()) {
 						item.setParentItem(activity.get());
 						continue;
 					}
-					
 					final var meeting = meetingRepo.findBySprintItemId(item.getId());
 					meeting.ifPresent(item::setParentItem);
 				}

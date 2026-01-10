@@ -37,7 +37,6 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "reviewDate"));
    
 			detailSection.addScreenLine(CDetailLinesService.createSection("Associations"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "accountableUser"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
@@ -54,7 +53,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "project", "entityType", "status", "accountableUser", "assignedTo", "createdBy",
+		grid.setColumnFields(List.of("id", "name", "description", "project", "entityType", "status", "assignedTo", "createdBy",
 				"createdDate", "implementationDate"));
 		return grid;
 	}

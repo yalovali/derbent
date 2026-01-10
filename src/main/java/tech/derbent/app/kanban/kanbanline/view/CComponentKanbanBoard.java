@@ -61,10 +61,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Returns true when the sprint item is owned by the target user. */
 	private static boolean matchesResponsibleUser(final CSprintItem sprintItem, final CUser targetUser) {
 		final ISprintableItem item = sprintItem.getParentItem();
-		if (item == null || item.getResponsible() == null || item.getResponsible().getId() == null || targetUser.getId() == null) {
+		if (item == null || item.getAssignedTo() == null || item.getAssignedTo().getId() == null || targetUser.getId() == null) {
 			return false;
 		}
-		return item.getResponsible().getId().equals(targetUser.getId());
+		return item.getAssignedTo().getId().equals(targetUser.getId());
 	}
 
 	/** Returns true when the sprint item matches the selected type filter. */

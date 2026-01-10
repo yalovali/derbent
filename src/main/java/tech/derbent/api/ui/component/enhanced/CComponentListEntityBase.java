@@ -75,17 +75,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListEntityBase.class);
 	private static final long serialVersionUID = 1L;
 
-	/** Creates an entity type configuration for use with addButtonFromList.
-	 * @param displayName The display name for the entity type
-	 * @param entityClass The entity class
-	 * @param service     The service for the entity type
-	 * @param <T>         The entity type
-	 * @return EntityTypeConfig instance */
-	protected static <T extends CEntityDB<T>> CComponentEntitySelection.EntityTypeConfig<T> createEntityTypeConfig(final String displayName,
-			final Class<T> entityClass, final CAbstractService<T> service) {
-		return new CComponentEntitySelection.EntityTypeConfig<>(displayName, entityClass, service);
-	}
-
 	/** Checks if the required indicator is visible.
 	 * @return false (required indicator not currently implemented) */
 	public static boolean isRequiredIndicatorVisible() { return false; }

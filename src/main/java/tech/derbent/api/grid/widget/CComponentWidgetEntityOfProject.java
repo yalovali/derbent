@@ -45,7 +45,7 @@ public abstract class CComponentWidgetEntityOfProject<EntityClass extends CProje
 	protected void createThirdLine() throws Exception {
 		final EntityClass item = getEntity();
 		layoutLineThree.add(new CLabelEntity(getEntity().getStatus()));
-		layoutLineThree.add(new CLabelEntity(getEntity().getResponsible()));
+		layoutLineThree.add(new CLabelEntity(getEntity().getAssignedTo()));
 		final LocalDate startDate = item.getStartDate();
 		final LocalDate endDate = item.getEndDate();
 		if (startDate != null || endDate != null) {

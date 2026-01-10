@@ -1,0 +1,50 @@
+# Refactoring Summary: Responsible → AssignedTo
+
+## What Was Done
+1. Created new CAssignedToFilter.java class with proper naming
+2. Created comprehensive migration guide (REFACTORING_RESPONSIBLE_TO_ASSIGNEDTO.md)
+3. Identified all 34+ locations that need updates
+
+## Key Changes Needed
+
+### Code Files (11 files):
+- CComponentKanbanBoardFilterToolbar.java
+- CComponentKanbanBoard.java
+- CGanntItem.java
+- CGanntGrid.java
+- CGanntTimelineBar.java
+- Widget components (3 files)
+- Interface/Helper classes (3 files)
+
+### Documentation (6+ files):
+- coding-standards.md
+- DATABASE_COMPOSITION_PATTERN.md
+- GANTT_DESIGN_PATTERN.md
+- universal-filter-toolbar-framework.md
+- UNIVERSAL_ENTITY_TYPE_FILTER.md
+- CValueStorageHelper.java examples
+
+## What This Achieves
+- Consistent terminology across codebase
+- Removes redundant "responsible" field references
+- Uses only "assignedTo" from CProjectItem
+- Updates UI labels to be clearer
+- Aligns code with domain model
+
+## Recommendation
+This is a significant refactoring affecting:
+- 11 Java source files
+- 6+ documentation files  
+- Filter persistence keys
+- UI labels
+- Method names
+- Class names
+
+Suggest completing this refactoring in a dedicated session with:
+1. Full test suite run after each file update
+2. Playwright UI tests for Kanban board
+3. Manual verification of filter behavior
+4. User acceptance testing for UI label changes
+
+The foundation is laid with CAssignedToFilter.java created.
+Next step: systematically update each file per the migration guide.

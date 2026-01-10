@@ -63,7 +63,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> impleme
 		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, entityStatusService);
 		// Initialize decision-specific fields with sensible defaults
 		entity.setEstimatedCost(BigDecimal.ZERO);
-		entity.setAccountableUser(currentUser); // Default accountable user is creator
-		LOGGER.debug("Decision initialization complete with accountable user: {}", currentUser.getName());
+		entity.setAssignedTo(currentUser); // Default assigned user is creator
+		LOGGER.debug("Decision initialization complete with assigned user: {}", currentUser.getName());
 	}
 }

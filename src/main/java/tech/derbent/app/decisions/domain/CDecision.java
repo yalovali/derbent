@@ -20,7 +20,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.users.domain.CUser;
 
 /** CDecision - Domain entity representing project decisions with comprehensive management features. Layer: Domain (MVC) Supports: - Decision type
  * categorization - Cost estimation and tracking - Team collaboration and assignments - Multi-stage approval workflow - Accountable personnel
@@ -36,14 +35,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	public static final String ENTITY_TITLE_PLURAL = "Decisions";
 	public static final String ENTITY_TITLE_SINGULAR = "Decision";
 	public static final String VIEW_NAME = "Decisions View";
-	// Accountable Personnel
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "accountable_user_id", nullable = true)
-	@AMetaData (
-			displayName = "Accountable Personnel", required = false, readOnly = false, description = "User accountable for this decision",
-			hidden = false, dataProviderBean = "CUserService"
-	)
-	private CUser accountableUser;
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -91,8 +82,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 		return super.equals(o);
 	}
 
-	public CUser getAccountableUser() { return accountableUser; }
-
 	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
 	 * @return the review date as LocalDate, or null if not set */
 	@Override
@@ -110,11 +99,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	public LocalDateTime getImplementationDate() { return implementationDate; }
 
-	/** Gets the responsible user for Gantt chart display. For decisions, this is the accountable user.
-	 * @return the accountable user */
-	@Override
-	public CUser getResponsible() { return accountableUser; }
-
 	public LocalDateTime getReviewDate() { return reviewDate; }
 
 	/** Gets the start date for Gantt chart display. For decisions, this is the implementation date.
@@ -123,7 +107,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	public LocalDate getStartDate() { return implementationDate != null ? implementationDate.toLocalDate() : null; }
 
 	@Override
-	public CWorkflowEntity getWorkflow() { 
+	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
 	}
@@ -131,11 +115,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@Override
 	public int hashCode() {
 		return super.hashCode();
-	}
-
-	public void setAccountableUser(final CUser accountableUser) {
-		this.accountableUser = accountableUser;
-		updateLastModified();
 	}
 
 	@Override
@@ -146,7 +125,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	}
 
 	public void setEstimatedCost(final BigDecimal estimatedCost) {
-		if ((estimatedCost != null) && (estimatedCost.compareTo(BigDecimal.ZERO) < 0)) {
+		if (estimatedCost != null && estimatedCost.compareTo(BigDecimal.ZERO) < 0) {
 			LOGGER.warn("setEstimatedCost called with negative value: {}", estimatedCost);
 		}
 		this.estimatedCost = estimatedCost;

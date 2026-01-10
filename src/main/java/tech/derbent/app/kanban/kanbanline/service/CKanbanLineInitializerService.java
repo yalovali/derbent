@@ -104,10 +104,6 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Kanban Board"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "kanbanBoard"));
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "kanbanColumns"));
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Kanban line view.");
@@ -126,7 +122,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		final CGridEntity kanbanGrid = createGridEntity(project);
 		kanbanDetailSection.setName("Kanban Board Section");
 		kanbanGrid.setName("Kanban Board Grid");
-		kanbanGrid.setAttributeNone(true);
+		kanbanGrid.setAttributeNone(true); // dont show grid
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, kanbanDetailSection, kanbanGrid,
 				menuTitle + " (Kanban Board View)", pageTitle + " (Kanban Board View)", pageDescription + " (Kanban Board View)", true,
 				menuOrder + ".1");
