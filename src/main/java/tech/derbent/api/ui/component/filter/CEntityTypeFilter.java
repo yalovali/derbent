@@ -12,21 +12,32 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CComboBox;
 
-/** CEntityTypeFilter - Dynamic entity type filter component.
+/** CEntityTypeFilter - Universal entity type selector component.
  * <p>
- * Automatically discovers entity types from provided items and presents them as filter options. Includes an "All types" option to show all entities.
+ * THE STANDARD component for entity type selection/filtering throughout the application. Automatically discovers entity types and presents them with
+ * human-friendly names from CEntityRegistry.
  * </p>
  * <p>
- * This filter solves the problem of missing entity types (like Meeting) in kanban boards by dynamically discovering all available types from the
- * actual data.
+ * <b>Two Modes:</b>
+ * <ul>
+ * <li><b>Filter Mode</b> (default): Includes "All types" option for filtering - use in toolbars</li>
+ * <li><b>Selection Mode</b>: No "All types", required selection - use in dialogs/forms</li>
+ * </ul>
  * </p>
  * <p>
- * <b>Usage Example:</b>
+ * <b>Usage Examples:</b>
  *
  * <pre>
+ * // Filter mode (with "All types")
  * CEntityTypeFilter filter = new CEntityTypeFilter();
- * filter.setAvailableEntityTypes(sprintItems); // Auto-discovers Activity, Meeting, Sprint, etc.
+ * filter.setAvailableEntityTypes(sprintItems);
  * toolbar.addFilterComponent(filter);
+ *
+ * // Selection mode (required selection)
+ * CEntityTypeFilter selector = new CEntityTypeFilter(false);
+ * selector.setLabel("Entity Type");
+ * selector.setRequired(true);
+ * selector.setAvailableEntityClasses(List.of(CActivity.class, CMeeting.class));
  * </pre>
  * </p>
  */
@@ -96,19 +107,29 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 
 	private final TypeOption allTypesOption;
 	private final CComboBox<TypeOption> comboBox;
+	private final boolean includeAllTypesOption;
 
-	/** Creates an entity type filter.
+	/** Creates an entity type filter in FILTER MODE (with "All types" option).
 	 * <p>
 	 * The filter is initialized with "All types" option by default. Call {@link #setAvailableEntityTypes(List)} to populate with actual entity types.
 	 * </p>
 	 */
 	public CEntityTypeFilter() {
+		this(true);
+	}
+
+	/** Creates an entity type filter with configurable mode.
+	 * @param includeAllTypesOption If true, creates FILTER MODE with "All types" option. If false, creates SELECTION MODE (required selection). */
+	public CEntityTypeFilter(final boolean includeAllTypesOption) {
 		super(FILTER_KEY);
-		allTypesOption = new TypeOption(ALL_TYPES_LABEL, null);
+		this.includeAllTypesOption = includeAllTypesOption;
+		allTypesOption = includeAllTypesOption ? new TypeOption(ALL_TYPES_LABEL, null) : null;
 		comboBox = new CComboBox<>("Type");
 		comboBox.setItemLabelGenerator(TypeOption::getLabel);
-		comboBox.setItems(allTypesOption);
-		comboBox.setValue(allTypesOption);
+		if (includeAllTypesOption) {
+			comboBox.setItems(allTypesOption);
+			comboBox.setValue(allTypesOption);
+		}
 		// Enable automatic persistence in CComboBox
 		comboBox.enablePersistence("entityTypeFilter_" + FILTER_KEY, className -> {
 			// Find matching TypeOption by entity class name
@@ -124,19 +145,77 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		});
 		// Notify listeners on value change
 		comboBox.addValueChangeListener(event -> {
-			final TypeOption option = event.getValue() != null ? event.getValue() : allTypesOption;
-			notifyChangeListeners(option.getEntityClass());
+			final TypeOption option = event.getValue();
+			notifyChangeListeners(option != null ? option.getEntityClass() : null);
 		});
 	}
 
 	@Override
 	public void clearFilter() {
-		comboBox.setValue(allTypesOption);
+		if (includeAllTypesOption && allTypesOption != null) {
+			comboBox.setValue(allTypesOption);
+		} else {
+			comboBox.clear();
+		}
 	}
 
 	@Override
 	protected Component createComponent() {
 		return comboBox;
+	}
+
+	/** Gets the underlying ComboBox component for direct access if needed.
+	 * @return The ComboBox component */
+	public CComboBox<TypeOption> getComboBox() {
+		return comboBox;
+	}
+
+	/** Gets the currently selected entity class.
+	 * @return The selected entity class, or null if "All types" is selected or nothing is selected */
+	public Class<?> getSelectedEntityClass() {
+		final TypeOption option = comboBox.getValue();
+		return option != null ? option.getEntityClass() : null;
+	}
+
+	/** Sets the label of the combobox.
+	 * @param label The label to display */
+	public void setLabel(final String label) {
+		comboBox.setLabel(label);
+	}
+
+	/** Sets whether this field is required.
+	 * @param required If true, the field must have a value */
+	public void setRequired(final boolean required) {
+		comboBox.setRequired(required);
+	}
+
+	/** Sets the width of the combobox.
+	 * @param width The width (e.g., "150px", "100%") */
+	public void setWidth(final String width) {
+		comboBox.setWidth(width);
+	}
+
+	/** Sets the available entity types from a list of entity classes.
+	 * <p>
+	 * Use this method in SELECTION MODE when you want to specify exact entity types to show.
+	 * </p>
+	 * <p>
+	 * <strong>Example:</strong>
+	 *
+	 * <pre>
+	 * filter.setAvailableEntityClasses(List.of(CActivity.class, CMeeting.class));
+	 * </pre>
+	 * </p>
+	 * @param entityClasses List of entity classes to display (must not be null) */
+	public void setAvailableEntityClasses(final List<Class<?>> entityClasses) {
+		Objects.requireNonNull(entityClasses, "Entity classes list cannot be null");
+		final Map<Class<?>, TypeOption> options = new LinkedHashMap<>();
+		for (final Class<?> entityClass : entityClasses) {
+			if (entityClass != null) {
+				options.put(entityClass, new TypeOption(resolveEntityTypeLabel(entityClass), entityClass));
+			}
+		}
+		updateTypeOptionsFromMap(options);
 	}
 
 	/** Sets the available entity types based on a list of entities.
@@ -197,10 +276,19 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		} catch (@SuppressWarnings ("unused") final ClassNotFoundException e) {
 			// Meeting class not available - skip
 		}
-		// Build sorted list with "All types" first
+		updateTypeOptionsFromMap(options);
+	}
+
+	/** Updates the combobox with type options from a map.
+	 * @param options Map of entity class to TypeOption */
+	private void updateTypeOptionsFromMap(final Map<Class<?>, TypeOption> options) {
+		// Build sorted list
 		final List<TypeOption> typeOptions =
 				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
-		typeOptions.add(0, allTypesOption);
+		// Add "All types" option at the beginning if in filter mode
+		if (includeAllTypesOption && allTypesOption != null) {
+			typeOptions.add(0, allTypesOption);
+		}
 		// Capture current value BEFORE setItems() to check if it's still valid afterwards
 		final TypeOption oldValue = comboBox.getValue();
 		// Update ComboBox items (this clears the current value temporarily)
@@ -212,10 +300,16 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			comboBox.clear();
 			notifyChangeListeners(null);
 		}
-		// If no value is currently set, select "All types" as default
+		// If no value is currently set, select default
 		if (comboBox.getValue() == null) {
-			comboBox.setValue(allTypesOption);
-			notifyChangeListeners(null);
+			if (includeAllTypesOption && allTypesOption != null) {
+				comboBox.setValue(allTypesOption);
+				notifyChangeListeners(null);
+			} else if (!typeOptions.isEmpty()) {
+				// In selection mode, auto-select first item if nothing is selected
+				comboBox.setValue(typeOptions.get(0));
+				notifyChangeListeners(typeOptions.get(0).getEntityClass());
+			}
 		}
 		// Value persistence will restore saved value after this method completes
 	}
