@@ -327,7 +327,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		initializeStyles();
 		// Show root level initially
 		showLevel("root");
-		LOGGER.info("CHierarchicalSideMenu initialized successfully with {} menu levels", menuLevels.size());
+		// LOGGER.info("CHierarchicalSideMenu initialized successfully with {} menu levels", menuLevels.size());
 	}
 
 	@Override

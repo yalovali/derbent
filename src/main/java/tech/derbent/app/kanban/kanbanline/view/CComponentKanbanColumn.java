@@ -30,8 +30,7 @@ import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CComponentKanbanColumn - Renders a single kanban column with its header and post-it items. */
-public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn>
-		implements IHasSelectionNotification, IHasDragControl {
+public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implements IHasSelectionNotification, IHasDragControl {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumn.class);
 	private static final long serialVersionUID = 1L;
@@ -250,6 +249,11 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn>
 			cachedFilteredItems = filterItems(sprintItems);
 		}
 		return cachedFilteredItems;
+	}
+
+	public List<CComponentKanbanPostit> getPostits() {
+		return itemsLayout.getChildren().filter(CComponentKanbanPostit.class::isInstance).map(component -> (CComponentKanbanPostit) component)
+				.toList();
 	}
 
 	/** Invalidates the cached filtered items. Called when sprintItems or column value changes. CACHE INVALIDATION: Clear cache to force recomputation

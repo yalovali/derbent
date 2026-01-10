@@ -111,11 +111,11 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
      * restore its value.
      * </p>
      * 
-     * @see #enablePersistence(String)
+     * @see #persist_enable(String)
      */
-    default void disablePersistence() {
-        setPersistenceEnabled(false);
-        getLogger().info("[{}] Persistence disabled for key: {}", getClass().getSimpleName(), getPersistenceKey());
+    default void persist_disable() {
+        persist_setEnabled(false);
+        getLogger().info("[{}] Persistence disabled for key: {}", getClass().getSimpleName(), persist_getKey());
     }
 
     /**
@@ -136,36 +136,36 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
      * @param storageKey The unique key to use for storing the value in session
      *                   storage
      * @throws IllegalArgumentException if storageKey is null or blank
-     * @see #disablePersistence()
+     * @see #persist_disable()
      */
-    default void enablePersistence(final String storageKey) {
+    default void persist_enable(final String storageKey) {
         if (storageKey == null || storageKey.isBlank()) {
             throw new IllegalArgumentException("Storage key cannot be null or blank");
         }
-        setPersistenceKey(storageKey);
-        setPersistenceEnabled(true);
+        persist_setKey(storageKey);
+        persist_setEnabled(true);
         getLogger().info("[{}] Persistence enabled for key: {}", getClass().getSimpleName(), storageKey);
         // Add value change listener to save on every change
         addValueChangeListener(event -> {
             if (!event.isFromClient()) {
                 getLogger().debug("[{}] Value change not from client, skipping save for key: {}",
-                        getClass().getSimpleName(), getPersistenceKey());
+                        getClass().getSimpleName(), persist_getKey());
                 return;
             }
-            if (isPersistenceEnabled()) {
-                persistence_saveValue();
+            if (persist_isEnabled()) {
+                persist_saveValue();
             }
         });
         // Add attach listener to restore when component is added to UI
         if (this instanceof Component) {
             ((Component) this).addAttachListener(event -> {
-                if (isPersistenceEnabled()) {
-                    persistence_restoreValue();
+                if (persist_isEnabled()) {
+                    persist_restoreValue();
                 }
             });
             // If already attached, restore immediately
             if (((Component) this).isAttached()) {
-                persistence_restoreValue();
+                persist_restoreValue();
             }
         }
     }
@@ -185,7 +185,7 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
      * 
      * @return The storage key
      */
-    String getPersistenceKey();
+    String persist_getKey();
 
     /**
      * Gets the session service for this component.
@@ -205,7 +205,7 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
      * 
      * @return true if persistence is enabled, false otherwise
      */
-    boolean isPersistenceEnabled();
+    boolean persist_isEnabled();
 
     /**
      * Restores the value from session storage.
@@ -214,29 +214,29 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
      * component attaches.
      * </p>
      */
-    default void persistence_restoreValue() {
-        if (!isPersistenceEnabled() || getSessionService() == null) {
+    default void persist_restoreValue() {
+        if (!persist_isEnabled() || getSessionService() == null) {
             return;
         }
         try {
-            final Optional<String> storedValue = getSessionService().getSessionValue(getPersistenceKey());
+            final Optional<String> storedValue = getSessionService().getSessionValue(persist_getKey());
             if (storedValue.isPresent()) {
                 final String serialized = storedValue.get();
                 getLogger().debug("[{}] Restoring value '{}' for key: {}", getClass().getSimpleName(), serialized,
-                        getPersistenceKey());
+                        persist_getKey());
                 final T value = deserializeValue(serialized);
                 if (value != null) {
                     setValue(value);
                     getLogger().info("[{}] Restored value for key: {}", getClass().getSimpleName(),
-                            getPersistenceKey());
+                            persist_getKey());
                 } else {
                     getLogger().warn("[{}] Could not deserialize stored value '{}' for key: {}",
                             getClass().getSimpleName(), serialized,
-                            getPersistenceKey());
+                            persist_getKey());
                 }
             }
         } catch (final Exception e) {
-            getLogger().error("[{}] Error restoring value for key: {}", getClass().getSimpleName(), getPersistenceKey(),
+            getLogger().error("[{}] Error restoring value for key: {}", getClass().getSimpleName(), persist_getKey(),
                     e);
         }
     }
@@ -248,9 +248,9 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
      * changes.
      * </p>
      */
-    default void persistence_saveValue() {
-        getLogger().debug("[{}] Saving value for key: {}", getClass().getSimpleName(), getPersistenceKey());
-        if (!isPersistenceEnabled() || getSessionService() == null) {
+    default void persist_saveValue() {
+        getLogger().debug("[{}] Saving value for key: {}", getClass().getSimpleName(), persist_getKey());
+        if (!persist_isEnabled() || getSessionService() == null) {
             return;
         }
         try {
@@ -258,17 +258,17 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
             if (value != null) {
                 final String serialized = serializeValue(value);
                 if (serialized != null && !serialized.isBlank()) {
-                    getSessionService().setSessionValue(getPersistenceKey(), serialized);
+                    getSessionService().setSessionValue(persist_getKey(), serialized);
                     getLogger().debug("[{}] Saved value '{}' for key: {}", getClass().getSimpleName(), serialized,
-                            getPersistenceKey());
+                            persist_getKey());
                     return;
                 }
             }
             // Value is null or empty - remove from storage
-            getSessionService().removeSessionValue(getPersistenceKey());
-            getLogger().debug("[{}] Cleared value for key: {}", getClass().getSimpleName(), getPersistenceKey());
+            getSessionService().removeSessionValue(persist_getKey());
+            getLogger().debug("[{}] Cleared value for key: {}", getClass().getSimpleName(), persist_getKey());
         } catch (final Exception e) {
-            getLogger().error("[{}] Error saving value for key: {}", getClass().getSimpleName(), getPersistenceKey(),
+            getLogger().error("[{}] Error saving value for key: {}", getClass().getSimpleName(), persist_getKey(),
                     e);
         }
     }
@@ -292,12 +292,12 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
      * 
      * @param enabled true to enable, false to disable
      */
-    void setPersistenceEnabled(boolean enabled);
+    void persist_setEnabled(boolean enabled);
 
     /**
      * Sets the persistence key.
      * 
      * @param key The storage key
      */
-    void setPersistenceKey(String key);
+    void persist_setKey(String key);
 }

@@ -3,10 +3,8 @@ package tech.derbent.api.ui.view;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -18,7 +16,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.view.CAbstractPage;
@@ -76,7 +73,7 @@ public final class CDashboardView extends CAbstractPage {
 	 * @param activityService the activity service for fetching activity counts */
 	public CDashboardView(final CProjectService projectService, final CUserService userService, final CActivityService activityService) {
 		super();
-		LOGGER.info("Creating CDashboardView");
+		// LOGGER.info("Creating CDashboardView");
 		this.projectService = projectService;
 		this.userService = userService;
 		this.activityService = activityService;
@@ -90,7 +87,7 @@ public final class CDashboardView extends CAbstractPage {
 
 	/** Creates the project details section showing per-project statistics. */
 	private void createProjectDetailsSection() {
-		LOGGER.debug("Creating project details section");
+		// LOGGER.debug("Creating project details section");
 		projectDetailsLayout = new VerticalLayout();
 		projectDetailsLayout.addClassNames(Padding.NONE, Gap.MEDIUM);
 		projectDetailsLayout.setWidthFull();
@@ -101,7 +98,7 @@ public final class CDashboardView extends CAbstractPage {
 
 	/** Creates the summary statistics cards. */
 	private void createSummaryCards() {
-		LOGGER.debug("Creating summary statistics cards");
+		// LOGGER.debug("Creating summary statistics cards");
 		totalProjectsCard = new CDashboardStatCard("Total Projects", "0", VaadinIcon.BRIEFCASE.create());
 		totalUsersCard = new CDashboardStatCard("Total Users", "0", VaadinIcon.USERS.create());
 		totalActivitiesCard = new CDashboardStatCard("Total Activities", "0", VaadinIcon.TASKS.create());
@@ -180,8 +177,8 @@ public final class CDashboardView extends CAbstractPage {
 			totalActivitiesCard.updateValue(totalActivities);
 			// Update project details
 			updateProjectDetails(projectMetrics);
-			LOGGER.info("Dashboard data refreshed successfully - Projects: {}, Users: {}, Activities: {}", totalProjects, totalUsers,
-					totalActivities);
+			// LOGGER.info("Dashboard data refreshed successfully - Projects: {}, Users: {}, Activities: {}", totalProjects,
+			// totalUsers,totalActivities);
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing dashboard data", e);
 			// In case of error, show zero values rather than crashing
@@ -193,7 +190,7 @@ public final class CDashboardView extends CAbstractPage {
 
 	@Override
 	protected void setupToolbar() {
-		// Dashboard doesn't need a custom toolbar - using default from MainLayout		
+		// Dashboard doesn't need a custom toolbar - using default from MainLayout
 	}
 
 	/** Updates the project details section with per-project metrics.
