@@ -96,8 +96,8 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		layoutLineThree.setAlignItems(Alignment.CENTER);
 		layoutLineThree.getStyle().set("margin-top", "4px");
 		// Left side: Compact user icon
-		if (item != null && item.getResponsible() != null) {
-			final CLabelEntity userLabel = CLabelEntity.createCompactUserLabel(item.getResponsible());
+		if (item != null && item.getAssignedTo() != null) {
+			final CLabelEntity userLabel = CLabelEntity.createCompactUserLabel(item.getAssignedTo());
 			userLabel.getStyle().set("font-size", "10px");
 			layoutLineThree.add(userLabel);
 		}

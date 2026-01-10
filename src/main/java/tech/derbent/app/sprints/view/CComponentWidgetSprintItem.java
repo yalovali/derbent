@@ -75,8 +75,8 @@ public class CComponentWidgetSprintItem extends CComponentWidgetEntity<CSprintIt
 			layoutLineThree.add(dateLabel);
 		}
 		// Show responsible user
-		if (getEntity().getResponsible() != null) {
-			final CLabelEntity userLabel = CLabelEntity.createUserLabel(getEntity().getResponsible());
+		if (getEntity().getAssignedTo() != null) {
+			final CLabelEntity userLabel = CLabelEntity.createUserLabel(getEntity().getAssignedTo());
 			userLabel.getStyle().set("margin-left", "8px");
 			layoutLineThree.add(userLabel);
 		}

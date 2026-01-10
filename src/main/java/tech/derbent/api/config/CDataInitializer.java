@@ -487,7 +487,6 @@ public class CDataInitializer {
 			decision1.setEntityType(type1);
 			decision1.setStatus(status1);
 			decision1.setAssignedTo(user1);
-			decision1.setAccountableUser(user1);
 			decision1.setEstimatedCost(new java.math.BigDecimal("50000.00"));
 			decision1.setImplementationDate(java.time.LocalDateTime.now().plusDays(30));
 			decision1.setReviewDate(java.time.LocalDateTime.now().plusDays(90));
@@ -506,7 +505,6 @@ public class CDataInitializer {
 			decision2.setEntityType(type2);
 			decision2.setStatus(status2);
 			decision2.setAssignedTo(user2);
-			decision2.setAccountableUser(user1);
 			decision2.setEstimatedCost(new java.math.BigDecimal("25000.00"));
 			decision2.setImplementationDate(java.time.LocalDateTime.now().plusDays(15));
 			decision2.setReviewDate(java.time.LocalDateTime.now().plusDays(60));
@@ -540,7 +538,6 @@ public class CDataInitializer {
 				}
 			}
 			meeting1.setAssignedTo(user1);
-			meeting1.setResponsible(user2);
 			meeting1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
 			meeting1.setEndDate(meeting1.getStartDate().plusDays((int) (Math.random() * 3)));
 			meeting1.setLocation("Conference Room A / Virtual");
@@ -564,7 +561,6 @@ public class CDataInitializer {
 				}
 			}
 			meeting2.setAssignedTo(user2);
-			meeting2.setResponsible(user1);
 			meeting2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 150)));
 			meeting2.setEndDate(meeting2.getStartDate().plusDays((int) (Math.random() * 2)));
 			meeting2.setLocation("Engineering Lab / Teams");

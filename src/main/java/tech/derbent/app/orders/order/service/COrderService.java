@@ -47,16 +47,16 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 		return super.checkDeleteAllowed(order);
 	}
 
+	public List<COrder> findByAssignedTo(final CUser responsible) {
+		LOGGER.info("findByAssignedTo called with responsible: {}", responsible != null ? responsible.getName() : "null");
+		Check.notNull(responsible, "Responsible user cannot be null");
+		return ((COrderService) repository).findByAssignedTo(responsible);
+	}
+
 	public List<COrder> findByRequestor(final CUser requestor) {
 		LOGGER.info("findByRequestor called with requestor: {}", requestor != null ? requestor.getName() : "null");
 		Check.notNull(requestor, "Requestor cannot be null");
 		return ((COrderService) repository).findByRequestor(requestor);
-	}
-
-	public List<COrder> findByResponsible(final CUser responsible) {
-		LOGGER.info("findByResponsible called with responsible: {}", responsible != null ? responsible.getName() : "null");
-		Check.notNull(responsible, "Responsible user cannot be null");
-		return ((COrderService) repository).findByResponsible(responsible);
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 		entity.setOrderDate(LocalDate.now(clock)); // Default: today
 		entity.setRequiredDate(LocalDate.now(clock).plusDays(7)); // Default required date one week from now
 		entity.setRequestor(currentUser);
-		entity.setResponsible(currentUser);
+		entity.setAssignedTo(currentUser);
 		// Set default currency
 		final List<CCurrency> availableCurrencies = currencyService.listByProject(currentProject);
 		Check.notEmpty(availableCurrencies, "No currencies available for project " + currentProject.getName());

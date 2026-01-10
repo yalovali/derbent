@@ -57,12 +57,12 @@ public interface ISprintableItem {
 		moveSprintItemToSprint(targetSprint);
 	}
 
+	CUser getAssignedTo();
 	String getDescription();
 	String getDescriptionShort();
 	LocalDate getEndDate();
 	Long getId();
 	String getName();
-	CUser getResponsible();
 	CSprintItem getSprintItem();
 	Integer getSprintOrder();
 	LocalDate getStartDate();

@@ -16,7 +16,6 @@ public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 				+ "LEFT JOIN FETCH o.entityType et " + "LEFT JOIN FETCH et.workflow " + "LEFT JOIN FETCH o.status " + "WHERE o.id = :id"
 	)
 	Optional<COrder> findById(@Param ("id") Long id);
-
 	@Override
 	@Query ("""
 			SELECT DISTINCT o FROM COrder o
@@ -28,7 +27,6 @@ public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH o.currency
 			LEFT JOIN FETCH o.requestor
-			LEFT JOIN FETCH o.responsible
 			LEFT JOIN FETCH o.approvals
 			WHERE o.project = :project
 			ORDER BY o.name ASC

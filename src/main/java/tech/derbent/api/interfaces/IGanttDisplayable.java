@@ -11,6 +11,9 @@ public interface IGanttDisplayable {
 
 	/** Clear the parent relationship for this item. */
 	void clearParent();
+	/** Get the user responsible for this item. This is typically the assigned user.
+	 * @return the responsible user, or null if not assigned */
+	CUser getAssignedTo();
 	/** Get the end date of this item. For activities, this is the due date. For meetings, this is the end date/time converted to LocalDate.
 	 * @return the end date, or null if not set */
 	LocalDate getEndDate();
@@ -23,9 +26,6 @@ public interface IGanttDisplayable {
 	/** Get the parent item type (class name) for hierarchy display.
 	 * @return the parent type name (e.g., "CActivity", "CMeeting"), or null if no parent */
 	String getParentType();
-	/** Get the user responsible for this item. This is typically the assigned user.
-	 * @return the responsible user, or null if not assigned */
-	CUser getResponsible();
 	/** Get the start date of this item. For activities, this is the start date. For meetings, this is the meeting date/time converted to LocalDate.
 	 * @return the start date, or null if not set */
 	LocalDate getStartDate();
