@@ -90,7 +90,7 @@ public class CGanntGrid extends CGrid<CGanntItem> {
 			title.append(item.getEntity().getName());
 			return title.toString();
 		}).setKey("title").setWidth("200px").setFlexGrow(0).setSortable(false), "Title");
-		addShortTextColumn(CGanntItem::getResponsibleName, "Responsible", "responsible").setWidth("120px").setFlexGrow(0);
+		addShortTextColumn(CGanntItem::getResponsibleName, "Responsible", "assignedTo").setWidth("120px").setFlexGrow(0);
 		// Timeline visual bar column - colorful, responsive, with proper scaling
 		addDateColumn(CGanntItem::getStartDate, "Start", "startDate").setWidth("100px").setFlexGrow(0);
 		addDateColumn(CGanntItem::getEndDate, "End", "endDate").setWidth("100px").setFlexGrow(0);

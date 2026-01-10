@@ -17,6 +17,7 @@ import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
 public class COrderInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = COrder.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".9";
@@ -50,7 +51,6 @@ public class COrderInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "deliveryAddress"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Responsibility"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requestor"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "responsible"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
