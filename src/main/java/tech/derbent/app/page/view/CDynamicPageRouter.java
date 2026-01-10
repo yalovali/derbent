@@ -41,17 +41,6 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	 * @param onepagerEntity the entity to show, can be null to clear the view
 	 * @param pageRouter     the router responsible for rendering the one-pager
 	 * @param sessionService session service used to resolve the active project
-	 * @deprecated Use {@link #displayEntityInDynamicOnepager(CProjectItem, CDynamicPageRouter, ISessionService, IContentOwner)} instead */
-	@Deprecated
-	public static void displayEntityInDynamicOnepager(final CProjectItem<?> onepagerEntity, final CDynamicPageRouter pageRouter,
-			final ISessionService sessionService) {
-		displayEntityInDynamicOnepager(onepagerEntity, pageRouter, sessionService, null);
-	}
-
-	/** Displays the provided project item in the dynamic one-pager slider using the configured router.
-	 * @param onepagerEntity the entity to show, can be null to clear the view
-	 * @param pageRouter     the router responsible for rendering the one-pager
-	 * @param sessionService session service used to resolve the active project
 	 * @param contentOwner   optional content owner to be notified of entity changes, can be null */
 	public static void displayEntityInDynamicOnepager(final CProjectItem<?> onepagerEntity, final CDynamicPageRouter pageRouter,
 			final ISessionService sessionService, final IContentOwner contentOwner) {
@@ -99,7 +88,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
 		try {
-			loadSpecificPage(pageEntityId, pageItemId, false);
+			loadSpecificPage(pageEntityId, pageItemId, false, null);
 		} catch (final Exception e) {
 			LOGGER.error("Error loading dynamic page for entity ID {}: {}", pageEntityId, e.getMessage());
 			e.printStackTrace();
@@ -113,15 +102,12 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 		return currentPageEntity.getPageTitle();
 	}
 
-	/** @deprecated Use {@link #loadSpecificPage(Long, Long, boolean, IContentOwner)} instead */
-	@Deprecated
-	public void loadSpecificPage(Long pageEntityId1, Long pageItemId1, boolean AsDetailComponent) throws Exception {
-		loadSpecificPage(pageEntityId1, pageItemId1, AsDetailComponent, null);
-	}
-
-	/** Load a specific page by entity ID.
-	 * @param pageItemId1
-	 * @throws Exception */
+	/** Load a specific page by entity ID with optional content owner.
+	 * @param pageEntityId1     Page entity ID
+	 * @param pageItemId1       Page item ID  
+	 * @param AsDetailComponent Whether to load as detail component
+	 * @param contentOwner      Optional content owner for updates
+	 * @throws Exception if page cannot be loaded */
 	public void loadSpecificPage(Long pageEntityId1, Long pageItemId1, boolean AsDetailComponent, IContentOwner contentOwner) throws Exception {
 		if (pageEntityId1 == null) {
 			LOGGER.debug("No page entity ID provided, clearing dynamic page router content.");

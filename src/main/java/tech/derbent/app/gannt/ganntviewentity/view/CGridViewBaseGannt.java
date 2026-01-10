@@ -222,11 +222,10 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void updateDetailsComponent() throws Exception {
         LOGGER.debug("Updating details component for Gantt view");
         CDynamicPageRouter.displayEntityInDynamicOnepager(getGanntEntityFromSelectedItem(), currentEntityPageRouter,
-                sessionService);
+                sessionService, this);
     }
 }
