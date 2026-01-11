@@ -211,5 +211,169 @@ Before completing any task:
 ❌ Inconsistent package structure
 ❌ Not running spotless before commit
 
+## Entity Design Patterns (2026-01 Updates)
+
+### Entity Inheritance Decision Tree
+```
+Database entity needed?
+├─ NO → POJO or Component
+└─ YES → CEntityDB<T>
+    └─ Needs name? → CEntityNamed<T>
+        ├─ Company-scoped (roles, workflows, types)? → CEntityOfCompany<T>
+        └─ Project-scoped? → CEntityOfProject<T>
+            └─ Work item with workflow? → CProjectItem<T>
+```
+
+### Interface vs Inheritance Rules
+- **Use inheritance** for: Identity, persistence, IS-A relationships
+- **Use interfaces** for: Optional capabilities, behavior contracts, features across hierarchies
+
+Examples:
+```java
+// ✅ GOOD: Interface for optional capability
+public interface ISprintableItem {
+    CSprintItem getSprintItem();
+    Long getStoryPoint();
+    void moveSprintItemToSprint(CSprint sprint);
+}
+
+// Entity opts-in to sprint capability
+public class CActivity extends CProjectItem<CActivity> 
+        implements ISprintableItem {
+    @OneToOne(mappedBy = "activity")
+    private CSprintItem sprintItem;
+}
+
+// ✅ GOOD: Composition over inheritance
+// CSprintItem is OWNED by CActivity, not inherited
+```
+
+### Lazy Loading Patterns (CRITICAL)
+
+#### Pattern 1: Refresh Detached Entities
+```java
+protected void on_grid_selectionChanged(SelectionEvent<T> event) {
+    T entity = event.getFirstSelectedItem().orElse(null);
+    
+    // CRITICAL: Refresh to get managed entity
+    if (entity != null && entity.getId() != null) {
+        entity = service.getById(entity.getId()).orElse(entity);
+    }
+    
+    // Now safe to access lazy fields
+    updateToolbar(entity);
+}
+```
+
+#### Pattern 2: Graceful Fallback
+```java
+protected List<CStatus> statusProvider(T entity) {
+    try {
+        return entity.getValidNextStatuses(); // May fail if detached
+    } catch (LazyInitializationException | IllegalStateException e) {
+        LOGGER.debug("Lazy loading failed, using fallback");
+        return statusService.findAll(); // Fallback
+    }
+}
+```
+
+### Story Points & Progress Indicators
+
+Rules:
+1. ✅ Always visible (show "0 SP" if null)
+2. ✅ Click to edit with inline field
+3. ✅ Auto-save on blur/enter
+4. ✅ Cancel on escape
+5. ✅ Refresh column totals after save
+
+```java
+// GOOD: Click-to-edit story point widget
+public class CComponentStoryPoint extends CDiv {
+    private void on_display_clicked() {
+        showEditor();
+    }
+    
+    private void on_editor_blurred() {
+        saveAndUpdateDisplay();
+        notifyParentToRefreshTotals();
+    }
+}
+```
+
+### Multi-Value Persistence Pattern
+
+For components that need to persist multiple state values:
+
+```java
+public class CKanbanBoard implements IHasMultiValuePersistence {
+    
+    public CKanbanBoard() {
+        // Enable with unique namespace
+        persist_enable("kanbanBoard_project123");
+        
+        // Restore state
+        persist_getValue("selectedKanbanLine").ifPresent(this::selectLine);
+        persist_getValue("expandedColumns").ifPresent(this::expandColumns);
+    }
+    
+    protected void on_kanbanLine_changed(Long lineId) {
+        persist_setValue("selectedKanbanLine", lineId.toString());
+    }
+}
+```
+
+### Company-Scoped vs Project-Scoped
+
+**Company-Scoped** (CEntityOfCompany):
+- Reusable templates: CRole, CWorkflowBase, CProjectType
+- Shared across ALL company projects
+- Changes affect all projects
+
+**Project-Scoped** (CEntityOfProject):
+- Project-specific: CActivity, CMeeting, CDecision
+- Different instances per project
+- Project-level configuration
+
+## Testing Requirements (2026-01 Updates)
+
+### Comprehensive Grid Filter Tests
+```bash
+./run-playwright-tests.sh comprehensive
+```
+
+Tests MUST verify:
+- ✅ Entity type filter reduces rows
+- ✅ Status filter works correctly
+- ✅ Assigned to filter works
+- ✅ Search filter works
+- ✅ Clear button resets ALL filters
+- ✅ Screenshots captured at each step
+
+### Story Point Testing
+```bash
+# Test story point editing in kanban
+# Verify: click to edit, auto-save, column total updates
+```
+
+Tests MUST verify:
+- ✅ Story points visible even when 0
+- ✅ Click opens editor
+- ✅ Enter/blur saves value
+- ✅ Escape cancels edit
+- ✅ Column totals refresh immediately
+
+### Lazy Loading Tests
+```java
+@Test
+void testToolbarHandlesDetachedEntity() {
+    // Create & save entity
+    // Clear session (detach entity)
+    // Verify toolbar handles gracefully
+    assertDoesNotThrow(() -> toolbar.update(detached));
+}
+```
+
 ## For Complete Details
-See `.github/copilot-instructions.md` for comprehensive guidelines.
+- Entity design patterns: `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md`
+- Comprehensive guidelines: `docs/development/copilot-guidelines.md`
+- Full instructions: `.github/copilot-instructions.md`

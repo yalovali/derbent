@@ -201,5 +201,118 @@ Before completing any task:
 ❌ Direct Notification.show() calls
 ❌ Forgetting to format with spotless
 
-## For Complete Guidelines
-See `.github/copilot-instructions.md` for comprehensive documentation.
+## Entity Design Patterns (2026-01)
+
+### Entity Inheritance Decision Tree
+```
+Database entity?
+├─ NO → POJO or Component
+└─ YES → CEntityDB<T>
+    └─ Named? → CEntityNamed<T>
+        ├─ Company-scoped? → CEntityOfCompany<T>  // roles, workflows, types
+        └─ Project-scoped? → CEntityOfProject<T>
+            └─ Work item? → CProjectItem<T>  // activities, meetings, decisions
+```
+
+### Interface vs Inheritance
+- **Inheritance**: Identity, persistence, IS-A relationships
+- **Interfaces**: Optional capabilities, behavior contracts
+
+Example:
+```java
+// ✅ Interface for optional capability
+public interface ISprintableItem {
+    CSprintItem getSprintItem();
+    void moveSprintItemToSprint(CSprint sprint);
+}
+
+// Entity opts-in
+public class CActivity extends CProjectItem<CActivity> 
+        implements ISprintableItem {
+    @OneToOne(mappedBy = "activity")
+    private CSprintItem sprintItem;  // Composition, not inheritance
+}
+```
+
+### Lazy Loading (CRITICAL)
+Entities from grids are often detached. ALWAYS refresh before accessing lazy fields:
+
+```java
+protected void on_grid_selected(T entity) {
+    // Refresh to get managed entity
+    if (entity != null && entity.getId() != null) {
+        entity = service.getById(entity.getId()).orElse(entity);
+    }
+    // Now safe to access lazy fields
+}
+```
+
+Graceful fallback:
+```java
+try {
+    return entity.getValidNextStatuses();  // May fail if detached
+} catch (LazyInitializationException e) {
+    return statusService.findAll();  // Fallback
+}
+```
+
+### Story Points & Progress
+Rules:
+1. Always visible (show "0 SP" if null)
+2. Click to edit
+3. Auto-save on blur/enter, cancel on escape
+4. Refresh column totals after save
+
+### Multi-Value Persistence
+For components with multiple state values:
+
+```java
+public class CKanbanBoard implements IHasMultiValuePersistence {
+    public CKanbanBoard() {
+        persist_enable("kanbanBoard_project123");
+        persist_getValue("selectedLine").ifPresent(this::selectLine);
+    }
+    
+    protected void on_line_changed(Long lineId) {
+        persist_setValue("selectedLine", lineId.toString());
+    }
+}
+```
+
+## Testing Requirements (2026-01)
+
+### Grid Filter Tests
+```bash
+./run-playwright-tests.sh comprehensive
+```
+
+Must verify:
+- ✅ Entity type filter works
+- ✅ Status filter works
+- ✅ Assigned to filter works
+- ✅ Search filter works
+- ✅ Clear resets ALL filters
+- ✅ Screenshots captured
+
+### Story Point Tests
+Must verify:
+- ✅ Always visible (even when 0)
+- ✅ Click opens editor
+- ✅ Enter/blur saves
+- ✅ Escape cancels
+- ✅ Column totals update
+
+### Lazy Loading Tests
+```java
+@Test
+void testDetachedEntity() {
+    // Create, save, detach entity
+    // Verify toolbar handles gracefully
+    assertDoesNotThrow(() -> toolbar.update(detached));
+}
+```
+
+## Documentation
+- Entity patterns: `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md`
+- Development guide: `docs/development/copilot-guidelines.md`
+- Full instructions: `.github/copilot-instructions.md`
