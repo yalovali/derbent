@@ -221,10 +221,10 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
                 super.validateRelationship(relationship);
                 Check.notNull(relationship, "Relationship cannot be null");
                 Check.notNull(relationship.getWorkflowEntity(), "Workflow cannot be null");
-                Check.notNull(relationship.getWorkflowEntity().getProject(), "Workflow must belong to a project");
+                Check.notNull(relationship.getWorkflowEntity().getCompany(), "Workflow must belong to a company");
                 Check.notNull(relationship.getFromStatus(), "From status cannot be null");
                 Check.notNull(relationship.getToStatus(), "To status cannot be null");
-                Check.isSameCompany(relationship.getWorkflowEntity().getProject(), relationship.getFromStatus());
-                Check.isSameCompany(relationship.getWorkflowEntity().getProject(), relationship.getToStatus());
+                Check.isSameCompany(relationship.getWorkflowEntity(), relationship.getFromStatus());
+                Check.isSameCompany(relationship.getWorkflowEntity(), relationship.getToStatus());
         }
 }

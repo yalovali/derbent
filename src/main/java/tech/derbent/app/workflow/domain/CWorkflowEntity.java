@@ -3,27 +3,30 @@ package tech.derbent.app.workflow.domain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 /** CWorkflowEntity - Domain entity representing workflow definitions. Layer: Domain (MVC) Inherits from CWorkflowBase to provide workflow
- * functionality for projects. This entity defines status transition workflows based on user roles in a project.
+ * functionality for companies. This entity defines status transition workflows based on user roles in a company.
  * @author Derbent Team
  * @since 1.0 */
 @Entity
 @Table (name = "cworkflowentity", uniqueConstraints = @UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cworkflowentity_id"))
+@AssociationOverride (name = "company", joinColumns = @JoinColumn (name = "company_id", nullable = false))
 public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
 	public static final String DEFAULT_COLOR = "#7A6E58"; // OpenWindows Border Darker - process flows (darker)
@@ -52,11 +55,11 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 		isActive = Boolean.TRUE;
 	}
 
-	/** Constructor with name and project.
+	/** Constructor with name and company.
 	 * @param name    the name of the workflow
-	 * @param project the project this workflow belongs to */
-	public CWorkflowEntity(final String name, final CProject project) {
-		super(CWorkflowEntity.class, name, project);
+	 * @param company the company this workflow belongs to */
+	public CWorkflowEntity(final String name, final CCompany company) {
+		super(CWorkflowEntity.class, name, company);
 		isActive = Boolean.TRUE;
 	}
 

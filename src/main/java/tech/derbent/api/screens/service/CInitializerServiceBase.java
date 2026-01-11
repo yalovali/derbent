@@ -244,7 +244,7 @@ public abstract class CInitializerServiceBase {
 					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 					final CTypeEntity<?> typeEntity = (CTypeEntity<?>) item;
 					typeEntity.setColor(CColorUtils.getRandomColor(true));
-					typeEntity.setWorkflow(workflowEntityService.getRandom(project));
+					typeEntity.setWorkflow(workflowEntityService.getRandom(project.getCompany()));
 					typeEntity.setSortOrder(100);
 					typeEntity.setAttributeNonDeletable(true);
 				}
