@@ -38,4 +38,7 @@ public interface IProjectRepository extends IEntityOfCompanyRepository<CProject>
 				+ " p.company.id = (SELECT u.company.id FROM CUser u WHERE u.id = :userId) ORDER BY p.name"
 	)
 	List<CProject> findNotAssignedToUser(@Param ("userId") Long userId);
+	
+	@Query("SELECT COUNT(p) FROM CProject p WHERE p.entityType = :type")
+	long countByType(@Param("type") tech.derbent.app.projects.domain.CProjectType type);
 }

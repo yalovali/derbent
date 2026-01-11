@@ -107,6 +107,8 @@ import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeT
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.service.CProjectInitializerService;
 import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.app.projects.service.CProjectTypeInitializerService;
+import tech.derbent.app.projects.service.CProjectTypeService;
 import tech.derbent.app.providers.provider.service.CProviderInitializerService;
 import tech.derbent.app.providers.provider.service.CProviderService;
 import tech.derbent.app.providers.providertype.service.CProviderTypeInitializerService;
@@ -192,6 +194,7 @@ public class CDataInitializer {
 	private final CProjectItemStatusService projectItemStatusService;
 	// Service dependencies - injected via constructor
 	private final CProjectService projectService;
+	private final CProjectTypeService projectTypeService;
 	private final CRiskService riskService;
 	private final CRiskTypeService riskTypeService;
 	private final CDetailLinesService screenLinesService;
@@ -212,6 +215,7 @@ public class CDataInitializer {
 		Check.notNull(sessionService, "SessionService cannot be null");
 		gridEntityService = CSpringContext.getBean(CGridEntityService.class);
 		projectService = CSpringContext.getBean(CProjectService.class);
+		projectTypeService = CSpringContext.getBean(CProjectTypeService.class);
 		userService = CSpringContext.getBean(CUserService.class);
 		userProjectSettingsService = CSpringContext.getBean(CUserProjectSettingsService.class);
 		activityService = CSpringContext.getBean(CActivityService.class);
@@ -835,6 +839,7 @@ public class CDataInitializer {
 					CProductVersionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectComponentTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectComponentVersionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CProjectTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CActivityPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -858,6 +863,7 @@ public class CDataInitializer {
 					CCurrencyInitializerService.initializeSample(project, minimal);
 					// types
 					initializeSampleWorkflowEntities(project, minimal);
+					CProjectTypeInitializerService.initializeSample(project, minimal);
 					CMeetingTypeInitializerService.initializeSample(project, minimal);
 					CDecisionTypeInitializerService.initializeSample(project, minimal);
 					COrderTypeInitializerService.initializeSample(project, minimal);

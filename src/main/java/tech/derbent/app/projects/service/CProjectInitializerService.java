@@ -38,6 +38,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
                         CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "kanbanLine"));
 
                         detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));

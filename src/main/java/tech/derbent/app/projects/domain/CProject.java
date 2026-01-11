@@ -44,13 +44,14 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 	public static final String ENTITY_TITLE_SINGULAR = "Project";
 	public static final String VIEW_NAME = "Projects View";
 	
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "workflow_id")
+	// Type Management - concrete implementation of IHasStatusAndWorkflow
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Workflow", required = false, readOnly = false, description = "Workflow for tracking project status transitions",
-			hidden = false, dataProviderBean = "CWorkflowEntityService"
+			displayName = "Project Type", required = false, readOnly = false, description = "Type category of the project", hidden = false,
+			dataProviderBean = "CProjectTypeService", setBackgroundFromColor = true, useIcon = true
 	)
-	private CWorkflowEntity workflow;
+	private CProjectType entityType;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "status_id")
@@ -184,7 +185,12 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
         
         // IHasStatusAndWorkflow implementation
         @Override
-        public CWorkflowEntity getWorkflow() { return workflow; }
+        public CWorkflowEntity getWorkflow() {
+                if (entityType == null) {
+                        return null;
+                }
+                return entityType.getWorkflow();
+        }
         
         @Override
         public CProjectItemStatus getStatus() { return status; }
@@ -199,24 +205,19 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
                 updateLastModified();
         }
         
-        public void setWorkflow(final CWorkflowEntity workflow) {
-                if (workflow != null) {
-                        Check.notNull(getCompany(), "Company must be set before applying workflow");
-                        Check.isSameCompany(this, workflow);
-                }
-                this.workflow = workflow;
-                updateLastModified();
-        }
-        
         @Override
         public CTypeEntity<?> getEntityType() {
-                // Projects don't have entity types - they use workflow directly
-                return null;
+                return entityType;
         }
         
         @Override
         public void setEntityType(final CTypeEntity<?> typeEntity) {
-                // Projects don't have entity types - they use workflow directly
-                // This method is intentionally empty
+                if (typeEntity != null) {
+                        Check.instanceOf(typeEntity, CProjectType.class, "Type entity must be an instance of CProjectType");
+                        Check.isTrue(typeEntity.getProject().getId().equals(getId()),
+                                        "Type entity project id " + typeEntity.getProject().getId() + " does not match project id " + getId());
+                }
+                this.entityType = (CProjectType) typeEntity;
+                updateLastModified();
         }
 }
