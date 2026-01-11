@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 public class Check {
 
@@ -195,6 +196,21 @@ public class Check {
 		}
 	}
 
+	public static void isInCompany(CEntityOfCompany<?> entity1, CCompany company) {
+		notNull(entity1, "First entity cannot be null");
+		notNull(company, "Company cannot be null");
+		notNull(entity1.getCompany(), "First entity's company cannot be null");
+		if (!entity1.getCompany().getId().equals(company.getId())) {
+			// this field may be lazy loaded, so we use getName() instead of company.getName()
+			final Long comp_id1 = entity1.getCompany().getId();
+			final Long comp_id2 = company.getId();
+			final String def = String.format("Entity belongs to different company: name(%s):%s: id:%d != name(%s): id:%d", entity1.getName(),
+					entity1.getId(), comp_id1, company.getName(), comp_id2);
+			logFail(def);
+			throw new IllegalArgumentException(def);
+		}
+	}
+
 	public static void isInitialized(final Object entity) {
 		isInitialized(entity, DEFAULT_UNINITIALIZED_MESSAGE);
 	}
@@ -234,9 +250,8 @@ public class Check {
 			// this field may be lazy loaded, so we use getName() instead of company.getName()
 			final Long comp_id1 = entity1.getCompany().getId();
 			final Long comp_id2 = entity2.getCompany().getId();
-			final String def =
-					String.format("Entities belong to different companies: name(%s):%s: id:%d != name(%s):%s: id:%d", entity1.getName(),
-							entity1.getId(), comp_id1, entity2.getName(), entity2.getId(), comp_id2);
+			final String def = String.format("Entities belong to different companies: name(%s):%s: id:%d != name(%s):%s: id:%d", entity1.getName(),
+					entity1.getId(), comp_id1, entity2.getName(), entity2.getId(), comp_id2);
 			logFail(def);
 			throw new IllegalArgumentException(def);
 		}
@@ -248,9 +263,8 @@ public class Check {
 		notNull(entity1.getProject(), "First entity's project cannot be null");
 		notNull(entity2.getProject(), "Second entity's project cannot be null");
 		if (!entity1.getProject().getId().equals(entity2.getProject().getId())) {
-			final String def =
-					String.format("Entities belong to different projects: name(%s):%s: pid:%d != name(%s):%s: pid:%d", entity1.getName(),
-							entity1.getId(), entity1.getProject().getId(), entity2.getName(), entity2.getId(), entity2.getProject().getId());
+			final String def = String.format("Entities belong to different projects: name(%s):%s: pid:%d != name(%s):%s: pid:%d", entity1.getName(),
+					entity1.getId(), entity1.getProject().getId(), entity2.getName(), entity2.getId(), entity2.getProject().getId());
 			logFail(def);
 			throw new IllegalArgumentException(def);
 		}
