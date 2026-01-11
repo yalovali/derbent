@@ -36,14 +36,14 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 	}
 
 	@Override
-	public EntityClass save(final EntityClass entity) {
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
 		// Validate status is set for IHasStatusAndWorkflow entities
 		if (entity instanceof tech.derbent.app.workflow.service.IHasStatusAndWorkflow) {
 			Check.notNull(entity.getStatus(), 
 				"Status cannot be null for " + entity.getClass().getSimpleName() + 
 				". All entities implementing IHasStatusAndWorkflow must have status initialized before saving.");
 		}
-		return super.save(entity);
 	}
 
 	@SuppressWarnings ("unchecked")
