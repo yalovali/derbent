@@ -84,8 +84,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// Get current project from session
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
-		final CUser currentUser = sessionService.getActiveUser()
-				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize activity"));
 		// Initialize workflow-based status and type
 		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
 		// Initialize activity-specific fields with sensible defaults
