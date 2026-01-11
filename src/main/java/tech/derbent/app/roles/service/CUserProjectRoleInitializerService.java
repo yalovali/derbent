@@ -11,6 +11,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.roles.domain.CUserProjectRole;
@@ -44,9 +45,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "attributeNonDeletable"));
-			// Audit and assignment details
-			detailSection.addScreenLine(CDetailLinesService.createSection("Assignments"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "createdBy"));
+			// Audit details
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "lastModifiedDate"));
@@ -77,7 +76,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		// Project role data: [name, description, isAdmin, isUser, isGuest]
 		final String[][] roleData = {
 				{
@@ -88,20 +87,36 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 						"Project Guest", "Guest role with limited access", "false", "false", "true"
 				}
 		};
-		// Use the service to create roles for the project
+		// Get the service to create roles
 		final CUserProjectRoleService service = CSpringContext.getBean(CUserProjectRoleService.class);
-		int index = 0;
-		for (final String[] data : roleData) {
-			final CUserProjectRole role = new CUserProjectRole(data[0], project);
-			role.setDescription(data[1]);
-			role.setIsAdmin(Boolean.parseBoolean(data[2]));
-			role.setIsUser(Boolean.parseBoolean(data[3]));
-			role.setIsGuest(Boolean.parseBoolean(data[4]));
-			role.setColor(CColorUtils.getRandomColor(true));
-			service.save(role);
-			index++;
-			if (minimal && index >= 1) {
-				return;
+		// Get all projects for this company
+		final tech.derbent.app.projects.service.CProjectService projectService = 
+			CSpringContext.getBean(tech.derbent.app.projects.service.CProjectService.class);
+		final java.util.List<tech.derbent.app.projects.domain.CProject> projects = projectService.listByCompany(company);
+		
+		if (projects.isEmpty()) {
+			LOGGER.warn("No projects found for company: {}. Skipping project role initialization.", company.getName());
+			return;
+		}
+		
+		// Create roles for each project in the company
+		for (final tech.derbent.app.projects.domain.CProject project : projects) {
+			int index = 0;
+			for (final String[] data : roleData) {
+				final CUserProjectRole role = new CUserProjectRole(data[0], project);
+				role.setDescription(data[1]);
+				role.setIsAdmin(Boolean.parseBoolean(data[2]));
+				role.setIsUser(Boolean.parseBoolean(data[3]));
+				role.setIsGuest(Boolean.parseBoolean(data[4]));
+				role.setColor(CColorUtils.getRandomColor(true));
+				service.save(role);
+				index++;
+				if (minimal && index >= 1) {
+					break;
+				}
+			}
+			if (minimal) {
+				break; // Only initialize for the first project in minimal mode
 			}
 		}
 	}

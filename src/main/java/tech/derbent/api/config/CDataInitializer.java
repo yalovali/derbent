@@ -768,6 +768,7 @@ public class CDataInitializer {
 				CUserCompanyRoleInitializerService.initializeSample(company, minimal);
 				CUserInitializerService.initializeSample(company, minimal);
 				CProjectInitializerService.initializeSample(company, minimal);
+				CUserProjectRoleInitializerService.initializeSample(company, minimal);
 				if (minimal) {
 					break;
 				}
@@ -855,7 +856,6 @@ public class CDataInitializer {
 					CGridEntityInitializerService.initializeSample(project, minimal);
 					CMasterInitializerService.initializeSample(project, minimal);
 					CCurrencyInitializerService.initializeSample(project, minimal);
-					CUserProjectRoleInitializerService.initializeSample(project, minimal);
 					// types
 					initializeSampleWorkflowEntities(project, minimal);
 					CMeetingTypeInitializerService.initializeSample(project, minimal);
