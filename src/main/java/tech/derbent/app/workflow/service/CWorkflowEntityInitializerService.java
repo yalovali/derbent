@@ -132,7 +132,8 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 		Check.notEmpty(statuses, "Statuses list cannot be empty");
 		Check.notEmpty(roles, "Roles list cannot be empty");
 		final List<CProjectItemStatus> filteredStatuses =
-				statuses.stream().filter(status -> status != null).peek(status -> Check.isSameCompany(company, status))
+				statuses.stream().filter(status -> status != null && status.getCompany() != null 
+						&& status.getCompany().getId() != null && status.getCompany().getId().equals(company.getId()))
 						.sorted(Comparator.comparing(CProjectItemStatus::getSortOrder, Comparator.nullsLast(Integer::compareTo))
 								.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
 						.toList();
