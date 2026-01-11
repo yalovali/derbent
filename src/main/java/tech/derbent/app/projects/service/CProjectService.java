@@ -33,11 +33,17 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
+	private final CProjectTypeService projectTypeService;
+	private final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService;
 
 	public CProjectService(final IProjectRepository repository, final Clock clock, final ISessionService sessionService,
-			final ApplicationEventPublisher eventPublisher) {
+			final ApplicationEventPublisher eventPublisher,
+			final CProjectTypeService projectTypeService,
+			final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
+		this.projectTypeService = projectTypeService;
+		this.projectItemStatusService = projectItemStatusService;
 	}
 
 	@Override
@@ -137,11 +143,31 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 	@Override
         public void initializeNewEntity(final CProject entity) {
                 super.initializeNewEntity(entity);
+                LOGGER.debug("Initializing new project entity");
                 // Get current company from session
                 final CCompany currentCompany = getCurrentCompany();
                 // Initialize company with current company
                 entity.setCompany(currentCompany);
                 // Name is set by base class generateUniqueName() which is overridden below
+                
+                // Initialize entity type
+                final java.util.List<?> availableTypes = projectTypeService.listByCompany(currentCompany);
+                tech.derbent.api.utils.Check.notEmpty(availableTypes, 
+                        "No project types available in company " + currentCompany.getName() + " - cannot initialize project");
+                final tech.derbent.app.projects.domain.CProjectType selectedType = 
+                        (tech.derbent.app.projects.domain.CProjectType) availableTypes.get(0);
+                entity.setEntityType(selectedType);
+                
+                // Initialize workflow-based status
+                tech.derbent.api.utils.Check.notNull(entity.getWorkflow(), 
+                        "Workflow cannot be null for project type " + selectedType.getName());
+                final tech.derbent.api.entityOfCompany.domain.CProjectItemStatus initialStatus = 
+                        tech.derbent.app.workflow.service.IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+                tech.derbent.api.utils.Check.notNull(initialStatus, 
+                        "Initial status cannot be null for project");
+                entity.setStatus(initialStatus);
+                
+                LOGGER.debug("Project initialization complete with workflow and status");
         }
 
 	@Override

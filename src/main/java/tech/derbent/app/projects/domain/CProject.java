@@ -197,10 +197,9 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
         
         @Override
         public void setStatus(final CProjectItemStatus status) {
-                if (status != null) {
-                        Check.notNull(getCompany(), "Company must be set before applying status");
-                        Check.isSameCompany(this, status);
-                }
+                Check.notNull(status, "Status cannot be null - projects must always have a valid status");
+                Check.notNull(getCompany(), "Company must be set before applying status");
+                Check.isSameCompany(this, status);
                 this.status = status;
                 updateLastModified();
         }

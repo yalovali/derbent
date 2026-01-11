@@ -56,16 +56,6 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		}
 	}
 
-	public void assignStatusToActivity(IHasStatusAndWorkflow<?> item) {
-		Check.notNull(item, "Item cannot be null when assigning status");
-		final CWorkflowEntity workflow = item.getWorkflow();
-		Check.notNull(workflow, "Workflow cannot be null when assigning status");
-		final List<CProjectItemStatus> initialStatuses = getValidNextStatuses(item);
-		if (!initialStatuses.isEmpty()) {
-			item.setStatus(initialStatuses.get(0));
-		}
-	}
-
 	/** Checks dependencies before allowing activity status deletion. Prevents deletion if the status is being used by any activities or workflows.
 	 * Always calls super.checkDeleteAllowed() first to ensure all parent-level checks (null validation, non-deletable flag) are performed.
 	 * @param entity the activity status entity to check
