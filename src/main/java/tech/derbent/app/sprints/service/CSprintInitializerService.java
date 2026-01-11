@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -19,9 +20,6 @@ import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.app.sprints.domain.CSprintType;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
@@ -118,45 +116,38 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		try {
-			// LOGGER.debug("Initializing sample sprints for project: {}", project.getName());
-			// Get services
-			final CSprintService sprintService = CSpringContext.getBean(CSprintService.class);
-			final CSprintTypeService sprintTypeService = CSpringContext.getBean(CSprintTypeService.class);
-			final CUserService userService = CSpringContext.getBean(CUserService.class);
-			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
-			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
-			// Create sprints
-			final int sprintCount = minimal ? 1 : 2;
-			for (int i = 1; i <= sprintCount; i++) {
-				final CSprintType sprintType = sprintTypeService.getRandom(project.getCompany());
-				final CUser assignedUser = userService.getRandom(project.getCompany());
-				final CSprint sprint = new CSprint("Sprint " + i, project);
-				sprint.setDescription("Sprint " + i + " - Development iteration");
-				sprint.setEntityType(sprintType);
-				sprint.setAssignedTo(assignedUser);
-				sprint.setColor(CSprint.DEFAULT_COLOR);
-				sprint.setStartDate(LocalDate.now().plusWeeks((i - 1) * 2));
-				sprint.setEndDate(LocalDate.now().plusWeeks(i * 2));
-				// Add random activities and meetings to sprint
-				CActivity activity = activityService.getRandom(project);
-				if (activity != null) {
-					sprint.addItem(activity);
+		final String[][] nameAndDescriptions = {
+				{
+						"Sprint 1", "Sprint 1 - Development iteration"
+				}, {
+						"Sprint 2", "Sprint 2 - Development iteration"
 				}
-				activity = activityService.getRandom(project);
-				if (activity != null) {
-					sprint.addItem(activity);
+		};
+		final CSprintService sprintService = (CSprintService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
+		final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
+		initializeProjectEntity(nameAndDescriptions, sprintService, project, minimal, (sprint, index) -> {
+			// Set sprint-specific fields
+			sprint.setColor(CSprint.DEFAULT_COLOR);
+			sprint.setStartDate(LocalDate.now().plusWeeks(index * 2));
+			sprint.setEndDate(LocalDate.now().plusWeeks((index + 1) * 2));
+			// Add random activities and meetings to sprint after it's saved
+			try {
+				final CActivity activity1 = activityService.getRandom(project);
+				if (activity1 != null) {
+					sprint.addItem(activity1);
+				}
+				final CActivity activity2 = activityService.getRandom(project);
+				if (activity2 != null) {
+					sprint.addItem(activity2);
 				}
 				final CMeeting meeting = meetingService.getRandom(project);
 				if (meeting != null) {
 					sprint.addItem(meeting);
 				}
-				sprintService.save(sprint);
-				// LOGGER.debug("Created sample sprint: {} with {} items", sprint.getName(), sprint.getItemCount());
+			} catch (final Exception e) {
+				LOGGER.debug("Could not add items to sprint (activities/meetings may not exist yet): {}", e.getMessage());
 			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating sample sprints", e);
-			throw e;
-		}
+		});
 	}
 }
