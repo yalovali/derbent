@@ -1161,6 +1161,462 @@ public void processActivity(CActivity activity) {
 }
 ```
 
+## Entity Design Patterns (CRITICAL - 2026-01)
+
+### Entity Inheritance Decision Tree
+
+**ALWAYS use this decision tree when creating new entities:**
+
+```
+Is this entity stored in database?
+├─ NO → Don't extend anything (POJO or Component)
+└─ YES → Extend CEntityDB<T>
+    │
+    ├─ Does it need a human-readable name?
+    │  └─ YES → Extend CEntityNamed<T>
+    │      │
+    │      ├─ Is it scoped to a company (workflows, roles, types)?
+    │      │  └─ YES → Extend CEntityOfCompany<T>
+    │      │      │
+    │      │      └─ Examples: CRole, CWorkflowBase, CProjectType
+    │      │
+    │      └─ Is it scoped to a project?
+    │          └─ YES → Extend CEntityOfProject<T>
+    │              │
+    │              ├─ Is it a work item with status workflow?
+    │              │  └─ YES → Extend CProjectItem<T>
+    │              │      │
+    │              │      └─ Examples: CActivity, CMeeting, CDecision
+    │              │
+    │              └─ NO → Stay at CEntityOfProject<T>
+    │                  │
+    │                  └─ Examples: CProject, CProjectPhase
+    │
+    └─ NO → Stay at CEntityDB<T>
+        │
+        └─ Examples: System config, simple lookup tables
+```
+
+### Interface vs Inheritance Guidelines (CRITICAL)
+
+**When to use inheritance:**
+- Shared **identity** (all entities need id, name, etc.)
+- Core **persistence behavior** (database operations)
+- **IS-A relationship** that cannot change (Activity IS-A ProjectItem)
+
+**When to use interfaces:**
+- Optional **capabilities** (can be added/removed from entities)
+- **Behavior contracts** (defines what entity can do)
+- Features that apply to **multiple unrelated hierarchies**
+
+#### Example: ISprintableItem - Optional Sprint Capability
+
+```java
+// ✅ GOOD: Interface for optional capability
+public interface ISprintableItem {
+    CSprintItem getSprintItem();
+    Long getStoryPoint();
+    void moveSprintItemToSprint(CSprint targetSprint);
+    void moveSprintItemToBacklog();
+}
+
+// Entities opt-in to sprint capability
+public class CActivity extends CProjectItem<CActivity> 
+        implements ISprintableItem {
+    
+    @OneToOne(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CSprintItem sprintItem;
+    
+    @Override
+    public CSprintItem getSprintItem() { return sprintItem; }
+}
+
+// NOT all project items need sprints
+public class CRisk extends CProjectItem<CRisk> {
+    // Does NOT implement ISprintableItem - risks don't go in sprints
+}
+```
+
+**Why interface here?**
+- Sprint capability is **optional** (not all project items need it)
+- Provides **default implementations** via interface methods
+- Multiple entity types can share sprint behavior **without common parent**
+- Can be **added/removed** per entity type without affecting hierarchy
+
+#### Composition Over Inheritance Pattern
+
+```java
+// ✅ EXCELLENT: Sprint data is OWNED BY Activity, not inherited
+public class CSprintItem extends CEntityDB<CSprintItem> {
+    @ManyToOne
+    @JoinColumn(name = "sprint_id")
+    private CSprint sprint;
+    
+    @OneToOne
+    @JoinColumn(name = "activity_id")
+    private CActivity activity;
+    
+    @Column(name = "item_order")
+    private Integer itemOrder;
+}
+
+public class CActivity extends CProjectItem<CActivity> 
+        implements ISprintableItem {
+    
+    // GOOD: Activity OWNS sprint item (composition)
+    @OneToOne(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CSprintItem sprintItem;
+}
+```
+
+**Why composition here?**
+- Sprint assignment is **mutable state** (can change multiple times)
+- Activity might have **no sprint item** (not in any sprint)
+- Sprint item is a **join table entity** (many-to-many with ordering)
+- Keeps Activity focused on its **core responsibility** (work item)
+
+### Lazy Loading Patterns (CRITICAL - MANDATORY)
+
+**Problem:** Entities selected in grids are often **detached** from Hibernate session, causing `LazyInitializationException` when accessing lazy-loaded fields.
+
+#### Pattern 1: Refresh Selected Entity Before Access
+
+```java
+// ✅ GOOD: Refresh entity when selecting from grid
+protected void on_grid_selectionChanged(SelectionEvent<CGrid<T>, T> event) {
+    T selectedEntity = event.getFirstSelectedItem().orElse(null);
+    
+    if (selectedEntity != null && selectedEntity.getId() != null) {
+        // CRITICAL: Refresh from database to get managed entity
+        selectedEntity = service.getById(selectedEntity.getId())
+            .orElse(selectedEntity);
+    }
+    
+    // Now safe to access lazy fields
+    if (selectedEntity != null) {
+        updateToolbar(selectedEntity);
+    }
+}
+```
+
+#### Pattern 2: Graceful Fallback on Lazy Load Failures
+
+```java
+// ✅ GOOD: Catch lazy loading exceptions and provide fallback
+protected List<CProjectItemStatus> statusProvider(T entity) {
+    try {
+        // Try to get workflow-specific statuses (requires lazy field access)
+        return entity.getValidNextStatuses();
+    } catch (LazyInitializationException | IllegalStateException e) {
+        LOGGER.debug("Lazy loading failed for entity {}, falling back to all statuses", 
+            entity.getId());
+        // Fallback: show all statuses
+        return statusService.findAll();
+    }
+}
+```
+
+#### Pattern 3: Eager Loading in Service Layer
+
+```java
+// ✅ GOOD: Fetch with JOIN FETCH when you know you'll need lazy fields
+@Query("SELECT e FROM #{#entityName} e " +
+       "LEFT JOIN FETCH e.company " +
+       "LEFT JOIN FETCH e.status " +
+       "WHERE e.id = :id")
+Optional<T> findByIdWithRelations(@Param("id") Long id);
+
+// Use this method when populating forms or displaying details
+public Optional<T> getForEditing(Long id) {
+    return repository.findByIdWithRelations(id);
+}
+```
+
+### Story Points & Progress Indicators (MANDATORY)
+
+**Visual Behavior Rules:**
+1. ✅ **Always Visible**: Story points display even when value is 0 (show "0 SP")
+2. ✅ **Click to Edit**: Single-click on story point value opens inline editor
+3. ✅ **Auto-Save**: Blur or Enter key saves value and closes editor
+4. ✅ **Escape Cancels**: Escape key discards changes and closes editor
+5. ✅ **Column Totals**: Parent column story point sum updates immediately after save
+6. ✅ **Validation**: Only non-negative integers allowed
+
+```java
+// GOOD: Click-to-edit story point widget
+public class CComponentStoryPoint extends CDiv {
+    private final ISprintableItem item;
+    private final Runnable onChangeCallback;
+    
+    public CComponentStoryPoint(ISprintableItem item, Runnable onChangeCallback) {
+        this.item = item;
+        this.onChangeCallback = onChangeCallback;
+        
+        createDisplayLabel();
+        createEditor();
+        
+        add(displayLabel);
+        displayLabel.addClickListener(e -> showEditor());
+    }
+    
+    private void saveStoryPoint() {
+        Long newValue = editor.getValue() != null ? editor.getValue().longValue() : 0L;
+        item.setStoryPoint(newValue);
+        
+        // Save through service
+        CProjectItemService<?> service = getServiceForItem(item);
+        service.save((CProjectItem<?>) item);
+        
+        // Notify parent to refresh totals
+        if (onChangeCallback != null) {
+            onChangeCallback.run();
+        }
+    }
+}
+```
+
+### Multi-Value Persistence Pattern
+
+**Purpose:** Persist multiple related UI state values under a single namespace for complex components.
+
+```java
+public class CComponentKanbanBoard extends CDiv 
+        implements IHasMultiValuePersistence {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanBoard.class);
+    private String persistenceNamespace;
+    private boolean persistenceEnabled;
+    
+    public CComponentKanbanBoard(Long projectId, ISessionService sessionService) {
+        this.sessionService = sessionService;
+        
+        // Enable persistence with unique namespace
+        persist_enable("kanbanBoard_project" + projectId);
+        
+        // Restore previous state
+        restorePersistedState();
+    }
+    
+    private void restorePersistedState() {
+        // Restore selected kanban line
+        persist_getValue("selectedKanbanLineId")
+            .map(Long::valueOf)
+            .ifPresent(this::selectKanbanLine);
+        
+        // Restore expanded columns
+        persist_getValue("expandedColumns")
+            .ifPresent(this::expandColumns);
+        
+        // Restore filter values
+        persist_getValue("filterStatus")
+            .ifPresent(statusFilter::setValue);
+    }
+    
+    protected void on_kanbanLineCombo_changed(Long kanbanLineId) {
+        // Persist selection
+        persist_setValue("selectedKanbanLineId", kanbanLineId.toString());
+        
+        // Update UI
+        loadKanbanLine(kanbanLineId);
+    }
+    
+    @Override
+    public Logger getLogger() { return LOGGER; }
+    
+    @Override
+    public String persist_getNamespace() { return persistenceNamespace; }
+    
+    @Override
+    public void persist_setNamespace(String namespace) { 
+        this.persistenceNamespace = namespace; 
+    }
+    
+    @Override
+    public boolean persist_isEnabled() { return persistenceEnabled; }
+    
+    @Override
+    public void persist_setEnabled(boolean enabled) { 
+        this.persistenceEnabled = enabled; 
+    }
+}
+```
+
+### Company-Scoped vs Project-Scoped Entities (CRITICAL)
+
+**Use CEntityOfCompany when:**
+1. Entity defines **reusable templates** (workflows, roles, types)
+2. Entity is **shared across all projects** in company
+3. Entity represents **company-wide configuration**
+4. Changes should affect **all projects** using the entity
+
+**Use CEntityOfProject when:**
+5. Entity is **specific to one project**
+6. Entity represents **project work items** (activities, meetings, risks)
+7. Different projects need **different instances** of the entity
+
+#### Example: CRole - Company-Scoped (Correct)
+
+```java
+// ✅ GOOD: Role is company-scoped, can be used in any project
+public class CRole extends CEntityOfCompany<CRole> {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private CCompany company;
+}
+
+// User-Project-Role assignment links role to specific project
+public class CUserProjectRole extends CRole {
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
+    private CProject project; // Explicit project reference
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private CUser user;
+}
+```
+
+**Benefits:**
+- **Reusable**: Same role definition across all company projects
+- **Consistent**: Role permissions uniform across projects
+- **Maintainable**: Update role once, affects all projects
+- **Flexible**: User can have different roles in different projects
+
+#### Example: CProjectType - Company-Scoped Template
+
+```java
+// ✅ GOOD: Project type is company-scoped, provides workflow template
+@Entity
+@Table(name = "cproject_type")
+public class CProjectType extends CTypeEntity {
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private CCompany company;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workflow_id")
+    private CWorkflowBase workflow;
+}
+
+// Project references type (and indirectly workflow)
+public class CProject extends CEntityOfProject<CProject> {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "entity_type_id")
+    private CProjectType entityType;
+    
+    // Convenience method
+    public CWorkflowBase getWorkflow() {
+        return entityType != null ? entityType.getWorkflow() : null;
+    }
+}
+```
+
+### Testing Requirements (MANDATORY)
+
+#### Grid Filtering Tests (Comprehensive)
+
+**MUST verify for ALL pages with grids:**
+- ✅ Entity type filter reduces rows correctly
+- ✅ Status filter works correctly
+- ✅ Assigned to filter works correctly
+- ✅ Search filter works correctly
+- ✅ Clear button resets ALL filters to defaults
+- ✅ Screenshots captured at each filtering step
+
+```bash
+# Run comprehensive grid filtering tests
+./run-playwright-tests.sh comprehensive
+```
+
+#### Story Point Editing Tests
+
+**MUST verify:**
+- ✅ Story points visible even when 0 (shows "0 SP")
+- ✅ Click opens inline editor
+- ✅ Enter/blur saves value and closes editor
+- ✅ Escape cancels edit without saving
+- ✅ Column totals refresh immediately after save
+
+```java
+@Test
+void testStoryPointEditingInKanban() {
+    navigateToKanbanBoard();
+    
+    Locator postit = page.locator(".kanban-postit").first();
+    Locator storyPointDisplay = postit.locator(".story-point-display");
+    
+    // Verify initial display
+    assertThat(storyPointDisplay).hasText("5 SP");
+    
+    // Click to edit
+    storyPointDisplay.click();
+    
+    // Editor should appear
+    Locator editor = postit.locator("vaadin-integer-field");
+    assertThat(editor).isVisible();
+    
+    // Change value
+    editor.fill("8");
+    editor.press("Enter");
+    
+    // Verify update
+    assertThat(storyPointDisplay).hasText("8 SP");
+    
+    // Verify column total updated
+    Locator columnTotal = page.locator(".kanban-column-header .story-point-total");
+    assertTrue(columnTotal.textContent().contains("8"));
+}
+```
+
+#### Lazy Loading Exception Tests
+
+**MUST verify:**
+- ✅ Detached entities don't cause exceptions in toolbars
+- ✅ Grid selection refreshes entities properly
+- ✅ Graceful fallback on lazy load failures
+
+```java
+@Test
+void testToolbarHandlesDetachedEntity() {
+    // Create and save entity
+    CActivity activity = createTestActivity();
+    activityService.save(activity);
+    
+    // Clear session to detach entity
+    entityManager.clear();
+    
+    // Get detached entity
+    CActivity detached = activityService.getById(activity.getId()).get();
+    
+    // Toolbar should handle gracefully (no exceptions)
+    CCrudToolbar<CActivity> toolbar = new CCrudToolbar<>(activityService, statusService);
+    assertDoesNotThrow(() -> toolbar.updateForEntity(detached));
+    
+    // Status combobox should show fallback options
+    ComboBox<CProjectItemStatus> statusCombo = toolbar.getStatusComboBox();
+    assertNotNull(statusCombo.getDataProvider());
+}
+```
+
+### Summary Checklist for Entity Design
+
+**Before creating/modifying entities:**
+- [ ] Used inheritance decision tree to choose base class
+- [ ] Chose interface over inheritance for optional capabilities
+- [ ] Used composition for mutable relationships (sprint items)
+- [ ] Determined correct scope (company vs project)
+- [ ] Implemented lazy loading safety patterns
+- [ ] Added story point display if implementing ISprintableItem
+- [ ] Added multi-value persistence if component has complex state
+- [ ] Created comprehensive tests for grids, filters, story points
+
+**For detailed documentation, see:**
+- `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md` - Complete entity design guide
+- `docs/development/copilot-guidelines.md` - Development patterns and guidelines
+
+---
+
 ## Technology Stack Reference
 
 ### Core Technologies
@@ -1210,7 +1666,9 @@ public void processActivity(CActivity activity) {
 - `.prettierrc.json` - TypeScript/JavaScript formatting
 
 ### Important Documentation  
+- `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md` - **CRITICAL** entity design patterns (2026-01)
 - `docs/architecture/coding-standards.md` - CRITICAL coding guidelines
+- `docs/development/copilot-guidelines.md` - Development patterns and AI assistant guidelines
 - `docs/testing/playwright-*.md` - Playwright testing strategies
 - `README.md` - Project overview and quick start
 
@@ -1220,4 +1678,14 @@ public void processActivity(CActivity activity) {
 
 ---
 
-**Remember**: Always follow the coding standards in `docs/architecture/coding-standards.md` and validate ALL changes with the build and test procedures documented above. When in doubt, refer to existing patterns in the codebase and comprehensive documentation in the `docs/` directory.
+**Remember**: Always follow the coding standards and entity design patterns documented above. When in doubt:
+1. Check entity inheritance decision tree in this file
+2. Review `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md` for detailed patterns
+3. Refer to `docs/architecture/coding-standards.md` for coding conventions
+4. Validate ALL changes with build and test procedures
+
+**Key Documentation References:**
+- Entity design patterns: `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md`
+- Coding standards: `docs/architecture/coding-standards.md`
+- Development guidelines: `docs/development/copilot-guidelines.md`
+- Quick rules: `.clinerules` and `.cursorrules`

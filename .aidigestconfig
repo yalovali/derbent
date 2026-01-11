@@ -11,12 +11,46 @@ java-spring-boot-vaadin
 - Maven 3.9+
 - Playwright (testing)
 
-## Critical Rules
+## Critical Rules (2026-01 Updated)
 
 ### Naming Convention (MANDATORY)
 - All custom classes MUST have "C" prefix: CActivity, CUser, CProject
 - Interfaces use "I" prefix: IActivityRepository, IUserService
+- UI fields: typeName format (buttonAdd, gridItems, dialogConfirmation)
+- Event handlers: on_componentName_eventType (on_buttonAdd_clicked)
+- Factory methods: create_componentName (create_buttonAdd)
 - NO exceptions to C-prefix rule for custom classes
+
+### Entity Inheritance (CRITICAL - Use Decision Tree)
+```
+Database entity?
+├─ NO → POJO/Component
+└─ YES → CEntityDB<T>
+    └─ Named? → CEntityNamed<T>
+        ├─ Company-scoped? → CEntityOfCompany<T>  // workflows, roles, types
+        └─ Project-scoped? → CEntityOfProject<T>
+            └─ Work item? → CProjectItem<T>  // activities, meetings
+```
+
+### Interface vs Inheritance
+- Inheritance: Identity, persistence, IS-A relationships
+- Interfaces: Optional capabilities (ISprintableItem, IGanttDisplayable)
+- Composition: Mutable relationships (CSprintItem owned by CActivity)
+
+### Lazy Loading (MANDATORY Safety Patterns)
+1. **Refresh detached entities**: `entity = service.getById(id).orElse(entity)`
+2. **Graceful fallback**: Try-catch LazyInitializationException
+3. **Eager loading**: Use JOIN FETCH for known access patterns
+
+### Story Points (MANDATORY Behavior)
+- Always visible (show "0 SP" if null)
+- Click to edit (inline editor)
+- Auto-save on blur/enter, cancel on escape
+- Column totals refresh immediately
+
+### Company vs Project Scope (CRITICAL)
+- Company-scoped: Reusable templates (CRole, CWorkflowBase, CProjectType)
+- Project-scoped: Project work items (CActivity, CMeeting, CDecision)
 
 ### Package Structure
 tech.derbent.{module}.{layer}
@@ -28,11 +62,18 @@ tech.derbent.{module}.{layer}
 - Services: Extend CAbstractService<T>
 - Views: Extend CAbstractEntityDBPage<T>
 - Use generics, avoid raw types
+- Always use C-prefixed components (CButton, CGrid, CDialog)
 
 ### Notification Pattern
 NEVER: Notification.show()
 ALWAYS: notificationService.showSuccess/Error/Warning()
 OR: CNotifications.showSuccess/Error/Warning()
+
+### Testing Requirements (MANDATORY)
+- Grid filtering: Verify entity type, status, assignedTo, search filters
+- Story points: Click-to-edit, auto-save, column totals update
+- Lazy loading: Detached entity handling, graceful fallback
+- Screenshots: Capture at all key UI interaction moments
 
 ## Build & Test Commands
 ```bash
@@ -53,10 +94,12 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 ```
 
 ## Important Files
-- Main config: .github/copilot-instructions.md
-- Coding standards: docs/architecture/coding-standards.md
-- Project structure: docs/development/project-structure.md
-- Build config: pom.xml
+- **Main config**: .github/copilot-instructions.md (comprehensive guide)
+- **Entity patterns**: docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md (CRITICAL)
+- **Coding standards**: docs/architecture/coding-standards.md
+- **Development guide**: docs/development/copilot-guidelines.md
+- **Quick rules**: .clinerules, .cursorrules
+- **Build config**: pom.xml
 
 ## Directories
 - Source: src/main/java/tech/derbent/
@@ -64,13 +107,17 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 - Docs: docs/ (architecture/, development/, testing/, archive/)
 - Resources: src/main/resources/
 
-## Key Patterns
-1. C-prefix on all custom classes
-2. Consistent domain/service/view structure
-3. Metadata-driven with @AMetaData
-4. Type-safe with generics
-5. CNotificationService for messages
-6. Multi-tenant company-based architecture
+## Key Patterns (2026-01 Updated)
+1. **C-prefix on all custom classes** (MANDATORY)
+2. **Entity inheritance decision tree** (use correct base class)
+3. **Interface for optional capabilities** (ISprintableItem, IGanttDisplayable)
+4. **Composition over inheritance** (CSprintItem owned by entities)
+5. **Lazy loading safety** (refresh detached, graceful fallback)
+6. **Story point behavior** (always visible, click-to-edit, auto-save)
+7. **Company vs project scope** (CEntityOfCompany vs CEntityOfProject)
+8. **Multi-value persistence** (IHasMultiValuePersistence for complex state)
+9. **CNotificationService for messages** (never direct Notification.show)
+10. **Comprehensive testing** (grids, filters, story points, lazy loading)
 
 ## Entry Points
 - Main: src/main/java/tech/derbent/Application.java
@@ -78,7 +125,9 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 - Tests: src/test/java/automated_tests/
 
 ## Documentation Priority
-1. .github/copilot-instructions.md - Complete guide
-2. docs/architecture/ - Design patterns
-3. docs/development/ - Setup and workflows
-4. docs/testing/ - Test strategies
+1. **.github/copilot-instructions.md** - Complete guide with entity patterns
+2. **docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md** - CRITICAL entity design (2026-01)
+3. **docs/architecture/** - Design patterns and coding standards
+4. **docs/development/** - Setup, workflows, and guidelines
+5. **docs/testing/** - Test strategies and Playwright patterns
+6. **.clinerules / .cursorrules** - Quick reference for AI agents
