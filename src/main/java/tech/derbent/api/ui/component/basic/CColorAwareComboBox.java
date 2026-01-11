@@ -16,6 +16,8 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -24,6 +26,7 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
@@ -280,7 +283,26 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		Check.notNull(service, "Service instance cannot be null for " + serviceClass.getSimpleName());
 		try {
 			List<T> items = null;
-			if (currentEntity != null && service instanceof CEntityOfProjectService) {
+			if (currentEntity != null && service instanceof CEntityOfCompanyService) {
+				final CEntityOfCompanyService<?> companyService = (CEntityOfCompanyService<?>) service;
+				if (currentEntity instanceof CEntityOfCompany) {
+					final CCompany company = ((CEntityOfCompany<?>) currentEntity).getCompany();
+					if (company != null) {
+						items = (List<T>) companyService.listByCompany(company);
+					}
+				} else if (currentEntity instanceof CEntityOfProject) {
+					final CProject project = ((CEntityOfProject<?>) currentEntity).getProject();
+					final CCompany company = project != null ? project.getCompany() : null;
+					if (company != null) {
+						items = (List<T>) companyService.listByCompany(company);
+					}
+				} else if (currentEntity instanceof CProject) {
+					final CCompany company = ((CProject) currentEntity).getCompany();
+					if (company != null) {
+						items = (List<T>) companyService.listByCompany(company);
+					}
+				}
+			} else if (currentEntity != null && service instanceof CEntityOfProjectService) {
 				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) service;
 				if (currentEntity instanceof CEntityOfProject) {
 					final CProject project = ((CEntityOfProject<?>) currentEntity).getProject();

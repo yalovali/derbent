@@ -6,11 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "ctickettype", uniqueConstraints = @UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "ctickettype_id"))
 public class CTicketType extends CTypeEntity<CTicketType> {
@@ -26,7 +26,7 @@ public class CTicketType extends CTypeEntity<CTicketType> {
 		super();
 	}
 
-	public CTicketType(final String name, final CProject project) {
-		super(CTicketType.class, name, project);
+	public CTicketType(final String name, final CCompany company) {
+		super(CTicketType.class, name, company);
 	}
 }

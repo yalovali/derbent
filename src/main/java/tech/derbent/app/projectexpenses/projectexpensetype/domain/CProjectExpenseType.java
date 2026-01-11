@@ -6,11 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cprojectexpensetype", uniqueConstraints = @UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cprojectexpensetype_id"))
 public class CProjectExpenseType extends CTypeEntity<CProjectExpenseType> {
@@ -26,7 +26,7 @@ public class CProjectExpenseType extends CTypeEntity<CProjectExpenseType> {
 		super();
 	}
 
-	public CProjectExpenseType(final String name, final CProject project) {
-		super(CProjectExpenseType.class, name, project);
+	public CProjectExpenseType(final String name, final CCompany company) {
+		super(CProjectExpenseType.class, name, company);
 	}
 }

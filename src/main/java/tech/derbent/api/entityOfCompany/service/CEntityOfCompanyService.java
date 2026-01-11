@@ -27,6 +27,14 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	}
 
 	@Override
+	@Transactional (readOnly = true)
+	public Optional<EntityClass> getById(final Long id) {
+		final Optional<EntityClass> entity = super.getById(id);
+		entity.ifPresent(CEntityOfCompany::initializeAllFields);
+		return entity;
+	}
+
+	@Override
 	public long count() {
 		return countByCompany(sessionService.getActiveCompany()
 				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot count entities without company context")));
@@ -97,6 +105,9 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		Check.notNull(company, "Company cannot be null");
 		try {
 			final List<EntityClass> entities = ((IEntityOfCompanyRepository<EntityClass>) repository).findByCompany(company);
+			for (final EntityClass entity : entities) {
+				entity.initializeAllFields();
+			}
 			return entities;
 		} catch (final RuntimeException ex) {
 			LOGGER.error("findByProject failed (company: {}): {}", Optional.ofNullable(company.getName()).orElse("<no-name>"), ex.toString(), ex);

@@ -173,7 +173,14 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CRiskType.class, "Type entity must be an instance of CRiskType");
+		Check.notNull(getProject(), "Project must be set before assigning risk type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning risk type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning risk type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match risk project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CRiskType) typeEntity;
 		updateLastModified();
 	}

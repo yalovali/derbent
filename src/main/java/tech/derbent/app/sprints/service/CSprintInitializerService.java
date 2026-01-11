@@ -129,7 +129,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			// Create sprints
 			final int sprintCount = minimal ? 1 : 2;
 			for (int i = 1; i <= sprintCount; i++) {
-				final CSprintType sprintType = sprintTypeService.getRandom(project);
+				final CSprintType sprintType = sprintTypeService.getRandom(project.getCompany());
 				final CUser assignedUser = userService.getRandom(project.getCompany());
 				final CSprint sprint = new CSprint("Sprint " + i, project);
 				sprint.setDescription("Sprint " + i + " - Development iteration");

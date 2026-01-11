@@ -5,27 +5,25 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.app.activities.domain.CActivityPriority;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 /** CActivityPriorityRepository - Repository interface for CActivityPriority entities. Layer: Data Access (MVC) Provides data access operations for
  * activity priority management. */
 @Repository
-public interface IActivityPriorityRepository extends IEntityOfProjectRepository<CActivityPriority> {
+public interface IActivityPriorityRepository extends IEntityOfCompanyRepository<CActivityPriority> {
 
-	@Query ("SELECT p FROM CActivityPriority p WHERE p.isDefault = true and p.project = :project")
-	Optional<CActivityPriority> findByIsDefaultTrue(@Param ("project") CProject project);
+	@Query ("SELECT p FROM CActivityPriority p WHERE p.isDefault = true and p.company = :company")
+	Optional<CActivityPriority> findByIsDefaultTrue(@Param ("company") CCompany company);
 
 	@Override
 	@Query ("""
 			SELECT p FROM CActivityPriority p
-			LEFT JOIN FETCH p.project
-			LEFT JOIN FETCH p.assignedTo
-			LEFT JOIN FETCH p.createdBy
+			LEFT JOIN FETCH p.company
 			LEFT JOIN FETCH p.workflow
-			WHERE p.project = :project
+			WHERE p.company = :company
 			ORDER BY p.name ASC
 			""")
-	List<CActivityPriority> listByProjectForPageView(@Param ("project") CProject project);
+	List<CActivityPriority> listByCompanyForPageView(@Param ("company") CCompany company);
 }

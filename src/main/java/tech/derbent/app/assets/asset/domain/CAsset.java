@@ -61,7 +61,14 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CAssetType.class, "Type entity must be an instance of CAssetType");
+		Check.notNull(getProject(), "Project must be set before assigning asset type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning asset type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning asset type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match asset project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CAssetType) typeEntity;
 		updateLastModified();
 	}

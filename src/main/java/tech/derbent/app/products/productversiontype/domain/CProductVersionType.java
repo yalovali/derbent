@@ -6,11 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cproductversiontype", uniqueConstraints = @UniqueConstraint (columnNames = {
-"name", "project_id"
+"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cproductversiontype_id"))
 public class CProductVersionType extends CTypeEntity<CProductVersionType> {
@@ -25,10 +25,7 @@ public CProductVersionType() {
 super();
 }
 
-public CProductVersionType(final String name, final CProject project) {
-super(CProductVersionType.class, name, project);
+public CProductVersionType(final String name, final CCompany company) {
+super(CProductVersionType.class, name, company);
 }
-
-@Override
-public void initializeAllFields() { /*****/ }
 }

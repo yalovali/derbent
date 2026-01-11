@@ -9,11 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.decisions.domain.CDecisionType;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
-/** CDecisionTypeService - Service class for CDecisionType entities. Layer: Service (MVC) Provides business logic operations for project-aware
+/** CDecisionTypeService - Service class for CDecisionType entities. Layer: Service (MVC) Provides business logic operations for company-aware
  * decision type management including validation, creation, and status management. */
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -38,13 +38,13 @@ public class CDecisionTypeService extends CTypeEntityService<CDecisionType> impl
 		return null;
 	}
 
-	/** Finds all active decision types for a project.
-	 * @param project the project
-	 * @return list of active decision types for the project */
+	/** Finds all active decision types for a company.
+	 * @param company the company
+	 * @return list of active decision types for the company */
 	@Transactional (readOnly = true)
-	public List<CDecisionType> findAllActiveByProject(final CProject project) {
-		Optional.ofNullable(project).orElse(null);
-		return ((IDecisionTypeRepository) repository).findByProjectAndActiveTrue(project);
+	public List<CDecisionType> findAllActiveByCompany(final CCompany company) {
+		Optional.ofNullable(company).orElse(null);
+		return ((IDecisionTypeRepository) repository).findByCompanyAndActiveTrue(company);
 	}
 
 	@Override

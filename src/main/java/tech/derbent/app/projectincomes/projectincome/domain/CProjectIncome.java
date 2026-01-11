@@ -61,7 +61,14 @@ public class CProjectIncome extends CProjectItem<CProjectIncome> implements IHas
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProjectIncomeType.class, "Type entity must be an instance of CProjectIncomeType");
+		Check.notNull(getProject(), "Project must be set before assigning project income type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning project income type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning project income type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match project income project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CProjectIncomeType) typeEntity;
 		updateLastModified();
 	}

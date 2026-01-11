@@ -61,7 +61,14 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CMilestoneType.class, "Type entity must be an instance of CMilestoneType");
+		Check.notNull(getProject(), "Project must be set before assigning milestone type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning milestone type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning milestone type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match milestone project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CMilestoneType) typeEntity;
 		updateLastModified();
 	}

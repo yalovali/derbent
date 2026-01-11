@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.tickets.ticket.service.ITicketRepository;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 import tech.derbent.base.session.service.ISessionService;
@@ -63,8 +63,8 @@ public class CTicketTypeService extends CTypeEntityService<CTicketType> implemen
 	@Override
 	public void initializeNewEntity(final CTicketType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((ITicketTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((ITicketTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("TicketType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}

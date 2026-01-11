@@ -12,7 +12,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.budgets.budget.service.IBudgetRepository;
 import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -63,8 +63,8 @@ public class CBudgetTypeService extends CTypeEntityService<CBudgetType> implemen
 	@Override
 	public void initializeNewEntity(final CBudgetType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((IBudgetTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IBudgetTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("BudgetType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}

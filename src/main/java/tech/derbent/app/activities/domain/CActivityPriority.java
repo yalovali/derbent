@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 /** CActivityPriority - Domain entity representing activity priority levels. Provides predefined priority levels for activity categorization and
  * workflow management. Layer: Domain (MVC) Standard priority levels: CRITICAL, HIGH, MEDIUM, LOW, LOWEST
@@ -47,18 +47,18 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	/** Constructor with required fields only.
 	 * @param name    the name of the activity priority (e.g., "HIGH", "MEDIUM")
-	 * @param project the project this priority belongs to */
-	public CActivityPriority(final String name, final CProject project) {
-		super(CActivityPriority.class, name, project);
+	 * @param company the company this priority belongs to */
+	public CActivityPriority(final String name, final CCompany company) {
+		super(CActivityPriority.class, name, company);
 	}
 
 	/** Constructor with all common fields.
 	 * @param name      the name of the activity priority
-	 * @param project   the project this priority belongs to
+	 * @param company   the company this priority belongs to
 	 * @param color     the hex color code for UI display
 	 * @param sortOrder the display order */
-	public CActivityPriority(final String name, final CProject project, final String color, final Integer sortOrder) {
-		super(CActivityPriority.class, name, project);
+	public CActivityPriority(final String name, final CCompany company, final String color, final Integer sortOrder) {
+		super(CActivityPriority.class, name, company);
 		setColor(color);
 		setSortOrder(sortOrder);
 	}
@@ -81,8 +81,8 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	@Override
 	public String toString() {
-		return String.format("CActivityPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, project=%s, priorityLevel=%d, isDefault=%s}",
-				getId(), getName(), getColor(), getSortOrder(), getActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
+		return String.format("CActivityPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, company=%s, priorityLevel=%d, isDefault=%s}",
+				getId(), getName(), getColor(), getSortOrder(), getActive(), getCompany() != null ? getCompany().getName() : "null", priorityLevel,
 				isDefault);
 	}
 }

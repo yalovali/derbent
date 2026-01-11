@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "ccommentpriority")
@@ -39,13 +39,13 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 		isDefault = false;
 	}
 
-	public CCommentPriority(final String name, final CProject project) {
-		super(CCommentPriority.class, name, project);
-		// LOGGER.debug("CCommentPriority constructor called with name: {} and project: {}", name, project);
+	public CCommentPriority(final String name, final CCompany company) {
+		super(CCommentPriority.class, name, company);
+		// LOGGER.debug("CCommentPriority constructor called with name: {} and company: {}", name, company);
 	}
 
-	public CCommentPriority(final String name, final CProject project, final String color, final Integer sortOrder) {
-		super(CCommentPriority.class, name, project);
+	public CCommentPriority(final String name, final CCompany company, final String color, final Integer sortOrder) {
+		super(CCommentPriority.class, name, company);
 		setColor(color);
 		setSortOrder(sortOrder);
 	}
@@ -62,8 +62,8 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	@Override
 	public String toString() {
-		return String.format("CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, project=%s, priorityLevel=%d, isDefault=%s}",
-				getId(), getName(), getColor(), getSortOrder(), getActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
+		return String.format("CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, company=%s, priorityLevel=%d, isDefault=%s}",
+				getId(), getName(), getColor(), getSortOrder(), getActive(), getCompany() != null ? getCompany().getName() : "null", priorityLevel,
 				isDefault);
 	}
 }

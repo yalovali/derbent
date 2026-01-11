@@ -73,8 +73,9 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 		if (user != null) {
 			Check.isSameCompany(project, user);
 		}
-		if (role != null && role.getProject() != null) {
-			Check.isTrue(role.getProject().getId().equals(project.getId()), "Project role is linked to a different project");
+		if (role != null && role.getCompany() != null) {
+			Check.isTrue(role.getCompany().getId().equals(project.getCompany().getId()),
+					"Project role is linked to a different company");
 		}
 		this.project = project;
 	}
@@ -85,8 +86,8 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 			return;
 		}
 		Check.notNull(project, "Project must be set before assigning a role");
-		if (role.getProject() != null) {
-			Check.isTrue(role.getProject().getId().equals(project.getId()), "Role must belong to the same project");
+		if (role.getCompany() != null && project.getCompany() != null) {
+			Check.isTrue(role.getCompany().getId().equals(project.getCompany().getId()), "Role must belong to the same company");
 		}
 		this.role = role;
 	}

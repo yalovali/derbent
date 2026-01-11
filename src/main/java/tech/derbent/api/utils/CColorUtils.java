@@ -12,6 +12,7 @@ import java.util.Optional;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Span;
@@ -355,7 +356,8 @@ public final class CColorUtils {
 
 	public static String getStaticStringValue(final Class<?> clazz, final String fieldName) throws Exception {
 		try {
-			final Field field = clazz.getDeclaredField(fieldName);
+			final Class<?> userClass = ProxyUtils.getUserClass(clazz);
+			final Field field = userClass.getDeclaredField(fieldName);
 			return field.get(null).toString();
 		} catch (final Exception e) {
 			LOGGER.error("Error getting static string value for field {} in class {}: {}", fieldName, clazz.getSimpleName(), e.getMessage());

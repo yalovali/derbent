@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.risks.risk.service.IRiskRepository;
 import tech.derbent.app.risks.risktype.domain.CRiskType;
 import tech.derbent.base.session.service.ISessionService;
@@ -70,8 +70,8 @@ public class CRiskTypeService extends CTypeEntityService<CRiskType> implements I
 	@Override
 	public void initializeNewEntity(final CRiskType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((IRiskTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IRiskTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("RiskType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}

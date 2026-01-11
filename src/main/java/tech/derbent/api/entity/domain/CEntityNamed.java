@@ -139,10 +139,12 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
         final String lowerSearchValue = searchValue.toLowerCase().trim();
         // Check ID field if requested
         Check.notNull(fieldNames, "fieldNames cannot be null here");
-        if (fieldNames.remove("name") && getName().toLowerCase().contains(lowerSearchValue)) {
+        final String name = getName();
+        if (fieldNames.remove("name") && name != null && name.toLowerCase().contains(lowerSearchValue)) {
             return true;
         }
-        if (fieldNames.remove("description") && getDescription().toLowerCase().contains(lowerSearchValue)) {
+        final String description = getDescription();
+        if (fieldNames.remove("description") && description != null && description.toLowerCase().contains(lowerSearchValue)) {
             return true;
         }
         return false;

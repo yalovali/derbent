@@ -12,7 +12,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.products.productversion.service.IProductVersionRepository;
 import tech.derbent.app.products.productversiontype.domain.CProductVersionType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -63,8 +63,8 @@ public class CProductVersionTypeService extends CTypeEntityService<CProductVersi
 	@Override
 	public void initializeNewEntity(final CProductVersionType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((IProductVersionTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IProductVersionTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ProductVersionType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}

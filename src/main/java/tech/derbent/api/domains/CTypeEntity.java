@@ -9,9 +9,9 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IHasColor;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 /** CTypeEntity - Abstract base class for all type entities in the system. Provides common fields for type management including color, sort order, and
@@ -19,7 +19,7 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
  * @author Derbent Team
  * @since 1.0 */
 @MappedSuperclass
-public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityClass> implements IHasColor {
+public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityClass> implements IHasColor {
 
 	@Column (nullable = false)
 	@AMetaData (
@@ -60,9 +60,9 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 
 	/** Constructor with required fields.
 	 * @param name    the name of the type entity
-	 * @param project the project this type belongs to */
-	public CTypeEntity(final Class<EntityClass> clazz, final String name, final CProject project) {
-		super(clazz, name, project);
+	 * @param company the company this type belongs to */
+	public CTypeEntity(final Class<EntityClass> clazz, final String name, final CCompany company) {
+		super(clazz, name, company);
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;
@@ -96,7 +96,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 		return super.hashCode();
 	}
 
-	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityOfProject to also search in
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityOfCompany to also search in
 	 * type-specific fields.
 	 * @param searchValue the value to search for (case-insensitive)
 	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
@@ -147,7 +147,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 
 	@Override
 	public String toString() {
-		return String.format("%s{id=%d, name='%s', color='%s', sortOrder=%d, nonDeletable=%s, project=%s}", getClass().getSimpleName(), getId(),
-				getName(), color, sortOrder, attributeNonDeletable, getProject() != null ? getProject().getName() : "null");
+		return String.format("%s{id=%d, name='%s', color='%s', sortOrder=%d, nonDeletable=%s, company=%s}", getClass().getSimpleName(), getId(),
+				getName(), color, sortOrder, attributeNonDeletable, getCompany() != null ? getCompany().getName() : "null");
 	}
 }

@@ -61,7 +61,14 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProviderType.class, "Type entity must be an instance of CProviderType");
+		Check.notNull(getProject(), "Project must be set before assigning provider type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning provider type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning provider type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match provider project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CProviderType) typeEntity;
 		updateLastModified();
 	}

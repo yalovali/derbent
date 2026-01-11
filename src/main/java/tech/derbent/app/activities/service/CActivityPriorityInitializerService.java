@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -17,6 +17,7 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.activities.domain.CActivityPriority;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
 
@@ -35,7 +36,7 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			scr.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
@@ -58,7 +59,7 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "priorityLevel", "isDefault", "color", "sortOrder", "active", "project"));
+		grid.setColumnFields(List.of("id", "name", "description", "priorityLevel", "isDefault", "color", "sortOrder", "active", "company"));
 		return grid;
 	}
 
@@ -85,7 +86,8 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 						"Lowest", "Lowest priority - no immediate action needed"
 				}
 		};
-		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
+		final CCompany company = project.getCompany();
+		initializeCompanyEntity(nameAndDescriptions,
+				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal, null);
 	}
 }

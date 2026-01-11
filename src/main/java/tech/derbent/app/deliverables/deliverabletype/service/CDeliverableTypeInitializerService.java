@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -31,7 +32,7 @@ public class CDeliverableTypeInitializerService extends CInitializerServiceBase 
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
@@ -53,7 +54,7 @@ public class CDeliverableTypeInitializerService extends CInitializerServiceBase 
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "project"));
+		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "company"));
 		return grid;
 	}
 
@@ -75,6 +76,7 @@ public class CDeliverableTypeInitializerService extends CInitializerServiceBase 
 		};
 		final CDeliverableTypeService service =
 				CSpringContext.getBean(CDeliverableTypeService.class);
-		initializeProjectEntity(deliverableTypes, service, project, minimal, null);
+		final CCompany company = project.getCompany();
+		initializeCompanyEntity(deliverableTypes, service, company, minimal, null);
 	}
 }

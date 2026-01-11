@@ -5,13 +5,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.app.companies.domain.CCompany;
 
 /** CProjectType - Domain entity representing project types. 
  * Layer: Domain (MVC) 
  * Inherits from CTypeEntity to provide project-aware type functionality for projects. */
 @Entity
 @Table(name = "cprojecttype", uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride(name = "id", column = @Column(name = "cprojecttype_id"))
 public class CProjectType extends CTypeEntity<CProjectType> {
@@ -27,7 +28,7 @@ public class CProjectType extends CTypeEntity<CProjectType> {
 		super();
 	}
 
-	public CProjectType(final String name, final CProject project) {
-		super(CProjectType.class, name, project);
+	public CProjectType(final String name, final CCompany company) {
+		super(CProjectType.class, name, company);
 	}
 }

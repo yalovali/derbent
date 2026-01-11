@@ -116,21 +116,23 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 	 * scenarios including the ability to restart workflows that have been canceled or completed.
 	 * @param name                          Workflow name
 	 * @param company                       Company for the workflow
-	 * @param project                       Project context for role filtering
 	 * @param statuses                      Available project item statuses
 	 * @param roles                         User project roles for transition permissions
 	 * @param workflowEntityService         Service for saving workflow entities
 	 * @param workflowStatusRelationService Service for saving status relations */
-	public static void initializeSampleWorkflow(final String name, final CCompany company, final CProject project, final List<CProjectItemStatus> statuses,
+	public static void initializeSampleWorkflow(final String name, final CCompany company, final List<CProjectItemStatus> statuses,
 			final List<CUserProjectRole> roles, final CWorkflowEntityService workflowEntityService,
 			final CWorkflowStatusRelationService workflowStatusRelationService) {
 		Check.notNull(name, "Workflow name cannot be null");
 		Check.notNull(company, "Company cannot be null");
-		Check.notNull(project, "Project cannot be null");
 		Check.notNull(statuses, "Statuses list cannot be null");
 		Check.notNull(roles, "Roles list cannot be null");
 		Check.notEmpty(statuses, "Statuses list cannot be empty");
 		Check.notEmpty(roles, "Roles list cannot be empty");
+		if (workflowEntityService.findByNameAndCompany(name, company).isPresent()) {
+			LOGGER.debug("Skipping sample workflow '{}' because it already exists for company: {}", name, company.getName());
+			return;
+		}
 		final List<CProjectItemStatus> filteredStatuses =
 				statuses.stream().filter(status -> status != null && status.getCompany() != null 
 						&& status.getCompany().getId() != null && status.getCompany().getId().equals(company.getId()))
@@ -138,9 +140,9 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 								.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
 						.toList();
 		Check.notEmpty(filteredStatuses, "No statuses available for workflow " + name + " in company " + company.getName());
-		final List<CUserProjectRole> filteredRoles = roles.stream().filter(role -> role != null && role.getProject() != null
-				&& role.getProject().getId() != null && role.getProject().getId().equals(project.getId())).toList();
-		Check.notEmpty(filteredRoles, "No roles available for workflow " + name + " in project " + project.getName());
+		final List<CUserProjectRole> filteredRoles = roles.stream().filter(role -> role != null && role.getCompany() != null
+				&& role.getCompany().getId() != null && role.getCompany().getId().equals(company.getId())).toList();
+		Check.notEmpty(filteredRoles, "No roles available for workflow " + name + " in company " + company.getName());
 		final CWorkflowEntity workflow = new CWorkflowEntity(name, company);
 		workflow.setDescription("Defines status transitions for " + name + " based on user roles");
 		workflow.setIsActive(true);
@@ -182,36 +184,34 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 	 * including: - Activity Status Workflow - Decision Status Workflow - Meeting Status Workflow - Risk Status Workflow - Project Status Workflow
 	 * Each workflow includes forward, backward, cancel, done, and restart transitions. The restart transition allows items in canceled or completed
 	 * states to be returned to the initial state to restart the workflow.
-	 * @param project                       The project context for role filtering
+	 * @param company                       The company context for role filtering
 	 * @param minimal                       Whether to create minimal sample data
 	 * @param projectItemStatusService      Service for loading statuses
 	 * @param userProjectRoleService        Service for loading roles
 	 * @param workflowEntityService         Service for saving workflow entities
 	 * @param workflowStatusRelationService Service for saving status relations */
-	public static void initializeSampleWorkflowEntities(final CProject project, final boolean minimal,
+	public static void initializeSampleWorkflowEntities(final CCompany company, final boolean minimal,
 			final CProjectItemStatusService projectItemStatusService, final CUserProjectRoleService userProjectRoleService,
 			final CWorkflowEntityService workflowEntityService, final CWorkflowStatusRelationService workflowStatusRelationService) {
 		try {
-			final CCompany company = project.getCompany();
-			Check.notNull(company, "Project must have a company");
+			Check.notNull(company, "Company cannot be null");
 			// Get available statuses for this company
 			final List<CProjectItemStatus> statuses = projectItemStatusService.listByCompany(company).stream()
 					.sorted(Comparator.comparing(CProjectItemStatus::getSortOrder, Comparator.nullsLast(Integer::compareTo))
 							.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
 					.toList();
 			Check.notEmpty(statuses, "No project item statuses found for company: " + company.getName());
-			final List<CUserProjectRole> roles = userProjectRoleService.findByProject(project).stream()
-					.filter(role -> role.getProject() != null && project.getId().equals(role.getProject().getId())).toList();
-			Check.notEmpty(roles, "No user project roles found for project: " + project.getName());
-			initializeSampleWorkflow("Activity Status Workflow", company, project, statuses, roles, workflowEntityService, workflowStatusRelationService);
-			initializeSampleWorkflow("Decision Status Workflow", company, project, statuses, roles, workflowEntityService, workflowStatusRelationService);
-			initializeSampleWorkflow("Meeting Status Workflow", company, project, statuses, roles, workflowEntityService, workflowStatusRelationService);
-			initializeSampleWorkflow("Risk Status Workflow", company, project, statuses, roles, workflowEntityService, workflowStatusRelationService);
-			initializeSampleWorkflow("Project Status Workflow", company, project, statuses, roles, workflowEntityService, workflowStatusRelationService);
+			final List<CUserProjectRole> roles = userProjectRoleService.listByCompany(company);
+			Check.notEmpty(roles, "No user project roles found for company: " + company.getName());
+			initializeSampleWorkflow("Activity Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
+			initializeSampleWorkflow("Decision Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
+			initializeSampleWorkflow("Meeting Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
+			initializeSampleWorkflow("Risk Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
+			initializeSampleWorkflow("Project Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
 			LOGGER.debug("Created sample workflow entities with complete cancel/done/restart transitions for company: {}", company.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample workflow entities for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample workflow entities for project: " + project.getName(), e);
+			LOGGER.error("Error initializing sample workflow entities for company: {}", company.getName(), e);
+			throw new RuntimeException("Failed to initialize sample workflow entities for company: " + company.getName(), e);
 		}
 	}
 }

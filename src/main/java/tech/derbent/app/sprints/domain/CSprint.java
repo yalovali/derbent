@@ -25,6 +25,7 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
@@ -453,6 +454,14 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
+		Check.instanceOf(typeEntity, CSprintType.class, "Type entity must be an instance of CSprintType");
+		Check.notNull(getProject(), "Project must be set before assigning sprint type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning sprint type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning sprint type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match sprint project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CSprintType) typeEntity;
 		updateLastModified();
 	}

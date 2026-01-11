@@ -355,7 +355,7 @@ public class CDataInitializer {
 	private void createSampleCommentsForDecision(final CDecision decision) {
 		try {
 			// Comments require an activity - create a simple activity related to this decision
-			final CActivityType activityType = activityTypeService.getRandom(decision.getProject());
+			final CActivityType activityType = activityTypeService.getRandom(decision.getProject().getCompany());
 			final CUser user = userService.getRandom(decision.getProject().getCompany());
 			final CActivity activity = new CActivity("Review Decision: " + decision.getName(), decision.getProject());
 			activity.setDescription("Activity to track review and implementation of decision");
@@ -364,8 +364,8 @@ public class CDataInitializer {
 			assignStatusToActivity(activity);
 			activityService.save(activity);
 			// Create 2 comments for this activity
-			final CCommentPriority priority1 = commentPriorityService.getRandom(decision.getProject());
-			final CCommentPriority priority2 = commentPriorityService.getRandom(decision.getProject());
+			final CCommentPriority priority1 = commentPriorityService.getRandom(decision.getProject().getCompany());
+			final CCommentPriority priority2 = commentPriorityService.getRandom(decision.getProject().getCompany());
 			final CUser commenter1 = userService.getRandom(decision.getProject().getCompany());
 			final CUser commenter2 = userService.getRandom(decision.getProject().getCompany());
 			final CComment comment1 =
@@ -386,7 +386,7 @@ public class CDataInitializer {
 	private void createSampleCommentsForMeeting(final CMeeting meeting, final boolean minimal) {
 		try {
 			// Comments require an activity - create a simple activity related to this meeting
-			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject());
+			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject().getCompany());
 			final CUser user = userService.getRandom(meeting.getProject().getCompany());
 			final CActivity activity = new CActivity("Follow-up: " + meeting.getName(), meeting.getProject());
 			activity.setDescription("Activity to track action items from meeting");
@@ -401,7 +401,7 @@ public class CDataInitializer {
 			}
 			activityService.save(activity);
 			// Create 2 comments for this activity
-			final CCommentPriority priority1 = commentPriorityService.getRandom(meeting.getProject());
+			final CCommentPriority priority1 = commentPriorityService.getRandom(meeting.getProject().getCompany());
 			final CUser commenter1 = userService.getRandom(meeting.getProject().getCompany());
 			final CComment comment1 = new CComment("Meeting was productive. Action items are clearly defined.", activity, commenter1, priority1);
 			commentService.save(comment1);
@@ -409,7 +409,7 @@ public class CDataInitializer {
 				return;
 			}
 			final CUser commenter2 = userService.getRandom(meeting.getProject().getCompany());
-			final CCommentPriority priority2 = commentPriorityService.getRandom(meeting.getProject());
+			final CCommentPriority priority2 = commentPriorityService.getRandom(meeting.getProject().getCompany());
 			final CComment comment2 = new CComment("I'll take ownership of the first two action items. Expected completion in 2 weeks.", activity,
 					commenter2, priority2);
 			commentService.save(comment2);
@@ -425,8 +425,8 @@ public class CDataInitializer {
 	private void initializeSampleActivities(final CProject project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
-			final CActivityType type1 = activityTypeService.getRandom(project);
-			final CActivityPriority priority1 = activityPriorityService.getRandom(project);
+			final CActivityType type1 = activityTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
 			// Create parent activity
 			final CActivity activity1 = new CActivity("Phase 1: Planning and Analysis", project);
@@ -439,8 +439,8 @@ public class CDataInitializer {
 			assignStatusToActivity(activity1);
 			activityService.save(activity1);
 			// Create child activity 1
-			final CActivityType type2 = activityTypeService.getRandom(project);
-			final CActivityPriority priority2 = activityPriorityService.getRandom(project);
+			final CActivityType type2 = activityTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			final CActivity activity2 = new CActivity("Requirements Gathering", project);
 			activity2.setDescription("Collect and document business requirements");
@@ -456,8 +456,8 @@ public class CDataInitializer {
 				return;
 			}
 			// Create child activity 2
-			final CActivityType type3 = activityTypeService.getRandom(project);
-			final CActivityPriority priority3 = activityPriorityService.getRandom(project);
+			final CActivityType type3 = activityTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority3 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user3 = userService.getRandom(project.getCompany());
 			final CActivity activity3 = new CActivity("System Architecture Design", project);
 			activity3.setDescription("Design system architecture and component interactions");
@@ -481,7 +481,7 @@ public class CDataInitializer {
 	private void initializeSampleDecisions(final CProject project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
-			final CDecisionType type1 = decisionTypeService.getRandom(project);
+			final CDecisionType type1 = decisionTypeService.getRandom(project.getCompany());
 			final CProjectItemStatus status1 = activityStatusService.getRandom(project.getCompany());
 			// use company here !!!
 			final CUser user1 = userService.getRandom(project.getCompany());
@@ -501,7 +501,7 @@ public class CDataInitializer {
 				return;
 			}
 			// Create second decision
-			final CDecisionType type2 = decisionTypeService.getRandom(project);
+			final CDecisionType type2 = decisionTypeService.getRandom(project.getCompany());
 			final CProjectItemStatus status2 = activityStatusService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			final CDecision decision2 = new CDecision("Implement Agile Methodology", project);
@@ -527,9 +527,9 @@ public class CDataInitializer {
 	private void initializeSampleMeetings(final CProject project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
-			final CMeetingType type1 = meetingTypeService.getRandom(project);
+			final CMeetingType type1 = meetingTypeService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
-			final CMeetingType type2 = meetingTypeService.getRandom(project);
+			final CMeetingType type2 = meetingTypeService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			// Create first meeting
 			final CMeeting meeting1 = new CMeeting("Q1 Planning Session", project, type1);
@@ -586,7 +586,7 @@ public class CDataInitializer {
 		try {
 			final CProjectExpenseTypeService expenseTypeService = CSpringContext.getBean(CProjectExpenseTypeService.class);
 			final CProjectExpenseService expenseService = CSpringContext.getBean(CProjectExpenseService.class);
-			final CProjectExpenseType type1 = expenseTypeService.getRandom(project);
+			final CProjectExpenseType type1 = expenseTypeService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
 			final CProjectExpense expense1 = new CProjectExpense("Cloud Hosting Services", project);
 			expense1.setDescription("Monthly cloud infrastructure hosting costs");
@@ -602,7 +602,7 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			final CProjectExpenseType type2 = expenseTypeService.getRandom(project);
+			final CProjectExpenseType type2 = expenseTypeService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			final CProjectExpense expense2 = new CProjectExpense("External Development Team", project);
 			expense2.setDescription("Contracted external development services");
@@ -626,7 +626,7 @@ public class CDataInitializer {
 		try {
 			final CProjectIncomeTypeService incomeTypeService = CSpringContext.getBean(CProjectIncomeTypeService.class);
 			final CProjectIncomeService incomeService = CSpringContext.getBean(CProjectIncomeService.class);
-			final CProjectIncomeType type1 = incomeTypeService.getRandom(project);
+			final CProjectIncomeType type1 = incomeTypeService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
 			final CProjectIncome income1 = new CProjectIncome("Software License Revenue", project);
 			income1.setDescription("Revenue from software license sales");
@@ -642,7 +642,7 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			final CProjectIncomeType type2 = incomeTypeService.getRandom(project);
+			final CProjectIncomeType type2 = incomeTypeService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			final CProjectIncome income2 = new CProjectIncome("Support Contract Revenue", project);
 			income2.setDescription("Annual support and maintenance contracts");
@@ -694,7 +694,7 @@ public class CDataInitializer {
 
 	private void initializeSampleTickets(final CProject project, final boolean minimal) {
 		try {
-			final CTicketType type1 = ticketTypeService.getRandom(project);
+			final CTicketType type1 = ticketTypeService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
 			final CTicket ticket1 = new CTicket("Login Authentication Bug", project);
 			ticket1.setDescription("Users unable to login with correct credentials");
@@ -710,7 +710,7 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			final CTicketType type2 = ticketTypeService.getRandom(project);
+			final CTicketType type2 = ticketTypeService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			final CTicket ticket2 = new CTicket("Dashboard Customization Feature", project);
 			ticket2.setDescription("Allow users to customize their dashboard layout");
@@ -747,11 +747,11 @@ public class CDataInitializer {
 	}
 
 	/** Initialize sample workflow entities to demonstrate workflow management.
-	 * @param project the project to create workflow entities for
+	 * @param company the company to create workflow entities for
 	 * @param minimal whether to create minimal sample data */
-	private void initializeSampleWorkflowEntities(final CProject project, final boolean minimal) {
+	private void initializeSampleWorkflowEntities(final CCompany company, final boolean minimal) {
 		// Delegate to CWorkflowEntityInitializerService for workflow initialization
-		CWorkflowEntityInitializerService.initializeSampleWorkflowEntities(project, minimal, projectItemStatusService, userProjectRoleService,
+		CWorkflowEntityInitializerService.initializeSampleWorkflowEntities(company, minimal, projectItemStatusService, userProjectRoleService,
 				workflowEntityService, workflowStatusRelationService);
 	}
 
@@ -770,9 +770,8 @@ public class CDataInitializer {
 			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
 				sessionService.setActiveCompany(company);
 				CUserCompanyRoleInitializerService.initializeSample(company, minimal);
-				CUserInitializerService.initializeSample(company, minimal);
-				CProjectInitializerService.initializeSample(company, minimal);
 				CUserProjectRoleInitializerService.initializeSample(company, minimal);
+				CUserInitializerService.initializeSample(company, minimal);
 				if (minimal) {
 					break;
 				}
@@ -791,7 +790,18 @@ public class CDataInitializer {
 				CProjectItemStatusInitializerService.initializeSample(company, minimal);
 				CKanbanLineInitializerService.initializeSample(company, minimal); // must be after status
 				CApprovalStatusInitializerService.initializeSample(company, minimal);
-				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
+				initializeSampleWorkflowEntities(company, minimal);
+				CProjectTypeInitializerService.initializeSample(company, minimal);
+				CProjectInitializerService.initializeSample(company, minimal);
+				final List<CProject> projects = projectService.listByCompany(company);
+				if (projects.isEmpty()) {
+					LOGGER.warn("No projects found for company: {}. Skipping project-specific initialization.", company.getName());
+					if (minimal) {
+						break;
+					}
+					continue;
+				}
+				final CProject sampleProject = projects.get(0);
 				for (final CProject project : projects) {
 					LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),
 							company.getName());
@@ -862,29 +872,29 @@ public class CDataInitializer {
 					CMasterInitializerService.initializeSample(project, minimal);
 					CCurrencyInitializerService.initializeSample(project, minimal);
 					// types
-					initializeSampleWorkflowEntities(project, minimal);
-					CProjectTypeInitializerService.initializeSample(project, minimal);
-					CMeetingTypeInitializerService.initializeSample(project, minimal);
-					CDecisionTypeInitializerService.initializeSample(project, minimal);
-					COrderTypeInitializerService.initializeSample(project, minimal);
-					CActivityTypeInitializerService.initializeSample(project, minimal);
-					CRiskTypeInitializerService.initializeSample(project, minimal);
-					CAssetTypeInitializerService.initializeSample(project, minimal);
-					CBudgetTypeInitializerService.initializeSample(project, minimal);
-					CDeliverableTypeInitializerService.initializeSample(project, minimal);
-					CMilestoneTypeInitializerService.initializeSample(project, minimal);
-					CTicketTypeInitializerService.initializeSample(project, minimal);
-					CProviderTypeInitializerService.initializeSample(project, minimal);
-					CProductTypeInitializerService.initializeSample(project, minimal);
-					CProductVersionTypeInitializerService.initializeSample(project, minimal);
-					CProjectComponentTypeInitializerService.initializeSample(project, minimal);
-					CProjectComponentVersionTypeInitializerService.initializeSample(project, minimal);
-					CProjectExpenseTypeInitializerService.initializeSample(project, minimal);
-					CProjectIncomeTypeInitializerService.initializeSample(project, minimal);
+					if (project.getId().equals(sampleProject.getId())) {
+						CMeetingTypeInitializerService.initializeSample(sampleProject, minimal);
+						CDecisionTypeInitializerService.initializeSample(sampleProject, minimal);
+						COrderTypeInitializerService.initializeSample(sampleProject, minimal);
+						CActivityTypeInitializerService.initializeSample(sampleProject, minimal);
+						CRiskTypeInitializerService.initializeSample(sampleProject, minimal);
+						CAssetTypeInitializerService.initializeSample(sampleProject, minimal);
+						CBudgetTypeInitializerService.initializeSample(sampleProject, minimal);
+						CDeliverableTypeInitializerService.initializeSample(sampleProject, minimal);
+						CMilestoneTypeInitializerService.initializeSample(sampleProject, minimal);
+						CTicketTypeInitializerService.initializeSample(sampleProject, minimal);
+						CProviderTypeInitializerService.initializeSample(sampleProject, minimal);
+						CProductTypeInitializerService.initializeSample(sampleProject, minimal);
+						CProductVersionTypeInitializerService.initializeSample(sampleProject, minimal);
+						CProjectComponentTypeInitializerService.initializeSample(sampleProject, minimal);
+						CProjectComponentVersionTypeInitializerService.initializeSample(sampleProject, minimal);
+						CProjectExpenseTypeInitializerService.initializeSample(sampleProject, minimal);
+						CProjectIncomeTypeInitializerService.initializeSample(sampleProject, minimal);
+						CActivityPriorityInitializerService.initializeSample(sampleProject, minimal);
+						CCommentPriorityInitializerService.initializeSample(sampleProject, minimal);
+						CSprintTypeInitializerService.initializeSample(sampleProject, minimal);
+					}
 					CGanntViewEntityInitializerService.initializeSample(project, minimal);
-					CActivityPriorityInitializerService.initializeSample(project, minimal);
-					CCommentPriorityInitializerService.initializeSample(project, minimal);
-					CSprintTypeInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
 					// entities
 					initializeSampleDecisions(project, minimal);

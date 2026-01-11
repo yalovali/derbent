@@ -5,11 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cordertype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "order_type_id"))
 public class COrderType extends CTypeEntity<COrderType> {
@@ -25,10 +25,10 @@ public class COrderType extends CTypeEntity<COrderType> {
 		super();
 	}
 
-	/** Constructor with name and project.
+	/** Constructor with name and company.
 	 * @param name    the name of the order type
-	 * @param project the project this type belongs to */
-	public COrderType(final String name, final CProject project) {
-		super(COrderType.class, name, project);
+	 * @param company the company this type belongs to */
+	public COrderType(final String name, final CCompany company) {
+		super(COrderType.class, name, company);
 	}
 }

@@ -66,7 +66,14 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProductType.class, "Type entity must be an instance of CProductType");
+		Check.notNull(getProject(), "Project must be set before assigning product type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning product type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning product type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match product project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CProductType) typeEntity;
 		updateLastModified();
 	}

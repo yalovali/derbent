@@ -8,7 +8,7 @@ import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.activities.domain.CActivityPriority;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -35,8 +35,8 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 	}
 
 	@Transactional (readOnly = true)
-	public Optional<CActivityPriority> findDefaultPriority(final CProject project) {
-		return ((IActivityPriorityRepository) repository).findByIsDefaultTrue(project);
+	public Optional<CActivityPriority> findDefaultPriority(final CCompany company) {
+		return ((IActivityPriorityRepository) repository).findByIsDefaultTrue(company);
 	}
 
 	@Override

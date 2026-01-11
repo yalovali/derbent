@@ -5,13 +5,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 /** CMeetingType - Domain entity representing meeting types. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project-aware type
  * functionality for meetings. */
 @Entity
 @Table (name = "cmeetingtype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingtype_id"))
 public class CMeetingType extends CTypeEntity<CMeetingType> {
@@ -27,7 +27,7 @@ public class CMeetingType extends CTypeEntity<CMeetingType> {
 		super();
 	}
 
-	public CMeetingType(final String name, final CProject project) {
-		super(CMeetingType.class, name, project);
+	public CMeetingType(final String name, final CCompany company) {
+		super(CMeetingType.class, name, company);
 	}
 }

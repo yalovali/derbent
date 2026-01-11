@@ -17,7 +17,7 @@ import tech.derbent.app.companies.domain.CCompany;
 @MappedSuperclass
 public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityClass> {
 
-        @ManyToOne (fetch = FetchType.LAZY)
+        @ManyToOne (fetch = FetchType.EAGER)
         @JoinColumn (name = "company_id", nullable = true)
         @OnDelete (action = OnDeleteAction.CASCADE)
         @AMetaData (

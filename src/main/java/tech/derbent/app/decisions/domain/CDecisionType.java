@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 /** CDecisionType - Domain entity representing decision categorization types. Provides classification for project decisions to support decision
  * tracking and analysis. Layer: Domain (MVC) Standard decision types: STRATEGIC, TACTICAL, OPERATIONAL, TECHNICAL, BUDGET
@@ -15,7 +15,7 @@ import tech.derbent.app.projects.domain.CProject;
  * @since 1.0 */
 @Entity
 @Table (name = "cdecisiontype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cdecisiontype_id"))
 public class CDecisionType extends CTypeEntity<CDecisionType> {
@@ -38,8 +38,8 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 		requiresApproval = false;
 	}
 
-	public CDecisionType(final String name, final CProject project) {
-		super(CDecisionType.class, name, project);
+	public CDecisionType(final String name, final CCompany company) {
+		super(CDecisionType.class, name, company);
 	}
 
 	public Boolean getRequiresApproval() { return requiresApproval; }

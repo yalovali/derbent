@@ -461,8 +461,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CActivityType.class, "Type entity must be an instance of CActivityType");
-		Check.isTrue(typeEntity.getProject().getId().equals(getProject().getId()),
-				"Type entity project id " + typeEntity.getProject().getId() + " does not match activity project id " + getProject().getId());
+		Check.notNull(getProject(), "Project must be set before assigning activity type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning activity type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning activity type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match activity project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}

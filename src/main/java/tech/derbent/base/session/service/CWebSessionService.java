@@ -19,6 +19,7 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.ICompanyRepository;
 import tech.derbent.app.projects.domain.CProject;
@@ -185,7 +186,15 @@ public class CWebSessionService implements ISessionService {
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
 		final CCompany company = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
-		return Optional.ofNullable(company);
+		if (company == null) {
+			return Optional.empty();
+		}
+		if (!CSpringAuxillaries.isLoaded(company) && company.getId() != null) {
+			final CCompany resolvedCompany = companyRepository.findById(company.getId()).orElse(company);
+			session.setAttribute(ACTIVE_COMPANY_KEY, resolvedCompany);
+			return Optional.of(resolvedCompany);
+		}
+		return Optional.of(company);
 	}
 
 	@Override

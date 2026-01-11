@@ -11,7 +11,7 @@ import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.activities.domain.CActivityType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
@@ -71,8 +71,9 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> impl
 	@Override
 	public void initializeNewEntity(final CActivityType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((IActivityTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany()
+				.orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IActivityTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ActivityType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}

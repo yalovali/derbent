@@ -6,11 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cmilestonetype", uniqueConstraints = @UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cmilestonetype_id"))
 public class CMilestoneType extends CTypeEntity<CMilestoneType> {
@@ -26,7 +26,7 @@ public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 		super();
 	}
 
-	public CMilestoneType(final String name, final CProject project) {
-		super(CMilestoneType.class, name, project);
+	public CMilestoneType(final String name, final CCompany company) {
+		super(CMilestoneType.class, name, company);
 	}
 }

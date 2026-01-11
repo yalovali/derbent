@@ -343,7 +343,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CMeetingType.class, "Type entity must be an instance of CMeetingType");
+		Check.notNull(getProject(), "Project must be set before assigning meeting type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning meeting type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning meeting type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match meeting project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CMeetingType) typeEntity;
 		updateLastModified();
 	}

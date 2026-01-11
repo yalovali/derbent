@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProjectType;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -82,8 +82,8 @@ public class CProjectTypeService extends CTypeEntityService<CProjectType> implem
 	@Override
 	public void initializeNewEntity(final CProjectType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((IProjectTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IProjectTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ProjectType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}

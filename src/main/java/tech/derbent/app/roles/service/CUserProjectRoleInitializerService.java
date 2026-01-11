@@ -23,7 +23,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectRoleInitializerService.class);
 	private static final String menuOrder = Menu_Order_ROLES + ".1";
 	private static final String menuTitle = MenuTitle_ROLES + ".User Project Roles";
-	private static final String pageDescription = "Manage project-specific roles and permissions";
+	private static final String pageDescription = "Manage company-defined project roles and permissions";
 	private static final String pageTitle = "User Project Role Management";
 	private static final boolean showInQuickToolbar = false;
 
@@ -34,7 +34,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "project"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "company"));
 			// Role classification and permissions
 			detailSection.addScreenLine(CDetailLinesService.createSection("Role Classification"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isAdmin"));
@@ -63,7 +63,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		// hide grid actions when needed
 		grid.setAttributeNone(attributeNone);
-		grid.setColumnFields(List.of("id", "name", "description", "project", "isAdmin", "isUser", "isGuest", "color", "sortOrder", "active",
+		grid.setColumnFields(List.of("id", "name", "description", "company", "isAdmin", "isUser", "isGuest", "color", "sortOrder", "active",
 				"attributeNonDeletable"));
 		return grid;
 	}
@@ -89,34 +89,18 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		};
 		// Get the service to create roles
 		final CUserProjectRoleService service = CSpringContext.getBean(CUserProjectRoleService.class);
-		// Get all projects for this company
-		final tech.derbent.app.projects.service.CProjectService projectService = 
-			CSpringContext.getBean(tech.derbent.app.projects.service.CProjectService.class);
-		final java.util.List<tech.derbent.app.projects.domain.CProject> projects = projectService.listByCompany(company);
-		
-		if (projects.isEmpty()) {
-			LOGGER.warn("No projects found for company: {}. Skipping project role initialization.", company.getName());
-			return;
-		}
-		
-		// Create roles for each project in the company
-		for (final tech.derbent.app.projects.domain.CProject project : projects) {
-			int index = 0;
-			for (final String[] data : roleData) {
-				final CUserProjectRole role = new CUserProjectRole(data[0], project);
-				role.setDescription(data[1]);
-				role.setIsAdmin(Boolean.parseBoolean(data[2]));
-				role.setIsUser(Boolean.parseBoolean(data[3]));
-				role.setIsGuest(Boolean.parseBoolean(data[4]));
-				role.setColor(CColorUtils.getRandomColor(true));
-				service.save(role);
-				index++;
-				if (minimal && index >= 1) {
-					break;
-				}
-			}
-			if (minimal) {
-				break; // Only initialize for the first project in minimal mode
+		int index = 0;
+		for (final String[] data : roleData) {
+			final CUserProjectRole role = new CUserProjectRole(data[0], company);
+			role.setDescription(data[1]);
+			role.setIsAdmin(Boolean.parseBoolean(data[2]));
+			role.setIsUser(Boolean.parseBoolean(data[3]));
+			role.setIsGuest(Boolean.parseBoolean(data[4]));
+			role.setColor(CColorUtils.getRandomColor(true));
+			service.save(role);
+			index++;
+			if (minimal && index >= 1) {
+				break;
 			}
 		}
 	}

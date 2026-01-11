@@ -174,9 +174,10 @@ domains/
 ├── CEntity.java                # Root entity
 ├── CEntityDB.java              # Database entity
 ├── CEntityNamed.java           # Named entity
+├── CEntityOfCompany.java       # Company-scoped entity
 ├── CEntityOfProject.java       # Project-scoped entity
 ├── CProjectItem.java           # Hierarchical entity
-├── CTypeEntity.java            # Type entity base
+├── CTypeEntity.java            # Company-scoped type entity base
 ├── CEvent.java                 # Event base
 └── AbstractEntity.java         # Legacy support
 ```
@@ -189,9 +190,11 @@ Base service classes:
 services/
 ├── CAbstractService.java            # Base service
 ├── CEntityNamedService.java         # Named entity service
+├── CEntityOfCompanyService.java     # Company-scoped service
 ├── CEntityOfProjectService.java     # Project-scoped service
 ├── IAbstractRepository.java         # Base repository interface
 ├── IEntityNamedRepository.java      # Named entity repository
+├── IEntityOfCompanyRepository.java  # Company-scoped repository
 └── IEntityOfProjectRepository.java  # Project-scoped repository
 ```
 

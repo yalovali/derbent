@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -15,6 +15,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.decisions.domain.CDecisionType;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -34,7 +35,7 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Decision Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requiresApproval"));
@@ -56,7 +57,7 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "requiresApproval", "color", "sortOrder", "active", "project"));
+		grid.setColumnFields(List.of("id", "name", "description", "requiresApproval", "color", "sortOrder", "active", "company"));
 		return grid;
 	}
 
@@ -88,8 +89,9 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 						"Quality", "Quality assurance and standards decisions"
 				}
 		};
-		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+		final CCompany company = project.getCompany();
+		initializeCompanyEntity(nameAndDescriptions,
+				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
 				(item, index) -> {
 					final CDecisionType type = (CDecisionType) item;
 					type.setRequiresApproval(true);

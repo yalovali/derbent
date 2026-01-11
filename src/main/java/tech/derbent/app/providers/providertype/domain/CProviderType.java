@@ -6,11 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cprovidertype", uniqueConstraints = @UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cprovidertype_id"))
 public class CProviderType extends CTypeEntity<CProviderType> {
@@ -26,7 +26,7 @@ public class CProviderType extends CTypeEntity<CProviderType> {
 		super();
 	}
 
-	public CProviderType(final String name, final CProject project) {
-		super(CProviderType.class, name, project);
+	public CProviderType(final String name, final CCompany company) {
+		super(CProviderType.class, name, company);
 	}
 }

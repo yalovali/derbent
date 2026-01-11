@@ -119,7 +119,14 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CDecisionType.class, "Type entity must be an instance of CDecisionType");
+		Check.notNull(getProject(), "Project must be set before assigning decision type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning decision type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning decision type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match decision project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CDecisionType) typeEntity;
 		updateLastModified();
 	}

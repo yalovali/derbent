@@ -2,13 +2,13 @@ package tech.derbent.api.entityOfProject.domain;
 
 import java.time.Clock;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
-import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.base.session.service.ISessionService;
 
-public abstract class CTypeEntityService<EntityClass extends CTypeEntity<EntityClass>> extends CEntityOfProjectService<EntityClass> {
+public abstract class CTypeEntityService<EntityClass extends CTypeEntity<EntityClass>> extends CEntityOfCompanyService<EntityClass> {
 
-	public CTypeEntityService(IEntityOfProjectRepository<EntityClass> repository, Clock clock, ISessionService sessionService) {
+	public CTypeEntityService(IEntityOfCompanyRepository<EntityClass> repository, Clock clock, ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

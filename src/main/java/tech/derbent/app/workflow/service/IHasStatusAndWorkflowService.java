@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
 
 public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<EntityClass>> {
@@ -39,10 +40,12 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
         Check.notNull(entity, "entity cannot be null");
         Check.notNull(typeService, "typeService cannot be null");
         Check.notNull(projectItemStatusService, "projectItemStatusService cannot be null");
+        final CCompany company = currentProject.getCompany();
+        Check.notNull(company, "Company cannot be null for project " + currentProject.getName());
         // Step 1: Assign entity type
-        final List<?> availableTypes = typeService.listByProject(currentProject);
+        final List<?> availableTypes = typeService.listByCompany(company);
         Check.notEmpty(availableTypes,
-                "No entity types available in project " + currentProject.getName() + " for entity class "
+                "No entity types available in company " + company.getName() + " for entity class "
                         + entity.getClass().getSimpleName() + " - cannot initialize entity");
         final CTypeEntity<?> selectedType = (CTypeEntity<?>) availableTypes.get(0);
         entity.setEntityType(selectedType);

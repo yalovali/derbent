@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.providers.provider.service.IProviderRepository;
 import tech.derbent.app.providers.providertype.domain.CProviderType;
 import tech.derbent.base.session.service.ISessionService;
@@ -63,8 +63,8 @@ public class CProviderTypeService extends CTypeEntityService<CProviderType> impl
 	@Override
 	public void initializeNewEntity(final CProviderType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((IProviderTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IProviderTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ProviderType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}

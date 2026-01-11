@@ -12,7 +12,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.deliverables.deliverable.service.IDeliverableRepository;
 import tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -63,8 +63,8 @@ public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType
 	@Override
 	public void initializeNewEntity(final CDeliverableType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((IDeliverableTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IDeliverableTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("DeliverableType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}

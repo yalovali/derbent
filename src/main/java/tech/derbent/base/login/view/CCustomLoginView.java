@@ -166,21 +166,29 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		LOGGER.info("✅ DB reset confirmed - starting database initialization...");
 		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
 		CompletableFuture.runAsync(() -> {
+			Exception failure = null;
 			try {
 				runDatabaseResetInSession(session, ui, minimal);
 				LOGGER.info("🗄️ DB reset completed successfully");
-				ui.access(() -> {
-					progressDialog.close();
-					CNotificationService.showSuccess(successMessage);
-					CNotificationService.showInfoDialog(infoMessage);
-					populateForm();
-				});
 			} catch (final Exception ex) {
+				failure = ex;
 				LOGGER.error("❌ DB reset failed", ex);
-				ui.access(() -> {
-					progressDialog.close();
-					CNotificationService.showException("Hata", ex);
-				});
+			} finally {
+				final Exception capturedFailure = failure;
+				try {
+					ui.access(() -> {
+						progressDialog.close();
+						if (capturedFailure == null) {
+							CNotificationService.showSuccess(successMessage);
+							CNotificationService.showInfoDialog(infoMessage);
+							populateForm();
+						} else {
+							CNotificationService.showException("Hata", capturedFailure);
+						}
+					});
+				} catch (final Exception accessError) {
+					LOGGER.error("Error closing progress dialog after DB reset", accessError);
+				}
 			}
 		});
 	}

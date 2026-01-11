@@ -87,8 +87,9 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// Initialize workflow-based status and type
 		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
 		// Initialize activity-specific fields with sensible defaults
-		final List<CActivityPriority> priorities = activityPriorityService.listByProject(currentProject);
-		Check.notEmpty(priorities, "No activity priorities available in project " + currentProject.getName() + " - cannot initialize new activity");
+		final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
+		Check.notEmpty(priorities,
+				"No activity priorities available in company " + currentProject.getCompany().getName() + " - cannot initialize new activity");
 		entity.setPriority(priorities.get(0));
 		LOGGER.debug("Assigned default priority: {}", priorities.get(0).getName());
 		// Budget tracking defaults (business event fields stay in CActivity)

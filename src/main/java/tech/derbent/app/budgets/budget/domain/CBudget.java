@@ -61,7 +61,14 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CBudgetType.class, "Type entity must be an instance of CBudgetType");
+		Check.notNull(getProject(), "Project must be set before assigning budget type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning budget type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning budget type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match budget project company id "
+						+ getProject().getCompany().getId());
 		entityType = (CBudgetType) typeEntity;
 		updateLastModified();
 	}

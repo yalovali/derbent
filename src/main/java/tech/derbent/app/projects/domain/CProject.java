@@ -214,8 +214,11 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
         public void setEntityType(final CTypeEntity<?> typeEntity) {
                 if (typeEntity != null) {
                         Check.instanceOf(typeEntity, CProjectType.class, "Type entity must be an instance of CProjectType");
-                        Check.isTrue(typeEntity.getProject().getId().equals(getId()),
-                                        "Type entity project id " + typeEntity.getProject().getId() + " does not match project id " + getId());
+                        Check.notNull(getCompany(), "Company must be set before assigning project type");
+                        Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning project type");
+                        Check.isTrue(typeEntity.getCompany().getId().equals(getCompany().getId()),
+                                        "Type entity company id " + typeEntity.getCompany().getId() + " does not match project company id "
+                                                        + getCompany().getId());
                 }
                 this.entityType = (CProjectType) typeEntity;
                 updateLastModified();

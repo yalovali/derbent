@@ -4,7 +4,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -14,6 +14,7 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
@@ -33,7 +34,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
@@ -55,7 +56,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "project"));
+		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "company"));
 		return grid;
 	}
 
@@ -87,7 +88,8 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 						"Training Session", "Training and knowledge sharing sessions"
 				}
 		};
-		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
+		final CCompany company = project.getCompany();
+		initializeCompanyEntity(nameAndDescriptions,
+				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal, null);
 	}
 }

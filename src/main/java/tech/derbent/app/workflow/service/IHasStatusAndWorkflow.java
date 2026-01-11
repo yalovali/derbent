@@ -11,7 +11,7 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
  * This interface provides a unified approach to initializing entities with workflow-aware status management. Entities implementing this interface can
  * leverage:
  * <ul>
- * <li>Automatic type assignment from available entity types in a project</li>
+ * <li>Automatic type assignment from available entity types in a company</li>
  * <li>Workflow-based initial status assignment (prioritizing workflow initial statuses)</li>
  * <li>Fallback to project-level available statuses if workflow is not configured</li>
  * </ul>
@@ -21,7 +21,7 @@ import tech.derbent.app.workflow.domain.CWorkflowEntity;
  * <li>Workflows define valid status transitions based on user roles</li>
  * <li>Initial statuses are marked in workflow status relations (CWorkflowStatusRelation.initialStatus = true)</li>
  * <li>When creating a new entity, the workflow's initial status is automatically assigned</li>
- * <li>If no workflow is configured, the first available status in the project is used as fallback</li>
+ * <li>If no workflow is configured, the first available status in the company is used as fallback</li>
  * </ul>
  * @param <EntityClass> The entity class implementing this interface
  * @see CWorkflowEntity

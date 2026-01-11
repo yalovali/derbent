@@ -12,7 +12,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.assets.asset.service.IAssetRepository;
 import tech.derbent.app.assets.assettype.domain.CAssetType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -63,8 +63,8 @@ public class CAssetTypeService extends CTypeEntityService<CAssetType> implements
 	@Override
 	public void initializeNewEntity(final CAssetType entity) {
 		super.initializeNewEntity(entity);
-		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		final long typeCount = ((IAssetTypeRepository) repository).countByProject(activeProject);
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IAssetTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("AssetType %02d", typeCount + 1);
 		entity.setName(autoName);
 	}
