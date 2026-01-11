@@ -14,7 +14,7 @@ import tech.derbent.app.companies.domain.CCompany;
 		"name", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cusercompanyrole_id"))
-public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
+public class CUserCompanyRole extends CRole<CUserCompanyRole> {
 
 	public static final String DEFAULT_COLOR = "#8E8E8E"; // CDE Dark Gray - company roles
 	public static final String DEFAULT_ICON = "vaadin:building";

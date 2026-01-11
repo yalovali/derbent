@@ -764,9 +764,11 @@ public class CDataInitializer {
 			CCompanyInitializerService.initializeSample(minimal);
 			/* create sample projects */
 			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+				sessionService.setActiveCompany(company);
 				CUserCompanyRoleInitializerService.initializeSample(company, minimal);
 				CUserInitializerService.initializeSample(company, minimal);
 				CProjectInitializerService.initializeSample(company, minimal);
+				CUserProjectRoleInitializerService.initializeSample(company, minimal);
 				if (minimal) {
 					break;
 				}
@@ -780,6 +782,7 @@ public class CDataInitializer {
 				Check.notNull(user, "No user found for company: " + company.getName());
 				// Use new atomic method to set both company and user
 				Check.notNull(sessionService, "SessionService is not initialized");
+				sessionService.setActiveCompany(company);
 				sessionService.setActiveUser(user); // Set company first, then user who is member of that company
 				CProjectItemStatusInitializerService.initializeSample(company, minimal);
 				CKanbanLineInitializerService.initializeSample(company, minimal); // must be after status
@@ -853,7 +856,6 @@ public class CDataInitializer {
 					CGridEntityInitializerService.initializeSample(project, minimal);
 					CMasterInitializerService.initializeSample(project, minimal);
 					CCurrencyInitializerService.initializeSample(project, minimal);
-					CUserProjectRoleInitializerService.initializeSample(project, minimal);
 					// types
 					initializeSampleWorkflowEntities(project, minimal);
 					CMeetingTypeInitializerService.initializeSample(project, minimal);

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
@@ -21,7 +22,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompanyRole> implements IEntityRegistrable {
+public class CUserCompanyRoleService extends CEntityOfCompanyService<CUserCompanyRole> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanyRoleService.class);
 
@@ -64,7 +65,7 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 	@Transactional (readOnly = true)
 	public List<CUserCompanyRole> findByCompany(CCompany selectedCompany) {
 		Check.notNull(selectedCompany, "Company cannot be null");
-		return ((IUserCompanyRoleRepository) repository).findByCompany(selectedCompany);
+		return listByCompany(selectedCompany);
 	}
 
 	@Override
@@ -80,7 +81,8 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 	}
 
 	public CUserCompanyRole getRandom(CCompany company) {
-		final List<CUserCompanyRole> roles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
+		Check.notNull(company, "Company cannot be null");
+		final List<CUserCompanyRole> roles = listByCompany(company);
 		if (roles.isEmpty()) {
 			throw new IllegalStateException("No roles found for company: " + company.getName());
 		}
@@ -94,7 +96,7 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 	@Transactional
 	public void initializeDefaultRoles(CCompany company) {
 		// Check if roles already exist for this company
-		final List<CUserCompanyRole> existingRoles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
+		final List<CUserCompanyRole> existingRoles = listByCompany(company);
 		if (existingRoles.isEmpty()) {
 			createAdminRole(company);
 			createUserRole(company);
@@ -116,6 +118,6 @@ public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompany
 	public Page<CUserCompanyRole> list(final Pageable pageable) {
 		final CCompany company = sessionService.getActiveCompany()
 				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot list entities without company context"));
-		return ((IUserCompanyRoleRepository) repository).listByCompany(company, pageable);
+		return findByCompany(company, pageable);
 	}
 }

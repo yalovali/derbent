@@ -20,6 +20,7 @@ import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.companies.service.ICompanyRepository;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.projects.events.ProjectListChangeEvent;
 import tech.derbent.app.projects.service.IProjectRepository;
@@ -38,6 +39,7 @@ public class CWebSessionService implements ISessionService {
 	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
 	private static final String ACTIVE_ID_KEY = "activeId";
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
+	private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	private static final String ACTIVE_USER_KEY = "activeUser";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private static final String PROJECT_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectChangeListeners";
@@ -101,11 +103,13 @@ public class CWebSessionService implements ISessionService {
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
+	private final ICompanyRepository companyRepository;
 
-	public CWebSessionService(@SuppressWarnings ("unused") final AuthenticationContext authenticationContext,
-			final IUserRepository userRepository, final IProjectRepository projectRepository) {
+	public CWebSessionService(@SuppressWarnings ("unused") final AuthenticationContext authenticationContext, final IUserRepository userRepository,
+			final IProjectRepository projectRepository, final ICompanyRepository companyRepository) {
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
+		this.companyRepository = companyRepository;
 	}
 
 	/** Registers a component to receive notifications when the active project changes. Components should call this method when they are attached to
@@ -180,9 +184,7 @@ public class CWebSessionService implements ISessionService {
 	public Optional<CCompany> getActiveCompany() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		final CUser activeUser = (CUser) session.getAttribute(ACTIVE_USER_KEY);
-		Check.notNull(activeUser, "Active user must not be null to get company");
-		final CCompany company = activeUser.getCompany();
+		final CCompany company = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
 		return Optional.ofNullable(company);
 	}
 
@@ -386,9 +388,10 @@ public class CWebSessionService implements ISessionService {
 
 	@Override
 	public void setActiveCompany(final CCompany company) {
-		// dont call it
-		// use set user or set project instead
-		Check.fail("setActiveCompany should not be called directly; use setActiveUser or setActiveProject instead");
+		final VaadinSession session = VaadinSession.getCurrent();
+		Check.notNull(session, "Vaadin session must not be null");
+		final CCompany resolvedCompany = company.getId() == null ? company : companyRepository.findById(company.getId()).orElse(company);
+		session.setAttribute(ACTIVE_COMPANY_KEY, resolvedCompany);
 	}
 	// ==================== Generic Session Storage Implementation ====================
 
@@ -441,6 +444,9 @@ public class CWebSessionService implements ISessionService {
 	public void setActiveUser(final CUser user) {
 		Check.notNull(user, "User must not be null");
 		Check.notNull(userRepository, "UserRepository must not be null");
+		if (user != null) {
+			Check.isInCompany(user, getActiveCompany().orElse(null));
+		}
 		// Only clear session if changing user
 		final CUser existing = (CUser) VaadinSession.getCurrent().getAttribute(ACTIVE_USER_KEY);
 		if (existing != null && !existing.getId().equals(user.getId())) {

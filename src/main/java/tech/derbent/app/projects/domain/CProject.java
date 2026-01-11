@@ -15,12 +15,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyService;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
 /** CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database functionality. */
@@ -32,13 +36,30 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 })
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 @AssociationOverride (name = "company", joinColumns = @JoinColumn (name = "company_id", nullable = false))
-public class CProject extends CEntityOfCompany<CProject> implements ISearchable {
+public class CProject extends CEntityOfCompany<CProject> implements ISearchable, IHasStatusAndWorkflow<CProject> {
 
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - organizational entity
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
 	public static final String ENTITY_TITLE_PLURAL = "Projects";
 	public static final String ENTITY_TITLE_SINGULAR = "Project";
 	public static final String VIEW_NAME = "Projects View";
+	
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "workflow_id")
+	@AMetaData (
+			displayName = "Workflow", required = false, readOnly = false, description = "Workflow for tracking project status transitions",
+			hidden = false, dataProviderBean = "CWorkflowEntityService"
+	)
+	private CWorkflowEntity workflow;
+	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "status_id")
+	@AMetaData (
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the project", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableStatusesForProjectItem", setBackgroundFromColor = true, useIcon = true
+	)
+	private CProjectItemStatus status;
+	
         @ManyToOne (fetch = FetchType.LAZY)
         @JoinColumn (name = "kanban_line_id")
         @AMetaData (
@@ -159,5 +180,43 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable 
                         Check.isSameCompany(this, kanbanLine);
                 }
                 this.kanbanLine = kanbanLine;
+        }
+        
+        // IHasStatusAndWorkflow implementation
+        @Override
+        public CWorkflowEntity getWorkflow() { return workflow; }
+        
+        @Override
+        public CProjectItemStatus getStatus() { return status; }
+        
+        @Override
+        public void setStatus(final CProjectItemStatus status) {
+                if (status != null) {
+                        Check.notNull(getCompany(), "Company must be set before applying status");
+                        Check.isSameCompany(this, status);
+                }
+                this.status = status;
+                updateLastModified();
+        }
+        
+        public void setWorkflow(final CWorkflowEntity workflow) {
+                if (workflow != null) {
+                        Check.notNull(getCompany(), "Company must be set before applying workflow");
+                        Check.isSameCompany(this, workflow);
+                }
+                this.workflow = workflow;
+                updateLastModified();
+        }
+        
+        @Override
+        public CTypeEntity<?> getEntityType() {
+                // Projects don't have entity types - they use workflow directly
+                return null;
+        }
+        
+        @Override
+        public void setEntityType(final CTypeEntity<?> typeEntity) {
+                // Projects don't have entity types - they use workflow directly
+                // This method is intentionally empty
         }
 }

@@ -97,9 +97,9 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	@Transactional (readOnly = true)
 	public CProjectItemStatus getInitialStatusFromWorkflow(final CWorkflowEntity workflow) {
 		Check.notNull(workflow, "Workflow cannot be null when retrieving initial status");
-		Check.notNull(workflow.getProject(), "Workflow project cannot be null when retrieving initial status");
+		Check.notNull(workflow.getCompany(), "Workflow company cannot be null when retrieving initial status");
 		try {
-			final List<CWorkflowStatusRelation> relations = getWorkflowRelationsForProject(workflow, workflow.getProject());
+			final List<CWorkflowStatusRelation> relations = getWorkflowRelationsForCompany(workflow);
 			Check.notEmpty(relations, "No status relations found for workflow: " + workflow.getName());
 			final Optional<CProjectItemStatus> initialStatus = relations.stream().filter(relation -> Boolean.TRUE.equals(relation.getInitialStatus()))
 					.map(CWorkflowStatusRelation::getToStatus).filter(Objects::nonNull).findFirst();
@@ -137,15 +137,14 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 			Check.notNull(project, "Project cannot be null when retrieving valid next statuses for project item");
 			final CWorkflowEntity workflow = item.getWorkflow();
 			Check.notNull(workflow, "Workflow cannot be null when retrieving valid next statuses for project item");
-			Check.notNull(workflow.getProject(), "Workflow project cannot be null when retrieving valid next statuses");
-			Check.isSameCompany(project, workflow.getProject());
-			Check.equals(project.getId(), workflow.getProject().getId(), "Workflow must belong to the same project");
+			Check.notNull(workflow.getCompany(), "Workflow company cannot be null when retrieving valid next statuses");
+			Check.isSameCompany(project, workflow);
 			final CProjectItemStatus currentStatus = item.getStatus();
 			if (currentStatus != null) {
 				Check.isSameCompany(project, currentStatus);
 			}
 			final List<CProjectItemStatus> validStatuses = new ArrayList<>();
-			final List<CWorkflowStatusRelation> relations = getWorkflowRelationsForProject(workflow, project);
+			final List<CWorkflowStatusRelation> relations = getWorkflowRelationsForCompany(workflow);
 			Check.notEmpty(relations, "Workflow " + workflow.getName() + " has no status relations defined");
 			if (currentStatus != null) {
 				validStatuses.add(item.getStatus()); // Always include current status
@@ -171,19 +170,16 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		}
 	}
 
-	private List<CWorkflowStatusRelation> getWorkflowRelationsForProject(final CWorkflowEntity workflow, final CProject project) {
+	private List<CWorkflowStatusRelation> getWorkflowRelationsForCompany(final CWorkflowEntity workflow) {
 		Check.notNull(workflow, "Workflow cannot be null when loading relations");
-		Check.notNull(project, "Project cannot be null when loading workflow relations");
-		Check.notNull(workflow.getProject(), "Workflow project cannot be null when loading relations");
-		Check.equals(project.getId(), workflow.getProject().getId(), "Workflow must belong to the provided project");
-		Check.isSameCompany(project, workflow.getProject());
+		Check.notNull(workflow.getCompany(), "Workflow company cannot be null when loading relations");
 		final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
 		if (relations == null) {
 			return List.of();
 		}
 		return relations.stream().filter(relation -> relation.getFromStatus() != null && relation.getToStatus() != null).peek(relation -> {
-			Check.isSameCompany(project, relation.getFromStatus());
-			Check.isSameCompany(project, relation.getToStatus());
+			Check.isSameCompany(workflow, relation.getFromStatus());
+			Check.isSameCompany(workflow, relation.getToStatus());
 		}).sorted(Comparator.comparing((CWorkflowStatusRelation relation) -> {
 			final Integer sortOrder = relation.getToStatus().getSortOrder();
 			return sortOrder != null ? sortOrder : Integer.MAX_VALUE;
