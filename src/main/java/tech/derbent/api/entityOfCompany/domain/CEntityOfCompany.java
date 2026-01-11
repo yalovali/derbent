@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.app.companies.domain.CCompany;
 
@@ -38,6 +39,13 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	}
 
 	public CCompany getCompany() { return company; }
+
+	@Override
+	public void initializeAllFields() {
+		if (company != null && !CSpringAuxillaries.isLoaded(company)) {
+			CSpringAuxillaries.initializeLazily(company);
+		}
+	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityNamed to also search in
 	 * company field. For the company field, only the company name is searched.

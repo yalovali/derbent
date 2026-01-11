@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,6 @@ import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
@@ -286,12 +286,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		try {
 			final String serviceBeanName = gridEntity.getDataServiceBeanName();
 			Check.notBlank(serviceBeanName, "Service bean name is blank for search filtering");
-			// Get the service and entity class
-			final CEntityOfProjectService<?> projectService = CSpringContext.<CEntityOfProjectService<?>>getBean(serviceBeanName);
-			final CProject currentProject1 = sessionService != null
-					? sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found.")) : null;
-			// Get all entities for the current project - note: using raw types due to grid constraints
-			final List allEntities = projectService.listByProject(currentProject1, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+			final CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(serviceBeanName);
+			final PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
+			// Load data through the service to honor company/project scoping where applicable.
+			final List allEntities = serviceBean.listForPageView(pageRequest, null).getContent();
 			// Filter entities based on search text
 			final List filteredEntities = (List) allEntities.stream().filter(entity -> {
 				try {
@@ -306,7 +304,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.debug("Applied search filter '{}' - {} results out of {} total", searchText, filteredEntities.size(), allEntities.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error applying search filter. {}", e.getMessage());
-			throw e;
+			throw new IllegalStateException("Error applying search filter", e);
 		}
 	}
 
@@ -812,7 +810,18 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		if (!enableSelectionChangeListener) {
 			return;
 		}
-		final CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
+		CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
+		if (selectedEntity != null && gridEntity != null) {
+			try {
+				final CAbstractService<?> serviceBean = (CAbstractService<?>) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
+				final Optional<?> refreshed = serviceBean.getById(selectedEntity.getId());
+				if (refreshed.isPresent()) {
+					selectedEntity = (CEntityDB<?>) refreshed.get();
+				}
+			} catch (final Exception e) {
+				LOGGER.debug("Failed to refresh selected entity for {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
+			}
+		}
 		fireEvent(new SelectionChangeEvent(this, selectedEntity));
 	}
 
@@ -909,9 +918,19 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		try {
 			// Use unchecked cast to work with generic grid constraints
 			final CGrid rawGrid = grid;
-			rawGrid.select(entity);
+			CEntityDB<?> selection = entity;
+			if (entity != null && entity.getId() != null) {
+				final List items = (List) rawGrid.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+				for (final Object item : items) {
+					if (item instanceof CEntityDB<?> candidate && entity.getId().equals(candidate.getId())) {
+						selection = candidate;
+						break;
+					}
+				}
+			}
+			rawGrid.select(selection);
 			// Scroll to the selected entity to make it visible
-			scrollToEntity(entity);
+			scrollToEntity(selection);
 		} catch (final Exception e) {
 			LOGGER.error("Error selecting entity in grid: {}", e.getMessage());
 			throw e;

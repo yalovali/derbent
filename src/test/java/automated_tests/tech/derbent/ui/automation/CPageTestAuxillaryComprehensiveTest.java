@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.Page;
 import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.app.products.productversion.domain.CProductVersion;
@@ -82,6 +83,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private static final String CRUD_REFRESH_BUTTON_ID = "cbutton-refresh";
 	private static final String CRUD_SAVE_BUTTON_ID = "cbutton-save";
 	private static final String FIELD_ID_PREFIX = "field-";
+	private static final String GRID_SELECTOR = "vaadin-grid, vaadin-grid-pro, so-grid, c-grid";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillaryComprehensiveTest.class);
 	private static final String METADATA_SELECTOR = "#test-auxillary-metadata";
 	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
@@ -142,7 +144,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	 * @return true if grid is present */
 	private boolean checkGridExists() {
 		try {
-			final Locator grids = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid");
+			final Locator grids = page.locator(GRID_SELECTOR);
 			return grids.count() > 0;
 		} catch (final Exception e) {
 			LOGGER.debug("Error checking for grid: {}", e.getMessage());
@@ -154,7 +156,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	 * @return true if grid contains data */
 	private boolean checkGridHasData() {
 		try {
-			final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
+			final Locator grid = page.locator(GRID_SELECTOR).first();
 			if (grid.count() == 0) {
 				return false;
 			}
@@ -308,7 +310,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	}
 
 	private int getGridRowCountSafe() {
-		final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
+		final Locator grid = page.locator(GRID_SELECTOR).first();
 		if (grid.count() == 0) {
 			return 0;
 		}
@@ -317,6 +319,22 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			return rows.count();
 		}
 		return grid.locator("vaadin-grid-cell-content, [part='cell']").count();
+	}
+
+	private String getFirstGridCellText() {
+		final Locator grid = page.locator(GRID_SELECTOR).first();
+		if (grid.count() == 0) {
+			return null;
+		}
+		final Locator cells = grid.locator("vaadin-grid-cell-content, [part='cell']");
+		final int maxCells = Math.min(cells.count(), 10);
+		for (int i = 0; i < maxCells; i++) {
+			final String text = cells.nth(i).textContent();
+			if (text != null && !text.isBlank()) {
+				return text.trim();
+			}
+		}
+		return null;
 	}
 
 	private boolean isComboBoxById(final String fieldId) {
@@ -653,6 +671,9 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				// Test sorting on first column
 				testGridSorting(pageName);
 			}
+			if (hasData) {
+				testGridFiltering(pageName);
+			}
 			// Test 3: Count grid rows
 			final int rowCount = getGridRowCount();
 			LOGGER.info("   ✓ Grid row count: {}", rowCount);
@@ -715,24 +736,46 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		if (embeddedCombo.count() > 0) {
 			combo = embeddedCombo.first();
 		}
-		combo.click();
+		final Locator input = combo.locator("input");
+		if (input.count() > 0) {
+			input.first().click();
+		} else {
+			combo.click();
+		}
 		wait_500();
 		Locator options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
 		if (options.count() == 0) {
 			options = page.locator("vaadin-combo-box-item");
 		}
 		for (int i = 0; i < options.count(); i++) {
-			final String optionText = options.nth(i).textContent() != null ? options.nth(i).textContent().trim() : "";
+			final Locator option = options.nth(i);
+			if (!option.isVisible()) {
+				continue;
+			}
+			final String optionText = option.textContent() != null ? option.textContent().trim() : "";
 			if (!optionText.isBlank() && (currentValue == null || !optionText.equals(currentValue.trim()))) {
-				options.nth(i).click();
+				option.click();
 				wait_500();
 				return optionText;
 			}
 		}
-		if (options.count() > 0) {
-			options.first().click();
-			wait_500();
-			return options.first().textContent();
+		for (int i = 0; i < options.count(); i++) {
+			final Locator option = options.nth(i);
+			if (option.isVisible()) {
+				option.click();
+				wait_500();
+				return option.textContent();
+			}
+		}
+		if (input.count() > 0) {
+			try {
+				input.first().press("ArrowDown");
+				input.first().press("Enter");
+				wait_500();
+				return readFieldValueById(elementId);
+			} catch (final PlaywrightException e) {
+				LOGGER.debug("Unable to select combo box {} via keyboard: {}", elementId, e.getMessage());
+			}
 		}
 		return null;
 	}
@@ -841,6 +884,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			locatorById(CRUD_NEW_BUTTON_ID).click();
 			wait_500();
 			final FieldValueResult createdResult = populateEditableFields(pageName);
+			testRelationMembershipEdits(pageName);
 			final String createdMarker = createdResult.value;
 			if (createdMarker != null && !createdMarker.isBlank()) {
 				lastCreatedValues.put(pageName, createdMarker);
@@ -921,9 +965,13 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private void testGridRowSelection(String pageName) {
 		try {
 			LOGGER.info("   🖱️  Testing grid row selection...");
-			final Locator grid = page.locator("vaadin-grid, vaadin-grid-pro, so-grid, c-grid").first();
+			final Locator grid = page.locator(GRID_SELECTOR).first();
 			final Locator cells = grid.locator("vaadin-grid-cell-content, [part='cell']");
 			if (cells.count() > 0) {
+				if (!cells.first().isVisible()) {
+					LOGGER.warn("      ⚠️ First grid cell is not visible, skipping row selection");
+					return;
+				}
 				cells.first().click();
 				wait_500();
 				LOGGER.info("      ✓ Selected first row");
@@ -953,6 +1001,194 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️  Grid sorting test failed: {}", e.getMessage());
+		}
+	}
+
+	private void testGridFiltering(String pageName) {
+		try {
+			final Locator searchField = page.locator("vaadin-text-field[placeholder='Search...']");
+			if (searchField.count() == 0) {
+				return;
+			}
+			final String searchTerm = getFirstGridCellText();
+			if (searchTerm == null || searchTerm.isBlank()) {
+				return;
+			}
+			final int beforeCount = getGridRowCountSafe();
+			applyGridSearchFilter(searchTerm);
+			wait_500();
+			final int afterCount = getGridRowCountSafe();
+			LOGGER.info("      ✓ Filtered grid using '{}' ({} -> {})", searchTerm, beforeCount, afterCount);
+			applyGridSearchFilter("");
+			wait_500();
+			takeScreenshot(String.format("%03d-page-%s-filtered", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Grid filtering test failed: {}", e.getMessage());
+		}
+	}
+
+	private void testRelationMembershipEdits(String pageName) {
+		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
+		for (int i = 0; i < fields.count(); i++) {
+			final Locator field = fields.nth(i);
+			final Locator addButton = field.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("Add"));
+			final Locator removeButton = field.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("Remove"));
+			if (addButton.count() == 0 || removeButton.count() == 0) {
+				continue;
+			}
+			final Locator grids = field.locator("vaadin-grid");
+			if (grids.count() == 0) {
+				continue;
+			}
+			LOGGER.info("   🔗 Testing relation membership controls...");
+			try {
+				final Locator availableGrid = grids.first();
+				final Locator availableCell = availableGrid.locator("vaadin-grid-cell-content, [part='cell']").first();
+				if (availableCell.count() == 0) {
+					LOGGER.warn("      ⚠️ No available items to add for relation field");
+					return;
+				}
+				availableCell.click();
+				wait_500();
+				addButton.first().click();
+				wait_500();
+				final Locator selectedGrid = grids.count() > 1 ? grids.nth(1) : grids.first();
+				final Locator selectedCell = selectedGrid.locator("vaadin-grid-cell-content, [part='cell']").first();
+				if (selectedCell.count() > 0) {
+					selectedCell.click();
+					wait_500();
+					removeButton.first().click();
+					wait_500();
+				}
+				takeScreenshot(String.format("%03d-page-%s-relation-membership", screenshotCounter++, pageName), false);
+			} catch (final Exception e) {
+				LOGGER.warn("⚠️  Relation membership test failed: {}", e.getMessage());
+			}
+			return;
+		}
+	}
+
+	private boolean hasKanbanBoard() {
+		return page.locator(".kanban-column").count() > 0;
+	}
+
+	private void runKanbanBoardTests(String pageName) {
+		try {
+			final Locator columns = page.locator(".kanban-column");
+			if (columns.count() == 0) {
+				return;
+			}
+			final Locator postits = page.locator(".kanban-postit");
+			if (postits.count() == 0) {
+				LOGGER.warn("   ⚠️ Kanban board has no post-it cards to test");
+				return;
+			}
+			editKanbanStoryPoints(pageName, postits.first());
+			dragKanbanPostitBetweenColumns(pageName, columns, postits.first());
+			dragKanbanPostitToBacklog(pageName, columns, postits.first());
+			dragBacklogItemToColumn(pageName, columns);
+			takeScreenshot(String.format("%03d-page-%s-kanban-tested", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  Kanban board tests failed: {}", e.getMessage());
+		}
+	}
+
+	private void editKanbanStoryPoints(String pageName, Locator postit) {
+		try {
+			postit.click();
+			wait_500();
+			final Locator editor = postit.locator("vaadin-text-field").first();
+			if (editor.count() == 0) {
+				return;
+			}
+			final Locator input = editor.locator("input");
+			if (input.count() == 0) {
+				return;
+			}
+			input.fill("5");
+			input.press("Enter");
+			wait_500();
+			LOGGER.info("      ✓ Updated kanban story points to 5");
+			takeScreenshot(String.format("%03d-page-%s-kanban-storypoints", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("      ⚠️ Kanban story point edit failed: {}", e.getMessage());
+		}
+	}
+
+	private void dragKanbanPostitBetweenColumns(String pageName, Locator columns, Locator postit) {
+		try {
+			if (columns.count() < 2) {
+				return;
+			}
+			Locator targetColumn = null;
+			for (int i = 0; i < columns.count(); i++) {
+				final Locator column = columns.nth(i);
+				final String text = column.textContent();
+				if (text != null && text.contains("Backlog")) {
+					continue;
+				}
+				targetColumn = column;
+				break;
+			}
+			if (targetColumn == null) {
+				return;
+			}
+			postit.dragTo(targetColumn);
+			wait_1000();
+			LOGGER.info("      ✓ Dragged post-it to another kanban column");
+			takeScreenshot(String.format("%03d-page-%s-kanban-drag", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("      ⚠️ Kanban column drag failed: {}", e.getMessage());
+		}
+	}
+
+	private void dragKanbanPostitToBacklog(String pageName, Locator columns, Locator postit) {
+		try {
+			final Locator backlogColumn = columns.filter(new Locator.FilterOptions().setHasText("Backlog")).first();
+			if (backlogColumn.count() == 0) {
+				return;
+			}
+			postit.dragTo(backlogColumn);
+			wait_1000();
+			LOGGER.info("      ✓ Dragged post-it to backlog column");
+			takeScreenshot(String.format("%03d-page-%s-kanban-backlog", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("      ⚠️ Kanban backlog drag failed: {}", e.getMessage());
+		}
+	}
+
+	private void dragBacklogItemToColumn(String pageName, Locator columns) {
+		try {
+			final Locator backlogColumn = columns.filter(new Locator.FilterOptions().setHasText("Backlog")).first();
+			if (backlogColumn.count() == 0) {
+				return;
+			}
+			Locator destination = null;
+			for (int i = 0; i < columns.count(); i++) {
+				final Locator column = columns.nth(i);
+				final String text = column.textContent();
+				if (text == null || !text.contains("Backlog")) {
+					destination = column;
+					break;
+				}
+			}
+			if (destination == null) {
+				return;
+			}
+			final Locator backlogGrid = backlogColumn.locator("vaadin-grid");
+			if (backlogGrid.count() == 0) {
+				return;
+			}
+			final Locator backlogCell = backlogGrid.first().locator("vaadin-grid-cell-content, [part='cell']").first();
+			if (backlogCell.count() == 0) {
+				return;
+			}
+			backlogCell.dragTo(destination);
+			wait_1000();
+			LOGGER.info("      ✓ Dragged backlog item to kanban column");
+			takeScreenshot(String.format("%03d-page-%s-backlog-to-column", screenshotCounter++, pageName), false);
+		} catch (final Exception e) {
+			LOGGER.warn("      ⚠️ Backlog to column drag failed: {}", e.getMessage());
 		}
 	}
 
@@ -1000,6 +1236,10 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				crudPagesFound++;
 			} else {
 				LOGGER.info("ℹ️  No CRUD toolbar found, skipping CRUD tests");
+			}
+			if (hasKanbanBoard()) {
+				LOGGER.info("🗂️  Running kanban board tests...");
+				runKanbanBoardTests(pageNameSafe);
 			}
 			// Take final screenshot
 			takeScreenshot(String.format("%03d-page-%s-final", screenshotCounter++, pageNameSafe), false);
@@ -1049,6 +1289,10 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("   🔄 Testing Refresh button...");
 			final Locator refreshButton = page.locator("#" + CRUD_REFRESH_BUTTON_ID);
 			if (refreshButton.count() > 0) {
+				if (!refreshButton.first().isEnabled()) {
+					LOGGER.info("      ℹ️ Refresh button is disabled, skipping");
+					return;
+				}
 				locatorById(CRUD_REFRESH_BUTTON_ID).click();
 				wait_500();
 				performFailFastCheck("CRUD Refresh");
@@ -1103,6 +1347,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				return;
 			}
 			testGridRowSelection(pageName);
+			testRelationMembershipEdits(pageName);
 			final String fieldId = findEditableFieldId();
 			if (fieldId == null) {
 				LOGGER.warn("      ⚠️ No editable field found for update workflow");

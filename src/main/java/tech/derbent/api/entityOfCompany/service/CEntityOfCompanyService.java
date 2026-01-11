@@ -110,6 +110,9 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = searchText == null ? "" : searchText.trim();
 		final List<EntityClass> all = ((IEntityOfCompanyRepository<EntityClass>) repository).listByCompanyForPageView(company);
+		for (final EntityClass entity : all) {
+			entity.initializeAllFields();
+		}
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
 		final List<EntityClass> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
 		final int start = (int) Math.min(safePage.getOffset(), filtered.size());

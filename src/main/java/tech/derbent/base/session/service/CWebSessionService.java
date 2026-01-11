@@ -100,9 +100,11 @@ public class CWebSessionService implements ISessionService {
 
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
+	private final IUserRepository userRepository;
 
 	public CWebSessionService(@SuppressWarnings ("unused") final AuthenticationContext authenticationContext,
-			@SuppressWarnings ("unused") final IUserRepository userRepository, final IProjectRepository projectRepository) {
+			final IUserRepository userRepository, final IProjectRepository projectRepository) {
+		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
 	}
 
@@ -438,6 +440,7 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public void setActiveUser(final CUser user) {
 		Check.notNull(user, "User must not be null");
+		Check.notNull(userRepository, "UserRepository must not be null");
 		// Only clear session if changing user
 		final CUser existing = (CUser) VaadinSession.getCurrent().getAttribute(ACTIVE_USER_KEY);
 		if (existing != null && !existing.getId().equals(user.getId())) {
@@ -445,7 +448,8 @@ public class CWebSessionService implements ISessionService {
 		}
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		session.setAttribute(ACTIVE_USER_KEY, user);
+		final CUser resolvedUser = user.getId() == null ? user : userRepository.findById(user.getId()).orElse(user);
+		session.setAttribute(ACTIVE_USER_KEY, resolvedUser);
 		final List<CProject> availableProjects = getAvailableProjects();
 		if (!availableProjects.isEmpty()) {
 			final CProject activeProject = availableProjects.get(0);
