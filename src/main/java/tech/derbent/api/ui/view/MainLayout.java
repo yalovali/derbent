@@ -386,6 +386,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final Long companyID = Long.parseLong(companyIDStr);
 		final CUser user = userService.findByLogin(login, companyID);
 		Check.notNull(user, "No user found for login: " + login + " and company ID: " + companyID);
+		sessionService.setActiveCompany(user.getCompany());
 		sessionService.setActiveUser(user);
 	}
 }
