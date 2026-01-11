@@ -271,13 +271,12 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 	@Override
 	@Transactional
 	public CKanbanColumn save(final CKanbanColumn entity) {
-		Check.notNull(entity, "Kanban column cannot be null");
-		Check.notNull(entity.getKanbanLine(), "Kanban line cannot be null for column save");
-		Check.notNull(entity.getKanbanLine().getId(), "Kanban line ID cannot be null for column save");
-		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
+		// Resolve managed line instance before validation
 		final CKanbanLine line = resolveLineForSave(entity);
 		entity.setKanbanLine(line);
-		validateEntity(entity);
+		
+		// Validation happens here (calls validateEntity which has all checks)
+		// Set default order if needed before saving
 		if (entity.getItemOrder() == null || entity.getItemOrder() <= 0) {
 			entity.setItemOrder(getNextItemOrder(line));
 		}

@@ -80,28 +80,36 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		// Project role data: [name, description, isAdmin, isUser, isGuest]
 		final String[][] roleData = {
 				{
-						"Project Admin", "Administrative role with full project access", "true", "false", "false"
+						"Project Admin", "Administrative role with full project access"
 				}, {
-						"Project User", "Standard user role with regular access", "false", "true", "false"
+						"Project User", "Standard user role with regular access"
 				}, {
-						"Project Guest", "Guest role with limited access", "false", "false", "true"
+						"Project Guest", "Guest role with limited access"
 				}
 		};
-		// Get the service to create roles
+		
 		final CUserProjectRoleService service = CSpringContext.getBean(CUserProjectRoleService.class);
-		int index = 0;
-		for (final String[] data : roleData) {
-			final CUserProjectRole role = new CUserProjectRole(data[0], company);
-			role.setDescription(data[1]);
-			role.setIsAdmin(Boolean.parseBoolean(data[2]));
-			role.setIsUser(Boolean.parseBoolean(data[3]));
-			role.setIsGuest(Boolean.parseBoolean(data[4]));
-			role.setColor(CColorUtils.getRandomColor(true));
-			service.save(role);
-			index++;
-			if (minimal && index >= 1) {
-				break;
+		initializeCompanyEntity(roleData, service, company, minimal, (role, index) -> {
+			// Set role flags based on index
+			switch (index) {
+				case 0: // Admin
+					role.setIsAdmin(true);
+					role.setIsUser(false);
+					role.setIsGuest(false);
+					break;
+				case 1: // User
+					role.setIsAdmin(false);
+					role.setIsUser(true);
+					role.setIsGuest(false);
+					break;
+				case 2: // Guest
+					role.setIsAdmin(false);
+					role.setIsUser(false);
+					role.setIsGuest(true);
+					break;
+				default:
+					break;
 			}
-		}
+		});
 	}
 }

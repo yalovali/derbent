@@ -73,21 +73,13 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
                                                 "Company Guest", "Guest role with limited access"
                                 }
                 };
-                int index = 0;
-                for (final String[] seed : nameAndDescription) {
-                        final CUserCompanyRole role = service.newEntity(seed[0]);
-                        role.setDescription(seed[1]);
-                        role.setCompany(company);
-                        role.setColor(CColorUtils.getRandomColor(true));
-                        role.setSortOrder(index + 1);
+                
+                initializeCompanyEntity(nameAndDescription, service, company, minimal, (role, index) -> {
+                        // Set role flags based on index
                         role.setIsAdmin(index == 0);
                         role.setIsUser(index == 1);
                         role.setIsGuest(index == 2);
-                        service.save(role);
-                        index++;
-                        if (minimal) {
-                                return;
-                        }
-                }
+                        role.setSortOrder(index + 1);
+                });
         }
 }

@@ -214,11 +214,18 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
+	@Override
+	protected void validateEntity(final CProject entity) {
+		super.validateEntity(entity);
+		Check.notNull(entity.getCompany(), "Company must be set before saving a project");
+		if (entity.getKanbanLine() != null) {
+			Check.isSameCompany(entity, entity.getKanbanLine());
+		}
+	}
+
         @Override
         @Transactional
         public CProject save(final CProject entity) {
-                Check.notNull(entity.getCompany(), "Company must be set before saving a project");
-                if (entity.getKanbanLine() != null) { Check.isSameCompany(entity, entity.getKanbanLine()); }
                 final boolean isNew = entity.getId() == null;
                 final CProject savedEntity = super.save(entity);
                 final ProjectListChangeEvent.ChangeType changeType =
