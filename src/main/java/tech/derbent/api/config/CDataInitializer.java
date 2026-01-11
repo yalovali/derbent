@@ -349,7 +349,13 @@ public class CDataInitializer {
 			activity.setDescription("Activity to track review and implementation of decision");
 			activity.setEntityType(activityType);
 			activity.setAssignedTo(user);
-			projectItemStatusService.assignStatusToActivity(activity);
+			// Initialize status using workflow
+			if (activityType != null && activityType.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity);
+				if (!initialStatuses.isEmpty()) {
+					activity.setStatus(initialStatuses.get(0));
+				}
+			}
 			activityService.save(activity);
 			// Create 2 comments for this activity
 			final CCommentPriority priority1 = commentPriorityService.getRandom(decision.getProject().getCompany());
@@ -424,7 +430,13 @@ public class CDataInitializer {
 			activity1.setAssignedTo(user1);
 			activity1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
 			activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 150)));
-			projectItemStatusService.assignStatusToActivity(activity1);
+			// Initialize status using workflow
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity1);
+				if (!initialStatuses.isEmpty()) {
+					activity1.setStatus(initialStatuses.get(0));
+				}
+			}
 			activityService.save(activity1);
 			// Create child activity 1
 			final CActivityType type2 = activityTypeService.getRandom(project.getCompany());
@@ -438,7 +450,13 @@ public class CDataInitializer {
 			activity2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
 			activity2.setDueDate(activity2.getStartDate().plusDays((long) (Math.random() * 50)));
 			activity2.setParent(activity1);
-			projectItemStatusService.assignStatusToActivity(activity2);
+			// Initialize status using workflow
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity2);
+				if (!initialStatuses.isEmpty()) {
+					activity2.setStatus(initialStatuses.get(0));
+				}
+			}
 			activityService.save(activity2);
 			if (minimal) {
 				return;
@@ -455,7 +473,13 @@ public class CDataInitializer {
 			activity3.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 50)));
 			activity3.setDueDate(activity3.getStartDate().plusDays((long) (Math.random() * 50)));
 			activity3.setParent(activity1);
-			projectItemStatusService.assignStatusToActivity(activity3);
+			// Initialize status using workflow
+			if (type3 != null && type3.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity3);
+				if (!initialStatuses.isEmpty()) {
+					activity3.setStatus(initialStatuses.get(0));
+				}
+			}
 			activityService.save(activity3);
 			LOGGER.debug("Created sample activities with parent-child relationships for project: {}", project.getName());
 		} catch (final Exception e) {

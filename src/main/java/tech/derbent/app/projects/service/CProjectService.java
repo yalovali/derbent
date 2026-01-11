@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -24,6 +26,7 @@ import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.projects.domain.CProjectType;
 import tech.derbent.app.projects.events.ProjectListChangeEvent;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -33,11 +36,17 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
+	private final CProjectTypeService projectTypeService;
+	private final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService;
 
 	public CProjectService(final IProjectRepository repository, final Clock clock, final ISessionService sessionService,
-			final ApplicationEventPublisher eventPublisher) {
+			final ApplicationEventPublisher eventPublisher,
+			final CProjectTypeService projectTypeService,
+			final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
+		this.projectTypeService = projectTypeService;
+		this.projectItemStatusService = projectItemStatusService;
 	}
 
 	@Override
@@ -137,11 +146,34 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 	@Override
         public void initializeNewEntity(final CProject entity) {
                 super.initializeNewEntity(entity);
+                LOGGER.debug("Initializing new project entity");
                 // Get current company from session
                 final CCompany currentCompany = getCurrentCompany();
                 // Initialize company with current company
                 entity.setCompany(currentCompany);
                 // Name is set by base class generateUniqueName() which is overridden below
+                
+                // Initialize entity type
+                final List<?> availableTypes = projectTypeService.listByCompany(currentCompany);
+                Check.notEmpty(availableTypes, 
+                        "No project types available in company " + currentCompany.getName() + " - cannot initialize project");
+                // Cast safely - CProjectTypeService only returns CProjectType instances
+                final Object firstType = availableTypes.get(0);
+                Check.instanceOf(firstType, CProjectType.class, 
+                        "Expected CProjectType but got " + firstType.getClass().getSimpleName());
+                final CProjectType selectedType = (CProjectType) firstType;
+                entity.setEntityType(selectedType);
+                
+                // Initialize workflow-based status
+                Check.notNull(entity.getWorkflow(), 
+                        "Workflow cannot be null for project type " + selectedType.getName());
+                final CProjectItemStatus initialStatus = 
+                        tech.derbent.app.workflow.service.IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+                Check.notNull(initialStatus, 
+                        "Initial status cannot be null for project");
+                entity.setStatus(initialStatus);
+                
+                LOGGER.debug("Project initialization complete with workflow and status");
         }
 
 	@Override
