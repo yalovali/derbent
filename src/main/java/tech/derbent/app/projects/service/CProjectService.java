@@ -2,6 +2,7 @@ package tech.derbent.app.projects.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -112,6 +113,14 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	@Override
 	public Class<CProject> getEntityClass() { return CProject.class; }
+	
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<CProject> getById(final Long id) {
+		Check.notNull(id, "ID cannot be null");
+		// Use findByIdForPageView to fetch with kanbanLine (avoids lazy loading issues)
+		return ((IProjectRepository) repository).findByIdForPageView(id);
+	}
 
 	@Override
 	public Class<?> getInitializerServiceClass() { return CProjectInitializerService.class; }
