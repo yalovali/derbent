@@ -314,7 +314,378 @@ public Optional<T> getForEditing(Long id) {
 }
 ```
 
-### Pattern 4: Company-Scoped Entity Initialization
+### Pattern 4: Override getById() for UI-Critical Lazy Fields (CRITICAL - MANDATORY)
+
+**Problem:** Grids use `service.getById()` to refresh selected entities. The default implementation doesn't fetch lazy fields, causing exceptions when UI components try to display them.
+
+**Rule:** If your entity has **lazy fields that are displayed in UI** (grids, toolbars, forms), **ALWAYS override getById()** in the service to use a query with JOIN FETCH.
+
+#### When to Override getById()
+
+**MUST override if:**
+- ✅ Entity has lazy @ManyToOne or @OneToMany fields
+- ✅ These fields are displayed in grids, forms, or toolbars
+- ✅ Grid selection or toolbar updates access these fields
+- ✅ Entity is used in CComponentGridEntity
+
+**Examples requiring override:**
+- CProject with lazy kanbanLine field (displayed in project grid)
+- CComment with lazy activity field (displayed in comment grid)  
+- CActivity with lazy comments collection (accessed in detail view)
+- CSprintItem with lazy activity/meeting references
+
+#### Implementation Pattern
+
+**Step 1: Create Repository Query with JOIN FETCH**
+
+```java
+public interface IProjectRepository extends IEntityOfCompanyRepository<CProject> {
+    
+    // CRITICAL: Include all lazy fields needed for UI display
+    @Query("""
+        SELECT p FROM CProject p
+        LEFT JOIN FETCH p.company
+        LEFT JOIN FETCH p.kanbanLine
+        WHERE p.id = :id
+        """)
+    Optional<CProject> findByIdForPageView(@Param("id") Long id);
+}
+```
+
+**Naming Convention:**
+- Use `findByIdForPageView()` - indicates query is optimized for UI
+- Use `findById()` for simple fetch without joins (repository default)
+
+**Step 2: Override getById() in Service**
+
+```java
+@Service
+public class CProjectService extends CEntityOfCompanyService<CProject> {
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CProject> getById(final Long id) {
+        Check.notNull(id, "ID cannot be null");
+        // Use findByIdForPageView to fetch with lazy fields
+        return ((IProjectRepository) repository).findByIdForPageView(id);
+    }
+}
+```
+
+**Pattern Elements:**
+1. **@Override** - Override base service method
+2. **@Transactional(readOnly = true)** - Read-only transaction
+3. **Check.notNull(id, ...)** - Validate input
+4. **Cast repository** - `((IProjectRepository) repository)`
+5. **Use ForPageView query** - Returns entity with JOIN FETCH
+6. **Document why** - Comment explaining lazy loading avoidance
+
+#### Real-World Examples
+
+**Example 1: CProject with kanbanLine**
+
+```java
+// Entity with lazy field
+@Entity
+public class CProject extends CEntityOfCompany<CProject> {
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kanban_line_id")
+    private CKanbanLine kanbanLine;  // Displayed in project grid
+    
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    private List<CUserProjectSettings> userSettings;  // Collection, not in grid
+}
+
+// Repository with ForPageView query
+public interface IProjectRepository extends IEntityOfCompanyRepository<CProject> {
+    @Query("""
+        SELECT p FROM CProject p
+        LEFT JOIN FETCH p.company
+        LEFT JOIN FETCH p.kanbanLine
+        WHERE p.id = :id
+        """)
+    Optional<CProject> findByIdForPageView(@Param("id") Long id);
+}
+
+// Service override
+@Service
+public class CProjectService extends CEntityOfCompanyService<CProject> {
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CProject> getById(final Long id) {
+        Check.notNull(id, "ID cannot be null");
+        return ((IProjectRepository) repository).findByIdForPageView(id);
+    }
+}
+```
+
+**Why kanbanLine needs JOIN FETCH:**
+- Displayed in project grid columns
+- Accessed when project is selected in grid
+- Grid selection triggers `onSelectionChange()` → calls `getById()`
+- Without JOIN FETCH → LazyInitializationException
+
+**Why userSettings collection doesn't need JOIN FETCH:**
+- Collection is NOT displayed in grid
+- Only accessed in dedicated detail view
+- Detail view can load separately when needed
+
+**Example 2: CComment with activity**
+
+```java
+// Entity with lazy field
+@Entity
+public class CComment extends CEntityDB<CComment> {
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "activity_id")
+    private CActivity activity;  // Displayed in comment grid
+}
+
+// Repository with ForPageView query
+public interface ICommentRepository extends IAbstractRepository<CComment> {
+    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.activity WHERE c.id = :id")
+    Optional<CComment> findByIdForPageView(@Param("id") Long id);
+}
+
+// Service override
+@Service
+public class CCommentService extends CAbstractService<CComment> {
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CComment> getById(final Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+        return ((ICommentRepository) repository).findByIdForPageView(id);
+    }
+}
+```
+
+#### Decision Criteria: Which Lazy Fields to Fetch?
+
+Use this checklist to determine which lazy fields need JOIN FETCH:
+
+| Field Characteristic | JOIN FETCH? | Reason |
+|----------------------|-------------|--------|
+| Displayed in grid columns | ✅ YES | Grid selection refreshes entity |
+| Shown in toolbar/header | ✅ YES | Accessed immediately on selection |
+| Used in form validation | ✅ YES | Form population needs data |
+| Shown in detail tabs | ❓ MAYBE | Consider if loaded on selection |
+| Collection rarely accessed | ❌ NO | Load separately when needed |
+| Admin-only field | ❌ NO | Most users never access |
+| Audit fields (createdBy, etc.) | ❓ MAYBE | If shown in grid/toolbar |
+
+**Example Decision Process:**
+
+```java
+@Entity
+public class CActivity extends CProjectItem<CActivity> {
+    
+    // DECISION TREE:
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    private CProject project;  
+    // ✅ JOIN FETCH: Displayed in activity grid, shown in toolbar
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    private CUser assignedTo;  
+    // ✅ JOIN FETCH: Displayed in grid, used for filtering
+    
+    @OneToMany(mappedBy = "activity", fetch = FetchType.LAZY)
+    private List<CComment> comments;  
+    // ❌ NO JOIN FETCH: Collection loaded in separate tab, not in grid
+    
+    @OneToOne(mappedBy = "activity", fetch = FetchType.LAZY)
+    private CSprintItem sprintItem;  
+    // ✅ JOIN FETCH: Sprint info shown in grid, toolbar updates
+}
+
+// Repository query fetches only grid-critical fields
+@Query("""
+    SELECT a FROM CActivity a
+    LEFT JOIN FETCH a.project
+    LEFT JOIN FETCH a.assignedTo
+    LEFT JOIN FETCH a.sprintItem
+    WHERE a.id = :id
+    """)
+Optional<CActivity> findByIdForPageView(@Param("id") Long id);
+// Note: comments NOT fetched - loaded separately when tab opened
+```
+
+#### Common Mistakes to Avoid
+
+❌ **DON'T fetch all lazy fields blindly:**
+```java
+// ❌ BAD: Fetching unnecessary collections hurts performance
+@Query("""
+    SELECT a FROM CActivity a
+    LEFT JOIN FETCH a.project
+    LEFT JOIN FETCH a.assignedTo
+    LEFT JOIN FETCH a.comments         -- ❌ Large collection, not in grid
+    LEFT JOIN FETCH a.attachments      -- ❌ Large collection, not in grid
+    LEFT JOIN FETCH a.historyEntries   -- ❌ Rarely accessed
+    WHERE a.id = :id
+    """)
+```
+
+✅ **DO fetch only UI-critical fields:**
+```java
+// ✅ GOOD: Only grid/toolbar fields
+@Query("""
+    SELECT a FROM CActivity a
+    LEFT JOIN FETCH a.project
+    LEFT JOIN FETCH a.assignedTo
+    LEFT JOIN FETCH a.sprintItem
+    WHERE a.id = :id
+    """)
+```
+
+❌ **DON'T skip override for grid-displayed lazy fields:**
+```java
+// ❌ BAD: Entity has lazy kanbanLine, but no getById() override
+@Service
+public class CProjectService extends CEntityOfCompanyService<CProject> {
+    // Missing override - will cause LazyInitializationException in grid!
+}
+```
+
+✅ **DO override for any grid-displayed lazy field:**
+```java
+// ✅ GOOD: Override ensures lazy fields loaded for grid
+@Service
+public class CProjectService extends CEntityOfCompanyService<CProject> {
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CProject> getById(final Long id) {
+        Check.notNull(id, "ID cannot be null");
+        return ((IProjectRepository) repository).findByIdForPageView(id);
+    }
+}
+```
+
+#### Interaction with Base Service Overrides
+
+**Pattern: Chain with parent getById() if it has additional logic**
+
+Some base services already override `getById()` (e.g., `CEntityOfCompanyService`). Chain calls appropriately:
+
+```java
+// CEntityOfCompanyService already overrides getById()
+public abstract class CEntityOfCompanyService<EntityClass> {
+    @Override
+    public Optional<EntityClass> getById(final Long id) {
+        final Optional<EntityClass> entity = super.getById(id);
+        entity.ifPresent(CEntityOfCompany::initializeAllFields);  // Extra logic
+        return entity;
+    }
+}
+
+// Your service should fetch with JOIN FETCH, then apply parent logic
+@Service
+public class CProjectService extends CEntityOfCompanyService<CProject> {
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CProject> getById(final Long id) {
+        Check.notNull(id, "ID cannot be null");
+        
+        // Fetch with JOIN FETCH from repository
+        final Optional<CProject> project = 
+            ((IProjectRepository) repository).findByIdForPageView(id);
+        
+        // Apply parent logic (initializeAllFields if entity present)
+        project.ifPresent(CEntityOfCompany::initializeAllFields);
+        
+        return project;
+    }
+}
+```
+
+**Alternative: If parent only calls initializeAllFields, skip chaining:**
+
+```java
+@Override
+@Transactional(readOnly = true)
+public Optional<CProject> getById(final Long id) {
+    Check.notNull(id, "ID cannot be null");
+    // findByIdForPageView already fetches with JOIN FETCH
+    // No need to call parent since we're fetching eagerly
+    return ((IProjectRepository) repository).findByIdForPageView(id);
+}
+```
+
+#### Testing Pattern for getById() Override
+
+```java
+@Test
+void testGetByIdFetchesLazyFields() {
+    // Create project with kanbanLine
+    CProject project = new CProject("Test Project", company);
+    CKanbanLine kanbanLine = new CKanbanLine("Sprint Kanban", company);
+    kanbanLineService.save(kanbanLine);
+    project.setKanbanLine(kanbanLine);
+    projectService.save(project);
+    
+    // Clear session to detach entities
+    entityManager.clear();
+    
+    // Retrieve via getById()
+    CProject retrieved = projectService.getById(project.getId()).orElseThrow();
+    
+    // Should NOT throw LazyInitializationException
+    assertDoesNotThrow(() -> {
+        CKanbanLine line = retrieved.getKanbanLine();
+        assertNotNull(line);
+        assertEquals("Sprint Kanban", line.getName());
+    });
+}
+```
+
+#### Summary: getById() Override Pattern
+
+**Checklist for Every Entity Service:**
+
+- [ ] Identify all lazy @ManyToOne/@OneToMany fields in entity
+- [ ] Determine which lazy fields are displayed in grid/toolbar
+- [ ] Create `findByIdForPageView()` query with JOIN FETCH for UI fields
+- [ ] Override `getById()` in service to use ForPageView query
+- [ ] Add @Transactional(readOnly = true) annotation
+- [ ] Document why override is needed (lazy loading avoidance)
+- [ ] Write test verifying lazy fields load without exception
+- [ ] Update if grid columns change (add/remove lazy fields)
+
+**Quick Reference:**
+
+```java
+// 1. Repository: Add ForPageView query
+@Query("""
+    SELECT e FROM EntityName e
+    LEFT JOIN FETCH e.lazyField1
+    LEFT JOIN FETCH e.lazyField2
+    WHERE e.id = :id
+    """)
+Optional<EntityName> findByIdForPageView(@Param("id") Long id);
+
+// 2. Service: Override getById()
+@Override
+@Transactional(readOnly = true)
+public Optional<EntityName> getById(final Long id) {
+    Check.notNull(id, "ID cannot be null");
+    return ((IEntityRepository) repository).findByIdForPageView(id);
+}
+
+// 3. Test: Verify lazy loading works
+@Test
+void testGetByIdFetchesLazyFields() {
+    entityManager.clear();  // Detach
+    entity = service.getById(id).orElseThrow();
+    assertDoesNotThrow(() -> entity.getLazyField());  // Should work
+}
+```
+
+### Pattern 5: Company-Scoped Entity Initialization
 
 ```java
 // GOOD: Initialize company entities on first access
