@@ -133,11 +133,9 @@ import tech.derbent.app.tickets.ticket.service.CTicketService;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeService;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
 import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.domain.CUser;
@@ -277,16 +275,6 @@ public class CDataInitializer {
 		projectService.save(project);
 	}
 
-	private void assignStatusToActivity(IHasStatusAndWorkflow<?> item) {
-		Check.notNull(item, "Item cannot be null when assigning status");
-		final CWorkflowEntity workflow = item.getWorkflow();
-		Check.notNull(workflow, "Workflow cannot be null when assigning status");
-		final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(item);
-		if (!initialStatuses.isEmpty()) {
-			item.setStatus(initialStatuses.get(0));
-		}
-	}
-
 	@Transactional
 	private void clearSampleData() {
 		LOGGER.debug("Clearing sample data from database (forced)");
@@ -361,7 +349,7 @@ public class CDataInitializer {
 			activity.setDescription("Activity to track review and implementation of decision");
 			activity.setEntityType(activityType);
 			activity.setAssignedTo(user);
-			assignStatusToActivity(activity);
+			projectItemStatusService.assignStatusToActivity(activity);
 			activityService.save(activity);
 			// Create 2 comments for this activity
 			final CCommentPriority priority1 = commentPriorityService.getRandom(decision.getProject().getCompany());
@@ -436,7 +424,7 @@ public class CDataInitializer {
 			activity1.setAssignedTo(user1);
 			activity1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
 			activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 150)));
-			assignStatusToActivity(activity1);
+			projectItemStatusService.assignStatusToActivity(activity1);
 			activityService.save(activity1);
 			// Create child activity 1
 			final CActivityType type2 = activityTypeService.getRandom(project.getCompany());
@@ -450,7 +438,7 @@ public class CDataInitializer {
 			activity2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
 			activity2.setDueDate(activity2.getStartDate().plusDays((long) (Math.random() * 50)));
 			activity2.setParent(activity1);
-			assignStatusToActivity(activity2);
+			projectItemStatusService.assignStatusToActivity(activity2);
 			activityService.save(activity2);
 			if (minimal) {
 				return;
@@ -467,7 +455,7 @@ public class CDataInitializer {
 			activity3.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 50)));
 			activity3.setDueDate(activity3.getStartDate().plusDays((long) (Math.random() * 50)));
 			activity3.setParent(activity1);
-			assignStatusToActivity(activity3);
+			projectItemStatusService.assignStatusToActivity(activity3);
 			activityService.save(activity3);
 			LOGGER.debug("Created sample activities with parent-child relationships for project: {}", project.getName());
 		} catch (final Exception e) {

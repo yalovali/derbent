@@ -35,6 +35,7 @@ import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
@@ -354,7 +355,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		}
 		// Ensure sprint item is always created for composition pattern
 		if (sprintItem == null) {
-			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+			sprintItem = CSprintItemService.createDefaultSprintItem();
 		}
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {
@@ -464,9 +465,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		Check.notNull(getProject(), "Project must be set before assigning activity type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning activity type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning activity type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match activity project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match activity project company id " + getProject().getCompany().getId());
 		entityType = (CActivityType) typeEntity;
 		updateLastModified();
 	}
