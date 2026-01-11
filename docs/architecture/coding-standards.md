@@ -1791,6 +1791,191 @@ if (isDefaultColumn && column.getDefaultColumn()) {
 }
 ```
 
+## Status Initialization and Management Rules (CRITICAL - MANDATORY)
+
+### Rule: Status Must NEVER Be Null for Workflow Entities
+
+**All entities implementing `IHasStatusAndWorkflow` MUST maintain a valid status at all times after initialization.**
+
+This rule is enforced at multiple levels:
+1. **Interface level**: `IHasStatusAndWorkflow.setStatus()` default implementation prevents null assignment
+2. **Domain level**: Entity `setStatus()` overrides enforce null checks (e.g., `CProjectItem`, `CProject`)
+3. **Service level**: `initializeNewEntity()` methods must assign initial status
+
+#### Why This Matters
+
+Setting status to null breaks workflow state management:
+- Workflow transitions become undefined
+- Status validation fails
+- UI components crash when rendering null status
+- Kanban boards cannot determine column placement
+
+### Rule: Use IHasStatusAndWorkflowService.initializeNewEntity
+
+**ALWAYS use `IHasStatusAndWorkflowService.initializeNewEntity()` to initialize entities with workflow and status.**
+
+This utility method:
+1. Assigns entity type from available types in company
+2. Resolves workflow from entity type
+3. Gets initial status from workflow status relations
+4. Assigns initial status to entity
+
+#### ✅ CORRECT - Using IHasStatusAndWorkflowService
+
+```java
+@Override
+public void initializeNewEntity(final CActivity entity) {
+    super.initializeNewEntity(entity);
+    LOGGER.debug("Initializing new activity entity");
+    
+    // Get current project from session
+    final CProject currentProject = sessionService.getActiveProject()
+            .orElseThrow(() -> new CInitializationException("No active project"));
+    
+    // Initialize workflow-based status and type (CRITICAL - ALWAYS DO THIS)
+    IHasStatusAndWorkflowService.initializeNewEntity(
+            entity, currentProject, entityTypeService, projectItemStatusService);
+    
+    // Initialize activity-specific fields
+    entity.setPriority(activityPriorityService.listByCompany(company).get(0));
+    // ... other fields
+}
+```
+
+#### ❌ INCORRECT - Manual status assignment
+
+```java
+// WRONG - Don't manually assign status
+@Override
+public void initializeNewEntity(final CActivity entity) {
+    super.initializeNewEntity(entity);
+    
+    // WRONG: Manual status lookup bypasses workflow logic
+    final List<CProjectItemStatus> statuses = projectItemStatusService.listByCompany(company);
+    entity.setStatus(statuses.get(0));  // Wrong: Ignores workflow initial status!
+}
+```
+
+### Rule: Removed Method - Do Not Use assignStatusToActivity
+
+**The method `CProjectItemStatusService.assignStatusToActivity()` has been REMOVED as redundant.**
+
+Use the proper initialization pattern instead:
+
+#### ✅ CORRECT - Workflow-based initialization in data initializers
+
+```java
+// For manually created entities in data initializers
+final CActivity activity = new CActivity("Activity Name", project);
+activity.setEntityType(activityType);
+activity.setAssignedTo(user);
+
+// Initialize status using workflow (CORRECT PATTERN)
+if (activityType != null && activityType.getWorkflow() != null) {
+    final List<CProjectItemStatus> initialStatuses = 
+            projectItemStatusService.getValidNextStatuses(activity);
+    if (!initialStatuses.isEmpty()) {
+        activity.setStatus(initialStatuses.get(0));
+    }
+}
+
+activityService.save(activity);
+```
+
+#### ❌ INCORRECT - Using removed method
+
+```java
+// WRONG - This method no longer exists
+projectItemStatusService.assignStatusToActivity(activity);  // COMPILATION ERROR
+```
+
+### Rule: Workflow Initial Status Marking
+
+**Workflows MUST have at least one status marked as initial status (`CWorkflowStatusRelation.initialStatus = true`).**
+
+The initial status is automatically assigned to new entities when they are created:
+1. Service calls `IHasStatusAndWorkflowService.initializeNewEntity()`
+2. Method calls `CProjectItemStatusService.getInitialStatusFromWorkflow()`
+3. Returns status marked with `initialStatus = true` in workflow relations
+4. Falls back to first status in workflow if no initial status marked
+
+#### Implementation in Workflow Status Relations
+
+```java
+// When creating workflow status relations
+final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
+relation.setWorkflow(workflow);
+relation.setFromStatus(null);  // null means "new entity"
+relation.setToStatus(toDoStatus);
+relation.setInitialStatus(true);  // Mark as initial status for new entities
+workflowStatusRelationService.save(relation);
+```
+
+### Rule: Status Changes Must Follow Workflow Transitions
+
+**Status can only be changed to values returned by `getValidNextStatuses()`.**
+
+Never bypass workflow validation:
+
+#### ✅ CORRECT - Using workflow transitions
+
+```java
+// Get valid next statuses from workflow
+final List<CProjectItemStatus> validStatuses = 
+        projectItemStatusService.getValidNextStatuses(entity);
+
+// Check if target status is valid
+if (validStatuses.contains(newStatus)) {
+    entity.setStatus(newStatus);
+    service.save(entity);
+} else {
+    throw new IllegalStateException(
+            "Invalid status transition from " + entity.getStatus().getName() + 
+            " to " + newStatus.getName());
+}
+```
+
+#### ❌ INCORRECT - Bypassing workflow
+
+```java
+// WRONG - Direct status assignment without workflow validation
+entity.setStatus(anyStatus);  // May violate workflow rules!
+service.save(entity);
+```
+
+### Exception: CProject Status Initialization
+
+**CProject entities require special handling because they extend `CEntityOfCompany`, not `CEntityOfProject`.**
+
+Since `IHasStatusAndWorkflowService.initializeNewEntity()` expects a `CProject` parameter (which CProject itself cannot provide), use inline initialization:
+
+```java
+@Override
+public void initializeNewEntity(final CProject entity) {
+    super.initializeNewEntity(entity);
+    
+    final CCompany currentCompany = getCurrentCompany();
+    entity.setCompany(currentCompany);
+    
+    // Initialize entity type
+    final List<?> availableTypes = projectTypeService.listByCompany(currentCompany);
+    Check.notEmpty(availableTypes, "No project types available");
+    entity.setEntityType((CProjectType) availableTypes.get(0));
+    
+    // Initialize workflow-based status using static method
+    Check.notNull(entity.getWorkflow(), "Workflow cannot be null");
+    final CProjectItemStatus initialStatus = 
+            IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+    entity.setStatus(initialStatus);
+}
+```
+
+### Related Documentation
+
+- [Entity Inheritance Patterns](entity-inheritance-patterns.md) - Entity design principles
+- [IHasStatusAndWorkflow Interface](../../src/main/java/tech/derbent/app/workflow/service/IHasStatusAndWorkflow.java) - Interface definition
+- [IHasStatusAndWorkflowService](../../src/main/java/tech/derbent/app/workflow/service/IHasStatusAndWorkflowService.java) - Service utility methods
+
 ### Rule: Workflow-Aware Status Transitions
 
 When items are dragged between kanban columns:
