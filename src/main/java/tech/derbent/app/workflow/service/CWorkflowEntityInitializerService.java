@@ -194,7 +194,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 							.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
 					.toList();
 			Check.notEmpty(statuses, "No project item statuses found for project: " + project.getName());
-			final List<CUserProjectRole> roles = userProjectRoleService.listByProject(project).stream()
+			final List<CUserProjectRole> roles = userProjectRoleService.findByProject(project).stream()
 					.filter(role -> role.getProject() != null && project.getId().equals(role.getProject().getId())).toList();
 			Check.notEmpty(roles, "No user project roles found for project: " + project.getName());
 			initializeSampleWorkflow("Activity Status Workflow", project, statuses, roles, workflowEntityService, workflowStatusRelationService);

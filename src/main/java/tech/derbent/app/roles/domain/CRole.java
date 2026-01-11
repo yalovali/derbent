@@ -5,11 +5,11 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.app.companies.domain.CCompany;
 
 @MappedSuperclass
-public abstract class CRole<EntityClass> extends CEntityOfProject<EntityClass> {
+public abstract class CRole<EntityClass> extends CEntityOfCompany<EntityClass> {
 
 	@Column (nullable = false)
 	@AMetaData (
@@ -39,8 +39,8 @@ public abstract class CRole<EntityClass> extends CEntityOfProject<EntityClass> {
 		attributeNonDeletable = false;
 	}
 
-	protected CRole(final Class<EntityClass> clazz, final String name, final CProject project) {
-		super(clazz, name, project);
+	protected CRole(final Class<EntityClass> clazz, final String name, final CCompany company) {
+		super(clazz, name, company);
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;

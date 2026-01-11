@@ -4,8 +4,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -96,15 +94,21 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 						"Project Guest", "Guest role with limited access", "false", "false", "true"
 				}
 		};
-		// Use consumer pattern to set role-specific fields
-		initializeProjectEntity(roleData, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(ENTITY_CLASS)),
-				project, minimal, (item, index) -> {
-					final CUserProjectRole role = (CUserProjectRole) item;
-					final String[] data = roleData[index];
-					role.setIsAdmin(Boolean.parseBoolean(data[2]));
-					role.setIsUser(Boolean.parseBoolean(data[3]));
-					role.setIsGuest(Boolean.parseBoolean(data[4]));
-					role.setColor(CColorUtils.getRandomColor(true));
-				});
+		// Use the service to create roles for the project
+		final CUserProjectRoleService service = CSpringContext.getBean(CUserProjectRoleService.class);
+		int index = 0;
+		for (final String[] data : roleData) {
+			final CUserProjectRole role = new CUserProjectRole(data[0], project);
+			role.setDescription(data[1]);
+			role.setIsAdmin(Boolean.parseBoolean(data[2]));
+			role.setIsUser(Boolean.parseBoolean(data[3]));
+			role.setIsGuest(Boolean.parseBoolean(data[4]));
+			role.setColor(CColorUtils.getRandomColor(true));
+			service.save(role);
+			index++;
+			if (minimal && index >= 1) {
+				return;
+			}
+		}
 	}
 }

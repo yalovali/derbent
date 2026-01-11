@@ -1,17 +1,23 @@
 package tech.derbent.app.roles.domain;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 
 /** CUserProjectRole - Defines a user's role within a specific project context. Replaces enumeration-based role system with flexible, database-driven
  * role management. Includes boolean attributes for role types and page access permissions. */
 @Entity
 @Table (name = "cuserprojectrole", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
-		"name", "project_id"
+		"name", "company_id", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cuserprojectrole_id"))
 public class CUserProjectRole extends CRole<CUserProjectRole> {
@@ -22,6 +28,13 @@ public class CUserProjectRole extends CRole<CUserProjectRole> {
 	public static final String ENTITY_TITLE_PLURAL = "User Project Roles";
 	public static final String ENTITY_TITLE_SINGULAR = "User Project Role";
 	public static final String VIEW_NAME = "User Project Roles View";
+	
+	// Project field - roles are scoped to both company and project
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "project_id", nullable = false)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	@AMetaData (displayName = "Project", required = true, readOnly = true, description = "Project of this role", hidden = false)
+	private CProject project;
 	// Boolean attributes for project role types
 	@Column (name = "is_admin", nullable = false)
 	@AMetaData (
@@ -48,7 +61,20 @@ public class CUserProjectRole extends CRole<CUserProjectRole> {
 	}
 
 	public CUserProjectRole(String name, CProject project) {
-		super(CUserProjectRole.class, name, project);
+		super(CUserProjectRole.class, name, project != null ? project.getCompany() : null);
+		this.project = project;
+	}
+	
+	// Project getter and setter
+	public CProject getProject() { return project; }
+	
+	public void setProject(final CProject project) {
+		Check.notNull(project, "Project cannot be null for project-scoped roles");
+		if (getCompany() != null && project.getCompany() != null) {
+			Check.isTrue(getCompany().getId().equals(project.getCompany().getId()), 
+				"Project must belong to the same company as the role");
+		}
+		this.project = project;
 	}
 
 	// Boolean attribute getters and setters
