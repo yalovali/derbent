@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -24,6 +26,7 @@ import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.projects.domain.CProjectType;
 import tech.derbent.app.projects.events.ProjectListChangeEvent;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -151,19 +154,22 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
                 // Name is set by base class generateUniqueName() which is overridden below
                 
                 // Initialize entity type
-                final java.util.List<?> availableTypes = projectTypeService.listByCompany(currentCompany);
-                tech.derbent.api.utils.Check.notEmpty(availableTypes, 
+                final List<?> availableTypes = projectTypeService.listByCompany(currentCompany);
+                Check.notEmpty(availableTypes, 
                         "No project types available in company " + currentCompany.getName() + " - cannot initialize project");
-                final tech.derbent.app.projects.domain.CProjectType selectedType = 
-                        (tech.derbent.app.projects.domain.CProjectType) availableTypes.get(0);
+                // Cast safely - CProjectTypeService only returns CProjectType instances
+                final Object firstType = availableTypes.get(0);
+                Check.instanceOf(firstType, CProjectType.class, 
+                        "Expected CProjectType but got " + firstType.getClass().getSimpleName());
+                final CProjectType selectedType = (CProjectType) firstType;
                 entity.setEntityType(selectedType);
                 
                 // Initialize workflow-based status
-                tech.derbent.api.utils.Check.notNull(entity.getWorkflow(), 
+                Check.notNull(entity.getWorkflow(), 
                         "Workflow cannot be null for project type " + selectedType.getName());
-                final tech.derbent.api.entityOfCompany.domain.CProjectItemStatus initialStatus = 
+                final CProjectItemStatus initialStatus = 
                         tech.derbent.app.workflow.service.IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
-                tech.derbent.api.utils.Check.notNull(initialStatus, 
+                Check.notNull(initialStatus, 
                         "Initial status cannot be null for project");
                 entity.setStatus(initialStatus);
                 

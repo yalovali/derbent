@@ -52,12 +52,22 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 	 * <p>
 	 * <strong>CRITICAL RULE: Status can NEVER be set to null once entity is initialized.</strong>
 	 * <p>
-	 * This default implementation enforces the rule that status cannot be set to null, 
-	 * which prevents workflow state corruption. All entities implementing this interface
-	 * inherit this validation automatically.
+	 * This default implementation enforces null-check validation only.
+	 * Implementing classes MUST override this method to actually set the status field,
+	 * and SHOULD call this default implementation (via super or direct validation) to
+	 * ensure the null check is enforced.
 	 * <p>
-	 * Subclasses can override this method to add additional validation (e.g., company checks),
-	 * but MUST call this default implementation or enforce the same null check.
+	 * Example implementation in entity class:
+	 * <pre>
+	 * {@code
+	 * @Override
+	 * public void setStatus(CProjectItemStatus status) {
+	 *     IHasStatusAndWorkflow.super.setStatus(status); // Enforce null check
+	 *     this.status = status;
+	 *     updateLastModified();
+	 * }
+	 * }
+	 * </pre>
 	 * 
 	 * @param status the new status (must not be null)
 	 * @throws NullPointerException if status is null */
