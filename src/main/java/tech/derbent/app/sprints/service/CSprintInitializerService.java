@@ -126,6 +126,8 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
+			final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService =
+					CSpringContext.getBean(tech.derbent.api.entityOfCompany.service.CProjectItemStatusService.class);
 			// Create sprints
 			final int sprintCount = minimal ? 1 : 2;
 			for (int i = 1; i <= sprintCount; i++) {
@@ -138,6 +140,14 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				sprint.setColor(CSprint.DEFAULT_COLOR);
 				sprint.setStartDate(LocalDate.now().plusWeeks((i - 1) * 2));
 				sprint.setEndDate(LocalDate.now().plusWeeks(i * 2));
+				// Set initial status from workflow (CRITICAL: all project items must have status)
+				if (sprintType != null && sprintType.getWorkflow() != null) {
+					final java.util.List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> initialStatuses =
+							projectItemStatusService.getValidNextStatuses(sprint);
+					if (!initialStatuses.isEmpty()) {
+						sprint.setStatus(initialStatuses.get(0));
+					}
+				}
 				// Add random activities and meetings to sprint
 				CActivity activity = activityService.getRandom(project);
 				if (activity != null) {
