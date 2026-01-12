@@ -19,6 +19,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.storage.IAttachmentStorage;
+import tech.derbent.app.documenttypes.domain.CDocumentType;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 

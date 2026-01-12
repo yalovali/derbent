@@ -217,40 +217,31 @@ public class CDialogAttachmentUpload extends CDialog {
 			final CUser currentUser = sessionService.getActiveUser()
 					.orElseThrow(() -> new IllegalStateException("No active user"));
 			
-			// Get project from parent entity
-			final tech.derbent.api.projects.domain.CProject project;
-			if (parentEntity instanceof tech.derbent.api.entityOfProject.domain.CEntityOfProject) {
-				project = ((tech.derbent.api.entityOfProject.domain.CEntityOfProject<?>) parentEntity).getProject();
-			} else {
-				throw new IllegalStateException("Parent entity must be CEntityOfProject");
-			}
-			
-			// Upload file
+			// Upload file via service (no project parameter needed)
 			final CAttachment attachment = attachmentService.uploadFile(
 					fileName,
-					mimeType,
-					fileSize,
 					buffer.getInputStream(),
-					project,
-					currentUser);
+					fileSize,
+					mimeType,
+					comboDocumentType.getValue(),
+					textAreaDescription.getValue());
 			
-			// Set optional fields
-			attachment.setDocumentType(comboDocumentType.getValue());
-			attachment.setDescription(textAreaDescription.getValue());
+			// Set version number if specified
 			if (fieldVersionNumber.getValue() != null) {
 				attachment.setVersionNumber(fieldVersionNumber.getValue());
+				attachmentService.save(attachment);
 			}
 			
-			// Link to parent entity
-			linkAttachmentToParent(attachment);
+			// Important: Parent entity will add attachment to its collection
+			// No need to call link methods - unidirectional @OneToMany pattern
 			
-			// Save again to persist optional fields and links
+			// Save again to persist optional fields
 			attachmentService.save(attachment);
 			
 			// Notify success
 			CNotificationService.showSaveSuccess();
 			
-			// Callback
+			// Callback (parent will add attachment to its collection)
 			if (onUploadSuccess != null) {
 				onUploadSuccess.accept(attachment);
 			}
@@ -268,19 +259,12 @@ public class CDialogAttachmentUpload extends CDialog {
 		}
 	}
 
-	/** Link attachment to the parent entity. */
+	/** Link attachment to the parent entity - DEPRECATED, not used with unidirectional pattern. */
+	@Deprecated
 	private void linkAttachmentToParent(final CAttachment attachment) {
-		if (parentEntity instanceof CActivity) {
-			attachmentService.linkToActivity(attachment, (CActivity) parentEntity);
-		} else if (parentEntity instanceof CRisk) {
-			attachmentService.linkToRisk(attachment, (CRisk) parentEntity);
-		} else if (parentEntity instanceof CMeeting) {
-			attachmentService.linkToMeeting(attachment, (CMeeting) parentEntity);
-		} else if (parentEntity instanceof CSprint) {
-			attachmentService.linkToSprint(attachment, (CSprint) parentEntity);
-		} else {
-			LOGGER.warn("Unknown parent entity type: {}", parentEntity.getClass().getSimpleName());
-		}
+		// NOTE: With unidirectional @OneToMany pattern, parent entity manages the collection
+		// Parent will call: parentEntity.getAttachments().add(attachment)
+		// No service linkTo* methods needed
 	}
 
 	/** Format file size for display. */

@@ -178,19 +178,18 @@ public class CComponentListAttachments<MasterEntity extends CEntityDB<?>>
 			return;
 		}
 		
-		// Load attachments based on master entity type
+		// Load attachments from parent entity's collection
+		// NOTE: Parent entities need @OneToMany List<CAttachment> attachments field
 		List<CAttachment> items = List.of();
-		if (masterEntity instanceof CActivity) {
-			items = attachmentService.findByActivity((CActivity) masterEntity);
-		} else if (masterEntity instanceof CRisk) {
-			items = attachmentService.findByRisk((CRisk) masterEntity);
-		} else if (masterEntity instanceof CMeeting) {
-			items = attachmentService.findByMeeting((CMeeting) masterEntity);
-		} else if (masterEntity instanceof CSprint) {
-			items = attachmentService.findBySprint((CSprint) masterEntity);
-		} else {
-			LOGGER.warn("Unknown master entity type: {}", masterEntity.getClass().getSimpleName());
-		}
+		
+		// TODO: Once parent entities have @OneToMany List<CAttachment> getAttachments(), use:
+		// if (masterEntity instanceof IHasAttachments) {
+		//     items = ((IHasAttachments) masterEntity).getAttachments();
+		// }
+		
+		// Temporary: Use empty list until parent entities are updated with @OneToMany
+		LOGGER.warn("Parent entity attachments not yet implemented. Entity type: {}", 
+				masterEntity.getClass().getSimpleName());
 		
 		grid.setItems(items);
 	}
