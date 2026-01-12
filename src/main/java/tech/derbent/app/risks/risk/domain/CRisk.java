@@ -1,7 +1,10 @@
 package tech.derbent.app.risks.risk.domain;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,6 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
@@ -16,6 +20,8 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.risks.risktype.domain.CRiskType;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -23,13 +29,21 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 @Entity
 @Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
-public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk> {
+public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk>, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - caution
 	public static final String DEFAULT_ICON = "vaadin:warning";
 	public static final String ENTITY_TITLE_PLURAL = "Risks";
 	public static final String ENTITY_TITLE_SINGULAR = "Risk";
 	public static final String VIEW_NAME = "Risks View";
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "risk_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this risk", hidden = false,
+			createComponentMethodBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+	)
+	private List<CAttachment> attachments = new ArrayList<>();
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
@@ -218,5 +232,19 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public void setRiskSeverity(final ERiskSeverity riskSeverity) {
 		this.riskSeverity = riskSeverity;
 		updateLastModified();
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public List<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<>();
+		}
+		return attachments;
+	}
+
+	@Override
+	public void setAttachments(final List<CAttachment> attachments) {
+		this.attachments = attachments;
 	}
 }

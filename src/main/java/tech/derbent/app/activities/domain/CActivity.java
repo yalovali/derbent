@@ -31,6 +31,8 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -43,7 +45,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon {
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -76,6 +78,14 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			description = "Actual time spent on this activity in hours", hidden = false
 	)
 	private BigDecimal actualHours = BigDecimal.ZERO;
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "activity_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this activity", hidden = false,
+			createComponentMethodBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+	)
+	private List<CAttachment> attachments = new ArrayList<>();
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private List<CComment> comments = new ArrayList<>();
@@ -556,5 +566,19 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		sprintItem.setStoryPoint(storyPoint);
 		this.storyPoint = storyPoint; // Keep for backward compatibility during migration
 		updateLastModified();
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public List<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<>();
+		}
+		return attachments;
+	}
+
+	@Override
+	public void setAttachments(final List<CAttachment> attachments) {
+		this.attachments = attachments;
 	}
 }
