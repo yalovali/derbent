@@ -51,6 +51,12 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "hourlyRate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
+			
+			/******************/
+			// Attachments section - component will be compact when empty
+			scr.addScreenLine(CDetailLinesService.createSection("Attachments"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attachments"));
+			
 			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));

@@ -1,6 +1,7 @@
 package tech.derbent.app.attachments.view;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -8,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.server.StreamResource;
-import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -17,12 +17,9 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.attachments.service.CAttachmentService;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.risks.risk.domain.CRisk;
-import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.base.session.service.ISessionService;
 
 /**
@@ -32,11 +29,23 @@ import tech.derbent.base.session.service.ISessionService;
  * upload date and uploaded by user. Supports upload, download, delete and 
  * version history operations.
  * 
- * This component follows the relation component pattern for master-detail relationships.
+ * This component uses the IHasAttachments interface for clean, type-safe
+ * integration with any entity that can have attachments.
  * 
- * @param <MasterEntity> The parent entity type (Activity, Risk, Meeting, Sprint, or Project)
+ * Benefits of interface approach:
+ * - No generic type parameters needed
+ * - No type casting required
+ * - Works with any class (not just CEntityDB subclasses)
+ * - Simpler factory implementation
+ * - Better compile-time type safety
+ * 
+ * Usage:
+ * <pre>
+ * CComponentListAttachments component = new CComponentListAttachments(service, session);
+ * component.setMasterEntity(activity); // activity implements IHasAttachments
+ * </pre>
  */
-public class CComponentListAttachments<MasterEntity extends CEntityDB<?>> 
+public class CComponentListAttachments 
 		extends CVerticalLayout implements IContentOwner, tech.derbent.api.interfaces.IPageServiceAutoRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListAttachments.class);
@@ -45,8 +54,7 @@ public class CComponentListAttachments<MasterEntity extends CEntityDB<?>>
 	
 	private final CAttachmentService attachmentService;
 	private final ISessionService sessionService;
-	private final Class<MasterEntity> masterEntityClass;
-	private MasterEntity masterEntity;
+	private IHasAttachments masterEntity;
 	
 	private CGrid<CAttachment> grid;
 	private CButton buttonDownload;
@@ -55,16 +63,13 @@ public class CComponentListAttachments<MasterEntity extends CEntityDB<?>>
 	private CHorizontalLayout layoutToolbar;
 
 	/** Constructor for attachment list component.
-	 * @param masterEntityClass the master entity class
 	 * @param attachmentService the attachment service
 	 * @param sessionService the session service */
-	public CComponentListAttachments(final Class<MasterEntity> masterEntityClass,
-			final CAttachmentService attachmentService, final ISessionService sessionService) {
-		Check.notNull(masterEntityClass, "MasterEntityClass cannot be null");
+	public CComponentListAttachments(final CAttachmentService attachmentService, 
+			final ISessionService sessionService) {
 		Check.notNull(attachmentService, "AttachmentService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
 		
-		this.masterEntityClass = masterEntityClass;
 		this.attachmentService = attachmentService;
 		this.sessionService = sessionService;
 		
@@ -90,9 +95,28 @@ public class CComponentListAttachments<MasterEntity extends CEntityDB<?>>
 		grid = new CGrid<>(CAttachment.class);
 		CGrid.setupGrid(grid);
 		configureGrid();
-		grid.setHeight("400px");
+		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));
 		add(grid);
+		
+		// Set initial compact mode (will adjust when data loaded)
+		updateCompactMode(true);
+	}
+	
+	/** Update component height based on content.
+	 * @param isEmpty true if no attachments exist */
+	private void updateCompactMode(final boolean isEmpty) {
+		if (isEmpty) {
+			// Compact mode: narrow height when empty
+			grid.setHeight("150px");
+			setHeight("200px"); // Component total height
+			LOGGER.debug("Compact mode: No attachments");
+		} else {
+			// Normal mode: full height when has content
+			grid.setHeight("300px");
+			setHeight("auto"); // Component auto-adjusts
+			LOGGER.debug("Normal mode: Has attachments");
+		}
 	}
 
 	/** Configure grid columns. */
