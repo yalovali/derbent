@@ -46,7 +46,7 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentListAttachments 
-		extends CVerticalLayout implements IContentOwner, tech.derbent.api.interfaces.IPageServiceAutoRegistrable {
+		extends CVerticalLayout implements tech.derbent.api.interfaces.IPageServiceAutoRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListAttachments.class);
 	private static final long serialVersionUID = 1L;
@@ -189,7 +189,6 @@ public class CComponentListAttachments
 		layoutToolbar.add(buttonDelete);
 	}
 
-	@Override
 	public void populateForm() {
 		refreshGrid();
 	}
@@ -201,7 +200,6 @@ public class CComponentListAttachments
 		refreshGrid();
 	}
 
-	@Override
 	public void refreshGrid() {
 		if (masterEntity == null) {
 			LOGGER.debug("Master entity is null, clearing grid");
@@ -338,34 +336,7 @@ public class CComponentListAttachments
 		}
 	}
 
-	@Override
-	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		throw new UnsupportedOperationException("Not supported - use upload dialog instead");
-	}
 
-	@Override
-	public CEntityDB<?> getValue() {
-		// IHasAttachments doesn't extend CEntityDB, so return null
-		// This component is not meant for entity selection/binding
-		return null;
-	}
-
-	@Override
-	public String getCurrentEntityIdString() {
-		// Return null since IHasAttachments doesn't have getId()
-		// If needed in future, can add getId() to interface or use instanceof check
-		return null;
-	}
-
-	@Override
-	public tech.derbent.api.entity.service.CAbstractService<?> getEntityService() {
-		return attachmentService;
-	}
-
-	@Override
-	public void setValue(final CEntityDB<?> entity) {
-		setEntity(entity);
-	}
 
 	public void setEntity(final Object entity) {
 		if (entity == null) {
