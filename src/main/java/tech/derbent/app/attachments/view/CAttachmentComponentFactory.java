@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.attachments.service.CAttachmentService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -49,27 +49,20 @@ public class CAttachmentComponentFactory {
 	 * This method is called by the form builder via reflection when rendering
 	 * entity detail forms that have the attachments field with proper @AMetaData.
 	 * 
-	 * @param <T> the entity type
 	 * @param masterEntity the parent entity (Activity, Risk, Meeting, Sprint, Project, User, etc.)
 	 * @param fieldName the field name (typically "attachments")
 	 * @return configured attachment list component
 	 */
-	public <T extends CEntityDB<T>> CComponentListAttachments<T> createComponent(
-			final T masterEntity, 
+	public CComponentListAttachments createComponent(
+			final IHasAttachments masterEntity, 
 			final String fieldName) {
 		
 		Objects.requireNonNull(masterEntity, "Master entity cannot be null");
 		Objects.requireNonNull(fieldName, "Field name cannot be null");
 		
-		LOGGER.debug("Creating attachment component for {} field '{}'", 
-				masterEntity.getClass().getSimpleName(), fieldName);
+		LOGGER.debug("Creating attachment component for field '{}'", fieldName);
 		
-		// Create component with entity type
-		@SuppressWarnings("unchecked")
-		final Class<T> entityClass = (Class<T>) masterEntity.getClass();
-		
-		final CComponentListAttachments<T> component = new CComponentListAttachments<>(
-				entityClass,
+		final CComponentListAttachments component = new CComponentListAttachments(
 				attachmentService,
 				sessionService
 		);
@@ -77,7 +70,7 @@ public class CAttachmentComponentFactory {
 		// Set master entity
 		component.setMasterEntity(masterEntity);
 		
-		LOGGER.debug("Created attachment component for {}", entityClass.getSimpleName());
+		LOGGER.debug("Created attachment component");
 		
 		return component;
 	}
@@ -86,8 +79,7 @@ public class CAttachmentComponentFactory {
 	 * Alternative method signature for compatibility.
 	 * Some form builders may call with just the entity.
 	 */
-	public <T extends CEntityDB<T>> CComponentListAttachments<T> createComponent(
-			final T masterEntity) {
+	public CComponentListAttachments createComponent(final IHasAttachments masterEntity) {
 		return createComponent(masterEntity, "attachments");
 	}
 }

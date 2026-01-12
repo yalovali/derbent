@@ -193,29 +193,42 @@ public class CComponentListAttachments
 	public void populateForm() {
 		refreshGrid();
 	}
+	
+	/** Set the master entity for this component.
+	 * @param masterEntity the master entity that owns the attachments */
+	public void setMasterEntity(final IHasAttachments masterEntity) {
+		this.masterEntity = masterEntity;
+		refreshGrid();
+	}
 
 	@Override
 	public void refreshGrid() {
 		if (masterEntity == null) {
 			LOGGER.debug("Master entity is null, clearing grid");
 			grid.setItems(List.of());
+			updateCompactMode(true);
 			return;
 		}
 		
 		// Load attachments from parent entity's collection
-		// NOTE: Parent entities need @OneToMany List<CAttachment> attachments field
-		List<CAttachment> items = List.of();
+		List<CAttachment> items = masterEntity.getAttachments();
+		if (items == null) {
+			LOGGER.debug("Attachments list is null, initializing empty list");
+			items = new ArrayList<>();
+			masterEntity.setAttachments(items);
+		}
 		
-		// TODO: Once parent entities have @OneToMany List<CAttachment> getAttachments(), use:
-		// if (masterEntity instanceof IHasAttachments) {
-		//     items = ((IHasAttachments) masterEntity).getAttachments();
-		// }
-		
-		// Temporary: Use empty list until parent entities are updated with @OneToMany
-		LOGGER.warn("Parent entity attachments not yet implemented. Entity type: {}", 
-				masterEntity.getClass().getSimpleName());
+		// Sort by version number descending (newest first)
+		items.sort((a1, a2) -> {
+			final int v1 = a1.getVersionNumber() != null ? a1.getVersionNumber() : 0;
+			final int v2 = a2.getVersionNumber() != null ? a2.getVersionNumber() : 0;
+			return Integer.compare(v2, v1);
+		});
 		
 		grid.setItems(items);
+		updateCompactMode(items.isEmpty());
+		
+		LOGGER.debug("Loaded {} attachments for entity", items.size());
 	}
 
 	/** Handle grid selection changes. */
@@ -231,13 +244,23 @@ public class CComponentListAttachments
 			return;
 		}
 		
+		// masterEntity is IHasAttachments, but dialog needs CEntityDB
+		// Cast is safe because all current entities (Activity, Risk, etc.) extend CEntityDB
+		final Object parentEntity = masterEntity;
+		if (!(parentEntity instanceof tech.derbent.api.entity.domain.CEntityDB)) {
+			CNotificationService.showError("Entity does not support file uploads");
+			LOGGER.error("Master entity does not extend CEntityDB: {}", 
+					parentEntity.getClass().getSimpleName());
+			return;
+		}
+		
 		final CDialogAttachmentUpload dialog = new CDialogAttachmentUpload(
 				attachmentService,
 				(tech.derbent.app.documenttypes.service.CDocumentTypeService) 
 					tech.derbent.api.config.CSpringContext.getBean(
 						tech.derbent.app.documenttypes.service.CDocumentTypeService.class),
 				sessionService,
-				masterEntity,
+				(tech.derbent.api.entity.domain.CEntityDB<?>) parentEntity,
 				attachment -> {
 					// Refresh grid after successful upload
 					try {
@@ -322,13 +345,16 @@ public class CComponentListAttachments
 
 	@Override
 	public CEntityDB<?> getValue() {
-		return masterEntity;
+		// IHasAttachments doesn't extend CEntityDB, so return null
+		// This component is not meant for entity selection/binding
+		return null;
 	}
 
 	@Override
 	public String getCurrentEntityIdString() {
-		return masterEntity != null && masterEntity.getId() != null ? 
-				masterEntity.getId().toString() : null;
+		// Return null since IHasAttachments doesn't have getId()
+		// If needed in future, can add getId() to interface or use instanceof check
+		return null;
 	}
 
 	@Override
@@ -344,14 +370,12 @@ public class CComponentListAttachments
 	public void setEntity(final Object entity) {
 		if (entity == null) {
 			this.masterEntity = null;
+		} else if (entity instanceof IHasAttachments) {
+			this.masterEntity = (IHasAttachments) entity;
 		} else {
-			try {
-				this.masterEntity = masterEntityClass.cast(entity);
-			} catch (final ClassCastException e) {
-				LOGGER.error("Entity is not of expected type {}: {}", masterEntityClass.getSimpleName(), 
-						entity.getClass().getSimpleName());
-				this.masterEntity = null;
-			}
+			LOGGER.warn("Entity does not implement IHasAttachments: {}", 
+					entity.getClass().getSimpleName());
+			this.masterEntity = null;
 		}
 		refreshGrid();
 	}

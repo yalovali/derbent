@@ -17,12 +17,23 @@ import tech.derbent.app.attachments.domain.CAttachment;
 /**
  * Initializer service for CAttachment entities.
  * 
- * Provides screen and grid initialization for attachment management views.
- * Creates detail sections and grid configurations for viewing all attachments.
+ * Provides:
+ * 1. Screen and grid initialization for standalone attachment management views
+ * 2. Standard attachment section creation for ALL entity detail views
+ * 
+ * **Key Feature**: addAttachmentsSection() ensures ALL entities have identical
+ * attachment sections with consistent naming, behavior, and appearance.
  */
 public final class CAttachmentInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Attachment Details";
+	
+	/** Standard section name - same for ALL entities */
+	public static final String SECTION_NAME_ATTACHMENTS = "Attachments";
+	
+	/** Standard field name - must match entity field name */
+	public static final String FIELD_NAME_ATTACHMENTS = "attachments";
+	
 	private static final Class<?> clazz = CAttachment.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAttachmentInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".7";
@@ -31,7 +42,66 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	private static final String pageTitle = "Attachment Management";
 	private static final boolean showInQuickToolbar = false;
 
-	/** Create basic detail view for attachments.
+	/**
+	 * Add standard Attachments section to any entity detail view.
+	 * 
+	 * **This is the ONLY method that creates attachment sections.**
+	 * ALL entity initializers (Activity, Risk, Meeting, Sprint, Project, User, etc.)
+	 * MUST call this method to ensure consistent attachment sections.
+	 * 
+	 * Creates:
+	 * - Section header: "Attachments"
+	 * - Field: "attachments" (renders CComponentListAttachments via factory)
+	 * 
+	 * Usage in ANY entity initializer:
+	 * <pre>
+	 * // CActivityInitializerService.java
+	 * public static CDetailSection createBasicView(CProject project) {
+	 *     CDetailSection scr = createBaseScreenEntity(project, CActivity.class);
+	 *     // ... other sections ...
+	 *     CAttachmentInitializerService.addAttachmentsSection(scr, CActivity.class);
+	 *     // ... more sections ...
+	 * }
+	 * 
+	 * // Same for ALL entities:
+	 * CAttachmentInitializerService.addAttachmentsSection(scr, CRisk.class);
+	 * CAttachmentInitializerService.addAttachmentsSection(scr, CMeeting.class);
+	 * CAttachmentInitializerService.addAttachmentsSection(scr, CSprint.class);
+	 * CAttachmentInitializerService.addAttachmentsSection(scr, CProject.class);
+	 * CAttachmentInitializerService.addAttachmentsSection(scr, CUser.class);
+	 * </pre>
+	 * 
+	 * @param detailSection the detail section to add attachments to
+	 * @param entityClass the entity class (must implement IHasAttachments and have @OneToMany attachments field)
+	 * @throws Exception if adding section fails
+	 */
+	public static void addAttachmentsSection(
+			final CDetailSection detailSection, 
+			final Class<?> entityClass) throws Exception {
+		
+		Check.notNull(detailSection, "detailSection cannot be null");
+		Check.notNull(entityClass, "entityClass cannot be null");
+		
+		try {
+			// Section header - IDENTICAL for all entities
+			detailSection.addScreenLine(
+					CDetailLinesService.createSection(SECTION_NAME_ATTACHMENTS));
+			
+			// Attachments field - IDENTICAL for all entities
+			// Renders via CAttachmentComponentFactory (referenced in entity's @AMetaData)
+			detailSection.addScreenLine(
+					CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_ATTACHMENTS));
+			
+			LOGGER.debug("Added standard Attachments section for {}", entityClass.getSimpleName());
+			
+		} catch (final Exception e) {
+			LOGGER.error("Error adding Attachments section for {}: {}", 
+					entityClass.getSimpleName(), e.getMessage(), e);
+			throw e;
+		}
+	}
+
+	/** Create basic detail view for standalone attachment management page.
 	 * @param project the project
 	 * @return the detail section
 	 * @throws Exception if creation fails */
@@ -58,16 +128,9 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "uploadedBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "uploadDate"));
 			
-			// Links section
-			detailSection.addScreenLine(CDetailLinesService.createSection("Linked To"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activity"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "risk"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "meeting"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sprint"));
-			
 			// System section
 			detailSection.addScreenLine(CDetailLinesService.createSection("System"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			
@@ -79,7 +142,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 		}
 	}
 
-	/** Create grid entity for attachments.
+	/** Create grid entity for standalone attachment management page.
 	 * @param project the project
 	 * @return the grid entity */
 	public static CGridEntity createGridEntity(final CProject project) {
@@ -88,19 +151,17 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 				"id", 
 				"versionNumber", 
 				"fileName", 
-				"fileSize", 
+				"fileSize",
+				"fileType",
 				"documentType", 
 				"uploadDate", 
 				"uploadedBy",
-				"activity",
-				"risk",
-				"meeting",
-				"sprint",
+				"company",
 				"active"));
 		return grid;
 	}
 
-	/** Initialize attachment management page.
+	/** Initialize standalone attachment management page.
 	 * @param project the project
 	 * @param gridEntityService grid service
 	 * @param detailSectionService detail section service

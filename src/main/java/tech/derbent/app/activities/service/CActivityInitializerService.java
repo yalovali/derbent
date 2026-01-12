@@ -53,9 +53,8 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
 			
 			/******************/
-			// Attachments section - component will be compact when empty
-			scr.addScreenLine(CDetailLinesService.createSection("Attachments"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attachments"));
+			// Attachments section - standard section for ALL entities
+			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
 			
 			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));

@@ -13,9 +13,6 @@ import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.view.CComponentWidgetActivity;
-import tech.derbent.app.attachments.service.CAttachmentService;
-import tech.derbent.app.attachments.view.CComponentListAttachments;
-import tech.derbent.base.session.service.ISessionService;
 
 public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 		implements IPageServiceHasStatusAndWorkflow<CActivity>, IComponentWidgetEntityProvider<CActivity>, ISprintItemPageService<CActivity> {
@@ -24,9 +21,6 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;
 	Long serialVersionUID = 1L;
-	
-	// Attachment list component
-	private CComponentListAttachments<CActivity> componentAttachments;
 
 	public CPageServiceActivity(final IPageServiceImplementer<CActivity> view) {
 		super(view);
@@ -38,23 +32,11 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 		}
 	}
 
-	/** Creates the attachments list component for displaying activity attachments.
-	 * @return configured CComponentListAttachments component */
-	public CComponentListAttachments<CActivity> createAttachmentsComponent() {
-		if (componentAttachments == null) {
-			try {
-				final CAttachmentService attachmentService = CSpringContext.getBean(CAttachmentService.class);
-				final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
-				componentAttachments = new CComponentListAttachments<>(
-						CActivity.class, attachmentService, sessionService);
-				// Register with page service for auto-wiring
-				componentAttachments.registerWithPageService(this);
-			} catch (final Exception e) {
-				LOGGER.error("Failed to initialize attachments component", e);
-			}
-		}
-		return componentAttachments;
-	}
+	// NOTE: createAttachmentsComponent() method removed
+	// Attachments are now created automatically via CAttachmentComponentFactory
+	// Referenced in CActivity's @OneToMany field @AMetaData:
+	//   createComponentMethodBean = "CAttachmentComponentFactory"
+	//   createComponentMethod = "createComponent"
 
 	/** Creates a widget component for displaying the given activity entity.
 	 * @param entity the activity to create a widget for
