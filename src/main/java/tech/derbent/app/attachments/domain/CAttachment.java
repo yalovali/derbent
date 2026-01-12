@@ -14,29 +14,30 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IHasIcon;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.documenttypes.domain.CDocumentType;
 import tech.derbent.base.users.domain.CUser;
 
 /**
  * CAttachment - Domain entity representing file attachments.
  * 
- * Stores metadata about uploaded files and links them to a single parent entity 
- * (Activity, Risk, Meeting, or Sprint). Files are stored on disk, not in the database. 
+ * Stores metadata about uploaded files. Files are stored on disk, not in database.
  * Supports versioning to track document changes over time.
  * 
- * Pattern: Similar to CComment - each attachment belongs to ONE parent entity,
- * and each parent entity can have MANY attachments.
+ * Pattern: Simple entity with no back-reference to parent.
+ * Parent entities (Activity, Risk, Meeting, Sprint, Project) have:
+ *   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+ *   private List<CAttachment> attachments = new ArrayList<>();
+ * 
+ * Managed via relation builder components in parent entity views.
  * 
  * Layer: Domain (MVC)
  */
 @Entity
 @Table(name = "cattachment")
 @AttributeOverride(name = "id", column = @Column(name = "attachment_id"))
-public class CAttachment extends CEntityOfProject<CAttachment> implements IHasIcon {
+public class CAttachment extends CEntityDB<CAttachment> implements IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#2F4F4F"; // Dark Slate Gray - files
 	public static final String DEFAULT_ICON = "vaadin:paperclip";
@@ -179,30 +180,6 @@ public class CAttachment extends CEntityOfProject<CAttachment> implements IHasIc
 	)
 	private String color = DEFAULT_COLOR;
 
-	// Generic parent reference - stores which entity owns this attachment
-	// Pattern: Like CProjectItem's parentId/parentType but for attachments
-	@Column(name = "owner_entity_id", nullable = true)
-	@AMetaData(
-		displayName = "Owner Entity ID",
-		required = false,
-		readOnly = true,
-		description = "ID of the parent entity (Activity, Risk, Meeting, Sprint, Project)",
-		hidden = true
-	)
-	private Long ownerEntityId;
-
-	@Column(name = "owner_entity_type", nullable = true, length = 100)
-	@Size(max = 100)
-	@AMetaData(
-		displayName = "Owner Entity Type",
-		required = false,
-		readOnly = true,
-		description = "Type of the parent entity (CActivity, CRisk, CMeeting, CSprint, CProject)",
-		hidden = true,
-		maxLength = 100
-	)
-	private String ownerEntityType;
-
 	/** Default constructor for JPA. */
 	public CAttachment() {
 		super();
@@ -212,11 +189,10 @@ public class CAttachment extends CEntityOfProject<CAttachment> implements IHasIc
 	 * @param fileName the original file name
 	 * @param fileSize the file size in bytes
 	 * @param contentPath the path where the file is stored on disk
-	 * @param uploadedBy the user who uploaded the file
-	 * @param project the project this attachment belongs to */
+	 * @param uploadedBy the user who uploaded the file */
 	public CAttachment(final String fileName, final Long fileSize, final String contentPath, 
-			final CUser uploadedBy, final CProject project) {
-		super(CAttachment.class, fileName, project);
+			final CUser uploadedBy) {
+		super(CAttachment.class);
 		this.fileName = fileName;
 		this.fileSize = fileSize;
 		this.contentPath = contentPath;
@@ -312,39 +288,6 @@ public class CAttachment extends CEntityOfProject<CAttachment> implements IHasIc
 
 	public void setColor(final String color) {
 		this.color = color;
-	}
-
-	public Long getOwnerEntityId() {
-		return ownerEntityId;
-	}
-
-	public void setOwnerEntityId(final Long ownerEntityId) {
-		this.ownerEntityId = ownerEntityId;
-	}
-
-	public String getOwnerEntityType() {
-		return ownerEntityType;
-	}
-
-	public void setOwnerEntityType(final String ownerEntityType) {
-		this.ownerEntityType = ownerEntityType;
-	}
-
-	/** Set the owner entity for this attachment.
-	 * @param owner the owner entity (Activity, Risk, Meeting, Sprint, or Project) */
-	public void setOwner(final IAttachmentOwner owner) {
-		Check.notNull(owner, "Owner cannot be null");
-		this.ownerEntityId = owner.getId();
-		this.ownerEntityType = owner.getEntityClass().getSimpleName();
-	}
-
-	/** Get the parent entity name for display.
-	 * @return the parent entity type and ID */
-	public String getParentEntityName() {
-		if (ownerEntityType != null && ownerEntityId != null) {
-			return ownerEntityType + " #" + ownerEntityId;
-		}
-		return "Unknown";
 	}
 
 	/** Get formatted file size.

@@ -1,38 +1,38 @@
 package tech.derbent.app.attachments.service;
 
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
+import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.app.attachments.domain.CAttachment;
 
 /**
- * IAttachmentRepository - Repository interface for CAttachment entity.
+ * IAttachmentRepository - Repository interface for CAttachment entities.
  * 
- * Provides data access methods for attachment management including queries
- * to find attachments by owner entity (Activity, Risk, Meeting, Sprint, Project).
+ * Simple repository with basic queries. Parent entities query their attachments
+ * via their @OneToMany collections.
  * 
- * Pattern: Uses generic ownerEntityId and ownerEntityType fields to support
- * multiple parent entity types without multiple foreign key columns.
+ * Layer: Service (MVC) - Repository interface
  */
-public interface IAttachmentRepository extends IEntityOfProjectRepository<CAttachment> {
+public interface IAttachmentRepository extends IAbstractRepository<CAttachment> {
 
-	/** Find all attachments for a specific owner entity.
-	 * @param ownerEntityId the ID of the owner entity
-	 * @param ownerEntityType the type of the owner entity (e.g., "CActivity", "CRisk")
-	 * @return list of attachments ordered by upload date descending */
-	@Query("SELECT a FROM #{#entityName} a WHERE a.ownerEntityId = :ownerEntityId AND a.ownerEntityType = :ownerEntityType ORDER BY a.uploadDate DESC")
-	List<CAttachment> findByOwner(@Param("ownerEntityId") Long ownerEntityId, @Param("ownerEntityType") String ownerEntityType);
-
-	/** Find all attachments for a specific owner entity type.
-	 * @param ownerEntityType the type of the owner entity (e.g., "CActivity", "CRisk")
-	 * @return list of attachments ordered by upload date descending */
-	@Query("SELECT a FROM #{#entityName} a WHERE a.ownerEntityType = :ownerEntityType ORDER BY a.uploadDate DESC")
-	List<CAttachment> findByOwnerType(@Param("ownerEntityType") String ownerEntityType);
-
-	/** Find all attachments that reference a specific attachment as previous version.
+	/**
+	 * Find all attachments that reference a specific attachment as previous version.
+	 * Used to check if an attachment can be deleted (cannot delete if newer versions exist).
 	 * @param previousVersion the previous version attachment
-	 * @return list of attachments that have this as previous version */
-	@Query("SELECT a FROM #{#entityName} a WHERE a.previousVersion = :previousVersion ORDER BY a.uploadDate DESC")
+	 * @return list of attachments that reference this as previous version
+	 */
+	@Query("SELECT a FROM CAttachment a WHERE a.previousVersion = :previousVersion")
 	List<CAttachment> findByPreviousVersion(@Param("previousVersion") CAttachment previousVersion);
+
+	/**
+	 * Find attachment by ID with eager loading.
+	 * @param id the attachment ID
+	 * @return optional attachment
+	 */
+	@EntityGraph(attributePaths = {"uploadedBy", "documentType", "previousVersion"})
+	@Override
+	Optional<CAttachment> findById(Long id);
 }
