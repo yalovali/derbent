@@ -14,30 +14,32 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.app.documenttypes.domain.CDocumentType;
 import tech.derbent.base.users.domain.CUser;
 
 /**
- * CAttachment - Domain entity representing file attachments.
+ * CAttachment - Company-scoped domain entity representing file attachments.
  * 
  * Stores metadata about uploaded files. Files are stored on disk, not in database.
  * Supports versioning to track document changes over time.
+ * Company-scoped for multi-tenant support and universal usage across all entities.
  * 
- * Pattern: Simple entity with no back-reference to parent.
- * Parent entities (Activity, Risk, Meeting, Sprint, Project) have:
+ * Pattern: Unidirectional @OneToMany from parent entities.
+ * Parent entities (Activity, Risk, Meeting, Sprint, Project, User, etc.) have:
  *   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+ *   @JoinColumn(name = "activity_id")  // or risk_id, user_id, etc.
  *   private List<CAttachment> attachments = new ArrayList<>();
  * 
- * Managed via relation builder components in parent entity views.
+ * CAttachment has NO back-reference to parents (clean unidirectional pattern).
  * 
  * Layer: Domain (MVC)
  */
 @Entity
 @Table(name = "cattachment")
 @AttributeOverride(name = "id", column = @Column(name = "attachment_id"))
-public class CAttachment extends CEntityDB<CAttachment> implements IHasIcon {
+public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#2F4F4F"; // Dark Slate Gray - files
 	public static final String DEFAULT_ICON = "vaadin:paperclip";
@@ -192,7 +194,7 @@ public class CAttachment extends CEntityDB<CAttachment> implements IHasIcon {
 	 * @param uploadedBy the user who uploaded the file */
 	public CAttachment(final String fileName, final Long fileSize, final String contentPath, 
 			final CUser uploadedBy) {
-		super(CAttachment.class);
+		super(); // CEntityOfCompany default constructor
 		this.fileName = fileName;
 		this.fileSize = fileSize;
 		this.contentPath = contentPath;

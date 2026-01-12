@@ -88,90 +88,110 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 			entity.setVersionNumber(1);
 		}
 		
-		// Note: fileName, fileSize, contentPath are required and must be set before saving
-		// Note: project is required and must be set before saving
+		// Set default color if not set
+		if (entity.getColor() == null || entity.getColor().isBlank()) {
+			entity.setColor(CAttachment.DEFAULT_COLOR);
+		}
+		
+		LOGGER.debug("Initialized new attachment: {} (version {})", entity.getFileName(),
+				entity.getVersionNumber());
 	}
 
 	@Override
 	public String checkDeleteAllowed(final CAttachment attachment) {
-		// Check if attachment is used as a previous version reference
-		final List<CAttachment> newerVersions = attachmentRepository.findByFileNameAndProject(
-				attachment.getFileName(), attachment.getProject());
+		// Check if attachment is referenced by newer versions as previousVersion
+		final List<CAttachment> newerVersions = attachmentRepository.findByPreviousVersion(attachment);
 		
-		for (final CAttachment version : newerVersions) {
-			if (version.getPreviousVersion() != null && 
-					version.getPreviousVersion().getId().equals(attachment.getId())) {
-				return "Cannot delete attachment - it is referenced by a newer version (version " + 
-						version.getVersionNumber() + ")";
-			}
+		if (!newerVersions.isEmpty()) {
+			return "Cannot delete attachment - it is referenced by newer version(s). Version numbers: " + 
+					newerVersions.stream()
+						.map(v -> String.valueOf(v.getVersionNumber()))
+						.collect(java.util.stream.Collectors.joining(", "));
 		}
 		
 		return super.checkDeleteAllowed(attachment);
 	}
 
-	/** Upload a new file and create an attachment record.
+	/** Upload a new file and create an attachment entity.
 	 * @param fileName the original file name
-	 * @param fileType the MIME type
+	 * @param inputStream the file content stream
 	 * @param fileSize the file size in bytes
-	 * @param contentStream the file content
-	 * @param project the project
-	 * @param uploadedBy the uploading user
-	 * @return the created attachment
-	 * @throws Exception if upload fails */
+	 * @param fileType the MIME type (optional)
+	 * @param documentType the document type classification (optional)
+	 * @param description user-provided description (optional)
+	 * @return the created attachment entity */
 	@Transactional
-	public CAttachment uploadFile(final String fileName, final String fileType, final long fileSize,
-			final InputStream contentStream, final CProject project, final CUser uploadedBy) throws Exception {
+	public CAttachment uploadFile(final String fileName, final InputStream inputStream,
+			final long fileSize, final String fileType, final CDocumentType documentType,
+			final String description) throws Exception {
+
 		Objects.requireNonNull(fileName, "File name cannot be null");
-		Objects.requireNonNull(contentStream, "Content stream cannot be null");
-		Objects.requireNonNull(project, "Project cannot be null");
-		Objects.requireNonNull(uploadedBy, "Uploading user cannot be null");
+		Objects.requireNonNull(inputStream, "Input stream cannot be null");
 
 		// Upload file to storage
-		final String contentPath = attachmentStorage.upload(fileName, contentStream, fileSize);
+		final String contentPath = attachmentStorage.upload(fileName, inputStream, fileSize);
 
-		// Create attachment record
-		final CAttachment attachment = new CAttachment(fileName, fileSize, contentPath, uploadedBy, project);
+		// Create attachment entity
+		final CUser currentUser = sessionService.getActiveUser()
+				.orElseThrow(() -> new IllegalStateException("No active user found"));
+
+		final CAttachment attachment = new CAttachment(fileName, fileSize, contentPath, currentUser);
 		attachment.setFileType(fileType);
+		attachment.setDocumentType(documentType);
+		attachment.setDescription(description);
 		attachment.setUploadDate(LocalDateTime.now());
+		attachment.setVersionNumber(1);
 
-		return save(attachment);
+		// Save to database
+		final CAttachment saved = save(attachment);
+
+		LOGGER.info("Uploaded file: {} (size: {} bytes, id: {})", fileName, fileSize, saved.getId());
+
+		return saved;
 	}
 
-	/** Upload a new version of an existing file.
+	/** Upload a new version of an existing attachment.
 	 * @param previousAttachment the previous version
-	 * @param fileName the new file name
-	 * @param fileType the MIME type
+	 * @param fileName the file name
+	 * @param inputStream the file content stream
 	 * @param fileSize the file size in bytes
-	 * @param contentStream the file content
-	 * @param uploadedBy the uploading user
-	 * @return the new version attachment
-	 * @throws Exception if upload fails */
+	 * @param fileType the MIME type (optional)
+	 * @param description user-provided description (optional)
+	 * @return the new version attachment */
 	@Transactional
-	public CAttachment uploadNewVersion(final CAttachment previousAttachment, final String fileName, 
-			final String fileType, final long fileSize, final InputStream contentStream, 
-			final CUser uploadedBy) throws Exception {
+	public CAttachment uploadNewVersion(final CAttachment previousAttachment, final String fileName,
+			final InputStream inputStream, final long fileSize, final String fileType,
+			final String description) throws Exception {
+
 		Objects.requireNonNull(previousAttachment, "Previous attachment cannot be null");
+		Objects.requireNonNull(fileName, "File name cannot be null");
+		Objects.requireNonNull(inputStream, "Input stream cannot be null");
 
 		// Upload file to storage
-		final String contentPath = attachmentStorage.upload(fileName, contentStream, fileSize);
+		final String contentPath = attachmentStorage.upload(fileName, inputStream, fileSize);
 
 		// Create new version
-		final CAttachment newVersion = new CAttachment(fileName, fileSize, contentPath, 
-				uploadedBy, previousAttachment.getProject());
+		final CUser currentUser = sessionService.getActiveUser()
+				.orElseThrow(() -> new IllegalStateException("No active user found"));
+
+		final CAttachment newVersion = new CAttachment(fileName, fileSize, contentPath, currentUser);
 		newVersion.setFileType(fileType);
+		newVersion.setDocumentType(previousAttachment.getDocumentType()); // Inherit document type
+		newVersion.setDescription(description);
 		newVersion.setUploadDate(LocalDateTime.now());
 		newVersion.setVersionNumber(previousAttachment.getVersionNumber() + 1);
 		newVersion.setPreviousVersion(previousAttachment);
-		newVersion.setDocumentType(previousAttachment.getDocumentType());
-		newVersion.setDescription(previousAttachment.getDescription());
 
-		// Copy entity links
-		newVersion.setActivity(previousAttachment.getActivity());
-		newVersion.setRisk(previousAttachment.getRisk());
-		newVersion.setMeeting(previousAttachment.getMeeting());
-		newVersion.setSprint(previousAttachment.getSprint());
+		// Important: New version must be in same company as previous version
+		newVersion.setCompany(previousAttachment.getCompany());
 
-		return save(newVersion);
+		// Save to database
+		final CAttachment saved = save(newVersion);
+
+		LOGGER.info("Uploaded new version {} of attachment: {} (id: {})",
+				saved.getVersionNumber(), fileName, saved.getId());
+
+		return saved;
 	}
 
 	/** Download a file.
