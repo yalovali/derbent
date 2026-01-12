@@ -3,6 +3,8 @@ package tech.derbent.app.risklevel.risklevel.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -10,8 +12,6 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.risklevel.risklevel.domain.CRiskLevel;
 
 public class CRiskLevelInitializerService extends CInitializerServiceBase {
@@ -19,7 +19,7 @@ public class CRiskLevelInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CRiskLevel.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskLevelInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".11";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Risk Levels";
+	private static final String menuTitle = MenuTitle_TYPES + ".Risk Levels";
 	private static final String pageDescription = "Risk level assessment and management";
 	private static final String pageTitle = "Risk Level Management";
 	private static final boolean showInQuickToolbar = false;
@@ -36,7 +36,6 @@ public class CRiskLevelInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

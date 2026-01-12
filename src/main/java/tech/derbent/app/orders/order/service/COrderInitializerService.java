@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -13,15 +15,13 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.orders.order.domain.COrder;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 
 public class COrderInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = COrder.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".9";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Orders";
+	private static final String menuOrder = Menu_Order_FINANCE + ".9";
+	private static final String menuTitle = MenuTitle_FINANCE + ".Orders";
 	private static final String pageDescription = "Order management with approval workflow";
 	private static final String pageTitle = "Order Management";
 	private static final boolean showInQuickToolbar = false;

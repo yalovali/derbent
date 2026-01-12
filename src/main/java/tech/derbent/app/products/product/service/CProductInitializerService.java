@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -13,9 +15,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.app.products.product.domain.CProduct;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 
@@ -23,8 +23,8 @@ public class CProductInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CProduct.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".30";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Products";
+	private static final String menuOrder = Menu_Order_PRODUCTS + ".30";
+	private static final String menuTitle = MenuTitle_PRODUCTS + ".Products";
 	private static final String pageDescription = "Product management";
 	private static final String pageTitle = "Product Management";
 	private static final boolean showInQuickToolbar = false;

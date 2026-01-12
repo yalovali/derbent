@@ -3,6 +3,8 @@ package tech.derbent.app.projectexpenses.projectexpense.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -10,18 +12,16 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense;
-import tech.derbent.api.projects.domain.CProject;
 
 public class CProjectExpenseInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CProjectExpense.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectExpenseInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".20";
-	private static final String menuTitle = MenuTitle_PROJECT + ".ProjectExpenses";
-	private static final String pageDescription = "ProjectExpense management";
-	private static final String pageTitle = "ProjectExpense Management";
+	private static final String menuOrder = Menu_Order_FINANCE + ".20";
+	private static final String menuTitle = MenuTitle_FINANCE + ".Project Expenses";
+	private static final String pageDescription = "Project Expense management";
+	private static final String pageTitle = "Project Expense Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -35,7 +35,6 @@ public class CProjectExpenseInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

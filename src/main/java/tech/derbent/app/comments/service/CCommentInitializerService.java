@@ -1,19 +1,18 @@
 package tech.derbent.app.comments.service;
 
-import tech.derbent.api.utils.Check;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 
 public final class CCommentInitializerService extends CInitializerServiceBase {
 
@@ -21,7 +20,7 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CComment.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".6";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Comments";
+	private static final String menuTitle = MenuTitle_SETUP + ".UI.Comments";
 	private static final String pageDescription = "Manage comments captured on project activities";
 	private static final String pageTitle = "Comment Management";
 	private static final boolean showInQuickToolbar = false;
@@ -63,5 +62,6 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	private CCommentInitializerService() { /*****/ }
+	private CCommentInitializerService() { /*****/
+	}
 }

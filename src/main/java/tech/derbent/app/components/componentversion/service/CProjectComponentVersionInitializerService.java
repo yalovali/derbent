@@ -3,6 +3,8 @@ package tech.derbent.app.components.componentversion.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -11,17 +13,15 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 
 public class CProjectComponentVersionInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CProjectComponentVersion.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".30";
-	private static final String menuTitle = MenuTitle_PROJECT + ".ComponentVersions";
-	private static final String pageDescription = "ComponentVersion management";
-	private static final String pageTitle = "ComponentVersion Management";
+	private static final String menuOrder = Menu_Order_PRODUCTS + ".30";
+	private static final String menuTitle = MenuTitle_PRODUCTS + ".ComponentVersions";
+	private static final String pageDescription = "Component Version management";
+	private static final String pageTitle = "Component Version Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
