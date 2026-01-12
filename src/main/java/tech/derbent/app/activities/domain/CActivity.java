@@ -83,7 +83,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@JoinColumn (name = "activity_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this activity", hidden = false,
-			createComponentMethodBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 	// One-to-Many relationship with comments - cascade delete enabled
