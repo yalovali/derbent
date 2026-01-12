@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

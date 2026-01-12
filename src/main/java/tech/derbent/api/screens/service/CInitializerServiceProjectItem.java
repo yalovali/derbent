@@ -1,7 +1,7 @@
 package tech.derbent.api.screens.service;
 
 import tech.derbent.api.screens.domain.CDetailSection;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public abstract class CInitializerServiceProjectItem extends CInitializerServiceEntityOfProject {
 

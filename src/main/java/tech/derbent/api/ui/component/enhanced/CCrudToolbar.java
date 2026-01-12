@@ -18,7 +18,7 @@ import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 public class CCrudToolbar extends HorizontalLayout {
 

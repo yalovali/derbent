@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 @Entity
 @Table (name = "\"crisklevel\"") // Using quoted identifiers for PostgreSQL

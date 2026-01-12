@@ -7,8 +7,8 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 
 public class CGridEntityInitializerService extends CInitializerServiceBase {
 

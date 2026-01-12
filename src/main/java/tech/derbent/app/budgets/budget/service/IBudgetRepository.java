@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.budgets.budget.domain.CBudget;
 import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface IBudgetRepository extends IEntityOfProjectRepository<CBudget> {
 

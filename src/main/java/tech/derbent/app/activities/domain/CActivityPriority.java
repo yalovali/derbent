@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 /** CActivityPriority - Domain entity representing activity priority levels. Provides predefined priority levels for activity categorization and
  * workflow management. Layer: Domain (MVC) Standard priority levels: CRITICAL, HIGH, MEDIUM, LOW, LOWEST

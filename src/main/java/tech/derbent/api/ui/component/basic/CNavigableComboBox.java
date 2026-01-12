@@ -15,8 +15,8 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.base.session.service.CWebSessionService;
 
 /** CNavigableComboBox - A combobox component that includes a navigation button to navigate to the entity's page. Extends CustomField to provide a

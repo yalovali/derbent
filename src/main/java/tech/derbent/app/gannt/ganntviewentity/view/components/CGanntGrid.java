@@ -16,8 +16,8 @@ import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.ganntitem.domain.CGanntItem;
 import tech.derbent.app.gannt.ganntviewentity.view.datasource.CGanntDataProvider;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 
 /** CGanntGrid - Gantt items displayed in a unified grid with navigation to entity pages and visual timeline bars. */
 @CssImport ("./themes/default/gantt.css")

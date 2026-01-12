@@ -75,7 +75,7 @@ if (saveError != null) {
 ### 4. Existing Validation Examples
 
 #### CWorkflowStatusRelationService
-**File:** `src/main/java/tech/derbent/app/workflow/service/CWorkflowStatusRelationService.java`
+**File:** `src/main/java/tech/derbent/api/workflow/service/CWorkflowStatusRelationService.java`
 
 Already implements proper validation in `checkSaveAllowed`:
 - Validates that from status and to status cannot be the same

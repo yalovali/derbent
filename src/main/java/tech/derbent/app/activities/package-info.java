@@ -19,7 +19,7 @@
  * Activities extend {@link tech.derbent.api.entityOfProject.domain.CProjectItem} and support
  * hierarchical project structures with parent-child relationships.
  *
- * @see tech.derbent.app.projects Project module
+ * @see tech.derbent.api.projects Project module
  * @see tech.derbent.api.entityOfProject.domain.CProjectItem Base class
  */
 @NullMarked

@@ -16,9 +16,9 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 

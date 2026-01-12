@@ -34,8 +34,8 @@ import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 
 @Entity
 @Table (name = "cuser", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {

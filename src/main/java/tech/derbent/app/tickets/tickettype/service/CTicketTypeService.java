@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.app.tickets.ticket.service.ITicketRepository;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 import tech.derbent.base.session.service.ISessionService;

@@ -12,7 +12,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.milestones.milestone.service.IMilestoneRepository;
 import tech.derbent.app.milestones.milestonetype.domain.CMilestoneType;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

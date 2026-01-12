@@ -3,7 +3,7 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.List;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;

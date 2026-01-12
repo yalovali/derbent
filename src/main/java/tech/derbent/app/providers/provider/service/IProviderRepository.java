@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.providers.provider.domain.CProvider;
 import tech.derbent.app.providers.providertype.domain.CProviderType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface IProviderRepository extends IEntityOfProjectRepository<CProvider> {
 

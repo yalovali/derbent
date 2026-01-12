@@ -12,7 +12,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.components.componentversion.service.IProjectComponentVersionRepository;
 import tech.derbent.app.components.componentversiontype.domain.CProjectComponentVersionType;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

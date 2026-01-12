@@ -1,10 +1,13 @@
 package tech.derbent.base.login.view;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -26,16 +29,19 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import tech.derbent.api.config.CDataInitializer;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
+import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.companies.service.CCompanyService;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.companies.service.CCompanyService;
+import tech.derbent.bab.config.CBabDataInitializer;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Custom login view using basic Vaadin components instead of LoginOverlay. This provides an alternative login interface for testing purposes. */
@@ -46,6 +52,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
 	private static final long serialVersionUID = 1L;
+	private static final String SCHEMA_BAB_GATEWAY = "BAB Gateway";
+	private static final String SCHEMA_DERBENT = "Derbent";
 
 	private static HorizontalLayout createHorizontalField(final String labelText, final Component field) {
 		final HorizontalLayout layout = new HorizontalLayout();
@@ -67,14 +75,17 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final Button resetDbMinimalButton = new CButton("DB Min", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	private final CComboBox<String> schemaSelector = new CComboBox<>();
+	private final Environment environment;
 	private final ISessionService sessionService;
 	private final TextField usernameField = new TextField();
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired
-	public CCustomLoginView(ISessionService sessionService, CCompanyService companyService) {
+	public CCustomLoginView(ISessionService sessionService, CCompanyService companyService, Environment environment) {
 		this.sessionService = sessionService;
 		this.companyService = companyService;
+		this.environment = environment;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();
@@ -163,12 +174,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		Check.notNull(ui, "UI must be available to run database reset");
 		final VaadinSession session = ui.getSession();
 		Check.notNull(session, "Vaadin session must not be null");
+		final String schemaSelection = schemaSelector.getValue();
 		LOGGER.info("✅ DB reset confirmed - starting database initialization...");
 		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
 		CompletableFuture.runAsync(() -> {
 			Exception failure = null;
 			try {
-				runDatabaseResetInSession(session, ui, minimal);
+				runDatabaseResetInSession(session, ui, minimal, schemaSelection);
 				LOGGER.info("🗄️ DB reset completed successfully");
 			} catch (final Exception ex) {
 				failure = ex;
@@ -193,13 +205,22 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		});
 	}
 
-	private void runDatabaseResetInSession(final VaadinSession session, final UI ui, final boolean minimal) throws Exception {
+	private void runDatabaseResetInSession(final VaadinSession session, final UI ui, final boolean minimal, final String schemaSelection)
+			throws Exception {
 		session.lock();
 		try {
 			VaadinSession.setCurrent(session);
 			UI.setCurrent(ui);
-			final CDataInitializer init = new CDataInitializer(sessionService);
-			init.reloadForced(minimal);
+			final String resolvedSchema = schemaSelection == null ? SCHEMA_DERBENT : schemaSelection;
+			if (SCHEMA_BAB_GATEWAY.equals(resolvedSchema)) {
+				final Map<String, CBabDataInitializer> initializers = CSpringContext.getBeansOfType(CBabDataInitializer.class);
+				Check.isTrue(!initializers.isEmpty(), "BAB initializer bean is not available. Activate the bab profile.");
+				final CBabDataInitializer init = initializers.values().iterator().next();
+				init.reloadForced(minimal);
+			} else {
+				final CDataInitializer init = new CDataInitializer(sessionService);
+				init.reloadForced(minimal);
+			}
 		} finally {
 			UI.setCurrent(null);
 			VaadinSession.setCurrent(null);
@@ -282,10 +303,20 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		final HorizontalLayout buttonsLayout = new CHorizontalLayout();
 		buttonsLayout.setAlignItems(Alignment.CENTER);
 		//
-		buttonsLayout.add(passwordHint, resetDbMinimalButton, resetDbButton/* , chartTestButton */);
+		final boolean isBabProfile = environment.acceptsProfiles(Profiles.of("bab"));
+		final List<String> schemaOptions = isBabProfile ? List.of(SCHEMA_BAB_GATEWAY) : List.of(SCHEMA_DERBENT);
+		schemaSelector.setItems(schemaOptions);
+		schemaSelector.setValue(schemaOptions.get(0));
+		final boolean showSchemaSelector = schemaOptions.size() > 1;
+		schemaSelector.setVisible(showSchemaSelector);
+		schemaSelector.setId("custom-schema-selector");
+		if (showSchemaSelector) {
+			buttonsLayout.add(schemaSelector);
+		}
+		buttonsLayout.add(new CDiv(), resetDbMinimalButton, resetDbButton/* , chartTestButton */);
 		final HorizontalLayout loginButtonLayout = new CHorizontalLayout();
 		loginButtonLayout.setAlignItems(Alignment.END);
-		loginButtonLayout.add(new CDiv(), loginButton);
+		loginButtonLayout.add(passwordHint, new CDiv(), loginButton);
 		// Add components to form card
 		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, errorMessage, loginButtonLayout, buttonsLayout);
 		container.add(formCard);

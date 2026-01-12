@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.projects.events.ProjectListChangeEvent;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.events.ProjectListChangeEvent;
 import tech.derbent.base.users.domain.CUser;
 
 public interface ISessionService {

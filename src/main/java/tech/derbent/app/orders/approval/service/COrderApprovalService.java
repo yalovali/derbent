@@ -11,12 +11,12 @@ import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
 import tech.derbent.app.orders.order.domain.COrder;
 import tech.derbent.app.orders.order.service.COrderService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 

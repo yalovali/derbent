@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.users.domain.CUser;
 
 /** CTeam - Team entity for grouping users Represents a team of users with a manager, associated with a company */

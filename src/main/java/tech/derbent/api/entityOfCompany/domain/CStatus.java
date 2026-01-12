@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 /** CStatus - Abstract base entity for all status types in the system. Layer: Domain (MVC) This class provides common functionality for status
  * entities including name and description. All status types (like CProjectItemStatus) should inherit from this class. */

@@ -13,7 +13,7 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.service.CPageServiceKanbanLine;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
 
 /** CComponentKanbanColumnBacklog - A specialized kanban column that displays the project backlog.

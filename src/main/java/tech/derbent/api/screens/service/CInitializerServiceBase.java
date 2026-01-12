@@ -3,6 +3,7 @@ package tech.derbent.api.screens.service;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.function.ObjIntConsumer;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
@@ -12,18 +13,17 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.services.pageservice.CPageServiceUtility;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.service.CWorkflowEntityService;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 public abstract class CInitializerServiceBase {
 
@@ -165,26 +165,24 @@ public abstract class CInitializerServiceBase {
 				if (item instanceof IHasStatusAndWorkflow) {
 					/* item has: void setEntityType(CTypeEntity<?> typeEntity); void setStatus(CProjectItemStatus status); */
 					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-					if (statusItem instanceof tech.derbent.api.entityOfCompany.domain.CEntityOfCompany<?> companyEntity) {
+					if (statusItem instanceof final tech.derbent.api.entityOfCompany.domain.CEntityOfCompany<?> companyEntity) {
 						final CTypeEntityService<?> typeServiceInstance = getEntityTypeService(statusItem);
 						final CCompany companyContext = companyEntity.getCompany();
 						Check.notNull(companyContext, "Company is required to choose entity type for " + item.getClass().getSimpleName());
 						final CTypeEntity<EntityClass> randomType = (CTypeEntity<EntityClass>) typeServiceInstance.getRandom(companyContext);
 						Check.notNull(randomType, "No type entities found for " + item.getClass().getSimpleName()
-										+ ". Cannot initialize status and workflow for new entity.");
+								+ ". Cannot initialize status and workflow for new entity.");
 						statusItem.setEntityType(randomType);
-						Check.notNull(statusItem.getWorkflow(),
-										"Workflow cannot be null for " + item.getClass().getSimpleName());
+						Check.notNull(statusItem.getWorkflow(), "Workflow cannot be null for " + item.getClass().getSimpleName());
 						if (statusItem instanceof CEntityOfProject<?>) {
 							final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 							final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(statusItem);
 							Check.notEmpty(initialStatuses, "No valid initial statuses found for " + item.getClass().getSimpleName()
-											+ ". Cannot initialize status for new entity.");
+									+ ". Cannot initialize status for new entity.");
 							if (!initialStatuses.isEmpty()) {
 								statusItem.setStatus(initialStatuses.get(0));
 							}
-							Check.notNull(statusItem.getStatus(),
-											"Status cannot be null for " + item.getClass().getSimpleName());
+							Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
 						}
 					}
 				}
@@ -227,27 +225,25 @@ public abstract class CInitializerServiceBase {
 					// no color setter present
 				}
 				if (item instanceof IHasStatusAndWorkflow) {
-                                        /* item has: void setEntityType(CTypeEntity<?> typeEntity); void setStatus(CProjectItemStatus status); */
-                                        final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-                                        final CTypeEntityService<?> typeServiceInstance = getEntityTypeService(statusItem);
-                                        final CCompany companyContext = project.getCompany();
-                                        Check.notNull(companyContext, "Company is required to choose entity type for " + item.getClass().getSimpleName());
-                                        final CTypeEntity<EntityClass> randomType = (CTypeEntity<EntityClass>) typeServiceInstance.getRandom(companyContext);
-                                        Check.notNull(randomType, "No type entities found for " + item.getClass().getSimpleName()
-                                                        + ". Cannot initialize status and workflow for new entity.");
-                                        statusItem.setEntityType(randomType);
-                                        Check.notNull(statusItem.getWorkflow(),
-                                                        "Workflow cannot be null for " + item.getClass().getSimpleName());
-                                        final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-                                        final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(statusItem);
-                                        Check.notEmpty(initialStatuses,
-                                                        "No valid initial statuses found for " + item.getClass().getSimpleName() + ". Cannot initialize status for new entity.");
-                                        if (!initialStatuses.isEmpty()) {
-                                                statusItem.setStatus(initialStatuses.get(0));
-                                        }
-                                        Check.notNull(statusItem.getStatus(),
-                                                        "Status cannot be null for " + item.getClass().getSimpleName());
-                                }
+					/* item has: void setEntityType(CTypeEntity<?> typeEntity); void setStatus(CProjectItemStatus status); */
+					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
+					final CTypeEntityService<?> typeServiceInstance = getEntityTypeService(statusItem);
+					final CCompany companyContext = project.getCompany();
+					Check.notNull(companyContext, "Company is required to choose entity type for " + item.getClass().getSimpleName());
+					final CTypeEntity<EntityClass> randomType = (CTypeEntity<EntityClass>) typeServiceInstance.getRandom(companyContext);
+					Check.notNull(randomType, "No type entities found for " + item.getClass().getSimpleName()
+							+ ". Cannot initialize status and workflow for new entity.");
+					statusItem.setEntityType(randomType);
+					Check.notNull(statusItem.getWorkflow(), "Workflow cannot be null for " + item.getClass().getSimpleName());
+					final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+					final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(statusItem);
+					Check.notEmpty(initialStatuses,
+							"No valid initial statuses found for " + item.getClass().getSimpleName() + ". Cannot initialize status for new entity.");
+					if (!initialStatuses.isEmpty()) {
+						statusItem.setStatus(initialStatuses.get(0));
+					}
+					Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
+				}
 				// last-chance specialization
 				if (customizer != null) {
 					customizer.accept((EntityClass) item, index);

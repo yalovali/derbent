@@ -14,8 +14,8 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.milestones.milestone.domain.CMilestone;
 import tech.derbent.app.milestones.milestonetype.service.CMilestoneTypeService;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

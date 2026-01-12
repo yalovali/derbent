@@ -47,7 +47,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAccordionDBEntity;
-import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
+import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 

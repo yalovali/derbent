@@ -15,9 +15,9 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 
 public class CBudgetTypeInitializerService extends CInitializerServiceBase {
 

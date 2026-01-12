@@ -47,7 +47,6 @@ public class CRouteDiscoveryService {
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRouteDiscoveryService.class);
-
 	/** Adds common routes that might not extend CAbstractNamedEntityPage */
 	private static void addCommonRoutes(List<RouteInfo> routes) {
 		// Add home/dashboard route if not already present
@@ -62,7 +61,6 @@ public class CRouteDiscoveryService {
 		addRouteIfNotExists(routes, "cactivitiesview", "Activities", "Activities");
 		addRouteIfNotExists(routes, "cmeetingsview", "Meetings", "Meetings");
 		addRouteIfNotExists(routes, "cusersview", "Users", "Users");
-		addRouteIfNotExists(routes, "cprojectganttview", "Gantt Chart", "Gantt Chart");
 		addRouteIfNotExists(routes, "cordersview", "Orders", "Orders");
 		addRouteIfNotExists(routes, "cgridentityview", "Grid Entities", "Grid Entities");
 		addRouteIfNotExists(routes, "cdashboardview", "Dashboard", "Dashboard");

@@ -15,10 +15,10 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.risks.risktype.domain.CRiskType;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 @Entity
 @Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL

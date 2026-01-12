@@ -20,7 +20,7 @@ import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;

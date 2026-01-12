@@ -12,10 +12,10 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeService;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

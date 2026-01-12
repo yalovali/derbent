@@ -49,6 +49,22 @@ run_menu_test() {
     run_test "automated_tests.tech.derbent.ui.automation.CMenuNavigationTest"
 }
 
+run_bab_menu_test() {
+    echo "🧪 Running BAB Gateway Menu Navigation Test..."
+    echo "=============================================="
+    echo "This test will:"
+    echo "  1. Select BAB Gateway schema on login"
+    echo "  2. Reset the database with minimal BAB data"
+    echo "  3. Login and browse available menu items"
+    echo ""
+
+    export PLAYWRIGHT_SCHEMA="BAB Gateway"
+    export PLAYWRIGHT_FORCE_SAMPLE_RELOAD="true"
+    export SPRING_PROFILES_ACTIVE="test,bab"
+
+    run_test "automated_tests.tech.derbent.ui.automation.CBabMenuNavigationTest"
+}
+
 # Function to run comprehensive page test (all views)
 run_comprehensive_test() {
     echo "🧪 Running Comprehensive Page Test..."
@@ -213,6 +229,15 @@ show_options_menu() {
 # Generic function to run a test
 run_test() {
     local test_class="$1"
+    local schema_arg=()
+    local reload_arg=()
+    local spring_profiles="${SPRING_PROFILES_ACTIVE:-test}"
+    if [ -n "$PLAYWRIGHT_SCHEMA" ]; then
+        schema_arg=("-Dplaywright.schema=$PLAYWRIGHT_SCHEMA")
+    fi
+    if [ -n "$PLAYWRIGHT_FORCE_SAMPLE_RELOAD" ]; then
+        reload_arg=("-Dplaywright.forceSampleReload=$PLAYWRIGHT_FORCE_SAMPLE_RELOAD")
+    fi
     
     # Create screenshots directory
     mkdir -p target/screenshots
@@ -241,14 +266,18 @@ run_test() {
     local test_result=0
     if [ "$SHOW_CONSOLE" = "true" ]; then
         mvn test -Dtest="$test_class" \
-            -Dspring.profiles.active=test \
+            -Dspring.profiles.active="$spring_profiles" \
+            "${schema_arg[@]}" \
+            "${reload_arg[@]}" \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
             -Dplaywright.viewport.height=$VIEWPORT_HEIGHT || test_result=$?
     else
         mvn test -Dtest="$test_class" \
-            -Dspring.profiles.active=test \
+            -Dspring.profiles.active="$spring_profiles" \
+            "${schema_arg[@]}" \
+            "${reload_arg[@]}" \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
@@ -290,6 +319,7 @@ Run Playwright UI automation tests for the Derbent application.
 OPTIONS:
     (no args)       Run the menu navigation test (default)
     menu            Run the menu navigation test
+    bab             Run the BAB Gateway menu navigation test
     comprehensive   Run comprehensive page tests (all views + CRUD operations)
     all-views       Navigate through all application views and capture screenshots
     crud            Test CRUD operations on all pages with toolbars
@@ -305,6 +335,9 @@ ENVIRONMENT VARIABLES:
     PLAYWRIGHT_SLOWMO            Delay in milliseconds between actions for debugging (default: 0)
     PLAYWRIGHT_VIEWPORT_WIDTH    Browser viewport width in pixels (default: 1920)
     PLAYWRIGHT_VIEWPORT_HEIGHT   Browser viewport height in pixels (default: 1080)
+    PLAYWRIGHT_SCHEMA            Set schema selection at login (default: Derbent)
+    PLAYWRIGHT_FORCE_SAMPLE_RELOAD  Set to 'true' to force DB reset on login (default: false)
+    SPRING_PROFILES_ACTIVE       Spring profiles to activate for tests (default: test)
     INTERACTIVE_MODE             Set to 'true' to show configuration menu before test (default: false)
 
 EXAMPLES:
@@ -313,6 +346,9 @@ EXAMPLES:
     
     # Run quick menu navigation test (default, ~37 seconds)
     ./run-playwright-tests.sh
+
+    # Run BAB Gateway menu navigation test
+    ./run-playwright-tests.sh bab
     
     # Run comprehensive test covering all views and CRUD operations (~2-5 minutes)
     ./run-playwright-tests.sh comprehensive
@@ -337,6 +373,12 @@ TEST DESCRIPTIONS:
                     - Logs into the application
                     - Browses all hierarchical menu items
                     - Captures screenshots for each menu item (if enabled)
+
+    bab             BAB Gateway menu navigation test (under 1 minute)
+                    - Selects BAB Gateway schema
+                    - Resets database with minimal BAB data
+                    - Logs into the application
+                    - Browses available menu items
     
     comprehensive   Complete page testing with CRUD operations (2-5 minutes)
                     - Tests all pages accessible via test auxiliary buttons
@@ -396,6 +438,9 @@ EOF
 case "${1:-menu}" in
     menu|"")
         run_menu_test
+        ;;
+    bab)
+        run_bab_menu_test
         ;;
     comprehensive)
         run_comprehensive_test

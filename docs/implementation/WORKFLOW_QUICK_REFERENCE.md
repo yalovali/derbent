@@ -35,16 +35,16 @@ CREATE TABLE cworkflowentity (
 ## Class References
 
 ### Domain Layer
-- **CWorkflowEntity**: `tech.derbent.app.workflow.domain.CWorkflowEntity`
-- **CWorkflowBase**: `tech.derbent.app.workflow.domain.CWorkflowBase`
+- **CWorkflowEntity**: `tech.derbent.api.workflow.domain.CWorkflowEntity`
+- **CWorkflowBase**: `tech.derbent.api.workflow.domain.CWorkflowBase`
 
 ### Service Layer
-- **CWorkflowEntityService**: `tech.derbent.app.workflow.service.CWorkflowEntityService`
-- **CWorkflowBaseService**: `tech.derbent.app.workflow.service.CWorkflowBaseService`
-- **IWorkflowEntityRepository**: `tech.derbent.app.workflow.service.IWorkflowEntityRepository`
+- **CWorkflowEntityService**: `tech.derbent.api.workflow.service.CWorkflowEntityService`
+- **CWorkflowBaseService**: `tech.derbent.api.workflow.service.CWorkflowBaseService`
+- **IWorkflowEntityRepository**: `tech.derbent.api.workflow.service.IWorkflowEntityRepository`
 
 ### Initialization
-- **CWorkflowEntityInitializerService**: `tech.derbent.app.workflow.service.CWorkflowEntityInitializerService`
+- **CWorkflowEntityInitializerService**: `tech.derbent.api.workflow.service.CWorkflowEntityInitializerService`
 
 ## Common Operations
 
@@ -176,8 +176,8 @@ try {
 ## Related Files
 
 ### Source Files
-- Domain: `src/main/java/tech/derbent/app/workflow/domain/`
-- Service: `src/main/java/tech/derbent/app/workflow/service/`
+- Domain: `src/main/java/tech/derbent/api/workflow/domain/`
+- Service: `src/main/java/tech/derbent/api/workflow/service/`
 - Data Initializer: `src/main/java/tech/derbent/api/config/CDataInitializer.java`
 
 ### Documentation

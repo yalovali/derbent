@@ -33,11 +33,11 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity

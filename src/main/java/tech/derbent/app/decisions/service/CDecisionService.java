@@ -12,8 +12,8 @@ import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.decisions.domain.CDecision;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 

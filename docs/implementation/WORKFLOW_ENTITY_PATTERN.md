@@ -18,7 +18,7 @@ CEntityDB (base)
 ### Domain Model
 
 #### CWorkflowEntity
-**Location:** `tech.derbent.app.workflow.domain.CWorkflowEntity`
+**Location:** `tech.derbent.api.workflow.domain.CWorkflowEntity`
 
 **Table:** `cworkflowentity`
 
@@ -43,7 +43,7 @@ CEntityDB (base)
 ## Service Layer
 
 ### CWorkflowEntityService
-**Location:** `tech.derbent.app.workflow.service.CWorkflowEntityService`
+**Location:** `tech.derbent.api.workflow.service.CWorkflowEntityService`
 
 **Responsibilities:**
 - CRUD operations for workflow entities
@@ -68,7 +68,7 @@ IWorkflowRepository<EntityClass extends CWorkflowBase<EntityClass>>
 ## Initialization
 
 ### CWorkflowEntityInitializerService
-**Location:** `tech.derbent.app.workflow.service.CWorkflowEntityInitializerService`
+**Location:** `tech.derbent.api.workflow.service.CWorkflowEntityInitializerService`
 
 **Configuration:**
 - Menu Order: `Menu_Order_PROJECT + ".21"`

@@ -9,7 +9,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IProjectChangeListener;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Project-aware accordion description that refreshes content when the active project changes. This base class implements CProjectChangeListener to

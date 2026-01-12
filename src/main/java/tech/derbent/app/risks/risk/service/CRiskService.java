@@ -12,11 +12,11 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.risks.risk.domain.CRisk;
 import tech.derbent.app.risks.risk.domain.ERiskSeverity;
 import tech.derbent.app.risks.risktype.service.CRiskTypeService;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

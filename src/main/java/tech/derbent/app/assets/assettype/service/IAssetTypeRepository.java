@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.app.assets.assettype.domain.CAssetType;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 public interface IAssetTypeRepository extends IEntityOfCompanyRepository<CAssetType> {
 

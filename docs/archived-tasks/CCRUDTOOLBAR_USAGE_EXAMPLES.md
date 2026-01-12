@@ -195,11 +195,11 @@ public class CGanttChartPage extends CAbstractPage {
 ## Example 3: Legacy Pattern (Backward Compatible)
 
 ```java
-package tech.derbent.app.projects.view;
+package tech.derbent.api.projects.view;
 
 import tech.derbent.api.views.CAbstractEntityDBPage;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.service.CProjectService;
 
 // No changes needed - uses deprecated constructor internally
 public class CProjectPage extends CAbstractEntityDBPage<CProject> {

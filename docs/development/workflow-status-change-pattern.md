@@ -272,8 +272,8 @@ To test status changes:
 - `tech.derbent.api.ui.component.CCrudToolbar`
 - `tech.derbent.api.services.pageservice.CPageService`
 - `tech.derbent.api.services.pageservice.CPageServiceWithWorkflow`
-- `tech.derbent.app.workflow.service.IHasStatusAndWorkflow`
-- `tech.derbent.app.workflow.service.IHasStatusAndWorkflowService`
+- `tech.derbent.api.workflow.service.IHasStatusAndWorkflow`
+- `tech.derbent.api.workflow.service.IHasStatusAndWorkflowService`
 - `tech.derbent.app.activities.service.CProjectItemStatusService`
-- `tech.derbent.app.workflow.domain.CWorkflowEntity`
-- `tech.derbent.app.workflow.domain.CWorkflowStatusRelation`
+- `tech.derbent.api.workflow.domain.CWorkflowEntity`
+- `tech.derbent.api.workflow.domain.CWorkflowStatusRelation`

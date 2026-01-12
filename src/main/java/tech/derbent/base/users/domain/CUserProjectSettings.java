@@ -12,8 +12,8 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.roles.domain.CUserProjectRole;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.roles.domain.CUserProjectRole;
 
 @Entity
 @Table (name = "cuserprojectsettings", uniqueConstraints = @UniqueConstraint (columnNames = {

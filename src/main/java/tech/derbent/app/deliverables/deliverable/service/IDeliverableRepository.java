@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.app.deliverables.deliverabletype.domain.CDeliverableType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface IDeliverableRepository extends IEntityOfProjectRepository<CDeliverable> {
 

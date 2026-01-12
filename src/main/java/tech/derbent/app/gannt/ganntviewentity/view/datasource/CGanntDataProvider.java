@@ -16,7 +16,7 @@ import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.ganntitem.domain.CGanntItem;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 /** CGanttDataProvider - Combines activities and meetings of a project into unified CGanttItem list. Provides a single data source for Gantt grids and
  * charts. */

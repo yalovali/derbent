@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 
 public interface ITicketTypeRepository extends IEntityOfCompanyRepository<CTicketType> {

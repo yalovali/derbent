@@ -208,6 +208,35 @@ public class ActivityService { }  // Missing C-prefix
 - Test classes: `CActivityTest`, `CActivityServiceTest`
 - Package names: lowercase without prefix
 
+## Profile Seed Initialization (MANDATORY)
+
+**Rule**: Profile-specific seed data MUST live in the related `*InitializerService` classes, not inside profile data initializers.
+
+### Pattern: Profile Seed Initialization
+
+**When to Use**: Adding or changing seed data for a product profile (e.g., BAB).
+
+**✅ CORRECT**:
+```java
+// In initializer services
+public static CCompany initializeSampleBab(final boolean minimal) throws Exception { ... }
+
+// In CBabDataInitializer
+final CCompany company = CCompanyInitializerService.initializeSampleBab(minimal);
+final CUserCompanyRole adminRole = CUserCompanyRoleInitializerService.initializeSampleBab(company, minimal);
+```
+
+**❌ INCORRECT**:
+```java
+// In CBabDataInitializer
+final CCompany company = new CCompany("BAB Gateway");
+entityManager.persist(company);
+```
+
+**Rule**: `CBabDataInitializer` (and other profile initializers) must only orchestrate calls to `initializeSampleBab(...)` methods and UI definition initializers. Do not create or persist profile seed data directly in the initializer.
+
+**Related**: [Method Placement Guidelines](method-placement-guidelines.md), [Service Layer Patterns](service-layer-patterns.md)
+
 ### 2. **Type Safety** (Mandatory)
 
 Always use generic type parameters:
@@ -928,7 +957,7 @@ public void completeActivity(CActivity activity) {
 #### ✅ Correct
 ```java
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public class CActivityService {
     public CActivity createActivity(String name, CProject project) {
@@ -942,7 +971,7 @@ public class CActivityService {
 ```java
 public class CActivityService {
     public tech.derbent.app.activities.domain.CActivity createActivity(
-            String name, tech.derbent.app.projects.domain.CProject project) {
+            String name, tech.derbent.api.projects.domain.CProject project) {
         tech.derbent.app.activities.domain.CActivity activity = 
             new CActivity(name, project);
         return save(activity);
@@ -1973,8 +2002,8 @@ public void initializeNewEntity(final CProject entity) {
 ### Related Documentation
 
 - [Entity Inheritance Patterns](entity-inheritance-patterns.md) - Entity design principles
-- [IHasStatusAndWorkflow Interface](../../src/main/java/tech/derbent/app/workflow/service/IHasStatusAndWorkflow.java) - Interface definition
-- [IHasStatusAndWorkflowService](../../src/main/java/tech/derbent/app/workflow/service/IHasStatusAndWorkflowService.java) - Service utility methods
+- [IHasStatusAndWorkflow Interface](../../src/main/java/tech/derbent/api/workflow/service/IHasStatusAndWorkflow.java) - Interface definition
+- [IHasStatusAndWorkflowService](../../src/main/java/tech/derbent/api/workflow/service/IHasStatusAndWorkflowService.java) - Service utility methods
 
 ### Rule: Workflow-Aware Status Transitions
 
@@ -2387,6 +2416,6 @@ When migrating existing filter toolbars:
 
 ---
 
-**Version**: 1.1  
-**Last Updated**: 2026-01-03  
-**Pattern Added**: Universal Filter Toolbar Framework
+**Version**: 1.2  
+**Last Updated**: 2026-01-12  
+**Pattern Added**: Profile Seed Initialization

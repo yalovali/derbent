@@ -28,7 +28,7 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import com.vaadin.flow.router.Route;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -58,6 +58,8 @@ public abstract class CBaseUITest {
 	private static final String LOGIN_BUTTON_ID = "cbutton-login";
 	private static final String PROGRESS_DIALOG_ID = "custom-progress-dialog";
 	private static final String RESET_DB_FULL_BUTTON_ID = "cbutton-db-full";
+	private static final String SCHEMA_SELECTOR_ID = "custom-schema-selector";
+	private static final String SCHEMA_SELECTION_PROPERTY = "playwright.schema";
 	private static final AtomicBoolean SAMPLE_DATA_INITIALIZED = new AtomicBoolean(false);
 	private static final Object SAMPLE_DATA_LOCK = new Object();
 	protected static final String SCREENSHOT_FAILURE_SUFFIX = "failure";
@@ -487,6 +489,42 @@ public abstract class CBaseUITest {
 		}
 	}
 
+	/** Ensures the schema selector is set before database reset/login. */
+	protected void ensureSchemaSelected() {
+		if (!isBrowserAvailable()) {
+			return;
+		}
+		final String desiredSchema = System.getProperty(SCHEMA_SELECTION_PROPERTY, "Derbent").trim();
+		if (desiredSchema.isBlank()) {
+			return;
+		}
+		try {
+			final Locator schemaCombo = page.locator("#" + SCHEMA_SELECTOR_ID);
+			if (schemaCombo.count() == 0) {
+				LOGGER.debug("ℹ️ Schema selector not found on login page");
+				return;
+			}
+			final Object rawValue = schemaCombo.evaluate("combo => combo.value ?? null");
+			if (rawValue != null && desiredSchema.equals(rawValue.toString().trim())) {
+				LOGGER.debug("ℹ️ Schema already selected on login page: {}", desiredSchema);
+				return;
+			}
+			LOGGER.info("🧭 Selecting schema '{}' on login page", desiredSchema);
+			schemaCombo.first().click();
+			wait_500();
+			final Locator items = page.locator("vaadin-combo-box-item").filter(new Locator.FilterOptions().setHasText(desiredSchema));
+			if (items.count() > 0) {
+				items.first().click();
+				wait_500();
+				LOGGER.info("✅ Schema selection completed");
+			} else {
+				LOGGER.warn("⚠️ Schema option '{}' not found in selector", desiredSchema);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Failed to select schema on login page: {}", e.getMessage());
+		}
+	}
+
 	/** Ensures the custom login view is loaded and ready for interaction. */
 	protected void ensureLoginViewLoaded() {
 		try {
@@ -675,6 +713,7 @@ public abstract class CBaseUITest {
 			}
 			try {
 				wait_loginscreen();
+				ensureSchemaSelected();
 				final Locator fullButton = page.locator("#" + RESET_DB_FULL_BUTTON_ID);
 				if (fullButton.count() == 0) {
 					throw new AssertionError("DB Full reset button not found on login page");
@@ -838,6 +877,7 @@ public abstract class CBaseUITest {
 		try {
 			LOGGER.info("🔐 Attempting login with username: {}", username);
 			ensureLoginViewLoaded();
+			ensureSchemaSelected();
 			// CRITICAL: If company is empty on the login page, ensure sample data is initialized first.
 			// This addresses the requirement: "at initial db, if combobox of company is empty you should initialize db"
 			try {
@@ -1788,7 +1828,7 @@ public abstract class CBaseUITest {
 				}
 			}
 			// Fallback: try direct navigation using navigateToFirstPage
-			return navigateToFirstPage(null, tech.derbent.app.companies.domain.CCompany.class);
+			return navigateToFirstPage(null, tech.derbent.api.companies.domain.CCompany.class);
 		} catch (final Exception e) {
 			LOGGER.error("❌ Failed to test navigation to company page: {}", e.getMessage());
 			return false;

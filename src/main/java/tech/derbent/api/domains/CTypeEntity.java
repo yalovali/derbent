@@ -11,8 +11,8 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IHasColor;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
 
 /** CTypeEntity - Abstract base class for all type entities in the system. Provides common fields for type management including color, sort order, and
  * active status. Layer: Domain (MVC)

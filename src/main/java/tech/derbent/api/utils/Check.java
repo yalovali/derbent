@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 public class Check {
 

@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.icon.Icon;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 
 /** Test class to verify that user icons render correctly with the new innerHTML-based implementation. This test validates that icons are properly
  * generated and contain SVG content in their innerHTML. */

@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entity.service.IAbstractNamedRepository;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.base.users.domain.CUser;
 

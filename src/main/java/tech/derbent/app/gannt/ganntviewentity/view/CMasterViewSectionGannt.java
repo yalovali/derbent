@@ -15,8 +15,8 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.ganntviewentity.view.components.CGanntGrid;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass>

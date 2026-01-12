@@ -12,7 +12,7 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 
 // @FilterDef (name = "byProject", parameters = @ParamDef (name = "projectId", type = Long.class))

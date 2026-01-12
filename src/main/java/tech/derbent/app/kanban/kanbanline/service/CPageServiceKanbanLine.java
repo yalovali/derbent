@@ -28,10 +28,10 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanColumnBacklog;
 import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.app.kanban.kanbanline.view.CDialogKanbanStatusSelection;
-import tech.derbent.app.page.view.CDynamicPageViewWithoutGrid;
+import tech.derbent.api.page.view.CDynamicPageViewWithoutGrid;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 

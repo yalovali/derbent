@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.app.comments.domain.CCommentPriority;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 /** CCommentPriorityRepository - Repository interface for CCommentPriority entities. Layer: Service (MVC) - Repository interface Provides data access
  * methods for comment priority entities. */

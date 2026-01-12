@@ -74,38 +74,38 @@ derbent/
 ```
 src/main/java/tech/derbent/
 ├── Application.java           # Main Spring Boot application
-├── api/                       # Core framework and utilities
+├── api/                       # Core framework and shared modules
 │   ├── annotations/          # Custom annotations
 │   ├── components/           # Reusable UI components
+│   ├── companies/            # Company management (shared)
 │   ├── domains/              # Base entity classes
 │   ├── exceptions/           # Custom exceptions
 │   ├── interfaces/           # Shared interfaces
-│   ├── roles/                # Role management
+│   ├── page/                 # Dynamic page system (shared)
+│   ├── projects/             # Project management (shared)
+│   ├── roles/                # Role management (shared)
+│   ├── screens/              # Screen definitions and builders
 │   ├── services/             # Base service classes
 │   ├── ui/                   # UI utilities
 │   ├── utils/                # Utility classes
 │   └── views/                # Base view classes
-├── activities/               # Activity management module
-│   ├── domain/              # CActivity, CProjectItemStatus, CActivityType
-│   ├── service/             # CActivityService, repositories
-│   └── view/                # Activity UI components
-├── comments/                 # Comment management
-├── companies/                # Company management
-├── config/                   # Application configuration
-├── dashboard/                # Dashboard view
-├── decisions/                # Decision management
-├── gannt/                    # Gantt chart views
-├── kanban/                   # Kanban board implementation
-├── login/                    # Login and authentication
-├── meetings/                 # Meeting management
-├── orders/                   # Order management
-├── page/                     # Dynamic page system
-├── projects/                 # Project management
-├── risks/                    # Risk management
-├── screens/                  # Screen management
-├── session/                  # Session management
-├── setup/                    # System setup
-└── users/                    # User management
+├── app/                      # Derbent business modules
+│   ├── activities/           # Activity management module
+│   ├── comments/             # Comment management
+│   ├── decisions/            # Decision management
+│   ├── gannt/                # Gantt chart views
+│   ├── kanban/               # Kanban board implementation
+│   ├── meetings/             # Meeting management
+│   ├── orders/               # Order management
+│   ├── risks/                # Risk management
+│   └── ui/view/              # Dashboard view (app/ui/view/CDashboardView)
+├── bab/                      # BAB Gateway modules
+│   └── ui/view/              # BAB dashboard and future IoT UI
+├── base/                     # Infrastructure modules
+│   ├── login/                # Login and authentication
+│   ├── session/              # Session management
+│   ├── setup/                # System setup
+│   └── users/                # User management
 ```
 
 ## Module Structure Pattern
@@ -522,8 +522,8 @@ All major packages now include `package-info.java` files that document:
 
 **Business Modules:**
 - `tech.derbent.app.activities` - Activity management
-- `tech.derbent.app.projects` - Project management  
-- `tech.derbent.app.companies` - Company/multi-tenancy
+- `tech.derbent.api.projects` - Project management  
+- `tech.derbent.api.companies` - Company/multi-tenancy
 - `tech.derbent.base.users` - User management
 
 **Core API:**

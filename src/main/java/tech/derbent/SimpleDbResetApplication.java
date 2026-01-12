@@ -22,11 +22,12 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		// Only include essential service packages for database operations
 		"tech.derbent.api.config",
 		// Core entity services needed for database reset
-		"tech.derbent.activities.service", "tech.derbent.app.comments.service", "tech.derbent.app.companies.service",
+		"tech.derbent.activities.service", "tech.derbent.app.comments.service", "tech.derbent.api.companies.service",
 		"tech.derbent.app.decisions.service", "tech.derbent.app.meetings.service", "tech.derbent.app.orders.service",
-		"tech.derbent.app.projects.service", "tech.derbent.app.risks.risk.service", "tech.derbent.base.users.service",
+		"tech.derbent.api.projects.service", "tech.derbent.api.roles.service", "tech.derbent.app.risks.risk.service",
+		"tech.derbent.base.users.service",
 		// Additional services that might be needed by CDataInitializer
-		"tech.derbent.app.page.service", "tech.derbent.api.screens.service", "tech.derbent.app.gannt.service", "tech.derbent.administration.service",
+		"tech.derbent.api.page.service", "tech.derbent.api.screens.service", "tech.derbent.app.gannt.service", "tech.derbent.administration.service",
 		"tech.derbent.base.setup.service",
 		// Session service is needed by activity priority service
 		"tech.derbent.base.session.service"

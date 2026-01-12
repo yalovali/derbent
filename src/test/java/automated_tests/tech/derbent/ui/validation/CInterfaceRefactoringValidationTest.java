@@ -18,9 +18,9 @@ import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.page.view.CDynamicPageBase;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.api.page.view.CDynamicPageBase;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 

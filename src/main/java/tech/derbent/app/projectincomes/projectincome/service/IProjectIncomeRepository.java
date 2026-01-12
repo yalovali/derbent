@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface IProjectIncomeRepository extends IEntityOfProjectRepository<CProjectIncome> {
 

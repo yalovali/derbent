@@ -341,6 +341,10 @@ public class CActivityDetailView extends CAbstractPage
 }
 ```
 
+For profile-specific routes (ex: bab vs derbent), set `registerAtStartup = false` on the `@Route` and register the route in a profile-scoped
+`VaadinServiceInitListener` using `RouteConfiguration.forApplicationScope()`. This prevents ambiguous route registrations when both products share the
+same route path.
+
 ### Navigation
 
 ```java

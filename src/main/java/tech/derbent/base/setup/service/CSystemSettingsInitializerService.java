@@ -11,9 +11,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.setup.domain.CSystemSettings;
 
 /** CSystemSettingsInitializerService - Initializer service for CSystemSettings entities. This service creates the dynamic page configuration for
@@ -120,5 +120,19 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 			settings.setApplicationVersion("1.0.0");
 		}
 		systemSettingsService.save(settings);
+	}
+
+	public static CSystemSettings initializeSampleBab(@SuppressWarnings ("unused") final CProject project,
+			@SuppressWarnings ("unused") final boolean minimal) throws Exception {
+		final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
+		final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();
+		if (settings.getApplicationName() == null || settings.getApplicationName().isBlank()) {
+			settings.setApplicationName("BAB Gateway IoT");
+		}
+		if (settings.getApplicationDescription() == null || settings.getApplicationDescription().isBlank()) {
+			settings.setApplicationDescription("BAB Gateway IoT management console.");
+		}
+		systemSettingsService.save(settings);
+		return settings;
 	}
 }

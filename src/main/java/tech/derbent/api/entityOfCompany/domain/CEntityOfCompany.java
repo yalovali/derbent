@@ -12,7 +12,7 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 @MappedSuperclass
 public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityClass> {

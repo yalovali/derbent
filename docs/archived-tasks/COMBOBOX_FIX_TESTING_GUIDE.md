@@ -206,7 +206,7 @@ The previous implementation can be restored, though it had the same issue.
 ## Related Files
 
 - `src/main/java/tech/derbent/api/views/dialogs/CDBRelationDialog.java` - Base class with the fix
-- `src/main/java/tech/derbent/app/workflow/view/CWorkflowStatusRelationDialog.java` - Example usage
+- `src/main/java/tech/derbent/api/workflow/view/CWorkflowStatusRelationDialog.java` - Example usage
 - `src/main/java/tech/derbent/api/views/dialogs/CUserProjectRelationDialog.java` - Another example
 - `src/test/java/automated_tests/tech/derbent/ui/automation/CDialogRefreshTest.java` - Automated test
 

@@ -19,8 +19,8 @@ import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.currency.service.CCurrencyService;
 import tech.derbent.app.orders.order.domain.COrder;
 import tech.derbent.app.orders.type.service.COrderTypeService;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 

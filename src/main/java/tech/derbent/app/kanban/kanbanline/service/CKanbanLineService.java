@@ -16,10 +16,10 @@ import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

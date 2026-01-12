@@ -2,7 +2,7 @@ package tech.derbent.api.interfaces;
 
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
+import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 
 public interface IContentOwner {
 

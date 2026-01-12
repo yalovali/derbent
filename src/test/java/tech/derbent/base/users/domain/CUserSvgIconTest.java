@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.utils.CImageUtils;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 
 /** Test class for user SVG icon functionality. Verifies that icons are properly generated using SVG data URLs with Vaadin's Icon component. */
 @SuppressWarnings ("static-method")

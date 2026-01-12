@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.orders.currency.domain.CCurrency;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface ICurrencyRepository extends IEntityOfProjectRepository<CCurrency> {
 	// Inherits standard operations from CAbstractNamedRepository

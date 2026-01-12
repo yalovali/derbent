@@ -41,7 +41,7 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CPageTestAuxillaryService;
-import tech.derbent.app.page.service.CPageMenuIntegrationService;
+import tech.derbent.api.page.service.CPageMenuIntegrationService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsService;

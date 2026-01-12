@@ -14,7 +14,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

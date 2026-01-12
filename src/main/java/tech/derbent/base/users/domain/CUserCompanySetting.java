@@ -14,8 +14,8 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CAbstractEntityRelationship;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 
 /** Entity representing the relationship between a user and a company with ownership privileges. This entity manages company membership, roles, and
  * ownership levels for users. */

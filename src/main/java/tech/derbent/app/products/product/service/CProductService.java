@@ -14,8 +14,8 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.products.product.domain.CProduct;
 import tech.derbent.app.products.producttype.service.CProductTypeService;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service

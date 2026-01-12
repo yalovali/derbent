@@ -39,10 +39,9 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.gannt.projectgannt.view.CProjectGanntView;
-import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.app.page.service.CPageMenuIntegrationService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageMenuIntegrationService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
@@ -343,7 +342,6 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		// Add last visited button first
 		buttons.add(createLastVisitedButton());
 		// Add static buttons (these will be deprecated in favor of dynamic pages)
-		buttons.add(createNavigateButtonForView(CProjectGanntView.class));
 		buttons.add(createNavigateButtonForView(CDetailSectionView.class));
 		// Add dynamic page buttons if pageMenuIntegrationService is available
 		if (pageMenuIntegrationService != null && pageMenuIntegrationService.isReady()) {

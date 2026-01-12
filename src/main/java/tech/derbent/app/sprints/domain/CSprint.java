@@ -29,9 +29,9 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 // @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "sprint_status_id"))
 @Entity

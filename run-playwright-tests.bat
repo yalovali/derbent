@@ -26,12 +26,16 @@ if not defined PLAYWRIGHT_SKIP_SCREENSHOTS set PLAYWRIGHT_SKIP_SCREENSHOTS=false
 if not defined PLAYWRIGHT_SLOWMO set PLAYWRIGHT_SLOWMO=0
 if not defined PLAYWRIGHT_VIEWPORT_WIDTH set PLAYWRIGHT_VIEWPORT_WIDTH=1920
 if not defined PLAYWRIGHT_VIEWPORT_HEIGHT set PLAYWRIGHT_VIEWPORT_HEIGHT=1080
+if not defined PLAYWRIGHT_SCHEMA set PLAYWRIGHT_SCHEMA=
+if not defined PLAYWRIGHT_FORCE_SAMPLE_RELOAD set PLAYWRIGHT_FORCE_SAMPLE_RELOAD=
+if not defined SPRING_PROFILES_ACTIVE set SPRING_PROFILES_ACTIVE=test
 if not defined INTERACTIVE_MODE set INTERACTIVE_MODE=false
 
 REM Parse command line arguments
 set TEST_TYPE=menu
 if "%1"=="" set TEST_TYPE=menu
 if "%1"=="menu" set TEST_TYPE=menu
+if "%1"=="bab" set TEST_TYPE=bab
 if "%1"=="comprehensive" set TEST_TYPE=comprehensive
 if "%1"=="all-views" set TEST_TYPE=all-views
 if "%1"=="crud" set TEST_TYPE=crud
@@ -44,6 +48,7 @@ if "%INTERACTIVE_MODE%"=="true" call :show_options_menu
 
 REM Run the appropriate test
 if "%TEST_TYPE%"=="menu" call :run_menu_test
+if "%TEST_TYPE%"=="bab" call :run_bab_menu_test
 if "%TEST_TYPE%"=="comprehensive" call :run_comprehensive_test
 if "%TEST_TYPE%"=="all-views" call :run_all_views_test
 if "%TEST_TYPE%"=="crud" call :run_crud_test
@@ -69,6 +74,23 @@ echo   4. Complete in under 1 minute
 echo.
 
 call :run_test "automated_tests.tech.derbent.ui.automation.CMenuNavigationTest"
+goto :end
+
+:run_bab_menu_test
+echo.
+echo 🧪 Running BAB Gateway Menu Navigation Test...
+echo ===============================================
+echo This test will:
+echo   1. Select BAB Gateway schema on login
+echo   2. Reset the database with minimal BAB data
+echo   3. Login and browse available menu items
+echo.
+
+set PLAYWRIGHT_SCHEMA=BAB Gateway
+set PLAYWRIGHT_FORCE_SAMPLE_RELOAD=true
+set SPRING_PROFILES_ACTIVE=test,bab
+
+call :run_test "automated_tests.tech.derbent.ui.automation.CBabMenuNavigationTest"
 goto :end
 
 :run_comprehensive_test
@@ -241,6 +263,11 @@ goto :eof
 
 :run_test
 set test_class=%~1
+set schema_arg=
+set reload_arg=
+set spring_profiles=%SPRING_PROFILES_ACTIVE%
+if not "%PLAYWRIGHT_SCHEMA%"=="" set schema_arg=-Dplaywright.schema="%PLAYWRIGHT_SCHEMA%"
+if not "%PLAYWRIGHT_FORCE_SAMPLE_RELOAD%"=="" set reload_arg=-Dplaywright.forceSampleReload=%PLAYWRIGHT_FORCE_SAMPLE_RELOAD%
 
 REM Create screenshots directory
 if not exist "target\screenshots" mkdir "target\screenshots"
@@ -277,7 +304,9 @@ REM Run the test with Playwright-specific profile
 set TEST_RESULT=0
 if "%PLAYWRIGHT_SHOW_CONSOLE%"=="true" (
     mvn test -Dtest="%test_class%" ^
-        -Dspring.profiles.active=test ^
+        -Dspring.profiles.active=%spring_profiles% ^
+        %schema_arg% ^
+        %reload_arg% ^
         -Dplaywright.headless=%PLAYWRIGHT_HEADLESS% ^
         -Dplaywright.slowmo=%PLAYWRIGHT_SLOWMO% ^
         -Dplaywright.viewport.width=%PLAYWRIGHT_VIEWPORT_WIDTH% ^
@@ -285,7 +314,9 @@ if "%PLAYWRIGHT_SHOW_CONSOLE%"=="true" (
     set TEST_RESULT=!errorlevel!
 ) else (
     mvn test -Dtest="%test_class%" ^
-        -Dspring.profiles.active=test ^
+        -Dspring.profiles.active=%spring_profiles% ^
+        %schema_arg% ^
+        %reload_arg% ^
         -Dplaywright.headless=%PLAYWRIGHT_HEADLESS% ^
         -Dplaywright.slowmo=%PLAYWRIGHT_SLOWMO% ^
         -Dplaywright.viewport.width=%PLAYWRIGHT_VIEWPORT_WIDTH% ^
@@ -351,6 +382,7 @@ echo.
 echo OPTIONS:
 echo     (no args)       Run the menu navigation test (default)
 echo     menu            Run the menu navigation test
+echo     bab             Run the BAB Gateway menu navigation test
 echo     comprehensive   Run comprehensive page tests (all views + CRUD operations)
 echo     all-views       Navigate through all application views and capture screenshots
 echo     crud            Test CRUD operations on all pages with toolbars
@@ -365,6 +397,9 @@ echo     PLAYWRIGHT_SKIP_SCREENSHOTS  Set to 'true' to disable screenshot captur
 echo     PLAYWRIGHT_SLOWMO            Delay in milliseconds between actions for debugging (default: 0)
 echo     PLAYWRIGHT_VIEWPORT_WIDTH    Browser viewport width in pixels (default: 1920)
 echo     PLAYWRIGHT_VIEWPORT_HEIGHT   Browser viewport height in pixels (default: 1080)
+echo     PLAYWRIGHT_SCHEMA            Set schema selection at login (default: Derbent)
+echo     PLAYWRIGHT_FORCE_SAMPLE_RELOAD  Set to 'true' to force DB reset on login (default: false)
+echo     SPRING_PROFILES_ACTIVE       Spring profiles to activate for tests (default: test)
 echo     INTERACTIVE_MODE             Set to 'true' to show configuration menu before test (default: false)
 echo.
 echo EXAMPLES:
@@ -373,6 +408,9 @@ echo     set INTERACTIVE_MODE=true ^&^& run-playwright-tests.bat menu
 echo.
 echo     REM Run quick menu navigation test (default, ~37 seconds)
 echo     run-playwright-tests.bat
+echo.
+echo     REM Run BAB Gateway menu navigation test
+echo     run-playwright-tests.bat bab
 echo.
 echo     REM Run comprehensive test covering all views and CRUD operations (~2-5 minutes)
 echo     run-playwright-tests.bat comprehensive

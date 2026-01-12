@@ -23,9 +23,9 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.type.domain.COrderType;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity

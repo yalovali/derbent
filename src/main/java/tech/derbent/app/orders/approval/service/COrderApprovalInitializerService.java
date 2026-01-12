@@ -15,8 +15,8 @@ import tech.derbent.app.orders.approval.domain.CApprovalStatus;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
 import tech.derbent.app.orders.order.domain.COrder;
 import tech.derbent.app.orders.order.service.COrderService;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 
 /** Initializes UI metadata for {@link COrderApproval} entities. */
 public final class COrderApprovalInitializerService extends CInitializerServiceBase {

@@ -5,7 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cactivitytype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {

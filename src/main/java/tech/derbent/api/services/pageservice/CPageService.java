@@ -33,8 +33,8 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceHasStatusAndWorkflow<EntityClass> {

@@ -16,7 +16,7 @@ import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.app.gannt.ganntviewentity.view.CGridViewBaseGannt;
 import tech.derbent.app.gannt.projectgannt.service.CPageServiceProjectGannt;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cprojectganntview")

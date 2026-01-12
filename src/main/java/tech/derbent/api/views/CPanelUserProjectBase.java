@@ -16,7 +16,7 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 import tech.derbent.base.users.service.CUserProjectSettingsService;

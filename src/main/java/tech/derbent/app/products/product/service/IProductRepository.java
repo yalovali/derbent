@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.products.product.domain.CProduct;
 import tech.derbent.app.products.producttype.domain.CProductType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface IProductRepository extends IEntityOfProjectRepository<CProduct> {
 

@@ -11,7 +11,7 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<EntityClass>> {
 

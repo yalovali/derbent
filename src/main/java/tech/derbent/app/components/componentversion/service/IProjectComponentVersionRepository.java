@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.app.components.componentversiontype.domain.CProjectComponentVersionType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface IProjectComponentVersionRepository extends IEntityOfProjectRepository<CProjectComponentVersion> {
 

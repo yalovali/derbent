@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.assets.asset.domain.CAsset;
 import tech.derbent.app.assets.assettype.domain.CAssetType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface IAssetRepository extends IEntityOfProjectRepository<CAsset> {
 

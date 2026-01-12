@@ -172,7 +172,7 @@ protected void loginToApplication(String username, String password) {
    - ✅ Spring Security processes authentication
 
 5. **Post-Login Verification**
-   - ✅ Redirect to home/dashboard view
+   - ✅ Redirect to home/dashboard view (app/ui/view/CDashboardView)
    - ✅ Application shell is loaded
    - ✅ Navigation menu is visible
    - ✅ User session is established

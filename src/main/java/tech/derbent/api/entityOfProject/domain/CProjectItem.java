@@ -12,7 +12,7 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 /** CProjectItem - Base class for project items that can be displayed in Gantt charts. Provides hierarchical structure support and Gantt-specific
  * abstract methods for date handling, visual representation, and user assignments. All subclasses must implement the abstract Gantt methods. */

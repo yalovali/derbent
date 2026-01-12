@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface ITicketRepository extends IEntityOfProjectRepository<CTicket> {
 

@@ -23,7 +23,7 @@ import tech.derbent.api.views.CPageTestAuxillaryService.RouteEntry;
 
 @Route ("cpagetestauxillary")
 @PageTitle ("Test Support Page")
-@Menu (order = 3.1001, icon = "class:tech.derbent.app.gannt.projectgannt.view.CProjectGanntView", title = "Test Support Page")
+@Menu (order = 3.1001, icon = "vaadin:progressbar", title = "Test Support Page")
 @PermitAll
 public class CPageTestAuxillary extends Main {
 
@@ -45,7 +45,6 @@ public class CPageTestAuxillary extends Main {
 	// Header is a persistent component for this view; create once and add in constructor
 	private final CDiv header = new CDiv();
 	Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillary.class);
-	// private final String ENTITY_ID_FIELD = "ganntview_id";
 	private final CFlexLayout pageLinksLayout = new CFlexLayout();
 	private final CPageTestAuxillaryService pageTestAuxillaryService;
 

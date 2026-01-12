@@ -14,7 +14,7 @@ import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 @Entity
 @Table (name = "ckanbanline")

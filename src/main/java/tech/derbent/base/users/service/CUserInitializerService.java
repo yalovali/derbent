@@ -11,10 +11,11 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.roles.service.CUserCompanyRoleService;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.base.users.domain.CUser;
 
 public class CUserInitializerService extends CInitializerServiceBase {
@@ -25,6 +26,11 @@ public class CUserInitializerService extends CInitializerServiceBase {
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);
 	private static final String STANDARD_PASSWORD = "test123";
+	private static final String BAB_ADMIN_LOGIN = "admin";
+	private static final String BAB_ADMIN_NAME = "Admin";
+	private static final String BAB_ADMIN_LASTNAME = "Gateway";
+	private static final String BAB_ADMIN_EMAIL = "admin@babgateway.local";
+	private static final String BAB_ADMIN_PASSWORD = "test123";
 	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
 	private static final String menuTitle = MenuTitle_SYSTEM + ".Users";
 	private static final String pageDescription = "User management for system access and permissions";
@@ -109,5 +115,14 @@ public class CUserInitializerService extends CInitializerServiceBase {
 				break;
 			}
 		}
+	}
+
+	public static CUser initializeSampleBab(final CCompany company, final CUserCompanyRole adminRole, final boolean minimal) throws Exception {
+		final CUserService userService = CSpringContext.getBean(CUserService.class);
+		final CUser user = userService.createLoginUser(BAB_ADMIN_LOGIN, BAB_ADMIN_PASSWORD, BAB_ADMIN_NAME, BAB_ADMIN_EMAIL, company, adminRole);
+		user.setLastname(BAB_ADMIN_LASTNAME);
+		user.setActive(true);
+		userService.save(user);
+		return user;
 	}
 }

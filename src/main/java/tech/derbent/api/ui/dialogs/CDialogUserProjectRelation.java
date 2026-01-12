@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 import tech.derbent.base.users.service.CUserProjectSettingsService;
 import tech.derbent.base.users.service.CUserService;

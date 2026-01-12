@@ -4,7 +4,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
 
 /** Example usage and tests for the new owner notification interfaces.

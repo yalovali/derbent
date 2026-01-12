@@ -11,7 +11,7 @@ Define which status transitions are allowed in a workflow, optionally filtered b
 ## Entity Structure
 
 ### CWorkflowStatusRelation
-**Location:** `tech.derbent.app.workflow.domain.CWorkflowStatusRelation`
+**Location:** `tech.derbent.api.workflow.domain.CWorkflowStatusRelation`
 
 **Table:** `cworkflowstatusrelation`
 
@@ -37,7 +37,7 @@ The combination of (workflow_id, from_status_id, to_status_id, role_id) must be 
 ## Repository Layer
 
 ### IWorkflowStatusRelationRepository
-**Location:** `tech.derbent.app.workflow.service.IWorkflowStatusRelationRepository`
+**Location:** `tech.derbent.api.workflow.service.IWorkflowStatusRelationRepository`
 
 **Key Methods:**
 ```java
@@ -80,7 +80,7 @@ All queries use eager fetching with LEFT JOIN FETCH to load related entities:
 ## Service Layer
 
 ### CWorkflowStatusRelationService
-**Location:** `tech.derbent.app.workflow.service.CWorkflowStatusRelationService`
+**Location:** `tech.derbent.api.workflow.service.CWorkflowStatusRelationService`
 
 **Extends:** `CAbstractEntityRelationService<CWorkflowStatusRelation>`
 
@@ -132,7 +132,7 @@ The service validates:
 ## UI Components
 
 ### CWorkflowStatusRelationInitializerService
-**Location:** `tech.derbent.app.workflow.service.CWorkflowStatusRelationInitializerService`
+**Location:** `tech.derbent.api.workflow.service.CWorkflowStatusRelationInitializerService`
 
 **Purpose:** Initializes UI configuration for workflow status relations.
 
@@ -157,7 +157,7 @@ void initialize(CProject project,
 - Grid View: id, workflow, fromStatus, toStatus, role, active
 
 ### CWorkflowStatusRelationDialog
-**Location:** `tech.derbent.app.workflow.view.CWorkflowStatusRelationDialog`
+**Location:** `tech.derbent.api.workflow.view.CWorkflowStatusRelationDialog`
 
 **Extends:** `CDBRelationDialog<CWorkflowStatusRelation, CWorkflowEntity, CProjectItemStatus>`
 

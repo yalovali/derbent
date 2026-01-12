@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.app.milestones.milestone.domain.CMilestone;
 import tech.derbent.app.milestones.milestonetype.domain.CMilestoneType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 public interface IMilestoneRepository extends IEntityOfProjectRepository<CMilestone> {
 

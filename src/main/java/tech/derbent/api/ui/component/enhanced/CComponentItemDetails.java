@@ -16,9 +16,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.page.view.CDynamicPageRouter;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.base.session.service.ISessionService;
 
 /**

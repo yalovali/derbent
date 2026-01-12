@@ -9,7 +9,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entity.service.IAbstractNamedRepository;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 
 @NoRepositoryBean
 public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject<EntityClass>> extends IAbstractNamedRepository<EntityClass> {

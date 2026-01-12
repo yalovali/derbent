@@ -9,7 +9,7 @@ This document summarizes the Playwright test execution and screenshot capture fo
 - **Resolution:** 1280 x 720
 - **Format:** PNG (RGB)
 - **Database:** H2 (in-memory)
-- **Description:** Dashboard view immediately after successful login. Shows the main application interface with navigation menu and dashboard widgets.
+- **Description:** Dashboard view (app/ui/view/CDashboardView) immediately after successful login. Shows the main application interface with navigation menu and dashboard widgets.
 
 ### 2. sample-journey-post-login.png (82 KB)
 - **Resolution:** 1280 x 720

@@ -95,7 +95,7 @@ All validation errors now provide user-friendly messages:
 4. No regressions introduced
 
 ## Files Modified
-- `src/main/java/tech/derbent/app/workflow/view/CWorkflowStatusRelationDialog.java`
+- `src/main/java/tech/derbent/api/workflow/view/CWorkflowStatusRelationDialog.java`
 
 ## Implementation Notes
 - The solution leverages existing service methods for duplicate checking

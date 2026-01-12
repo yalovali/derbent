@@ -21,8 +21,8 @@ import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.gannt.ganntitem.domain.CGanntItem;
 import tech.derbent.app.gannt.ganntviewentity.view.components.CGanntGrid;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.page.view.CDynamicPageRouter;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.base.session.service.ISessionService;
 
 /* display a Gannt chart for any entity of project type */

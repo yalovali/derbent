@@ -18,11 +18,11 @@
  *   <li>{@code config/} - User-related configuration</li>
  * </ul>
  * <p>
- * Users are associated with a {@link tech.derbent.app.companies.domain.CCompany}
+ * Users are associated with a {@link tech.derbent.api.companies.domain.CCompany}
  * which provides multi-tenant isolation.
  *
  * @see tech.derbent.base.login Login module
- * @see tech.derbent.app.companies Company module
+ * @see tech.derbent.api.companies Company module
  * @see tech.derbent.base.session Session management
  */
 @NullMarked

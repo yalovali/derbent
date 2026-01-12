@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.app.decisions.domain.CDecisionType;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 /** CDecisionTypeRepository - Repository interface for CDecisionType entities. Layer: Data Access (MVC) Provides data access methods for project-aware
  * decision type entities with eager loading support. */

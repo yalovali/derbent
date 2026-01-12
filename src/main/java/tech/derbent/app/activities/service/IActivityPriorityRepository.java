@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.app.activities.domain.CActivityPriority;
-import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 /** CActivityPriorityRepository - Repository interface for CActivityPriority entities. Layer: Data Access (MVC) Provides data access operations for
  * activity priority management. */

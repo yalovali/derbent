@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.roles.domain.CUserProjectRole;
+import tech.derbent.api.roles.domain.CUserProjectRole;
 
 public class CPageServiceUserProjectRole extends CPageServiceDynamicPage<CUserProjectRole> {
 

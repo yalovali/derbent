@@ -12,16 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
+import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
-import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
-import tech.derbent.app.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CProjectItemStatusService - Service class for managing CProjectItemStatus entities. Layer: Service (MVC) Provides business logic for activity
@@ -131,18 +130,10 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
 		try {
 			Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
-			Check.instanceOf(item, CProjectItem.class, "Workflow items must extend CProjectItem");
-			final CProjectItem<?> projectItem = (CProjectItem<?>) item;
-			final CProject project = projectItem.getProject();
-			Check.notNull(project, "Project cannot be null when retrieving valid next statuses for project item");
 			final CWorkflowEntity workflow = item.getWorkflow();
 			Check.notNull(workflow, "Workflow cannot be null when retrieving valid next statuses for project item");
 			Check.notNull(workflow.getCompany(), "Workflow company cannot be null when retrieving valid next statuses");
-			Check.isSameCompany(project, workflow);
 			final CProjectItemStatus currentStatus = item.getStatus();
-			if (currentStatus != null) {
-				Check.isSameCompany(project, currentStatus);
-			}
 			final List<CProjectItemStatus> validStatuses = new ArrayList<>();
 			final List<CWorkflowStatusRelation> relations = getWorkflowRelationsForCompany(workflow);
 			Check.notEmpty(relations, "Workflow " + workflow.getName() + " has no status relations defined");

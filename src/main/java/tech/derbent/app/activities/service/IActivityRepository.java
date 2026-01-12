@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityType;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.base.users.domain.CUser;
 
