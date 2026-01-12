@@ -203,9 +203,27 @@ public class CComponentListAttachments<MasterEntity extends CEntityDB<?>>
 
 	/** Handle upload button click. */
 	protected void on_buttonUpload_clicked() {
-		// TODO: Open upload dialog
-		// For now, show a notification
-		CNotificationService.showInfo("Upload dialog not yet implemented - will be created next");
+		if (masterEntity == null) {
+			CNotificationService.showWarning("Please select an entity first");
+			return;
+		}
+		
+		final CDialogAttachmentUpload dialog = new CDialogAttachmentUpload(
+				attachmentService,
+				(tech.derbent.app.documenttypes.service.CDocumentTypeService) 
+					tech.derbent.api.config.CSpringContext.getBean(
+						tech.derbent.app.documenttypes.service.CDocumentTypeService.class),
+				sessionService,
+				masterEntity,
+				attachment -> {
+					// Refresh grid after successful upload
+					try {
+						refreshGrid();
+					} catch (final Exception e) {
+						LOGGER.error("Error refreshing grid after upload", e);
+					}
+				});
+		dialog.open();
 	}
 
 	/** Handle download button click. */

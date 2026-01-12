@@ -60,20 +60,57 @@ public class CAttachmentService extends CEntityOfProjectService<CAttachment> imp
 
 	@Override
 	public Class<?> getInitializerServiceClass() {
-		// Initializer service not yet implemented - optional for now
-		return null;
+		return CAttachmentInitializerService.class;
 	}
 
 	@Override
 	public Class<?> getPageServiceClass() {
-		// Page service not yet implemented - optional for now
-		return null;
+		return CPageServiceAttachment.class;
 	}
 
 	@Override
 	public void initializeNewEntity(final CAttachment entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new attachment entity");
+		
+		// Get current user from session
+		final CUser currentUser = sessionService.getActiveUser()
+				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize attachment"));
+		
+		// Initialize upload date if not set
+		if (entity.getUploadDate() == null) {
+			entity.setUploadDate(LocalDateTime.now());
+		}
+		
+		// Initialize uploaded by if not set
+		if (entity.getUploadedBy() == null) {
+			entity.setUploadedBy(currentUser);
+		}
+		
+		// Initialize version number if not set
+		if (entity.getVersionNumber() == null) {
+			entity.setVersionNumber(1);
+		}
+		
+		// Note: fileName, fileSize, contentPath are required and must be set before saving
+		// Note: project is required and must be set before saving
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CAttachment attachment) {
+		// Check if attachment is used as a previous version reference
+		final List<CAttachment> newerVersions = attachmentRepository.findByFileNameAndProject(
+				attachment.getFileName(), attachment.getProject());
+		
+		for (final CAttachment version : newerVersions) {
+			if (version.getPreviousVersion() != null && 
+					version.getPreviousVersion().getId().equals(attachment.getId())) {
+				return "Cannot delete attachment - it is referenced by a newer version (version " + 
+						version.getVersionNumber() + ")";
+			}
+		}
+		
+		return super.checkDeleteAllowed(attachment);
 	}
 
 	/** Upload a new file and create an attachment record.
