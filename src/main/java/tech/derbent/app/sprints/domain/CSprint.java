@@ -27,6 +27,8 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.api.projects.domain.CProject;
@@ -37,7 +39,7 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 @Entity
 @Table (name = "csprint")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_id"))
-public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasIcon {
+public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasIcon, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - time-boxed work
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
@@ -50,6 +52,14 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		return sprintItem.getParentItem() != null && sprintItem.getParentItem().equals(item);
 	}
 
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "sprint_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Sprint documentation and files", hidden = false,
+			createComponentMethodBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+	)
+	private List<CAttachment> attachments = new ArrayList<>();
 	@Transient
 	@AMetaData (
 			displayName = "Item Detail", required = false, readOnly = false, description = "Item fields", hidden = false,
@@ -522,5 +532,19 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @param totalStoryPoints the total story points value */
 	public void setTotalStoryPoints(final Long totalStoryPoints) {
 		this.totalStoryPoints = totalStoryPoints;
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public List<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<>();
+		}
+		return attachments;
+	}
+
+	@Override
+	public void setAttachments(final List<CAttachment> attachments) {
+		this.attachments = attachments;
 	}
 }
