@@ -3,6 +3,7 @@ package tech.derbent.app.attachments.service;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -12,17 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.storage.IAttachmentStorage;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.risks.risk.domain.CRisk;
-import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -35,7 +31,7 @@ import tech.derbent.base.users.domain.CUser;
 @PreAuthorize("isAuthenticated()")
 @Menu(icon = "vaadin:paperclip", title = "Project.Attachments")
 @PermitAll
-public class CAttachmentService extends CEntityOfProjectService<CAttachment> implements IEntityRegistrable, IEntityWithView {
+public class CAttachmentService extends CEntityOfCompanyService<CAttachment> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAttachmentService.class);
 	private final IAttachmentStorage attachmentStorage;
@@ -205,101 +201,36 @@ public class CAttachmentService extends CEntityOfProjectService<CAttachment> imp
 		super.delete(attachment);
 	}
 
-	/** Link an attachment to an activity.
+	/** Get version history for an attachment (all versions linked via previousVersion chain).
 	 * @param attachment the attachment
-	 * @param activity the activity */
-	@Transactional
-	public void linkToActivity(final CAttachment attachment, final CActivity activity) {
-		Objects.requireNonNull(attachment, "Attachment cannot be null");
-		Objects.requireNonNull(activity, "Activity cannot be null");
-		attachment.setActivity(activity);
-		attachment.setRisk(null);
-		attachment.setMeeting(null);
-		attachment.setSprint(null);
-		save(attachment);
-	}
-
-	/** Link an attachment to a risk.
-	 * @param attachment the attachment
-	 * @param risk the risk */
-	@Transactional
-	public void linkToRisk(final CAttachment attachment, final CRisk risk) {
-		Objects.requireNonNull(attachment, "Attachment cannot be null");
-		Objects.requireNonNull(risk, "Risk cannot be null");
-		attachment.setActivity(null);
-		attachment.setRisk(risk);
-		attachment.setMeeting(null);
-		attachment.setSprint(null);
-		save(attachment);
-	}
-
-	/** Link an attachment to a meeting.
-	 * @param attachment the attachment
-	 * @param meeting the meeting */
-	@Transactional
-	public void linkToMeeting(final CAttachment attachment, final CMeeting meeting) {
-		Objects.requireNonNull(attachment, "Attachment cannot be null");
-		Objects.requireNonNull(meeting, "Meeting cannot be null");
-		attachment.setActivity(null);
-		attachment.setRisk(null);
-		attachment.setMeeting(meeting);
-		attachment.setSprint(null);
-		save(attachment);
-	}
-
-	/** Link an attachment to a sprint.
-	 * @param attachment the attachment
-	 * @param sprint the sprint */
-	@Transactional
-	public void linkToSprint(final CAttachment attachment, final CSprint sprint) {
-		Objects.requireNonNull(attachment, "Attachment cannot be null");
-		Objects.requireNonNull(sprint, "Sprint cannot be null");
-		attachment.setActivity(null);
-		attachment.setRisk(null);
-		attachment.setMeeting(null);
-		attachment.setSprint(sprint);
-		save(attachment);
-	}
-
-	/** Get all attachments for a project.
-	 * @param project the project
-	 * @return list of attachments */
-	public List<CAttachment> findByProject(final CProject project) {
-		return attachmentRepository.listByProject(project);
-	}
-
-	/** Get all attachments for an activity.
-	 * @param activity the activity
-	 * @return list of attachments */
-	public List<CAttachment> findByActivity(final CActivity activity) {
-		return attachmentRepository.findByActivity(activity);
-	}
-
-	/** Get all attachments for a risk.
-	 * @param risk the risk
-	 * @return list of attachments */
-	public List<CAttachment> findByRisk(final CRisk risk) {
-		return attachmentRepository.findByRisk(risk);
-	}
-
-	/** Get all attachments for a meeting.
-	 * @param meeting the meeting
-	 * @return list of attachments */
-	public List<CAttachment> findByMeeting(final CMeeting meeting) {
-		return attachmentRepository.findByMeeting(meeting);
-	}
-
-	/** Get all attachments for a sprint.
-	 * @param sprint the sprint
-	 * @return list of attachments */
-	public List<CAttachment> findBySprint(final CSprint sprint) {
-		return attachmentRepository.findBySprint(sprint);
-	}
-
-	/** Get version history for an attachment.
-	 * @param attachment the attachment
-	 * @return list of all versions */
+	 * @return list of all versions (newest first) */
 	public List<CAttachment> getVersionHistory(final CAttachment attachment) {
-		return attachmentRepository.findVersionHistory(attachment.getId());
+		if (attachment == null || attachment.getId() == null) {
+			return new ArrayList<>();
+		}
+
+		final List<CAttachment> history = new ArrayList<>();
+		history.add(attachment);
+
+		// Find all newer versions that reference this attachment
+		CAttachment current = attachment;
+		while (current != null) {
+			final List<CAttachment> newerVersions = attachmentRepository.findByPreviousVersion(current);
+			if (!newerVersions.isEmpty()) {
+				current = newerVersions.get(0); // Get the next version
+				history.add(0, current); // Add to beginning (newest first)
+			} else {
+				current = null;
+			}
+		}
+
+		// Find all older versions by traversing previousVersion chain
+		CAttachment older = attachment.getPreviousVersion();
+		while (older != null) {
+			history.add(older); // Add to end (oldest last)
+			older = older.getPreviousVersion();
+		}
+
+		return history;
 	}
 }
