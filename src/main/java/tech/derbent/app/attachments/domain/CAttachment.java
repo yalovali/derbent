@@ -15,27 +15,28 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.documenttypes.domain.CDocumentType;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.risks.risk.domain.CRisk;
-import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.base.users.domain.CUser;
 
 /**
  * CAttachment - Domain entity representing file attachments.
  * 
- * Stores metadata about uploaded files and links them to project items (activities, risks, 
- * meetings, sprints). Files are stored on disk, not in the database. Supports versioning
- * to track document changes over time.
+ * Stores metadata about uploaded files and links them to a single parent entity 
+ * (Activity, Risk, Meeting, or Sprint). Files are stored on disk, not in the database. 
+ * Supports versioning to track document changes over time.
+ * 
+ * Pattern: Similar to CComment - each attachment belongs to ONE parent entity,
+ * and each parent entity can have MANY attachments.
  * 
  * Layer: Domain (MVC)
  */
 @Entity
 @Table(name = "cattachment")
 @AttributeOverride(name = "id", column = @Column(name = "attachment_id"))
-public class CAttachment extends CEntityOfProject<CAttachment> {
+public class CAttachment extends CEntityOfProject<CAttachment> implements IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#2F4F4F"; // Dark Slate Gray - files
 	public static final String DEFAULT_ICON = "vaadin:paperclip";
@@ -165,50 +166,29 @@ public class CAttachment extends CEntityOfProject<CAttachment> {
 	)
 	private String description;
 
-	// Links to various entities - only one should be set
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "activity_id", nullable = true)
+	// Generic parent reference - stores which entity owns this attachment
+	// Pattern: Like CProjectItem's parentId/parentType but for attachments
+	@Column(name = "owner_entity_id", nullable = true)
 	@AMetaData(
-		displayName = "Activity",
+		displayName = "Owner Entity ID",
 		required = false,
 		readOnly = true,
-		description = "Activity this attachment belongs to",
+		description = "ID of the parent entity (Activity, Risk, Meeting, Sprint, Project)",
 		hidden = true
 	)
-	private CActivity activity;
+	private Long ownerEntityId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "risk_id", nullable = true)
+	@Column(name = "owner_entity_type", nullable = true, length = 100)
+	@Size(max = 100)
 	@AMetaData(
-		displayName = "Risk",
+		displayName = "Owner Entity Type",
 		required = false,
 		readOnly = true,
-		description = "Risk this attachment belongs to",
-		hidden = true
+		description = "Type of the parent entity (CActivity, CRisk, CMeeting, CSprint, CProject)",
+		hidden = true,
+		maxLength = 100
 	)
-	private CRisk risk;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "meeting_id", nullable = true)
-	@AMetaData(
-		displayName = "Meeting",
-		required = false,
-		readOnly = true,
-		description = "Meeting this attachment belongs to",
-		hidden = true
-	)
-	private CMeeting meeting;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "sprint_id", nullable = true)
-	@AMetaData(
-		displayName = "Sprint",
-		required = false,
-		readOnly = true,
-		description = "Sprint this attachment belongs to",
-		hidden = true
-	)
-	private CSprint sprint;
+	private String ownerEntityType;
 
 	/** Default constructor for JPA. */
 	public CAttachment() {
@@ -313,36 +293,37 @@ public class CAttachment extends CEntityOfProject<CAttachment> {
 		this.description = description;
 	}
 
-	public CActivity getActivity() {
-		return activity;
+	public Long getOwnerEntityId() {
+		return ownerEntityId;
 	}
 
-	public void setActivity(final CActivity activity) {
-		this.activity = activity;
+	public void setOwnerEntityId(final Long ownerEntityId) {
+		this.ownerEntityId = ownerEntityId;
 	}
 
-	public CRisk getRisk() {
-		return risk;
+	public String getOwnerEntityType() {
+		return ownerEntityType;
 	}
 
-	public void setRisk(final CRisk risk) {
-		this.risk = risk;
+	public void setOwnerEntityType(final String ownerEntityType) {
+		this.ownerEntityType = ownerEntityType;
 	}
 
-	public CMeeting getMeeting() {
-		return meeting;
+	/** Set the owner entity for this attachment.
+	 * @param owner the owner entity (Activity, Risk, Meeting, Sprint, or Project) */
+	public void setOwner(final IAttachmentOwner owner) {
+		Check.notNull(owner, "Owner cannot be null");
+		this.ownerEntityId = owner.getId();
+		this.ownerEntityType = owner.getEntityClass().getSimpleName();
 	}
 
-	public void setMeeting(final CMeeting meeting) {
-		this.meeting = meeting;
-	}
-
-	public CSprint getSprint() {
-		return sprint;
-	}
-
-	public void setSprint(final CSprint sprint) {
-		this.sprint = sprint;
+	/** Get the parent entity name for display.
+	 * @return the parent entity type and ID */
+	public String getParentEntityName() {
+		if (ownerEntityType != null && ownerEntityId != null) {
+			return ownerEntityType + " #" + ownerEntityId;
+		}
+		return "Unknown";
 	}
 
 	/** Get formatted file size.
@@ -360,21 +341,88 @@ public class CAttachment extends CEntityOfProject<CAttachment> {
 		return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre);
 	}
 
-	/** Get the entity this attachment is linked to.
-	 * @return the linked entity name or "Project" if only linked to project */
-	public String getLinkedEntityName() {
-		if (activity != null) {
-			return "Activity: " + activity.getName();
+	/** Get the file extension from the filename.
+	 * @return file extension in lowercase (e.g., "pdf", "docx", "jpg") or empty string */
+	public String getFileExtension() {
+		if (fileName == null || !fileName.contains(".")) {
+			return "";
 		}
-		if (risk != null) {
-			return "Risk: " + risk.getName();
+		final int lastDotIndex = fileName.lastIndexOf('.');
+		if (lastDotIndex >= 0 && lastDotIndex < fileName.length() - 1) {
+			return fileName.substring(lastDotIndex + 1).toLowerCase();
 		}
-		if (meeting != null) {
-			return "Meeting: " + meeting.getName();
+		return "";
+	}
+
+	@Override
+	public String getIconString() {
+		return getFileTypeIcon();
+	}
+
+	/** Get the Vaadin icon for this file type based on extension or MIME type.
+	 * @return Vaadin icon string (e.g., "vaadin:file-text", "vaadin:file-picture") */
+	public String getFileTypeIcon() {
+		final String extension = getFileExtension();
+		
+		// PDF documents
+		if ("pdf".equals(extension)) {
+			return "vaadin:file-text-o";
 		}
-		if (sprint != null) {
-			return "Sprint: " + sprint.getName();
+		
+		// Word documents
+		if ("doc".equals(extension) || "docx".equals(extension) || "odt".equals(extension)) {
+			return "vaadin:file-text";
 		}
-		return "Project: " + getProject().getName();
+		
+		// Excel/spreadsheets
+		if ("xls".equals(extension) || "xlsx".equals(extension) || "ods".equals(extension) || "csv".equals(extension)) {
+			return "vaadin:file-table";
+		}
+		
+		// PowerPoint/presentations
+		if ("ppt".equals(extension) || "pptx".equals(extension) || "odp".equals(extension)) {
+			return "vaadin:file-presentation";
+		}
+		
+		// Images
+		if ("jpg".equals(extension) || "jpeg".equals(extension) || "png".equals(extension) || 
+			"gif".equals(extension) || "bmp".equals(extension) || "svg".equals(extension) || 
+			"webp".equals(extension)) {
+			return "vaadin:file-picture";
+		}
+		
+		// Videos
+		if ("mp4".equals(extension) || "avi".equals(extension) || "mov".equals(extension) || 
+			"wmv".equals(extension) || "flv".equals(extension) || "webm".equals(extension)) {
+			return "vaadin:file-movie";
+		}
+		
+		// Audio
+		if ("mp3".equals(extension) || "wav".equals(extension) || "ogg".equals(extension) || 
+			"m4a".equals(extension) || "flac".equals(extension)) {
+			return "vaadin:file-sound";
+		}
+		
+		// Archives/compressed
+		if ("zip".equals(extension) || "rar".equals(extension) || "7z".equals(extension) || 
+			"tar".equals(extension) || "gz".equals(extension)) {
+			return "vaadin:file-zip";
+		}
+		
+		// Code files
+		if ("java".equals(extension) || "js".equals(extension) || "ts".equals(extension) || 
+			"py".equals(extension) || "cpp".equals(extension) || "c".equals(extension) || 
+			"html".equals(extension) || "css".equals(extension) || "xml".equals(extension) || 
+			"json".equals(extension) || "sql".equals(extension)) {
+			return "vaadin:file-code";
+		}
+		
+		// Text files
+		if ("txt".equals(extension) || "md".equals(extension) || "log".equals(extension)) {
+			return "vaadin:file-text-o";
+		}
+		
+		// Default generic file icon
+		return "vaadin:file-o";
 	}
 }
