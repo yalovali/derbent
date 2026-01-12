@@ -37,7 +37,7 @@ import tech.derbent.base.session.service.ISessionService;
  * @param <MasterEntity> The parent entity type (Activity, Risk, Meeting, Sprint, or Project)
  */
 public class CComponentListAttachments<MasterEntity extends CEntityDB<?>> 
-		extends CVerticalLayout implements IContentOwner {
+		extends CVerticalLayout implements IContentOwner, tech.derbent.api.interfaces.IPageServiceAutoRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListAttachments.class);
 	private static final long serialVersionUID = 1L;
@@ -331,5 +331,18 @@ public class CComponentListAttachments<MasterEntity extends CEntityDB<?>>
 			}
 		}
 		refreshGrid();
+	}
+
+	@Override
+	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
+		tech.derbent.api.utils.Check.notNull(pageService, "Page service cannot be null");
+		pageService.registerComponent(getComponentName(), this);
+		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", 
+				getClass().getSimpleName(), getComponentName());
+	}
+
+	@Override
+	public String getComponentName() {
+		return "Attachments";
 	}
 }
