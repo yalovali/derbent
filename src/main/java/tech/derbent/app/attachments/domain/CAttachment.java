@@ -166,6 +166,19 @@ public class CAttachment extends CEntityOfProject<CAttachment> implements IHasIc
 	)
 	private String description;
 
+	// Color for display (required by IHasIcon interface)
+	@Column(name = "color", nullable = true, length = 20)
+	@Size(max = 20)
+	@AMetaData(
+		displayName = "Color",
+		required = false,
+		readOnly = false,
+		description = "Display color for this attachment",
+		hidden = true,
+		maxLength = 20
+	)
+	private String color = DEFAULT_COLOR;
+
 	// Generic parent reference - stores which entity owns this attachment
 	// Pattern: Like CProjectItem's parentId/parentType but for attachments
 	@Column(name = "owner_entity_id", nullable = true)
@@ -291,6 +304,14 @@ public class CAttachment extends CEntityOfProject<CAttachment> implements IHasIc
 
 	public void setDescription(final String description) {
 		this.description = description;
+	}
+
+	public String getColor() {
+		return color != null ? color : DEFAULT_COLOR;
+	}
+
+	public void setColor(final String color) {
+		this.color = color;
 	}
 
 	public Long getOwnerEntityId() {
