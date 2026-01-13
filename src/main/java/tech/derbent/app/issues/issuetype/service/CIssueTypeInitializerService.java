@@ -21,8 +21,8 @@ public class CIssueTypeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CIssueType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CIssueTypeInitializerService.class);
-	private static final String menuOrder = Menu_Order_ADMINISTRATION + ".15";
-	private static final String menuTitle = MenuTitle_ADMINISTRATION + ".Issue Types";
+	private static final String menuOrder = Menu_Order_TYPES + ".15";
+	private static final String menuTitle = MenuTitle_TYPES + ".Issue Types";
 	private static final String pageDescription = "Manage issue type categories";
 	private static final String pageTitle = "Issue Types";
 	private static final boolean showInQuickToolbar = false;

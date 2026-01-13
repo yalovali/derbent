@@ -25,12 +25,13 @@ import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.issues.issuetype.domain.CIssueType;
 
 @Entity
 @Table(name = "cissue")
 @AttributeOverride(name = "id", column = @Column(name = "issue_id"))
-public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflow<CIssue>, IHasAttachments {
+public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflow<CIssue>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#D32F2F"; // Red for issues/bugs
 	public static final String DEFAULT_ICON = "vaadin:bug";
@@ -104,7 +105,9 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 	private Set<CAttachment> attachments = new HashSet<>();
 
 	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "issue_id")
+	@AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Comments for this issue", hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent")
 	private Set<CComment> comments = new HashSet<>();
 
 	/** Default constructor for JPA. */
@@ -120,15 +123,22 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 
 	@Override
 	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
 		return attachments;
+	}
+
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
 	}
 
 	public String getActualResult() {
 		return actualResult;
-	}
-
-	public Set<CComment> getComments() {
-		return comments;
 	}
 
 	public LocalDate getDueDate() {
@@ -196,6 +206,7 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 		this.attachments = attachments;
 	}
 
+	@Override
 	public void setComments(final Set<CComment> comments) {
 		this.comments = comments;
 	}

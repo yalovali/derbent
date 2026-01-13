@@ -2,10 +2,7 @@ package tech.derbent.app.activities.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +36,7 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
@@ -48,7 +46,7 @@ import tech.derbent.base.users.domain.CUser;
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity>
-		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments {
+		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -90,8 +88,13 @@ public class CActivity extends CProjectItem<CActivity>
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
 	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany (mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	private List<CComment> comments = new ArrayList<>();
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "activity_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this activity", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "completion_date", nullable = true)
 	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
 	private LocalDate completionDate;
@@ -274,7 +277,13 @@ public class CActivity extends CProjectItem<CActivity>
 
 	/** Gets the list of comments associated with this activity.
 	 * @return list of comments, never null */
-	public List<CComment> getComments() { return comments != null ? comments : new ArrayList<>(); }
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
@@ -462,9 +471,10 @@ public class CActivity extends CProjectItem<CActivity>
 	}
 
 	/** Sets the list of comments for this activity.
-	 * @param comments the list of comments */
-	public void setComments(final List<CComment> comments) {
-		this.comments = comments != null ? comments : new ArrayList<>();
+	 * @param comments the set of comments */
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
 		updateLastModified();
 	}
 
