@@ -50,7 +50,7 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 	private final CEnhancedBinder<CAttachment> binder;
 	private final CFormBuilder<CAttachment> formBuilder;
 	
-	// Upload mode fields
+	// Upload mode fields (custom UI for file selection)
 	private Upload upload;
 	private MemoryBuffer buffer;
 	private Span statusLabel;
@@ -58,10 +58,7 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 	private Long uploadedFileSize;
 	private String uploadedMimeType;
 	private boolean uploadInProgress = false;
-	
-	// Edit mode - form fields managed by CFormBuilder
-	private IntegerField fieldVersionNumber;
-	private TextArea textAreaDescription;
+	// Note: Both upload and edit modes use FormBuilder for form fields
 
 	/**
 	 * Constructor for upload mode (new attachment).
@@ -103,17 +100,77 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 		populateForm();
 	}
 
-	private void createEditFormFields() throws Exception {
+	private void createFormFields() throws Exception {
 		Check.notNull(getDialogLayout(), "Dialog layout must be initialized");
 		
-		// Use FormBuilder to create form from entity annotations
-		final List<String> editableFields = List.of(
+		// Upload mode: add file upload component first
+		if (isNew) {
+			final CVerticalLayout uploadSection = new CVerticalLayout();
+			uploadSection.setPadding(false);
+			uploadSection.setSpacing(true);
+			
+			// Upload component (for file selection)
+			buffer = new MemoryBuffer();
+			upload = new Upload(buffer);
+			upload.setMaxFileSize((int) MAX_FILE_SIZE);
+			upload.setDropLabel(new Span("Drop file here or click to browse"));
+			upload.setUploadButton(new com.vaadin.flow.component.button.Button("Choose File"));
+			
+			// Upload listeners - populate entity fields when file is selected
+			upload.addSucceededListener(event -> {
+				uploadedFileName = event.getFileName();
+				uploadedFileSize = event.getContentLength();
+				uploadedMimeType = event.getMIMEType();
+				
+				// Populate entity fields
+				getEntity().setFileName(event.getFileName());
+				getEntity().setFileSize(event.getContentLength());
+				getEntity().setFileType(event.getMIMEType());
+				
+				// Refresh form to show populated values
+				binder.readBean(getEntity());
+				
+				statusLabel.setText("File ready: " + event.getFileName() + " (" + formatFileSize(event.getContentLength()) + ")");
+				LOGGER.debug("File selected: {}, size: {}", event.getFileName(), event.getContentLength());
+			});
+			
+			upload.addFailedListener(event -> {
+				LOGGER.error("File upload failed: {}", event.getReason().getMessage());
+				CNotificationService.showError("Upload failed: " + event.getReason().getMessage());
+				statusLabel.setText("Upload failed");
+				uploadedFileName = null;
+				uploadedFileSize = null;
+				uploadedMimeType = null;
+			});
+			
+			upload.addFileRejectedListener(event -> {
+				CNotificationService.showWarning("File rejected: " + event.getErrorMessage());
+				statusLabel.setText("File rejected");
+				uploadedFileName = null;
+				uploadedFileSize = null;
+				uploadedMimeType = null;
+			});
+			
+			uploadSection.add(upload);
+			
+			// Status label
+			statusLabel = new Span("No file selected");
+			statusLabel.getStyle()
+				.set("font-size", "0.875rem")
+				.set("color", "var(--lumo-secondary-text-color)");
+			uploadSection.add(statusLabel);
+			
+			getDialogLayout().add(uploadSection);
+		}
+		
+		// Both modes: Use FormBuilder to create form fields from entity annotations
+		final List<String> fields = List.of(
 			"fileName", "fileSize", "documentType", "versionNumber", "description"
 		);
 		
-		getDialogLayout().add(formBuilder.build(CAttachment.class, binder, editableFields));
+		getDialogLayout().add(formBuilder.build(CAttachment.class, binder, fields));
 		
-		// Mark file metadata as read-only (safety - no file replacement)
+		// Mark file metadata as read-only (safety - cannot change file content)
 		if (formBuilder.getComponentMap().containsKey("fileName")) {
 			((com.vaadin.flow.component.HasValue<?, ?>) formBuilder.getComponentMap().get("fileName")).setReadOnly(true);
 		}
@@ -121,86 +178,27 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 			((com.vaadin.flow.component.HasValue<?, ?>) formBuilder.getComponentMap().get("fileSize")).setReadOnly(true);
 		}
 		
-		// Safety notice
-		final Span safetyNote = new Span(
-			"⚠ File content cannot be changed for safety. To replace a file, upload a new version instead."
-		);
-		safetyNote.getStyle()
-			.set("font-size", "0.875rem")
-			.set("color", "var(--lumo-secondary-text-color)")
-			.set("font-style", "italic")
-			.set("padding", "var(--lumo-space-s)")
-			.set("background-color", "var(--lumo-contrast-5pct)")
-			.set("border-radius", "var(--lumo-border-radius-m)")
-			.set("margin-top", "var(--lumo-space-m)");
-		getDialogLayout().add(safetyNote);
-	}
-
-	private void createUploadFormFields() {
-		Check.notNull(getDialogLayout(), "Dialog layout must be initialized");
+		// Edit mode: add safety notice
+		if (!isNew) {
+			final Span safetyNote = new Span(
+				"⚠ File content cannot be changed for safety. To replace a file, upload a new version instead."
+			);
+			safetyNote.getStyle()
+				.set("font-size", "0.875rem")
+				.set("color", "var(--lumo-secondary-text-color)")
+				.set("font-style", "italic")
+				.set("padding", "var(--lumo-space-s)")
+				.set("background-color", "var(--lumo-contrast-5pct)")
+				.set("border-radius", "var(--lumo-border-radius-m)")
+				.set("margin-top", "var(--lumo-space-m)");
+			getDialogLayout().add(safetyNote);
+		}
 		
-		final CVerticalLayout content = new CVerticalLayout();
-		content.setPadding(false);
-		content.setSpacing(true);
-		
-		// Upload component
-		buffer = new MemoryBuffer();
-		upload = new Upload(buffer);
-		upload.setMaxFileSize((int) MAX_FILE_SIZE);
-		upload.setDropLabel(new Span("Drop file here or click to browse"));
-		upload.setUploadButton(new com.vaadin.flow.component.button.Button("Choose File"));
-		
-		// Upload listeners
-		upload.addSucceededListener(event -> {
-			uploadedFileName = event.getFileName();
-			uploadedFileSize = event.getContentLength();
-			uploadedMimeType = event.getMIMEType();
-			statusLabel.setText("File ready: " + event.getFileName() + " (" + formatFileSize(event.getContentLength()) + ")");
-		});
-		
-		upload.addFailedListener(event -> {
-			LOGGER.error("File upload failed: {}", event.getReason().getMessage());
-			CNotificationService.showError("Upload failed: " + event.getReason().getMessage());
-			statusLabel.setText("Upload failed");
-			uploadedFileName = null;
-			uploadedFileSize = null;
-			uploadedMimeType = null;
-		});
-		
-		upload.addFileRejectedListener(event -> {
-			CNotificationService.showWarning("File rejected: " + event.getErrorMessage());
-			statusLabel.setText("File rejected");
-			uploadedFileName = null;
-			uploadedFileSize = null;
-			uploadedMimeType = null;
-		});
-		
-		content.add(upload);
-		
-		// Status label
-		statusLabel = new Span("No file selected");
-		statusLabel.getStyle()
-			.set("font-size", "0.875rem")
-			.set("color", "var(--lumo-secondary-text-color)");
-		content.add(statusLabel);
-		
-		// Version number
-		fieldVersionNumber = new IntegerField("Version Number");
-		fieldVersionNumber.setWidthFull();
-		fieldVersionNumber.setValue(1);
-		fieldVersionNumber.setMin(1);
-		fieldVersionNumber.setMax(999);
-		fieldVersionNumber.setHelperText("Auto-incremented if uploading new version");
-		content.add(fieldVersionNumber);
-		
-		// Description
-		textAreaDescription = new TextArea("Description");
-		textAreaDescription.setWidthFull();
-		textAreaDescription.setMaxLength(2000);
-		textAreaDescription.setPlaceholder("Optional notes about this file");
-		content.add(textAreaDescription);
-		
-		getDialogLayout().add(content);
+		// Upload mode: set entity defaults
+		if (isNew) {
+			getEntity().setVersionNumber(1);
+			binder.readBean(getEntity());
+		}
 	}
 
 	@Override
@@ -240,14 +238,8 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 		super.setupContent();
 		setWidth("600px");
 		setResizable(true);
-		
-		if (isNew) {
-			setHeight("500px");
-			createUploadFormFields();
-		} else {
-			setHeight("550px");
-			createEditFormFields();
-		}
+		setHeight(isNew ? "600px" : "550px");
+		createFormFields();
 	}
 
 	@Override
@@ -286,23 +278,26 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 		try {
 			validateForm();
 			
+			// Write form data to entity
+			binder.writeBean(getEntity());
+			
 			final CUser currentUser = sessionService.getActiveUser()
 				.orElseThrow(() -> new IllegalStateException("No active user"));
 			
-			// Upload file and create attachment (auto-detects document type)
+			// Upload file and create attachment (auto-detects document type if not set)
 			final CAttachment attachment = attachmentService.uploadFile(
 				uploadedFileName, 
 				buffer.getInputStream(), 
 				uploadedFileSize, 
 				uploadedMimeType,
-				textAreaDescription.getValue()
+				getEntity().getDescription()
 			);
 			
-			// Set version number if specified
-			if (fieldVersionNumber.getValue() != null) {
-				attachment.setVersionNumber(fieldVersionNumber.getValue());
-				attachmentService.save(attachment);
-			}
+			// Copy user-entered fields from form to saved attachment
+			attachment.setVersionNumber(getEntity().getVersionNumber());
+			attachment.setDocumentType(getEntity().getDocumentType());
+			attachment.setDescription(getEntity().getDescription());
+			attachmentService.save(attachment);
 			
 			// Callback
 			if (onSave != null) {
@@ -319,8 +314,13 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 	@Override
 	protected void validateForm() {
 		if (isNew) {
-			Check.notBlank(uploadedFileName, "No file selected");
+			Check.notBlank(uploadedFileName, "No file selected - please choose a file first");
 			Check.notNull(uploadedFileSize, "File size is missing");
+			try {
+				binder.validate();
+			} catch (final Exception e) {
+				throw new IllegalStateException("Failed to validate attachment form", e);
+			}
 		} else {
 			Check.notNull(getEntity(), "Attachment entity cannot be null");
 			try {
