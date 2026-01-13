@@ -24,6 +24,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.project
 			LEFT JOIN FETCH a.assignedTo
 			LEFT JOIN FETCH a.createdBy
+			LEFT JOIN FETCH a.attachments
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
@@ -38,6 +39,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.project
 			LEFT JOIN FETCH a.assignedTo
 			LEFT JOIN FETCH a.createdBy
+			LEFT JOIN FETCH a.attachments
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status
@@ -53,6 +55,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			LEFT JOIN FETCH a.project
 			LEFT JOIN FETCH a.assignedTo
 			LEFT JOIN FETCH a.createdBy
+			LEFT JOIN FETCH a.attachments
 			LEFT JOIN FETCH a.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH a.status

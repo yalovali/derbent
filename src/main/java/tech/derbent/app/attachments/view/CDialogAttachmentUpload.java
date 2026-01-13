@@ -1,7 +1,6 @@
 package tech.derbent.app.attachments.view;
 
 import java.io.ByteArrayInputStream;
-import java.util.Objects;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +61,9 @@ public class CDialogAttachmentUpload extends CDialog {
 	private CButton buttonUpload;
 	private CButton buttonCancel;
 	private Span statusLabel;
+	private String uploadedFileName;
+	private Long uploadedFileSize;
+	private String uploadedMimeType;
 	
 	private boolean uploadInProgress = false;
 
@@ -127,6 +129,9 @@ public class CDialogAttachmentUpload extends CDialog {
 		// Configure upload listeners
 		upload.addSucceededListener(event -> {
 			LOGGER.info("File upload succeeded: {}", event.getFileName());
+			uploadedFileName = event.getFileName();
+			uploadedFileSize = event.getContentLength();
+			uploadedMimeType = event.getMIMEType();
 			statusLabel.setText("File ready: " + event.getFileName() + 
 					" (" + formatFileSize(event.getContentLength()) + ")");
 			buttonUpload.setEnabled(true);
@@ -136,6 +141,9 @@ public class CDialogAttachmentUpload extends CDialog {
 			LOGGER.error("File upload failed: {}", event.getReason().getMessage());
 			CNotificationService.showError("Upload failed: " + event.getReason().getMessage());
 			statusLabel.setText("Upload failed");
+			uploadedFileName = null;
+			uploadedFileSize = null;
+			uploadedMimeType = null;
 			buttonUpload.setEnabled(false);
 		});
 		
@@ -143,6 +151,9 @@ public class CDialogAttachmentUpload extends CDialog {
 			LOGGER.warn("File rejected: {}", event.getErrorMessage());
 			CNotificationService.showWarning("File rejected: " + event.getErrorMessage());
 			statusLabel.setText("File rejected");
+			uploadedFileName = null;
+			uploadedFileSize = null;
+			uploadedMimeType = null;
 			buttonUpload.setEnabled(false);
 		});
 		
@@ -207,11 +218,11 @@ public class CDialogAttachmentUpload extends CDialog {
 			statusLabel.setText("Uploading...");
 			
 			// Get file data from buffer
-			final String fileName = upload.getElement().getProperty("files[0].name");
-			Objects.requireNonNull(fileName, "File name is null");
-			
-			final long fileSize = Long.parseLong(upload.getElement().getProperty("files[0].size"));
-			final String mimeType = upload.getElement().getProperty("files[0].type");
+			Check.notBlank(uploadedFileName, "Upload file name is missing");
+			Check.notNull(uploadedFileSize, "Upload file size is missing");
+			final String fileName = uploadedFileName;
+			final long fileSize = uploadedFileSize;
+			final String mimeType = uploadedMimeType;
 			
 			// Get current user
 			final CUser currentUser = sessionService.getActiveUser()

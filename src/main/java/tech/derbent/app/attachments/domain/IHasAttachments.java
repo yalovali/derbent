@@ -19,7 +19,7 @@ import java.util.List;
  *     {@literal @}JoinColumn(name = "activity_id")
  *     {@literal @}AMetaData(
  *         displayName = "Attachments",
- *         createComponentMethodBean = "CAttachmentComponentFactory",
+ *         dataProviderBean = "CAttachmentService",
  *         createComponentMethod = "createComponent"
  *     )
  *     private List<CAttachment> attachments = new ArrayList<>();
