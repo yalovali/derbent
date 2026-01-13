@@ -4,26 +4,35 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entity.service.IAbstractNamedRepository;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.base.users.domain.CUser;
 
-public interface ITeamRepository extends IAbstractNamedRepository<CTeam> {
+public interface ITeamRepository extends IEntityOfCompanyRepository<CTeam> {
 
-	/** Find all teams for a specific company */
-	@Query ("SELECT t FROM CTeam t WHERE t.company = :company ORDER BY t.name")
-	List<CTeam> findByCompany(@Param ("company") CCompany company);
-	/** Page view query with fetch joins for full entity graph */
-	@Query ("SELECT DISTINCT t FROM CTeam t LEFT JOIN FETCH t.company LEFT JOIN FETCH t.teamManager LEFT JOIN FETCH t.members WHERE t.company = :company ORDER BY t.name")
-	List<CTeam> listByCompanyForPageView(@Param ("company") CCompany company);
 	@Override
-	@Query ("SELECT t FROM CTeam t LEFT JOIN FETCH t.company LEFT JOIN FETCH t.teamManager LEFT JOIN FETCH t.members WHERE t.id = :id")
+	@Query ("SELECT t FROM #{#entityName} t WHERE t.company = :company ORDER BY t.name ASC")
+	List<CTeam> findByCompany(@Param ("company") CCompany company);
+
+	@Override
+	@Query ("SELECT DISTINCT t FROM #{#entityName} t " +
+		"LEFT JOIN FETCH t.company " +
+		"LEFT JOIN FETCH t.teamManager " +
+		"WHERE t.company = :company " +
+		"ORDER BY t.name ASC")
+	List<CTeam> listByCompanyForPageView(@Param ("company") CCompany company);
+
+	@Override
+	@Query ("SELECT t FROM #{#entityName} t " +
+		"LEFT JOIN FETCH t.company " +
+		"LEFT JOIN FETCH t.teamManager " +
+		"WHERE t.id = :id")
 	Optional<CTeam> findById(@Param ("id") Long id);
-	/** Find teams managed by a specific user */
-	@Query ("SELECT t FROM CTeam t WHERE t.teamManager = :manager ORDER BY t.name")
+
+	@Query ("SELECT t FROM #{#entityName} t WHERE t.teamManager = :manager ORDER BY t.name ASC")
 	List<CTeam> findByManager(@Param ("manager") CUser manager);
-	/** Find teams that include a specific user as a member */
-	@Query ("SELECT t FROM CTeam t JOIN t.members m WHERE m = :user ORDER BY t.name")
+
+	@Query ("SELECT DISTINCT t FROM #{#entityName} t JOIN t.members m WHERE m = :user ORDER BY t.name ASC")
 	List<CTeam> findByMember(@Param ("user") CUser user);
 }
