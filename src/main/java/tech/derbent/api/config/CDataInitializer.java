@@ -37,11 +37,6 @@ import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
 import tech.derbent.app.budgets.budget.service.CBudgetService;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
 import tech.derbent.app.comments.domain.CComment;
-import tech.derbent.app.comments.domain.CCommentPriority;
-import tech.derbent.app.comments.service.CCommentInitializerService;
-import tech.derbent.app.comments.service.CCommentPriorityService;
-import tech.derbent.app.comments.service.CCommentService;
-import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyInitializerService;
 import tech.derbent.api.companies.service.CCompanyService;
@@ -173,9 +168,6 @@ public class CDataInitializer {
 	private final CActivityService activityService;
 	private final CProjectItemStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
-	private final CCommentPriorityService commentPriorityService;
-	private final CCommentService commentService;
-	private final CCompanyService companyService;
 	private final CCurrencyService currencyService;
 	private final CDecisionService decisionService;
 	private final CDecisionTypeService decisionTypeService;
@@ -223,9 +215,6 @@ public class CDataInitializer {
 		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
 		CSpringContext.getBean(COrderService.class);
 		orderTypeService = CSpringContext.getBean(COrderTypeService.class);
-		companyService = CSpringContext.getBean(CCompanyService.class);
-		commentService = CSpringContext.getBean(CCommentService.class);
-		commentPriorityService = CSpringContext.getBean(CCommentPriorityService.class);
 		meetingService = CSpringContext.getBean(CMeetingService.class);
 		riskService = CSpringContext.getBean(CRiskService.class);
 		decisionTypeService = CSpringContext.getBean(CDecisionTypeService.class);
@@ -306,8 +295,6 @@ public class CDataInitializer {
 				LOGGER.debug("Skipping PostgreSQL truncate path; database is not PostgreSQL.");
 			}
 			// ---- 2) Fallback: JPA batch silme (FK sırasına dikkat)
-			commentService.deleteAllInBatch();
-			commentPriorityService.deleteAllInBatch();
 			meetingService.deleteAllInBatch();
 			projectItemStatusService.deleteAllInBatch();
 			meetingTypeService.deleteAllInBatch();
@@ -323,7 +310,6 @@ public class CDataInitializer {
 			currencyService.deleteAllInBatch();
 			orderTypeService.deleteAllInBatch();
 			userService.deleteAllInBatch();
-			companyService.deleteAllInBatch();
 			projectService.deleteAllInBatch();
 			pageEntityService.deleteAllInBatch();
 			ganntViewEntityService.deleteAllInBatch();
@@ -338,82 +324,7 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Create sample comments for a decision.
-	 * @param decision the decision to create comments for */
-	private void createSampleCommentsForDecision(final CDecision decision) {
-		try {
-			// Comments require an activity - create a simple activity related to this decision
-			final CActivityType activityType = activityTypeService.getRandom(decision.getProject().getCompany());
-			final CUser user = userService.getRandom(decision.getProject().getCompany());
-			final CActivity activity = new CActivity("Review Decision: " + decision.getName(), decision.getProject());
-			activity.setDescription("Activity to track review and implementation of decision");
-			activity.setEntityType(activityType);
-			activity.setAssignedTo(user);
-			// Initialize status using workflow
-			if (activityType != null && activityType.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity);
-				if (!initialStatuses.isEmpty()) {
-					activity.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity);
-			// Create 2 comments for this activity
-			final CCommentPriority priority1 = commentPriorityService.getRandom(decision.getProject().getCompany());
-			final CCommentPriority priority2 = commentPriorityService.getRandom(decision.getProject().getCompany());
-			final CUser commenter1 = userService.getRandom(decision.getProject().getCompany());
-			final CUser commenter2 = userService.getRandom(decision.getProject().getCompany());
-			final CComment comment1 =
-					new CComment("This decision looks promising. We should prioritize implementation.", activity, commenter1, priority1);
-			commentService.save(comment1);
-			final CComment comment2 =
-					new CComment("Agreed. Let's schedule a follow-up meeting to discuss resource allocation.", activity, commenter2, priority2);
-			commentService.save(comment2);
-			// LOGGER.debug("Created sample activity and comments for decision ID: {}", decision.getId());
-		} catch (final Exception e) {
-			LOGGER.error("Error creating comments for decision: {}", decision.getName(), e);
-		}
-	}
-
-	/** Create sample comments for a meeting.
-	 * @param meeting the meeting to create comments for
-	 * @param minimal */
-	private void createSampleCommentsForMeeting(final CMeeting meeting, final boolean minimal) {
-		try {
-			// Comments require an activity - create a simple activity related to this meeting
-			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject().getCompany());
-			final CUser user = userService.getRandom(meeting.getProject().getCompany());
-			final CActivity activity = new CActivity("Follow-up: " + meeting.getName(), meeting.getProject());
-			activity.setDescription("Activity to track action items from meeting");
-			activity.setEntityType(activityType);
-			activity.setAssignedTo(user);
-			// Set initial status from workflow
-			if (activityType != null && activityType.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity);
-				if (!initialStatuses.isEmpty()) {
-					activity.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity);
-			// Create 2 comments for this activity
-			final CCommentPriority priority1 = commentPriorityService.getRandom(meeting.getProject().getCompany());
-			final CUser commenter1 = userService.getRandom(meeting.getProject().getCompany());
-			final CComment comment1 = new CComment("Meeting was productive. Action items are clearly defined.", activity, commenter1, priority1);
-			commentService.save(comment1);
-			if (minimal) {
-				return;
-			}
-			final CUser commenter2 = userService.getRandom(meeting.getProject().getCompany());
-			final CCommentPriority priority2 = commentPriorityService.getRandom(meeting.getProject().getCompany());
-			final CComment comment2 = new CComment("I'll take ownership of the first two action items. Expected completion in 2 weeks.", activity,
-					commenter2, priority2);
-			commentService.save(comment2);
-			// LOGGER.debug("Created sample activity and comments for meeting ID: {}", meeting.getId());
-		} catch (final Exception e) {
-			LOGGER.error("Error creating comments for meeting: {}", meeting.getName(), e);
-		}
-	}
-
-	/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
+			/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
 	 * @param project the project to create activities for
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleActivities(final CProject project, final boolean minimal) {
@@ -508,7 +419,6 @@ public class CDataInitializer {
 			decision1.setReviewDate(java.time.LocalDateTime.now().plusDays(90));
 			decisionService.save(decision1);
 			// Create first decision comments
-			createSampleCommentsForDecision(decision1);
 			if (minimal) {
 				return;
 			}
@@ -526,7 +436,6 @@ public class CDataInitializer {
 			decision2.setReviewDate(java.time.LocalDateTime.now().plusDays(60));
 			decisionService.save(decision2);
 			// Create second decision comments
-			createSampleCommentsForDecision(decision2);
 			LOGGER.debug("Created 2 sample decisions with comments for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
@@ -562,7 +471,6 @@ public class CDataInitializer {
 			meeting1.addParticipant(user2);
 			meetingService.save(meeting1);
 			// Create first meeting comments
-			createSampleCommentsForMeeting(meeting1, minimal);
 			if (minimal) {
 				return;
 			}
@@ -586,7 +494,6 @@ public class CDataInitializer {
 			meeting2.addParticipant(user2);
 			meetingService.save(meeting2);
 			// Create second meeting comments
-			createSampleCommentsForMeeting(meeting2, minimal);
 			LOGGER.debug("Created 2 sample meetings with parent-child relationship for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
@@ -779,7 +686,7 @@ public class CDataInitializer {
 			// **** CREATE COMPANY SAMPLES ****//
 			CCompanyInitializerService.initializeSample(minimal);
 			/* create sample projects */
-			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+			for (final CCompany company : CSpringContext.getBean(CCompanyService.class).list(Pageable.unpaged()).getContent()) {
 				sessionService.setActiveCompany(company);
 				CUserCompanyRoleInitializerService.initializeSample(company, minimal);
 				CUserProjectRoleInitializerService.initializeSample(company, minimal);
@@ -789,7 +696,7 @@ public class CDataInitializer {
 				}
 			}
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
-			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+			for (final CCompany company : CSpringContext.getBean(CCompanyService.class).list(Pageable.unpaged()).getContent()) {
 				// sessionService.setActiveCompany(company);
 				// later implement better user randomization logic
 				LOGGER.info("Setting active company to: id:{}:{}", company.getId(), company.getName());
@@ -825,7 +732,6 @@ public class CDataInitializer {
 					CUserInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CCompanyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CDecisionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CCommentInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMeetingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -865,7 +771,6 @@ public class CDataInitializer {
 					CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CActivityPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CCommentPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CCurrencyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CDecisionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMeetingTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -889,6 +794,7 @@ public class CDataInitializer {
 						CDecisionTypeInitializerService.initializeSample(sampleProject, minimal);
 						COrderTypeInitializerService.initializeSample(sampleProject, minimal);
 						CActivityTypeInitializerService.initializeSample(sampleProject, minimal);
+						tech.derbent.app.issues.issuetype.service.CIssueTypeInitializerService.initializeSample(sampleProject, minimal);
 						CRiskTypeInitializerService.initializeSample(sampleProject, minimal);
 						CAssetTypeInitializerService.initializeSample(sampleProject, minimal);
 						CBudgetTypeInitializerService.initializeSample(sampleProject, minimal);
@@ -903,7 +809,6 @@ public class CDataInitializer {
 						CProjectExpenseTypeInitializerService.initializeSample(sampleProject, minimal);
 						CProjectIncomeTypeInitializerService.initializeSample(sampleProject, minimal);
 						CActivityPriorityInitializerService.initializeSample(sampleProject, minimal);
-						CCommentPriorityInitializerService.initializeSample(sampleProject, minimal);
 						CSprintTypeInitializerService.initializeSample(sampleProject, minimal);
 					}
 					CGanntViewEntityInitializerService.initializeSample(project, minimal);
@@ -926,6 +831,7 @@ public class CDataInitializer {
 					COrderApprovalInitializerService.initializeSample(project, minimal);
 					initializeSampleTeams(project, minimal);
 					CRiskInitializerService.initializeSample(project, minimal);
+					tech.derbent.app.issues.issue.service.CIssueInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {

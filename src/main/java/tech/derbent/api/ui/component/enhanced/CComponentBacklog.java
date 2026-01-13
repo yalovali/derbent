@@ -24,6 +24,8 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.issues.issue.domain.CIssue;
+import tech.derbent.app.issues.issue.service.CIssueService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.api.projects.domain.CProject;
@@ -38,15 +40,17 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * Uses {@link EntityTypeConfig#createWithRegistryName} to automatically get human-friendly names from entity registry (e.g., "Activity" instead of
 	 * "CActivity").
 	 * </p>
-	 * @return list of entity type configs (Activity, Meeting) */
+	 * @return list of entity type configs (Activity, Meeting, Issue) */
 	private static List<EntityTypeConfig<?>> createEntityTypes() {
 		final List<EntityTypeConfig<?>> entityTypes = new ArrayList<>();
 		// Get services from Spring context
 		final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 		final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
+		final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
 		// Use factory method to get human-friendly names from entity registry
 		entityTypes.add(EntityTypeConfig.createWithRegistryName(CActivity.class, activityService));
 		entityTypes.add(EntityTypeConfig.createWithRegistryName(CMeeting.class, meetingService));
+		entityTypes.add(EntityTypeConfig.createWithRegistryName(CIssue.class, issueService));
 		return entityTypes;
 	}
 
@@ -64,11 +68,14 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				// Get services from Spring context
 				final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 				final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
+				final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
 				// Load items ordered by sprintOrder for proper backlog display
 				if (config.getEntityClass() == CActivity.class) {
 					return (List<CProjectItem<?>>) (List<?>) activityService.listForProjectBacklog(project);
 				} else if (config.getEntityClass() == CMeeting.class) {
 					return (List<CProjectItem<?>>) (List<?>) meetingService.listForProjectBacklog(project);
+				} else if (config.getEntityClass() == CIssue.class) {
+					return (List<CProjectItem<?>>) (List<?>) issueService.listForProjectBacklog(project);
 				}
 				return new ArrayList<>();
 			} catch (final Exception e) {
@@ -108,6 +115,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		this.compactMode = compactMode;
 		CSpringContext.getBean(CActivityService.class);
 		CSpringContext.getBean(CMeetingService.class);
+		CSpringContext.getBean(CIssueService.class);
 		setupComponent();
 		setDynamicHeight("600px");
 		// CRITICAL: Select first entity type BEFORE enabling persistence

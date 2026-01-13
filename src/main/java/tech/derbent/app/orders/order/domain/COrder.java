@@ -27,6 +27,8 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.type.domain.COrderType;
@@ -35,7 +37,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "corder")
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
-public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder>, IHasAttachments {
+public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#D2B48C"; // X11 Tan - purchase orders
 	public static final String DEFAULT_ICON = "vaadin:invoice";
@@ -62,6 +64,12 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "order_id")
+	@AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this order", hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent")
+	private Set<CComment> comments = new HashSet<>();
 	// Financial Information
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "currency_id", nullable = false)
@@ -180,6 +188,15 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		return attachments;
 	}
 
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
 	public CCurrency getCurrency() { return currency; }
 
 	public String getDeliveryAddress() { return deliveryAddress; }
@@ -248,6 +265,11 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
+	}
 
 	public void setCurrency(final CCurrency currency) {
 		this.currency = currency;
