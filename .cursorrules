@@ -178,6 +178,41 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 ./run-playwright-tests.sh comprehensive # Full test suite
 ```
 
+## Grid Column Standards (MANDATORY)
+
+### Always Use Entity-Enabled Column Methods
+
+When adding grid columns for entity references (status, assigned user, approved by, etc.), ALWAYS use CGrid's entity column helper methods instead of manual rendering:
+
+```java
+// ✅ CORRECT - Use entity column helper methods
+grid.addColumnEntityNamed(CActivity::getStatus, "Status");
+grid.addColumnEntityNamed(CActivity::getAssignedTo, "Assigned To");
+grid.addColumnEntityNamed(CActivity::getApprovedBy, "Approved By");
+grid.addColumnEntityCollection(CActivity::getParticipants, "Participants");
+
+// ❌ WRONG - Manual rendering
+grid.addColumn(a -> a.getStatus() != null ? a.getStatus().getName() : "")
+    .setHeader("Status");  // Don't do this!
+```
+
+**Available CGrid Entity Column Methods:**
+| Method | Use For | Example |
+|--------|---------|---------|
+| `addColumnEntityNamed()` | Single entity reference (status, user, etc.) | `grid.addColumnEntityNamed(Activity::getStatus, "Status")` |
+| `addColumnEntityCollection()` | Collection of entities | `grid.addColumnEntityCollection(Activity::getParticipants, "Participants")` |
+| `addEntityColumn()` | Entity with custom rendering (uses CLabelEntity) | `grid.addEntityColumn(Activity::getStatus, "Status", "status", CStatus.class)` |
+
+**Benefits:**
+- ✅ Consistent rendering across all grids
+- ✅ Automatic null handling
+- ✅ Proper lazy loading handling
+- ✅ Name extraction from CEntityNamed
+- ✅ Collection formatting (comma-separated)
+- ✅ Error handling built-in
+
+**Rule**: If a field returns `CEntityDB<?>` or `Collection<? extends CEntityDB<?>>`, use entity column methods.
+
 ## Validation Checklist
 
 Before completing any task:
@@ -189,8 +224,9 @@ Before completing any task:
 6. ✅ Uses C-prefixed components (not raw Vaadin)
 7. ✅ No raw types - generics used everywhere
 8. ✅ CNotificationService used (not Notification.show)
-9. ✅ Code formatted with `mvn spotless:apply`
-10. ✅ Project compiles: `mvn clean compile`
+9. ✅ **Entity columns use helper methods** (addColumnEntityNamed, etc.)
+10. ✅ Code formatted with `mvn spotless:apply`
+11. ✅ Project compiles: `mvn clean compile`
 
 ## Common Mistakes to Avoid
 ❌ Wrong field names (addBtn instead of buttonAdd)

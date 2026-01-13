@@ -13,15 +13,16 @@ import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.CWebSessionService;
 
 /** CNavigableComboBox - A combobox component that includes a navigation button to navigate to the entity's page. Extends CustomField to provide a
  * composite component with combobox and navigation button. */
 public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CNavigableComboBox.class);
 	private static final long serialVersionUID = 1L;
 	private final CColorAwareComboBox<T> comboBox;
@@ -34,12 +35,12 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	public CNavigableComboBox(final EntityFieldInfo fieldInfo) {
 		super();
 		this.fieldInfo = fieldInfo;
-		this.layout = new HorizontalLayout();
+		layout = new HorizontalLayout();
 		layout.setSpacing(false);
 		layout.setPadding(false);
 		layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
 		// Create the combobox
-		this.comboBox = new CColorAwareComboBox<>(fieldInfo);
+		comboBox = new CColorAwareComboBox<>(fieldInfo);
 		comboBox.setWidthFull();
 		// Add value change listener to update navigation button visibility
 		comboBox.addValueChangeListener(event -> updateNavigationButton());
@@ -56,16 +57,16 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	public CNavigableComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CDataProviderResolver dataProviderResolver)
 			throws Exception {
 		super();
-		Check.notNull(contentOwner, "Content owner cannot be null");
+		// Check.notNull(contentOwner, "Content owner cannot be null");
 		Check.notNull(fieldInfo, "Field info cannot be null");
 		Check.notNull(dataProviderResolver, "Data provider resolver cannot be null");
 		this.fieldInfo = fieldInfo;
-		this.layout = new HorizontalLayout();
+		layout = new HorizontalLayout();
 		layout.setSpacing(false);
 		layout.setPadding(false);
 		layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
 		// Create the combobox with data provider - don't bind it, CustomField handles binding
-		this.comboBox = new CColorAwareComboBox<>(contentOwner, fieldInfo, null, dataProviderResolver);
+		comboBox = new CColorAwareComboBox<>(contentOwner, fieldInfo, null, dataProviderResolver);
 		comboBox.setWidthFull();
 		// Add value change listener to update navigation button visibility and propagate changes
 		comboBox.addValueChangeListener(event -> {
@@ -117,6 +118,27 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		}
 	}
 
+	/** Disables automatic persistence for the internal ComboBox.
+	 * <p>
+	 * This is a convenience method that delegates to the internal CColorAwareComboBox's disablePersistence method.
+	 * </p>
+	 * @see CColorAwareComboBox#disablePersistence() */
+	public void disablePersistence() {
+		comboBox.disablePersistence();
+	}
+
+	/** Enables automatic persistence for the internal ComboBox.
+	 * <p>
+	 * This is a convenience method that delegates to the internal CColorAwareComboBox's enablePersistence method.
+	 * </p>
+	 * @param storageKey The unique key to use for storing the value in session storage
+	 * @param converter  Function to convert stored ID back to entity (return null if not found)
+	 * @throws IllegalArgumentException if storageKey is null/blank or converter is null
+	 * @see CColorAwareComboBox#enablePersistence(String, Function) */
+	public void enablePersistence(final String storageKey, final Function<String, T> converter) {
+		comboBox.enablePersistence(storageKey, converter);
+	}
+
 	@Override
 	protected T generateModelValue() {
 		return comboBox.getValue();
@@ -125,6 +147,11 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	/** Gets the internal combobox component.
 	 * @return the combobox */
 	public CColorAwareComboBox<T> getComboBox() { return comboBox; }
+
+	/** Checks if persistence is enabled for the internal ComboBox.
+	 * @return true if persistence is enabled, false otherwise
+	 * @see CColorAwareComboBox#isPersistenceEnabled() */
+	public boolean isPersistenceEnabled() { return comboBox.isPersistenceEnabled(); }
 
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
@@ -152,39 +179,11 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		}
 		// Create new navigation button if value is present
 		final T value = comboBox.getValue();
-		if ((value != null) && (value.getId() != null)) {
+		if (value != null && value.getId() != null) {
 			navigateButton = createNavigationButton();
 			if (navigateButton != null) {
 				layout.add(navigateButton);
 			}
 		}
-	}
-
-	/** Enables automatic persistence for the internal ComboBox.
-	 * <p>
-	 * This is a convenience method that delegates to the internal CColorAwareComboBox's enablePersistence method.
-	 * </p>
-	 * @param storageKey The unique key to use for storing the value in session storage
-	 * @param converter  Function to convert stored ID back to entity (return null if not found)
-	 * @throws IllegalArgumentException if storageKey is null/blank or converter is null
-	 * @see CColorAwareComboBox#enablePersistence(String, Function) */
-	public void enablePersistence(final String storageKey, final Function<String, T> converter) {
-		comboBox.enablePersistence(storageKey, converter);
-	}
-
-	/** Disables automatic persistence for the internal ComboBox.
-	 * <p>
-	 * This is a convenience method that delegates to the internal CColorAwareComboBox's disablePersistence method.
-	 * </p>
-	 * @see CColorAwareComboBox#disablePersistence() */
-	public void disablePersistence() {
-		comboBox.disablePersistence();
-	}
-
-	/** Checks if persistence is enabled for the internal ComboBox.
-	 * @return true if persistence is enabled, false otherwise
-	 * @see CColorAwareComboBox#isPersistenceEnabled() */
-	public boolean isPersistenceEnabled() {
-		return comboBox.isPersistenceEnabled();
 	}
 }

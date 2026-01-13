@@ -30,6 +30,7 @@ import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.attachments.service.CAttachmentService;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
 
 /** CComponentListAttachments - Component for managing attachments on entities. Displays a list of attachments with version number, filename, size,
  * type, upload date and uploaded by user. Supports upload, download, delete and version history operations. This component uses the IHasAttachments
@@ -93,42 +94,45 @@ public class CComponentListAttachments extends CVerticalLayout
 	/** Configure grid columns. */
 	@Override
 	public void configureGrid(final CGrid<CAttachment> grid1) {
-		Check.notNull(grid1, "Grid cannot be null");
-		// Version number column (important - shows prominently)
-		grid1.addCustomColumn(CAttachment::getVersionNumber, "Ver.", "100px", "version", 0)
-				.setTooltipGenerator(item -> "Version " + item.getVersionNumber());
-		// File name column (expanding to fill space)
-		grid1.addExpandingShortTextColumn(CAttachment::getFileName, "File Name", "fileName");
-		// Formatted file size
-		grid1.addCustomColumn(CAttachment::getFormattedFileSize, "Size", "100px", "fileSize", 0);
-		// File type/extension
-		grid1.addCustomColumn(attachment -> {
-			final String fileName = attachment.getFileName();
-			if (fileName != null && fileName.contains(".")) {
-				return fileName.substring(fileName.lastIndexOf(".") + 1).toUpperCase();
-			}
-			return "N/A";
-		}, "Type", "80px", "fileType", 0);
-		// Document type category
 		try {
+			Check.notNull(grid1, "Grid cannot be null");
+			// Version number column (important - shows prominently)
+			grid1.addCustomColumn(CAttachment::getVersionNumber, "Ver.", "100px", "version", 0)
+					.setTooltipGenerator(item -> "Version " + item.getVersionNumber());
+			// File name column (expanding to fill space)
+			grid1.addExpandingShortTextColumn(CAttachment::getFileName, "File Name", "fileName");
+			grid1.addLongTextColumn(CAttachment::getDescription, "Description", "description");
+			// Formatted file size
+			grid1.addCustomColumn(CAttachment::getFormattedFileSize, "Size", "100px", "fileSize", 0);
+			// File type/extension
+			grid1.addCustomColumn(attachment -> {
+				final String fileName = attachment.getFileName();
+				if (fileName != null && fileName.contains(".")) {
+					return fileName.substring(fileName.lastIndexOf(".") + 1).toUpperCase();
+				}
+				return "N/A";
+			}, "Type", "80px", "fileType", 0);
+			// Document type category
 			grid1.addEntityColumn(CAttachment::getDocumentType, "Category", "documentType", CAttachment.class);
+			// Upload date
+			grid1.addCustomColumn(attachment -> {
+				if (attachment.getUploadDate() != null) {
+					return attachment.getUploadDate().format(DATE_TIME_FORMATTER);
+				}
+				return "";
+			}, "Uploaded", "150px", "uploadDate", 0);
+			// Uploaded by user
+			grid1.addEntityColumn(CAttachment::getUploadedBy, "Uploaded By", "uploadedBy", CUser.class);
+			grid1.addCustomColumn(attachment -> {
+				if (attachment.getUploadedBy() != null) {
+					return attachment.getUploadedBy().getName();
+				}
+				return "";
+			}, "By", "120px", "uploadedBy", 0);
 		} catch (final Exception e) {
-			LOGGER.error("Error adding document type column: {}", e.getMessage(), e);
+			LOGGER.error("Error configuring attachments grid", e);
+			CNotificationService.showException("Error configuring attachments grid", e);
 		}
-		// Upload date
-		grid1.addCustomColumn(attachment -> {
-			if (attachment.getUploadDate() != null) {
-				return attachment.getUploadDate().format(DATE_TIME_FORMATTER);
-			}
-			return "";
-		}, "Uploaded", "150px", "uploadDate", 0);
-		// Uploaded by user
-		grid1.addCustomColumn(attachment -> {
-			if (attachment.getUploadedBy() != null) {
-				return attachment.getUploadedBy().getName();
-			}
-			return "";
-		}, "By", "120px", "uploadedBy", 0);
 	}
 
 	@Override
@@ -314,6 +318,26 @@ public class CComponentListAttachments extends CVerticalLayout
 		}
 	}
 
+	protected void on_buttonEdit_clicked() {
+		try {
+			final CAttachment selected = grid.asSingleSelect().getValue();
+			Check.notNull(selected, "No attachment selected");
+			final CDialogAttachment dialog = new CDialogAttachment(selected, attachment -> {
+				try {
+					attachmentService.save(attachment);
+					refreshGrid();
+					notifyRefreshListeners(attachment);
+				} catch (final Exception e) {
+					LOGGER.error("Error saving attachment", e);
+					CNotificationService.showException("Error saving attachment", e);
+				}
+			});
+			dialog.open();
+		} catch (final Exception e) {
+			CNotificationService.showException("Error opening edit dialog", e);
+		}
+	}
+
 	/** Handle upload button click. */
 	protected void on_buttonUpload_clicked() {
 		try {
@@ -327,48 +351,18 @@ public class CComponentListAttachments extends CVerticalLayout
 				LOGGER.error("Master entity does not extend CEntityDB: {}", parentEntity.getClass().getSimpleName());
 				return;
 			}
-			
-			final CDialogAttachment dialog = new CDialogAttachment(
-				attachmentService, 
-				sessionService, 
-				(CEntityDB<?>) parentEntity, 
-				attachment -> {
-					try {
-						linkAttachmentToMaster(attachment);
-						refreshGrid();
-						notifyRefreshListeners(attachment);
-					} catch (final Exception e) {
-						LOGGER.error("Error refreshing grid after upload", e);
-					}
+			final CDialogAttachment dialog = new CDialogAttachment(attachmentService, sessionService, (CEntityDB<?>) parentEntity, attachment -> {
+				try {
+					linkAttachmentToMaster(attachment);
+					refreshGrid();
+					notifyRefreshListeners(attachment);
+				} catch (final Exception e) {
+					LOGGER.error("Error refreshing grid after upload", e);
 				}
-			);
+			});
 			dialog.open();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error opening attachment dialog", e);
-		}
-	}
-
-	protected void on_buttonEdit_clicked() {
-		try {
-			final CAttachment selected = grid.asSingleSelect().getValue();
-			Check.notNull(selected, "No attachment selected");
-			
-			final CDialogAttachment dialog = new CDialogAttachment(
-				selected, 
-				attachment -> {
-					try {
-						attachmentService.save(attachment);
-						refreshGrid();
-						notifyRefreshListeners(attachment);
-					} catch (final Exception e) {
-						LOGGER.error("Error saving attachment", e);
-						CNotificationService.showException("Error saving attachment", e);
-					}
-				}
-			);
-			dialog.open();
-		} catch (final Exception e) {
-			CNotificationService.showException("Error opening edit dialog", e);
 		}
 	}
 

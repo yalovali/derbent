@@ -948,6 +948,176 @@ public void completeActivity(CActivity activity) {
 }
 ```
 
+## Grid Column Standards (MANDATORY)
+
+### Rule: Always Use Entity-Enabled Column Methods
+
+When adding grid columns for entity references (status, assigned user, approved by, participants, etc.), **ALWAYS** use `CGrid`'s entity column helper methods instead of manual rendering.
+
+**❌ INCORRECT - Manual rendering:**
+```java
+// DON'T do this - manual name extraction
+grid.addColumn(activity -> {
+    CStatus status = activity.getStatus();
+    return status != null ? status.getName() : "";
+}).setHeader("Status");
+
+grid.addColumn(activity -> {
+    CUser user = activity.getAssignedTo();
+    return user != null ? user.getFullName() : "";
+}).setHeader("Assigned To");
+
+grid.addColumn(activity -> {
+    List<CUser> participants = activity.getParticipants();
+    if (participants == null || participants.isEmpty()) {
+        return "No participants";
+    }
+    return participants.stream()
+        .map(CUser::getFullName)
+        .collect(Collectors.joining(", "));
+}).setHeader("Participants");
+```
+
+**✅ CORRECT - Use entity column helper methods:**
+```java
+// Single entity reference - use addColumnEntityNamed()
+grid.addColumnEntityNamed(CActivity::getStatus, "Status");
+grid.addColumnEntityNamed(CActivity::getAssignedTo, "Assigned To");
+grid.addColumnEntityNamed(CActivity::getApprovedBy, "Approved By");
+grid.addColumnEntityNamed(CActivity::getCreatedBy, "Created By");
+grid.addColumnEntityNamed(CMeeting::getMeetingType, "Type");
+grid.addColumnEntityNamed(CRisk::getRiskLevel, "Level");
+
+// Collection of entities - use addColumnEntityCollection()
+grid.addColumnEntityCollection(CActivity::getParticipants, "Participants");
+grid.addColumnEntityCollection(CActivity::getTags, "Tags");
+grid.addColumnEntityCollection(CProject::getTeamMembers, "Team");
+
+// Custom rendering with CLabelEntity - use addEntityColumn()
+grid.addEntityColumn(CActivity::getStatus, "Status", "status", CStatus.class);
+```
+
+### Available CGrid Entity Column Methods
+
+| Method | Signature | Use For | Benefits |
+|--------|-----------|---------|----------|
+| `addColumnEntityNamed()` | `addColumnEntityNamed(ValueProvider<T, CEntityDB<?>>, String)` | Single entity reference | Auto name extraction, null handling, lazy loading safe |
+| `addColumnEntityCollection()` | `addColumnEntityCollection(ValueProvider<T, Collection<?>>, String)` | Collection of entities | Comma-separated names, empty collection handling, lazy loading safe |
+| `addEntityColumn()` | `addEntityColumn(ValueProvider<T, ?>, String, String, Class<?>)` | Custom entity rendering | Uses CLabelEntity for rich formatting, color/icon support |
+
+### Benefits of Entity Column Methods
+
+1. **Consistent Rendering**: All entity columns look and behave the same across the application
+2. **Null Safety**: Built-in null checks prevent NullPointerException
+3. **Lazy Loading Handling**: Detects uninitialized collections and displays fallback text
+4. **Name Extraction**: Automatically extracts names from `CEntityNamed` entities
+5. **Collection Formatting**: Comma-separated list with proper empty handling
+6. **Error Resilience**: Gracefully handles errors with fallback display
+7. **Less Code**: One line instead of 5-10 lines of manual rendering
+8. **Maintainability**: Changes to entity rendering update all grids automatically
+
+### When to Use Each Method
+
+**Use `addColumnEntityNamed()` when:**
+- Field type is `CEntityDB<?>` or extends it
+- You need simple name display
+- Entity implements `CEntityNamed` or has a name property
+- Examples: status, assignedTo, approvedBy, createdBy, project, type, category
+
+**Use `addColumnEntityCollection()` when:**
+- Field type is `Collection<? extends CEntityDB<?>>`
+- You want comma-separated names
+- Examples: participants, tags, teamMembers, approvers, watchers
+
+**Use `addEntityColumn()` when:**
+- You need custom rendering with colors/icons
+- Entity has visual attributes (color, icon)
+- You want rich formatted display using `CLabelEntity`
+- Examples: status with color indicator, priority with icon
+
+### Implementation Details
+
+**`addColumnEntityNamed()` internals:**
+```java
+// Automatically extracts entity name
+final ValueProvider<EntityClass, String> nameProvider = entity -> {
+    final CEntityDB<?> ref = valueProvider.apply(entity);
+    return ref == null ? "" : entityName(ref);  // Uses CGrid.entityName()
+};
+```
+
+**`addColumnEntityCollection()` internals:**
+```java
+// Handles null, uninitialized, and empty collections
+- Checks Hibernate.isInitialized() to avoid lazy loading exceptions
+- Returns "No {header}" for empty/uninitialized collections
+- Extracts names from CEntityDB items
+- Joins names with comma separator
+- Falls back to toString() for non-entity items
+```
+
+### Validation Checklist
+
+Before committing code with grid columns:
+
+- [ ] ✅ All entity reference columns use `addColumnEntityNamed()`
+- [ ] ✅ All entity collection columns use `addColumnEntityCollection()`
+- [ ] ✅ No manual `addColumn()` calls for entities
+- [ ] ✅ No manual name extraction in lambda expressions
+- [ ] ✅ No manual null checks for entity references
+- [ ] ✅ No manual collection iteration for name lists
+
+### Migration Example
+
+**Before (manual rendering):**
+```java
+@Override
+public void configureGrid(final CGrid<CActivity> grid) {
+    grid.addColumn(a -> a.getName()).setHeader("Name");
+    
+    // Manual entity rendering (WRONG)
+    grid.addColumn(a -> {
+        CStatus status = a.getStatus();
+        return status != null ? status.getName() : "";
+    }).setHeader("Status").setWidth("150px");
+    
+    // Manual collection rendering (WRONG)
+    grid.addColumn(a -> {
+        List<CUser> users = a.getParticipants();
+        if (users == null || users.isEmpty()) return "None";
+        return users.stream().map(CUser::getName).collect(Collectors.joining(", "));
+    }).setHeader("Participants");
+}
+```
+
+**After (entity column methods):**
+```java
+@Override
+public void configureGrid(final CGrid<CActivity> grid) {
+    grid.addShortTextColumn(CActivity::getName, "Name", "name");
+    
+    // Use entity column helper (CORRECT)
+    grid.addColumnEntityNamed(CActivity::getStatus, "Status");
+    
+    // Use collection helper (CORRECT)
+    grid.addColumnEntityCollection(CActivity::getParticipants, "Participants");
+}
+```
+
+**Result:**
+- Lines of code: 15 → 6 (60% reduction)
+- Null safety: Manual → Automatic
+- Lazy loading: Manual → Automatic
+- Error handling: None → Built-in
+
+### Related Documentation
+
+- [CGrid Configuration Patterns](cgrid-configuration-patterns.md) - Complete grid configuration guide
+- [View Layer Patterns](view-layer-patterns.md#grid-configuration-patterns) - Grid patterns in views
+- [Component and Utility Reference](component-utility-reference.md) - All available CGrid methods
+
+---
+
 ## Code Formatting
 
 ### Import Organization (Mandatory)

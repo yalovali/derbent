@@ -1,0 +1,30 @@
+project_issue_id,project_parent_issue_id,StoryPoint,account_type,account_name,repo_name,project_id,project_number,status,labels,title,body
+gizmo,,0,user,yalovali,derbent,derbent project,2,In Progress,"foo,bar",Create gizmo application,"The goal of this main issue is to create a new gizmo app.
+There are multiple items we need to  complete for that:"
+gizmo-a,gizmo,2,user,yalovali,derbent,derbent project,2,In Progress,"foo,bar",Design Gizmo data model,"A gizmo has two fields as follow:
+- [ ] foo
+- [ ] bar
+"
+gizmo-b,gizmo,3,user,yalovali,derbent,derbent project,2,,"foo,bar",Create Gizmo back-end,We need to create a backend with a rest API
+gizmo-c,gizmo,4,user,yalovali,derbent,derbent project,2,,"foo,bar",Create Gizmo front-end UI,We need to create a frontend with a web UI
+bidule,,0,user,yalovali,derbent,derbent project,2,Todo," foo, baz ",Create bidule application,"The goal of this main issue is to create a new bidule app.
+There are multiple items we need to  complete for that:"
+bidule-d,bidule,5,user,yalovali,derbent,derbent project,2,,,Design bidule data model,"A bidule has two fields as follow:
+- [ ] foo
+- [ ] bar
+"
+bidule-e,bidule,6,user,yalovali,derbent,derbent project,2,,,Create bidule back-end,We need to create a backend with a rest API
+bidule-f,bidule,7,user,yalovali,derbent,derbent project,2,,,Create bidule front-end UI,We need to create a frontend with a web UI
+,,,user,yalovali,derbent,derbent project,2,,,"Plain issue, no project",Plain
+,,9,user,yalovali,derbent,derbent project,2,,biz,"Plain issue, in project 2",Plain 2
+meta,,10,user,yalovali,derbent,derbent project,2,,boz ,"Meta issue, in project 2, no sub",Plain 3
+metasub,meta,,user,yalovali,derbent,derbent project,2,,,"Meta issue, NO project with sub",Meta plain
+metasub-subissue,metasub,,user,yalovali,derbent,derbent project,2,,    ,"Sub issue, NO project with sub",Sub plain
+truc,,,user,yalovali,derbent,derbent project,2,,,Create truc application NO project ,"The goal of this main issue is to create a new truc app.
+There are multiple items we need to  complete for that:"
+truc-d,truc,,user,yalovali,derbent,derbent project,2,,bur,Design truc data model NO project ,"A truc has two fields as follow:
+- [ ] foo
+- [ ] bar
+"
+truc-e,truc,,user,yalovali,derbent,derbent project,2,,,Create truc back-end NO project ,We need to create a backend with a rest API
+truc-f,truc,,user,yalovali,derbent,derbent project,2,,,Create truc front-end UI NO project ,We need to create a frontend with a web UI
