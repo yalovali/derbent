@@ -165,6 +165,15 @@ public class CIssue extends CProjectItem<CIssue>
 		return actualResult;
 	}
 
+	@Override
+	public String getColor() {
+		// Return color from entity type if available, else default
+		if (entityType != null) {
+			return entityType.getColor();
+		}
+		return DEFAULT_COLOR;
+	}
+
 	public LocalDate getDueDate() {
 		return dueDate;
 	}
@@ -227,28 +236,6 @@ public class CIssue extends CProjectItem<CIssue>
 		return storyPoint != null ? storyPoint : 0L;
 	}
 
-	@Override
-	public void moveSprintItemToBacklog() {
-		if (sprintItem != null && sprintItem.getSprint() != null) {
-			final CSprintItemService sprintItemService = tech.derbent.api.config.CSpringContext.getBean(CSprintItemService.class);
-			sprintItemService.moveToBacklog(sprintItem);
-			LOGGER.debug("Moved issue {} to backlog", getId());
-		}
-	}
-
-	@Override
-	public void moveSprintItemToSprint(final tech.derbent.app.sprints.domain.CSprint targetSprint) {
-		if (sprintItem == null) {
-			// Create new sprint item if it doesn't exist
-			sprintItem = new CSprintItem();
-			sprintItem.setIssue(this);
-			sprintItem.setStoryPoint(storyPoint != null ? storyPoint : 0L);
-		}
-		final CSprintItemService sprintItemService = tech.derbent.api.config.CSpringContext.getBean(CSprintItemService.class);
-		sprintItemService.moveToSprint(sprintItem, targetSprint);
-		LOGGER.debug("Moved issue {} to sprint {}", getId(), targetSprint.getName());
-	}
-
 	public EIssuePriority getIssuePriority() {
 		return issuePriority;
 	}
@@ -301,6 +288,12 @@ public class CIssue extends CProjectItem<CIssue>
 		this.comments = comments;
 	}
 
+	@Override
+	public void setColor(final String color) {
+		// Color is managed by entity type
+		// This method exists for IHasColor interface compatibility
+	}
+
 	public void setDueDate(final LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
@@ -342,6 +335,22 @@ public class CIssue extends CProjectItem<CIssue>
 
 	public void setSprintItem(final CSprintItem sprintItem) {
 		this.sprintItem = sprintItem;
+	}
+
+	@Override
+	public void setSprintOrder(final Integer sprintOrder) {
+		// Sprint order is managed by sprint item
+		// This method exists for ISprintableItem interface compatibility
+		// Order is actually stored in sprint item, not on entity
+		LOGGER.debug("setSprintOrder called on issue {} with value {}", getId(), sprintOrder);
+	}
+
+	@Override
+	public Integer getSprintOrder() {
+		if (sprintItem != null) {
+			return sprintItem.getItemOrder();
+		}
+		return null;
 	}
 
 	@Override

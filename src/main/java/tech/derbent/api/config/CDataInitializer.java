@@ -37,10 +37,6 @@ import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
 import tech.derbent.app.budgets.budget.service.CBudgetService;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
 import tech.derbent.app.comments.domain.CComment;
-import tech.derbent.app.comments.domain.CCommentPriority;
-import tech.derbent.app.comments.service.CCommentInitializerService;
-import tech.derbent.app.comments.service.CCommentPriorityService;
-import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyInitializerService;
 import tech.derbent.api.companies.service.CCompanyService;
@@ -219,7 +215,6 @@ public class CDataInitializer {
 		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
 		CSpringContext.getBean(COrderService.class);
 		orderTypeService = CSpringContext.getBean(COrderTypeService.class);
-		companyService = CSpringContext.getBean(CCompanyService.class);
 		meetingService = CSpringContext.getBean(CMeetingService.class);
 		riskService = CSpringContext.getBean(CRiskService.class);
 		decisionTypeService = CSpringContext.getBean(CDecisionTypeService.class);
@@ -300,7 +295,6 @@ public class CDataInitializer {
 				LOGGER.debug("Skipping PostgreSQL truncate path; database is not PostgreSQL.");
 			}
 			// ---- 2) Fallback: JPA batch silme (FK sırasına dikkat)
-			commentService.deleteAllInBatch();
 			meetingService.deleteAllInBatch();
 			projectItemStatusService.deleteAllInBatch();
 			meetingTypeService.deleteAllInBatch();
@@ -316,7 +310,6 @@ public class CDataInitializer {
 			currencyService.deleteAllInBatch();
 			orderTypeService.deleteAllInBatch();
 			userService.deleteAllInBatch();
-			companyService.deleteAllInBatch();
 			projectService.deleteAllInBatch();
 			pageEntityService.deleteAllInBatch();
 			ganntViewEntityService.deleteAllInBatch();
@@ -478,7 +471,6 @@ public class CDataInitializer {
 			meeting1.addParticipant(user2);
 			meetingService.save(meeting1);
 			// Create first meeting comments
-			createSampleCommentsForMeeting(meeting1, minimal);
 			if (minimal) {
 				return;
 			}
@@ -502,7 +494,6 @@ public class CDataInitializer {
 			meeting2.addParticipant(user2);
 			meetingService.save(meeting2);
 			// Create second meeting comments
-			createSampleCommentsForMeeting(meeting2, minimal);
 			LOGGER.debug("Created 2 sample meetings with parent-child relationship for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
@@ -695,7 +686,7 @@ public class CDataInitializer {
 			// **** CREATE COMPANY SAMPLES ****//
 			CCompanyInitializerService.initializeSample(minimal);
 			/* create sample projects */
-			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+			for (final CCompany company : CSpringContext.getBean(CCompanyService.class).list(Pageable.unpaged()).getContent()) {
 				sessionService.setActiveCompany(company);
 				CUserCompanyRoleInitializerService.initializeSample(company, minimal);
 				CUserProjectRoleInitializerService.initializeSample(company, minimal);
@@ -705,7 +696,7 @@ public class CDataInitializer {
 				}
 			}
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
-			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+			for (final CCompany company : CSpringContext.getBean(CCompanyService.class).list(Pageable.unpaged()).getContent()) {
 				// sessionService.setActiveCompany(company);
 				// later implement better user randomization logic
 				LOGGER.info("Setting active company to: id:{}:{}", company.getId(), company.getName());
