@@ -34,6 +34,8 @@ import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 
@@ -42,7 +44,7 @@ import tech.derbent.api.roles.domain.CUserCompanyRole;
 		"login", "company_id"
 })) // Using quoted identifier to ensure exact case matching in
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
-public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator, IHasIcon {
+public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator, IHasIcon, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#6CAFB0"; // CDE Light Green - individual people
 	public static final String DEFAULT_ICON = "vaadin:user";
@@ -188,6 +190,15 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			createComponentMethod = "createUserProjectSettingsComponent"
 	)
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
+	
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "user_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "User documents (CV, certifications, etc.)", hidden = false,
+			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+	)
+	private List<CAttachment> attachments = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	public CUser() {
@@ -510,5 +521,19 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			return login;
 		}
 		return "User #" + getId();
+	}
+	
+	// IHasAttachments interface methods
+	@Override
+	public List<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<>();
+		}
+		return attachments;
+	}
+	
+	@Override
+	public void setAttachments(final List<CAttachment> attachments) {
+		this.attachments = attachments;
 	}
 }

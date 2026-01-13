@@ -37,6 +37,10 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			
+			// Attachments section - standard section for ALL entities
+			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));

@@ -43,6 +43,9 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "implementationDate"));
    
+			// Attachments section - standard section for ALL entities
+			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

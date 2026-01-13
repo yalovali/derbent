@@ -25,6 +25,8 @@ import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
 /** CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database functionality. */
@@ -36,7 +38,7 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 })
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 @AssociationOverride (name = "company", joinColumns = @JoinColumn (name = "company_id", nullable = false))
-public class CProject extends CEntityOfCompany<CProject> implements ISearchable, IHasStatusAndWorkflow<CProject> {
+public class CProject extends CEntityOfCompany<CProject> implements ISearchable, IHasStatusAndWorkflow<CProject>, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - organizational entity
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
@@ -75,6 +77,15 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
                         createComponentMethod = "createProjectUserSettingsComponent"
 	)
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
+	
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "project_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Project documentation and files", hidden = false,
+			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+	)
+	private List<CAttachment> attachments = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	public CProject() {
@@ -221,5 +232,19 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
                 }
                 this.entityType = (CProjectType) typeEntity;
                 updateLastModified();
+        }
+        
+        // IHasAttachments interface methods
+        @Override
+        public List<CAttachment> getAttachments() {
+                if (attachments == null) {
+                        attachments = new ArrayList<>();
+                }
+                return attachments;
+        }
+        
+        @Override
+        public void setAttachments(final List<CAttachment> attachments) {
+                this.attachments = attachments;
         }
 }

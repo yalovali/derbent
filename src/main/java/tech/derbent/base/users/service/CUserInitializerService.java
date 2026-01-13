@@ -72,6 +72,10 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeDisplaySectionsAsTabs"));
+			
+			// Attachments section - standard section for ALL entities
+			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

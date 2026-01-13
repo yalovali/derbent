@@ -87,6 +87,10 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			
+			// Attachments section - standard section for ALL entities
+			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
+			
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
