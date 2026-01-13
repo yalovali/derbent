@@ -20,6 +20,7 @@ public interface IRiskRepository extends IEntityOfProjectRepository<CRisk> {
 				LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy
 				LEFT JOIN FETCH r.createdBy
 				LEFT JOIN FETCH r.attachments
+			   LEFT JOIN FETCH r.comments
 				LEFT JOIN FETCH r.status
 				LEFT JOIN FETCH r.entityType et
 				LEFT JOIN FETCH et.workflow WHERE r.id = :id
@@ -32,6 +33,7 @@ public interface IRiskRepository extends IEntityOfProjectRepository<CRisk> {
 			LEFT JOIN FETCH r.assignedTo
 			LEFT JOIN FETCH r.createdBy
 			LEFT JOIN FETCH r.attachments
+			   LEFT JOIN FETCH r.comments
 			LEFT JOIN FETCH r.status
 			LEFT JOIN FETCH r.entityType et
 			LEFT JOIN FETCH et.workflow

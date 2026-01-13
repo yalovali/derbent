@@ -24,6 +24,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.attachments
+			LEFT JOIN FETCH m.comments
 			   LEFT JOIN FETCH m.participants
 			   LEFT JOIN FETCH m.sprintItem si
 			   LEFT JOIN FETCH si.sprint
@@ -41,6 +42,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.assignedTo
 			   LEFT JOIN FETCH m.attachments
+			LEFT JOIN FETCH m.comments
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
@@ -56,6 +58,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.assignedTo
 			   LEFT JOIN FETCH m.attachments
+			LEFT JOIN FETCH m.comments
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
@@ -73,6 +76,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH et.workflow
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.attachments
+			LEFT JOIN FETCH m.comments
 			   LEFT JOIN FETCH m.assignedTo
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
@@ -95,6 +99,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.assignedTo
 			   LEFT JOIN FETCH m.attachments
+			LEFT JOIN FETCH m.comments
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
@@ -114,6 +119,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.assignedTo
 			   LEFT JOIN FETCH m.attachments
+			LEFT JOIN FETCH m.comments
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants

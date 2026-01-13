@@ -32,6 +32,8 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.users.domain.CUser;
@@ -43,7 +45,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
 public class CMeeting extends CProjectItem<CMeeting>
-		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments {
+		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -65,6 +67,13 @@ public class CMeeting extends CProjectItem<CMeeting>
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "meeting_id")
+	@AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this meeting", hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent")
+	private Set<CComment> comments = new HashSet<>();
+
 	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
@@ -228,6 +237,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 		return attachments;
 	}
 
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
 	@Override
@@ -352,6 +369,11 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
+	}
 
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
 
