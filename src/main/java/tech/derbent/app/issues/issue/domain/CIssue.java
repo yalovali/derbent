@@ -15,10 +15,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasIcon;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.activities.domain.CActivity;
@@ -26,12 +29,16 @@ import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.issues.issuetype.domain.CIssueType;
+import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.service.CSprintItemService;
 
 @Entity
 @Table(name = "cissue")
 @AttributeOverride(name = "id", column = @Column(name = "issue_id"))
-public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflow<CIssue>, IHasAttachments, IHasComments {
+public class CIssue extends CProjectItem<CIssue> 
+		implements IHasStatusAndWorkflow<CIssue>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#D32F2F"; // Red for issues/bugs
 	public static final String DEFAULT_ICON = "vaadin:bug";
@@ -104,6 +111,16 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 	@AMetaData(displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this issue", hidden = false, dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent")
 	private Set<CAttachment> attachments = new HashSet<>();
 
+	// Sprint item relationship (bidirectional)
+	@OneToOne(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@AMetaData(displayName = "Sprint Item", required = false, readOnly = true, description = "Sprint item for this issue", hidden = true)
+	private CSprintItem sprintItem;
+
+	// Story points for estimation
+	@Column(nullable = true)
+	@AMetaData(displayName = "Story Points", required = false, readOnly = false, defaultValue = "0", description = "Estimated effort or complexity in story points", hidden = false)
+	private Long storyPoint;
+
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "issue_id")
@@ -119,6 +136,13 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 	public CIssue(final String name, final CProject project) {
 		super(CIssue.class, name, project);
 		initializeDefaults();
+	}
+
+	@jakarta.persistence.PostLoad
+	protected void ensureSprintItemParent() {
+		if (sprintItem != null) {
+			sprintItem.setParentItem(this);
+		}
 	}
 
 	@Override
@@ -145,6 +169,28 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 		return dueDate;
 	}
 
+	// ========================================================================
+	// Gantt Chart Support - IGanntEntityItem implementation
+	// ========================================================================
+
+	@Override
+	public LocalDate getEndDate() {
+		return dueDate;
+	}
+
+	@Override
+	public LocalDate getStartDate() {
+		return getCreatedDate() != null ? getCreatedDate().toLocalDate() : null;
+	}
+
+	@Override
+	public Integer getProgressPercentage() {
+		if (sprintItem != null) {
+			return sprintItem.getProgressPercentage();
+		}
+		return 0;
+	}
+
 	@Override
 	public CIssueType getEntityType() {
 		return entityType;
@@ -155,8 +201,52 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 	}
 
 	@Override
+	public tech.derbent.api.workflow.domain.CWorkflowEntity getWorkflow() {
+		return entityType != null ? entityType.getWorkflow() : null;
+	}
+
+	@Override
 	public String getIconString() {
 		return DEFAULT_ICON;
+	}
+
+	// ========================================================================
+	// Sprint Support - ISprintableItem implementation
+	// ========================================================================
+
+	@Override
+	public CSprintItem getSprintItem() {
+		return sprintItem;
+	}
+
+	@Override
+	public Long getStoryPoint() {
+		if (sprintItem != null) {
+			return sprintItem.getStoryPoint();
+		}
+		return storyPoint != null ? storyPoint : 0L;
+	}
+
+	@Override
+	public void moveSprintItemToBacklog() {
+		if (sprintItem != null && sprintItem.getSprint() != null) {
+			final CSprintItemService sprintItemService = tech.derbent.api.config.CSpringContext.getBean(CSprintItemService.class);
+			sprintItemService.moveToBacklog(sprintItem);
+			LOGGER.debug("Moved issue {} to backlog", getId());
+		}
+	}
+
+	@Override
+	public void moveSprintItemToSprint(final tech.derbent.app.sprints.domain.CSprint targetSprint) {
+		if (sprintItem == null) {
+			// Create new sprint item if it doesn't exist
+			sprintItem = new CSprintItem();
+			sprintItem.setIssue(this);
+			sprintItem.setStoryPoint(storyPoint != null ? storyPoint : 0L);
+		}
+		final CSprintItemService sprintItemService = tech.derbent.api.config.CSpringContext.getBean(CSprintItemService.class);
+		sprintItemService.moveToSprint(sprintItem, targetSprint);
+		LOGGER.debug("Moved issue {} to sprint {}", getId(), targetSprint.getName());
 	}
 
 	public EIssuePriority getIssuePriority() {
@@ -248,6 +338,19 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 
 	public void setResolvedDate(final LocalDate resolvedDate) {
 		this.resolvedDate = resolvedDate;
+	}
+
+	public void setSprintItem(final CSprintItem sprintItem) {
+		this.sprintItem = sprintItem;
+	}
+
+	@Override
+	public void setStoryPoint(final Long storyPoint) {
+		if (sprintItem != null) {
+			sprintItem.setStoryPoint(storyPoint);
+		} else {
+			this.storyPoint = storyPoint;
+		}
 	}
 
 	public void setStepsToReproduce(final String stepsToReproduce) {

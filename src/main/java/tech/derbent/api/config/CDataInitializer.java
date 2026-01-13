@@ -40,7 +40,6 @@ import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.CCommentPriority;
 import tech.derbent.app.comments.service.CCommentInitializerService;
 import tech.derbent.app.comments.service.CCommentPriorityService;
-import tech.derbent.app.comments.service.CCommentService;
 import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyInitializerService;
@@ -173,9 +172,6 @@ public class CDataInitializer {
 	private final CActivityService activityService;
 	private final CProjectItemStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
-	private final CCommentPriorityService commentPriorityService;
-	private final CCommentService commentService;
-	private final CCompanyService companyService;
 	private final CCurrencyService currencyService;
 	private final CDecisionService decisionService;
 	private final CDecisionTypeService decisionTypeService;
@@ -305,7 +301,6 @@ public class CDataInitializer {
 			}
 			// ---- 2) Fallback: JPA batch silme (FK sırasına dikkat)
 			commentService.deleteAllInBatch();
-			commentPriorityService.deleteAllInBatch();
 			meetingService.deleteAllInBatch();
 			projectItemStatusService.deleteAllInBatch();
 			meetingTypeService.deleteAllInBatch();
@@ -431,7 +426,6 @@ public class CDataInitializer {
 			decision1.setReviewDate(java.time.LocalDateTime.now().plusDays(90));
 			decisionService.save(decision1);
 			// Create first decision comments
-			createSampleCommentsForDecision(decision1);
 			if (minimal) {
 				return;
 			}
@@ -449,7 +443,6 @@ public class CDataInitializer {
 			decision2.setReviewDate(java.time.LocalDateTime.now().plusDays(60));
 			decisionService.save(decision2);
 			// Create second decision comments
-			createSampleCommentsForDecision(decision2);
 			LOGGER.debug("Created 2 sample decisions with comments for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
