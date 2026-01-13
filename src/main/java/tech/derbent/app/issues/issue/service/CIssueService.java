@@ -2,6 +2,7 @@ package tech.derbent.app.issues.issue.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,12 +16,14 @@ import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.app.issues.issue.domain.CIssue;
 import tech.derbent.app.issues.issue.domain.EIssuePriority;
 import tech.derbent.app.issues.issue.domain.EIssueResolution;
 import tech.derbent.app.issues.issue.domain.EIssueSeverity;
 import tech.derbent.app.issues.issuetype.service.CIssueTypeService;
+import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -89,5 +92,21 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 			}
 		}
 		return super.save(issue);
+	}
+
+	/** Get all issues in the project backlog (not assigned to any sprint).
+	 * @param project the project
+	 * @return list of backlog issues ordered by sprint order */
+	public List<CIssue> listForProjectBacklog(final CProject project) {
+		Check.notNull(project, "Project cannot be null");
+		return ((IIssueRepository) repository).listForProjectBacklog(project);
+	}
+
+	/** Get all issues assigned to a specific sprint.
+	 * @param sprint the sprint
+	 * @return list of issues in the sprint ordered by sprint item order */
+	public List<CIssue> listForSprint(final CSprint sprint) {
+		Check.notNull(sprint, "Sprint cannot be null");
+		return ((IIssueRepository) repository).listForSprint(sprint);
 	}
 }

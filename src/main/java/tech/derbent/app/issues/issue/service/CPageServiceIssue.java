@@ -4,13 +4,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
+import tech.derbent.api.interfaces.ISprintItemPageService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.issues.issue.domain.CIssue;
+import tech.derbent.app.issues.issue.view.CComponentWidgetIssue;
 
-public class CPageServiceIssue extends CPageServiceDynamicPage<CIssue> implements IPageServiceHasStatusAndWorkflow<CIssue> {
+public class CPageServiceIssue extends CPageServiceDynamicPage<CIssue> 
+		implements IPageServiceHasStatusAndWorkflow<CIssue>, IComponentWidgetEntityProvider<CIssue>, ISprintItemPageService<CIssue> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceIssue.class);
 	Long serialVersionUID = 1L;
@@ -44,5 +49,15 @@ public class CPageServiceIssue extends CPageServiceDynamicPage<CIssue> implement
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() {
 		return projectItemStatusService;
+	}
+
+	@Override
+	public CComponentWidgetEntity<CIssue> getComponentWidget(CIssue entity) {
+		return new CComponentWidgetIssue(entity);
+	}
+
+	@Override
+	public CComponentWidgetEntity<CIssue> getSprintItemWidget(CIssue entity) {
+		return getComponentWidget(entity);
 	}
 }
