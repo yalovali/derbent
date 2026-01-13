@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyInitializerService;
 import tech.derbent.api.page.service.CPageEntityInitializerService;
@@ -28,6 +27,7 @@ import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.service.CUserInitializerService;
@@ -36,6 +36,12 @@ import tech.derbent.base.users.service.CUserInitializerService;
 @Profile ("bab")
 public class CBabDataInitializer {
 
+	@FunctionalInterface
+	private interface IBabUiInitializer {
+
+		void initialize(CProject project) throws Exception;
+	}
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDataInitializer.class);
 	private final CPageEntityService pageEntityService;
 	private final JdbcTemplate jdbcTemplate;
@@ -43,14 +49,11 @@ public class CBabDataInitializer {
 	private final CGridEntityService gridEntityService;
 	@PersistenceContext
 	private EntityManager entityManager;
+	private final tech.derbent.bab.device.service.CBabDeviceService babDeviceService;
+	private final tech.derbent.bab.node.service.CBabNodeService babNodeService;
 
-	@FunctionalInterface
-	private interface IBabUiInitializer {
-		void initialize(CProject project) throws Exception;
-	}
-
-	public CBabDataInitializer(final JdbcTemplate jdbcTemplate,
-			final CGridEntityService gridEntityService, final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService,
+	public CBabDataInitializer(final JdbcTemplate jdbcTemplate, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService,
 			final tech.derbent.bab.device.service.CBabDeviceService babDeviceService,
 			final tech.derbent.bab.node.service.CBabNodeService babNodeService) {
 		Check.notNull(jdbcTemplate, "JdbcTemplate cannot be null");
@@ -65,17 +68,6 @@ public class CBabDataInitializer {
 		this.pageEntityService = pageEntityService;
 		this.babDeviceService = babDeviceService;
 		this.babNodeService = babNodeService;
-	}
-
-	private final tech.derbent.bab.device.service.CBabDeviceService babDeviceService;
-	private final tech.derbent.bab.node.service.CBabNodeService babNodeService;
-
-	@Transactional
-	public void reloadForced(final boolean minimal) throws Exception {
-		LOGGER.info("BAB data reload (forced) started");
-		clearDatabase();
-		loadMinimalData(minimal);
-		LOGGER.info("BAB data reload (forced) finished");
 	}
 
 	private void clearDatabase() {
@@ -95,6 +87,25 @@ public class CBabDataInitializer {
 		}
 	}
 
+	private void initializeStandardViews(final CProject project) throws Exception {
+		try {
+			final List<IBabUiInitializer> initializers =
+					List.of(p -> CSystemSettingsInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
+							p -> CCompanyInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
+							p -> CUserInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
+							p -> CUserCompanyRoleInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
+							p -> CProjectInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
+							p -> CGridEntityInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
+							p -> CPageEntityInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService));
+			for (final IBabUiInitializer initializer : initializers) {
+				initializer.initialize(project);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing BAB standard views", e);
+			throw e;
+		}
+	}
+
 	private boolean isPostgreSql(final String productName) {
 		return productName != null && productName.toLowerCase().contains("postgresql");
 	}
@@ -110,10 +121,8 @@ public class CBabDataInitializer {
 			final CProject project = CProjectInitializerService.initializeSampleBab(company, minimal);
 			initializeStandardViews(project);
 			CSystemSettingsInitializerService.initializeSampleBab(project, minimal);
-			
 			// Initialize BAB device and nodes
 			tech.derbent.bab.device.service.CBabDeviceInitializerService.initializeSample(project, minimal);
-			
 			if (!minimal) {
 				LOGGER.info("BAB initializer uses minimal defaults for all modes.");
 			}
@@ -124,34 +133,37 @@ public class CBabDataInitializer {
 		}
 	}
 
-	private void initializeStandardViews(final CProject project) throws Exception {
-		try {
-			final List<IBabUiInitializer> initializers = List.of(
-					p -> CSystemSettingsInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
-					p -> CCompanyInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
-					p -> CUserInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
-					p -> CUserCompanyRoleInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
-					p -> CProjectInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
-					p -> CGridEntityInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
-					p -> CPageEntityInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService));
-			for (final IBabUiInitializer initializer : initializers) {
-				initializer.initialize(project);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing BAB standard views", e);
-			throw e;
+	private String normalizeQuote(final String quote) {
+		if (quote == null) {
+			return "";
 		}
+		final String trimmed = quote.trim();
+		return trimmed.isEmpty() ? "" : trimmed;
+	}
+
+	private String normalizeSchema(final String schema) {
+		if (schema == null || schema.isBlank()) {
+			return "PUBLIC";
+		}
+		return schema;
+	}
+
+	@Transactional
+	public void reloadForced(final boolean minimal) throws Exception {
+		LOGGER.info("BAB data reload (forced) started");
+		clearDatabase();
+		loadMinimalData(minimal);
+		LOGGER.info("BAB data reload (forced) finished");
 	}
 
 	private void truncatePostgresTables(final Connection connection) throws Exception {
 		final List<String> tableNames = new ArrayList<>();
-		try (Statement statement = connection.createStatement();
-				ResultSet rs = statement.executeQuery("""
-						SELECT tablename
-						FROM pg_tables
-						WHERE schemaname = 'public'
-						  AND tablename NOT IN ('flyway_schema_history')
-						""")) {
+		try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery("""
+				SELECT tablename
+				FROM pg_tables
+				WHERE schemaname = 'public'
+				  AND tablename NOT IN ('flyway_schema_history')
+				""")) {
 			while (rs.next()) {
 				tableNames.add(rs.getString(1));
 			}
@@ -199,20 +211,5 @@ public class CBabDataInitializer {
 			}
 		}
 		LOGGER.info("All tables truncated (generic).");
-	}
-
-	private String normalizeQuote(final String quote) {
-		if (quote == null) {
-			return "";
-		}
-		final String trimmed = quote.trim();
-		return trimmed.isEmpty() ? "" : trimmed;
-	}
-
-	private String normalizeSchema(final String schema) {
-		if (schema == null || schema.isBlank()) {
-			return "PUBLIC";
-		}
-		return schema;
 	}
 }

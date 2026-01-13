@@ -1,6 +1,8 @@
 package tech.derbent.app.documenttypes.service;
 
 import java.time.Clock;
+import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +31,68 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 
 	public CDocumentTypeService(final IDocumentTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+	
+	public Optional<CDocumentType> detectDocumentType(final String fileName, final String mimeType) {
+		if (fileName == null || fileName.isBlank()) {
+			return Optional.empty();
+		}
+		
+		final String extension = getFileExtension(fileName).toLowerCase();
+		final List<CDocumentType> allTypes = findAll();
+		
+		for (final CDocumentType type : allTypes) {
+			final String typeName = type.getName().toLowerCase();
+			
+			if (typeName.contains("pdf") && extension.equals("pdf")) {
+				return Optional.of(type);
+			}
+			if (typeName.contains("word") || typeName.contains("document")) {
+				if (extension.equals("doc") || extension.equals("docx")) {
+					return Optional.of(type);
+				}
+			}
+			if (typeName.contains("excel") || typeName.contains("spreadsheet")) {
+				if (extension.equals("xls") || extension.equals("xlsx")) {
+					return Optional.of(type);
+				}
+			}
+			if (typeName.contains("powerpoint") || typeName.contains("presentation")) {
+				if (extension.equals("ppt") || extension.equals("pptx")) {
+					return Optional.of(type);
+				}
+			}
+			if (typeName.contains("image") || typeName.contains("picture")) {
+				if (extension.matches("jpg|jpeg|png|gif|bmp|svg")) {
+					return Optional.of(type);
+				}
+			}
+			if (typeName.contains("video")) {
+				if (extension.matches("mp4|avi|mov|mkv|wmv")) {
+					return Optional.of(type);
+				}
+			}
+			if (typeName.contains("code") || typeName.contains("source")) {
+				if (extension.matches("java|py|js|ts|cpp|c|h|cs|go|rb|php")) {
+					return Optional.of(type);
+				}
+			}
+			if (typeName.contains("text")) {
+				if (extension.equals("txt")) {
+					return Optional.of(type);
+				}
+			}
+		}
+		
+		return Optional.empty();
+	}
+	
+	private String getFileExtension(final String fileName) {
+		final int lastDot = fileName.lastIndexOf('.');
+		if (lastDot > 0 && lastDot < fileName.length() - 1) {
+			return fileName.substring(lastDot + 1);
+		}
+		return "";
 	}
 
 	@Override

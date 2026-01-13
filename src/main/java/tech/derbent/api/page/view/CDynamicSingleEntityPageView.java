@@ -1,167 +1,149 @@
 package tech.derbent.api.page.view;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CScroller;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 
-/**
- * Single entity dynamic page view for displaying pageEntity without grid. This
- * page is used for displaying settings, user's single company, etc.
- * where there is only one item per user or per project or per application wide.
- * Only works with pageEntity.getGridEntity().getAttributeNone() ==
- * true
- */
+/** Single entity dynamic page view for displaying pageEntity without grid. This page is used for displaying settings, user's single company, etc.
+ * where there is only one item per user or per project or per application wide. Only works with pageEntity.getGridEntity().getAttributeNone() ==
+ * true */
 @PermitAll
 public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicSingleEntityPageView.class);
-    private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicSingleEntityPageView.class);
+	private static final long serialVersionUID = 1L;
+	private Long targetEntity;
 
-    public CDynamicSingleEntityPageView(final CPageEntity pageEntity, final ISessionService sessionService,
-            final CDetailSectionService detailSectionService) throws Exception {
-        super(pageEntity, sessionService, detailSectionService);
-        try {
-            initializePage();
-        } catch (final Exception e) {
-            CNotificationService.showException(
-                    "Failed to initialize dynamic page view with sections for: " + pageEntity.getPageTitle(), e);
-        }
-    }
+	public CDynamicSingleEntityPageView(final CPageEntity pageEntity, final ISessionService sessionService,
+			final CDetailSectionService detailSectionService, Long targetEntity) throws Exception {
+		super(pageEntity, sessionService, detailSectionService);
+		try {
+			this.targetEntity = targetEntity;
+			initializePage();
+		} catch (final Exception e) {
+			CNotificationService.showException("Failed to initialize dynamic page view with sections for: " + pageEntity.getPageTitle(), e);
+		}
+	}
 
-    @Override
-    protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
-        return null;
-    }
+	@Override
+	protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
+		return null;
+	}
 
-    @Override
-    public CEntityDB<?> createNewEntityInstance() throws Exception {
-        return null;
-    }
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		return null;
+	}
 
-    /** Override to create only details section without grid/master section */
-    private void createSingleEntityLayout() {
-        try {
-            initializeEntityService();
-            final CScroller detailsScroller = new CScroller();
-            detailsScroller.setContent(baseDetailsLayout);
-            // Create toolbar with minimal constructor and configure
-            crudToolbar = new CCrudToolbar();
-            crudToolbar.setPageBase(this);
-            configureCrudToolbar(crudToolbar);
-            add(crudToolbar);
-            add(detailsScroller);
-            loadAndDisplaySingleEntity();
-        } catch (final Exception e) {
-            LOGGER.error("Failed to create single entity layout for page: {}", getPageEntity().getPageTitle(), e);
-            throw e;
-        }
-    }
+	/** Override to create only details section without grid/master section */
+	private void createSingleEntityLayout() {
+		try {
+			initializeEntityService();
+			final CScroller detailsScroller = new CScroller();
+			detailsScroller.setContent(baseDetailsLayout);
+			// Create toolbar with minimal constructor and configure
+			crudToolbar = new CCrudToolbar();
+			crudToolbar.setPageBase(this);
+			configureCrudToolbar(crudToolbar);
+			add(crudToolbar);
+			add(detailsScroller);
+			loadAndDisplaySingleEntity();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create single entity layout for page: {}", getPageEntity().getPageTitle(), e);
+			throw e;
+		}
+	}
 
-    /**
-     * Override the parent's createGridAndDetailSections to create only details
-     * section
-     * 
-     * @throws Exception
-     */
-    @Override
-    protected void initializePage() throws Exception {
-        super.initializePage();
-        if (getPageEntity().getPageTitle() != null && !getPageEntity().getPageTitle().trim().isEmpty()) {
-            getElement().executeJs("document.title = $0", getPageEntity().getPageTitle());
-        }
-        createSingleEntityLayout();
-    }
+	/** Override the parent's createGridAndDetailSections to create only details section
+	 * @throws Exception */
+	@Override
+	protected void initializePage() throws Exception {
+		super.initializePage();
+		if (getPageEntity().getPageTitle() != null && !getPageEntity().getPageTitle().trim().isEmpty()) {
+			getElement().executeJs("document.title = $0", getPageEntity().getPageTitle());
+		}
+		createSingleEntityLayout();
+	}
 
-    /**
-     * Loads the single entity from the data source and displays it. Shows warning
-     * if more than 1 item is returned and displays the first item.
-     */
-    private void loadAndDisplaySingleEntity() {
-        try {
-            final List<? extends CEntityDB<?>> entities = entityService.findAll();
-            Check.notEmpty(entities, "No entities found for single entity page.");
-            final CEntityDB<?> entity = entities.get(0);
-            onEntitySelected(entity);
-        } catch (final Exception e) {
-            LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
-        }
-    }
+	/** Loads the single entity from the data source and displays it. Shows warning if more than 1 item is returned and displays the first item. */
+	private void loadAndDisplaySingleEntity() {
+		try {
+			if (targetEntity == null) {
+				final List<? extends CEntityDB<?>> entities = entityService.findAll();
+				Check.notEmpty(entities, "No entities found for single entity page.");
+				final CEntityDB<?> entity = entities.get(0);
+				onEntitySelected(entity);
+			} else {
+				onEntitySelected(entityService.getById(targetEntity).orElseThrow(() -> new IllegalStateException(
+						"No entity found for ID: " + targetEntity + " on single entity page: " + getPageEntity().getPageTitle())));
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
+		}
+	}
 
-    @Override
-    protected void locateFirstEntity() throws Exception {
-        /** */
-    }
+	@Override
+	protected void locateFirstEntity() throws Exception {
+		/** */
+	}
 
-    @Override
-    protected void locateItemById(Long pageItemId) {
-        try {
-            if (pageItemId == null) {
-                return;
-            }
-            Check.notNull(pageItemId, "Page item ID cannot be null");
-            LOGGER.debug("Locating item by ID: {}", pageItemId);
-            final CEntityDB<?> entity = entityService.getById(pageItemId).orElse(null);
-            Check.notNull(entity, "No entity found for ID: " + pageItemId);
-            onEntitySelected(entity);
-        } catch (final Exception e) {
-            LOGGER.error("Error locating item by ID {}: {}", pageItemId, e.getMessage());
-            throw new IllegalStateException("Error locating item by ID " + pageItemId + ": " + e.getMessage());
-        }
-    }
+	@Override
+	protected void locateItemById(Long pageItemId) {
+		try {
+			if (pageItemId == null) {
+				return;
+			}
+			Check.notNull(pageItemId, "Page item ID cannot be null");
+			LOGGER.debug("Locating item by ID: {}", pageItemId);
+			final CEntityDB<?> entity = entityService.getById(pageItemId).orElse(null);
+			Check.notNull(entity, "No entity found for ID: " + pageItemId);
+			onEntitySelected(entity);
+		} catch (final Exception e) {
+			LOGGER.error("Error locating item by ID {}: {}", pageItemId, e.getMessage());
+			throw new IllegalStateException("Error locating item by ID " + pageItemId + ": " + e.getMessage());
+		}
+	}
 
-    @Override
-    protected void on_after_construct() {
-        // No grid, so no need to subscribe to grid events
-    }
+	/** Notifies the parent content owner (e.g., kanban board) to refresh after entity changes. This method is called after entity save or delete
+	 * operations to ensure parent components are updated to reflect the changes. For example, when an activity's status is changed via the CRUD
+	 * toolbar, the kanban board will automatically refresh to show the item in the correct column.
+	 * @param operation Description of the operation (e.g., "save", "deletion") for logging */
+	private void notifyParentOfEntityChange(final String operation) {
+		if (getContentOwner() != null) {
+			try {
+				getContentOwner().refreshGrid();
+				LOGGER.debug("Notified parent content owner to refresh after entity {}", operation);
+			} catch (final Exception e) {
+				LOGGER.warn("Failed to notify parent content owner after entity {}: {}", operation, e.getMessage());
+			}
+		}
+	}
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void onEntityDeleted(CEntityDB entity) throws Exception {
-        loadAndDisplaySingleEntity();
-        notifyParentOfEntityChange("deletion");
-    }
+	@Override
+	protected void on_after_construct() {
+		// No grid, so no need to subscribe to grid events
+	}
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void onEntitySaved(CEntityDB entity) throws Exception {
-        onEntitySelected(entity);
-        notifyParentOfEntityChange("save");
-    }
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntityDeleted(CEntityDB entity) throws Exception {
+		loadAndDisplaySingleEntity();
+		notifyParentOfEntityChange("deletion");
+	}
 
-    /**
-     * Notifies the parent content owner (e.g., kanban board) to refresh after
-     * entity changes.
-     * 
-     * This method is called after entity save or delete operations to ensure parent
-     * components
-     * are updated to reflect the changes. For example, when an activity's status is
-     * changed
-     * via the CRUD toolbar, the kanban board will automatically refresh to show the
-     * item
-     * in the correct column.
-     * 
-     * @param operation Description of the operation (e.g., "save", "deletion") for
-     *                  logging
-     */
-    private void notifyParentOfEntityChange(final String operation) {
-        if (getContentOwner() != null) {
-            try {
-                getContentOwner().refreshGrid();
-                LOGGER.debug("Notified parent content owner to refresh after entity {}", operation);
-            } catch (final Exception e) {
-                LOGGER.warn("Failed to notify parent content owner after entity {}: {}", operation, e.getMessage());
-            }
-        }
-    }
+	@SuppressWarnings ("rawtypes")
+	@Override
+	public void onEntitySaved(CEntityDB entity) throws Exception {
+		onEntitySelected(entity);
+		notifyParentOfEntityChange("save");
+	}
 }

@@ -55,6 +55,7 @@ public class CComponentListAttachments extends CVerticalLayout
 	private final CAttachmentService attachmentService;
 	private CButton buttonDelete;
 	private CButton buttonDownload;
+	private CButton buttonEdit;
 	private CButton buttonUpload;
 	private CGrid<CAttachment> grid;
 	private CHorizontalLayout layoutToolbar;
@@ -143,6 +144,12 @@ public class CComponentListAttachments extends CVerticalLayout
 		buttonUpload.setTooltipText("Upload attachment");
 		buttonUpload.addClickListener(e -> on_buttonUpload_clicked());
 		layoutToolbar.add(buttonUpload);
+		// Edit button
+		buttonEdit = new CButton(VaadinIcon.EDIT.create());
+		buttonEdit.setTooltipText("Edit attachment metadata");
+		buttonEdit.addClickListener(e -> on_buttonEdit_clicked());
+		buttonEdit.setEnabled(false);
+		layoutToolbar.add(buttonEdit);
 		// Download button
 		buttonDownload = new CButton(VaadinIcon.DOWNLOAD.create());
 		buttonDownload.setTooltipText("Download attachment");
@@ -323,8 +330,6 @@ public class CComponentListAttachments extends CVerticalLayout
 				return;
 			}
 			final CDialogAttachmentUpload dialog = new CDialogAttachmentUpload(attachmentService,
-					(tech.derbent.app.documenttypes.service.CDocumentTypeService) tech.derbent.api.config.CSpringContext
-							.getBean(tech.derbent.app.documenttypes.service.CDocumentTypeService.class),
 					sessionService, (CEntityDB<?>) parentEntity, attachment -> {
 						// Refresh grid after successful upload
 						try {
@@ -341,8 +346,39 @@ public class CComponentListAttachments extends CVerticalLayout
 		}
 	}
 
+	protected void on_buttonEdit_clicked() {
+		try {
+			final CAttachment selected = grid.asSingleSelect().getValue();
+			Check.notNull(selected, "No attachment selected");
+			
+			final tech.derbent.app.documenttypes.service.CDocumentTypeService docTypeService = 
+				(tech.derbent.app.documenttypes.service.CDocumentTypeService) tech.derbent.api.config.CSpringContext
+					.getBean(tech.derbent.app.documenttypes.service.CDocumentTypeService.class);
+			
+			final CDialogAttachmentEdit dialog = new CDialogAttachmentEdit(
+				selected, 
+				docTypeService,
+				attachment -> {
+					try {
+						attachmentService.save(attachment);
+						refreshGrid();
+						notifyRefreshListeners(attachment);
+						CNotificationService.showSaveSuccess();
+					} catch (final Exception e) {
+						LOGGER.error("Error saving attachment", e);
+						CNotificationService.showException("Error saving attachment", e);
+					}
+				}
+			);
+			dialog.open();
+		} catch (final Exception e) {
+			CNotificationService.showException("Error opening edit dialog", e);
+		}
+	}
+
 	/** Handle grid selection changes. */
 	private void on_grid_selectionChanged(final CAttachment selected) {
+		buttonEdit.setEnabled(selected != null);
 		buttonDownload.setEnabled(selected != null);
 		buttonDelete.setEnabled(selected != null);
 	}

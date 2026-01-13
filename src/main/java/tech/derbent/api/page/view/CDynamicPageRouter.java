@@ -16,13 +16,13 @@ import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IPageTitleProvider;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.view.MainLayout;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Router for dynamic pages that handles all database-defined page routes. This acts as a router for dynamic project pages. */
@@ -104,9 +104,10 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 
 	/** Load a specific page by entity ID with optional content owner.
 	 * @param pageEntityId1     Page entity ID
-	 * @param pageItemId1       Page item ID  
+	 * @param pageItemId1       Page item ID
 	 * @param AsDetailComponent Whether to load as detail component
 	 * @param contentOwner      Optional content owner for updates
+	 * @param object
 	 * @throws Exception if page cannot be loaded */
 	public void loadSpecificPage(Long pageEntityId1, Long pageItemId1, boolean AsDetailComponent, IContentOwner contentOwner) throws Exception {
 		if (pageEntityId1 == null) {
@@ -125,7 +126,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			// Check if this page has grid and detail sections configured
 			if (currentPageEntity.getGridEntity().getAttributeNone() == false) {
 				if (AsDetailComponent) {
-					page = new CDynamicSingleEntityPageView(currentPageEntity, sessionService, detailSectionService);
+					page = new CDynamicSingleEntityPageView(currentPageEntity, sessionService, detailSectionService, pageItemId1);
 				} else {
 					page = new CDynamicPageViewWithSections(currentPageEntity, sessionService, detailSectionService, gridEntityService);
 				}

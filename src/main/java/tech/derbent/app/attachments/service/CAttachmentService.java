@@ -37,11 +37,13 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAttachmentService.class);
 	private final IAttachmentRepository attachmentRepository;
 	private final IAttachmentStorage attachmentStorage;
+	private final tech.derbent.app.documenttypes.service.CDocumentTypeService documentTypeService;
 
 	public CAttachmentService(final IAttachmentRepository repository, final Clock clock, final ISessionService sessionService,
-			final IAttachmentStorage attachmentStorage) {
+			final IAttachmentStorage attachmentStorage, final tech.derbent.app.documenttypes.service.CDocumentTypeService documentTypeService) {
 		super(repository, clock, sessionService);
 		this.attachmentStorage = attachmentStorage;
+		this.documentTypeService = documentTypeService;
 		attachmentRepository = repository;
 	}
 
@@ -176,12 +178,11 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 	 * @param inputStream  the file content stream
 	 * @param fileSize     the file size in bytes
 	 * @param fileType     the MIME type (optional)
-	 * @param documentType the document type classification (optional)
 	 * @param description  user-provided description (optional)
 	 * @return the created attachment entity */
 	@Transactional
 	public CAttachment uploadFile(final String fileName, final InputStream inputStream, final long fileSize, final String fileType,
-			final CDocumentType documentType, final String description) throws Exception {
+			final String description) throws Exception {
 		Objects.requireNonNull(fileName, "File name cannot be null");
 		Objects.requireNonNull(inputStream, "Input stream cannot be null");
 		// Upload file to storage
@@ -191,13 +192,15 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 		final CAttachment attachment = new CAttachment(fileName, fileSize, contentPath, currentUser);
 		attachment.setName(fileName);
 		attachment.setFileType(fileType);
-		attachment.setDocumentType(documentType);
+		// Auto-detect document type based on file extension
+		documentTypeService.detectDocumentType(fileName, fileType).ifPresent(attachment::setDocumentType);
 		attachment.setDescription(description);
 		attachment.setUploadDate(LocalDateTime.now());
 		attachment.setVersionNumber(1);
 		// Save to database
 		final CAttachment saved = save(attachment);
-		LOGGER.info("Uploaded file: {} (size: {} bytes, id: {})", fileName, fileSize, saved.getId());
+		LOGGER.info("Uploaded file: {} (size: {} bytes, id: {}, type: {})", fileName, fileSize, saved.getId(), 
+			saved.getDocumentType() != null ? saved.getDocumentType().getName() : "none");
 		return saved;
 	}
 
