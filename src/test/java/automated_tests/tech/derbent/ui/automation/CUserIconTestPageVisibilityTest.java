@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assumptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,12 @@ public class CUserIconTestPageVisibilityTest extends CBaseUITest {
 	@DisplayName ("✅ Verify User Icon Test button appears on Test Support Page and icons display correctly")
 	void testUserIconPageVisibilityAndIconDisplay() {
 		LOGGER.info("🚀 Starting User Icon Test Page visibility verification...");
+		// Check if browser is available
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 			// Step 1: Login to application

@@ -31,6 +31,12 @@ public class CAttachmentPlaywrightTest extends CBaseUITest {
 	@ParameterizedTest (name = "✅ Attachment lifecycle on {0}")
 	@MethodSource ("attachmentEntityTypes")
 	void testAttachmentLifecycleOnEntity(final String entityType) {
+		// Check if browser is available
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 			loginToApplication();
