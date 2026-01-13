@@ -30,10 +30,12 @@ public final class CDataProviderResolver {
 		// paramBeanName is ok now
 		if ("context".equals(beanName)) {
 			// just the content owner
+			Check.notNull(contentOwner, "Content owner cannot be null when resolving 'context' bean");
 			bean = contentOwner;
 		} else if ("session".equals(beanName)) {
 			bean = CSpringContext.getBean(CSessionService.class);
 		} else if ("pageservice".equals(beanName)) {
+			Check.notNull(contentOwner, "Content owner cannot be null when resolving 'pageservice' bean");
 			Check.instanceOf(contentOwner, IPageServiceImplementer.class,
 					"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
 			bean = ((IPageServiceImplementer) contentOwner).getPageService();
