@@ -1,11 +1,10 @@
-package tech.derbent.bab.node.repository;
+package tech.derbent.bab.node.service;
 
 import java.util.List;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.bab.device.domain.CBabDevice;
@@ -13,9 +12,8 @@ import tech.derbent.bab.node.domain.CBabNode;
 
 /**
  * Repository interface for CBabNode entities.
- * Provides data access methods for device communication nodes.
+ * Following Derbent pattern: Repository interfaces in service package.
  */
-@Repository
 @Profile("bab")
 public interface IBabNodeRepository extends IAbstractRepository<CBabNode> {
 

@@ -5,25 +5,33 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.service.IAbstractRepository;
+import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.device.domain.CBabDevice;
-import tech.derbent.bab.device.repository.IBabDeviceRepository;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
 /**
  * Service class for CBabDevice entity.
  * Provides business logic for BAB IoT gateway device management.
+ * Following Derbent pattern: Service with IEntityRegistrable and IEntityWithView.
  */
 @Service
 @Profile("bab")
-public class CBabDeviceService extends CAbstractService<CBabDevice> {
+@PreAuthorize("isAuthenticated()")
+public class CBabDeviceService extends CAbstractService<CBabDevice> 
+		implements IEntityRegistrable, IEntityWithView {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDeviceService.class);
 	private final IBabDeviceRepository repository;
 	private final ISessionService sessionService;
 
@@ -103,5 +111,20 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> {
 	@Override
 	public IAbstractRepository<CBabDevice> getRepository() {
 		return repository;
+	}
+
+	@Override
+	public Class<?> getInitializerServiceClass() {
+		return CBabDeviceInitializerService.class;
+	}
+
+	@Override
+	public Class<?> getPageServiceClass() {
+		return CPageServiceBabDevice.class;
+	}
+
+	@Override
+	public Class<?> getServiceClass() {
+		return this.getClass();
 	}
 }

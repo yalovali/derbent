@@ -112,7 +112,7 @@ public class CBabDataInitializer {
 			CSystemSettingsInitializerService.initializeSampleBab(project, minimal);
 			
 			// Initialize BAB device and nodes
-			tech.derbent.bab.device.initializer.CBabDeviceInitializerService.initializeSample(company, babDeviceService, babNodeService, minimal);
+			tech.derbent.bab.device.service.CBabDeviceInitializerService.initializeSample(company, minimal);
 			
 			if (!minimal) {
 				LOGGER.info("BAB initializer uses minimal defaults for all modes.");

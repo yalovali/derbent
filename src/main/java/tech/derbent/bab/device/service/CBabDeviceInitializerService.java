@@ -1,4 +1,4 @@
-package tech.derbent.bab.device.initializer;
+package tech.derbent.bab.device.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,39 +7,38 @@ import org.springframework.stereotype.Component;
 
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.bab.device.domain.CBabDevice;
-import tech.derbent.bab.device.service.CBabDeviceService;
 import tech.derbent.bab.node.domain.CBabNodeCAN;
 import tech.derbent.bab.node.domain.CBabNodeEthernet;
 import tech.derbent.bab.node.domain.CBabNodeModbus;
 import tech.derbent.bab.node.domain.CBabNodeROS;
 import tech.derbent.bab.node.service.CBabNodeService;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.registry.CEntityRegistry;
 
 /**
  * Initializer service for BAB device sample data.
- * Creates sample device and nodes for testing.
+ * Following Derbent pattern: Initializer service with static initializeSample method.
  */
 @Component
 @Profile("bab")
 public class CBabDeviceInitializerService extends CInitializerServiceBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDeviceInitializerService.class);
+	private static final Class<?> clazz = CBabDevice.class;
 
 	/**
 	 * Initialize sample BAB device with nodes.
 	 * 
 	 * @param company the company to create device for
-	 * @param deviceService the device service
-	 * @param nodeService the node service
 	 * @param minimal if true, create minimal sample data
 	 */
-	public static void initializeSample(
-			final CCompany company,
-			final CBabDeviceService deviceService,
-			final CBabNodeService nodeService,
-			final boolean minimal
-	) throws Exception {
+	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		LOGGER.info("Initializing BAB sample data for company: {}", company.getName());
+
+		final CBabDeviceService deviceService = (CBabDeviceService) CSpringContext.getBean(
+				CEntityRegistry.getServiceClassForEntity(clazz));
+		final CBabNodeService nodeService = (CBabNodeService) CSpringContext.getBean(CBabNodeService.class);
 
 		// Create or get unique device for company
 		CBabDevice device = deviceService.getUniqueDevice().orElse(null);

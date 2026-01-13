@@ -3,6 +3,7 @@ package tech.derbent.bab.node.domain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -12,10 +13,11 @@ import tech.derbent.bab.device.domain.CBabDevice;
 
 /**
  * CBabNodeROS - ROS (Robot Operating System) communication node.
- * Handles ROS topic publishing/subscription and service calls.
+ * Following Derbent pattern: Concrete entity with specific fields.
  */
 @Entity
 @Table(name = "cbab_node_ros")
+@AttributeOverride(name = "id", column = @Column(name = "ros_node_id"))
 public class CBabNodeROS extends CBabNode {
 
 	public static final String DEFAULT_COLOR = "#9C27B0";
@@ -29,26 +31,32 @@ public class CBabNodeROS extends CBabNode {
 	@Column(name = "ros_master_uri", nullable = true, length = 255)
 	@Size(max = 255)
 	@AMetaData(
-		displayName = "ROS Master URI", required = false, readOnly = false, description = "ROS Master URI (e.g., http://localhost:11311)",
-		hidden = false, maxLength = 255
+		displayName = "ROS Master URI", required = false, readOnly = false, 
+		description = "ROS Master URI (e.g., http://localhost:11311)", hidden = false, maxLength = 255
 	)
 	private String rosMasterUri;
 
 	@Column(name = "node_name", nullable = true, length = 100)
 	@Size(max = 100)
-	@AMetaData(displayName = "Node Name", required = false, readOnly = false, description = "ROS node name", hidden = false, maxLength = 100)
+	@AMetaData(
+		displayName = "Node Name", required = false, readOnly = false, 
+		description = "ROS node name", hidden = false, maxLength = 100
+	)
 	private String nodeName;
 
 	@Column(name = "namespace", nullable = true, length = 100)
 	@Size(max = 100)
-	@AMetaData(displayName = "Namespace", required = false, readOnly = false, description = "ROS namespace", hidden = false, maxLength = 100)
+	@AMetaData(
+		displayName = "Namespace", required = false, readOnly = false, 
+		description = "ROS namespace", hidden = false, maxLength = 100
+	)
 	private String namespace;
 
 	@Column(name = "ros_version", nullable = true, length = 20)
 	@Size(max = 20)
 	@AMetaData(
-		displayName = "ROS Version", required = false, readOnly = false, description = "ROS version (ROS1 or ROS2)", hidden = false,
-		maxLength = 20
+		displayName = "ROS Version", required = false, readOnly = false, 
+		description = "ROS version (ROS1 or ROS2)", hidden = false, maxLength = 20
 	)
 	private String rosVersion;
 
@@ -58,42 +66,31 @@ public class CBabNodeROS extends CBabNode {
 	}
 
 	public CBabNodeROS(final String name, final CBabDevice device) {
-		super((Class) CBabNodeROS.class, name, device, "ROS");
+		super(CBabNodeROS.class, name, device, "ROS");
 	}
 
-	public String getRosMasterUri() {
-		return rosMasterUri;
-	}
-
-	public void setRosMasterUri(final String rosMasterUri) {
-		this.rosMasterUri = rosMasterUri;
+	// Getters and Setters
+	public String getRosMasterUri() { return rosMasterUri; }
+	public void setRosMasterUri(final String rosMasterUri) { 
+		this.rosMasterUri = rosMasterUri; 
 		updateLastModified();
 	}
 
-	public String getNodeName() {
-		return nodeName;
-	}
-
-	public void setNodeName(final String nodeName) {
-		this.nodeName = nodeName;
+	public String getNodeName() { return nodeName; }
+	public void setNodeName(final String nodeName) { 
+		this.nodeName = nodeName; 
 		updateLastModified();
 	}
 
-	public String getNamespace() {
-		return namespace;
-	}
-
-	public void setNamespace(final String namespace) {
-		this.namespace = namespace;
+	public String getNamespace() { return namespace; }
+	public void setNamespace(final String namespace) { 
+		this.namespace = namespace; 
 		updateLastModified();
 	}
 
-	public String getRosVersion() {
-		return rosVersion;
-	}
-
-	public void setRosVersion(final String rosVersion) {
-		this.rosVersion = rosVersion;
+	public String getRosVersion() { return rosVersion; }
+	public void setRosVersion(final String rosVersion) { 
+		this.rosVersion = rosVersion; 
 		updateLastModified();
 	}
 

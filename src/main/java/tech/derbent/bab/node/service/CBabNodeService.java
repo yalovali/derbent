@@ -3,21 +3,34 @@ package tech.derbent.bab.node.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.service.IAbstractRepository;
+import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.device.domain.CBabDevice;
 import tech.derbent.bab.node.domain.CBabNode;
-import tech.derbent.bab.node.repository.IBabNodeRepository;
 import tech.derbent.base.session.service.ISessionService;
 
-/** Service class for CBabNode entity. Provides business logic for device communication node management. */
+/**
+ * Service class for CBabNode entity.
+ * Provides business logic for device communication node management.
+ * Following Derbent pattern: Service with IEntityRegistrable and IEntityWithView.
+ */
 @Service
-@Profile ("bab")
-public class CBabNodeService extends CAbstractService<CBabNode> {
+@Profile("bab")
+@PreAuthorize("isAuthenticated()")
+public class CBabNodeService extends CAbstractService<CBabNode> 
+		implements IEntityRegistrable, IEntityWithView {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeService.class);
 	private final IBabNodeRepository repository;
 	private final ISessionService sessionService;
 
@@ -73,6 +86,21 @@ public class CBabNodeService extends CAbstractService<CBabNode> {
 	@Override
 	public IAbstractRepository<CBabNode> getRepository() {
 		return repository;
+	}
+
+	@Override
+	public Class<?> getInitializerServiceClass() {
+		return CBabNodeInitializerService.class;
+	}
+
+	@Override
+	public Class<?> getPageServiceClass() {
+		return CPageServiceBabNode.class;
+	}
+
+	@Override
+	public Class<?> getServiceClass() {
+		return this.getClass();
 	}
 
 	/** Enable or disable a node.
