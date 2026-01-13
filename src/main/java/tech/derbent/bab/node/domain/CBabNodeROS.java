@@ -17,7 +17,6 @@ import tech.derbent.bab.device.domain.CBabDevice;
  */
 @Entity
 @Table(name = "cbab_node_ros")
-@AttributeOverride(name = "id", column = @Column(name = "ros_node_id"))
 public class CBabNodeROS extends CBabNode {
 
 	public static final String DEFAULT_COLOR = "#9C27B0";

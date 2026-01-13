@@ -27,7 +27,6 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table(name = "cbab_node")
 @Inheritance(strategy = InheritanceType.JOINED)
-@AttributeOverride(name = "id", column = @Column(name = "node_id"))
 public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNode.class);

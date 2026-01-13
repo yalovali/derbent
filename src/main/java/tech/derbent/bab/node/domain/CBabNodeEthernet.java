@@ -17,7 +17,6 @@ import tech.derbent.bab.device.domain.CBabDevice;
  */
 @Entity
 @Table(name = "cbab_node_ethernet")
-@AttributeOverride(name = "id", column = @Column(name = "ethernet_node_id"))
 public class CBabNodeEthernet extends CBabNode {
 
 	public static final String DEFAULT_COLOR = "#4CAF50";

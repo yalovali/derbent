@@ -5,6 +5,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -12,18 +14,12 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.node.domain.CBabNode;
 
-/**
- * Initializer service for BAB node.
- * Following Derbent pattern: createBasicView, createGridEntity, initialize, initializeSample.
- */
 public class CBabNodeInitializerService extends CInitializerServiceBase {
 
-private static final Class<?> clazz = CBabNode.class;
+static final Class<?> clazz = CBabNode.class;
 private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeInitializerService.class);
 private static final String menuOrder = Menu_Order_SYSTEM + ".2";
 private static final String menuTitle = MenuTitle_SYSTEM + ".Nodes";
@@ -77,16 +73,7 @@ initBase(clazz, project, gridEntityService, detailSectionService, pageEntityServ
 menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder);
 }
 
-/**
- * Initialize sample BAB nodes.
- * Note: Nodes are created via CBabDeviceInitializerService, not independently.
- * 
- * @param project the project
- * @param minimal if true, create minimal sample data
- */
 public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
 LOGGER.debug("CBabNode sample data created via CBabDeviceInitializerService");
-// Nodes are created as part of device initialization
-// This method is here for consistency with Derbent pattern
 }
 }

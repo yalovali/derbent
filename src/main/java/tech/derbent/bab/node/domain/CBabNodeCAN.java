@@ -17,7 +17,6 @@ import tech.derbent.bab.device.domain.CBabDevice;
  */
 @Entity
 @Table(name = "cbab_node_can")
-@AttributeOverride(name = "id", column = @Column(name = "can_node_id"))
 public class CBabNodeCAN extends CBabNode {
 
 	public static final String DEFAULT_COLOR = "#FF5722";

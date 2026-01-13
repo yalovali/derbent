@@ -17,7 +17,6 @@ import tech.derbent.bab.device.domain.CBabDevice;
  */
 @Entity
 @Table(name = "cbab_node_modbus")
-@AttributeOverride(name = "id", column = @Column(name = "modbus_node_id"))
 public class CBabNodeModbus extends CBabNode {
 
 	public static final String DEFAULT_COLOR = "#2196F3";
