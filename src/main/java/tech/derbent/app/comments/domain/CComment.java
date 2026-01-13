@@ -14,12 +14,13 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEventEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.issues.issue.domain.CIssue;
 import tech.derbent.base.users.domain.CUser;
 
-/** CComment - Domain entity representing user comments on activities. Layer: Domain (MVC) Inherits from CEvent to provide event-based functionality
- * with audit fields. Comments are linked to activities and contain: - Command text (comment content) - Author information (inherited from CEvent) -
- * Date/timestamp (inherited from CEvent) - Priority level - Activity reference - Project context (inherited from CEvent) Comments are displayed in
- * historic order within activity views. */
+/** CComment - Domain entity representing user comments on activities and issues. Layer: Domain (MVC) Inherits from CEvent to provide event-based functionality
+ * with audit fields. Comments are linked to activities or issues and contain: - Command text (comment content) - Author information (inherited from CEvent) -
+ * Date/timestamp (inherited from CEvent) - Priority level - Activity/Issue reference - Project context (inherited from CEvent) Comments are displayed in
+ * historic order within activity and issue views. */
 @Entity
 @Table (name = "ccomment")
 @AttributeOverride (name = "id", column = @Column (name = "comment_id"))
@@ -33,12 +34,20 @@ public class CComment extends CEventEntity<CComment> {
 	public static final String VIEW_NAME = "Comments View";
 	// Activity this comment belongs to
 	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "activity_id", nullable = false)
+	@JoinColumn (name = "activity_id", nullable = true)
 	@AMetaData (
-			displayName = "Activity", required = true, readOnly = false, description = "Activity this comment belongs to", hidden = false,
+			displayName = "Activity", required = false, readOnly = false, description = "Activity this comment belongs to", hidden = false,
 			dataProviderBean = "CActivityService"
 	)
 	private CActivity activity;
+	// Issue this comment belongs to
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "issue_id", nullable = true)
+	@AMetaData (
+			displayName = "Issue", required = false, readOnly = false, description = "Issue this comment belongs to", hidden = false,
+			dataProviderBean = "CIssueService"
+	)
+	private CIssue issue;
 	// Comment text content
 	@Column (name = "comment_text", nullable = false, length = 4000)
 	@Size (max = 4000)
@@ -91,6 +100,17 @@ public class CComment extends CEventEntity<CComment> {
 		this.priority = priority;
 	}
 
+	/** Constructor with comment text, issue, and author.
+	 * @param commentText the comment content text - must not be null or empty
+	 * @param issue       the issue this comment belongs to - must not be null
+	 * @param author      the user who created this comment - must not be null */
+	public CComment(final String commentText, final CIssue issue, final CUser author) {
+		super(CComment.class);
+		setAuthor(author);
+		this.commentText = commentText;
+		this.issue = issue;
+	}
+
 	public CActivity getActivity() { return activity; }
 
 	public String getActivityName() {
@@ -104,6 +124,30 @@ public class CComment extends CEventEntity<CComment> {
 			LOGGER.debug("LazyInitializationException accessing activity name, returning safe value", e);
 			return "Activity#" + (activity.getId() != null ? activity.getId() : "unknown");
 		}
+	}
+
+	public CIssue getIssue() { return issue; }
+
+	public String getIssueName() {
+		if (issue == null) {
+			return "Issue (unset)";
+		}
+		try {
+			// Safe access to avoid LazyInitializationException
+			return issue.getName();
+		} catch (final org.hibernate.LazyInitializationException e) {
+			LOGGER.debug("LazyInitializationException accessing issue name, returning safe value", e);
+			return "Issue#" + (issue.getId() != null ? issue.getId() : "unknown");
+		}
+	}
+
+	public String getParentName() {
+		if (activity != null) {
+			return getActivityName();
+		} else if (issue != null) {
+			return getIssueName();
+		}
+		return "No parent";
 	}
 
 	/** Get a short preview of the comment text (first 100 characters).
@@ -134,8 +178,11 @@ public class CComment extends CEventEntity<CComment> {
 	public Boolean isImportant() { return important; }
 
 	public void setActivity(final CActivity activity) {
-		Check.notNull(activity, "Activity cannot be null");
 		this.activity = activity;
+	}
+
+	public void setIssue(final CIssue issue) {
+		this.issue = issue;
 	}
 
 	public void setCommentText(final String commentText) {
@@ -148,6 +195,6 @@ public class CComment extends CEventEntity<CComment> {
 
 	@Override
 	public String toString() {
-		return String.format("CComment{id=%d, activity=%s, author=%s, preview=%s}", getId(), getActivityName(), getAuthorName(), getCommentPreview());
+		return String.format("CComment{id=%d, parent=%s, author=%s, preview=%s}", getId(), getParentName(), getAuthorName(), getCommentPreview());
 	}
 }
