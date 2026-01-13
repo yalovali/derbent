@@ -63,17 +63,17 @@ public class CActivity extends CProjectItem<CActivity> {
         hidden = false,
         createComponentMethod = "createAttachmentsComponent"
     )
-    private List<CAttachment> attachments = new ArrayList<>();
+    private Set<CAttachment> attachments = new HashSet<>();
     
     // Getter and setter
-    public List<CAttachment> getAttachments() {
+    public Set<CAttachment> getAttachments() {
         if (attachments == null) {
-            attachments = new ArrayList<>();
+            attachments = new HashSet<>();
         }
         return attachments;
     }
     
-    public void setAttachments(final List<CAttachment> attachments) {
+    public void setAttachments(final Set<CAttachment> attachments) {
         this.attachments = attachments;
     }
     
@@ -86,7 +86,7 @@ public class CActivity extends CProjectItem<CActivity> {
             return;
         }
         if (this.attachments == null) {
-            this.attachments = new ArrayList<>();
+            this.attachments = new HashSet<>();
         }
         if (!this.attachments.contains(attachment)) {
             this.attachments.add(attachment);
@@ -116,7 +116,7 @@ public class CActivity extends CProjectItem<CActivity> {
     description = "File attachments for this risk",
     createComponentMethod = "createAttachmentsComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 #### CMeeting
@@ -129,7 +129,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     description = "Meeting documents and files",
     createComponentMethod = "createAttachmentsComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 #### CSprint
@@ -142,7 +142,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     description = "Sprint documentation",
     createComponentMethod = "createAttachmentsComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 #### CProject (non-project item)
@@ -155,7 +155,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     description = "Project documentation and files",
     createComponentMethod = "createAttachmentsComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 #### CUser (non-project item)
@@ -168,7 +168,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     description = "User documents (CV, certifications, etc.)",
     createComponentMethod = "createAttachmentsComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 ## Step 2: Update Repository with EntityGraph

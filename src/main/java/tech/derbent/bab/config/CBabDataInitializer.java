@@ -50,16 +50,25 @@ public class CBabDataInitializer {
 	}
 
 	public CBabDataInitializer(final JdbcTemplate jdbcTemplate,
-			final CGridEntityService gridEntityService, final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) {
+			final CGridEntityService gridEntityService, final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService,
+			final tech.derbent.bab.device.service.CBabDeviceService babDeviceService,
+			final tech.derbent.bab.node.service.CBabNodeService babNodeService) {
 		Check.notNull(jdbcTemplate, "JdbcTemplate cannot be null");
 		Check.notNull(gridEntityService, "GridEntityService cannot be null");
 		Check.notNull(detailSectionService, "DetailSectionService cannot be null");
 		Check.notNull(pageEntityService, "PageEntityService cannot be null");
+		Check.notNull(babDeviceService, "BabDeviceService cannot be null");
+		Check.notNull(babNodeService, "BabNodeService cannot be null");
 		this.jdbcTemplate = jdbcTemplate;
 		this.gridEntityService = gridEntityService;
 		this.detailSectionService = detailSectionService;
 		this.pageEntityService = pageEntityService;
+		this.babDeviceService = babDeviceService;
+		this.babNodeService = babNodeService;
 	}
+
+	private final tech.derbent.bab.device.service.CBabDeviceService babDeviceService;
+	private final tech.derbent.bab.node.service.CBabNodeService babNodeService;
 
 	@Transactional
 	public void reloadForced(final boolean minimal) throws Exception {
@@ -101,6 +110,10 @@ public class CBabDataInitializer {
 			final CProject project = CProjectInitializerService.initializeSampleBab(company, minimal);
 			initializeStandardViews(project);
 			CSystemSettingsInitializerService.initializeSampleBab(project, minimal);
+			
+			// Initialize BAB device and nodes
+			tech.derbent.bab.device.initializer.CBabDeviceInitializerService.initializeSample(company, babDeviceService, babNodeService, minimal);
+			
 			if (!minimal) {
 				LOGGER.info("BAB initializer uses minimal defaults for all modes.");
 			}

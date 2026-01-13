@@ -141,17 +141,17 @@ public class CActivity extends CProjectItem<CActivity> {
         createComponentMethodBean = "CAttachmentComponentFactory",  // ← Factory bean name
         createComponentMethod = "createComponent"                    // ← Factory method name
     )
-    private List<CAttachment> attachments = new ArrayList<>();
+    private Set<CAttachment> attachments = new HashSet<>();
     
     // Standard getters/setters
-    public List<CAttachment> getAttachments() {
+    public Set<CAttachment> getAttachments() {
         if (attachments == null) {
-            attachments = new ArrayList<>();
+            attachments = new HashSet<>();
         }
         return attachments;
     }
     
-    public void setAttachments(final List<CAttachment> attachments) {
+    public void setAttachments(final Set<CAttachment> attachments) {
         this.attachments = attachments;
     }
 }
@@ -191,7 +191,7 @@ public class CPageServiceActivity extends CAbstractPageService<CActivity> {
     createComponentMethodBean = "CAttachmentComponentFactory",
     createComponentMethod = "createComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 **Apply to Risk:**
@@ -201,7 +201,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     createComponentMethodBean = "CAttachmentComponentFactory",
     createComponentMethod = "createComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 **Apply to Meeting:**
@@ -211,7 +211,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     createComponentMethodBean = "CAttachmentComponentFactory",
     createComponentMethod = "createComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 **Apply to Sprint:**
@@ -221,7 +221,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     createComponentMethodBean = "CAttachmentComponentFactory",
     createComponentMethod = "createComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 **Apply to Project:**
@@ -231,7 +231,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     createComponentMethodBean = "CAttachmentComponentFactory",
     createComponentMethod = "createComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 **Apply to User:**
@@ -241,7 +241,7 @@ private List<CAttachment> attachments = new ArrayList<>();
     createComponentMethodBean = "CAttachmentComponentFactory",
     createComponentMethod = "createComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 **Apply to ANY entity:**
@@ -434,7 +434,7 @@ Use exact same annotation for all entities:
     createComponentMethodBean = "CAttachmentComponentFactory",
     createComponentMethod = "createComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 ### 2. Field Name Convention
@@ -451,7 +451,7 @@ Initialize the list in entity constructor:
 ```java
 public CActivity() {
     super();
-    this.attachments = new ArrayList<>();
+    this.attachments = new HashSet<>();
 }
 ```
 
@@ -460,9 +460,9 @@ public CActivity() {
 Ensure getter returns non-null list:
 
 ```java
-public List<CAttachment> getAttachments() {
+public Set<CAttachment> getAttachments() {
     if (attachments == null) {
-        attachments = new ArrayList<>();
+        attachments = new HashSet<>();
     }
     return attachments;
 }

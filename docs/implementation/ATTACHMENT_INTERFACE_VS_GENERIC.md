@@ -157,13 +157,13 @@ public class CActivity extends CProjectItem<CActivity> implements IHasAttachment
         createComponentMethodBean = "CAttachmentComponentFactory",
         createComponentMethod = "createComponent"
     )
-    private List<CAttachment> attachments = new ArrayList<>();
+    private Set<CAttachment> attachments = new HashSet<>();
     
     // Interface implementation - standard getters/setters
     @Override
-    public List<CAttachment> getAttachments() {
+    public Set<CAttachment> getAttachments() {
         if (attachments == null) {
-            attachments = new ArrayList<>();
+            attachments = new HashSet<>();
         }
         return attachments;
     }
@@ -315,10 +315,10 @@ public class CComponentListAttachments extends CVerticalLayout {
 public class CActivity extends CProjectItem<CActivity> implements IHasAttachments {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "activity_id")
-    private List<CAttachment> attachments = new ArrayList<>();
+    private Set<CAttachment> attachments = new HashSet<>();
     
     @Override
-    public List<CAttachment> getAttachments() {
+    public Set<CAttachment> getAttachments() {
         return attachments != null ? attachments : (attachments = new ArrayList<>());
     }
     

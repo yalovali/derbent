@@ -3,10 +3,12 @@ package tech.derbent.app.decisions.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -20,12 +22,12 @@ import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.utils.Check;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 
 /** CDecision - Domain entity representing project decisions with comprehensive management features. Layer: Domain (MVC) Supports: - Decision type
  * categorization - Cost estimation and tracking - Team collaboration and assignments - Multi-stage approval workflow - Accountable personnel
@@ -37,10 +39,18 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 	public static final String ENTITY_TITLE_PLURAL = "Decisions";
 	public static final String ENTITY_TITLE_SINGULAR = "Decision";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 	public static final String VIEW_NAME = "Decisions View";
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "decision_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Decision supporting documents", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -67,15 +77,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 			displayName = "Review Date", required = false, readOnly = false, description = "Date when the decision will be reviewed", hidden = false
 	)
 	private LocalDateTime reviewDate;
-	
-	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "decision_id")
-	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "Decision supporting documents", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
-	)
-	private List<CAttachment> attachments = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	public CDecision() {
@@ -95,6 +96,15 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 			return false;
 		}
 		return super.equals(o);
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
 	}
 
 	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
@@ -133,15 +143,17 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	}
 
 	@Override
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CDecisionType.class, "Type entity must be an instance of CDecisionType");
 		Check.notNull(getProject(), "Project must be set before assigning decision type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning decision type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning decision type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match decision project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match decision project company id " + getProject().getCompany().getId());
 		entityType = (CDecisionType) typeEntity;
 		updateLastModified();
 	}
@@ -167,19 +179,5 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
-	}
-	
-	// IHasAttachments interface methods
-	@Override
-	public List<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new ArrayList<>();
-		}
-		return attachments;
-	}
-	
-	@Override
-	public void setAttachments(final List<CAttachment> attachments) {
-		this.attachments = attachments;
 	}
 }

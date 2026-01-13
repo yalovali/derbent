@@ -5,7 +5,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -24,11 +26,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISearchable;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
@@ -36,8 +40,6 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.roles.domain.CUserCompanyRole;
 
 @Entity
 @Table (name = "cuser", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
@@ -118,6 +120,14 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			hidden = true, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "listByUser"
 	)
 	private List<CActivity> activities;
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "user_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "User documents (CV, certifications, etc.)",
+			hidden = false, dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
 	@Column (name = "attribute_display_sections_as_tabs", nullable = true)
 	@AMetaData (
 			displayName = "Display Sections As Tabs", required = false, readOnly = false, defaultValue = "true",
@@ -190,15 +200,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			createComponentMethod = "createUserProjectSettingsComponent"
 	)
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
-	
-	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "user_id")
-	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "User documents (CV, certifications, etc.)", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
-	)
-	private List<CAttachment> attachments = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	public CUser() {
@@ -224,11 +225,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		if (projectSettings1 == null) {
 			return;
 		}
-		if (this.projectSettings == null) {
-			this.projectSettings = new ArrayList<>();
+		if (projectSettings == null) {
+			projectSettings = new ArrayList<>();
 		}
-		if (!this.projectSettings.contains(projectSettings1)) {
-			this.projectSettings.add(projectSettings1);
+		if (!projectSettings.contains(projectSettings1)) {
+			projectSettings.add(projectSettings1);
 			projectSettings1.setUser(this);
 		}
 	}
@@ -239,6 +240,15 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	public List<CActivity> getActivities() { return activities; }
+
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
 
 	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
 
@@ -445,13 +455,16 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	 * @param projectSettings1 the project settings to remove */
 	public void removeProjectSettings(final CUserProjectSettings projectSettings1) {
 		Check.notNull(projectSettings1, "Project settings cannot be null");
-		Check.notNull(this.projectSettings, "User's project settings collection cannot be null");
-		if (this.projectSettings.remove(projectSettings1)) {
+		Check.notNull(projectSettings, "User's project settings collection cannot be null");
+		if (projectSettings.remove(projectSettings1)) {
 			projectSettings1.setUser(null);
 		}
 	}
 
 	public void setActivities(final List<CActivity> activities) { this.activities = activities; }
+
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	public void setAttributeDisplaySectionsAsTabs(final Boolean attributeDisplaySectionsAsTabs) {
 		this.attributeDisplaySectionsAsTabs = attributeDisplaySectionsAsTabs;
@@ -521,19 +534,5 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			return login;
 		}
 		return "User #" + getId();
-	}
-	
-	// IHasAttachments interface methods
-	@Override
-	public List<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new ArrayList<>();
-		}
-		return attachments;
-	}
-	
-	@Override
-	public void setAttachments(final List<CAttachment> attachments) {
-		this.attachments = attachments;
 	}
 }

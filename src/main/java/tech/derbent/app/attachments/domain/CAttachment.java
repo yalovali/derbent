@@ -30,7 +30,7 @@ import tech.derbent.base.users.domain.CUser;
  * Parent entities (Activity, Risk, Meeting, Sprint, Project, User, etc.) have:
  *   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
  *   @JoinColumn(name = "activity_id")  // or risk_id, user_id, etc.
- *   private List<CAttachment> attachments = new ArrayList<>();
+ *   private Set<CAttachment> attachments = new HashSet<>();
  * 
  * CAttachment has NO back-reference to parents (clean unidirectional pattern).
  * 

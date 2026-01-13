@@ -2,7 +2,9 @@ package tech.derbent.app.attachments.view;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +46,10 @@ public class CComponentListAttachments extends CVerticalLayout
 		implements IContentOwner, IGridComponent<CAttachment>, IGridRefreshListener<CAttachment>, IPageServiceAutoRegistrable {
 
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+	public static final String ID_GRID = "custom-attachments-grid";
 	public static final String ID_HEADER = "custom-attachments-header";
 	public static final String ID_ROOT = "custom-attachments-component";
 	public static final String ID_TOOLBAR = "custom-attachments-toolbar";
-	public static final String ID_GRID = "custom-attachments-grid";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListAttachments.class);
 	private static final long serialVersionUID = 1L;
 	private final CAttachmentService attachmentService;
@@ -69,6 +71,22 @@ public class CComponentListAttachments extends CVerticalLayout
 		this.attachmentService = attachmentService;
 		this.sessionService = sessionService;
 		initializeComponent();
+	}
+
+	@Override
+	public void addRefreshListener(final Consumer<CAttachment> listener) {
+		Check.notNull(listener, "Refresh listener cannot be null");
+		refreshListeners.add(listener);
+	}
+
+	@Override
+	public void clearGrid() {
+		Check.notNull(grid, "Grid cannot be null when clearing attachments");
+		grid.setItems(List.of());
+		grid.asSingleSelect().clear();
+		buttonDownload.setEnabled(false);
+		buttonDelete.setEnabled(false);
+		updateCompactMode(true);
 	}
 
 	/** Configure grid columns. */
@@ -112,6 +130,11 @@ public class CComponentListAttachments extends CVerticalLayout
 		}, "By", "120px", "uploadedBy", 0);
 	}
 
+	@Override
+	public CEntityDB<?> createNewEntityInstance() throws Exception {
+		throw new UnsupportedOperationException("Attachments are managed via upload dialog.");
+	}
+
 	/** Create toolbar buttons. */
 	private void createToolbarButtons() {
 		// Upload button
@@ -137,6 +160,29 @@ public class CComponentListAttachments extends CVerticalLayout
 
 	@Override
 	public String getComponentName() { return "attachments"; }
+
+	@Override
+	public String getCurrentEntityIdString() {
+		if (masterEntity instanceof CEntityDB<?>) {
+			final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
+			return entity.getId() != null ? entity.getId().toString() : null;
+		}
+		return null;
+	}
+
+	@Override
+	public CAbstractService<?> getEntityService() { return attachmentService; }
+
+	@Override
+	public CGrid<CAttachment> getGrid() { return grid; }
+
+	@Override
+	public CEntityDB<?> getValue() {
+		if (masterEntity instanceof CEntityDB<?>) {
+			return (CEntityDB<?>) masterEntity;
+		}
+		return null;
+	}
 
 	/** Initialize the component layout and grid. */
 	private void initializeComponent() {
@@ -164,6 +210,47 @@ public class CComponentListAttachments extends CVerticalLayout
 		add(grid);
 		// Set initial compact mode (will adjust when data loaded)
 		updateCompactMode(true);
+	}
+
+	private void linkAttachmentToMaster(final CAttachment attachment) {
+		Check.notNull(attachment, "Attachment cannot be null");
+		Check.notNull(masterEntity, "Master entity cannot be null");
+		Set<CAttachment> items = masterEntity.getAttachments();
+		if (items == null) {
+			items = new HashSet<>();
+			masterEntity.setAttachments(items);
+		}
+		final Long attachmentId = attachment.getId();
+		final boolean exists = items.stream().anyMatch(existing -> {
+			if (attachmentId != null && existing != null) {
+				return attachmentId.equals(existing.getId());
+			}
+			return existing == attachment;
+		});
+		if (!exists) {
+			items.add(attachment);
+		}
+		if (masterEntity instanceof CEntityDB<?>) {
+			final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
+			if (entity.getId() != null) {
+				saveMasterEntity(entity);
+			} else {
+				LOGGER.warn("Master entity has no ID; attachment will persist when the parent entity is saved");
+			}
+		}
+	}
+
+	@Override
+	public void notifyRefreshListeners(final CAttachment changedItem) {
+		if (!refreshListeners.isEmpty()) {
+			for (final Consumer<CAttachment> listener : refreshListeners) {
+				try {
+					listener.accept(changedItem);
+				} catch (final Exception e) {
+					LOGGER.error("Error notifying refresh listener", e);
+				}
+			}
+		}
 	}
 
 	/** Handle delete button click. */
@@ -260,71 +347,6 @@ public class CComponentListAttachments extends CVerticalLayout
 		buttonDelete.setEnabled(selected != null);
 	}
 
-	private void linkAttachmentToMaster(final CAttachment attachment) {
-		Check.notNull(attachment, "Attachment cannot be null");
-		Check.notNull(masterEntity, "Master entity cannot be null");
-		List<CAttachment> items = masterEntity.getAttachments();
-		if (items == null) {
-			items = new ArrayList<>();
-			masterEntity.setAttachments(items);
-		}
-		final Long attachmentId = attachment.getId();
-		final boolean exists = items.stream().anyMatch(existing -> {
-			if (attachmentId != null && existing != null) {
-				return attachmentId.equals(existing.getId());
-			}
-			return existing == attachment;
-		});
-		if (!exists) {
-			items.add(attachment);
-		}
-		if (masterEntity instanceof CEntityDB<?>) {
-			final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
-			if (entity.getId() != null) {
-				saveMasterEntity(entity);
-			} else {
-				LOGGER.warn("Master entity has no ID; attachment will persist when the parent entity is saved");
-			}
-		}
-	}
-
-	private void unlinkAttachmentFromMaster(final CAttachment attachment) {
-		Check.notNull(attachment, "Attachment cannot be null");
-		Check.notNull(masterEntity, "Master entity cannot be null");
-		Check.instanceOf(masterEntity, CEntityDB.class, "Master entity must support database persistence");
-		final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
-		Check.notNull(entity.getId(), "Master entity must be saved before deleting attachments");
-		List<CAttachment> items = masterEntity.getAttachments();
-		Check.notNull(items, "Attachments list cannot be null");
-		final Long attachmentId = attachment.getId();
-		final boolean removed = items.removeIf(existing -> {
-			if (attachmentId != null && existing != null) {
-				return attachmentId.equals(existing.getId());
-			}
-			return existing == attachment;
-		});
-		Check.isTrue(removed, "Attachment not found in master entity");
-		saveMasterEntity(entity);
-	}
-
-	@SuppressWarnings ("unchecked")
-	private void saveMasterEntity(final CEntityDB<?> entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		try {
-			saveMasterEntityTyped(entity);
-		} catch (final Exception e) {
-			LOGGER.error("Failed to save master entity after attachment upload", e);
-			CNotificationService.showException("Failed to save attachment to parent entity", e);
-		}
-	}
-
-	@SuppressWarnings ("unchecked")
-	private <T extends CEntityDB<T>> void saveMasterEntityTyped(final CEntityDB<?> entity) {
-		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
-		final CAbstractService<T> service = (CAbstractService<T>) CSpringContext.getBean(serviceClass);
-		service.save((T) entity);
-	}
-
 	@Override
 	public void populateForm() {
 		refreshGrid();
@@ -339,12 +361,7 @@ public class CComponentListAttachments extends CVerticalLayout
 			return;
 		}
 		// Load attachments from parent entity's collection
-		List<CAttachment> items = masterEntity.getAttachments();
-		if (items == null) {
-			LOGGER.debug("Attachments list is null, initializing empty list");
-			items = new ArrayList<>();
-			masterEntity.setAttachments(items);
-		}
+		final List<CAttachment> items = new ArrayList<>(masterEntity.getAttachments());
 		// Sort by version number descending (newest first)
 		items.sort((a1, a2) -> {
 			final int v1 = a1.getVersionNumber() != null ? a1.getVersionNumber() : 0;
@@ -362,6 +379,30 @@ public class CComponentListAttachments extends CVerticalLayout
 		tech.derbent.api.utils.Check.notNull(pageService, "Page service cannot be null");
 		pageService.registerComponent(getComponentName(), this);
 		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
+	}
+
+	@Override
+	public void removeRefreshListener(final Consumer<CAttachment> listener) {
+		if (listener != null) {
+			refreshListeners.remove(listener);
+		}
+	}
+
+	private void saveMasterEntity(final CEntityDB<?> entity) {
+		Check.notNull(entity, "Entity cannot be null");
+		try {
+			saveMasterEntityTyped(entity);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to save master entity after attachment upload", e);
+			CNotificationService.showException("Failed to save attachment to parent entity", e);
+		}
+	}
+
+	@SuppressWarnings ("unchecked")
+	private <T extends CEntityDB<T>> void saveMasterEntityTyped(final CEntityDB<?> entity) {
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
+		final CAbstractService<T> service = (CAbstractService<T>) CSpringContext.getBean(serviceClass);
+		service.save((T) entity);
 	}
 
 	public void setEntity(final Object entity) {
@@ -391,70 +432,6 @@ public class CComponentListAttachments extends CVerticalLayout
 	}
 
 	@Override
-	public void addRefreshListener(final Consumer<CAttachment> listener) {
-		Check.notNull(listener, "Refresh listener cannot be null");
-		refreshListeners.add(listener);
-	}
-
-	@Override
-	public void clearGrid() {
-		Check.notNull(grid, "Grid cannot be null when clearing attachments");
-		grid.setItems(List.of());
-		grid.asSingleSelect().clear();
-		buttonDownload.setEnabled(false);
-		buttonDelete.setEnabled(false);
-		updateCompactMode(true);
-	}
-
-	@Override
-	public CEntityDB<?> createNewEntityInstance() throws Exception {
-		throw new UnsupportedOperationException("Attachments are managed via upload dialog.");
-	}
-
-	@Override
-	public CAbstractService<?> getEntityService() { return attachmentService; }
-
-	@Override
-	public CGrid<CAttachment> getGrid() { return grid; }
-
-	@Override
-	public String getCurrentEntityIdString() {
-		if (masterEntity instanceof CEntityDB<?>) {
-			final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
-			return entity.getId() != null ? entity.getId().toString() : null;
-		}
-		return null;
-	}
-
-	@Override
-	public CEntityDB<?> getValue() {
-		if (masterEntity instanceof CEntityDB<?>) {
-			return (CEntityDB<?>) masterEntity;
-		}
-		return null;
-	}
-
-	@Override
-	public void notifyRefreshListeners(final CAttachment changedItem) {
-		if (!refreshListeners.isEmpty()) {
-			for (final Consumer<CAttachment> listener : refreshListeners) {
-				try {
-					listener.accept(changedItem);
-				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void removeRefreshListener(final Consumer<CAttachment> listener) {
-		if (listener != null) {
-			refreshListeners.remove(listener);
-		}
-	}
-
-	@Override
 	public void setValue(final CEntityDB<?> entity) {
 		if (entity == null) {
 			masterEntity = null;
@@ -469,6 +446,25 @@ public class CComponentListAttachments extends CVerticalLayout
 		LOGGER.warn("setValue called with unexpected entity type: {}", entity.getClass().getSimpleName());
 		masterEntity = null;
 		clearGrid();
+	}
+
+	private void unlinkAttachmentFromMaster(final CAttachment attachment) {
+		Check.notNull(attachment, "Attachment cannot be null");
+		Check.notNull(masterEntity, "Master entity cannot be null");
+		Check.instanceOf(masterEntity, CEntityDB.class, "Master entity must support database persistence");
+		final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
+		Check.notNull(entity.getId(), "Master entity must be saved before deleting attachments");
+		final Set<CAttachment> items = masterEntity.getAttachments();
+		Check.notNull(items, "Attachments list cannot be null");
+		final Long attachmentId = attachment.getId();
+		final boolean removed = items.removeIf(existing -> {
+			if (attachmentId != null && existing != null) {
+				return attachmentId.equals(existing.getId());
+			}
+			return existing == attachment;
+		});
+		Check.isTrue(removed, "Attachment not found in master entity");
+		saveMasterEntity(entity);
 	}
 
 	/** Update component height based on content.

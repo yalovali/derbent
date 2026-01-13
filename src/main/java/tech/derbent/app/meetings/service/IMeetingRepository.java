@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
-import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.sprints.domain.CSprint;
 
 public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting> {
@@ -23,6 +23,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.assignedTo
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
+			   LEFT JOIN FETCH m.attachments
 			   LEFT JOIN FETCH m.participants
 			   LEFT JOIN FETCH m.sprintItem si
 			   LEFT JOIN FETCH si.sprint
@@ -39,6 +40,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH et.workflow
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.assignedTo
+			   LEFT JOIN FETCH m.attachments
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
@@ -53,6 +55,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH et.workflow
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.assignedTo
+			   LEFT JOIN FETCH m.attachments
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
@@ -69,6 +72,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH m.entityType et
 			   LEFT JOIN FETCH et.workflow
 			   LEFT JOIN FETCH m.status
+			   LEFT JOIN FETCH m.attachments
 			   LEFT JOIN FETCH m.assignedTo
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
@@ -90,6 +94,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH et.workflow
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.assignedTo
+			   LEFT JOIN FETCH m.attachments
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants
@@ -108,6 +113,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   LEFT JOIN FETCH et.workflow
 			   LEFT JOIN FETCH m.status
 			   LEFT JOIN FETCH m.assignedTo
+			   LEFT JOIN FETCH m.attachments
 			   LEFT JOIN FETCH m.relatedActivity
 			   LEFT JOIN FETCH m.attendees
 			   LEFT JOIN FETCH m.participants

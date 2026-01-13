@@ -2,10 +2,8 @@ package tech.derbent.app.meetings.domain;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
@@ -27,15 +25,15 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.api.workflow.domain.CWorkflowEntity;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 /** CMeeting - Domain entity representing meetings. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association. */
@@ -44,21 +42,14 @@ import tech.derbent.base.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments {
+public class CMeeting extends CProjectItem<CMeeting>
+		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String ENTITY_TITLE_PLURAL = "Meetings";
 	public static final String ENTITY_TITLE_SINGULAR = "Meeting";
 	public static final String VIEW_NAME = "Meetings View";
-	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "meeting_id")
-	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "Meeting documents and files", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
-	)
-	private List<CAttachment> attachments = new ArrayList<>();
 	@Column (name = "agenda", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -66,6 +57,14 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			hidden = false, maxLength = 4000
 	)
 	private String agenda;
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "meeting_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Meeting documents and files", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
 	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
@@ -220,6 +219,15 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public String getAgenda() { return agenda; }
 
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
+
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
 	@Override
@@ -342,6 +350,9 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setAgenda(final String agenda) { this.agenda = agenda; }
 
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
 
 	@Override
@@ -361,9 +372,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		Check.notNull(getProject(), "Project must be set before assigning meeting type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning meeting type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning meeting type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match meeting project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match meeting project company id " + getProject().getCompany().getId());
 		entityType = (CMeetingType) typeEntity;
 		updateLastModified();
 	}
@@ -397,19 +407,5 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.storyPoint = storyPoint; // Keep for backward compatibility
 		sprintItem.setStoryPoint(storyPoint);
-	}
-
-	// IHasAttachments interface methods
-	@Override
-	public List<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new ArrayList<>();
-		}
-		return attachments;
-	}
-
-	@Override
-	public void setAttachments(final List<CAttachment> attachments) {
-		this.attachments = attachments;
 	}
 }

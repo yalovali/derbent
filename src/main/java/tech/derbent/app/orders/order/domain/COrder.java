@@ -3,7 +3,9 @@ package tech.derbent.app.orders.order.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,15 +21,15 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.type.domain.COrderType;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.workflow.domain.CWorkflowEntity;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity
@@ -52,7 +54,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@OneToMany (mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@AMetaData (displayName = "Approvals", required = false, readOnly = true, description = "Approval records for this order", hidden = false)
 	private List<COrderApproval> approvals = new ArrayList<>();
-	
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "order_id")
@@ -60,8 +61,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 			displayName = "Attachments", required = false, readOnly = false, description = "Order documents and invoices", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
-	private List<CAttachment> attachments = new ArrayList<>();
-	
+	private Set<CAttachment> attachments = new HashSet<>();
 	// Financial Information
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "currency_id", nullable = false)
@@ -171,6 +171,15 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	public List<COrderApproval> getApprovals() { return approvals; }
 
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
+
 	public CCurrency getCurrency() { return currency; }
 
 	public String getDeliveryAddress() { return deliveryAddress; }
@@ -237,6 +246,9 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		updateLastModified();
 	}
 
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
 	public void setCurrency(final CCurrency currency) {
 		this.currency = currency;
 		updateLastModified();
@@ -259,9 +271,8 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		Check.notNull(getProject(), "Project must be set before assigning order type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning order type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning order type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match order project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match order project company id " + getProject().getCompany().getId());
 		entityType = (COrderType) typeEntity;
 		updateLastModified();
 	}
@@ -304,19 +315,5 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	public void setRequiredDate(final LocalDate requiredDate) {
 		this.requiredDate = requiredDate;
 		updateLastModified();
-	}
-	
-	// IHasAttachments interface methods
-	@Override
-	public List<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new ArrayList<>();
-		}
-		return attachments;
-	}
-	
-	@Override
-	public void setAttachments(final List<CAttachment> attachments) {
-		this.attachments = attachments;
 	}
 }

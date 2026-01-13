@@ -444,7 +444,7 @@ public class CActivity extends CProjectItem<CActivity>
     dataProviderBean = "CAttachmentService",
     createComponentMethod = "createComponent"
 )
-private List<CAttachment> attachments = new ArrayList<>();
+private Set<CAttachment> attachments = new HashSet<>();
 ```
 
 **Entity-Specific Join Columns:**
@@ -467,15 +467,15 @@ private List<CAttachment> attachments = new ArrayList<>();
 ```java
 // IHasAttachments interface methods
 @Override
-public List<CAttachment> getAttachments() {
+public Set<CAttachment> getAttachments() {
     if (attachments == null) {
-        attachments = new ArrayList<>();
+        attachments = new HashSet<>();
     }
     return attachments;
 }
 
 @Override
-public void setAttachments(final List<CAttachment> attachments) {
+public void setAttachments(final Set<CAttachment> attachments) {
     this.attachments = attachments;
 }
 ```
@@ -541,19 +541,19 @@ public class CActivity extends CProjectItem<CActivity>
         dataProviderBean = "CAttachmentService",
         createComponentMethod = "createComponent"
     )
-    private List<CAttachment> attachments = new ArrayList<>();
+    private Set<CAttachment> attachments = new HashSet<>();
     
     // IHasAttachments interface methods
     @Override
-    public List<CAttachment> getAttachments() {
+    public Set<CAttachment> getAttachments() {
         if (attachments == null) {
-            attachments = new ArrayList<>();
+            attachments = new HashSet<>();
         }
         return attachments;
     }
     
     @Override
-    public void setAttachments(final List<CAttachment> attachments) {
+    public void setAttachments(final Set<CAttachment> attachments) {
         this.attachments = attachments;
     }
     

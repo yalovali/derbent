@@ -3,7 +3,9 @@ package tech.derbent.app.sprints.domain;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,16 +26,16 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.workflow.domain.CWorkflowEntity;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 // @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "sprint_status_id"))
 @Entity
@@ -59,7 +61,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			displayName = "Attachments", required = false, readOnly = false, description = "Sprint documentation and files", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
-	private List<CAttachment> attachments = new ArrayList<>();
+	private Set<CAttachment> attachments = new HashSet<>();
 	@Transient
 	@AMetaData (
 			displayName = "Item Detail", required = false, readOnly = false, description = "Item fields", hidden = false,
@@ -204,6 +206,15 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			}
 		}
 		return activities;
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
 	}
 
 	@Override
@@ -445,6 +456,9 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	}
 
 	@Override
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
 	public void setColor(final String color) {
 		this.color = color;
 		updateLastModified();
@@ -469,9 +483,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		Check.notNull(getProject(), "Project must be set before assigning sprint type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning sprint type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning sprint type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match sprint project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match sprint project company id " + getProject().getCompany().getId());
 		entityType = (CSprintType) typeEntity;
 		updateLastModified();
 	}
@@ -532,19 +545,5 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @param totalStoryPoints the total story points value */
 	public void setTotalStoryPoints(final Long totalStoryPoints) {
 		this.totalStoryPoints = totalStoryPoints;
-	}
-
-	// IHasAttachments interface methods
-	@Override
-	public List<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new ArrayList<>();
-		}
-		return attachments;
-	}
-
-	@Override
-	public void setAttachments(final List<CAttachment> attachments) {
-		this.attachments = attachments;
 	}
 }

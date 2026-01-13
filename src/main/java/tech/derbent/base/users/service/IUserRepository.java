@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.ICompanyEntityRepositoryBase;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.base.users.domain.CUser;
 
 public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICompanyEntityRepositoryBase<CUser> {
@@ -17,32 +17,38 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 	@Query ("SELECT COUNT(DISTINCT u) FROM #{#entityName} u LEFT JOIN u.projectSettings ps WHERE ps.project.id = :projectId")
 	long countByProjectId(@Param ("projectId") Long projectId);
 	@Override
-	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company = :company"
-	)
+	@Query ("""
+			SELECT u FROM #{#entityName} u
+			LEFT JOIN FETCH u.company co
+			LEFT JOIN FETCH u.attachments
+			LEFT JOIN FETCH u.companyRole cr
+			LEFT JOIN FETCH u.activities
+			WHERE u.company = :company
+			""")
 	Page<CUser> findByCompany(@Param ("company") CCompany company, Pageable pageable);
-	@Override
-	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company = :company"
-	)
-	List<CUser> listByCompanyForPageView(@Param ("company") CCompany company);
 	// Page<CUser> findByCompany(CCompany company, Pageable pageable);
 	/** Find all users by company ID with eager loading */
 	@Override
-	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company.id = :company_id"
-	)
+	@Query ("""
+			SELECT u FROM #{#entityName} u
+			LEFT JOIN FETCH u.company co
+			LEFT JOIN FETCH u.companyRole cr
+			LEFT JOIN FETCH u.activities
+			LEFT JOIN FETCH u.attachments
+			WHERE u.company.id = :company_id
+			""")
 	List<CUser> findByCompanyId(@Param ("company_id") Long company_id);
 	/** Find users by company ID with pagination */
 	@Override
 	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company.id = :company_id"
+		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co " + " LEFT JOIN FETCH u.attachments "
+				+ "LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company.id = :company_id"
 	)
 	Page<CUser> findByCompanyId(@Param ("company_id") Long company_id, Pageable pageable);
 	/** Find user by ID with eager loading using generic pattern */
 	@Override
 	@Query ("SELECT u FROM #{#entityName} u " + /* */
-			"LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.id = :userId"
+			"LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.attachments LEFT JOIN FETCH u.activities WHERE u.id = :userId"
 	)
 	Optional<CUser> findById(@Param ("userId") Long id);
 	/** Find all users by project ID with eager loading using generic pattern */
@@ -63,4 +69,9 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 		"SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId) and (u.company.id = :CompanyId)"
 	)
 	List<CUser> findNotAssignedToProject(@Param ("projectId") Long projectId, @Param ("CompanyId") Long company_id);
+	@Override
+	@Query (
+		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company = :company"
+	)
+	List<CUser> listByCompanyForPageView(@Param ("company") CCompany company);
 }

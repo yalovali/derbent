@@ -75,6 +75,13 @@ public class CCompany extends CEntityNamed<CCompany> {
 			description = "Enable email and system notifications for company", hidden = false
 	)
 	private Boolean enableNotifications;
+	@Column (name = "ipAddress", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.FIELD_MAX_LENGTH)
+	@AMetaData (
+			displayName = "IpAddress", required = false, readOnly = false, defaultValue = "", description = "Gateway IP address", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	private String ipAddress = "127.0.0.1";
 	@Column (name = "notification_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Email (message = ValidationMessages.EMAIL_INVALID)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
@@ -150,6 +157,8 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public Boolean getEnableNotifications() { return enableNotifications; }
 
+	public String getIpAddress() { return ipAddress; }
+
 	public String getNotificationEmail() { return notificationEmail; }
 
 	public String getPhone() { return phone; }
@@ -194,30 +203,30 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	@Override
 	public boolean matchesFilter(final String searchValue, final @Nullable Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("address") && (getAddress() != null) && getAddress().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("address") && getAddress() != null && getAddress().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("email") && (getEmail() != null) && getEmail().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("email") && getEmail() != null && getEmail().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("phone") && (getPhone() != null) && getPhone().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("phone") && getPhone() != null && getPhone().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("taxNumber") && (getTaxNumber() != null) && getTaxNumber().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("taxNumber") && getTaxNumber() != null && getTaxNumber().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("website") && (getWebsite() != null) && getWebsite().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("website") && getWebsite() != null && getWebsite().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		// Check boolean field
-		if (fieldNames.remove("enableNotifications") && (getEnableNotifications() != null)
+		if (fieldNames.remove("enableNotifications") && getEnableNotifications() != null
 				&& getEnableNotifications().toString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
@@ -237,6 +246,8 @@ public class CCompany extends CEntityNamed<CCompany> {
 	public void setEmail(final String email) { this.email = email; }
 
 	public void setEnableNotifications(final Boolean enableNotifications) { this.enableNotifications = enableNotifications; }
+
+	public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
 
 	public void setNotificationEmail(final String notificationEmail) { this.notificationEmail = notificationEmail; }
 

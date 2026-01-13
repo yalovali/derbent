@@ -38,3 +38,4 @@ docs/graphviz-output/
 *.backup
 /bin/
 docs/__PROJECT_BACKLOG_backup.xlsx
+/attachment-test-output.log

@@ -1,8 +1,9 @@
 package tech.derbent.app.risks.risk.domain;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,13 +19,13 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.risks.risktype.domain.CRiskType;
-import tech.derbent.api.workflow.domain.CWorkflowEntity;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 @Entity
 @Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
@@ -43,7 +44,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this risk", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
-	private List<CAttachment> attachments = new ArrayList<>();
+	private Set<CAttachment> attachments = new HashSet<>();
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
@@ -119,6 +120,15 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		initializeDefaults();
 	}
 
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
+
 	public String getCause() { return cause; }
 
 	@Override
@@ -166,7 +176,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
@@ -174,11 +184,14 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity field
-		if (fieldNames.remove("entityType") && (getEntityType() != null) && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("entityType") && getEntityType() != null && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
 	}
+
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	public void setCause(final String cause) {
 		this.cause = cause;
@@ -192,9 +205,8 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		Check.notNull(getProject(), "Project must be set before assigning risk type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning risk type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning risk type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match risk project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match risk project company id " + getProject().getCompany().getId());
 		entityType = (CRiskType) typeEntity;
 		updateLastModified();
 	}
@@ -232,19 +244,5 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public void setRiskSeverity(final ERiskSeverity riskSeverity) {
 		this.riskSeverity = riskSeverity;
 		updateLastModified();
-	}
-
-	// IHasAttachments interface methods
-	@Override
-	public List<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new ArrayList<>();
-		}
-		return attachments;
-	}
-
-	@Override
-	public void setAttachments(final List<CAttachment> attachments) {
-		this.attachments = attachments;
 	}
 }

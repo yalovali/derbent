@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
@@ -86,7 +88,7 @@ public class CActivity extends CProjectItem<CActivity>
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this activity", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
-	private List<CAttachment> attachments = new ArrayList<>();
+	private Set<CAttachment> attachments = new HashSet<>();
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private List<CComment> comments = new ArrayList<>();
@@ -260,9 +262,9 @@ public class CActivity extends CProjectItem<CActivity>
 
 	// IHasAttachments interface methods
 	@Override
-	public List<CAttachment> getAttachments() {
+	public Set<CAttachment> getAttachments() {
 		if (attachments == null) {
-			attachments = new ArrayList<>();
+			attachments = new HashSet<>();
 		}
 		return attachments;
 	}
@@ -453,7 +455,7 @@ public class CActivity extends CProjectItem<CActivity>
 	}
 
 	@Override
-	public void setAttachments(final List<CAttachment> attachments) { this.attachments = attachments; }
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
 	public void setColor(String color) { /*****/

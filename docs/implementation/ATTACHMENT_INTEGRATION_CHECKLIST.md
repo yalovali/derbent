@@ -34,13 +34,13 @@ public class CRisk extends CProjectItem<CRisk> implements IHasAttachments {
         createComponentMethodBean = "CAttachmentComponentFactory",
         createComponentMethod = "createComponent"
     )
-    private List<CAttachment> attachments = new ArrayList<>();
+    private Set<CAttachment> attachments = new HashSet<>();
     
     // Add interface implementation
     @Override
-    public List<CAttachment> getAttachments() {
+    public Set<CAttachment> getAttachments() {
         if (attachments == null) {
-            attachments = new ArrayList<>();
+            attachments = new HashSet<>();
         }
         return attachments;
     }

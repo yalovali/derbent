@@ -16,11 +16,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -32,7 +30,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
-
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -48,6 +45,7 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.api.screens.service.CEntityFieldService;
@@ -55,9 +53,9 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragControl, IPageServiceAutoRegistrable {
@@ -770,6 +768,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		} catch (final Exception e) {
 			LOGGER.error("Error loading data from service {}: {}", gridEntity.getDataServiceBeanName(), e.getMessage());
 			grid.setItems(Collections.emptyList());
+			CNotificationService.showErrorDialog("Error loading grid data: " + e.getMessage());
 		}
 	}
 
@@ -922,7 +921,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			if (entity != null && entity.getId() != null) {
 				final List items = (List) rawGrid.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
 				for (final Object item : items) {
-					if (item instanceof CEntityDB<?> candidate && entity.getId().equals(candidate.getId())) {
+					if (item instanceof final CEntityDB<?> candidate && entity.getId().equals(candidate.getId())) {
 						selection = candidate;
 						break;
 					}
