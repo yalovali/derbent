@@ -830,6 +830,7 @@ public class CDataInitializer {
 					COrderApprovalInitializerService.initializeSample(project, minimal);
 					initializeSampleTeams(project, minimal);
 					CRiskInitializerService.initializeSample(project, minimal);
+					tech.derbent.app.issues.issue.service.CIssueInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {

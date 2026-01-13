@@ -24,12 +24,14 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.risks.risktype.domain.CRiskType;
 
 @Entity
 @Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
-public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk>, IHasAttachments {
+public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - caution
 	public static final String DEFAULT_ICON = "vaadin:warning";
@@ -44,6 +46,12 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "risk_id")
+	@AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this risk", hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent")
+	private Set<CComment> comments = new HashSet<>();
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
@@ -191,6 +199,11 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
+	}
 
 	public void setCause(final String cause) {
 		this.cause = cause;

@@ -28,6 +28,7 @@ public interface IIssueRepository extends IProjectItemRespository<CIssue> {
 			LEFT JOIN FETCH i.assignedTo
 			LEFT JOIN FETCH i.createdBy
 			LEFT JOIN FETCH i.attachments
+			LEFT JOIN FETCH i.comments
 			LEFT JOIN FETCH i.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH i.status
@@ -44,6 +45,7 @@ public interface IIssueRepository extends IProjectItemRespository<CIssue> {
 			LEFT JOIN FETCH i.assignedTo
 			LEFT JOIN FETCH i.createdBy
 			LEFT JOIN FETCH i.attachments
+			LEFT JOIN FETCH i.comments
 			LEFT JOIN FETCH i.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH i.status
@@ -61,6 +63,7 @@ public interface IIssueRepository extends IProjectItemRespository<CIssue> {
 			LEFT JOIN FETCH i.assignedTo
 			LEFT JOIN FETCH i.createdBy
 			LEFT JOIN FETCH i.attachments
+			LEFT JOIN FETCH i.comments
 			LEFT JOIN FETCH i.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH i.status

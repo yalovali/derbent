@@ -26,6 +26,8 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 
 /** CDecision - Domain entity representing project decisions with comprehensive management features. Layer: Domain (MVC) Supports: - Decision type
  * categorization - Cost estimation and tracking - Team collaboration and assignments - Multi-stage approval workflow - Accountable personnel
@@ -33,7 +35,7 @@ import tech.derbent.app.attachments.domain.IHasAttachments;
 @Entity
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
-public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision>, IHasAttachments {
+public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
@@ -49,6 +51,12 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "decision_id")
+	@AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this decision", hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent")
+	private Set<CComment> comments = new HashSet<>();
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -142,6 +150,11 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
+	}
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {

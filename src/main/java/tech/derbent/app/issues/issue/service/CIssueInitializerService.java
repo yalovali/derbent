@@ -53,6 +53,10 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 			// Attachments section - standard section for ALL entities
 			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 
+			// Comments section - standard section for discussion entities
+			detailSection.addScreenLine(CDetailLinesService.createSection("Comments"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "comments"));
+
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
