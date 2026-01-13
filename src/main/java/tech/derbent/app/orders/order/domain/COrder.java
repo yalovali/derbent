@@ -20,6 +20,8 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.type.domain.COrderType;
@@ -31,7 +33,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "corder")
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
-public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder> {
+public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder>, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#D2B48C"; // X11 Tan - purchase orders
 	public static final String DEFAULT_ICON = "vaadin:invoice";
@@ -50,6 +52,16 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@OneToMany (mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@AMetaData (displayName = "Approvals", required = false, readOnly = true, description = "Approval records for this order", hidden = false)
 	private List<COrderApproval> approvals = new ArrayList<>();
+	
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "order_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Order documents and invoices", hidden = false,
+			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+	)
+	private List<CAttachment> attachments = new ArrayList<>();
+	
 	// Financial Information
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "currency_id", nullable = false)
@@ -292,5 +304,19 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	public void setRequiredDate(final LocalDate requiredDate) {
 		this.requiredDate = requiredDate;
 		updateLastModified();
+	}
+	
+	// IHasAttachments interface methods
+	@Override
+	public List<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<>();
+		}
+		return attachments;
+	}
+	
+	@Override
+	public void setAttachments(final List<CAttachment> attachments) {
+		this.attachments = attachments;
 	}
 }

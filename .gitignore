@@ -37,3 +37,4 @@ docs/graphviz-output/
 # Backup files from configuration scripts
 *.backup
 /bin/
+docs/__PROJECT_BACKLOG_backup.xlsx

@@ -56,6 +56,10 @@ public class COrderInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			
+			// Attachments section - standard section for ALL entities
+			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

@@ -2,8 +2,10 @@ package tech.derbent.app.meetings.domain;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
@@ -15,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
@@ -26,6 +29,8 @@ import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
@@ -39,13 +44,21 @@ import tech.derbent.base.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon {
+public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String ENTITY_TITLE_PLURAL = "Meetings";
 	public static final String ENTITY_TITLE_SINGULAR = "Meeting";
 	public static final String VIEW_NAME = "Meetings View";
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "meeting_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Meeting documents and files", hidden = false,
+			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+	)
+	private List<CAttachment> attachments = new ArrayList<>();
 	@Column (name = "agenda", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -384,5 +397,19 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.storyPoint = storyPoint; // Keep for backward compatibility
 		sprintItem.setStoryPoint(storyPoint);
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public List<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<>();
+		}
+		return attachments;
+	}
+
+	@Override
+	public void setAttachments(final List<CAttachment> attachments) {
+		this.attachments = attachments;
 	}
 }

@@ -51,6 +51,11 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "hourlyRate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
+			
+			/******************/
+			// Attachments section - standard section for ALL entities
+			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
+			
 			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));

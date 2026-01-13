@@ -5,18 +5,24 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -27,7 +33,7 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 @Entity
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
-public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision> {
+public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision>, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
@@ -61,6 +67,15 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 			displayName = "Review Date", required = false, readOnly = false, description = "Date when the decision will be reviewed", hidden = false
 	)
 	private LocalDateTime reviewDate;
+	
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "decision_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Decision supporting documents", hidden = false,
+			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+	)
+	private List<CAttachment> attachments = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	public CDecision() {
@@ -152,5 +167,19 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
+	}
+	
+	// IHasAttachments interface methods
+	@Override
+	public List<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<>();
+		}
+		return attachments;
+	}
+	
+	@Override
+	public void setAttachments(final List<CAttachment> attachments) {
+		this.attachments = attachments;
 	}
 }

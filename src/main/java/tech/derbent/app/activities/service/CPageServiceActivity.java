@@ -32,6 +32,12 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 		}
 	}
 
+	// NOTE: createAttachmentsComponent() method removed
+	// Attachments are now created automatically via CAttachmentComponentFactory
+	// Referenced in CActivity's @OneToMany field @AMetaData:
+	//   createComponentMethodBean = "CAttachmentComponentFactory"
+	//   createComponentMethod = "createComponent"
+
 	/** Creates a widget component for displaying the given activity entity.
 	 * @param entity the activity to create a widget for
 	 * @return the CActivityWidget component */
