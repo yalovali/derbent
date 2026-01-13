@@ -794,7 +794,7 @@ public class CDataInitializer {
 						CDecisionTypeInitializerService.initializeSample(sampleProject, minimal);
 						COrderTypeInitializerService.initializeSample(sampleProject, minimal);
 						CActivityTypeInitializerService.initializeSample(sampleProject, minimal);
-						tech.derbent.app.issues.issuetype.service.CIssueTypeInitializerService.initializeSample(company, minimal);
+						tech.derbent.app.issues.issuetype.service.CIssueTypeInitializerService.initializeSample(sampleProject, minimal);
 						CRiskTypeInitializerService.initializeSample(sampleProject, minimal);
 						CAssetTypeInitializerService.initializeSample(sampleProject, minimal);
 						CBudgetTypeInitializerService.initializeSample(sampleProject, minimal);

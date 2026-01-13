@@ -113,6 +113,15 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 		return attachments;
 	}
 
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
 	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
 	 * @return the review date as LocalDate, or null if not set */
 	@Override

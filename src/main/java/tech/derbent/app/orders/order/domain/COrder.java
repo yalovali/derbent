@@ -188,6 +188,15 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		return attachments;
 	}
 
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
 	public CCurrency getCurrency() { return currency; }
 
 	public String getDeliveryAddress() { return deliveryAddress; }

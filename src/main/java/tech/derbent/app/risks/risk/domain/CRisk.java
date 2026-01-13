@@ -136,6 +136,15 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		return attachments;
 	}
 
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
 	public String getCause() { return cause; }
 
 	@Override
