@@ -441,7 +441,7 @@ public class CActivity extends CProjectItem<CActivity>
     readOnly = false,
     description = "File attachments for this activity",  // Entity-specific description
     hidden = false,
-    dataProviderBean = "CAttachmentComponentFactory",
+    dataProviderBean = "CAttachmentService",
     createComponentMethod = "createComponent"
 )
 private List<CAttachment> attachments = new ArrayList<>();
@@ -538,7 +538,7 @@ public class CActivity extends CProjectItem<CActivity>
         readOnly = false,
         description = "File attachments for this activity",
         hidden = false,
-        dataProviderBean = "CAttachmentComponentFactory",
+        dataProviderBean = "CAttachmentService",
         createComponentMethod = "createComponent"
     )
     private List<CAttachment> attachments = new ArrayList<>();
@@ -567,7 +567,7 @@ For each entity, verify:
 
 - [ ] Implements `IHasAttachments` interface
 - [ ] Has `@OneToMany` field with correct join column
-- [ ] Field has `@AMetaData` with `dataProviderBean = "CAttachmentComponentFactory"`
+- [ ] Field has `@AMetaData` with `dataProviderBean = "CAttachmentService"`
 - [ ] Has null-safe `getAttachments()` and `setAttachments()` methods
 - [ ] Initializer service calls `CAttachmentInitializerService.addAttachmentsSection()`
 - [ ] Compiles without errors
@@ -605,7 +605,7 @@ Grid component for displaying attachments.
 
 ```java
 // Created automatically by CAttachmentComponentFactory
-// when entity has @AMetaData with dataProviderBean = "CAttachmentComponentFactory"
+// when entity has @AMetaData with dataProviderBean = "CAttachmentService"
 CComponentListAttachments component = factory.createComponent(entity, "attachments");
 ```
 
@@ -668,7 +668,7 @@ public class CAttachmentComponentFactory {
 }
 ```
 
-**Integration:** Referenced via `@AMetaData(dataProviderBean = "CAttachmentComponentFactory")`
+**Integration:** Referenced via `@AMetaData(dataProviderBean = "CAttachmentService")`
 
 ### File Type Icons
 

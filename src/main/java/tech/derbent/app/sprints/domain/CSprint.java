@@ -57,7 +57,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	@JoinColumn (name = "sprint_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "Sprint documentation and files", hidden = false,
-			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 	@Transient

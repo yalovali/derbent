@@ -196,7 +196,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@JoinColumn (name = "user_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "User documents (CV, certifications, etc.)", hidden = false,
-			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 

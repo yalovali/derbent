@@ -41,7 +41,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@JoinColumn (name = "risk_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this risk", hidden = false,
-			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 	@Column (nullable = true, length = 1000)

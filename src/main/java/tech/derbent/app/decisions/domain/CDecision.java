@@ -73,7 +73,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@JoinColumn (name = "decision_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "Decision supporting documents", hidden = false,
-			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 

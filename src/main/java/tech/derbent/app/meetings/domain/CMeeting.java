@@ -56,7 +56,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	@JoinColumn (name = "meeting_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "Meeting documents and files", hidden = false,
-			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 	@Column (name = "agenda", nullable = true, length = 4000)

@@ -58,7 +58,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@JoinColumn (name = "order_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "Order documents and invoices", hidden = false,
-			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 	

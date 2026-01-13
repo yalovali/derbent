@@ -83,7 +83,7 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 	@JoinColumn (name = "project_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "Project documentation and files", hidden = false,
-			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 

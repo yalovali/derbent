@@ -30,22 +30,23 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
-import tech.derbent.api.workflow.domain.CWorkflowEntity;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments {
+public class CActivity extends CProjectItem<CActivity>
+		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -83,7 +84,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@JoinColumn (name = "activity_id")
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this activity", hidden = false,
-			dataProviderBean = "CAttachmentComponentFactory", createComponentMethod = "createComponent"
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private List<CAttachment> attachments = new ArrayList<>();
 	// One-to-Many relationship with comments - cascade delete enabled
@@ -256,6 +257,15 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	// Getters and Setters with proper logging and null checking
 
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
+
+	// IHasAttachments interface methods
+	@Override
+	public List<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<>();
+		}
+		return attachments;
+	}
 
 	@Override
 	public String getColor() { return DEFAULT_COLOR; }
@@ -443,6 +453,9 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	@Override
+	public void setAttachments(final List<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
 	public void setColor(String color) { /*****/
 	}
 
@@ -566,19 +579,5 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		sprintItem.setStoryPoint(storyPoint);
 		this.storyPoint = storyPoint; // Keep for backward compatibility during migration
 		updateLastModified();
-	}
-
-	// IHasAttachments interface methods
-	@Override
-	public List<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new ArrayList<>();
-		}
-		return attachments;
-	}
-
-	@Override
-	public void setAttachments(final List<CAttachment> attachments) {
-		this.attachments = attachments;
 	}
 }
