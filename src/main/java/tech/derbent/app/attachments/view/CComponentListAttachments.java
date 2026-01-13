@@ -321,28 +321,30 @@ public class CComponentListAttachments extends CVerticalLayout
 				CNotificationService.showWarning("Please select an entity first");
 				return;
 			}
-			// masterEntity is IHasAttachments, but dialog needs CEntityDB
-			// Cast is safe because all current entities (Activity, Risk, etc.) extend CEntityDB
 			final Object parentEntity = masterEntity;
 			if (!(parentEntity instanceof CEntityDB)) {
 				CNotificationService.showError("Entity does not support file uploads");
 				LOGGER.error("Master entity does not extend CEntityDB: {}", parentEntity.getClass().getSimpleName());
 				return;
 			}
-			final CDialogAttachmentUpload dialog = new CDialogAttachmentUpload(attachmentService,
-					sessionService, (CEntityDB<?>) parentEntity, attachment -> {
-						// Refresh grid after successful upload
-						try {
-							linkAttachmentToMaster(attachment);
-							refreshGrid();
-							notifyRefreshListeners(attachment);
-						} catch (final Exception e) {
-							LOGGER.error("Error refreshing grid after upload", e);
-						}
-					});
+			
+			final CDialogAttachment dialog = new CDialogAttachment(
+				attachmentService, 
+				sessionService, 
+				(CEntityDB<?>) parentEntity, 
+				attachment -> {
+					try {
+						linkAttachmentToMaster(attachment);
+						refreshGrid();
+						notifyRefreshListeners(attachment);
+					} catch (final Exception e) {
+						LOGGER.error("Error refreshing grid after upload", e);
+					}
+				}
+			);
 			dialog.open();
 		} catch (final Exception e) {
-			CNotificationService.showException("Error opening attachment upload dialog", e);
+			CNotificationService.showException("Error opening attachment dialog", e);
 		}
 	}
 
@@ -351,19 +353,13 @@ public class CComponentListAttachments extends CVerticalLayout
 			final CAttachment selected = grid.asSingleSelect().getValue();
 			Check.notNull(selected, "No attachment selected");
 			
-			final tech.derbent.app.documenttypes.service.CDocumentTypeService docTypeService = 
-				(tech.derbent.app.documenttypes.service.CDocumentTypeService) tech.derbent.api.config.CSpringContext
-					.getBean(tech.derbent.app.documenttypes.service.CDocumentTypeService.class);
-			
-			final CDialogAttachmentEdit dialog = new CDialogAttachmentEdit(
+			final CDialogAttachment dialog = new CDialogAttachment(
 				selected, 
-				docTypeService,
 				attachment -> {
 					try {
 						attachmentService.save(attachment);
 						refreshGrid();
 						notifyRefreshListeners(attachment);
-						CNotificationService.showSaveSuccess();
 					} catch (final Exception e) {
 						LOGGER.error("Error saving attachment", e);
 						CNotificationService.showException("Error saving attachment", e);
