@@ -2589,3 +2589,218 @@ When migrating existing filter toolbars:
 **Version**: 1.2  
 **Last Updated**: 2026-01-12  
 **Pattern Added**: Profile Seed Initialization
+
+## Entity-Enabled Grid Columns (MANDATORY)
+
+**Rule**: Always use entity-enabled columns (`CGridColumnEntity`) for entity references like `assignedTo`, `approvedBy`, `status`, `createdBy`, etc.
+
+**Benefits**:
+- Automatic entity name formatting
+- Icon/avatar display
+- Click-to-view entity details
+- Consistent UI across application
+- Null-safe rendering
+
+**Example**:
+```java
+// ✅ CORRECT - Use entity column
+grid.addColumn_entity(CActivity::getAssignedTo)
+    .setHeader("Assigned To")
+    .setAutoWidth(true);
+
+// ❌ WRONG - Manual formatting
+grid.addColumn(activity -> activity.getAssignedTo() != null 
+    ? activity.getAssignedTo().getName() 
+    : "")
+    .setHeader("Assigned To");
+```
+
+## Attachment/Dialog Component Pattern (MANDATORY)
+
+**Rule**: When creating dialogs for entity management (especially with file uploads), follow these patterns:
+
+### 1. Use Existing Base Classes
+```java
+// ✅ CORRECT - Extend CDBEditDialog
+public class CDialogAttachment extends CDBEditDialog<CAttachment> {
+    // Implementation
+}
+```
+
+### 2. Use FormBuilder for Form Fields
+```java
+// ✅ CORRECT - Use FormBuilder
+protected void setupForm() {
+    formBuilder = new CFormBuilder<>(binder, entity);
+    formBuilder.buildForm(formLayout);
+}
+
+// ❌ WRONG - Manual field creation
+private TextField textFieldName = new TextField("Name");
+private TextArea textAreaDescription = new TextArea("Description");
+```
+
+### 3. Single Dialog for Add/Edit
+```java
+// ✅ CORRECT - Handle both modes in one dialog
+public CDialogAttachment(CAttachment entity, CAttachmentService service) {
+    if (entity.getId() == null) {
+        // New mode - show upload
+    } else {
+        // Edit mode - existing document
+    }
+}
+
+// ❌ WRONG - Separate dialogs
+public class CDialogAttachmentUpload { }
+public class CDialogAttachmentEdit { }
+```
+
+### 4. Selection-Aware Display Grid
+```java
+// ✅ CORRECT - Enable/disable based on selection
+grid.addSelectionListener(event -> {
+    boolean hasSelection = event.getFirstSelectedItem().isPresent();
+    buttonEdit.setEnabled(hasSelection);
+    buttonDelete.setEnabled(hasSelection);
+});
+```
+
+### 5. Double-Click to Edit
+```java
+// ✅ CORRECT - Add double-click listener
+grid.addItemDoubleClickListener(event -> {
+    openEditDialog(event.getItem());
+});
+```
+
+## CRUD Pattern Standards (MANDATORY)
+
+All CRUD views MUST implement these features:
+
+1. **Selection-Aware Toolbar**
+   - Buttons enabled/disabled based on grid selection
+   - Update immediately on selection change
+
+2. **Double-Click Grid Editing**
+   - Double-click any row opens edit dialog
+   - Single-click for selection only
+
+3. **Inline Validation**
+   - Validate before save
+   - Show clear error messages
+   - Focus on first error field
+
+4. **Optimistic Locking Handling**
+   - Catch `OptimisticLockingFailureException`
+   - Show user-friendly message
+   - Offer to refresh and retry
+
+5. **Confirmation Dialogs**
+   - Confirm before delete
+   - Warn about unsaved changes
+   - Clear yes/no buttons
+
+**Example Complete CRUD View**:
+```java
+public class CAttachmentGridView extends CComponentListEntityBase<CAttachment> {
+    
+    private CButton buttonAdd;
+    private CButton buttonEdit;
+    private CButton buttonDelete;
+    private CGrid<CAttachment> grid;
+    
+    @Override
+    protected void createUI() {
+        // 1. Create toolbar with disabled buttons
+        buttonAdd = create_buttonAdd();
+        buttonEdit = create_buttonEdit();
+        buttonEdit.setEnabled(false);  // Disabled initially
+        buttonDelete = create_buttonDelete();
+        buttonDelete.setEnabled(false);  // Disabled initially
+        
+        // 2. Create grid with double-click
+        grid = new CGrid<>(CAttachment.class);
+        grid.addItemDoubleClickListener(e -> on_buttonEdit_clicked());
+        
+        // 3. Add selection listener for toolbar
+        grid.addSelectionListener(this::on_grid_selectionChanged);
+    }
+    
+    protected void on_grid_selectionChanged(SelectionEvent<Grid<CAttachment>, CAttachment> event) {
+        boolean hasSelection = event.getFirstSelectedItem().isPresent();
+        buttonEdit.setEnabled(hasSelection);
+        buttonDelete.setEnabled(hasSelection);
+    }
+    
+    protected void on_buttonEdit_clicked() {
+        CAttachment selected = grid.asSingleSelect().getValue();
+        Objects.requireNonNull(selected, "No item selected");
+        
+        CDialogAttachment dialog = new CDialogAttachment(selected, service);
+        dialog.addSaveListener(event -> refreshGrid());
+        dialog.open();
+    }
+    
+    protected void on_buttonDelete_clicked() {
+        CAttachment selected = grid.asSingleSelect().getValue();
+        Objects.requireNonNull(selected, "No item selected");
+        
+        // Confirmation dialog
+        CNotifications.showConfirmationDialog(
+            "Delete attachment '" + selected.getName() + "'?",
+            () -> {
+                try {
+                    service.delete(selected);
+                    CNotifications.showDeleteSuccess();
+                    refreshGrid();
+                } catch (OptimisticLockingFailureException ex) {
+                    CNotifications.showOptimisticLockingError();
+                    refreshGrid();
+                } catch (Exception ex) {
+                    LOGGER.error("Error deleting attachment", ex);
+                    CNotifications.showException("Error deleting attachment", ex);
+                }
+            }
+        );
+    }
+}
+```
+
+## Grid Component Standards (MANDATORY)
+
+All display/list grids MUST:
+
+1. **Update toolbar on selection change**
+   ```java
+   grid.addSelectionListener(this::on_grid_selectionChanged);
+   ```
+
+2. **Enable/disable buttons based on selection**
+   ```java
+   protected void on_grid_selectionChanged(SelectionEvent<?, T> event) {
+       boolean hasSelection = !event.getAllSelectedItems().isEmpty();
+       buttonEdit.setEnabled(hasSelection);
+       buttonDelete.setEnabled(hasSelection);
+       buttonMoveUp.setEnabled(hasSelection);
+       buttonMoveDown.setEnabled(hasSelection);
+   }
+   ```
+
+3. **Support keyboard navigation**
+   - Arrow keys for navigation
+   - Enter key for edit
+   - Delete key for delete (with confirmation)
+
+4. **Have configurable columns**
+   ```java
+   grid.getColumns().forEach(col -> col.setResizable(true));
+   grid.setColumnReorderingAllowed(true);
+   ```
+
+5. **Use consistent column types**
+   - Entity references: `addColumn_entity()`
+   - Dates: `addColumn_date()`
+   - Numbers: `addColumn_number()`
+   - Status/workflow: `addColumn_status()`
+
