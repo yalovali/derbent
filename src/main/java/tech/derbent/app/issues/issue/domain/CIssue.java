@@ -219,6 +219,13 @@ public class CIssue extends CProjectItem<CIssue> implements IHasStatusAndWorkflo
 		this.entityType = entityType;
 	}
 
+	@Override
+	public void setEntityType(final tech.derbent.api.domains.CTypeEntity<?> typeEntity) {
+		if (typeEntity instanceof CIssueType) {
+			setEntityType((CIssueType) typeEntity);
+		}
+	}
+
 	public void setExpectedResult(final String expectedResult) {
 		this.expectedResult = expectedResult;
 	}

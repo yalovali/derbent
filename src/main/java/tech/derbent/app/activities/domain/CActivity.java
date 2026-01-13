@@ -2,6 +2,7 @@ package tech.derbent.app.activities.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;

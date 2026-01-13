@@ -89,12 +89,9 @@ public class CComment extends CEntityOfCompany<CComment> {
 	 * @param commentText the comment content text - must not be null or empty
 	 * @param author      the user who created this comment */
 	public CComment(final String commentText, final CUser author) {
-		super(CComment.class);
+		super(CComment.class, "", author != null ? author.getCompany() : null);
 		this.commentText = commentText;
 		this.author = author;
-		if (author != null) {
-			setCompany(author.getCompany());
-		}
 		initializeDefaults();
 	}
 
