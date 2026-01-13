@@ -192,6 +192,11 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 	private void saveEdit() throws Exception {
 		try {
 			validateForm();
+			
+			// Write form data back to entity
+			binder.writeBean(getEntity());
+			
+			// Entity should be saved by callback
 			if (onSave != null) {
 				onSave.accept(getEntity());
 			}

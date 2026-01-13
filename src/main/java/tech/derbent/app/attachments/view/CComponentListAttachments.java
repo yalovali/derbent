@@ -218,6 +218,10 @@ public class CComponentListAttachments extends CVerticalLayout
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));
+		
+		// Add double-click to edit
+		grid.addItemDoubleClickListener(e -> on_grid_doubleClicked(e.getItem()));
+		
 		add(grid);
 		// Set initial compact mode (will adjust when data loaded)
 		updateCompactMode(true);
@@ -371,6 +375,13 @@ public class CComponentListAttachments extends CVerticalLayout
 		buttonEdit.setEnabled(selected != null);
 		buttonDownload.setEnabled(selected != null);
 		buttonDelete.setEnabled(selected != null);
+	}
+
+	/** Handle grid double-click to edit. */
+	protected void on_grid_doubleClicked(final CAttachment attachment) {
+		if (attachment != null) {
+			on_buttonEdit_clicked();
+		}
 	}
 
 	@Override

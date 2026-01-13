@@ -3,6 +3,14 @@
 ## Project Overview
 Derbent is a Java 21 Spring Boot + Vaadin 24.8 project management application.
 
+## Essential Documentation (READ FIRST)
+
+**CRITICAL**: Always consult these documents when working on specific features:
+- **Entity Dialogs** → [Entity Dialog Coding Standards](docs/architecture/entity-dialog-coding-standards.md) ⭐ **MANDATORY**
+- **Grid Columns** → [Grid Column Standards](docs/architecture/coding-standards.md#grid-column-standards-mandatory)
+- **Grid Configuration** → [CGrid Configuration Patterns](docs/architecture/cgrid-configuration-patterns.md)
+- **Entity Design** → [Entity Inheritance Patterns](docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md)
+
 ## Essential Setup
 Before coding, ALWAYS run:
 ```bash
