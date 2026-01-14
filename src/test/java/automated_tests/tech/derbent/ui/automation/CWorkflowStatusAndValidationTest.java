@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assumptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,6 +57,12 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 	@DisplayName("✅ Test workflow status combobox appears for workflow entities")
 	void testWorkflowStatusComboboxAppears() {
 		LOGGER.info("🚀 Starting workflow status combobox test...");
+		// Check if browser is available
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 
@@ -131,6 +138,12 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 	@DisplayName("✅ Test save button disabled when name field is empty")
 	void testSaveButtonDisabledWithEmptyName() {
 		LOGGER.info("🚀 Starting name field validation test...");
+		// Check if browser is available
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 
@@ -215,6 +228,12 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 	@DisplayName("✅ Test name validation on multiple entity types")
 	void testNameValidationOnMultipleEntities() {
 		LOGGER.info("🚀 Starting multi-entity name validation test...");
+		// Check if browser is available
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 

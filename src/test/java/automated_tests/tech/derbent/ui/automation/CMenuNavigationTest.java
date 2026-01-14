@@ -143,6 +143,12 @@ public class CMenuNavigationTest extends CBaseUITest {
 	@DisplayName ("✅ Login and browse all hierarchical menu items")
 	void testMenuNavigation() {
 		LOGGER.info("🚀 Starting hierarchical menu navigation test...");
+		// Check if browser is available
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 			// Login

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assumptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -803,6 +804,12 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	@DisplayName ("✅ Comprehensive test of all CPageTestAuxillary navigation buttons")
 	void testAllAuxillaryPages() {
 		LOGGER.info("🚀 Starting comprehensive CPageTestAuxillary test suite...");
+		// Check if browser is available
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 			// Step 1: Login to application
