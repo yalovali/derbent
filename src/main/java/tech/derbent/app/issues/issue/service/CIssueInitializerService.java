@@ -85,6 +85,20 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+		// Clear existing issues for this project to avoid duplicate key violations
+		final CIssueService issueService = (CIssueService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		final List<CIssue> existingIssues = issueService.findAll();
+		if (!existingIssues.isEmpty()) {
+			LOGGER.info("Clearing {} existing issues for project: {}", existingIssues.size(), project.getName());
+			for (final CIssue existingIssue : existingIssues) {
+				try {
+					issueService.delete(existingIssue);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not delete existing issue {}: {}", existingIssue.getId(), e.getMessage());
+				}
+			}
+		}
+		
 		final String[][] nameAndDescriptions = {
 				{ "Login button not responding", "Button click event not firing on login page" },
 				{ "Data validation error", "Form submission fails with incorrect validation message" },

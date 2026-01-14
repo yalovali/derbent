@@ -352,6 +352,14 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
+			} else if (!hasDataProvider && (java.util.Set.class.isAssignableFrom(fieldType) 
+					|| java.util.List.class.isAssignableFrom(fieldType) 
+					|| java.util.Collection.class.isAssignableFrom(fieldType))) {
+				// Collection fields without data provider (e.g., OneToMany relationships like attachments, comments)
+				// These should be handled by separate specialized components, not in the main form
+				LOGGER.debug("Skipping collection field '{}' of type {} - handled by separate component", 
+					fieldInfo.getFieldName(), fieldType.getSimpleName());
+				return null; // Return null to skip this field in form
 			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class) {
 				// Integer types
 				component = createIntegerField(fieldInfo, binder);
@@ -396,7 +404,12 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				Check.isTrue(false, "Component field [" + fieldInfo.getFieldName() + "], unsupported field type [" + fieldType.getSimpleName()
 						+ "] for field [" + fieldInfo.getDisplayName() + "]");
 			}
-			Objects.requireNonNull(component, "Component for field " + fieldInfo.getFieldName() + " of type " + fieldType.getSimpleName());
+			
+			// Allow null component for fields that should be skipped (handled by separate components)
+			if (component == null) {
+				return null;
+			}
+			
 			setRequiredIndicatorVisible(fieldInfo, component);
 			// dont use helper text for Checkbox components setHelperText(meta, component);
 			setComponentWidth(component, fieldInfo.getWidth());
@@ -928,7 +941,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		try {
 			Check.notNull(fieldInfo, "field");
 			final Component component = createComponentForField(contentOwner, fieldInfo, binder);
-			Check.notNull(component, "Component for field " + fieldInfo.getFieldName());
+			
+			// Allow null components for fields that should be skipped (e.g., collection fields handled separately)
+			if (component == null) {
+				LOGGER.debug("Skipping field '{}' - component creation returned null (handled separately)", fieldInfo.getFieldName());
+				return null;
+			}
+			
 			assignDeterministicComponentId(component, fieldInfo, binder);
 			// Navigation button is now integrated into CNavigableComboBox
 			final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
