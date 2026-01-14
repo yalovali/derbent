@@ -112,6 +112,26 @@ run_crud_test() {
     run_comprehensive_test
 }
 
+# Function to run recent features CRUD test
+run_recent_features_test() {
+    echo "🧪 Running Recent Features CRUD Test..."
+    echo "========================================"
+    echo "This test will:"
+    echo "  1. Test Issues & Bug Tracking CRUD operations"
+    echo "  2. Test Teams Management CRUD operations"
+    echo "  3. Test Attachments upload/download/delete"
+    echo "  4. Test Comments add/edit/delete"
+    echo "  5. Verify all recent commits (last 3 days) features"
+    echo ""
+    
+    # Show options menu if INTERACTIVE mode is set
+    if [ "${INTERACTIVE_MODE:-false}" = "true" ]; then
+        show_options_menu
+    fi
+    
+    run_test "automated_tests.tech.derbent.ui.automation.CRecentFeaturesCrudTest"
+}
+
 # Function to run workflow status and validation test
 run_workflow_validation_test() {
     echo "🧪 Running Workflow Status and Name Validation Test..."
@@ -323,6 +343,7 @@ OPTIONS:
     comprehensive   Run comprehensive page tests (all views + CRUD operations)
     all-views       Navigate through all application views and capture screenshots
     crud            Test CRUD operations on all pages with toolbars
+    recent-features Test recent features (Issues, Teams, Attachments, Comments)
     workflow-validation  Test workflow status combobox and name field validation
     clean           Clean test artifacts (screenshots, reports)
     install         Install Playwright browsers
@@ -398,6 +419,14 @@ TEST DESCRIPTIONS:
                     - Verifies form dialogs open and close correctly
                     - Captures screenshots of each operation (if enabled)
     
+    recent-features Test recent features from last 3 days (2-3 minutes)
+                    - Tests Issues & Bug Tracking CRUD operations
+                    - Tests Teams Management CRUD operations
+                    - Tests Attachments upload/download/delete
+                    - Tests Comments add/edit/delete functionality
+                    - Verifies all recent commits features working
+                    - Captures detailed screenshots at each step (if enabled)
+    
     workflow-validation  Workflow status and name validation testing (1-2 minutes)
                     - Tests status combobox appears for workflow entities
                     - Verifies status combobox shows valid workflow transitions
@@ -450,6 +479,9 @@ case "${1:-menu}" in
         ;;
     crud)
         run_crud_test
+        ;;
+    recent-features)
+        run_recent_features_test
         ;;
     workflow-validation)
         run_workflow_validation_test
