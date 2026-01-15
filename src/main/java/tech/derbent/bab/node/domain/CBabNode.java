@@ -23,6 +23,10 @@ import tech.derbent.base.users.domain.CUser;
 @Inheritance (strategy = InheritanceType.JOINED)
 public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 
+	public static final String DEFAULT_COLOR = "#4CAF50"; // Green for BAB nodes
+	public static final String DEFAULT_ICON = "vaadin:cluster";
+	public static final String ENTITY_TITLE_PLURAL = "BAB Nodes";
+	public static final String ENTITY_TITLE_SINGULAR = "BAB Node";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNode.class);
 	private static final long serialVersionUID = 1L;
 	@ManyToOne (fetch = FetchType.EAGER)
