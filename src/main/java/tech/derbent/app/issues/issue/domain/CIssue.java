@@ -17,7 +17,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -268,7 +267,7 @@ public class CIssue extends CProjectItem<CIssue>
 		if (issueResolution == null) {
 			issueResolution = EIssueResolution.NONE;
 		}
-		LOGGER.debug("Issue defaults initialized: severity={}, priority={}, resolution={}", issueSeverity, issuePriority, issueResolution);
+		// LOGGER.debug("Issue defaults initialized: severity={}, priority={}, resolution={}", issueSeverity, issuePriority, issueResolution);
 	}
 
 	public void setActualResult(final String actualResult) { this.actualResult = actualResult; }

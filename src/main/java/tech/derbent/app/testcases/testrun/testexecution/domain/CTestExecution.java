@@ -28,84 +28,65 @@ public class CTestExecution extends CEntityOfProject<CTestExecution> {
 	public static final String ENTITY_TITLE_PLURAL = "Test Executions";
 	public static final String ENTITY_TITLE_SINGULAR = "Test Execution";
 	public static final String VIEW_NAME = "Test Execution View";
-
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "testcase_id", nullable = false)
 	@AMetaData (
-			displayName = "Test Case", required = true, readOnly = false,
-			description = "Test case being executed", hidden = false,
+			displayName = "Test Case", required = true, readOnly = false, description = "Test case being executed", hidden = false,
 			dataProviderBean = "CTestCaseService"
 	)
 	private CTestCase testCase;
-
 	@Enumerated (EnumType.STRING)
 	@Column (name = "result", nullable = true, length = 20)
-	@AMetaData (
-			displayName = "Result", required = false, readOnly = false,
-			description = "Test execution result", hidden = false
-	)
+	@AMetaData (displayName = "Result", required = false, readOnly = false, description = "Test execution result", hidden = false)
 	private CTestResult result = CTestResult.NOT_EXECUTED;
-
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "executed_by_id", nullable = true)
 	@AMetaData (
-			displayName = "Executed By", required = false, readOnly = false,
-			description = "User who executed the test", hidden = false,
+			displayName = "Executed By", required = false, readOnly = false, description = "User who executed the test", hidden = false,
 			dataProviderBean = "CUserService"
 	)
 	private CUser executedBy;
-
 	@Column (name = "execution_date", nullable = true)
-	@AMetaData (
-			displayName = "Execution Date", required = false, readOnly = false,
-			description = "Date and time of test execution", hidden = false
-	)
+	@AMetaData (displayName = "Execution Date", required = false, readOnly = false, description = "Date and time of test execution", hidden = false)
 	private LocalDateTime executionDate;
-
 	@Column (name = "execution_duration_ms", nullable = true)
 	@AMetaData (
-			displayName = "Duration (ms)", required = false, readOnly = false,
-			description = "Test execution duration in milliseconds", hidden = false
+			displayName = "Duration (ms)", required = false, readOnly = false, description = "Test execution duration in milliseconds", hidden = false
 	)
 	private Long executionDurationMs;
-
 	@Column (nullable = true, length = 5000)
 	@Size (max = 5000)
 	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false,
-			description = "Execution notes and observations", hidden = false, maxLength = 5000
+			displayName = "Notes", required = false, readOnly = false, description = "Execution notes and observations", hidden = false,
+			maxLength = 5000
 	)
 	private String notes;
-
 	@Column (nullable = true, length = 5000)
 	@Size (max = 5000)
 	@AMetaData (
-			displayName = "Actual Results", required = false, readOnly = false,
-			description = "Actual results observed during execution", hidden = false, maxLength = 5000
+			displayName = "Actual Results", required = false, readOnly = false, description = "Actual results observed during execution",
+			hidden = false, maxLength = 5000
 	)
 	private String actualResults;
-
 	@Column (nullable = true, length = 5000)
 	@Size (max = 5000)
 	@AMetaData (
-			displayName = "Error Details", required = false, readOnly = false,
-			description = "Error details if test failed", hidden = false, maxLength = 5000
+			displayName = "Error Details", required = false, readOnly = false, description = "Error details if test failed", hidden = false,
+			maxLength = 5000
 	)
 	private String errorDetails;
-
 	@Column (name = "build_number", nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Build Number", required = false, readOnly = false,
-			description = "Build/version number of software tested", hidden = false, maxLength = 100
+			displayName = "Build Number", required = false, readOnly = false, description = "Build/version number of software tested", hidden = false,
+			maxLength = 100
 	)
 	private String buildNumber;
-
 	@Column (name = "environment", nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Environment", required = false, readOnly = false,
-			description = "Test environment (dev, staging, prod)", hidden = false, maxLength = 100
+			displayName = "Environment", required = false, readOnly = false, description = "Test environment (dev, staging, prod)", hidden = false,
+			maxLength = 100
 	)
 	private String environment;
 
@@ -120,6 +101,26 @@ public class CTestExecution extends CEntityOfProject<CTestExecution> {
 		initializeDefaults();
 	}
 
+	public String getActualResults() { return actualResults; }
+
+	public String getBuildNumber() { return buildNumber; }
+
+	public String getEnvironment() { return environment; }
+
+	public String getErrorDetails() { return errorDetails; }
+
+	public CUser getExecutedBy() { return executedBy; }
+
+	public LocalDateTime getExecutionDate() { return executionDate; }
+
+	public Long getExecutionDurationMs() { return executionDurationMs; }
+
+	public String getNotes() { return notes; }
+
+	public CTestResult getResult() { return result; }
+
+	public CTestCase getTestCase() { return testCase; }
+
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
@@ -128,73 +129,53 @@ public class CTestExecution extends CEntityOfProject<CTestExecution> {
 		}
 	}
 
-	public CTestCase getTestCase() { return testCase; }
-
-	public void setTestCase(final CTestCase testCase) {
-		this.testCase = testCase;
-		updateLastModified();
-	}
-
-	public CTestResult getResult() { return result; }
-
-	public void setResult(final CTestResult result) {
-		this.result = result;
-		updateLastModified();
-	}
-
-	public CUser getExecutedBy() { return executedBy; }
-
-	public void setExecutedBy(final CUser executedBy) {
-		this.executedBy = executedBy;
-		updateLastModified();
-	}
-
-	public LocalDateTime getExecutionDate() { return executionDate; }
-
-	public void setExecutionDate(final LocalDateTime executionDate) {
-		this.executionDate = executionDate;
-		updateLastModified();
-	}
-
-	public Long getExecutionDurationMs() { return executionDurationMs; }
-
-	public void setExecutionDurationMs(final Long executionDurationMs) {
-		this.executionDurationMs = executionDurationMs;
-		updateLastModified();
-	}
-
-	public String getNotes() { return notes; }
-
-	public void setNotes(final String notes) {
-		this.notes = notes;
-		updateLastModified();
-	}
-
-	public String getActualResults() { return actualResults; }
-
 	public void setActualResults(final String actualResults) {
 		this.actualResults = actualResults;
 		updateLastModified();
 	}
-
-	public String getErrorDetails() { return errorDetails; }
-
-	public void setErrorDetails(final String errorDetails) {
-		this.errorDetails = errorDetails;
-		updateLastModified();
-	}
-
-	public String getBuildNumber() { return buildNumber; }
 
 	public void setBuildNumber(final String buildNumber) {
 		this.buildNumber = buildNumber;
 		updateLastModified();
 	}
 
-	public String getEnvironment() { return environment; }
-
 	public void setEnvironment(final String environment) {
 		this.environment = environment;
+		updateLastModified();
+	}
+
+	public void setErrorDetails(final String errorDetails) {
+		this.errorDetails = errorDetails;
+		updateLastModified();
+	}
+
+	public void setExecutedBy(final CUser executedBy) {
+		this.executedBy = executedBy;
+		updateLastModified();
+	}
+
+	public void setExecutionDate(final LocalDateTime executionDate) {
+		this.executionDate = executionDate;
+		updateLastModified();
+	}
+
+	public void setExecutionDurationMs(final Long executionDurationMs) {
+		this.executionDurationMs = executionDurationMs;
+		updateLastModified();
+	}
+
+	public void setNotes(final String notes) {
+		this.notes = notes;
+		updateLastModified();
+	}
+
+	public void setResult(final CTestResult result) {
+		this.result = result;
+		updateLastModified();
+	}
+
+	public void setTestCase(final CTestCase testCase) {
+		this.testCase = testCase;
 		updateLastModified();
 	}
 }
