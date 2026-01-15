@@ -4,6 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * CPageTestNewEntities - Focused tests for newly added entities (this week)
@@ -11,6 +14,8 @@ import org.slf4j.LoggerFactory;
  * Tests Financial, Test Management, and Team/Issue entities added recently
  * with deep CRUD validation including attachments and comments sections.
  */
+@SpringBootTest(classes = tech.derbent.Application.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@ActiveProfiles("h2")
 public class CPageTestNewEntities extends CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestNewEntities.class);
@@ -134,7 +139,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 	}
 
 	private void navigateToEntityPage(String entityName) {
-		String url = getBaseUrl() + "/cdynamicpagerouter/" + entityName;
+		String url = "http://localhost:" + port + "/cdynamicpagerouter/" + entityName;
 		LOGGER.info("      🔗 Navigating to: {}", url);
 		page.navigate(url);
 		page.waitForLoadState();
