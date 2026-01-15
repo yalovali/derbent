@@ -60,7 +60,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
     @Override
     protected String getEntityRouteIdField() {
-        return null;
+        return ENTITY_ID_FIELD;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
     @Override
     public ISessionService getSessionService() {
-        return null;
+        return sessionService;
     }
 
     @Override

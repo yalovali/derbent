@@ -67,7 +67,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	public CPageService<CGanntViewEntity> getPageService() { return pageService; }
 
 	@Override
-	public ISessionService getSessionService() { return null; }
+	public ISessionService getSessionService() { return sessionService; }
 
 	@Override
 	public void selectFirstInGrid() {/**/
