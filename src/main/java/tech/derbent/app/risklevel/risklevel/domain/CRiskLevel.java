@@ -1,17 +1,27 @@
 package tech.derbent.app.risklevel.risklevel.domain;
 
+import java.util.HashSet;
+import java.util.Set;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.api.projects.domain.CProject;
 
 @Entity
 @Table (name = "\"crisklevel\"") // Using quoted identifiers for PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "risklevel_id"))
-public class CRiskLevel extends CProjectItem<CRiskLevel> {
+public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#7A6E58"; // Darker border - risk levels
 	public static final String DEFAULT_ICON = "vaadin:chart-3d";
@@ -24,6 +34,34 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> {
 			hidden = false
 	)
 	private Integer riskLevel;
+
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "risklevel_id")
+	@AMetaData(
+		displayName = "Attachments",
+		required = false,
+		readOnly = false,
+		description = "File attachments for this entity",
+		hidden = false,
+		dataProviderBean = "CAttachmentService",
+		createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
+
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "risklevel_id")
+	@AMetaData(
+		displayName = "Comments",
+		required = false,
+		readOnly = false,
+		description = "Comments for this entity",
+		hidden = false,
+		dataProviderBean = "CCommentService",
+		createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 
 	/** Default constructor for JPA. */
 	public CRiskLevel() {
@@ -48,6 +86,35 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> {
 
 	public void setRiskLevel(final Integer riskLevel) {
 		this.riskLevel = riskLevel;
+		updateLastModified();
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
+
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) {
+		this.attachments = attachments;
+	}
+
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
 		updateLastModified();
 	}
 }
