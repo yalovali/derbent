@@ -305,17 +305,32 @@ run_test() {
     echo "   Slowdown: ${SLOWMO}ms"
     echo "   Viewport: ${VIEWPORT_WIDTH}x${VIEWPORT_HEIGHT}"
     echo ""
+
+    # Prepare live log file
+    local timestamp
+    timestamp=$(date +%Y%m%d-%H%M%S)
+    local LOG_DIR="target/test-logs"
+    mkdir -p "$LOG_DIR"
+    local LOG_FILE="$LOG_DIR/${test_class##*.}-${timestamp}.log"
+    echo "📝 Live console log: $LOG_FILE"
     
     local test_result=0
     if [ "$SHOW_CONSOLE" = "true" ]; then
-        mvn test -Dtest="$test_class" \
+        # Fail-fast on exceptions; monitor script writes to /tmp, copy to project log
+        ./scripts/check-test-exceptions.sh mvn test -Dtest="$test_class" \
             -Dspring.profiles.active="$spring_profiles" \
             "${schema_arg[@]}" \
             "${reload_arg[@]}" \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
-            -Dplaywright.viewport.height=$VIEWPORT_HEIGHT || test_result=$?
+            -Dplaywright.viewport.height=$VIEWPORT_HEIGHT
+        test_result=$?
+        # Preserve live log into project directory
+        if [ -f "/tmp/derbent-test-exceptions.log" ]; then
+            cp "/tmp/derbent-test-exceptions.log" "$LOG_FILE" || true
+            echo "📋 Live log copied to: $LOG_FILE"
+        fi
     else
         mvn test -Dtest="$test_class" \
             -Dspring.profiles.active="$spring_profiles" \
@@ -324,7 +339,7 @@ run_test() {
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
-            -Dplaywright.viewport.height=$VIEWPORT_HEIGHT > /dev/null 2>&1 || test_result=$?
+            -Dplaywright.viewport.height=$VIEWPORT_HEIGHT > "$LOG_FILE" 2>&1 || test_result=$?
     fi
     
     if [ $test_result -eq 0 ]; then

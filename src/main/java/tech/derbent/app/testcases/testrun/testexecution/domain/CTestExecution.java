@@ -18,7 +18,7 @@ import tech.derbent.app.testcases.testcase.domain.CTestCase;
 import tech.derbent.base.users.domain.CUser;
 
 /** CTestExecution - Entity tracking test case execution and results. */
-@Entity
+@Entity (name = "CTestExecutionRecord")
 @Table (name = "ctestexecution")
 @AttributeOverride (name = "id", column = @Column (name = "testexecution_id"))
 public class CTestExecution extends CEntityOfProject<CTestExecution> {
