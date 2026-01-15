@@ -93,7 +93,8 @@ final CBabDeviceService deviceService = (CBabDeviceService) CSpringContext.getBe
 CEntityRegistry.getServiceClassForEntity(clazz));
 final CBabNodeService nodeService = (CBabNodeService) CSpringContext.getBean(CBabNodeService.class);
 
-CBabDevice device = deviceService.getUniqueDevice().orElse(null);
+// Use overloaded method that accepts company parameter (no session context during initialization)
+CBabDevice device = deviceService.getUniqueDevice(company).orElse(null);
 
 if (device == null) {
 device = new CBabDevice("IoT Gateway Device", company);

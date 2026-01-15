@@ -53,6 +53,19 @@ public class CBabDeviceService extends CAbstractService<CBabDevice>
 	}
 
 	/**
+	 * Get the unique device for a specific company.
+	 * Used during initialization when no session context exists.
+	 * 
+	 * @param company the company
+	 * @return optional device
+	 */
+	@Transactional(readOnly = true)
+	public Optional<CBabDevice> getUniqueDevice(final CCompany company) {
+		Objects.requireNonNull(company, "Company cannot be null");
+		return repository.findByCompanyId(company.getId());
+	}
+
+	/**
 	 * Get or create the unique device for the current company.
 	 * 
 	 * @return the device (existing or newly created)
