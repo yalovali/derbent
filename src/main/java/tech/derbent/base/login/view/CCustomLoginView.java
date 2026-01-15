@@ -296,7 +296,14 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		errorMessage.getStyle().set("min-height", "20px");
 		resetDbButton.setMinWidth("120px");
 		resetDbButton.setMinWidth("120px");
-		final Paragraph passwordHint = new Paragraph("Default: admin/test123");
+		
+		// Get active profile(s) to display
+		String activeProfiles = String.join(", ", environment.getActiveProfiles());
+		if (activeProfiles.isEmpty()) {
+			activeProfiles = "default";
+		}
+		
+		final Paragraph passwordHint = new Paragraph("Default: admin/test123 | Profile: " + activeProfiles);
 		passwordHint.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
 		passwordHint.setWidthFull();
 		// Back to original login link
