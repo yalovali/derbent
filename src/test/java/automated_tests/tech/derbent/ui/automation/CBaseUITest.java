@@ -35,7 +35,6 @@ import tech.derbent.api.projects.domain.CProject;
  * authentication workflows - Navigation between views using ID-based selectors - CRUD operations testing - Form validation and ComboBox testing -
  * Grid interactions and data verification - Screenshot capture for debugging - Cross-view data consistency testing */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
-@ActiveProfiles ("test")
 @SuppressWarnings ("static-method")
 public abstract class CBaseUITest {
 
