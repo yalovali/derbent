@@ -22,6 +22,8 @@ import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.base.users.domain.CUser;
 
 @Entity
@@ -30,7 +32,7 @@ import tech.derbent.base.users.domain.CUser;
 	columnNames = {"name", "company_id"}
 ))
 @AttributeOverride (name = "id", column = @Column (name = "team_id"))
-public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasAttachments {
+public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#4B7F82"; // CDE Green - collaborative/people
 	public static final String DEFAULT_ICON = "vaadin:group";
@@ -74,6 +76,15 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
 
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "team_id")
+	@AMetaData (
+		displayName = "Comments", required = false, readOnly = false,
+		description = "Comments for this team", hidden = false,
+		dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
+
 	public CTeam() {
 		super();
 	}
@@ -112,8 +123,22 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 	}
 
 	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
+	@Override
 	public void setAttachments(final Set<CAttachment> attachments) {
 		this.attachments = attachments != null ? attachments : new HashSet<>();
+		updateLastModified();
+	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments != null ? comments : new HashSet<>();
 		updateLastModified();
 	}
 
@@ -128,6 +153,9 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 		}
 		if (attachments != null) {
 			attachments.size();
+		}
+		if (comments != null) {
+			comments.size();
 		}
 	}
 

@@ -91,6 +91,9 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			// Attachments section - standard section for ALL entities
 			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
 			
+			// Comments section - standard section for discussion entities
+			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(scr, clazz);
+			
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

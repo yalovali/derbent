@@ -40,13 +40,15 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 
 @Entity
 @Table (name = "cuser", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
 		"login", "company_id"
 })) // Using quoted identifier to ensure exact case matching in
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
-public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator, IHasIcon, IHasAttachments {
+public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFieldInfoGenerator, IHasIcon, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#6CAFB0"; // CDE Light Green - individual people
 	public static final String DEFAULT_ICON = "vaadin:user";
@@ -128,6 +130,14 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			hidden = false, dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "user_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this user",
+			hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "attribute_display_sections_as_tabs", nullable = true)
 	@AMetaData (
 			displayName = "Display Sections As Tabs", required = false, readOnly = false, defaultValue = "true",
@@ -248,6 +258,15 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			attachments = new HashSet<>();
 		}
 		return attachments;
+	}
+
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
 	}
 
 	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
@@ -465,6 +484,9 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setAttributeDisplaySectionsAsTabs(final Boolean attributeDisplaySectionsAsTabs) {
 		this.attributeDisplaySectionsAsTabs = attributeDisplaySectionsAsTabs;

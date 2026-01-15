@@ -34,6 +34,8 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
 
@@ -41,7 +43,7 @@ import tech.derbent.app.meetings.domain.CMeeting;
 @Entity
 @Table (name = "csprint")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_id"))
-public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasIcon, IHasAttachments {
+public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasIcon, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - time-boxed work
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
@@ -62,6 +64,14 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "sprint_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this sprint", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@Transient
 	@AMetaData (
 			displayName = "Item Detail", required = false, readOnly = false, description = "Item fields", hidden = false,
@@ -215,6 +225,15 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			attachments = new HashSet<>();
 		}
 		return attachments;
+	}
+
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
 	}
 
 	@Override
@@ -457,6 +476,9 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
 	public void setColor(final String color) {
