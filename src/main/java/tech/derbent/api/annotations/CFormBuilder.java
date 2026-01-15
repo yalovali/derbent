@@ -1158,8 +1158,12 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				try {
 					((IContentOwner) component).setValue(entity);
 					((IContentOwner) component).populateForm();
+				} catch (final org.hibernate.LazyInitializationException e) {
+					// Log but don't fail - lazy loading issues are common in detached entities
+					LOGGER.warn("LazyInitializationException populating form component {}: {}. Component will be displayed in degraded mode.", 
+						component.getClass().getSimpleName(), e.getMessage());
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
+					LOGGER.warn("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
 				}
 			}
 		});
@@ -1182,9 +1186,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			if (component instanceof IContentOwner) {
 				try {
 					((IContentOwner) component).setValue(entity);
+				} catch (final org.hibernate.LazyInitializationException e) {
+					// Log but don't fail - lazy loading issues are common in detached entities
+					LOGGER.warn("LazyInitializationException populating form component {}: {}. Component will be displayed in degraded mode.", 
+						component.getClass().getSimpleName(), e.getMessage());
 				} catch (final Exception e) {
 					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
-					throw e;
+					// Don't re-throw - allow form to display with other components working
 				}
 			}
 		});

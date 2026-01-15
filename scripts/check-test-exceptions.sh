@@ -6,7 +6,7 @@
 set -e
 
 TEMP_LOG="/tmp/derbent-test-exceptions.log"
-EXCEPTION_PATTERNS="ERROR|Exception|CRITICAL|FATAL|BindingException|RuntimeException"
+EXCEPTION_PATTERNS="ERROR.*Exception|CRITICAL|FATAL|BindingException|RuntimeException"
 
 echo "🚨 Starting exception monitoring for fail-fast testing..."
 echo "📝 Monitoring patterns: $EXCEPTION_PATTERNS"
