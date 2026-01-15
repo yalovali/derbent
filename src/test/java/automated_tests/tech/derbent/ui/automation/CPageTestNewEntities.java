@@ -78,6 +78,24 @@ public class CPageTestNewEntities extends CBaseUITest {
 	}
 
 	@Test
+	@DisplayName("Test Single Entity - For targeted testing")
+	void testSingleEntity() {
+		String entityName = System.getProperty("entity.name");
+		if (entityName == null || entityName.isEmpty()) {
+			LOGGER.warn("⚠️  No entity.name system property set, skipping test");
+			return;
+		}
+		
+		LOGGER.info("🎯 ========================================");
+		LOGGER.info("🎯 TESTING SINGLE ENTITY: {}", entityName);
+		LOGGER.info("🎯 ========================================");
+		
+		testEntityCrudWithSections(entityName);
+		
+		LOGGER.info("✅ Single entity test completed for: {}", entityName);
+	}
+
+	@Test
 	@DisplayName("Test Team/Issue Entities - Issues, Teams")
 	void testTeamIssueEntities() {
 		LOGGER.info("👥 ========================================");
