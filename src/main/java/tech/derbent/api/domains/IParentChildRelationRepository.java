@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entity.repository.IAbstractRepository;
+import tech.derbent.api.entity.service.IAbstractRepository;
 
 /** Repository interface for managing parent-child relationships between project items.
  * Provides queries for finding relationships, checking for circular dependencies,

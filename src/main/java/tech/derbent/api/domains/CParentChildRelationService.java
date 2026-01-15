@@ -13,7 +13,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 
 /** Service for managing parent-child relationships between project items.
@@ -28,6 +28,11 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	public CParentChildRelationService(final IParentChildRelationRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		this.repository = repository;
+	}
+	
+	@Override
+	protected Class<CParentChildRelation> getEntityClass() {
+		return CParentChildRelation.class;
 	}
 
 	/** Establish a parent-child relationship between two project items.
@@ -168,18 +173,26 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	}
 
 	/** Check if a project item can have children based on its entity type configuration.
+	 * Note: Not all CProjectItem subclasses have getEntityType() method.
+	 * This method uses reflection to check if the type allows children.
 	 * @param item the project item to check
-	 * @return true if the item's type allows children */
+	 * @return true if the item's type allows children, or true by default if type cannot be determined */
 	@Transactional (readOnly = true)
 	public boolean canHaveChildren(final CProjectItem<?> item) {
 		if (item == null) {
 			return false;
 		}
-		final CTypeEntity<?> entityType = item.getEntityType();
-		if (entityType == null) {
-			// If no entity type is set, default to allowing children
-			return true;
+		try {
+			// Use reflection to get entityType (not all CProjectItem subclasses have this method)
+			final java.lang.reflect.Method getEntityTypeMethod = item.getClass().getMethod("getEntityType");
+			final Object entityType = getEntityTypeMethod.invoke(item);
+			if (entityType instanceof CTypeEntity) {
+				return ((CTypeEntity<?>) entityType).getCanHaveChildren();
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not determine entity type for {}, defaulting to allowing children", item.getClass().getSimpleName());
 		}
-		return entityType.getCanHaveChildren();
+		// If no entity type is set or method doesn't exist, default to allowing children
+		return true;
 	}
 }
