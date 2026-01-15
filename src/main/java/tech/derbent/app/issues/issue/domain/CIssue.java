@@ -128,9 +128,8 @@ public class CIssue extends CProjectItem<CIssue>
 	private Set<CAttachment> attachments = new HashSet<>();
 	// Sprint item relationship - CIssue owns the relationship
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn (name = "sprintitem_id", nullable = false)
-	@NotNull (message = "Sprint item is required for progress tracking")
-	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this activity", hidden = true)
+	@JoinColumn (name = "sprintitem_id", nullable = true)
+	@AMetaData (displayName = "Sprint Item", required = false, readOnly = true, description = "Progress tracking for this activity", hidden = true)
 	private CSprintItem sprintItem;
 	// Story points for estimation
 	@Column (nullable = true)

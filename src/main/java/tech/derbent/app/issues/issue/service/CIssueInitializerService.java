@@ -112,6 +112,10 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 					final CIssue issue = (CIssue) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					issue.setAssignedTo(user);
+					
+					// Set required enum fields
+					issue.setIssueSeverity(tech.derbent.app.issues.issue.domain.EIssueSeverity.MINOR);
+					issue.setIssuePriority(tech.derbent.app.issues.issue.domain.EIssuePriority.MEDIUM);
 				});
 	}
 }
