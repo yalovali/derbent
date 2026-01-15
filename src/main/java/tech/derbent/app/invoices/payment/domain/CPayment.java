@@ -15,7 +15,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityDB.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.app.invoices.invoice.domain.CInvoice;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.base.users.domain.CUser;
@@ -120,8 +120,8 @@ public class CPayment extends CEntityDB<CPayment> {
 		initializeDefaults();
 	}
 
-	@Override
 	protected void initializeDefaults() {
+		super.initializeDefaults();
 		if (paymentDate == null) {
 			paymentDate = LocalDate.now();
 		}

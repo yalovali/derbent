@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityDB.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.app.testcases.teststep.domain.CTestStep;
 
 /** CTestStepResult - Result of executing a specific test step within a test case.
@@ -105,8 +105,8 @@ public class CTestStepResult extends CEntityDB<CTestStepResult> {
 		initializeDefaults();
 	}
 
-	@Override
 	protected void initializeDefaults() {
+		super.initializeDefaults();
 		if (result == null) {
 			result = CTestResult.NOT_EXECUTED;
 		}

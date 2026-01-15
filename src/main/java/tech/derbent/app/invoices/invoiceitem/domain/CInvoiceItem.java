@@ -13,7 +13,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityDB.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.app.invoices.invoice.domain.CInvoice;
 
 /** CInvoiceItem - Line item on an invoice. */
@@ -101,8 +101,8 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 		initializeDefaults();
 	}
 
-	@Override
 	protected void initializeDefaults() {
+		super.initializeDefaults();
 		if (itemOrder == null) itemOrder = 1;
 		if (quantity == null) quantity = BigDecimal.ONE;
 		if (unitPrice == null) unitPrice = BigDecimal.ZERO;

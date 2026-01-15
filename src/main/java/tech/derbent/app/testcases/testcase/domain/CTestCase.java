@@ -49,22 +49,6 @@ public class CTestCase extends CProjectItem<CTestCase>
 	)
 	private CTestCaseType entityType;
 
-	@Column (nullable = true, length = 5000)
-	@Size (max = 5000)
-	@AMetaData (
-			displayName = "Test Steps", required = false, readOnly = false,
-			description = "Step-by-step instructions to execute the test", hidden = false, maxLength = 5000
-	)
-	private String testSteps;
-
-	@Column (nullable = true, length = 5000)
-	@Size (max = 5000)
-	@AMetaData (
-			displayName = "Expected Results", required = false, readOnly = false,
-			description = "Expected outcome of the test", hidden = false, maxLength = 5000
-	)
-	private String expectedResults;
-
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
@@ -208,20 +192,6 @@ public class CTestCase extends CProjectItem<CTestCase>
 				"Type entity company id " + typeEntity.getCompany().getId() + " does not match test case project company id "
 						+ getProject().getCompany().getId());
 		entityType = (CTestCaseType) typeEntity;
-		updateLastModified();
-	}
-
-	public String getTestSteps() { return testSteps; }
-
-	public void setTestSteps(final String testSteps) {
-		this.testSteps = testSteps;
-		updateLastModified();
-	}
-
-	public String getExpectedResults() { return expectedResults; }
-
-	public void setExpectedResults(final String expectedResults) {
-		this.expectedResults = expectedResults;
 		updateLastModified();
 	}
 

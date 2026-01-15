@@ -5,7 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entityOfCompany.domain.CCompany;
+import tech.derbent.api.companies.domain.CCompany;
 
 /** CTestCaseType - Type entity for test case categorization. */
 @Entity

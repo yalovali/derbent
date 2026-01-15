@@ -15,7 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityDB.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.app.testcases.testcase.domain.CTestCase;
 
 /** CTestCaseResult - Result of executing a specific test case within a test run. */
@@ -107,7 +107,6 @@ public class CTestCaseResult extends CEntityDB<CTestCaseResult> {
 		initializeDefaults();
 	}
 
-	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 		if (result == null) {

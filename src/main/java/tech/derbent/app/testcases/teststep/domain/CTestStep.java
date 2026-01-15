@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityDB.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.app.testcases.testcase.domain.CTestCase;
 
 /** CTestStep - Entity representing individual test steps within a test case.
@@ -88,7 +88,6 @@ public class CTestStep extends CEntityDB<CTestStep> {
 		initializeDefaults();
 	}
 
-	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 		if (stepOrder == null) {
@@ -100,42 +99,36 @@ public class CTestStep extends CEntityDB<CTestStep> {
 
 	public void setTestCase(final CTestCase testCase) {
 		this.testCase = testCase;
-		updateLastModified();
 	}
 
 	public Integer getStepOrder() { return stepOrder; }
 
 	public void setStepOrder(final Integer stepOrder) {
 		this.stepOrder = stepOrder;
-		updateLastModified();
 	}
 
 	public String getAction() { return action; }
 
 	public void setAction(final String action) {
 		this.action = action;
-		updateLastModified();
 	}
 
 	public String getExpectedResult() { return expectedResult; }
 
 	public void setExpectedResult(final String expectedResult) {
 		this.expectedResult = expectedResult;
-		updateLastModified();
 	}
 
 	public String getTestData() { return testData; }
 
 	public void setTestData(final String testData) {
 		this.testData = testData;
-		updateLastModified();
 	}
 
 	public String getNotes() { return notes; }
 
 	public void setNotes(final String notes) {
 		this.notes = notes;
-		updateLastModified();
 	}
 
 	@Override
