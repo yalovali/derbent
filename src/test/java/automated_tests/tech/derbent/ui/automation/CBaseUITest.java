@@ -1424,7 +1424,8 @@ public abstract class CBaseUITest {
 		LOGGER.info("🧪 Setting up Playwright test environment...");
 		try {
 			// Read configuration from system properties
-			final boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
+			// DEFAULT TO VISIBLE (false) for better debugging
+			final boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "false"));
 			final int slowmo = Integer.parseInt(System.getProperty("playwright.slowmo", "0"));
 			final int viewportWidth = Integer.parseInt(System.getProperty("playwright.viewport.width", "1920"));
 			final int viewportHeight = Integer.parseInt(System.getProperty("playwright.viewport.height", "1080"));
