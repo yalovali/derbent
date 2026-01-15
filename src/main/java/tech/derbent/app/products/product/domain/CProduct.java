@@ -1,25 +1,33 @@
 package tech.derbent.app.products.product.domain;
 
+import java.util.HashSet;
+import java.util.Set;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.utils.Check;
-import tech.derbent.app.products.producttype.domain.CProductType;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.app.products.producttype.domain.CProductType;
 
 @Entity
 @Table (name = "\"cproduct\"")
 @AttributeOverride (name = "id", column = @Column (name = "product_id"))
-public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWorkflow<CProduct> {
+public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWorkflow<CProduct>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#6B8E23"; // X11 OliveDrab - product entities (darker)
 	public static final String DEFAULT_ICON = "vaadin:package";
@@ -33,6 +41,22 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 			dataProviderBean = "CProductTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProductType entityType;
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "product_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Attachments for this product", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "product_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this product", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@Column (nullable = true, length = 100)
 	@AMetaData (displayName = "Product Code", required = false, readOnly = false, description = "Unique product code or SKU", hidden = false)
 	private String productCode;
@@ -49,6 +73,22 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	}
 
 	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
+
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
+	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	public String getProductCode() { return productCode; }
@@ -62,6 +102,16 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
+	}
+
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) {
+		this.attachments = attachments;
+	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
 	}
 
 	@Override

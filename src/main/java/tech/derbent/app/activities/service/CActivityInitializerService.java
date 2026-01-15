@@ -57,6 +57,10 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
 			
 			/******************/
+			// Comments section - standard section for discussion entities
+			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(scr, clazz);
+			
+			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));

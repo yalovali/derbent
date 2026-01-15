@@ -1,0 +1,74 @@
+package tech.derbent.app.comments.service;
+
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.service.CDetailLinesService;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.utils.Check;
+import tech.derbent.app.comments.domain.CComment;
+
+/**
+ * Initializer service for CComment entities.
+ * 
+ * Provides standard comment section creation for ALL entity detail views.
+ * 
+ * **Key Feature**: addCommentsSection() ensures ALL entities have identical comment
+ * sections with consistent naming, behavior, and appearance.
+ * 
+ * **Important**: Comments are child entities with NO standalone views or pages.
+ * They are managed exclusively through their parent entities.
+ */
+public final class CCommentInitializerService extends CInitializerServiceBase {
+
+	private static final Class<?> clazz = CComment.class;
+	/** Standard field name - must match entity field name */
+	public static final String FIELD_NAME_COMMENTS = "comments";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentInitializerService.class);
+	/** Standard section name - same for ALL entities */
+	public static final String SECTION_NAME_COMMENTS = "Comments";
+
+	/**
+	 * Add standard Comments section to any entity detail view.
+	 * 
+	 * **This is the ONLY method that creates comment sections.**
+	 * ALL entity initializers (Activity, Risk, Meeting, Sprint, Project, User, etc.)
+	 * MUST call this method to ensure consistent comment sections.
+	 * 
+	 * Creates:
+	 * - Section header: "Comments"
+	 * - Field: "comments" (renders comment component via factory)
+	 * 
+	 * @param detailSection the detail section to add comments to
+	 * @param entityClass   the entity class (must implement IHasComments and have @OneToMany comments field)
+	 * @throws Exception if adding section fails
+	 */
+	public static void addCommentsSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
+		Check.notNull(detailSection, "detailSection cannot be null");
+		Check.notNull(entityClass, "entityClass cannot be null");
+		
+		try {
+			// Section header - IDENTICAL for all entities
+			detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_COMMENTS));
+			
+			// Comments field - IDENTICAL for all entities
+			// Renders via component factory (referenced in entity's @AMetaData)
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_COMMENTS));
+			
+			// LOGGER.debug("Added standard Comments section for {}", entityClass.getSimpleName());
+		} catch (final Exception e) {
+			LOGGER.error("Error adding Comments section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			throw e;
+		}
+	}
+
+	private CCommentInitializerService() {
+		// Utility class - no instantiation
+	}
+}

@@ -56,6 +56,9 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			// Attachments section - standard section for ALL entities
 			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, ENTITY_CLASS);
 			
+			// Comments section - standard section for discussion entities
+			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, ENTITY_CLASS);
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

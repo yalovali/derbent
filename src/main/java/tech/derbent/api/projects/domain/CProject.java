@@ -28,6 +28,8 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
@@ -40,7 +42,7 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 })
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 @AssociationOverride (name = "company", joinColumns = @JoinColumn (name = "company_id", nullable = false))
-public class CProject extends CEntityOfCompany<CProject> implements ISearchable, IHasStatusAndWorkflow<CProject>, IHasAttachments {
+public class CProject extends CEntityOfCompany<CProject> implements ISearchable, IHasStatusAndWorkflow<CProject>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - organizational entity
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
@@ -55,6 +57,14 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "project_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this project", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	// Type Management - concrete implementation of IHasStatusAndWorkflow
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -114,6 +124,15 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 			attachments = new HashSet<>();
 		}
 		return attachments;
+	}
+
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
 	}
 
 	public Long getCompanyId() { return getCompany() != null ? getCompany().getId() : null; }
@@ -202,6 +221,9 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	@Override
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
 	public void setCompany(final CCompany company) {
