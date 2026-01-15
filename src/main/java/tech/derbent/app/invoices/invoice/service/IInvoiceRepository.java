@@ -15,6 +15,20 @@ import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
 
 public interface IInvoiceRepository extends IProjectItemRespository<CInvoice> {
 
+	@Override
+	@Query("""
+			SELECT i FROM #{#entityName} i
+			LEFT JOIN FETCH i.attachments
+			LEFT JOIN FETCH i.comments
+			LEFT JOIN FETCH i.project
+			LEFT JOIN FETCH i.assignedTo
+			LEFT JOIN FETCH i.createdBy
+			LEFT JOIN FETCH i.status
+			LEFT JOIN FETCH i.entityType et
+			LEFT JOIN FETCH et.workflow
+			WHERE i.id = :id
+			""")
+	Optional<CInvoice> findById(@Param("id") Long id);
 
 
 

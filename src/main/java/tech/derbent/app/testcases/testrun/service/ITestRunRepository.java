@@ -13,6 +13,21 @@ import tech.derbent.app.testcases.testscenario.domain.CTestScenario;
 
 public interface ITestRunRepository extends IProjectItemRespository<CTestRun> {
 
+	@Override
+	@Query("""
+			SELECT tr FROM #{#entityName} tr
+			LEFT JOIN FETCH tr.attachments
+			LEFT JOIN FETCH tr.comments
+			LEFT JOIN FETCH tr.project
+			LEFT JOIN FETCH tr.assignedTo
+			LEFT JOIN FETCH tr.createdBy
+			LEFT JOIN FETCH tr.status
+			LEFT JOIN FETCH tr.entityType et
+			LEFT JOIN FETCH et.workflow
+			WHERE tr.id = :id
+			""")
+	Optional<CTestRun> findById(@Param("id") Long id);
+
 
 	@Override
 	@Query("""

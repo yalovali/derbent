@@ -24,10 +24,14 @@ public interface ITeamRepository extends IEntityOfCompanyRepository<CTeam> {
 	List<CTeam> listByCompanyForPageView(@Param ("company") CCompany company);
 
 	@Override
-	@Query ("SELECT t FROM #{#entityName} t " +
-		"LEFT JOIN FETCH t.company " +
-		"LEFT JOIN FETCH t.teamManager " +
-		"WHERE t.id = :id")
+	@Query("""
+		SELECT t FROM #{#entityName} t
+		LEFT JOIN FETCH t.attachments
+		LEFT JOIN FETCH t.comments
+		LEFT JOIN FETCH t.company
+		LEFT JOIN FETCH t.teamManager
+		WHERE t.id = :id
+		""")
 	Optional<CTeam> findById(@Param ("id") Long id);
 
 	@Query ("SELECT t FROM #{#entityName} t WHERE t.teamManager = :manager ORDER BY t.name ASC")

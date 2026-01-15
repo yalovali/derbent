@@ -14,8 +14,18 @@ public interface IBudgetRepository extends IEntityOfProjectRepository<CBudget> {
 	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :entityType")
 	long countByType(@Param ("entityType") CBudgetType type);
 	@Override
-	@Query (
-		"SELECT r FROM CBudget r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow " + "WHERE r.id = :id"
+	@Query ("""
+		SELECT r FROM CBudget r 
+		LEFT JOIN FETCH r.attachments
+		LEFT JOIN FETCH r.comments
+		LEFT JOIN FETCH r.project 
+		LEFT JOIN FETCH r.assignedTo 
+		LEFT JOIN FETCH r.createdBy 
+		LEFT JOIN FETCH r.status 
+		LEFT JOIN FETCH r.entityType et 
+		LEFT JOIN FETCH et.workflow 
+		WHERE r.id = :id
+		"""
 	)
 	Optional<CBudget> findById(@Param ("id") Long id);
 
