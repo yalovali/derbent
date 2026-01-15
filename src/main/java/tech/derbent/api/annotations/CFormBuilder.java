@@ -1138,8 +1138,25 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			if (component instanceof IContentOwner) {
 				try {
 					((IContentOwner) component).populateForm();
+				} catch (final org.hibernate.LazyInitializationException e) {
+					LOGGER.error("LazyInitializationException populating form component {}: {}", 
+						component.getClass().getSimpleName(), e.getMessage(), e);
+					// Show notification to user
+					com.vaadin.flow.component.UI.getCurrent().access(() -> {
+						tech.derbent.api.ui.notifications.CNotificationService.showError(
+							"Failed to load " + component.getClass().getSimpleName() + 
+							": Data not available in current session");
+					});
+					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
+					LOGGER.error("Error populating form component {}: {}", 
+						component.getClass().getSimpleName(), e.getMessage(), e);
+					// Show notification to user
+					com.vaadin.flow.component.UI.getCurrent().access(() -> {
+						tech.derbent.api.ui.notifications.CNotificationService.showError(
+							"Error loading " + component.getClass().getSimpleName());
+					});
+					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}
 			}
 		});
@@ -1159,11 +1176,24 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					((IContentOwner) component).setValue(entity);
 					((IContentOwner) component).populateForm();
 				} catch (final org.hibernate.LazyInitializationException e) {
-					// Log but don't fail - lazy loading issues are common in detached entities
-					LOGGER.warn("LazyInitializationException populating form component {}: {}. Component will be displayed in degraded mode.", 
-						component.getClass().getSimpleName(), e.getMessage());
+					LOGGER.error("LazyInitializationException populating form component {}: {}", 
+						component.getClass().getSimpleName(), e.getMessage(), e);
+					// Show notification to user
+					com.vaadin.flow.component.UI.getCurrent().access(() -> {
+						tech.derbent.api.ui.notifications.CNotificationService.showError(
+							"Failed to load " + component.getClass().getSimpleName() + 
+							": Data not available in current session");
+					});
+					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
-					LOGGER.warn("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
+					LOGGER.error("Error populating form component {}: {}", 
+						component.getClass().getSimpleName(), e.getMessage(), e);
+					// Show notification to user
+					com.vaadin.flow.component.UI.getCurrent().access(() -> {
+						tech.derbent.api.ui.notifications.CNotificationService.showError(
+							"Error loading " + component.getClass().getSimpleName());
+					});
+					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}
 			}
 		});
@@ -1187,12 +1217,24 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				try {
 					((IContentOwner) component).setValue(entity);
 				} catch (final org.hibernate.LazyInitializationException e) {
-					// Log but don't fail - lazy loading issues are common in detached entities
-					LOGGER.warn("LazyInitializationException populating form component {}: {}. Component will be displayed in degraded mode.", 
-						component.getClass().getSimpleName(), e.getMessage());
+					LOGGER.error("LazyInitializationException populating form component {}: {}", 
+						component.getClass().getSimpleName(), e.getMessage(), e);
+					// Show notification to user
+					com.vaadin.flow.component.UI.getCurrent().access(() -> {
+						tech.derbent.api.ui.notifications.CNotificationService.showError(
+							"Failed to load " + component.getClass().getSimpleName() + 
+							": Data not available in current session");
+					});
+					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
-					// Don't re-throw - allow form to display with other components working
+					LOGGER.error("Error populating form component {}: {}", 
+						component.getClass().getSimpleName(), e.getMessage(), e);
+					// Show notification to user
+					com.vaadin.flow.component.UI.getCurrent().access(() -> {
+						tech.derbent.api.ui.notifications.CNotificationService.showError(
+							"Error loading " + component.getClass().getSimpleName());
+					});
+					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}
 			}
 		});
