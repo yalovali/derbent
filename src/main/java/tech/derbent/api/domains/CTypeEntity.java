@@ -48,6 +48,46 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 			dataProviderBean = "CWorkflowEntityService"
 	)
 	private CWorkflowEntity workflow;
+	
+	// Parent-Child Hierarchy Configuration
+	@Column (name = "can_have_children", nullable = false)
+	@AMetaData (
+			displayName = "Can Have Children", required = false, readOnly = false, defaultValue = "true",
+			description = "Whether items of this type can have child items", hidden = false
+	)
+	private boolean canHaveChildren = true;
+	
+	@Column (name = "parent_level1_entity_class", nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Level 1 Entity Class", required = false, readOnly = false,
+			description = "Entity class name for level 1 parent (e.g., Epic level)", hidden = false, maxLength = 100
+	)
+	private String parentLevel1EntityClass;
+	
+	@Column (name = "parent_level2_entity_class", nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Level 2 Entity Class", required = false, readOnly = false,
+			description = "Entity class name for level 2 parent (e.g., Feature level)", hidden = false, maxLength = 100
+	)
+	private String parentLevel2EntityClass;
+	
+	@Column (name = "parent_level3_entity_class", nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Level 3 Entity Class", required = false, readOnly = false,
+			description = "Entity class name for level 3 parent (e.g., User Story level)", hidden = false, maxLength = 100
+	)
+	private String parentLevel3EntityClass;
+	
+	@Column (name = "parent_level4_entity_class", nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Level 4 Entity Class", required = false, readOnly = false,
+			description = "Entity class name for level 4 parent (e.g., Task level)", hidden = false, maxLength = 100
+	)
+	private String parentLevel4EntityClass;
 
 	/** Default constructor for JPA. */
 	protected CTypeEntity() {
@@ -56,6 +96,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;
+		canHaveChildren = true;
 	}
 
 	/** Constructor with required fields.
@@ -66,6 +107,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;
+		canHaveChildren = true;
 	}
 
 	@Override
@@ -89,6 +131,26 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 	/** Gets the workflow for this type.
 	 * @return the workflow entity */
 	public CWorkflowEntity getWorkflow() { return workflow; }
+	
+	/** Gets whether this type can have children.
+	 * @return true if items of this type can have child items */
+	public boolean getCanHaveChildren() { return canHaveChildren; }
+	
+	/** Gets the entity class name for level 1 parent.
+	 * @return the entity class name or null */
+	public String getParentLevel1EntityClass() { return parentLevel1EntityClass; }
+	
+	/** Gets the entity class name for level 2 parent.
+	 * @return the entity class name or null */
+	public String getParentLevel2EntityClass() { return parentLevel2EntityClass; }
+	
+	/** Gets the entity class name for level 3 parent.
+	 * @return the entity class name or null */
+	public String getParentLevel3EntityClass() { return parentLevel3EntityClass; }
+	
+	/** Gets the entity class name for level 4 parent.
+	 * @return the entity class name or null */
+	public String getParentLevel4EntityClass() { return parentLevel4EntityClass; }
 
 	@Override
 	public int hashCode() {
@@ -144,6 +206,34 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 	/** Sets the workflow for this type.
 	 * @param workflow the workflow entity to set */
 	public void setWorkflow(final CWorkflowEntity workflow) { this.workflow = workflow; }
+	
+	/** Sets whether this type can have children.
+	 * @param canHaveChildren true if items of this type can have child items */
+	public void setCanHaveChildren(final boolean canHaveChildren) { this.canHaveChildren = canHaveChildren; }
+	
+	/** Sets the entity class name for level 1 parent.
+	 * @param parentLevel1EntityClass the entity class name */
+	public void setParentLevel1EntityClass(final String parentLevel1EntityClass) { 
+		this.parentLevel1EntityClass = parentLevel1EntityClass; 
+	}
+	
+	/** Sets the entity class name for level 2 parent.
+	 * @param parentLevel2EntityClass the entity class name */
+	public void setParentLevel2EntityClass(final String parentLevel2EntityClass) { 
+		this.parentLevel2EntityClass = parentLevel2EntityClass; 
+	}
+	
+	/** Sets the entity class name for level 3 parent.
+	 * @param parentLevel3EntityClass the entity class name */
+	public void setParentLevel3EntityClass(final String parentLevel3EntityClass) { 
+		this.parentLevel3EntityClass = parentLevel3EntityClass; 
+	}
+	
+	/** Sets the entity class name for level 4 parent.
+	 * @param parentLevel4EntityClass the entity class name */
+	public void setParentLevel4EntityClass(final String parentLevel4EntityClass) { 
+		this.parentLevel4EntityClass = parentLevel4EntityClass; 
+	}
 
 	@Override
 	public String toString() {

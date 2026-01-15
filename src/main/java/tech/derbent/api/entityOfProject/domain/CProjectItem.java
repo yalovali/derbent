@@ -49,6 +49,12 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		parentId = null;
 		updateLastModified();
 	}
+	
+	/** Check if this item has a parent.
+	 * @return true if this item has a parent assigned */
+	public boolean hasParent() {
+		return parentId != null && parentType != null;
+	}
 
 	/** Get the end date for Gantt chart display. Subclasses should override this to return the appropriate end date field (e.g., dueDate for
 	 * activities, endDate for meetings, reviewDate for decisions). Default implementation returns null.
