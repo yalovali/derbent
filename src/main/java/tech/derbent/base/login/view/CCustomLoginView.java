@@ -211,14 +211,29 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		try {
 			VaadinSession.setCurrent(session);
 			UI.setCurrent(ui);
-			final String resolvedSchema = schemaSelection == null ? SCHEMA_DERBENT : schemaSelection;
+			
+			// Auto-detect profile if schema not explicitly selected
+			String resolvedSchema = schemaSelection;
+			if (resolvedSchema == null) {
+				// Check if BAB profile is active
+				if (environment.acceptsProfiles(Profiles.of("bab"))) {
+					resolvedSchema = SCHEMA_BAB_GATEWAY;
+					LOGGER.info("🔧 Auto-detected BAB profile - using BAB Gateway initializer");
+				} else {
+					resolvedSchema = SCHEMA_DERBENT;
+					LOGGER.info("🔧 Using default Derbent initializer");
+				}
+			}
+			
 			if (SCHEMA_BAB_GATEWAY.equals(resolvedSchema)) {
 				final Map<String, CBabDataInitializer> initializers = CSpringContext.getBeansOfType(CBabDataInitializer.class);
 				Check.isTrue(!initializers.isEmpty(), "BAB initializer bean is not available. Activate the bab profile.");
 				final CBabDataInitializer init = initializers.values().iterator().next();
+				LOGGER.info("🔧 Using BAB Gateway data initializer");
 				init.reloadForced(minimal);
 			} else {
 				final CDataInitializer init = new CDataInitializer(sessionService);
+				LOGGER.info("🔧 Using Derbent data initializer");
 				init.reloadForced(minimal);
 			}
 		} finally {
