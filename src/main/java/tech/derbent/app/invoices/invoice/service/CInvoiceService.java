@@ -50,12 +50,12 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 
 	@Override
 	public Class<?> getInitializerServiceClass() {
-		return null;
+		return CInvoiceInitializerService.class;
 	}
 
 	@Override
 	public Class<?> getPageServiceClass() {
-		return null;
+		return CPageServiceInvoice.class;
 	}
 
 	@Override

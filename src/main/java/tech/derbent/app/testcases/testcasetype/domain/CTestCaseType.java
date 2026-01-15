@@ -11,7 +11,7 @@ import tech.derbent.api.companies.domain.CCompany;
 @Entity
 @Table (name = "ctestcasetype")
 @AttributeOverride (name = "id", column = @Column (name = "testcasetype_id"))
-public class CTestCaseType extends CTypeEntity {
+public class CTestCaseType extends CTypeEntity<CTestCaseType> {
 
 	public static final String DEFAULT_COLOR = "#4169E1"; // RoyalBlue - testing
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";

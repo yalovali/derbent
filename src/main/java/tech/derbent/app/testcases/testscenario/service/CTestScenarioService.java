@@ -35,12 +35,12 @@ public class CTestScenarioService extends CEntityOfProjectService<CTestScenario>
 
 	@Override
 	public Class<?> getInitializerServiceClass() {
-		return null;
+		return CTestScenarioInitializerService.class;
 	}
 
 	@Override
 	public Class<?> getPageServiceClass() {
-		return null;
+		return CPageServiceTestScenario.class;
 	}
 
 	@Override

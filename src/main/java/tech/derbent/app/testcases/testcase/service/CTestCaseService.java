@@ -43,12 +43,12 @@ public class CTestCaseService extends CProjectItemService<CTestCase> implements 
 
 	@Override
 	public Class<?> getInitializerServiceClass() {
-		return null;
+		return CTestCaseInitializerService.class;
 	}
 
 	@Override
 	public Class<?> getPageServiceClass() {
-		return null;
+		return CPageServiceTestCase.class;
 	}
 
 	@Override

@@ -44,12 +44,12 @@ public class CTestRunService extends CEntityOfProjectService<CTestRun> implement
 
 	@Override
 	public Class<?> getInitializerServiceClass() {
-		return null;
+		return CTestRunInitializerService.class;
 	}
 
 	@Override
 	public Class<?> getPageServiceClass() {
-		return null;
+		return CPageServiceTestRun.class;
 	}
 
 	@Override
