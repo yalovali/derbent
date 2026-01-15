@@ -14,6 +14,7 @@ import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.projectexpenses.projectexpensetype.domain.CProjectExpenseType;
 import tech.derbent.api.projects.domain.CProject;
@@ -24,7 +25,7 @@ import tech.derbent.app.orders.currency.domain.CCurrency;
 @Entity
 @Table (name = "\"cprojectexpense\"")
 @AttributeOverride (name = "id", column = @Column (name = "projectexpense_id"))
-public class CProjectExpense extends CProjectItem<CProjectExpense> implements IHasStatusAndWorkflow<CProjectExpense> {
+public class CProjectExpense extends CProjectItem<CProjectExpense> implements IHasStatusAndWorkflow<CProjectExpense>, IFinancialEntity {
 
 	public static final String DEFAULT_COLOR = "#A0522D"; // X11 Sienna - outgoing money (darker)
 	public static final String DEFAULT_ICON = "vaadin:money-withdraw";

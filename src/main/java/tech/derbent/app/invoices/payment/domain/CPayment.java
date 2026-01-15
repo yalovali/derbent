@@ -16,6 +16,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.app.invoices.invoice.domain.CInvoice;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.base.users.domain.CUser;
@@ -24,7 +25,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cpayment")
 @AttributeOverride (name = "id", column = @Column (name = "payment_id"))
-public class CPayment extends CEntityDB<CPayment> {
+public class CPayment extends CEntityDB<CPayment> implements IFinancialEntity {
 
 	public static final String DEFAULT_COLOR = "#90EE90"; // LightGreen - payments received
 	public static final String DEFAULT_ICON = "vaadin:money";

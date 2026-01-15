@@ -4,25 +4,42 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entity.service.IAbstractRepository;
+import tech.derbent.api.interfaces.IChildEntityRepository;
 import tech.derbent.app.invoices.invoice.domain.CInvoice;
 import tech.derbent.app.invoices.payment.domain.CPayment;
 import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
 
-public interface IPaymentRepository extends IAbstractRepository<CPayment> {
+public interface IPaymentRepository extends IChildEntityRepository<CPayment, CInvoice> {
 
-	/** Find all payments for an invoice.
-	 * @param invoice the invoice
-	 * @return list of payments ordered by payment date descending */
+	@Override
 	@Query("""
 			SELECT p FROM #{#entityName} p
 			LEFT JOIN FETCH p.invoice
 			LEFT JOIN FETCH p.currency
 			LEFT JOIN FETCH p.receivedBy
-			WHERE p.invoice = :invoice
+			WHERE p.invoice = :master
 			ORDER BY p.paymentDate DESC
 			""")
-	List<CPayment> findByInvoice(@Param("invoice") CInvoice invoice);
+	List<CPayment> findByMaster(@Param("master") CInvoice master);
+
+	@Override
+	@Query("""
+			SELECT p FROM #{#entityName} p
+			LEFT JOIN FETCH p.invoice
+			LEFT JOIN FETCH p.currency
+			LEFT JOIN FETCH p.receivedBy
+			WHERE p.invoice.id = :masterId
+			ORDER BY p.paymentDate DESC
+			""")
+	List<CPayment> findByMasterId(@Param("masterId") Long masterId);
+
+	@Override
+	@Query("SELECT COUNT(p) FROM #{#entityName} p WHERE p.invoice = :master")
+	Long countByMaster(@Param("master") CInvoice master);
+
+	@Override
+	@Query("SELECT COALESCE(MAX(p.id), 0) + 1 FROM #{#entityName} p WHERE p.invoice = :master")
+	Integer getNextItemOrder(@Param("master") CInvoice master);
 
 	/** Find payments by status.
 	 * @param status the payment status

@@ -3,26 +3,35 @@ package tech.derbent.app.testcases.teststep.service;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entity.service.IAbstractRepository;
+import tech.derbent.api.interfaces.IChildEntityRepository;
 import tech.derbent.app.testcases.testcase.domain.CTestCase;
 import tech.derbent.app.testcases.teststep.domain.CTestStep;
 
-public interface ITestStepRepository extends IAbstractRepository<CTestStep> {
+public interface ITestStepRepository extends IChildEntityRepository<CTestStep, CTestCase> {
 
-	/** Find all test steps for a test case.
-	 * @param testCase the test case
-	 * @return list of test steps ordered by step order */
+	@Override
 	@Query("""
 			SELECT ts FROM #{#entityName} ts
 			LEFT JOIN FETCH ts.testCase
-			WHERE ts.testCase = :testCase
+			WHERE ts.testCase = :master
 			ORDER BY ts.stepOrder ASC
 			""")
-	List<CTestStep> findByTestCase(@Param("testCase") CTestCase testCase);
+	List<CTestStep> findByMaster(@Param("master") CTestCase master);
 
-	/** Get next step order for a test case.
-	 * @param testCase the test case
-	 * @return next step order number */
-	@Query("SELECT COALESCE(MAX(ts.stepOrder), 0) + 1 FROM #{#entityName} ts WHERE ts.testCase = :testCase")
-	Integer getNextStepOrder(@Param("testCase") CTestCase testCase);
+	@Override
+	@Query("""
+			SELECT ts FROM #{#entityName} ts
+			LEFT JOIN FETCH ts.testCase
+			WHERE ts.testCase.id = :masterId
+			ORDER BY ts.stepOrder ASC
+			""")
+	List<CTestStep> findByMasterId(@Param("masterId") Long masterId);
+
+	@Override
+	@Query("SELECT COUNT(ts) FROM #{#entityName} ts WHERE ts.testCase = :master")
+	Long countByMaster(@Param("master") CTestCase master);
+
+	@Override
+	@Query("SELECT COALESCE(MAX(ts.stepOrder), 0) + 1 FROM #{#entityName} ts WHERE ts.testCase = :master")
+	Integer getNextItemOrder(@Param("master") CTestCase master);
 }

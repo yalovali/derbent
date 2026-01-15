@@ -22,6 +22,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
@@ -39,7 +40,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cinvoice")
 @AttributeOverride (name = "id", column = @Column (name = "invoice_id"))
-public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments, IHasComments {
+public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments, IHasComments, IFinancialEntity {
 
 	public static final String DEFAULT_COLOR = "#FFD700"; // Gold - incoming revenue
 	public static final String DEFAULT_ICON = "vaadin:invoice";
@@ -469,6 +470,14 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 
 	public void setTotalAmount(final BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
+	}
+
+	@Override
+	public BigDecimal getAmount() { return totalAmount; }
+
+	@Override
+	public void setAmount(final BigDecimal amount) {
+		setTotalAmount(amount);
 	}
 
 	public BigDecimal getPaidAmount() { return paidAmount; }

@@ -4,22 +4,37 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entity.service.IAbstractRepository;
+import tech.derbent.api.interfaces.IChildEntityRepository;
 import tech.derbent.app.invoices.invoice.domain.CInvoice;
 import tech.derbent.app.invoices.invoiceitem.domain.CInvoiceItem;
 
-public interface IInvoiceItemRepository extends IAbstractRepository<CInvoiceItem> {
+public interface IInvoiceItemRepository extends IChildEntityRepository<CInvoiceItem, CInvoice> {
 
-	/** Find all invoice items for an invoice.
-	 * @param invoice the invoice
-	 * @return list of invoice items ordered by item order */
+	@Override
 	@Query("""
 			SELECT ii FROM #{#entityName} ii
 			LEFT JOIN FETCH ii.invoice
-			WHERE ii.invoice = :invoice
+			WHERE ii.invoice = :master
 			ORDER BY ii.itemOrder ASC
 			""")
-	List<CInvoiceItem> findByInvoice(@Param("invoice") CInvoice invoice);
+	List<CInvoiceItem> findByMaster(@Param("master") CInvoice master);
+
+	@Override
+	@Query("""
+			SELECT ii FROM #{#entityName} ii
+			LEFT JOIN FETCH ii.invoice
+			WHERE ii.invoice.id = :masterId
+			ORDER BY ii.itemOrder ASC
+			""")
+	List<CInvoiceItem> findByMasterId(@Param("masterId") Long masterId);
+
+	@Override
+	@Query("SELECT COUNT(ii) FROM #{#entityName} ii WHERE ii.invoice = :master")
+	Long countByMaster(@Param("master") CInvoice master);
+
+	@Override
+	@Query("SELECT COALESCE(MAX(ii.itemOrder), 0) + 1 FROM #{#entityName} ii WHERE ii.invoice = :master")
+	Integer getNextItemOrder(@Param("master") CInvoice master);
 
 	/** Calculate subtotal for an invoice (sum of all line totals).
 	 * @param invoice the invoice
