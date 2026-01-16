@@ -75,7 +75,7 @@ public class CComponentTestExecution extends CVerticalLayout
 	private CTestRun currentTestRun;
 	private List<CTestStepResult> allSteps;
 	private int currentStepIndex = 0;
-	private boolean hasUnsavedChanges = false;
+	private volatile boolean hasUnsavedChanges = false;
 
 	private CH3 headerTitle;
 	private CSpan sessionInfoSpan;
@@ -357,7 +357,7 @@ public class CComponentTestExecution extends CVerticalLayout
 
 	@Override
 	public void setValue(final CTestRun testRun) {
-		Objects.requireNonNull(testRun, "TestRun cannot be null");
+		Check.notNull(testRun, "TestRun cannot be null");
 		LOGGER.debug("Loading test run {} for execution", testRun.getId());
 
 		this.currentTestRun = testRun;
@@ -716,7 +716,15 @@ public class CComponentTestExecution extends CVerticalLayout
 
 	private void on_jumpTo_selected(final String selection) {
 		try {
-			final String indexStr = selection.substring(5, selection.indexOf(":"));
+			if (selection == null || selection.isEmpty()) {
+				return;
+			}
+			final int colonIndex = selection.indexOf(":");
+			if (colonIndex <= 5) {
+				LOGGER.warn("Invalid jump selection format: {}", selection);
+				return;
+			}
+			final String indexStr = selection.substring(5, colonIndex);
 			final int newIndex = Integer.parseInt(indexStr) - 1;
 
 			if (newIndex >= 0 && newIndex < allSteps.size() && newIndex != currentStepIndex) {
@@ -727,7 +735,7 @@ public class CComponentTestExecution extends CVerticalLayout
 				LOGGER.debug("Jumped to step {}", currentStepIndex + 1);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error jumping to step: {}", e.getMessage(), e);
+			LOGGER.error("Error jumping to step from '{}': {}", selection, e.getMessage(), e);
 			CNotificationService.showException("Failed to jump to step", e);
 		}
 	}
@@ -876,6 +884,14 @@ public class CComponentTestExecution extends CVerticalLayout
 		}
 		if (autoSaveExecutor != null) {
 			autoSaveExecutor.shutdown();
+			try {
+				if (!autoSaveExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+					autoSaveExecutor.shutdownNow();
+				}
+			} catch (final InterruptedException e) {
+				autoSaveExecutor.shutdownNow();
+				Thread.currentThread().interrupt();
+			}
 		}
 		LOGGER.debug("Auto-save stopped");
 	}
