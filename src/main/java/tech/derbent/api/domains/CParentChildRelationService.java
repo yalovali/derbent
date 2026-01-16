@@ -153,17 +153,17 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 
 	/** Get all child items for a parent project item filtered by child entity class.
 	 * This is useful when you want only children of a specific type (e.g., only CActivity children).
-	 * @param parent          the parent project item
-	 * @param childEntityClass the class name of children to retrieve (e.g., "CActivity")
+	 * @param parent              the parent project item
+	 * @param childEntityClassName the class name of children to retrieve (e.g., "CActivity")
 	 * @return list of child project items matching the specified type */
 	@SuppressWarnings ("unchecked")
 	@Transactional (readOnly = true)
-	public <T extends CProjectItem<?>> List<T> getChildrenByType(final CProjectItem<?> parent, final String childEntityClass) {
+	public <T extends CProjectItem<?>> List<T> getChildrenByType(final CProjectItem<?> parent, final String childEntityClassName) {
 		Check.notNull(parent, "Parent item cannot be null");
 		Check.notNull(parent.getId(), "Parent item must be persisted (ID cannot be null)");
-		Check.notBlank(childEntityClass, "Child entity class cannot be blank");
+		Check.notBlank(childEntityClassName, "Child entity class name cannot be blank");
 		final String parentType = parent.getClass().getSimpleName();
-		final List<CParentChildRelation> relations = repository.findByParentAndChildType(parent.getId(), parentType, childEntityClass);
+		final List<CParentChildRelation> relations = repository.findByParentAndChildType(parent.getId(), parentType, childEntityClassName);
 		final List<T> children = new ArrayList<>();
 		for (final CParentChildRelation rel : relations) {
 			try {

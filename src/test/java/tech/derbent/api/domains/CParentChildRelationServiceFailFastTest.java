@@ -11,7 +11,8 @@ class CParentChildRelationServiceFailFastTest {
 	void testWouldCreateCircularDependency_FailsFastOnNullParentId() {
 		// When/Then: Null parent ID throws exception
 		assertThrows(IllegalArgumentException.class,
-				() -> new TestableParentChildService().wouldCreateCircularDependency(null, "CActivity", 2L, "CActivity"));
+				() -> new TestableParentChildService().wouldCreateCircularDependency(null, "CActivity", 2L, "CActivity"),
+				"Should throw exception for null parent ID");
 	}
 
 	@Test
@@ -33,8 +34,11 @@ class CParentChildRelationServiceFailFastTest {
 	void testWouldCreateCircularDependency_FailsFastOnBlankChildType() {
 		// When/Then: Null/blank child type throws exception
 		assertThrows(IllegalArgumentException.class,
-				() -> new TestableParentChildService().wouldCreateCircularDependency(1L, "CActivity", 2L, null));
-		assertThrows(IllegalArgumentException.class, () -> new TestableParentChildService().wouldCreateCircularDependency(1L, "CActivity", 2L, ""));
+				() -> new TestableParentChildService().wouldCreateCircularDependency(1L, "CActivity", 2L, null),
+				"Should throw exception for null child type");
+		assertThrows(IllegalArgumentException.class,
+				() -> new TestableParentChildService().wouldCreateCircularDependency(1L, "CActivity", 2L, ""),
+				"Should throw exception for blank child type");
 	}
 
 	/** Testable subclass that doesn't require Spring dependencies. */
