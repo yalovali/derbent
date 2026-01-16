@@ -151,6 +151,42 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		return children;
 	}
 
+	/** Get all child items for a parent project item filtered by child entity class.
+	 * This is useful when you want only children of a specific type (e.g., only CActivity children).
+	 * @param parent          the parent project item
+	 * @param childEntityClass the class name of children to retrieve (e.g., "CActivity")
+	 * @return list of child project items matching the specified type */
+	@SuppressWarnings ("unchecked")
+	@Transactional (readOnly = true)
+	public <T extends CProjectItem<?>> List<T> getChildrenByType(final CProjectItem<?> parent, final String childEntityClass) {
+		Check.notNull(parent, "Parent item cannot be null");
+		Check.notNull(parent.getId(), "Parent item must be persisted (ID cannot be null)");
+		Check.notBlank(childEntityClass, "Child entity class cannot be blank");
+		final String parentType = parent.getClass().getSimpleName();
+		final List<CParentChildRelation> relations = repository.findByParentAndChildType(parent.getId(), parentType, childEntityClass);
+		final List<T> children = new ArrayList<>();
+		for (final CParentChildRelation rel : relations) {
+			try {
+				final Class<?> childClass = CEntityRegistry.getEntityClassByTitle(rel.getChildType());
+				if (childClass == null) {
+					LOGGER.warn("Could not find entity class for type: {}", rel.getChildType());
+					continue;
+				}
+				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(childClass);
+				if (serviceClass == null) {
+					LOGGER.warn("Could not find service class for entity: {}", childClass.getSimpleName());
+					continue;
+				}
+				final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
+				final Optional<?> child = service.getById(rel.getChildId());
+				child.ifPresent(c -> children.add((T) c));
+			} catch (final Exception e) {
+				LOGGER.error("Error retrieving child {}#{}: {}", rel.getChildType(), rel.getChildId(), e.getMessage(), e);
+			}
+		}
+		return children;
+	}
+
 	/** Check if setting a parent would create a circular dependency.
 	 * This checks if the proposed parent is already a descendant of the child.
 	 * @param parentId   ID of the proposed parent
@@ -160,6 +196,10 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @return true if circular dependency would be created */
 	@Transactional (readOnly = true)
 	public boolean wouldCreateCircularDependency(final Long parentId, final String parentType, final Long childId, final String childType) {
+		Check.notNull(parentId, "Parent ID cannot be null");
+		Check.notBlank(parentType, "Parent type cannot be blank");
+		Check.notNull(childId, "Child ID cannot be null");
+		Check.notBlank(childType, "Child type cannot be blank");
 		// Check if parent is a descendant of child
 		final List<Object[]> descendants = repository.findAllDescendants(childId, childType);
 		for (final Object[] desc : descendants) {
