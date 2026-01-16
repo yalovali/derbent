@@ -35,14 +35,13 @@ import tech.derbent.base.users.domain.CUser;
 
 /** CComponentListComments - Component for managing comments on entities.
  * <p>
- * Displays a list of comments with author, date, preview and important flag.
- * Supports CRUD operations (Create, Read, Update, Delete) with expandable details.
- * Comments can be clicked to expand and show full text.
+ * Displays a list of comments with author, date, preview and important flag. Supports CRUD operations (Create, Read, Update, Delete) with expandable
+ * details. Comments can be clicked to expand and show full text.
  * <p>
- * This component uses the IHasComments interface for clean, type-safe integration
- * with any entity that can have comments.
+ * This component uses the IHasComments interface for clean, type-safe integration with any entity that can have comments.
  * <p>
  * Usage:
+ *
  * <pre>
  * CComponentListComments component = new CComponentListComments(service, sessionService);
  * component.setMasterEntity(activity); // activity implements IHasComments
@@ -58,7 +57,6 @@ public class CComponentListComments extends CVerticalLayout
 	public static final String ID_TOOLBAR = "custom-comments-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListComments.class);
 	private static final long serialVersionUID = 1L;
-
 	private final CCommentService commentService;
 	private CButton buttonAdd;
 	private CButton buttonDelete;
@@ -101,10 +99,8 @@ public class CComponentListComments extends CVerticalLayout
 	public void configureGrid(final CGrid<CComment> grid1) {
 		try {
 			Check.notNull(grid1, "Grid cannot be null");
-
 			// Author column
 			grid1.addCustomColumn(CComment::getAuthorName, "Author", "150px", "author", 0);
-
 			// Created date column
 			grid1.addCustomColumn(comment -> {
 				if (comment.getCreatedDate() != null) {
@@ -112,10 +108,8 @@ public class CComponentListComments extends CVerticalLayout
 				}
 				return "";
 			}, "Date", "150px", "createdDate", 0);
-
 			// Comment preview column (expanding)
 			grid1.addExpandingShortTextColumn(CComment::getCommentPreview, "Comment", "commentPreview");
-
 			// Important flag column
 			grid1.addCustomColumn(comment -> {
 				if (Boolean.TRUE.equals(comment.getImportant())) {
@@ -123,29 +117,25 @@ public class CComponentListComments extends CVerticalLayout
 				}
 				return "";
 			}, "!", "50px", "important", 0).setTooltipGenerator(comment -> Boolean.TRUE.equals(comment.getImportant()) ? "Important" : "");
-
 			// Add expandable details renderer for full comment text
 			grid1.setItemDetailsRenderer(new ComponentRenderer<>(comment -> {
 				final CVerticalLayout detailsLayout = new CVerticalLayout();
 				detailsLayout.setPadding(true);
 				detailsLayout.setSpacing(true);
-				detailsLayout.getStyle().set("background-color", "var(--lumo-contrast-5pct)").set("border-left", "3px solid var(--lumo-primary-color)");
-
+				detailsLayout.getStyle().set("background-color", "var(--lumo-contrast-5pct)").set("border-left",
+						"3px solid var(--lumo-primary-color)");
 				// Full comment text
 				final CSpan commentText = new CSpan(comment.getCommentText());
 				commentText.getStyle().set("white-space", "pre-wrap").set("word-wrap", "break-word");
 				detailsLayout.add(commentText);
-
 				// Metadata footer
 				final CSpan metadata = new CSpan(String.format("By %s on %s%s", comment.getAuthorName(),
 						comment.getCreatedDate() != null ? comment.getCreatedDate().format(DATE_TIME_FORMATTER) : "unknown",
 						Boolean.TRUE.equals(comment.getImportant()) ? " [IMPORTANT]" : ""));
 				metadata.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-style", "italic");
 				detailsLayout.add(metadata);
-
 				return detailsLayout;
 			}));
-
 			// Enable single-click to expand/collapse
 			grid1.addItemClickListener(event -> {
 				final CComment comment = event.getItem();
@@ -155,7 +145,6 @@ public class CComponentListComments extends CVerticalLayout
 					grid1.setDetailsVisible(comment, true);
 				}
 			});
-
 		} catch (final Exception e) {
 			LOGGER.error("Error configuring comments grid", e);
 			CNotificationService.showException("Error configuring comments grid", e);
@@ -175,14 +164,12 @@ public class CComponentListComments extends CVerticalLayout
 		buttonAdd.setTooltipText("Add comment");
 		buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
 		layoutToolbar.add(buttonAdd);
-
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit comment");
 		buttonEdit.addClickListener(e -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
-
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
@@ -193,9 +180,7 @@ public class CComponentListComments extends CVerticalLayout
 	}
 
 	@Override
-	public String getComponentName() {
-		return "comments";
-	}
+	public String getComponentName() { return "comments"; }
 
 	@Override
 	public String getCurrentEntityIdString() {
@@ -207,14 +192,10 @@ public class CComponentListComments extends CVerticalLayout
 	}
 
 	@Override
-	public CAbstractService<?> getEntityService() {
-		return commentService;
-	}
+	public CAbstractService<?> getEntityService() { return commentService; }
 
 	@Override
-	public CGrid<CComment> getGrid() {
-		return grid;
-	}
+	public CGrid<CComment> getGrid() { return grid; }
 
 	@Override
 	public CEntityDB<?> getValue() {
@@ -229,19 +210,16 @@ public class CComponentListComments extends CVerticalLayout
 		setId(ID_ROOT);
 		setPadding(false);
 		setSpacing(true);
-
 		// Header
 		final CH3 header = new CH3("Comments");
 		header.setId(ID_HEADER);
 		add(header);
-
 		// Toolbar
 		layoutToolbar = new CHorizontalLayout();
 		layoutToolbar.setId(ID_TOOLBAR);
 		layoutToolbar.setSpacing(true);
 		createToolbarButtons();
 		add(layoutToolbar);
-
 		// Grid
 		grid = new CGrid<>(CComment.class);
 		grid.setId(ID_GRID);
@@ -250,12 +228,9 @@ public class CComponentListComments extends CVerticalLayout
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));
-
 		// Add double-click to edit
 		grid.addItemDoubleClickListener(e -> on_grid_doubleClicked(e.getItem()));
-
 		add(grid);
-
 		// Set initial compact mode (will adjust when data loaded)
 		updateCompactMode(true);
 	}
@@ -263,13 +238,11 @@ public class CComponentListComments extends CVerticalLayout
 	private void linkCommentToMaster(final CComment comment) {
 		Check.notNull(comment, "Comment cannot be null");
 		Check.notNull(masterEntity, "Master entity cannot be null");
-
 		Set<CComment> items = masterEntity.getComments();
 		if (items == null) {
 			items = new HashSet<>();
 			masterEntity.setComments(items);
 		}
-
 		// Check if comment already exists (by ID for persisted, by reference for new)
 		final Long commentId = comment.getId();
 		final boolean exists = items.stream().anyMatch(existing -> {
@@ -279,11 +252,9 @@ public class CComponentListComments extends CVerticalLayout
 			// For new comments (null ID), check by reference to avoid duplicates
 			return existing == comment;
 		});
-
 		if (!exists) {
 			items.add(comment);
 		}
-
 		if (masterEntity instanceof CEntityDB<?>) {
 			final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
 			if (entity.getId() != null) {
@@ -314,14 +285,12 @@ public class CComponentListComments extends CVerticalLayout
 				CNotificationService.showWarning("Please select an entity first");
 				return;
 			}
-
 			final Object parentEntity = masterEntity;
 			if (!(parentEntity instanceof CEntityDB)) {
 				CNotificationService.showError("Entity does not support comments");
 				LOGGER.error("Master entity does not extend CEntityDB: {}", parentEntity.getClass().getSimpleName());
 				return;
 			}
-
 			// Create new comment with current user as author
 			final CUser currentUser = sessionService.getActiveUser().orElse(null);
 			if (currentUser == null) {
@@ -329,9 +298,7 @@ public class CComponentListComments extends CVerticalLayout
 				LOGGER.error("Cannot create comment: no active user in session");
 				return;
 			}
-
 			final CComment newComment = new CComment("", currentUser);
-
 			final CDialogComment dialog = new CDialogComment(commentService, sessionService, newComment, comment -> {
 				try {
 					linkCommentToMaster(comment);
@@ -352,7 +319,6 @@ public class CComponentListComments extends CVerticalLayout
 		try {
 			final CComment selected = grid.asSingleSelect().getValue();
 			Check.notNull(selected, "No comment selected");
-
 			CNotificationService.showConfirmationDialog("Delete this comment?", () -> {
 				try {
 					unlinkCommentFromMaster(selected);
@@ -374,7 +340,6 @@ public class CComponentListComments extends CVerticalLayout
 		try {
 			final CComment selected = grid.asSingleSelect().getValue();
 			Check.notNull(selected, "No comment selected");
-
 			final CDialogComment dialog = new CDialogComment(commentService, sessionService, selected, comment -> {
 				try {
 					commentService.save(comment);
@@ -391,17 +356,17 @@ public class CComponentListComments extends CVerticalLayout
 		}
 	}
 
-	/** Handle grid selection changes. */
-	private void on_grid_selectionChanged(final CComment selected) {
-		buttonEdit.setEnabled(selected != null);
-		buttonDelete.setEnabled(selected != null);
-	}
-
 	/** Handle grid double-click to edit. */
 	protected void on_grid_doubleClicked(final CComment comment) {
 		if (comment != null) {
 			on_buttonEdit_clicked();
 		}
+	}
+
+	/** Handle grid selection changes. */
+	private void on_grid_selectionChanged(final CComment selected) {
+		buttonEdit.setEnabled(selected != null);
+		buttonDelete.setEnabled(selected != null);
 	}
 
 	@Override
@@ -417,10 +382,8 @@ public class CComponentListComments extends CVerticalLayout
 			clearGrid();
 			return;
 		}
-
 		// Load comments from parent entity's collection
 		final List<CComment> items = new ArrayList<>(masterEntity.getComments());
-
 		// Sort by date descending (newest first)
 		items.sort((c1, c2) -> {
 			if (c1.getCreatedDate() == null && c2.getCreatedDate() == null) {
@@ -434,7 +397,6 @@ public class CComponentListComments extends CVerticalLayout
 			}
 			return c2.getCreatedDate().compareTo(c1.getCreatedDate());
 		});
-
 		grid.setItems(items);
 		grid.asSingleSelect().clear();
 		updateCompactMode(items.isEmpty());
@@ -465,7 +427,7 @@ public class CComponentListComments extends CVerticalLayout
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private <T extends CEntityDB<T>> void saveMasterEntityTyped(final CEntityDB<?> entity) {
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
 		final CAbstractService<T> service = (CAbstractService<T>) CSpringContext.getBean(serviceClass);
@@ -519,13 +481,10 @@ public class CComponentListComments extends CVerticalLayout
 		Check.notNull(comment, "Comment cannot be null");
 		Check.notNull(masterEntity, "Master entity cannot be null");
 		Check.instanceOf(masterEntity, CEntityDB.class, "Master entity must support database persistence");
-
 		final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
 		Check.notNull(entity.getId(), "Master entity must be saved before deleting comments");
-
 		final Set<CComment> items = masterEntity.getComments();
 		Check.notNull(items, "Comments list cannot be null");
-
 		final Long commentId = comment.getId();
 		final boolean removed = items.removeIf(existing -> {
 			if (commentId != null && existing != null) {
@@ -533,7 +492,6 @@ public class CComponentListComments extends CVerticalLayout
 			}
 			return existing == comment;
 		});
-
 		Check.isTrue(removed, "Comment not found in master entity");
 		saveMasterEntity(entity);
 	}

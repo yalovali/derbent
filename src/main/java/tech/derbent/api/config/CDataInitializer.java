@@ -11,15 +11,32 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.companies.service.CCompanyInitializerService;
+import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusInitializerService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.page.service.CPageEntityInitializerService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.service.CProjectInitializerService;
+import tech.derbent.api.projects.service.CProjectService;
+import tech.derbent.api.projects.service.CProjectTypeInitializerService;
+import tech.derbent.api.projects.service.CProjectTypeService;
+import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
+import tech.derbent.api.roles.service.CUserProjectRoleInitializerService;
+import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CMasterInitializerService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
+import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.app.activities.domain.CActivityType;
@@ -36,10 +53,6 @@ import tech.derbent.app.assets.assettype.service.CAssetTypeService;
 import tech.derbent.app.budgets.budget.service.CBudgetInitializerService;
 import tech.derbent.app.budgets.budget.service.CBudgetService;
 import tech.derbent.app.budgets.budgettype.service.CBudgetTypeInitializerService;
-import tech.derbent.app.comments.domain.CComment;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.companies.service.CCompanyInitializerService;
-import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.app.components.component.service.CProjectComponentInitializerService;
 import tech.derbent.app.components.component.service.CProjectComponentService;
 import tech.derbent.app.components.componenttype.service.CProjectComponentTypeInitializerService;
@@ -79,8 +92,6 @@ import tech.derbent.app.orders.order.service.COrderInitializerService;
 import tech.derbent.app.orders.order.service.COrderService;
 import tech.derbent.app.orders.type.service.COrderTypeInitializerService;
 import tech.derbent.app.orders.type.service.COrderTypeService;
-import tech.derbent.api.page.service.CPageEntityInitializerService;
-import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.app.products.product.service.CProductInitializerService;
 import tech.derbent.app.products.product.service.CProductService;
 import tech.derbent.app.products.producttype.service.CProductTypeInitializerService;
@@ -99,11 +110,6 @@ import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeServi
 import tech.derbent.app.projectincomes.projectincometype.domain.CProjectIncomeType;
 import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeInitializerService;
 import tech.derbent.app.projectincomes.projectincometype.service.CProjectIncomeTypeService;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.service.CProjectInitializerService;
-import tech.derbent.api.projects.service.CProjectService;
-import tech.derbent.api.projects.service.CProjectTypeInitializerService;
-import tech.derbent.api.projects.service.CProjectTypeService;
 import tech.derbent.app.providers.provider.service.CProviderInitializerService;
 import tech.derbent.app.providers.provider.service.CProviderService;
 import tech.derbent.app.providers.providertype.service.CProviderTypeInitializerService;
@@ -113,24 +119,19 @@ import tech.derbent.app.risks.risk.service.CRiskInitializerService;
 import tech.derbent.app.risks.risk.service.CRiskService;
 import tech.derbent.app.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.app.risks.risktype.service.CRiskTypeService;
-import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
-import tech.derbent.api.roles.service.CUserCompanyRoleService;
-import tech.derbent.api.roles.service.CUserProjectRoleInitializerService;
-import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.app.sprints.service.CSprintInitializerService;
 import tech.derbent.app.sprints.service.CSprintTypeInitializerService;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.app.teams.team.service.CTeamInitializerService;
 import tech.derbent.app.teams.team.service.CTeamService;
+import tech.derbent.app.testcases.testcase.service.CTestCaseInitializerService;
+import tech.derbent.app.testcases.testcasetype.service.CTestCaseTypeInitializerService;
 import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.ticket.service.CTicketInitializerService;
 import tech.derbent.app.tickets.ticket.service.CTicketService;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeService;
-import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
-import tech.derbent.api.workflow.service.CWorkflowEntityService;
-import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.domain.CUser;
@@ -324,7 +325,7 @@ public class CDataInitializer {
 		}
 	}
 
-			/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
+	/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
 	 * @param project the project to create activities for
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleActivities(final CProject project, final boolean minimal) {
@@ -782,6 +783,9 @@ public class CDataInitializer {
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					/******************* TEST CASES **************************/
+					CTestCaseTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CTestCaseInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* SAMPLES **************************/
 					// Project-specific type and configuration entities
 					CSystemSettingsInitializerService.initializeSample(project, minimal);
