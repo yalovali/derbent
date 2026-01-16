@@ -34,7 +34,6 @@ public class CTestCaseTypeInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
@@ -47,7 +46,7 @@ public class CTestCaseTypeInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "color", "icon", "workflow", "company", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "color", "icon", "workflow", "company", "createdDate"));
 		return grid;
 	}
 
