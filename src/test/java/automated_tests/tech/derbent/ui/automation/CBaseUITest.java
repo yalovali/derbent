@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.ActiveProfiles;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
@@ -27,8 +26,8 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import com.vaadin.flow.router.Route;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -57,10 +56,10 @@ public abstract class CBaseUITest {
 	private static final String LOGIN_BUTTON_ID = "cbutton-login";
 	private static final String PROGRESS_DIALOG_ID = "custom-progress-dialog";
 	private static final String RESET_DB_FULL_BUTTON_ID = "cbutton-db-full";
-	private static final String SCHEMA_SELECTOR_ID = "custom-schema-selector";
-	private static final String SCHEMA_SELECTION_PROPERTY = "playwright.schema";
 	private static final AtomicBoolean SAMPLE_DATA_INITIALIZED = new AtomicBoolean(false);
 	private static final Object SAMPLE_DATA_LOCK = new Object();
+	private static final String SCHEMA_SELECTION_PROPERTY = "playwright.schema";
+	private static final String SCHEMA_SELECTOR_ID = "custom-schema-selector";
 	protected static final String SCREENSHOT_FAILURE_SUFFIX = "failure";
 	protected static final String SCREENSHOT_SUCCESS_SUFFIX = "success";
 	static {
@@ -488,6 +487,21 @@ public abstract class CBaseUITest {
 		}
 	}
 
+	/** Ensures the custom login view is loaded and ready for interaction. */
+	protected void ensureLoginViewLoaded() {
+		try {
+			final String loginUrl = "http://localhost:" + port + "/login";
+			if (!page.url().contains("/login")) {
+				LOGGER.info("ℹ️ Navigating to login view at {}", loginUrl);
+				page.navigate(loginUrl);
+				wait_500();
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Unable to determine current URL before ensuring login view: {}", e.getMessage());
+		}
+		wait_loginscreen();
+	}
+
 	/** Ensures the schema selector is set before database reset/login. */
 	protected void ensureSchemaSelected() {
 		if (!isBrowserAvailable()) {
@@ -522,21 +536,6 @@ public abstract class CBaseUITest {
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Failed to select schema on login page: {}", e.getMessage());
 		}
-	}
-
-	/** Ensures the custom login view is loaded and ready for interaction. */
-	protected void ensureLoginViewLoaded() {
-		try {
-			final String loginUrl = "http://localhost:" + port + "/login";
-			if (!page.url().contains("/login")) {
-				LOGGER.info("ℹ️ Navigating to login view at {}", loginUrl);
-				page.navigate(loginUrl);
-				wait_500();
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("⚠️ Unable to determine current URL before ensuring login view: {}", e.getMessage());
-		}
-		wait_loginscreen();
 	}
 
 	private void failFastIfExceptionDialogVisible(final String controlPoint) {
@@ -805,6 +804,40 @@ public abstract class CBaseUITest {
 		}
 	}
 
+	/** Locates the attachments container if present on the page. */
+	protected Locator locateAttachmentsContainer() {
+		openTabOrAccordionIfNeeded("Attachments");
+		final Locator container = page.locator("#custom-attachments-component");
+		if (container.count() > 0) {
+			return container.first();
+		}
+		final String selector = "h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')";
+		final Locator header = page.locator(selector);
+		if (header.count() > 0) {
+			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
+		}
+		return null;
+	}
+
+	/** Helper method to locate attachments grid within a container. */
+	protected Locator locateAttachmentsGrid(final Locator container) {
+		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
+		if (grid.count() == 0) {
+			throw new AssertionError("Attachments grid not found");
+		}
+		return grid.first();
+	}
+
+	/** Helper method to locate attachment toolbar button by icon name. */
+	protected Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
+		final Locator button =
+				container.locator("vaadin-button").filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='" + iconName + "']")));
+		if (button.count() == 0) {
+			throw new AssertionError("Toolbar button not found for icon " + iconName);
+		}
+		return button.first();
+	}
+
 	/** Resolves a button locator by ID, falling back to text when needed. */
 	protected Locator locateButtonByIdOrText(final String elementId, final String buttonText) {
 		Check.notBlank(elementId, "Button ID cannot be blank");
@@ -818,6 +851,31 @@ public abstract class CBaseUITest {
 	// ===========================================
 	// GRID INTERACTION METHODS
 	// ===========================================
+
+	/** Locates the comments container if present on the page. */
+	protected Locator locateCommentsContainer() {
+		openTabOrAccordionIfNeeded("Comments");
+		final Locator container = page.locator("#custom-comments-component");
+		if (container.count() > 0) {
+			return container.first();
+		}
+		final String selector = "h2:has-text('Comments'), h3:has-text('Comments'), h4:has-text('Comments'), span:has-text('Comments')";
+		final Locator header = page.locator(selector);
+		if (header.count() > 0) {
+			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
+		}
+		return null;
+	}
+
+	/** Locates the parent item selector if present on the page. */
+	protected Locator locateParentItemSelector() {
+		final Locator parentCombo = page.locator("vaadin-combo-box").filter(new Locator.FilterOptions()
+				.setHas(page.locator("label:has-text('Linked Activity'), label:has-text('Parent Item'), label:has-text('Related Activity')")));
+		if (parentCombo.count() > 0) {
+			return parentCombo.first();
+		}
+		return null;
+	}
 
 	/** Resolves a Playwright locator for an element by ID, waiting for it to be present. */
 	protected Locator locatorById(final String elementId) {
@@ -1127,6 +1185,26 @@ public abstract class CBaseUITest {
 		} catch (final Exception e) {
 			LOGGER.error("❌ Navigation failed for view: {} - Error: {}", viewText, e.getMessage());
 			return false;
+		}
+	}
+
+	/** Opens a tab or accordion panel if it contains the specified text. */
+	protected void openTabOrAccordionIfNeeded(final String text) {
+		final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText(text));
+		if (tab.count() > 0) {
+			tab.first().click();
+			wait_500();
+			return;
+		}
+		final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(text));
+		if (accordion.count() > 0) {
+			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
+			if (heading.count() > 0) {
+				heading.first().click();
+			} else {
+				accordion.first().click();
+			}
+			wait_500();
 		}
 	}
 
@@ -1612,6 +1690,106 @@ public abstract class CBaseUITest {
 		}
 	}
 
+	/** Performs comprehensive attachment CRUD operations (Upload/Download/Delete). Generic method that can be called from any test for any entity
+	 * with attachments.
+	 * @return true if all operations succeeded, false otherwise */
+	protected boolean testAttachmentCrudOperations() {
+		try {
+			final Locator attachmentsContainer = locateAttachmentsContainer();
+			if (attachmentsContainer == null) {
+				LOGGER.debug("ℹ️ No attachments section found - skipping attachment CRUD test");
+				return false;
+			}
+			LOGGER.info("📤 Testing Attachment CRUD - Upload/Download/Delete");
+			attachmentsContainer.scrollIntoViewIfNeeded();
+			wait_500();
+			// Test UPLOAD
+			final Locator uploadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:upload");
+			if (uploadButton.count() == 0) {
+				LOGGER.debug("ℹ️ Upload button not found - skipping attachment CRUD test");
+				return false;
+			}
+			uploadButton.click();
+			wait_500();
+			final Locator dialog = waitForDialogWithText("Upload File");
+			if (dialog.count() == 0) {
+				LOGGER.warn("⚠️ Upload dialog did not open");
+				return false;
+			}
+			final java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("test-attachment-", ".txt");
+			java.nio.file.Files.writeString(tempFile, "Test attachment content - " + System.currentTimeMillis());
+			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
+			final Locator dialogUploadButton = dialog.locator("#cbutton-upload");
+			waitForButtonEnabled(dialogUploadButton);
+			dialogUploadButton.click();
+			waitForDialogToClose();
+			wait_1000();
+			// Verify attachment uploaded
+			final String fileName = tempFile.getFileName().toString();
+			final Locator attachmentsGrid = locateAttachmentsGrid(attachmentsContainer);
+			waitForGridCellText(attachmentsGrid, fileName);
+			LOGGER.info("✅ Attachment uploaded: {}", fileName);
+			// Test DOWNLOAD
+			final Locator uploadedCell = attachmentsGrid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(fileName));
+			uploadedCell.first().click();
+			wait_500();
+			final Locator downloadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:download");
+			if (downloadButton.isDisabled()) {
+				LOGGER.warn("⚠️ Download button is disabled after selection");
+				return false;
+			}
+			downloadButton.click();
+			wait_500();
+			LOGGER.info("✅ Attachment download triggered");
+			// Test DELETE
+			final Locator deleteButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:trash");
+			if (deleteButton.isDisabled()) {
+				LOGGER.warn("⚠️ Delete button is disabled after selection");
+				return false;
+			}
+			deleteButton.click();
+			wait_500();
+			final Locator confirmYes = page.locator("#cbutton-yes");
+			if (confirmYes.count() > 0) {
+				confirmYes.first().click();
+			}
+			waitForDialogToClose();
+			wait_1000();
+			waitForGridCellGone(attachmentsGrid, fileName);
+			LOGGER.info("✅ Attachment deleted successfully");
+			return true;
+		} catch (final Exception e) {
+			LOGGER.error("❌ Attachment CRUD test failed: {}", e.getMessage(), e);
+			return false;
+		}
+	}
+
+	/** Tests attachment operations if available on the current page. */
+	protected boolean testAttachmentOperations() {
+		try {
+			final Locator attachmentsContainer = locateAttachmentsContainer();
+			if (attachmentsContainer == null) {
+				LOGGER.debug("ℹ️ No attachments section found on page");
+				return false;
+			}
+			LOGGER.info("📎 Testing attachment operations...");
+			attachmentsContainer.scrollIntoViewIfNeeded();
+			// Test upload button exists
+			final Locator uploadButton = attachmentsContainer.locator("vaadin-button")
+					.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:upload']")));
+			if (uploadButton.count() > 0) {
+				LOGGER.info("✅ Attachment upload button found");
+				return true;
+			} else {
+				LOGGER.debug("ℹ️ No attachment upload button found");
+				return false;
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Failed to test attachment operations: {}", e.getMessage());
+			return false;
+		}
+	}
+
 	/** Tests breadcrumb navigation if present */
 	protected void testBreadcrumbNavigation() {
 		LOGGER.info("🍞 Testing breadcrumb navigation...");
@@ -1646,6 +1824,79 @@ public abstract class CBaseUITest {
 	// ===========================================
 	// ENHANCED CRUD TESTING METHODS
 	// ===========================================
+
+	/** Performs comprehensive comment CRUD operations (Add/Edit/Delete). Generic method that can be called from any test for any entity with
+	 * comments.
+	 * @return true if all operations succeeded, false otherwise */
+	protected boolean testCommentCrudOperations() {
+		try {
+			final Locator commentsContainer = locateCommentsContainer();
+			if (commentsContainer == null) {
+				LOGGER.debug("ℹ️ No comments section found - skipping comment CRUD test");
+				return false;
+			}
+			LOGGER.info("💬 Testing Comment CRUD - Add/Edit/Delete");
+			commentsContainer.scrollIntoViewIfNeeded();
+			wait_500();
+			// Test ADD COMMENT
+			final Locator addCommentButton = commentsContainer.locator("vaadin-button")
+					.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:plus']")));
+			if (addCommentButton.count() == 0) {
+				LOGGER.debug("ℹ️ Add comment button not found - skipping comment CRUD test");
+				return false;
+			}
+			addCommentButton.first().click();
+			wait_500();
+			// Fill comment text
+			final Locator commentField = page.locator("vaadin-text-area");
+			if (commentField.count() == 0) {
+				LOGGER.warn("⚠️ Comment text area not found");
+				return false;
+			}
+			final String commentText = "Test comment added by Playwright automation - " + System.currentTimeMillis();
+			commentField.first().fill(commentText);
+			wait_500();
+			// Save comment
+			final Locator saveCommentButton = page.locator("#cbutton-save");
+			if (saveCommentButton.count() == 0) {
+				LOGGER.warn("⚠️ Save comment button not found");
+				return false;
+			}
+			saveCommentButton.first().click();
+			wait_1000();
+			LOGGER.info("✅ Comment added successfully");
+			return true;
+		} catch (final Exception e) {
+			LOGGER.error("❌ Comment CRUD test failed: {}", e.getMessage(), e);
+			return false;
+		}
+	}
+
+	/** Tests comment operations if available on the current page. */
+	protected boolean testCommentOperations() {
+		try {
+			final Locator commentsContainer = locateCommentsContainer();
+			if (commentsContainer == null) {
+				LOGGER.debug("ℹ️ No comments section found on page");
+				return false;
+			}
+			LOGGER.info("💬 Testing comment operations...");
+			commentsContainer.scrollIntoViewIfNeeded();
+			// Test add comment button exists
+			final Locator addButton = commentsContainer.locator("vaadin-button")
+					.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:plus']")));
+			if (addButton.count() > 0) {
+				LOGGER.info("✅ Add comment button found");
+				return true;
+			} else {
+				LOGGER.debug("ℹ️ No add comment button found");
+				return false;
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Failed to test comment operations: {}", e.getMessage());
+			return false;
+		}
+	}
 
 	/** Tests database initialization by verifying that essential data is present */
 	protected void testDatabaseInitialization() {
@@ -1870,6 +2121,34 @@ public abstract class CBaseUITest {
 		}
 	}
 
+	/** Tests parent item selection if available on the current page. */
+	protected boolean testParentItemSelection() {
+		try {
+			final Locator parentSelector = locateParentItemSelector();
+			if (parentSelector == null) {
+				LOGGER.debug("ℹ️ No parent item selector found on page");
+				return false;
+			}
+			LOGGER.info("🔗 Testing parent item selection...");
+			parentSelector.scrollIntoViewIfNeeded();
+			parentSelector.click();
+			wait_500();
+			final Locator items = page.locator("vaadin-combo-box-item");
+			if (items.count() > 0) {
+				items.first().click();
+				wait_500();
+				LOGGER.info("✅ Parent item selected successfully");
+				return true;
+			} else {
+				LOGGER.debug("ℹ️ No parent items available in dropdown");
+				return false;
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Failed to test parent item selection: {}", e.getMessage());
+			return false;
+		}
+	}
+
 	/** Tests project activation/deactivation functionality */
 	protected void testProjectActivation() {
 		LOGGER.info("🔄 Testing project activation functionality...");
@@ -2044,6 +2323,9 @@ public abstract class CBaseUITest {
 	// ===========================================
 	// TESTING UTILITY METHODS
 	// ===========================================
+	// ===========================================
+	// ATTACHMENT, COMMENT, AND PARENT ITEM TESTING
+	// ===========================================
 
 	/** Visits menu items with optional screenshot capture and configurable error handling. */
 	protected int visitMenuItems(boolean captureScreenshots, boolean allowEmpty, String screenshotPrefix) {
@@ -2163,6 +2445,42 @@ public abstract class CBaseUITest {
 	// EXCEPTION DETECTION SYSTEM FOR FAIL-FAST BEHAVIOR
 	// ================================================================================
 
+	/** Helper method to wait for button to become enabled. */
+	protected void waitForButtonEnabled(final Locator button) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (!button.isDisabled()) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Button did not become enabled");
+	}
+
+	/** Helper method to wait for dialog to close. */
+	protected void waitForDialogToClose() {
+		final int maxAttempts = 10;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
+				return;
+			}
+			wait_500();
+		}
+	}
+
+	/** Helper method to wait for dialog with specific text to appear. */
+	protected Locator waitForDialogWithText(final String text) {
+		final int maxAttempts = 10;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText(text));
+			if (overlay.count() > 0) {
+				return overlay.first();
+			}
+			wait_500();
+		}
+		throw new AssertionError("Dialog with text '" + text + "' did not open");
+	}
+
 	/** Wait for a dynamic page to fully load and verify no exceptions occurred. This method will fail fast if any error indicators are found. */
 	protected void waitForDynamicPageLoad() {
 		try {
@@ -2185,6 +2503,34 @@ public abstract class CBaseUITest {
 			LOGGER.error("❌ {}", message);
 			throw new AssertionError(message, e);
 		}
+	}
+
+	/** Helper method to wait for grid cell with specific text to disappear. */
+	protected void waitForGridCellGone(final Locator grid, final String text) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			final Locator matches = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text));
+			if (matches.count() == 0) {
+				return;
+			}
+			if (!matches.first().isVisible()) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Grid cell still present: " + text);
+	}
+
+	/** Helper method to wait for grid cell with specific text to appear. */
+	protected void waitForGridCellText(final Locator grid, final String text) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text)).count() > 0) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Expected grid cell not found: " + text);
 	}
 
 	private void waitForLoginSuccess() {
@@ -2269,390 +2615,4 @@ public abstract class CBaseUITest {
 	// ===========================================
 	// DYNAMIC PAGE NAVIGATION METHODS
 	// ===========================================
-	
-	// ===========================================
-	// ATTACHMENT, COMMENT, AND PARENT ITEM TESTING
-	// ===========================================
-	
-	/** Locates the attachments container if present on the page. */
-	protected Locator locateAttachmentsContainer() {
-		openTabOrAccordionIfNeeded("Attachments");
-		final Locator container = page.locator("#custom-attachments-component");
-		if (container.count() > 0) {
-			return container.first();
-		}
-		final String selector = "h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')";
-		final Locator header = page.locator(selector);
-		if (header.count() > 0) {
-			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
-		}
-		return null;
-	}
-	
-	/** Locates the comments container if present on the page. */
-	protected Locator locateCommentsContainer() {
-		openTabOrAccordionIfNeeded("Comments");
-		final Locator container = page.locator("#custom-comments-component");
-		if (container.count() > 0) {
-			return container.first();
-		}
-		final String selector = "h2:has-text('Comments'), h3:has-text('Comments'), h4:has-text('Comments'), span:has-text('Comments')";
-		final Locator header = page.locator(selector);
-		if (header.count() > 0) {
-			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
-		}
-		return null;
-	}
-	
-	/** Locates the parent item selector if present on the page. */
-	protected Locator locateParentItemSelector() {
-		final Locator parentCombo = page.locator("vaadin-combo-box").filter(
-			new Locator.FilterOptions().setHas(
-				page.locator("label:has-text('Linked Activity'), label:has-text('Parent Item'), label:has-text('Related Activity')")
-			)
-		);
-		if (parentCombo.count() > 0) {
-			return parentCombo.first();
-		}
-		return null;
-	}
-	
-	/** Opens a tab or accordion panel if it contains the specified text. */
-	protected void openTabOrAccordionIfNeeded(final String text) {
-		final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText(text));
-		if (tab.count() > 0) {
-			tab.first().click();
-			wait_500();
-			return;
-		}
-		final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(text));
-		if (accordion.count() > 0) {
-			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
-			if (heading.count() > 0) {
-				heading.first().click();
-			} else {
-				accordion.first().click();
-			}
-			wait_500();
-		}
-	}
-	
-	/** Tests parent item selection if available on the current page. */
-	protected boolean testParentItemSelection() {
-		try {
-			final Locator parentSelector = locateParentItemSelector();
-			if (parentSelector == null) {
-				LOGGER.debug("ℹ️ No parent item selector found on page");
-				return false;
-			}
-			
-			LOGGER.info("🔗 Testing parent item selection...");
-			parentSelector.scrollIntoViewIfNeeded();
-			parentSelector.click();
-			wait_500();
-			
-			final Locator items = page.locator("vaadin-combo-box-item");
-			if (items.count() > 0) {
-				items.first().click();
-				wait_500();
-				LOGGER.info("✅ Parent item selected successfully");
-				return true;
-			} else {
-				LOGGER.debug("ℹ️ No parent items available in dropdown");
-				return false;
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("⚠️ Failed to test parent item selection: {}", e.getMessage());
-			return false;
-		}
-	}
-	
-	/** Tests attachment operations if available on the current page. */
-	protected boolean testAttachmentOperations() {
-		try {
-			final Locator attachmentsContainer = locateAttachmentsContainer();
-			if (attachmentsContainer == null) {
-				LOGGER.debug("ℹ️ No attachments section found on page");
-				return false;
-			}
-			
-			LOGGER.info("📎 Testing attachment operations...");
-			attachmentsContainer.scrollIntoViewIfNeeded();
-			
-			// Test upload button exists
-			final Locator uploadButton = attachmentsContainer.locator("vaadin-button")
-				.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:upload']")));
-			
-			if (uploadButton.count() > 0) {
-				LOGGER.info("✅ Attachment upload button found");
-				return true;
-			} else {
-				LOGGER.debug("ℹ️ No attachment upload button found");
-				return false;
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("⚠️ Failed to test attachment operations: {}", e.getMessage());
-			return false;
-		}
-	}
-	
-	/** Tests comment operations if available on the current page. */
-	protected boolean testCommentOperations() {
-		try {
-			final Locator commentsContainer = locateCommentsContainer();
-			if (commentsContainer == null) {
-				LOGGER.debug("ℹ️ No comments section found on page");
-				return false;
-			}
-			
-			LOGGER.info("💬 Testing comment operations...");
-			commentsContainer.scrollIntoViewIfNeeded();
-			
-			// Test add comment button exists
-			final Locator addButton = commentsContainer.locator("vaadin-button")
-				.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:plus']")));
-			
-			if (addButton.count() > 0) {
-				LOGGER.info("✅ Add comment button found");
-				return true;
-			} else {
-				LOGGER.debug("ℹ️ No add comment button found");
-				return false;
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("⚠️ Failed to test comment operations: {}", e.getMessage());
-			return false;
-		}
-	}
-	
-	/** Performs comprehensive attachment CRUD operations (Upload/Download/Delete).
-	 * Generic method that can be called from any test for any entity with attachments.
-	 * @return true if all operations succeeded, false otherwise */
-	protected boolean testAttachmentCrudOperations() {
-		try {
-			final Locator attachmentsContainer = locateAttachmentsContainer();
-			if (attachmentsContainer == null) {
-				LOGGER.debug("ℹ️ No attachments section found - skipping attachment CRUD test");
-				return false;
-			}
-			
-			LOGGER.info("📤 Testing Attachment CRUD - Upload/Download/Delete");
-			attachmentsContainer.scrollIntoViewIfNeeded();
-			wait_500();
-			
-			// Test UPLOAD
-			final Locator uploadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:upload");
-			if (uploadButton.count() == 0) {
-				LOGGER.debug("ℹ️ Upload button not found - skipping attachment CRUD test");
-				return false;
-			}
-			
-			uploadButton.click();
-			wait_500();
-			
-			final Locator dialog = waitForDialogWithText("Upload File");
-			if (dialog.count() == 0) {
-				LOGGER.warn("⚠️ Upload dialog did not open");
-				return false;
-			}
-			
-			final java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("test-attachment-", ".txt");
-			java.nio.file.Files.writeString(tempFile, "Test attachment content - " + System.currentTimeMillis());
-			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
-			
-			final Locator dialogUploadButton = dialog.locator("#cbutton-upload");
-			waitForButtonEnabled(dialogUploadButton);
-			dialogUploadButton.click();
-			waitForDialogToClose();
-			wait_1000();
-			
-			// Verify attachment uploaded
-			final String fileName = tempFile.getFileName().toString();
-			final Locator attachmentsGrid = locateAttachmentsGrid(attachmentsContainer);
-			waitForGridCellText(attachmentsGrid, fileName);
-			LOGGER.info("✅ Attachment uploaded: {}", fileName);
-			
-			// Test DOWNLOAD
-			final Locator uploadedCell = attachmentsGrid.locator("vaadin-grid-cell-content")
-				.filter(new Locator.FilterOptions().setHasText(fileName));
-			uploadedCell.first().click();
-			wait_500();
-			
-			final Locator downloadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:download");
-			if (downloadButton.isDisabled()) {
-				LOGGER.warn("⚠️ Download button is disabled after selection");
-				return false;
-			}
-			downloadButton.click();
-			wait_500();
-			LOGGER.info("✅ Attachment download triggered");
-			
-			// Test DELETE
-			final Locator deleteButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:trash");
-			if (deleteButton.isDisabled()) {
-				LOGGER.warn("⚠️ Delete button is disabled after selection");
-				return false;
-			}
-			deleteButton.click();
-			wait_500();
-			
-			final Locator confirmYes = page.locator("#cbutton-yes");
-			if (confirmYes.count() > 0) {
-				confirmYes.first().click();
-			}
-			waitForDialogToClose();
-			wait_1000();
-			waitForGridCellGone(attachmentsGrid, fileName);
-			LOGGER.info("✅ Attachment deleted successfully");
-			
-			return true;
-			
-		} catch (final Exception e) {
-			LOGGER.error("❌ Attachment CRUD test failed: {}", e.getMessage(), e);
-			return false;
-		}
-	}
-	
-	/** Performs comprehensive comment CRUD operations (Add/Edit/Delete).
-	 * Generic method that can be called from any test for any entity with comments.
-	 * @return true if all operations succeeded, false otherwise */
-	protected boolean testCommentCrudOperations() {
-		try {
-			final Locator commentsContainer = locateCommentsContainer();
-			if (commentsContainer == null) {
-				LOGGER.debug("ℹ️ No comments section found - skipping comment CRUD test");
-				return false;
-			}
-			
-			LOGGER.info("💬 Testing Comment CRUD - Add/Edit/Delete");
-			commentsContainer.scrollIntoViewIfNeeded();
-			wait_500();
-			
-			// Test ADD COMMENT
-			final Locator addCommentButton = commentsContainer.locator("vaadin-button")
-				.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:plus']")));
-			
-			if (addCommentButton.count() == 0) {
-				LOGGER.debug("ℹ️ Add comment button not found - skipping comment CRUD test");
-				return false;
-			}
-			
-			addCommentButton.first().click();
-			wait_500();
-			
-			// Fill comment text
-			final Locator commentField = page.locator("vaadin-text-area");
-			if (commentField.count() == 0) {
-				LOGGER.warn("⚠️ Comment text area not found");
-				return false;
-			}
-			
-			final String commentText = "Test comment added by Playwright automation - " + System.currentTimeMillis();
-			commentField.first().fill(commentText);
-			wait_500();
-			
-			// Save comment
-			final Locator saveCommentButton = page.locator("#cbutton-save");
-			if (saveCommentButton.count() == 0) {
-				LOGGER.warn("⚠️ Save comment button not found");
-				return false;
-			}
-			
-			saveCommentButton.first().click();
-			wait_1000();
-			LOGGER.info("✅ Comment added successfully");
-			
-			return true;
-			
-		} catch (final Exception e) {
-			LOGGER.error("❌ Comment CRUD test failed: {}", e.getMessage(), e);
-			return false;
-		}
-	}
-	
-	/** Helper method to locate attachments grid within a container. */
-	protected Locator locateAttachmentsGrid(final Locator container) {
-		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
-		if (grid.count() == 0) {
-			throw new AssertionError("Attachments grid not found");
-		}
-		return grid.first();
-	}
-	
-	/** Helper method to locate attachment toolbar button by icon name. */
-	protected Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
-		final Locator button = container.locator("vaadin-button")
-			.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='" + iconName + "']")));
-		if (button.count() == 0) {
-			throw new AssertionError("Toolbar button not found for icon " + iconName);
-		}
-		return button.first();
-	}
-	
-	/** Helper method to wait for dialog with specific text to appear. */
-	protected Locator waitForDialogWithText(final String text) {
-		final int maxAttempts = 10;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]")
-				.filter(new Locator.FilterOptions().setHasText(text));
-			if (overlay.count() > 0) {
-				return overlay.first();
-			}
-			wait_500();
-		}
-		throw new AssertionError("Dialog with text '" + text + "' did not open");
-	}
-	
-	/** Helper method to wait for dialog to close. */
-	protected void waitForDialogToClose() {
-		final int maxAttempts = 10;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
-				return;
-			}
-			wait_500();
-		}
-	}
-	
-	/** Helper method to wait for button to become enabled. */
-	protected void waitForButtonEnabled(final Locator button) {
-		final int maxAttempts = 12;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			if (!button.isDisabled()) {
-				return;
-			}
-			wait_500();
-		}
-		throw new AssertionError("Button did not become enabled");
-	}
-	
-	/** Helper method to wait for grid cell with specific text to appear. */
-	protected void waitForGridCellText(final Locator grid, final String text) {
-		final int maxAttempts = 12;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			if (grid.locator("vaadin-grid-cell-content")
-				.filter(new Locator.FilterOptions().setHasText(text)).count() > 0) {
-				return;
-			}
-			wait_500();
-		}
-		throw new AssertionError("Expected grid cell not found: " + text);
-	}
-	
-	/** Helper method to wait for grid cell with specific text to disappear. */
-	protected void waitForGridCellGone(final Locator grid, final String text) {
-		final int maxAttempts = 12;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			final Locator matches = grid.locator("vaadin-grid-cell-content")
-				.filter(new Locator.FilterOptions().setHasText(text));
-			if (matches.count() == 0) {
-				return;
-			}
-			if (!matches.first().isVisible()) {
-				return;
-			}
-			wait_500();
-		}
-		throw new AssertionError("Grid cell still present: " + text);
-	}
 }
