@@ -618,14 +618,6 @@ public class CFinancialAndTestManagementCrudTest extends CBaseUITest {
 	}
 
 	/**
-	 * Locate a toolbar button within attachments container by icon.
-	 */
-	private Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
-		return container.locator("vaadin-button").filter(new Locator.FilterOptions().setHas(
-				page.locator("vaadin-icon[icon='" + iconName + "']")));
-	}
-
-	/**
 	 * Locate a toolbar button within comments container by icon.
 	 */
 	private Locator locateCommentToolbarButton(final Locator container, final String iconName) {
@@ -634,57 +626,9 @@ public class CFinancialAndTestManagementCrudTest extends CBaseUITest {
 	}
 
 	/**
-	 * Locate attachments grid within container.
-	 */
-	private Locator locateAttachmentsGrid(final Locator container) {
-		return container.locator("vaadin-grid").first();
-	}
-
-	/**
 	 * Locate comments grid within container.
 	 */
 	private Locator locateCommentsGrid(final Locator container) {
 		return container.locator("vaadin-grid").first();
-	}
-
-	/**
-	 * Wait for a dialog with specific text to appear.
-	 */
-	private Locator waitForDialogWithText(final String text) {
-		return page.locator("vaadin-dialog-overlay").filter(new Locator.FilterOptions().setHasText(text)).first();
-	}
-
-	/**
-	 * Wait for a button to become enabled.
-	 */
-	private void waitForButtonEnabled(final Locator button) {
-		for (int i = 0; i < 10; i++) {
-			if (!button.isDisabled()) {
-				return;
-			}
-			wait_500();
-		}
-	}
-
-	/**
-	 * Wait for dialog to close.
-	 */
-	private void waitForDialogToClose() {
-		wait_1000();
-		page.waitForSelector("vaadin-dialog-overlay", new Page.WaitForSelectorOptions().setState(
-				com.microsoft.playwright.options.WaitForSelectorState.DETACHED).setTimeout(5000));
-	}
-
-	/**
-	 * Wait for grid cell containing specific text.
-	 */
-	private void waitForGridCellText(final Locator grid, final String text) {
-		for (int i = 0; i < 20; i++) {
-			final Locator cell = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text));
-			if (cell.count() > 0) {
-				return;
-			}
-			wait_500();
-		}
 	}
 }

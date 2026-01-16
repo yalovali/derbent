@@ -193,7 +193,7 @@ public class CBudgetAttachmentCommentTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-budget-selected-for-comments", screenshotCounter++), false);
 
 			// Look for comments section (tab or accordion)
-			openCommentsSectionIfNeeded();
+			openTabOrAccordionIfNeeded("Comments");
 			wait_500();
 			takeScreenshot(String.format("%03d-comments-section", screenshotCounter++), false);
 
@@ -240,100 +240,4 @@ public class CBudgetAttachmentCommentTest extends CBaseUITest {
 		}
 	}
 
-	// Helper methods
-
-	private Locator locateAttachmentsGrid(final Locator container) {
-		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
-		assertTrue(grid.count() > 0, "Attachments grid not found");
-		return grid.first();
-	}
-
-	private Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
-		final Locator button = container.locator("vaadin-button")
-			.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='" + iconName + "']")));
-		assertTrue(button.count() > 0, "Toolbar button not found for icon " + iconName);
-		return button.first();
-	}
-
-	private Locator waitForDialogWithText(final String text) {
-		final int maxAttempts = 10;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]")
-				.filter(new Locator.FilterOptions().setHasText(text));
-			if (overlay.count() > 0) {
-				return overlay.first();
-			}
-			wait_500();
-		}
-		throw new AssertionError("Dialog with text '" + text + "' did not open");
-	}
-
-	private void openCommentsSectionIfNeeded() {
-		final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("Comments"));
-		if (tab.count() > 0) {
-			tab.first().click();
-			wait_500();
-			return;
-		}
-		final Locator accordion = page.locator("vaadin-accordion-panel")
-			.filter(new Locator.FilterOptions().setHasText("Comments"));
-		if (accordion.count() > 0) {
-			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
-			if (heading.count() > 0) {
-				heading.first().click();
-			} else {
-				accordion.first().click();
-			}
-			wait_500();
-		}
-	}
-
-	private void waitForDialogToClose() {
-		final int maxAttempts = 10;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
-				return;
-			}
-			wait_500();
-		}
-	}
-
-	private void waitForButtonEnabled(final Locator button) {
-		final int maxAttempts = 12;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			if (!button.isDisabled()) {
-				return;
-			}
-			wait_500();
-		}
-		throw new AssertionError("Button did not become enabled");
-	}
-
-	private void waitForGridCellText(final Locator grid, final String text) {
-		final int maxAttempts = 12;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			if (grid.locator("vaadin-grid-cell-content")
-				.filter(new Locator.FilterOptions().setHasText(text)).count() > 0) {
-				return;
-			}
-			wait_500();
-		}
-		throw new AssertionError("Expected grid cell not found: " + text);
-	}
-
-	private void waitForGridCellGone(final Locator grid, final String text) {
-		final int maxAttempts = 12;
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			final Locator matches = grid.locator("vaadin-grid-cell-content")
-				.filter(new Locator.FilterOptions().setHasText(text));
-			if (matches.count() == 0) {
-				return;
-			}
-			if (!matches.first().isVisible()) {
-				return;
-			}
-			wait_500();
-		}
-		throw new AssertionError("Grid cell still present: " + text);
-	}
 }
