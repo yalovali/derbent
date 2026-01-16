@@ -15,9 +15,11 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.testcases.testcase.domain.CTestCase;
+import tech.derbent.app.testcases.teststep.domain.CTestStep;
 import tech.derbent.app.testcases.testrun.domain.CTestCaseResult;
 import tech.derbent.app.testcases.testrun.domain.CTestResult;
 import tech.derbent.app.testcases.testrun.domain.CTestRun;
+import tech.derbent.app.testcases.testrun.domain.CTestStepResult;
 import tech.derbent.app.testcases.testscenario.domain.CTestScenario;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -65,7 +67,7 @@ public class CTestRunService extends CEntityOfProjectService<CTestRun> implement
 		LOGGER.debug("Test run initialization complete with current execution start time");
 	}
 
-	/** Execute a test run by initializing test case results for all test cases in the scenario.
+	/** Execute a test run by initializing test case results and test step results for all test cases in the scenario.
 	 * @param testRun the test run to execute
 	 * @return the test run with initialized results */
 	public CTestRun executeTestRun(final CTestRun testRun) {
@@ -81,13 +83,27 @@ public class CTestRunService extends CEntityOfProjectService<CTestRun> implement
 		final List<CTestCase> testCases = new java.util.ArrayList<>(testCasesSet);
 		int executionOrder = 1;
 		for (final CTestCase testCase : testCases) {
-			final CTestCaseResult result = new CTestCaseResult();
-			result.setTestRun(testRun);
-			result.setTestCase(testCase);
-			result.setExecutionOrder(executionOrder++);
-			result.setResult(CTestResult.NOT_EXECUTED);
-			testRun.getTestCaseResults().add(result);
-			LOGGER.debug("Initialized test case result for test case {} with order {}", testCase.getId(), result.getExecutionOrder());
+			final CTestCaseResult caseResult = new CTestCaseResult();
+			caseResult.setTestRun(testRun);
+			caseResult.setTestCase(testCase);
+			caseResult.setExecutionOrder(executionOrder++);
+			caseResult.setResult(CTestResult.NOT_EXECUTED);
+			testRun.getTestCaseResults().add(caseResult);
+			LOGGER.debug("Initialized test case result for test case {} with order {}", testCase.getId(), caseResult.getExecutionOrder());
+			final Set<CTestStep> testStepsSet = testCase.getTestSteps();
+			if (testStepsSet != null && !testStepsSet.isEmpty()) {
+				final List<CTestStep> testSteps = new java.util.ArrayList<>(testStepsSet);
+				testSteps.sort(java.util.Comparator.comparing(CTestStep::getStepOrder));
+				for (final CTestStep testStep : testSteps) {
+					final CTestStepResult stepResult = new CTestStepResult();
+					stepResult.setTestCaseResult(caseResult);
+					stepResult.setTestStep(testStep);
+					stepResult.setResult(CTestResult.NOT_EXECUTED);
+					stepResult.setActualResult("");
+					caseResult.getTestStepResults().add(stepResult);
+					LOGGER.debug("Initialized test step result for step {} with order {}", testStep.getId(), testStep.getStepOrder());
+				}
+			}
 		}
 		LOGGER.debug("Test run execution complete with {} test case results", testRun.getTestCaseResults().size());
 		return save(testRun);
@@ -99,5 +115,58 @@ public class CTestRunService extends CEntityOfProjectService<CTestRun> implement
 	public List<CTestRun> listByScenario(final CTestScenario scenario) {
 		Check.notNull(scenario, "Test scenario cannot be null");
 		return ((ITestRunRepository) repository).listByScenario(scenario);
+	}
+
+	/** Complete a test run by calculating statistics and setting overall result.
+	 * @param testRun the test run to complete
+	 * @return the completed test run with calculated statistics */
+	public CTestRun completeTestRun(final CTestRun testRun) {
+		Check.notNull(testRun, "Test run cannot be null");
+		LOGGER.debug("Completing test run {}", testRun.getId());
+		testRun.setExecutionEnd(LocalDateTime.now(clock));
+		if (testRun.getExecutionStart() != null && testRun.getExecutionEnd() != null) {
+			final long durationMs = java.time.Duration.between(testRun.getExecutionStart(), testRun.getExecutionEnd()).toMillis();
+			testRun.setDurationMs(durationMs);
+			LOGGER.debug("Test run duration calculated: {} ms", durationMs);
+		}
+		int totalCases = 0;
+		int passedCases = 0;
+		int failedCases = 0;
+		int totalSteps = 0;
+		int passedSteps = 0;
+		int failedSteps = 0;
+		for (final CTestCaseResult caseResult : testRun.getTestCaseResults()) {
+			totalCases++;
+			if (caseResult.getResult() == CTestResult.PASSED) {
+				passedCases++;
+			} else if (caseResult.getResult() == CTestResult.FAILED) {
+				failedCases++;
+			}
+			for (final CTestStepResult stepResult : caseResult.getTestStepResults()) {
+				totalSteps++;
+				if (stepResult.getResult() == CTestResult.PASSED) {
+					passedSteps++;
+				} else if (stepResult.getResult() == CTestResult.FAILED) {
+					failedSteps++;
+				}
+			}
+		}
+		testRun.setTotalTestCases(totalCases);
+		testRun.setPassedTestCases(passedCases);
+		testRun.setFailedTestCases(failedCases);
+		testRun.setTotalTestSteps(totalSteps);
+		testRun.setPassedTestSteps(passedSteps);
+		testRun.setFailedTestSteps(failedSteps);
+		if (failedCases > 0) {
+			testRun.setResult(passedCases > 0 ? CTestResult.PARTIAL : CTestResult.FAILED);
+		} else if (passedCases == totalCases && totalCases > 0) {
+			testRun.setResult(CTestResult.PASSED);
+		} else {
+			testRun.setResult(CTestResult.NOT_EXECUTED);
+		}
+		LOGGER.debug("Test run statistics - Total: {}, Passed: {}, Failed: {}, Steps: {}/{}/{}",
+				totalCases, passedCases, failedCases, totalSteps, passedSteps, failedSteps);
+		LOGGER.debug("Test run overall result: {}", testRun.getResult());
+		return save(testRun);
 	}
 }
