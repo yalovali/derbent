@@ -1,10 +1,11 @@
 package tech.derbent.app.comments.view;
 
-import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextArea;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
@@ -100,45 +101,28 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 	}
 
 	@Override
-	protected void on_buttonCancel_clicked() {
-		close();
+	public String getDialogTitleString() {
+		return isNew ? "Add Comment" : "Edit Comment";
 	}
 
 	@Override
-	protected void on_buttonSave_clicked() {
-		try {
-			// Validate
-			if (!binder.writeBeanIfValid(getEntity())) {
-				CNotificationService.showWarning("Please correct validation errors");
-				return;
-			}
+	protected Icon getFormIcon() throws Exception {
+		return isNew ? VaadinIcon.COMMENT.create() : VaadinIcon.EDIT.create();
+	}
 
-			// Set author for new comments
-			if (isNew && getEntity().getAuthor() == null) {
-				final CUser currentUser = sessionService.getActiveUser().orElse(null);
-				if (currentUser == null) {
-					CNotificationService.showError("No active user found");
-					LOGGER.error("Cannot create comment: no active user in session");
-					return;
-				}
-				getEntity().setAuthor(currentUser);
-				getEntity().setCompany(currentUser.getCompany());
-			}
+	@Override
+	protected String getFormTitleString() {
+		return isNew ? "New Comment" : "Edit Comment";
+	}
 
-			// Save comment
-			commentService.save(getEntity());
+	@Override
+	protected String getSuccessCreateMessage() {
+		return "Comment added successfully";
+	}
 
-			// Invoke callback
-			if (getSaveCallback() != null) {
-				getSaveCallback().accept(getEntity());
-			}
-
-			CNotificationService.showSaveSuccess();
-			close();
-		} catch (final Exception e) {
-			LOGGER.error("Error saving comment", e);
-			CNotificationService.showException("Error saving comment", e);
-		}
+	@Override
+	protected String getSuccessUpdateMessage() {
+		return "Comment updated successfully";
 	}
 
 	@Override
@@ -154,9 +138,33 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 	}
 
 	@Override
-	protected void setupDialog() {
-		setTitle(isNew ? "Add Comment" : "Edit Comment");
+	protected void setupContent() throws Exception {
+		super.setupContent();
 		setWidth("600px");
-		LOGGER.debug("Comment dialog initialized: isNew={}", isNew);
+	}
+
+	@Override
+	protected void validateForm() {
+		// Validate using binder
+		if (!binder.writeBeanIfValid(getEntity())) {
+			throw new IllegalStateException("Please correct validation errors");
+		}
+
+		// Set author for new comments
+		if (isNew && getEntity().getAuthor() == null) {
+			final CUser currentUser = sessionService.getActiveUser().orElse(null);
+			if (currentUser == null) {
+				LOGGER.error("Cannot create comment: no active user in session");
+				throw new IllegalStateException("No active user found");
+			}
+			getEntity().setAuthor(currentUser);
+			getEntity().setCompany(currentUser.getCompany());
+		}
+
+		// Save comment
+		commentService.save(getEntity());
+
+		LOGGER.debug("Comment validated and saved: {}", getEntity().getId());
 	}
 }
+
