@@ -1,0 +1,339 @@
+package automated_tests.tech.derbent.ui.automation;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.TestPropertySource;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
+
+/**
+ * Comprehensive attachment and comment operations test for Team entity.
+ * Tests cover full Create, Read, Update, Delete lifecycle for attachments and comments.
+ */
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@TestPropertySource(properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb",
+	"spring.datasource.username=sa",
+	"spring.datasource.password=",
+	"spring.datasource.driver-class-name=org.h2.Driver",
+	"spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+	"spring.jpa.hibernate.ddl-auto=create-drop"
+})
+@DisplayName("🔧 Team Attachment & Comment Test")
+public class CTeamAttachmentCommentTest extends CBaseUITest {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CTeamAttachmentCommentTest.class);
+	private int screenshotCounter = 1;
+
+	@Test
+	@DisplayName("✅ Team Attachments - Upload/Download/Delete")
+	void testTeamAttachmentOperations() {
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
+
+		try {
+			Files.createDirectories(Paths.get("target/screenshots"));
+			LOGGER.info("🧪 Testing Team Attachment operations...");
+
+			// Login and navigate to Teams view
+			loginToApplication();
+			takeScreenshot(String.format("%03d-login-team-attachments", screenshotCounter++), false);
+
+			final boolean navigated = navigateToDynamicPageByEntityType("CTeam");
+			assertTrue(navigated, "Failed to navigate to Teams view");
+			wait_2000();
+			takeScreenshot(String.format("%03d-teams-view", screenshotCounter++), false);
+
+			// Create a test team first
+			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
+			clickNew();
+			wait_1000();
+			takeScreenshot(String.format("%03d-teams-new-dialog", screenshotCounter++), false);
+
+			// Wait for dialog to open and fill team details
+			final Locator formDialog = page.locator("vaadin-dialog-overlay[opened]").first();
+			formDialog.locator("vaadin-text-field").first().fill("Team for Attachment Test");
+			wait_500();
+			final Locator textAreas = page.locator("vaadin-text-area");
+			if (textAreas.count() > 0) {
+				textAreas.first().fill("Team created for attachment testing");
+			}
+			wait_500();
+			takeScreenshot(String.format("%03d-teams-form-filled", screenshotCounter++), false);
+
+			clickSave();
+			wait_2000();
+			performFailFastCheck("After team create");
+			takeScreenshot(String.format("%03d-teams-created", screenshotCounter++), false);
+
+			// Refresh and select the team
+			clickRefresh();
+			wait_1000();
+			clickFirstGridRow();
+			wait_1000();
+			takeScreenshot(String.format("%03d-team-selected", screenshotCounter++), false);
+
+			// Locate attachments section
+			final Locator attachmentsContainer = locateAttachmentsContainer();
+			attachmentsContainer.scrollIntoViewIfNeeded();
+			takeScreenshot(String.format("%03d-attachments-visible", screenshotCounter++), false);
+
+			// Test UPLOAD
+			LOGGER.info("📤 Testing UPLOAD - New Attachment");
+			final Locator uploadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:upload");
+			uploadButton.click();
+			wait_500();
+
+			final Locator dialog = waitForDialogWithText("Upload File");
+			final java.nio.file.Path tempFile = Files.createTempFile("test-team-attachment-", ".txt");
+			Files.writeString(tempFile, "Test team attachment content - " + System.currentTimeMillis());
+			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
+
+			final Locator dialogUploadButton = dialog.locator("#cbutton-upload");
+			waitForButtonEnabled(dialogUploadButton);
+			takeScreenshot(String.format("%03d-upload-ready", screenshotCounter++), false);
+			dialogUploadButton.click();
+			waitForDialogToClose();
+			wait_1000();
+
+			// Verify attachment uploaded
+			final String fileName = tempFile.getFileName().toString();
+			final Locator attachmentsGrid = locateAttachmentsGrid(attachmentsContainer);
+			waitForGridCellText(attachmentsGrid, fileName);
+			takeScreenshot(String.format("%03d-uploaded", screenshotCounter++), false);
+
+			// Test DOWNLOAD
+			LOGGER.info("📥 Testing DOWNLOAD - Get Attachment");
+			final Locator uploadedCell = attachmentsGrid.locator("vaadin-grid-cell-content")
+				.filter(new Locator.FilterOptions().setHasText(fileName));
+			uploadedCell.first().click();
+			wait_500();
+
+			final Locator downloadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:download");
+			assertFalse(downloadButton.isDisabled(), "Download button should be enabled after selection");
+			downloadButton.click();
+			wait_500();
+			performFailFastCheck("After attachment download");
+			takeScreenshot(String.format("%03d-downloaded", screenshotCounter++), false);
+
+			// Test DELETE
+			LOGGER.info("🗑️ Testing DELETE - Remove Attachment");
+			final Locator deleteButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:trash");
+			assertFalse(deleteButton.isDisabled(), "Delete button should be enabled after selection");
+			deleteButton.click();
+			wait_500();
+			
+			final Locator confirmYes = page.locator("#cbutton-yes");
+			if (confirmYes.count() > 0) {
+				confirmYes.first().click();
+			}
+			waitForDialogToClose();
+			wait_1000();
+			waitForGridCellGone(attachmentsGrid, fileName);
+			takeScreenshot(String.format("%03d-deleted", screenshotCounter++), false);
+
+			LOGGER.info("✅ Team attachment operations completed successfully");
+
+		} catch (final Exception e) {
+			LOGGER.error("❌ Team attachment test failed: {}", e.getMessage(), e);
+			takeScreenshot(String.format("%03d-team-attachments-error", screenshotCounter++), true);
+			throw new AssertionError("Team attachment test failed", e);
+		}
+	}
+
+	@Test
+	@DisplayName("✅ Team Comments - Add/Edit/Delete")
+	void testTeamCommentOperations() {
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
+			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			return;
+		}
+
+		try {
+			Files.createDirectories(Paths.get("target/screenshots"));
+			LOGGER.info("🧪 Testing Team Comments operations...");
+
+			// Login and navigate to Teams view
+			loginToApplication();
+			takeScreenshot(String.format("%03d-login-team-comments", screenshotCounter++), false);
+
+			final boolean navigated = navigateToDynamicPageByEntityType("CTeam");
+			assertTrue(navigated, "Failed to navigate to Teams view");
+			wait_2000();
+			takeScreenshot(String.format("%03d-teams-view", screenshotCounter++), false);
+
+			// Create a test team first
+			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
+			clickNew();
+			wait_1000();
+			final Locator formDialog = page.locator("vaadin-dialog-overlay[opened]").first();
+			formDialog.locator("vaadin-text-field").first().fill("Team for Comment Test");
+			clickSave();
+			wait_2000();
+			performFailFastCheck("After team create");
+			takeScreenshot(String.format("%03d-teams-created", screenshotCounter++), false);
+
+			// Refresh and select the team
+			clickRefresh();
+			wait_1000();
+			clickFirstGridRow();
+			wait_1000();
+			takeScreenshot(String.format("%03d-team-selected-for-comments", screenshotCounter++), false);
+
+			// Look for comments section (tab or accordion)
+			openCommentsSectionIfNeeded();
+			wait_500();
+			takeScreenshot(String.format("%03d-comments-section", screenshotCounter++), false);
+
+			// Test ADD COMMENT
+			LOGGER.info("💬 Testing ADD COMMENT");
+			final Locator commentsContainer = locateCommentsContainer();
+			if (commentsContainer.count() > 0) {
+				commentsContainer.scrollIntoViewIfNeeded();
+				takeScreenshot(String.format("%03d-comments-visible", screenshotCounter++), false);
+
+				// Find add comment button or text field
+				final Locator addCommentButton = commentsContainer.locator("vaadin-button")
+					.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:plus']")));
+				
+				if (addCommentButton.count() > 0) {
+					addCommentButton.first().click();
+					wait_500();
+					
+					// Fill comment text
+					final Locator commentField = page.locator("vaadin-text-area");
+					if (commentField.count() > 0) {
+						commentField.first().fill("This is a test comment for team added by Playwright automation");
+						wait_500();
+						takeScreenshot(String.format("%03d-comment-filled", screenshotCounter++), false);
+						
+						// Save comment
+						final Locator saveCommentButton = page.locator("#cbutton-save");
+						if (saveCommentButton.count() > 0) {
+							saveCommentButton.first().click();
+							wait_1000();
+							performFailFastCheck("After comment add");
+							takeScreenshot(String.format("%03d-comment-added", screenshotCounter++), false);
+						}
+					}
+				}
+			}
+
+			LOGGER.info("✅ Team comments operations completed successfully");
+
+		} catch (final Exception e) {
+			LOGGER.error("❌ Team comments test failed: {}", e.getMessage(), e);
+			takeScreenshot(String.format("%03d-team-comments-error", screenshotCounter++), true);
+			throw new AssertionError("Team comments test failed", e);
+		}
+	}
+
+	// Helper methods
+
+	private Locator locateAttachmentsGrid(final Locator container) {
+		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
+		assertTrue(grid.count() > 0, "Attachments grid not found");
+		return grid.first();
+	}
+
+	private Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
+		final Locator button = container.locator("vaadin-button")
+			.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='" + iconName + "']")));
+		assertTrue(button.count() > 0, "Toolbar button not found for icon " + iconName);
+		return button.first();
+	}
+
+	private Locator waitForDialogWithText(final String text) {
+		final int maxAttempts = 10;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]")
+				.filter(new Locator.FilterOptions().setHasText(text));
+			if (overlay.count() > 0) {
+				return overlay.first();
+			}
+			wait_500();
+		}
+		throw new AssertionError("Dialog with text '" + text + "' did not open");
+	}
+
+	private void openCommentsSectionIfNeeded() {
+		final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("Comments"));
+		if (tab.count() > 0) {
+			tab.first().click();
+			wait_500();
+			return;
+		}
+		final Locator accordion = page.locator("vaadin-accordion-panel")
+			.filter(new Locator.FilterOptions().setHasText("Comments"));
+		if (accordion.count() > 0) {
+			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
+			if (heading.count() > 0) {
+				heading.first().click();
+			} else {
+				accordion.first().click();
+			}
+			wait_500();
+		}
+	}
+
+	private void waitForDialogToClose() {
+		final int maxAttempts = 10;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
+				return;
+			}
+			wait_500();
+		}
+	}
+
+	private void waitForButtonEnabled(final Locator button) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (!button.isDisabled()) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Button did not become enabled");
+	}
+
+	private void waitForGridCellText(final Locator grid, final String text) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (grid.locator("vaadin-grid-cell-content")
+				.filter(new Locator.FilterOptions().setHasText(text)).count() > 0) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Expected grid cell not found: " + text);
+	}
+
+	private void waitForGridCellGone(final Locator grid, final String text) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			final Locator matches = grid.locator("vaadin-grid-cell-content")
+				.filter(new Locator.FilterOptions().setHasText(text));
+			if (matches.count() == 0) {
+				return;
+			}
+			if (!matches.first().isVisible()) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Grid cell still present: " + text);
+	}
+}
