@@ -39,3 +39,4 @@ docs/graphviz-output/
 /bin/
 #docs/__PROJECT_BACKLOG_backup.xlsx
 /attachment-test-output.log
+/test-crud-derbent-final.log
