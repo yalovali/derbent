@@ -15,7 +15,19 @@ public interface IProductVersionRepository extends IEntityOfProjectRepository<CP
 long countByType(@Param ("entityType") CProductVersionType type);
 
 @Override
-@Query ("SELECT r FROM CProductVersion r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH r.product WHERE r.id = :id")
+@Query ("""
+		SELECT r FROM CProductVersion r
+		LEFT JOIN FETCH r.project
+		LEFT JOIN FETCH r.assignedTo
+		LEFT JOIN FETCH r.createdBy
+		LEFT JOIN FETCH r.status
+		LEFT JOIN FETCH r.entityType et
+		LEFT JOIN FETCH et.workflow
+		LEFT JOIN FETCH r.product
+		LEFT JOIN FETCH r.attachments
+		LEFT JOIN FETCH r.comments
+		WHERE r.id = :id
+		""")
 Optional<CProductVersion> findById(@Param ("id") Long id);
 
 @Override
@@ -28,6 +40,8 @@ Optional<CProductVersion> findById(@Param ("id") Long id);
 		LEFT JOIN FETCH r.entityType et
 		LEFT JOIN FETCH et.workflow
 		LEFT JOIN FETCH r.product
+		LEFT JOIN FETCH r.attachments
+		LEFT JOIN FETCH r.comments
 		WHERE r.project = :project
 		ORDER BY r.name ASC
 		""")

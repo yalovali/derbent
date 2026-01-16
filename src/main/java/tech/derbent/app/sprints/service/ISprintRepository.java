@@ -25,6 +25,7 @@ public interface ISprintRepository extends IProjectItemRespository<CSprint> {
 			LEFT JOIN FETCH s.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH s.attachments
+			LEFT JOIN FETCH s.comments
 			LEFT JOIN FETCH s.status
 			LEFT JOIN FETCH s.sprintItems si
 			WHERE s.id = :id
@@ -37,6 +38,7 @@ public interface ISprintRepository extends IProjectItemRespository<CSprint> {
 			LEFT JOIN FETCH s.assignedTo
 			LEFT JOIN FETCH s.createdBy
 			LEFT JOIN FETCH s.attachments
+			LEFT JOIN FETCH s.comments
 			LEFT JOIN FETCH s.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH s.status
@@ -53,6 +55,7 @@ public interface ISprintRepository extends IProjectItemRespository<CSprint> {
 			LEFT JOIN FETCH s.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH s.attachments
+			LEFT JOIN FETCH s.comments
 			LEFT JOIN FETCH s.status
 			LEFT JOIN FETCH s.sprintItems si
 			WHERE s.project = :project

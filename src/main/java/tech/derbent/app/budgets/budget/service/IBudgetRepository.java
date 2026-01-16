@@ -38,6 +38,8 @@ public interface IBudgetRepository extends IEntityOfProjectRepository<CBudget> {
 			LEFT JOIN FETCH r.status
 			LEFT JOIN FETCH r.entityType et
 			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH r.attachments
+			LEFT JOIN FETCH r.comments
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")

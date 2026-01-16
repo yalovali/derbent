@@ -21,6 +21,7 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 			SELECT u FROM #{#entityName} u
 			LEFT JOIN FETCH u.company co
 			LEFT JOIN FETCH u.attachments
+			LEFT JOIN FETCH u.comments
 			LEFT JOIN FETCH u.companyRole cr
 			LEFT JOIN FETCH u.activities
 			WHERE u.company = :company
@@ -35,15 +36,21 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 			LEFT JOIN FETCH u.companyRole cr
 			LEFT JOIN FETCH u.activities
 			LEFT JOIN FETCH u.attachments
+			LEFT JOIN FETCH u.comments
 			WHERE u.company.id = :company_id
 			""")
 	List<CUser> findByCompanyId(@Param ("company_id") Long company_id);
 	/** Find users by company ID with pagination */
 	@Override
-	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co " + " LEFT JOIN FETCH u.attachments "
-				+ "LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company.id = :company_id"
-	)
+	@Query ("""
+			SELECT u FROM #{#entityName} u
+			LEFT JOIN FETCH u.company co
+			LEFT JOIN FETCH u.attachments
+			LEFT JOIN FETCH u.comments
+			LEFT JOIN FETCH u.companyRole cr
+			LEFT JOIN FETCH u.activities
+			WHERE u.company.id = :company_id
+			""")
 	Page<CUser> findByCompanyId(@Param ("company_id") Long company_id, Pageable pageable);
 	/** Find user by ID with eager loading using generic pattern */
 	@Override
@@ -70,8 +77,14 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 	)
 	List<CUser> findNotAssignedToProject(@Param ("projectId") Long projectId, @Param ("CompanyId") Long company_id);
 	@Override
-	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.activities WHERE u.company = :company"
-	)
+	@Query ("""
+			SELECT u FROM #{#entityName} u
+			LEFT JOIN FETCH u.company co
+			LEFT JOIN FETCH u.companyRole cr
+			LEFT JOIN FETCH u.activities
+			LEFT JOIN FETCH u.attachments
+			LEFT JOIN FETCH u.comments
+			WHERE u.company = :company
+			""")
 	List<CUser> listByCompanyForPageView(@Param ("company") CCompany company);
 }

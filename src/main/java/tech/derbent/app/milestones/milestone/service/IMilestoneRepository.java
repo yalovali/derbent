@@ -14,9 +14,18 @@ public interface IMilestoneRepository extends IEntityOfProjectRepository<CMilest
 	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :entityType")
 	long countByType(@Param ("entityType") CMilestoneType type);
 	@Override
-	@Query (
-		"SELECT r FROM CMilestone r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow " + "WHERE r.id = :id"
-	)
+	@Query ("""
+			SELECT r FROM CMilestone r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.assignedTo
+			LEFT JOIN FETCH r.createdBy
+			LEFT JOIN FETCH r.status
+			LEFT JOIN FETCH r.entityType et
+			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH r.attachments
+			LEFT JOIN FETCH r.comments
+			WHERE r.id = :id
+			""")
 	Optional<CMilestone> findById(@Param ("id") Long id);
 
 	@Override
@@ -28,6 +37,8 @@ public interface IMilestoneRepository extends IEntityOfProjectRepository<CMilest
 			LEFT JOIN FETCH r.status
 			LEFT JOIN FETCH r.entityType et
 			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH r.attachments
+			LEFT JOIN FETCH r.comments
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")

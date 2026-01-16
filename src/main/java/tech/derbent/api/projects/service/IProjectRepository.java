@@ -19,7 +19,9 @@ public interface IProjectRepository extends IEntityOfCompanyRepository<CProject>
 			SELECT p FROM CProject p
 			LEFT JOIN FETCH p.company
 			LEFT JOIN FETCH p.attachments
-			WHERE p.company.id = :company_id ORDER BY p.name
+			LEFT JOIN FETCH p.comments
+			WHERE p.company.id = :company_id
+			ORDER BY p.name
 			""")
 	List<CProject> findByCompanyId(@Param ("company_id") Long company_id);
 	@Override

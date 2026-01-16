@@ -11,10 +11,16 @@ import tech.derbent.api.projects.domain.CProject;
 public interface IRiskLevelRepository extends IEntityOfProjectRepository<CRiskLevel> {
 
 	@Override
-	@Query (
-		"SELECT r FROM CRiskLevel r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy "
-				+ "LEFT JOIN FETCH r.status " + "WHERE r.id = :id"
-	)
+	@Query ("""
+			SELECT r FROM CRiskLevel r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.assignedTo
+			LEFT JOIN FETCH r.createdBy
+			LEFT JOIN FETCH r.status
+			LEFT JOIN FETCH r.attachments
+			LEFT JOIN FETCH r.comments
+			WHERE r.id = :id
+			""")
 	Optional<CRiskLevel> findById(@Param ("id") Long id);
 
 	@Override
@@ -24,6 +30,8 @@ public interface IRiskLevelRepository extends IEntityOfProjectRepository<CRiskLe
 			LEFT JOIN FETCH r.assignedTo
 			LEFT JOIN FETCH r.createdBy
 			LEFT JOIN FETCH r.status
+			LEFT JOIN FETCH r.attachments
+			LEFT JOIN FETCH r.comments
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
