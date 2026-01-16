@@ -63,7 +63,7 @@ public class CTestScenario extends CEntityOfProject<CTestScenario> implements IH
 	@AMetaData (
 			displayName = "Test Cases", required = false, readOnly = false,
 			description = "Test cases in this scenario", hidden = false,
-			dataProviderBean = "CTestCaseService", createComponentMethod = "createComponent"
+			dataProviderBean = "CTestCaseService", createComponentMethod = "createComponentListTestCases"
 	)
 	private Set<CTestCase> testCases = new HashSet<>();
 

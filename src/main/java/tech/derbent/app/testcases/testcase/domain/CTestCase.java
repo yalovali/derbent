@@ -101,7 +101,7 @@ public class CTestCase extends CProjectItem<CTestCase>
 	@AMetaData (
 			displayName = "Test Steps", required = false, readOnly = false,
 			description = "Ordered test steps", hidden = false,
-			dataProviderBean = "CTestStepService", createComponentMethod = "createComponent"
+			dataProviderBean = "CTestStepService", createComponentMethod = "createComponentListTestSteps"
 	)
 	private Set<CTestStep> testSteps = new HashSet<>();
 

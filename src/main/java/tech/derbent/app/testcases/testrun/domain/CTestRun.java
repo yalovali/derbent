@@ -156,7 +156,7 @@ public class CTestRun extends CEntityOfProject<CTestRun> implements IHasAttachme
 	@AMetaData (
 			displayName = "Test Case Results", required = false, readOnly = false,
 			description = "Results for each test case in scenario", hidden = false,
-			dataProviderBean = "CTestCaseResultService", createComponentMethod = "createComponent"
+			dataProviderBean = "CTestCaseResultService", createComponentMethod = "createComponentListTestCaseResults"
 	)
 	private Set<CTestCaseResult> testCaseResults = new HashSet<>();
 

@@ -90,7 +90,7 @@ public class CTestCaseResult extends CEntityDB<CTestCaseResult> {
 	@AMetaData (
 			displayName = "Test Step Results", required = false, readOnly = false,
 			description = "Results for each step in test case", hidden = false,
-			dataProviderBean = "CTestStepResultService", createComponentMethod = "createComponent"
+			dataProviderBean = "CTestStepResultService", createComponentMethod = "createComponentListTestStepResults"
 	)
 	private Set<CTestStepResult> testStepResults = new HashSet<>();
 

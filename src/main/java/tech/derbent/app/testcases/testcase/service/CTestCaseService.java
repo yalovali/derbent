@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
@@ -34,6 +37,21 @@ public class CTestCaseService extends CProjectItemService<CTestCase> implements 
 	@Override
 	public String checkDeleteAllowed(final CTestCase testCase) {
 		return super.checkDeleteAllowed(testCase);
+	}
+
+	public Component createComponentListTestCases() {
+		try {
+			final Div container = new Div();
+			container.add(new Span("Test Cases Component - Under Development"));
+			LOGGER.debug("Created test case component placeholder");
+			return container;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create test case component.", e);
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading test case component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
 	}
 
 	@Override
