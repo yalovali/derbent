@@ -306,12 +306,10 @@ run_test() {
     echo "   Viewport: ${VIEWPORT_WIDTH}x${VIEWPORT_HEIGHT}"
     echo ""
 
-    # Prepare live log file
-    local timestamp
-    timestamp=$(date +%Y%m%d-%H%M%S)
+    # Prepare live log file - always use same name for easy reference
     local LOG_DIR="target/test-logs"
     mkdir -p "$LOG_DIR"
-    local LOG_FILE="$LOG_DIR/${test_class##*.}-${timestamp}.log"
+    local LOG_FILE="$LOG_DIR/playwright-test-latest.log"
     echo "📝 Live console log: $LOG_FILE"
     
     local test_result=0
