@@ -3,13 +3,39 @@
 ## Project Overview
 Derbent is a Java 21 Spring Boot + Vaadin 24.8 project management application.
 
-## Essential Documentation (READ FIRST)
+## 🎯 PRIMARY DOCUMENTATION (MANDATORY - READ FIRST)
 
-**CRITICAL**: Always consult these documents when working on specific features:
-- **Entity Dialogs** → [Entity Dialog Coding Standards](docs/architecture/entity-dialog-coding-standards.md) ⭐ **MANDATORY**
-- **Grid Columns** → [Grid Column Standards](docs/architecture/coding-standards.md#grid-column-standards-mandatory)
-- **Grid Configuration** → [CGrid Configuration Patterns](docs/architecture/cgrid-configuration-patterns.md)
-- **Entity Design** → [Entity Inheritance Patterns](docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md)
+**⭐ SINGLE SOURCE OF TRUTH:**
+```
+docs/DERBENT_CODING_MASTER_GUIDE.md
+```
+**THIS IS THE AUTHORITATIVE REFERENCE. READ IT BEFORE ANY CODE CHANGES.**
+
+### Quick Reference by Task
+
+**For New Entity Implementation:**
+1. `docs/DERBENT_CODING_MASTER_GUIDE.md` Section 2 (Entity Implementation Guide)
+2. `docs/architecture/NEW_ENTITY_COMPLETE_CHECKLIST.md` (176 checkboxes)
+3. `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md` (detailed patterns)
+
+**For Repository/Query Work:**
+- `docs/DERBENT_CODING_MASTER_GUIDE.md` Section 5 (Repository & Query Patterns)
+- **CRITICAL**: All findById() MUST include JOIN FETCH for attachments/comments
+
+**For Service Layer:**
+- `docs/DERBENT_CODING_MASTER_GUIDE.md` Section 6 (Service Layer Patterns)
+- **CRITICAL**: Services MUST be stateless (multi-user)
+
+**For UI Components:**
+- `docs/DERBENT_CODING_MASTER_GUIDE.md` Section 7 (UI Component Standards)
+- `docs/development/component-coding-standards.md` (detailed component patterns)
+
+**For Testing:**
+- `docs/DERBENT_CODING_MASTER_GUIDE.md` Section 9 (Testing Guidelines)
+- `docs/testing/PLAYWRIGHT_USAGE.md` (Playwright specifics)
+
+**For Common Pitfalls:**
+- `docs/DERBENT_CODING_MASTER_GUIDE.md` Section 10 (10 CRITICAL mistakes to avoid)
 
 ## Essential Setup
 Before coding, ALWAYS run:
@@ -356,7 +382,116 @@ void testDetachedEntity() {
 }
 ```
 
-## Documentation
-- Entity patterns: `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md`
-- Development guide: `docs/development/copilot-guidelines.md`
-- Full instructions: `.github/copilot-instructions.md`
+## 📚 Documentation Hierarchy (MANDATORY ORDER)
+
+**ALWAYS FOLLOW THIS ORDER:**
+
+### 1️⃣ PRIMARY (Always Start Here)
+```
+docs/DERBENT_CODING_MASTER_GUIDE.md
+```
+- 11 comprehensive sections
+- 176 verification checkboxes
+- All patterns consolidated
+- Single source of truth
+
+### 2️⃣ ARCHITECTURE (Detailed Patterns)
+- `docs/architecture/NEW_ENTITY_COMPLETE_CHECKLIST.md` - Complete entity workflow
+- `docs/architecture/ENTITY_INHERITANCE_AND_DESIGN_PATTERNS.md` - Inheritance patterns
+- `docs/architecture/LAZY_LOADING_BEST_PRACTICES.md` - Lazy loading patterns
+- `docs/architecture/CHILD_ENTITY_PATTERNS.md` - Master-detail patterns
+
+### 3️⃣ DEVELOPMENT (Workflows)
+- `docs/development/copilot-guidelines.md` - AI agent guidelines
+- `docs/development/component-coding-standards.md` - Component standards
+- `docs/development/calculated-fields-pattern.md` - Calculated fields
+- `docs/development/multi-value-persistence-pattern.md` - State persistence
+- `docs/development/workflow-status-change-pattern.md` - Workflow patterns
+
+### 4️⃣ IMPLEMENTATION (Feature Patterns)
+- `docs/implementation/WORKFLOW_ENTITY_PATTERN.md` - Workflow entities
+- `docs/implementation/drag-drop-unified-pattern.md` - Drag & drop
+- `docs/implementation/CRUD-Operations-Guide.md` - CRUD operations
+- `docs/implementation/Grid-Selection-After-Save-Pattern.md` - Grid patterns
+
+### 5️⃣ TESTING (Test Strategies)
+- `docs/testing/PLAYWRIGHT_USAGE.md` - Playwright tests
+- `docs/testing/RECENT_FEATURES_CRUD_TEST_PATTERNS.md` - CRUD test patterns
+- `docs/testing/comprehensive-page-testing.md` - Page testing
+
+### 6️⃣ PROJECT INFO
+- `README.md` - Project overview
+- `AGENTS.md` - AI agent guidelines
+- `TESTING_RULES.md` - Testing standards
+
+## 🚫 DEPRECATED DOCUMENTATION (DO NOT USE)
+
+**ARCHIVED**: The following docs are DEPRECATED and archived:
+- `docs/archive/deprecated-2026-01/` (120+ old files)
+- OLD: `coding-standards.md` → USE: `DERBENT_CODING_MASTER_GUIDE.md`
+- OLD: `service-layer-patterns.md` → USE: `DERBENT_CODING_MASTER_GUIDE.md`
+- OLD: Individual architecture docs → USE: `DERBENT_CODING_MASTER_GUIDE.md`
+
+**RULE**: If a document is in `docs/archive/`, DO NOT reference it for new code.
+
+## ⚠️ ENFORCEMENT RULES
+
+**BEFORE starting ANY coding task:**
+1. ✅ Read `docs/DERBENT_CODING_MASTER_GUIDE.md` relevant section
+2. ✅ Use entity decision tree (Section 2.1) for entity work
+3. ✅ Check Common Pitfalls (Section 10) to avoid mistakes
+4. ✅ Follow complete checklist (Section 2-9) for new entities
+
+**DURING coding:**
+1. ✅ Reference master guide for patterns
+2. ✅ Follow naming conventions (typeName, on_xxx, create_xxx)
+3. ✅ Use C-prefixed components (NEVER raw Vaadin)
+4. ✅ Apply stateless service patterns
+
+**AFTER coding:**
+1. ✅ Verify against checklist (Section 1 Quick Start)
+2. ✅ Check Section 10 (Common Pitfalls) to ensure no mistakes
+3. ✅ Run build: `mvn clean compile`
+4. ✅ Run tests: `./run-playwright-tests.sh menu`
+5. ✅ Apply formatting (eclipse-formatter.xml in IDE)
+
+## 🎓 LESSONS LEARNED (MANDATORY)
+
+**Read these to understand WHY patterns exist:**
+- `docs/LESSONS_LEARNED_TEST_MODULE_2026-01.md` - What we missed and why
+- `docs/DERBENT_CODING_MASTER_GUIDE.md` Section 11 - Lessons Learned
+
+**Common Mistakes from Test Module (NEVER REPEAT):**
+1. ❌ Type entities don't have createdBy field
+2. ❌ Missing JOIN FETCH for attachments/comments
+3. ❌ Child entities still need services
+4. ❌ Missing CDataInitializer registration
+5. ❌ No ORDER BY in queries
+6. ❌ User state in service (multi-user violation)
+7. ❌ Missing updateLastModified() in setters
+8. ❌ Missing entity constants (5 mandatory)
+9. ❌ Wrong base class selection
+10. ❌ Unverified @AMetaData references
+
+## 📊 DOCUMENTATION STATS
+
+**Active Documentation:**
+- Total files: 80 essential documents
+- Primary reference: 1 master guide (49KB)
+- Architecture patterns: 5 files
+- Development guides: 8 files
+- Implementation patterns: 10 files
+- Testing guides: 8 files
+
+**Archived Documentation:**
+- Deprecated files: 120+ (in docs/archive/deprecated-2026-01/)
+- DO NOT USE for new code
+
+## ✅ MANDATORY VERIFICATION
+
+**Every code change MUST:**
+1. ✅ Follow patterns from `DERBENT_CODING_MASTER_GUIDE.md`
+2. ✅ Pass all 176 checkboxes (for new entities)
+3. ✅ Avoid all 10 common pitfalls
+4. ✅ Compile successfully
+5. ✅ Pass relevant tests
