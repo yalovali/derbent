@@ -102,7 +102,50 @@ Output requirements:
 - Follow user instructions about validation runs. If the user says “do not run tests”, do not run `mvn test`/`verify`; limit to code changes and static inspection unless explicitly asked.
 
 ## 12. Reference Map
-- Architecture deep dives: `docs/architecture/coding-standards.md`, `service-layer-patterns.md`, `view-layer-patterns.md`, `multi-user-singleton-advisory.md`.
+- Architecture deep dives: `docs/architecture/coding-standards.md`, `service-layer-patterns.md`, `view-layer-patterns.md` (includes two-view pattern), `multi-user-singleton-advisory.md`.
 - Development quickstarts: `docs/development/getting-started.md`, `project-structure.md`, `copilot-guidelines.md`, `multi-user-development-checklist.md`.
 - Security/authentication: `docs/implementation/COMPANY_LOGIN_PATTERN.md`, `LOGIN_AUTHENTICATION_MECHANISM.md`.
 - Testing: `docs/testing/*` plus Playwright scripts (`run-playwright-tests.sh`, `run-playwright-visible-h2.sh`, etc.).
+
+## 13. Two-View Pattern (Critical for Complex Entities)
+
+Some entities need **TWO views** instead of one:
+1. **Standard View** (Grid + Detail) - CRUD operations, entity management
+2. **Single-Page View** (Full-screen Component) - Specialized workflow, interactive UI
+
+### When to Create Two Views
+- Entity has BOTH management needs AND complex interactive workflow
+- Examples: Kanban (board management + sprint board), Test Sessions (session management + test execution)
+- Standard view is ALWAYS required; single-page is optional
+
+### Implementation Pattern
+```java
+public static void initialize(...) {
+    // View 1: Standard CRUD (always create this first)
+    CDetailSection detailSection = createBasicView(project);
+    CGridEntity grid = createGridEntity(project);
+    initBase(clazz, project, ..., menuTitle, pageTitle, description, toolbar, menuOrder);
+    
+    // View 2: Single-page specialized workflow (optional, if needed)
+    CDetailSection specialSection = createSpecializedView(project);
+    CGridEntity specialGrid = createGridEntity(project);
+    specialGrid.setAttributeNone(true);  // ← CRITICAL: Hide grid
+    specialSection.setName(pageTitle + " Specialized Section");
+    specialGrid.setName(pageTitle + " Specialized Grid");
+    initBase(clazz, project, ..., 
+        menuTitle + ".Execute",          // Submenu under parent
+        pageTitle + " Execution",
+        "Specialized description",
+        true,
+        menuOrder + ".1");               // Submenu order
+}
+```
+
+### Key Points
+- Standard view shows **grid + detail form** for CRUD
+- Single-page view shows **full-screen custom component** for workflow
+- Use `grid.setAttributeNone(true)` to hide grid in single-page view
+- Custom components created via page service: `createMyComponent()` method
+- Menu structure: `Parent Entity > Submenu` (e.g., `Tests.Test Sessions.Execute Tests`)
+- See `CKanbanLineInitializerService` for complete reference implementation
+- See `docs/architecture/view-layer-patterns.md` for detailed documentation
