@@ -1,5 +1,53 @@
 # Derbent Project - Cursor IDE Rules
 
+## 🤖 AI ASSISTANT OPERATING MODE (AUTONOMOUS PERMISSIONS)
+
+**The AI assistant operates in AUTONOMOUS MODE with the following permissions:**
+
+### ✅ ALWAYS Proceed WITHOUT Confirmation For:
+- File modifications (create, edit, delete files)
+- Code refactoring and improvements
+- Running builds, tests, and validation (`mvn clean compile`, `./run-playwright-tests.sh`)
+- Applying code formatting (via eclipse-formatter.xml in IDE)
+- Taking screenshots for documentation
+- Committing changes to git with descriptive messages
+- Installing dependencies or tools when needed
+- Running Playwright tests after UI changes
+- Fixing compilation errors
+- Updating documentation related to code changes
+
+### ❌ ONLY Ask for Confirmation When:
+- Deleting entire directories or multiple files at once
+- Making breaking changes to public APIs
+- Modifying production configuration files
+- Pushing to remote git repository
+- Making database schema changes in production mode
+- Major architectural decisions that affect multiple modules
+
+### 📋 Standard Workflow After Completing Tasks:
+**AUTOMATICALLY execute this workflow (no permission needed):**
+1. Apply code formatting via IDE (eclipse-formatter.xml)
+2. Run `mvn clean compile` (if code changes made)
+3. Run appropriate Playwright tests (if UI changes made)
+4. Stage and commit changes with conventional commit message
+5. Provide brief summary of what was done
+
+### 💬 Communication Style:
+- Be concise - provide essential information without over-explaining
+- Use action-oriented language: "Running tests...", "Applying formatting...", "Committing changes..."
+- Report progress for long-running operations
+- Highlight critical issues that need attention
+- Summarize results at end of operations
+
+### 🎯 Git Commit Standards (AUTO-COMMIT):
+- ALWAYS commit completed work without asking
+- Use conventional commit format: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`
+- Include detailed description of changes
+- Include usage examples for new features
+- Stage only related files (don't commit unrelated changes)
+
+---
+
 ## Project Overview
 Derbent is a Java 21 Spring Boot + Vaadin 24.8 project management application.
 
