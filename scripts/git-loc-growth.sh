@@ -10,6 +10,7 @@ WORKTREE=".loc-worktree"
 
 CSV="loc-3months.csv"
 DELTA_CSV="loc-3months-delta.csv"
+DELTA_AVG_CSV="loc-3months-delta-avg.csv"
 
 PNG_TOTAL="loc-total-growth.png"
 PNG_DELTA="loc-velocity.png"
@@ -40,14 +41,14 @@ count_lines_nonempty() {
 }
 
 count_loc() {
-  # PROD CODE
+  # PROD
   mapfile -t PROD < <(
     find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f \
       \( -name '*.java' -o -name '*.kt' \) \
       ! -path '*test*' -print
   )
 
-  # TEST CODE
+  # TEST
   mapfile -t TEST < <(
     find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f \
       \( -name '*.java' -o -name '*.kt' \) \
@@ -109,18 +110,29 @@ printf "%s\n" "=================================================================
 printf "CSV written: %s\n" "$CSV"
 
 ############################################
-# DELTA CSV (VELOCITY)
+# VELOCITY CSV
 ############################################
 echo "date,delta_loc" > "$DELTA_CSV"
 awk -F',' '
 NR==2 {prev=$5; next}
-NR>2  {
-  print $1 "," ($5-prev)
-  prev=$5
-}' "$CSV" >> "$DELTA_CSV"
+NR>2  {print $1 "," ($5-prev); prev=$5}
+' "$CSV" >> "$DELTA_CSV"
 
 ############################################
-# GNUPLOT
+# MOVING AVERAGE (WINDOW=5)
+############################################
+echo "date,avg_delta" > "$DELTA_AVG_CSV"
+awk -F',' '
+NR>1 {
+  vals[NR]=$2
+  sum+=$2
+  if (NR>5) sum-=vals[NR-5]
+  if (NR>=6) print $1 "," sum/5
+}
+' "$DELTA_CSV" >> "$DELTA_AVG_CSV"
+
+############################################
+# GNUPLOT (SAFE)
 ############################################
 if command -v gnuplot >/dev/null 2>&1; then
 
@@ -134,42 +146,26 @@ set format x "%b %d"
 set decimal locale
 set format y "%'.0f"
 
-############################
-# 1) TOTAL LOC GROWTH
-############################
+# 1) TOTAL LOC
 set output "${PNG_TOTAL}"
 set title "Total LOC Growth (Last 3 Months)"
 set xlabel "Date"
 set ylabel "Lines of Code"
+plot "${CSV}" using 1:5 with linespoints lw 3 title "Total LOC"
 
-stats "${CSV}" using 5 nooutput
-mean = STATS_mean
-
-plot \
-  "${CSV}" using 1:5 with linespoints lw 3 title "Total LOC", \
-  mean with lines lw 2 dt 2 title "Average LOC Level"
-
-############################
-# 2) LOC VELOCITY (THICK BARS + TREND)
-############################
+# 2) LOC VELOCITY
 set output "${PNG_DELTA}"
 set title "LOC Velocity (Δ LOC Between Snapshots)"
 set ylabel "LOC Change"
-
-# moving average (window = 5)
 plot \
   "${DELTA_CSV}" using 1:2 with impulses lw 4 title "Δ LOC", \
-  "${DELTA_CSV}" using 1:(avg=avg+(\$2-avg)/5) with lines lw 3 title "Velocity Trend"
+  "${DELTA_AVG_CSV}" using 1:2 with lines lw 3 title "Velocity Trend (MA)"
 
-############################
-# 3) TEST LOC GROWTH
-############################
+# 3) TEST LOC
 set output "${PNG_TEST}"
-set title "Test Code Growth (Testing Effort Over Time)"
+set title "Test Code Growth (Testing Effort)"
 set ylabel "Test LOC"
-
-plot \
-  "${CSV}" using 1:4 with linespoints lw 3 title "Test LOC"
+plot "${CSV}" using 1:4 with linespoints lw 3 title "Test LOC"
 
 EOF
 
@@ -183,3 +179,15 @@ else
 fi
 
 echo
+
+############################################
+# OPEN PNG FILES (DESKTOP)
+############################################
+if command -v xdg-open >/dev/null 2>&1; then
+  echo "Opening generated graphs..."
+  xdg-open "$PNG_TOTAL" >/dev/null 2>&1 &
+  xdg-open "$PNG_DELTA" >/dev/null 2>&1 &
+  xdg-open "$PNG_TEST"  >/dev/null 2>&1 &
+else
+  echo "NOTE: xdg-open not found, cannot auto-open PNG files."
+fi
