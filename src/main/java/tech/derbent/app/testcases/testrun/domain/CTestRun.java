@@ -178,6 +178,15 @@ public class CTestRun extends CEntityOfProject<CTestRun> implements IHasAttachme
 	)
 	private Set<CComment> comments = new HashSet<>();
 
+	// Transient field for test execution component (not stored in database)
+	@jakarta.persistence.Transient
+	@AMetaData (
+			displayName = "Test Execution", required = false, readOnly = false,
+			description = "Test execution interface", hidden = false,
+			dataProviderBean = "CPageServiceTestRun", createComponentMethod = "createTestExecutionComponent"
+	)
+	private transient Object testExecutionComponent;
+
 	/** Default constructor for JPA. */
 	public CTestRun() {
 		super(CTestRun.class, "New Test Run", null);
