@@ -3,13 +3,13 @@ package tech.derbent.app.comments.view;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.textfield.TextArea;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.ui.component.basic.CCheckbox;
+import tech.derbent.api.ui.component.basic.CTextArea;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -41,8 +41,8 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 	private final CEnhancedBinder<CComment> binder;
 	private final CFormBuilder<CComment> formBuilder;
 
-	private TextArea textAreaCommentText;
-	private Checkbox checkboxImportant;
+	private CTextArea textAreaCommentText;
+	private CCheckbox checkboxImportant;
 
 	/** Constructor for both new and edit modes.
 	 * @param commentService the comment service
@@ -74,7 +74,7 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 		formLayout.setSpacing(true);
 
 		// Comment text area
-		textAreaCommentText = new TextArea("Comment Text");
+		textAreaCommentText = new CTextArea("Comment Text");
 		textAreaCommentText.setWidthFull();
 		textAreaCommentText.setHeight("200px");
 		textAreaCommentText.setMaxLength(4000);
@@ -85,7 +85,7 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 		formLayout.add(textAreaCommentText);
 
 		// Important checkbox
-		checkboxImportant = new Checkbox("Mark as Important");
+		checkboxImportant = new CCheckbox("Mark as Important");
 		binder.forField(checkboxImportant).bind(CComment::getImportant, CComment::setImportant);
 		formLayout.add(checkboxImportant);
 
