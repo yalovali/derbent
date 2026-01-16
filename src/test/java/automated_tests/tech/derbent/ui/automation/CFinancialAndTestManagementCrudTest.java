@@ -618,20 +618,6 @@ public class CFinancialAndTestManagementCrudTest extends CBaseUITest {
 	}
 
 	/**
-	 * Locate attachments container in the current page.
-	 */
-	private Locator locateAttachmentsContainer() {
-		return page.locator("[id*='attachments'], [class*='attachments']").first();
-	}
-
-	/**
-	 * Locate comments container in the current page.
-	 */
-	private Locator locateCommentsContainer() {
-		return page.locator("[id*='comments'], [class*='comments']").first();
-	}
-
-	/**
 	 * Locate a toolbar button within attachments container by icon.
 	 */
 	private Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {

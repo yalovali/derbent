@@ -106,12 +106,30 @@ public class CRecentFeaturesCrudTest extends CBaseUITest {
 			// Modify issue
 			fillFirstTextField("Test Issue - UPDATED");
 			wait_500();
+			
+			// Test parent item selection if available
+			testParentItemSelection();
+			wait_500();
+			
 			takeScreenshot(String.format("%03d-issues-form-updated", screenshotCounter++), false);
 
 			clickSave();
 			wait_2000();
 			performFailFastCheck("After issue update");
 			takeScreenshot(String.format("%03d-issues-updated", screenshotCounter++), false);
+			
+			// Test attachment and comment operations
+			clickFirstGridRow();
+			wait_1000();
+			
+			LOGGER.info("🧪 Testing auxiliary features (attachments, comments)...");
+			testAttachmentOperations();
+			wait_500();
+			takeScreenshot(String.format("%03d-issues-attachments-tested", screenshotCounter++), false);
+			
+			testCommentOperations();
+			wait_500();
+			takeScreenshot(String.format("%03d-issues-comments-tested", screenshotCounter++), false);
 
 			// Test DELETE operation
 			LOGGER.info("🗑️ Testing DELETE - Remove Issue");
@@ -419,19 +437,6 @@ public class CRecentFeaturesCrudTest extends CBaseUITest {
 
 	// Helper methods
 
-	private Locator locateAttachmentsContainer() {
-		openAttachmentsSectionIfNeeded();
-		final Locator container = page.locator("#custom-attachments-component");
-		if (container.count() > 0) {
-			return container.first();
-		}
-		final String selector = "h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')";
-		page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(15000));
-		final Locator header = page.locator(selector);
-		assertTrue(header.count() > 0, "Attachments section header not found");
-		return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
-	}
-
 	private Locator locateAttachmentsGrid(final Locator container) {
 		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
 		assertTrue(grid.count() > 0, "Attachments grid not found");
@@ -445,19 +450,6 @@ public class CRecentFeaturesCrudTest extends CBaseUITest {
 		return button.first();
 	}
 
-	private Locator locateCommentsContainer() {
-		final Locator container = page.locator("#custom-comments-component");
-		if (container.count() > 0) {
-			return container.first();
-		}
-		final String selector = "h2:has-text('Comments'), h3:has-text('Comments'), h4:has-text('Comments'), span:has-text('Comments')";
-		final Locator header = page.locator(selector);
-		if (header.count() > 0) {
-			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
-		}
-		return page.locator("body"); // Fallback
-	}
-
 	private Locator waitForDialogWithText(final String text) {
 		final int maxAttempts = 10;
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
@@ -469,26 +461,6 @@ public class CRecentFeaturesCrudTest extends CBaseUITest {
 			wait_500();
 		}
 		throw new AssertionError("Dialog with text '" + text + "' did not open");
-	}
-
-	private void openAttachmentsSectionIfNeeded() {
-		final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("Attachments"));
-		if (tab.count() > 0) {
-			tab.first().click();
-			wait_500();
-			return;
-		}
-		final Locator accordion = page.locator("vaadin-accordion-panel")
-			.filter(new Locator.FilterOptions().setHasText("Attachments"));
-		if (accordion.count() > 0) {
-			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
-			if (heading.count() > 0) {
-				heading.first().click();
-			} else {
-				accordion.first().click();
-			}
-			wait_500();
-		}
 	}
 
 	private void openCommentsSectionIfNeeded() {

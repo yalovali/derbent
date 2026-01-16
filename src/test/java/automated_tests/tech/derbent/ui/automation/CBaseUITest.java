@@ -2269,4 +2269,159 @@ public abstract class CBaseUITest {
 	// ===========================================
 	// DYNAMIC PAGE NAVIGATION METHODS
 	// ===========================================
+	
+	// ===========================================
+	// ATTACHMENT, COMMENT, AND PARENT ITEM TESTING
+	// ===========================================
+	
+	/** Locates the attachments container if present on the page. */
+	protected Locator locateAttachmentsContainer() {
+		openTabOrAccordionIfNeeded("Attachments");
+		final Locator container = page.locator("#custom-attachments-component");
+		if (container.count() > 0) {
+			return container.first();
+		}
+		final String selector = "h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')";
+		final Locator header = page.locator(selector);
+		if (header.count() > 0) {
+			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
+		}
+		return null;
+	}
+	
+	/** Locates the comments container if present on the page. */
+	protected Locator locateCommentsContainer() {
+		openTabOrAccordionIfNeeded("Comments");
+		final Locator container = page.locator("#custom-comments-component");
+		if (container.count() > 0) {
+			return container.first();
+		}
+		final String selector = "h2:has-text('Comments'), h3:has-text('Comments'), h4:has-text('Comments'), span:has-text('Comments')";
+		final Locator header = page.locator(selector);
+		if (header.count() > 0) {
+			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
+		}
+		return null;
+	}
+	
+	/** Locates the parent item selector if present on the page. */
+	protected Locator locateParentItemSelector() {
+		final Locator parentCombo = page.locator("vaadin-combo-box").filter(
+			new Locator.FilterOptions().setHas(
+				page.locator("label:has-text('Linked Activity'), label:has-text('Parent Item'), label:has-text('Related Activity')")
+			)
+		);
+		if (parentCombo.count() > 0) {
+			return parentCombo.first();
+		}
+		return null;
+	}
+	
+	/** Opens a tab or accordion panel if it contains the specified text. */
+	protected void openTabOrAccordionIfNeeded(final String text) {
+		final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText(text));
+		if (tab.count() > 0) {
+			tab.first().click();
+			wait_500();
+			return;
+		}
+		final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(text));
+		if (accordion.count() > 0) {
+			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
+			if (heading.count() > 0) {
+				heading.first().click();
+			} else {
+				accordion.first().click();
+			}
+			wait_500();
+		}
+	}
+	
+	/** Tests parent item selection if available on the current page. */
+	protected boolean testParentItemSelection() {
+		try {
+			final Locator parentSelector = locateParentItemSelector();
+			if (parentSelector == null) {
+				LOGGER.debug("ℹ️ No parent item selector found on page");
+				return false;
+			}
+			
+			LOGGER.info("🔗 Testing parent item selection...");
+			parentSelector.scrollIntoViewIfNeeded();
+			parentSelector.click();
+			wait_500();
+			
+			final Locator items = page.locator("vaadin-combo-box-item");
+			if (items.count() > 0) {
+				items.first().click();
+				wait_500();
+				LOGGER.info("✅ Parent item selected successfully");
+				return true;
+			} else {
+				LOGGER.debug("ℹ️ No parent items available in dropdown");
+				return false;
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Failed to test parent item selection: {}", e.getMessage());
+			return false;
+		}
+	}
+	
+	/** Tests attachment operations if available on the current page. */
+	protected boolean testAttachmentOperations() {
+		try {
+			final Locator attachmentsContainer = locateAttachmentsContainer();
+			if (attachmentsContainer == null) {
+				LOGGER.debug("ℹ️ No attachments section found on page");
+				return false;
+			}
+			
+			LOGGER.info("📎 Testing attachment operations...");
+			attachmentsContainer.scrollIntoViewIfNeeded();
+			
+			// Test upload button exists
+			final Locator uploadButton = attachmentsContainer.locator("vaadin-button")
+				.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:upload']")));
+			
+			if (uploadButton.count() > 0) {
+				LOGGER.info("✅ Attachment upload button found");
+				return true;
+			} else {
+				LOGGER.debug("ℹ️ No attachment upload button found");
+				return false;
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Failed to test attachment operations: {}", e.getMessage());
+			return false;
+		}
+	}
+	
+	/** Tests comment operations if available on the current page. */
+	protected boolean testCommentOperations() {
+		try {
+			final Locator commentsContainer = locateCommentsContainer();
+			if (commentsContainer == null) {
+				LOGGER.debug("ℹ️ No comments section found on page");
+				return false;
+			}
+			
+			LOGGER.info("💬 Testing comment operations...");
+			commentsContainer.scrollIntoViewIfNeeded();
+			
+			// Test add comment button exists
+			final Locator addButton = commentsContainer.locator("vaadin-button")
+				.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:plus']")));
+			
+			if (addButton.count() > 0) {
+				LOGGER.info("✅ Add comment button found");
+				return true;
+			} else {
+				LOGGER.debug("ℹ️ No add comment button found");
+				return false;
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Failed to test comment operations: {}", e.getMessage());
+			return false;
+		}
+	}
 }

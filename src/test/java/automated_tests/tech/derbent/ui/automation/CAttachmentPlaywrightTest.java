@@ -117,19 +117,6 @@ public class CAttachmentPlaywrightTest extends CBaseUITest {
 		return Stream.of("CActivity", "CRisk", "CMeeting", "CDecision", "CSprint", "COrder", "CProject", "CUser");
 	}
 
-	private Locator locateAttachmentsContainer() {
-		openAttachmentsSectionIfNeeded();
-		final Locator container = page.locator("#custom-attachments-component");
-		if (container.count() > 0) {
-			return container.first();
-		}
-		final String selector = "h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')";
-		page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(15000));
-		final Locator header = page.locator(selector);
-		assertTrue(header.count() > 0, "Attachments section header not found");
-		return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
-	}
-
 	private Locator locateAttachmentsGrid(final Locator container) {
 		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
 		assertTrue(grid.count() > 0, "Attachments grid not found");
@@ -153,25 +140,6 @@ public class CAttachmentPlaywrightTest extends CBaseUITest {
 			wait_500();
 		}
 		throw new AssertionError("Dialog with text '" + text + "' did not open");
-	}
-
-	private void openAttachmentsSectionIfNeeded() {
-		final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("Attachments"));
-		if (tab.count() > 0) {
-			tab.first().click();
-			wait_500();
-			return;
-		}
-		final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText("Attachments"));
-		if (accordion.count() > 0) {
-			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
-			if (heading.count() > 0) {
-				heading.first().click();
-			} else {
-				accordion.first().click();
-			}
-			wait_500();
-		}
 	}
 
 	private void navigateToActivitiesFallback() {
