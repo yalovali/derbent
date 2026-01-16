@@ -18,6 +18,15 @@ public interface IParentChildRelationRepository extends IAbstractRepository<CPar
 	@Query("SELECT r FROM #{#entityName} r WHERE r.parentId = :parentId AND r.parentType = :parentType ORDER BY r.id ASC")
 	List<CParentChildRelation> findByParent(@Param("parentId") Long parentId, @Param("parentType") String parentType);
 
+	/** Find all children of a specific parent filtered by child type.
+	 * @param parentId   the ID of the parent entity
+	 * @param parentType the class name of the parent entity (e.g., "CActivity")
+	 * @param childType  the class name to filter children by (e.g., "CActivity")
+	 * @return list of parent-child relations where the given entity is the parent and child matches the type */
+	@Query("SELECT r FROM #{#entityName} r WHERE r.parentId = :parentId AND r.parentType = :parentType AND r.childType = :childType ORDER BY r.id ASC")
+	List<CParentChildRelation> findByParentAndChildType(@Param("parentId") Long parentId, @Param("parentType") String parentType,
+			@Param("childType") String childType);
+
 	/** Find the parent of a specific child.
 	 * @param childId   the ID of the child entity
 	 * @param childType the class name of the child entity (e.g., "CActivity")

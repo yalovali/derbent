@@ -2,6 +2,7 @@ package tech.derbent.api.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -61,9 +62,9 @@ public class CDialogParentSelection extends CDialog {
 	 * @param onSelection callback when parent is selected (receives selected parent or null for clear) */
 	public CDialogParentSelection(final CProjectItem<?> childItem, final Consumer<CProjectItem<?>> onSelection) {
 		super();
-		Check.notNull(childItem, "Child item cannot be null");
-		Check.notNull(childItem.getId(), "Child item must be persisted (ID cannot be null)");
-		Check.notNull(onSelection, "Selection callback cannot be null");
+		Objects.requireNonNull(childItem, "Child item cannot be null");
+		Objects.requireNonNull(childItem.getId(), "Child item must be persisted");
+		Objects.requireNonNull(onSelection, "Selection callback cannot be null");
 		this.childItem = childItem;
 		this.project = childItem.getProject();
 		Check.notNull(project, "Child item must have a project assigned");
@@ -262,6 +263,7 @@ public class CDialogParentSelection extends CDialog {
 	 * @return combobox or null if entity class not found */
 	@SuppressWarnings ("unchecked")
 	private ComboBox<CProjectItem<?>> createParentComboBox(final String entityClassName, final CProjectItem<?> parentFilter) {
+		Check.notBlank(entityClassName, "Entity class name cannot be blank");
 		try {
 			final Class<?> entityClass = CEntityRegistry.getEntityClassByTitle(entityClassName);
 			if (entityClass == null) {
@@ -280,8 +282,9 @@ public class CDialogParentSelection extends CDialog {
 			comboBox.setPlaceholder("Select " + entityClassName);
 			// Load items
 			if (parentFilter != null) {
-				// Filter by parent
-				final List<CProjectItem<?>> children = parentChildService.getChildren(parentFilter);
+				// Filter by parent - get only children of the specified entity type
+				Objects.requireNonNull(parentFilter.getId(), "Parent filter must be persisted");
+				final List<CProjectItem<?>> children = parentChildService.getChildrenByType(parentFilter, entityClassName);
 				comboBox.setItems(children);
 			} else {
 				// Show all items of this type in the current project (service uses active project from session)
@@ -311,12 +314,15 @@ public class CDialogParentSelection extends CDialog {
 			comboBoxLevel2.setEnabled(selectedItem != null);
 			if (selectedItem != null) {
 				// Reload level 2 items filtered by level 1 selection
+				Objects.requireNonNull(childType, "Child type must not be null");
 				final String level2Class = childType.getParentLevel2EntityClass();
-				final ComboBox<CProjectItem<?>> newCombo = createParentComboBox(level2Class, selectedItem);
-				if (newCombo != null) {
-					final List<CProjectItem<?>> items = new ArrayList<>();
-					newCombo.getListDataView().getItems().forEach(items::add);
-					comboBoxLevel2.setItems(items);
+				if (level2Class != null && !level2Class.isBlank()) {
+					final ComboBox<CProjectItem<?>> newCombo = createParentComboBox(level2Class, selectedItem);
+					if (newCombo != null) {
+						final List<CProjectItem<?>> items = new ArrayList<>();
+						newCombo.getListDataView().getItems().forEach(items::add);
+						comboBoxLevel2.setItems(items);
+					}
 				}
 			} else {
 				comboBoxLevel2.clear();
@@ -341,12 +347,15 @@ public class CDialogParentSelection extends CDialog {
 			comboBoxLevel3.setEnabled(selectedItem != null);
 			if (selectedItem != null) {
 				// Reload level 3 items filtered by level 2 selection
+				Objects.requireNonNull(childType, "Child type must not be null");
 				final String level3Class = childType.getParentLevel3EntityClass();
-				final ComboBox<CProjectItem<?>> newCombo = createParentComboBox(level3Class, selectedItem);
-				if (newCombo != null) {
-					final List<CProjectItem<?>> items = new ArrayList<>();
-					newCombo.getListDataView().getItems().forEach(items::add);
-					comboBoxLevel3.setItems(items);
+				if (level3Class != null && !level3Class.isBlank()) {
+					final ComboBox<CProjectItem<?>> newCombo = createParentComboBox(level3Class, selectedItem);
+					if (newCombo != null) {
+						final List<CProjectItem<?>> items = new ArrayList<>();
+						newCombo.getListDataView().getItems().forEach(items::add);
+						comboBoxLevel3.setItems(items);
+					}
 				}
 			} else {
 				comboBoxLevel3.clear();
@@ -366,12 +375,15 @@ public class CDialogParentSelection extends CDialog {
 			comboBoxLevel4.setEnabled(selectedItem != null);
 			if (selectedItem != null) {
 				// Reload level 4 items filtered by level 3 selection
+				Objects.requireNonNull(childType, "Child type must not be null");
 				final String level4Class = childType.getParentLevel4EntityClass();
-				final ComboBox<CProjectItem<?>> newCombo = createParentComboBox(level4Class, selectedItem);
-				if (newCombo != null) {
-					final List<CProjectItem<?>> items = new ArrayList<>();
-					newCombo.getListDataView().getItems().forEach(items::add);
-					comboBoxLevel4.setItems(items);
+				if (level4Class != null && !level4Class.isBlank()) {
+					final ComboBox<CProjectItem<?>> newCombo = createParentComboBox(level4Class, selectedItem);
+					if (newCombo != null) {
+						final List<CProjectItem<?>> items = new ArrayList<>();
+						newCombo.getListDataView().getItems().forEach(items::add);
+						comboBoxLevel4.setItems(items);
+					}
 				}
 			} else {
 				comboBoxLevel4.clear();
