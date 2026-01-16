@@ -15,7 +15,7 @@ public interface ITicketRepository extends IEntityOfProjectRepository<CTicket> {
 	long countByType(@Param ("entityType") CTicketType type);
 	@Override
 	@Query (
-		"SELECT r FROM CTicket r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow " + "WHERE r.id = :id"
+		"SELECT r FROM CTicket r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH r.attachments LEFT JOIN FETCH r.comments " + "WHERE r.id = :id"
 	)
 	Optional<CTicket> findById(@Param ("id") Long id);
 
@@ -28,6 +28,8 @@ public interface ITicketRepository extends IEntityOfProjectRepository<CTicket> {
 			LEFT JOIN FETCH r.status
 			LEFT JOIN FETCH r.entityType et
 			LEFT JOIN FETCH et.workflow
+			LEFT JOIN FETCH r.attachments
+			LEFT JOIN FETCH r.comments
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
