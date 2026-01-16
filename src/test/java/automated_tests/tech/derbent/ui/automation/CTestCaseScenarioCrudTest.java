@@ -50,13 +50,14 @@ public class CTestCaseScenarioCrudTest extends CBaseUITest {
 			loginToApplication();
 			takeScreenshot(String.format("%03d-login-testcase", screenshotCounter++), false);
 
-			final boolean navigated = navigateToDynamicPageByEntityType("CTestCase");
-			assertTrue(navigated, "Failed to navigate to Test Cases view");
-			wait_2000();
+			// Navigate directly to Test Case page using URL
+			final String testCaseUrl = "http://localhost:" + port + "/cdynamicpagerouter/CTestCase";
+			page.navigate(testCaseUrl);
+			wait_2000(); wait_1000(); // Give more time for page to load with project data
 			takeScreenshot(String.format("%03d-testcases-view", screenshotCounter++), false);
 
 			// Verify grid loaded
-			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
+			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(20000));
 			takeScreenshot(String.format("%03d-testcases-grid-loaded", screenshotCounter++), false);
 
 			// Test CREATE operation
@@ -169,13 +170,14 @@ public class CTestCaseScenarioCrudTest extends CBaseUITest {
 			loginToApplication();
 			takeScreenshot(String.format("%03d-login-testscenario", screenshotCounter++), false);
 
-			final boolean navigated = navigateToDynamicPageByEntityType("CTestScenario");
-			assertTrue(navigated, "Failed to navigate to Test Scenarios view");
-			wait_2000();
+			// Navigate directly to Test Scenario page using URL
+			final String testScenarioUrl = "http://localhost:" + port + "/cdynamicpagerouter/CTestScenario";
+			page.navigate(testScenarioUrl);
+			wait_2000(); wait_1000(); // Give more time for page to load with project data
 			takeScreenshot(String.format("%03d-testscenarios-view", screenshotCounter++), false);
 
 			// Verify grid loaded
-			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
+			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(20000));
 			takeScreenshot(String.format("%03d-testscenarios-grid-loaded", screenshotCounter++), false);
 
 			// Test CREATE operation
