@@ -973,6 +973,73 @@ public Double calculatePassRate(CTestRun testRun) {
 }
 ```
 
+### 6.4 Component Creation Methods (For @AMetaData Integration)
+
+**Rule**: Services referenced by `@AMetaData(createComponentMethod)` MUST implement the specified method
+
+**Pattern**: When an entity field uses `@AMetaData` with `createComponentMethod`, the service MUST provide that method:
+
+```java
+// In Domain Class
+@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+@AMetaData(
+    displayName = "Test Steps",
+    description = "Ordered test steps",
+    dataProviderBean = "CTestStepService",
+    createComponentMethod = "createComponentListTestSteps"
+)
+private Set<CTestStep> testSteps = new HashSet<>();
+
+// In Service Class
+@Service
+public class CTestStepService extends CAbstractService<CTestStep> {
+    
+    public Component createComponentListTestSteps() {
+        try {
+            // Return actual component
+            return new CComponentListTestSteps(this, sessionService);
+            
+            // OR: Return placeholder during development
+            final Div container = new Div();
+            container.add(new Span("Test Steps - Under Development"));
+            return container;
+        } catch (final Exception e) {
+            LOGGER.error("Failed to create test step component.", e);
+            final Div errorDiv = new Div();
+            errorDiv.setText("Error loading component: " + e.getMessage());
+            errorDiv.addClassName("error-message");
+            return errorDiv;
+        }
+    }
+}
+```
+
+**Key Requirements**:
+1. Method MUST be `public` (called via reflection by CDataProviderResolver)
+2. Method MUST return `Component`
+3. Method name should be descriptive: `createComponent{Description}`
+4. Method is called by `CFormBuilder` during metadata-driven form generation
+5. Handle exceptions gracefully and return error component
+
+**Common Patterns**:
+- `createComponentListAttachments()` - CAttachmentService
+- `createComponentListComments()` - CCommentService  
+- `createComponentListTestSteps()` - CTestStepService
+- `createComponentListTestCases()` - CTestCaseService
+- `createSpritBacklogComponent()` - CPageServiceSprint (in PageService, not Service)
+
+**Error Pattern** (if method missing):
+```
+java.lang.IllegalArgumentException: Method createComponentListTestSteps 
+not found in class CTestStepService$$SpringCGLIB$$0
+```
+
+**Why This Pattern Exists**:
+- Enables metadata-driven UI generation
+- Services can create context-aware components
+- Supports dependency injection in components
+- Allows lazy component instantiation
+
 ---
 
 ## UI Component Standards
