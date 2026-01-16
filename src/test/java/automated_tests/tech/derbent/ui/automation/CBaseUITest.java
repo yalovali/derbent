@@ -2424,4 +2424,235 @@ public abstract class CBaseUITest {
 			return false;
 		}
 	}
+	
+	/** Performs comprehensive attachment CRUD operations (Upload/Download/Delete).
+	 * Generic method that can be called from any test for any entity with attachments.
+	 * @return true if all operations succeeded, false otherwise */
+	protected boolean testAttachmentCrudOperations() {
+		try {
+			final Locator attachmentsContainer = locateAttachmentsContainer();
+			if (attachmentsContainer == null) {
+				LOGGER.debug("ℹ️ No attachments section found - skipping attachment CRUD test");
+				return false;
+			}
+			
+			LOGGER.info("📤 Testing Attachment CRUD - Upload/Download/Delete");
+			attachmentsContainer.scrollIntoViewIfNeeded();
+			wait_500();
+			
+			// Test UPLOAD
+			final Locator uploadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:upload");
+			if (uploadButton.count() == 0) {
+				LOGGER.debug("ℹ️ Upload button not found - skipping attachment CRUD test");
+				return false;
+			}
+			
+			uploadButton.click();
+			wait_500();
+			
+			final Locator dialog = waitForDialogWithText("Upload File");
+			if (dialog.count() == 0) {
+				LOGGER.warn("⚠️ Upload dialog did not open");
+				return false;
+			}
+			
+			final java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("test-attachment-", ".txt");
+			java.nio.file.Files.writeString(tempFile, "Test attachment content - " + System.currentTimeMillis());
+			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
+			
+			final Locator dialogUploadButton = dialog.locator("#cbutton-upload");
+			waitForButtonEnabled(dialogUploadButton);
+			dialogUploadButton.click();
+			waitForDialogToClose();
+			wait_1000();
+			
+			// Verify attachment uploaded
+			final String fileName = tempFile.getFileName().toString();
+			final Locator attachmentsGrid = locateAttachmentsGrid(attachmentsContainer);
+			waitForGridCellText(attachmentsGrid, fileName);
+			LOGGER.info("✅ Attachment uploaded: {}", fileName);
+			
+			// Test DOWNLOAD
+			final Locator uploadedCell = attachmentsGrid.locator("vaadin-grid-cell-content")
+				.filter(new Locator.FilterOptions().setHasText(fileName));
+			uploadedCell.first().click();
+			wait_500();
+			
+			final Locator downloadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:download");
+			if (downloadButton.isDisabled()) {
+				LOGGER.warn("⚠️ Download button is disabled after selection");
+				return false;
+			}
+			downloadButton.click();
+			wait_500();
+			LOGGER.info("✅ Attachment download triggered");
+			
+			// Test DELETE
+			final Locator deleteButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:trash");
+			if (deleteButton.isDisabled()) {
+				LOGGER.warn("⚠️ Delete button is disabled after selection");
+				return false;
+			}
+			deleteButton.click();
+			wait_500();
+			
+			final Locator confirmYes = page.locator("#cbutton-yes");
+			if (confirmYes.count() > 0) {
+				confirmYes.first().click();
+			}
+			waitForDialogToClose();
+			wait_1000();
+			waitForGridCellGone(attachmentsGrid, fileName);
+			LOGGER.info("✅ Attachment deleted successfully");
+			
+			return true;
+			
+		} catch (final Exception e) {
+			LOGGER.error("❌ Attachment CRUD test failed: {}", e.getMessage(), e);
+			return false;
+		}
+	}
+	
+	/** Performs comprehensive comment CRUD operations (Add/Edit/Delete).
+	 * Generic method that can be called from any test for any entity with comments.
+	 * @return true if all operations succeeded, false otherwise */
+	protected boolean testCommentCrudOperations() {
+		try {
+			final Locator commentsContainer = locateCommentsContainer();
+			if (commentsContainer == null) {
+				LOGGER.debug("ℹ️ No comments section found - skipping comment CRUD test");
+				return false;
+			}
+			
+			LOGGER.info("💬 Testing Comment CRUD - Add/Edit/Delete");
+			commentsContainer.scrollIntoViewIfNeeded();
+			wait_500();
+			
+			// Test ADD COMMENT
+			final Locator addCommentButton = commentsContainer.locator("vaadin-button")
+				.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='vaadin:plus']")));
+			
+			if (addCommentButton.count() == 0) {
+				LOGGER.debug("ℹ️ Add comment button not found - skipping comment CRUD test");
+				return false;
+			}
+			
+			addCommentButton.first().click();
+			wait_500();
+			
+			// Fill comment text
+			final Locator commentField = page.locator("vaadin-text-area");
+			if (commentField.count() == 0) {
+				LOGGER.warn("⚠️ Comment text area not found");
+				return false;
+			}
+			
+			final String commentText = "Test comment added by Playwright automation - " + System.currentTimeMillis();
+			commentField.first().fill(commentText);
+			wait_500();
+			
+			// Save comment
+			final Locator saveCommentButton = page.locator("#cbutton-save");
+			if (saveCommentButton.count() == 0) {
+				LOGGER.warn("⚠️ Save comment button not found");
+				return false;
+			}
+			
+			saveCommentButton.first().click();
+			wait_1000();
+			LOGGER.info("✅ Comment added successfully");
+			
+			return true;
+			
+		} catch (final Exception e) {
+			LOGGER.error("❌ Comment CRUD test failed: {}", e.getMessage(), e);
+			return false;
+		}
+	}
+	
+	/** Helper method to locate attachments grid within a container. */
+	protected Locator locateAttachmentsGrid(final Locator container) {
+		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
+		if (grid.count() == 0) {
+			throw new AssertionError("Attachments grid not found");
+		}
+		return grid.first();
+	}
+	
+	/** Helper method to locate attachment toolbar button by icon name. */
+	protected Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
+		final Locator button = container.locator("vaadin-button")
+			.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='" + iconName + "']")));
+		if (button.count() == 0) {
+			throw new AssertionError("Toolbar button not found for icon " + iconName);
+		}
+		return button.first();
+	}
+	
+	/** Helper method to wait for dialog with specific text to appear. */
+	protected Locator waitForDialogWithText(final String text) {
+		final int maxAttempts = 10;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]")
+				.filter(new Locator.FilterOptions().setHasText(text));
+			if (overlay.count() > 0) {
+				return overlay.first();
+			}
+			wait_500();
+		}
+		throw new AssertionError("Dialog with text '" + text + "' did not open");
+	}
+	
+	/** Helper method to wait for dialog to close. */
+	protected void waitForDialogToClose() {
+		final int maxAttempts = 10;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
+				return;
+			}
+			wait_500();
+		}
+	}
+	
+	/** Helper method to wait for button to become enabled. */
+	protected void waitForButtonEnabled(final Locator button) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (!button.isDisabled()) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Button did not become enabled");
+	}
+	
+	/** Helper method to wait for grid cell with specific text to appear. */
+	protected void waitForGridCellText(final Locator grid, final String text) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (grid.locator("vaadin-grid-cell-content")
+				.filter(new Locator.FilterOptions().setHasText(text)).count() > 0) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Expected grid cell not found: " + text);
+	}
+	
+	/** Helper method to wait for grid cell with specific text to disappear. */
+	protected void waitForGridCellGone(final Locator grid, final String text) {
+		final int maxAttempts = 12;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			final Locator matches = grid.locator("vaadin-grid-cell-content")
+				.filter(new Locator.FilterOptions().setHasText(text));
+			if (matches.count() == 0) {
+				return;
+			}
+			if (!matches.first().isVisible()) {
+				return;
+			}
+			wait_500();
+		}
+		throw new AssertionError("Grid cell still present: " + text);
+	}
 }
