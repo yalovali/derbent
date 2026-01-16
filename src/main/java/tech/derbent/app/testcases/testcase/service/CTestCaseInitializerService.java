@@ -101,14 +101,16 @@ public class CTestCaseInitializerService extends CInitializerServiceBase {
 		}
 
 		final String[][] nameAndDescriptions = {
-				{ "User Login Validation", "Verify user can login with valid credentials" },
-				{ "Password Reset Flow", "Test password reset functionality end-to-end" },
-				{ "Data Export Feature", "Verify data export generates correct file format" },
-				{ "Form Validation Rules", "Test all validation rules on registration form" },
-				{ "Dashboard Loading Performance", "Measure and validate dashboard load time" },
-				{ "Mobile Responsive Layout", "Verify UI adapts correctly to mobile viewport" },
-				{ "API Error Handling", "Test API error responses and error messages" },
-				{ "Session Timeout Handling", "Verify session timeout redirects to login" }
+				{ "User Login Validation", "Verify user can login with valid credentials and access dashboard" },
+				{ "Password Reset Flow", "Test password reset functionality with email verification" },
+				{ "Data Export Feature", "Verify data export generates correct CSV and Excel file formats" },
+				{ "Form Validation Rules", "Test all validation rules on user registration form" },
+				{ "Dashboard Loading Performance", "Measure and validate dashboard load time under 2 seconds" },
+				{ "Mobile Responsive Layout", "Verify UI adapts correctly to mobile and tablet viewports" },
+				{ "API Error Handling", "Test API error responses return proper HTTP status codes and messages" },
+				{ "Session Timeout Handling", "Verify session timeout after 30 minutes redirects to login page" },
+				{ "File Upload Functionality", "Test file upload with various formats and size limits" },
+				{ "Search and Filter Operations", "Verify search returns accurate results with proper filtering" }
 		};
 		initializeProjectEntity(nameAndDescriptions,
 				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,

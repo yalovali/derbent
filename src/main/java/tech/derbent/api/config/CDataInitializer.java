@@ -126,6 +126,8 @@ import tech.derbent.app.teams.team.service.CTeamInitializerService;
 import tech.derbent.app.teams.team.service.CTeamService;
 import tech.derbent.app.testcases.testcase.service.CTestCaseInitializerService;
 import tech.derbent.app.testcases.testcasetype.service.CTestCaseTypeInitializerService;
+import tech.derbent.app.testcases.testrun.service.CTestRunInitializerService;
+import tech.derbent.app.testcases.testscenario.service.CTestScenarioInitializerService;
 import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.ticket.service.CTicketInitializerService;
 import tech.derbent.app.tickets.ticket.service.CTicketService;
@@ -785,7 +787,9 @@ public class CDataInitializer {
 					CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* TEST CASES **************************/
 					CTestCaseTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CTestScenarioInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CTestCaseInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CTestRunInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* SAMPLES **************************/
 					// Project-specific type and configuration entities
 					CSystemSettingsInitializerService.initializeSample(project, minimal);
@@ -814,6 +818,7 @@ public class CDataInitializer {
 						CProjectIncomeTypeInitializerService.initializeSample(sampleProject, minimal);
 						CActivityPriorityInitializerService.initializeSample(sampleProject, minimal);
 						CSprintTypeInitializerService.initializeSample(sampleProject, minimal);
+						CTestCaseTypeInitializerService.initializeSample(sampleProject, minimal);
 					}
 					CGanntViewEntityInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
@@ -837,6 +842,10 @@ public class CDataInitializer {
 					CRiskInitializerService.initializeSample(project, minimal);
 					tech.derbent.app.issues.issue.service.CIssueInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);
+					// test management - must be after types are initialized
+					CTestScenarioInitializerService.initializeSample(project, minimal);
+					CTestCaseInitializerService.initializeSample(project, minimal);
+					CTestRunInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {
 						break;

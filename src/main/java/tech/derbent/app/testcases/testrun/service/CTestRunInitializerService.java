@@ -50,7 +50,12 @@ public class CTestRunInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "totalTestCases"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "passedTestCases"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "failedTestCases"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "skippedTestCases"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "totalTestSteps"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "passedTestSteps"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "failedTestSteps"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionNotes"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "buildNumber"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "environment"));
 
 			detailSection.addScreenLine(CDetailLinesService.createSection("Test Case Results"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "testCaseResults"));
@@ -129,12 +134,23 @@ public class CTestRunInitializerService extends CInitializerServiceBase {
 					// Set execution times
 					testRun.setExecutionStart(LocalDateTime.now().minusDays(10 - index).minusHours(2));
 					testRun.setExecutionEnd(testRun.getExecutionStart().plusHours(1).plusMinutes(30));
-					testRun.setDurationMs(5400000L + index * 100000); // ~1.5 hours
 
 					// Set test results
 					testRun.setTotalTestCases(10 + index * 2);
 					testRun.setPassedTestCases(8 + index);
 					testRun.setFailedTestCases(index % 3 == 0 ? 2 : 1);
+
+					// Set test steps results
+					testRun.setTotalTestSteps(testRun.getTotalTestCases() * 5); // Assume 5 steps per test case
+					testRun.setPassedTestSteps((int) (testRun.getTotalTestSteps() * 0.85)); // 85% pass rate
+					testRun.setFailedTestSteps(testRun.getTotalTestSteps() - testRun.getPassedTestSteps());
+
+					// Set execution metadata
+					testRun.setBuildNumber("Build-2026.01." + (15 + index));
+					testRun.setEnvironment(index % 2 == 0 ? "Staging" : "Production");
+					testRun.setExecutionNotes("Test run completed. " +
+							testRun.getPassedTestCases() + " test cases passed, " +
+							testRun.getFailedTestCases() + " failed.");
 
 					// Set overall result
 					if (testRun.getFailedTestCases() > 0) {
