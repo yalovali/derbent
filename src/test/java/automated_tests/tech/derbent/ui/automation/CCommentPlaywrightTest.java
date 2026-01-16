@@ -84,9 +84,9 @@ public class CCommentPlaywrightTest extends CBaseUITest {
 			waitForDialogToClose();
 			wait_1000();
 
-			// Verify comment appears in grid
-			final Locator commentsGrid = locateCommentsGrid(commentsContainer);
-			waitForGridCellText(commentsGrid, commentText.substring(0, Math.min(50, commentText.length())));
+			// Verify comment appears in grid (use getCommentPreview logic)
+			final String previewText = commentText.length() > 100 ? commentText.substring(0, 100) : commentText;
+			waitForGridCellText(commentsGrid, previewText.substring(0, Math.min(50, previewText.length())));
 			takeScreenshot(String.format("%03d-comment-added", screenshotCounter++), false);
 
 			// Test expand details by clicking on the comment row

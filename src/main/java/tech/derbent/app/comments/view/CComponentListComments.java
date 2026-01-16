@@ -270,11 +270,13 @@ public class CComponentListComments extends CVerticalLayout
 			masterEntity.setComments(items);
 		}
 
+		// Check if comment already exists (by ID for persisted, by reference for new)
 		final Long commentId = comment.getId();
 		final boolean exists = items.stream().anyMatch(existing -> {
-			if (commentId != null && existing != null) {
+			if (commentId != null && existing != null && existing.getId() != null) {
 				return commentId.equals(existing.getId());
 			}
+			// For new comments (null ID), check by reference to avoid duplicates
 			return existing == comment;
 		});
 
@@ -322,6 +324,12 @@ public class CComponentListComments extends CVerticalLayout
 
 			// Create new comment with current user as author
 			final CUser currentUser = sessionService.getActiveUser().orElse(null);
+			if (currentUser == null) {
+				CNotificationService.showError("No active user found");
+				LOGGER.error("Cannot create comment: no active user in session");
+				return;
+			}
+
 			final CComment newComment = new CComment("", currentUser);
 
 			final CDialogComment dialog = new CDialogComment(commentService, sessionService, newComment, comment -> {
