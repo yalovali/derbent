@@ -5,14 +5,17 @@ set -euo pipefail
 # CONFIG
 ############################################
 DAYS_BACK=90
-MAX_POINTS=30                 # grafikte kaç nokta olsun
+MAX_POINTS=30
 WORKTREE=".loc-worktree"
 
 CSV="loc-3months.csv"
-PNG_TOTAL="loc-total.png"
-PNG_STACK="loc-stacked.png"
-PNG_DELTA="loc-delta.png"
-PNG_RATIO="loc-ratio.png"
+DELTA_CSV="loc-3months-delta.csv"
+
+PNG_TOTAL="loc-total-growth.png"
+PNG_DELTA="loc-velocity.png"
+PNG_TEST="loc-test-growth.png"
+
+export LC_NUMERIC=en_US.UTF-8
 
 EXCLUDES=(.git target node_modules venv dist build out .idea .gradle .mvn .vscode)
 
@@ -30,43 +33,52 @@ build_prune_expr() {
 mapfile -t PRUNE_EXPR < <(build_prune_expr)
 
 ############################################
-# LOC
+# LOC COUNT
 ############################################
 count_lines_nonempty() {
   awk 'NF{n++} END{print n+0}' "$@"
 }
 
 count_loc() {
-  mapfile -t JAVA < <(find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f -name '*.java' -print)
-  mapfile -t DOCS < <(find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f \( -name '*.md' -o -name '*.adoc' -o -name '*.rst' -o -name '*.txt' \) -print)
-  mapfile -t CSS  < <(find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f -name '*.css' -print)
+  # PROD CODE
+  mapfile -t PROD < <(
+    find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f \
+      \( -name '*.java' -o -name '*.kt' \) \
+      ! -path '*test*' -print
+  )
 
-  j=$(count_lines_nonempty "${JAVA[@]}")
-  d=$(count_lines_nonempty "${DOCS[@]}")
-  c=$(count_lines_nonempty "${CSS[@]}")
+  # TEST CODE
+  mapfile -t TEST < <(
+    find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f \
+      \( -name '*.java' -o -name '*.kt' \) \
+      \( -path '*test*' -o -path '*tests*' \) -print
+  )
 
-  echo "$j,$d,$c,$((j+d+c))"
+  prod=$(count_lines_nonempty "${PROD[@]}")
+  test=$(count_lines_nonempty "${TEST[@]}")
+
+  echo "$prod,$test,$((prod+test))"
 }
 
 ############################################
-# COMMITS (last 3 months)
+# COMMITS (LAST 3 MONTHS)
 ############################################
 mapfile -t COMMITS < <(
   git rev-list --since="$DAYS_BACK days ago" --reverse HEAD
 )
 
-TOTAL_COMMITS=${#COMMITS[@]}
-STEP=$(( TOTAL_COMMITS / MAX_POINTS ))
+TOTAL=${#COMMITS[@]}
+STEP=$(( TOTAL / MAX_POINTS ))
 (( STEP < 1 )) && STEP=1
 
 ############################################
 # PREPARE
 ############################################
-echo "date,commit,java_loc,docs_loc,css_loc,total_loc" > "$CSV"
+echo "date,commit,prod_loc,test_loc,total_loc" > "$CSV"
 
-printf "\n📈 LOC METRICS – LAST 3 MONTHS\n"
+printf "\n📈 LOC METRICS – LAST 3 MONTHS (FOCUSED)\n"
 printf "%s\n" "===================================================================="
-printf "%-12s %-8s %10s %10s %8s %10s\n" "DATE" "COMMIT" "JAVA" "DOCS" "CSS" "TOTAL"
+printf "%-12s %-8s %'12s %'12s %'12s\n" "DATE" "COMMIT" "PROD_LOC" "TEST_LOC" "TOTAL_LOC"
 printf "%s\n" "--------------------------------------------------------------------"
 
 rm -rf "$WORKTREE"
@@ -74,7 +86,7 @@ rm -rf "$WORKTREE"
 ############################################
 # SNAPSHOT LOOP
 ############################################
-for ((i=0;i<TOTAL_COMMITS;i+=STEP)); do
+for ((i=0;i<TOTAL;i+=STEP)); do
   COMMIT="${COMMITS[$i]}"
   git worktree add -q "$WORKTREE" "$COMMIT"
 
@@ -85,19 +97,30 @@ for ((i=0;i<TOTAL_COMMITS;i+=STEP)); do
 
   git worktree remove -f "$WORKTREE"
 
-  IFS=',' read -r JAVA DOCS CSS TOTAL <<< "$LOC"
+  IFS=',' read -r PROD TEST TOTAL_LOC <<< "$LOC"
 
-  printf "%-12s %-8s %10d %10d %8d %10d\n" \
-    "$DATE" "${COMMIT:0:7}" "$JAVA" "$DOCS" "$CSS" "$TOTAL"
+  printf "%-12s %-8s %'12d %'12d %'12d\n" \
+    "$DATE" "${COMMIT:0:7}" "$PROD" "$TEST" "$TOTAL_LOC"
 
-  echo "$DATE,${COMMIT:0:7},$JAVA,$DOCS,$CSS,$TOTAL" >> "$CSV"
+  echo "$DATE,${COMMIT:0:7},$PROD,$TEST,$TOTAL_LOC" >> "$CSV"
 done
 
 printf "%s\n" "===================================================================="
 printf "CSV written: %s\n" "$CSV"
 
 ############################################
-# GNUPLOT GRAPHS
+# DELTA CSV (VELOCITY)
+############################################
+echo "date,delta_loc" > "$DELTA_CSV"
+awk -F',' '
+NR==2 {prev=$5; next}
+NR>2  {
+  print $1 "," ($5-prev)
+  prev=$5
+}' "$CSV" >> "$DELTA_CSV"
+
+############################################
+# GNUPLOT
 ############################################
 if command -v gnuplot >/dev/null 2>&1; then
 
@@ -105,47 +128,55 @@ gnuplot <<EOF
 set datafile separator ","
 set terminal pngcairo size 1400,800
 set grid
-set key left top
 set xdata time
 set timefmt "%Y-%m-%d"
 set format x "%b %d"
+set decimal locale
+set format y "%'.0f"
 
-# 1️⃣ TOTAL LOC
+############################
+# 1) TOTAL LOC GROWTH
+############################
 set output "${PNG_TOTAL}"
 set title "Total LOC Growth (Last 3 Months)"
 set xlabel "Date"
 set ylabel "Lines of Code"
-plot "${CSV}" using 1:6 with linespoints lw 3 title "Total LOC"
 
-# 2️⃣ STACKED AREA
-set output "${PNG_STACK}"
-set title "LOC Composition (Java / Docs / CSS)"
-set style fill solid 0.7
-set ylabel "Lines of Code"
+stats "${CSV}" using 5 nooutput
+mean = STATS_mean
+
 plot \
-  "${CSV}" using 1:3 with filledcurves x1 title "Java", \
-  "${CSV}" using 1:(\$3+\$4) with filledcurves x1 title "Docs", \
-  "${CSV}" using 1:(\$3+\$4+\$5) with filledcurves x1 title "CSS"
+  "${CSV}" using 1:5 with linespoints lw 3 title "Total LOC", \
+  mean with lines lw 2 dt 2 title "Average LOC Level"
 
-# 3️⃣ DAILY DELTA
+############################
+# 2) LOC VELOCITY (THICK BARS + TREND)
+############################
 set output "${PNG_DELTA}"
-set title "LOC Velocity (Change Between Snapshots)"
+set title "LOC Velocity (Δ LOC Between Snapshots)"
 set ylabel "LOC Change"
-plot "${CSV}" using 1:(column(6)-prev=prev, prev=column(6)) with impulses lw 2 title "Δ LOC"
 
-# 4️⃣ JAVA / DOCS RATIO
-set output "${PNG_RATIO}"
-set title "Java vs Docs Ratio"
-set ylabel "Java / Docs"
-plot "${CSV}" using 1:(\$3/\$4) with linespoints lw 2 title "Ratio"
+# moving average (window = 5)
+plot \
+  "${DELTA_CSV}" using 1:2 with impulses lw 4 title "Δ LOC", \
+  "${DELTA_CSV}" using 1:(avg=avg+(\$2-avg)/5) with lines lw 3 title "Velocity Trend"
+
+############################
+# 3) TEST LOC GROWTH
+############################
+set output "${PNG_TEST}"
+set title "Test Code Growth (Testing Effort Over Time)"
+set ylabel "Test LOC"
+
+plot \
+  "${CSV}" using 1:4 with linespoints lw 3 title "Test LOC"
 
 EOF
 
 echo "PNG generated:"
 echo " - $PNG_TOTAL"
-echo " - $PNG_STACK"
 echo " - $PNG_DELTA"
-echo " - $PNG_RATIO"
+echo " - $PNG_TEST"
 
 else
   echo "WARNING: gnuplot not installed (PNG skipped)"
