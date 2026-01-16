@@ -1,16 +1,24 @@
 package tech.derbent.app.components.componentversion.domain;
 
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.components.component.domain.CProjectComponent;
 import tech.derbent.app.components.componentversiontype.domain.CProjectComponentVersionType;
 import tech.derbent.api.projects.domain.CProject;
@@ -20,7 +28,7 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 @Entity
 @Table (name = "\"cprojectcomponentversion\"")
 @AttributeOverride (name = "id", column = @Column (name = "projectcomponentversion_id"))
-public class CProjectComponentVersion extends CProjectItem<CProjectComponentVersion> implements IHasStatusAndWorkflow<CProjectComponentVersion> {
+public class CProjectComponentVersion extends CProjectItem<CProjectComponentVersion> implements IHasStatusAndWorkflow<CProjectComponentVersion>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - component versions (darker)
 	public static final String DEFAULT_ICON = "vaadin:tag";
@@ -44,6 +52,34 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	@Column (nullable = true, length = 50)
 	@AMetaData (displayName = "Version Number", required = false, readOnly = false, description = "Version identifier (e.g., 1.0.0)", hidden = false)
 	private String versionNumber;
+
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "projectcomponentversion_id")
+	@AMetaData(
+		displayName = "Attachments",
+		required = false,
+		readOnly = false,
+		description = "File attachments for this entity",
+		hidden = false,
+		dataProviderBean = "CAttachmentService",
+		createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
+
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "projectcomponentversion_id")
+	@AMetaData(
+		displayName = "Comments",
+		required = false,
+		readOnly = false,
+		description = "Comments for this entity",
+		hidden = false,
+		dataProviderBean = "CCommentService",
+		createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 
 	public CProjectComponentVersion() {
 		super();
@@ -110,6 +146,35 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 
 	public void setVersionNumber(final String versionNumber) {
 		this.versionNumber = versionNumber;
+		updateLastModified();
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
+
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) {
+		this.attachments = attachments;
+	}
+
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
 		updateLastModified();
 	}
 }

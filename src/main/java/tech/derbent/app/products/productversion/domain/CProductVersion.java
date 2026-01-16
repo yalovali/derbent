@@ -1,16 +1,24 @@
 package tech.derbent.app.products.productversion.domain;
 
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.CComment;
+import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.products.product.domain.CProduct;
 import tech.derbent.app.products.productversiontype.domain.CProductVersionType;
 import tech.derbent.api.projects.domain.CProject;
@@ -20,7 +28,7 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 @Entity
 @Table (name = "\"cproductversion\"")
 @AttributeOverride (name = "id", column = @Column (name = "productversion_id"))
-public class CProductVersion extends CProjectItem<CProductVersion> implements IHasStatusAndWorkflow<CProductVersion> {
+public class CProductVersion extends CProjectItem<CProductVersion> implements IHasStatusAndWorkflow<CProductVersion>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#6B8E23"; // X11 OliveDrab - product versions (darker)
 	public static final String DEFAULT_ICON = "vaadin:tag";
@@ -44,6 +52,34 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 	@Column (nullable = true, length = 50)
 	@AMetaData (displayName = "Version Number", required = false, readOnly = false, description = "Version identifier (e.g., 1.0.0)", hidden = false)
 	private String versionNumber;
+
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "productversion_id")
+	@AMetaData(
+		displayName = "Attachments",
+		required = false,
+		readOnly = false,
+		description = "File attachments for this entity",
+		hidden = false,
+		dataProviderBean = "CAttachmentService",
+		createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
+
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "productversion_id")
+	@AMetaData(
+		displayName = "Comments",
+		required = false,
+		readOnly = false,
+		description = "Comments for this entity",
+		hidden = false,
+		dataProviderBean = "CCommentService",
+		createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 
 	public CProductVersion() {
 		super();
@@ -110,6 +146,35 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 
 	public void setVersionNumber(final String versionNumber) {
 		this.versionNumber = versionNumber;
+		updateLastModified();
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
+
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) {
+		this.attachments = attachments;
+	}
+
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) {
+		this.comments = comments;
 		updateLastModified();
 	}
 }
