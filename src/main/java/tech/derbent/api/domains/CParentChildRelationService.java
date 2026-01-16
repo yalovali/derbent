@@ -3,6 +3,7 @@ package tech.derbent.api.domains;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +47,10 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @throws IllegalArgumentException if validation fails */
 	@Transactional
 	public void setParent(final CProjectItem<?> child, final CProjectItem<?> parent) {
-		Check.notNull(child, "Child item cannot be null");
-		Check.notNull(parent, "Parent item cannot be null");
-		Check.notNull(child.getId(), "Child item must be persisted (ID cannot be null)");
-		Check.notNull(parent.getId(), "Parent item must be persisted (ID cannot be null)");
+		Objects.requireNonNull(child, "Child item cannot be null");
+		Objects.requireNonNull(parent, "Parent item cannot be null");
+		Objects.requireNonNull(child.getId(), "Child item must be persisted");
+		Objects.requireNonNull(parent.getId(), "Parent item must be persisted");
 		final String childType = child.getClass().getSimpleName();
 		final String parentType = parent.getClass().getSimpleName();
 		// Check that items are not the same
@@ -76,8 +77,8 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @param child the child project item */
 	@Transactional
 	public void clearParent(final CProjectItem<?> child) {
-		Check.notNull(child, "Child item cannot be null");
-		Check.notNull(child.getId(), "Child item must be persisted (ID cannot be null)");
+		Objects.requireNonNull(child, "Child item cannot be null");
+		Objects.requireNonNull(child.getId(), "Child item must be persisted");
 		final String childType = child.getClass().getSimpleName();
 		repository.deleteByChild(child.getId(), childType);
 		child.clearParent();
@@ -90,8 +91,8 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	@SuppressWarnings ("unchecked")
 	@Transactional (readOnly = true)
 	public <T extends CProjectItem<?>> Optional<T> getParent(final CProjectItem<?> child) {
-		Check.notNull(child, "Child item cannot be null");
-		Check.notNull(child.getId(), "Child item must be persisted (ID cannot be null)");
+		Objects.requireNonNull(child, "Child item cannot be null");
+		Objects.requireNonNull(child.getId(), "Child item must be persisted");
 		final String childType = child.getClass().getSimpleName();
 		final Optional<CParentChildRelation> relation = repository.findByChild(child.getId(), childType);
 		if (relation.isEmpty()) {
@@ -124,31 +125,11 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	@SuppressWarnings ("unchecked")
 	@Transactional (readOnly = true)
 	public <T extends CProjectItem<?>> List<T> getChildren(final CProjectItem<?> parent) {
-		Check.notNull(parent, "Parent item cannot be null");
-		Check.notNull(parent.getId(), "Parent item must be persisted (ID cannot be null)");
+		Objects.requireNonNull(parent, "Parent item cannot be null");
+		Objects.requireNonNull(parent.getId(), "Parent item must be persisted");
 		final String parentType = parent.getClass().getSimpleName();
 		final List<CParentChildRelation> relations = repository.findByParent(parent.getId(), parentType);
-		final List<T> children = new ArrayList<>();
-		for (final CParentChildRelation rel : relations) {
-			try {
-				final Class<?> childClass = CEntityRegistry.getEntityClassByTitle(rel.getChildType());
-				if (childClass == null) {
-					LOGGER.warn("Could not find entity class for type: {}", rel.getChildType());
-					continue;
-				}
-				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(childClass);
-				if (serviceClass == null) {
-					LOGGER.warn("Could not find service class for entity: {}", childClass.getSimpleName());
-					continue;
-				}
-				final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
-				final Optional<?> child = service.getById(rel.getChildId());
-				child.ifPresent(c -> children.add((T) c));
-			} catch (final Exception e) {
-				LOGGER.error("Error retrieving child {}#{}: {}", rel.getChildType(), rel.getChildId(), e.getMessage(), e);
-			}
-		}
-		return children;
+		return loadChildrenFromRelations(relations);
 	}
 
 	/** Get all child items for a parent project item filtered by child entity class.
@@ -159,11 +140,20 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	@SuppressWarnings ("unchecked")
 	@Transactional (readOnly = true)
 	public <T extends CProjectItem<?>> List<T> getChildrenByType(final CProjectItem<?> parent, final String childEntityClassName) {
-		Check.notNull(parent, "Parent item cannot be null");
-		Check.notNull(parent.getId(), "Parent item must be persisted (ID cannot be null)");
+		Objects.requireNonNull(parent, "Parent item cannot be null");
+		Objects.requireNonNull(parent.getId(), "Parent item must be persisted");
 		Check.notBlank(childEntityClassName, "Child entity class name cannot be blank");
 		final String parentType = parent.getClass().getSimpleName();
 		final List<CParentChildRelation> relations = repository.findByParentAndChildType(parent.getId(), parentType, childEntityClassName);
+		return loadChildrenFromRelations(relations);
+	}
+
+	/** Helper method to load child items from parent-child relations.
+	 * Extracts common logic for loading entities from relation records.
+	 * @param relations list of parent-child relation records
+	 * @return list of loaded child items */
+	@SuppressWarnings ("unchecked")
+	private <T extends CProjectItem<?>> List<T> loadChildrenFromRelations(final List<CParentChildRelation> relations) {
 		final List<T> children = new ArrayList<>();
 		for (final CParentChildRelation rel : relations) {
 			try {
@@ -196,9 +186,9 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @return true if circular dependency would be created */
 	@Transactional (readOnly = true)
 	public boolean wouldCreateCircularDependency(final Long parentId, final String parentType, final Long childId, final String childType) {
-		Check.notNull(parentId, "Parent ID cannot be null");
+		Objects.requireNonNull(parentId, "Parent ID cannot be null");
 		Check.notBlank(parentType, "Parent type cannot be blank");
-		Check.notNull(childId, "Child ID cannot be null");
+		Objects.requireNonNull(childId, "Child ID cannot be null");
 		Check.notBlank(childType, "Child type cannot be blank");
 		// Check if parent is a descendant of child
 		final List<Object[]> descendants = repository.findAllDescendants(childId, childType);

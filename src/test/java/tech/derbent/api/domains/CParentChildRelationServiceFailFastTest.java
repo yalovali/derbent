@@ -10,7 +10,7 @@ class CParentChildRelationServiceFailFastTest {
 	@Test
 	void testWouldCreateCircularDependency_FailsFastOnNullParentId() {
 		// When/Then: Null parent ID throws exception
-		assertThrows(IllegalArgumentException.class,
+		assertThrows(NullPointerException.class,
 				() -> new TestableParentChildService().wouldCreateCircularDependency(null, "CActivity", 2L, "CActivity"),
 				"Should throw exception for null parent ID");
 	}
@@ -26,7 +26,7 @@ class CParentChildRelationServiceFailFastTest {
 	@Test
 	void testWouldCreateCircularDependency_FailsFastOnNullChildId() {
 		// When/Then: Null child ID throws exception
-		assertThrows(IllegalArgumentException.class,
+		assertThrows(NullPointerException.class,
 				() -> new TestableParentChildService().wouldCreateCircularDependency(1L, "CActivity", null, "CActivity"));
 	}
 
@@ -46,9 +46,9 @@ class CParentChildRelationServiceFailFastTest {
 
 		public boolean wouldCreateCircularDependency(final Long parentId, final String parentType, final Long childId, final String childType) {
 			// Reproduce the fail-fast validation from the actual service
-			tech.derbent.api.utils.Check.notNull(parentId, "Parent ID cannot be null");
+			java.util.Objects.requireNonNull(parentId, "Parent ID cannot be null");
 			tech.derbent.api.utils.Check.notBlank(parentType, "Parent type cannot be blank");
-			tech.derbent.api.utils.Check.notNull(childId, "Child ID cannot be null");
+			java.util.Objects.requireNonNull(childId, "Child ID cannot be null");
 			tech.derbent.api.utils.Check.notBlank(childType, "Child type cannot be blank");
 			return false; // Actual implementation not needed for validation tests
 		}
