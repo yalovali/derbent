@@ -1,4 +1,4 @@
-package tech.derbent.app.testcases.testexecution.domain;
+package tech.derbent.app.testcases.testrun.testexecution.domain;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.AttributeOverride;

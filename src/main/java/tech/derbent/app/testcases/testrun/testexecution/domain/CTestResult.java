@@ -1,4 +1,4 @@
-package tech.derbent.app.testcases.testexecution.domain;
+package tech.derbent.app.testcases.testrun.testexecution.domain;
 
 /** Test execution result status. */
 public enum CTestResult {
