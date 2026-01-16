@@ -91,8 +91,8 @@ public class CTestCase extends CProjectItem<CTestCase>
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "testscenario_id", nullable = true)
 	@AMetaData (
-			displayName = "Test Scenario", required = false, readOnly = false,
-			description = "Parent test scenario", hidden = false,
+			displayName = "Test Suite", required = false, readOnly = false,
+			description = "Parent test suite (group of related test cases)", hidden = false,
 			dataProviderBean = "CTestScenarioService"
 	)
 	private CTestScenario testScenario;

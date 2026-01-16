@@ -21,10 +21,10 @@ public class CTestScenarioInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CTestScenario.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTestScenarioInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".31";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Test Scenarios";
-	private static final String pageDescription = "Test scenario and workflow management";
-	private static final String pageTitle = "Test Scenario Management";
+	private static final String menuOrder = Menu_Order_TESTS + ".20";
+	private static final String menuTitle = MenuTitle_TESTS + ".Test Suites";
+	private static final String pageDescription = "Test suite and workflow management";
+	private static final String pageTitle = "Test Suite Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

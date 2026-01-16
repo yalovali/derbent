@@ -27,10 +27,10 @@ public class CTestRunInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CTestRun.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTestRunInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".32";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Test Runs";
+	private static final String menuOrder = Menu_Order_TESTS + ".30";
+	private static final String menuTitle = MenuTitle_TESTS + ".Test Sessions";
 	private static final String pageDescription = "Test execution tracking and results";
-	private static final String pageTitle = "Test Run Management";
+	private static final String pageTitle = "Test Session Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
