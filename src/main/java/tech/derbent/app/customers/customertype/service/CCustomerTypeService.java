@@ -22,7 +22,6 @@ public class CCustomerTypeService extends CTypeEntityService<CCustomerType> impl
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerTypeService.class);
 
-	@Autowired
 	private final ICustomerRepository customerRepository;
 
 	public CCustomerTypeService(final ICustomerTypeRepository repository, final Clock clock, final ISessionService sessionService,
