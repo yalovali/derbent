@@ -24,6 +24,8 @@ import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import automated_tests.tech.derbent.ui.automation.signatures.CControlSignature;
 import automated_tests.tech.derbent.ui.automation.signatures.IControlSignature;
 import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
 
 
 /** Intelligent adaptive page testing framework that automatically detects UI components and runs appropriate tests.
@@ -55,7 +57,7 @@ import org.junit.jupiter.api.Assumptions;
  * mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0
  * </pre>
  */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop"

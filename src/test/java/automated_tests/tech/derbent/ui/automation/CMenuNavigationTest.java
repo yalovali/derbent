@@ -15,11 +15,13 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.LoadState;
 import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
 
 
 /** Fast hierarchical menu navigation test - logs in and browses all menu items at all levels. Handles dynamic database-driven menu from
  * CPageEntity. */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",

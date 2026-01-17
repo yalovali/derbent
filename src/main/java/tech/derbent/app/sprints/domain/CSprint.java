@@ -41,6 +41,8 @@ import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.activities.service.IActivityRepository;
 import tech.derbent.app.meetings.service.IMeetingRepository;
+import org.slf4j.LoggerFactory;
+
 
 // @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "sprint_status_id"))
 @Entity
@@ -53,7 +55,7 @@ public class CSprint extends CProjectItem<CSprint>
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
 	public static final String ENTITY_TITLE_PLURAL = "Sprints";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint";
-	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CSprint.class);
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CSprint.class);
 	public static final String VIEW_NAME = "Sprints View";
 
 	private static boolean isSameSprintable(final ISprintableItem item, final CSprintItem sprintItem) {

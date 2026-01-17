@@ -6,8 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
+import tech.derbent.Application;
 
-@SpringBootTest(classes = tech.derbent.Application.class)
+
+@SpringBootTest(classes = Application.class)
 @TestPropertySource(properties = {
     "spring.datasource.url=jdbc:h2:mem:testdb",
     "spring.datasource.username=sa",

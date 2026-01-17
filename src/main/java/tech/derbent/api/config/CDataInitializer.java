@@ -141,6 +141,8 @@ import tech.derbent.base.users.service.CUserProjectSettingsService;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.app.issues.issue.service.CIssueInitializerService;
 import tech.derbent.app.issues.issuetype.service.CIssueTypeInitializerService;
+import java.time.LocalDateTime;
+
 
 /** CSampleDataInitializer - System Bootstrap and Sample Data Initialization This class serves dual purposes: 1. SYSTEM INITIALIZATION: Creates
  * essential base entities required for system operation - Companies, Projects, Users (core business entities) - Status entities (Activity, Meeting,
@@ -516,8 +518,8 @@ public class CDataInitializer {
 			decision1.setStatus(status1);
 			decision1.setAssignedTo(user1);
 			decision1.setEstimatedCost(new java.math.BigDecimal("50000.00"));
-			decision1.setImplementationDate(java.time.LocalDateTime.now().plusDays(30));
-			decision1.setReviewDate(java.time.LocalDateTime.now().plusDays(90));
+			decision1.setImplementationDate(LocalDateTime.now().plusDays(30));
+			decision1.setReviewDate(LocalDateTime.now().plusDays(90));
 			decisionService.save(decision1);
 			// Create first decision comments
 			if (minimal) {
@@ -533,8 +535,8 @@ public class CDataInitializer {
 			decision2.setStatus(status2);
 			decision2.setAssignedTo(user2);
 			decision2.setEstimatedCost(new java.math.BigDecimal("25000.00"));
-			decision2.setImplementationDate(java.time.LocalDateTime.now().plusDays(15));
-			decision2.setReviewDate(java.time.LocalDateTime.now().plusDays(60));
+			decision2.setImplementationDate(LocalDateTime.now().plusDays(15));
+			decision2.setReviewDate(LocalDateTime.now().plusDays(60));
 			decisionService.save(decision2);
 			// Create second decision comments
 			LOGGER.debug("Created 2 sample decisions with comments for project: {}", project.getName());

@@ -10,12 +10,14 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
+import org.slf4j.LoggerFactory;
+
 
 @Service
 @Transactional
 public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable, IEntityWithView {
 
-	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CActivityPriorityService.class);
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CActivityPriorityService.class);
 
 	public CActivityPriorityService(final IActivityPriorityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

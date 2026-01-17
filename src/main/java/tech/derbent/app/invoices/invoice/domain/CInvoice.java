@@ -35,6 +35,8 @@ import tech.derbent.app.milestones.milestone.domain.CMilestone;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.base.users.domain.CUser;
 import java.time.temporal.ChronoUnit;
+import java.math.RoundingMode;
+
 
 /** CInvoice - Invoice entity for customer billing and income tracking. Represents invoices sent to customers for project work or services. */
 @Entity
@@ -444,7 +446,7 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 		subtotal = invoiceItems.stream().map(CInvoiceItem::getLineTotal).filter(java.util.Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
 		// Calculate discount amount
 		if (discountRate != null && discountRate.compareTo(BigDecimal.ZERO) > 0) {
-			discountAmount = subtotal.multiply(discountRate).divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
+			discountAmount = subtotal.multiply(discountRate).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 		} else {
 			discountAmount = BigDecimal.ZERO;
 		}
@@ -452,7 +454,7 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 		final BigDecimal taxableAmount = subtotal.subtract(discountAmount);
 		// Calculate tax amount
 		if (taxRate != null && taxRate.compareTo(BigDecimal.ZERO) > 0) {
-			taxAmount = taxableAmount.multiply(taxRate).divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
+			taxAmount = taxableAmount.multiply(taxRate).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 		} else {
 			taxAmount = BigDecimal.ZERO;
 		}

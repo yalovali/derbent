@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
 
 
 /**
@@ -25,7 +27,7 @@ import org.junit.jupiter.api.Assumptions;
  * 3. Save button is disabled when name field is empty
  * 4. Save button is enabled when name field has content
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource(properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb",
 		"spring.datasource.username=sa",

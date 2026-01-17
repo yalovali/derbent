@@ -19,6 +19,8 @@ import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.app.gannt.ganntviewentity.domain.CGanntViewEntity;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.app.gannt.ganntviewentity.view.CGanntViewEntityView;
+
 
 @Route("cganntviewentityview")
 @PageTitle("Gannt Views Master Detail")

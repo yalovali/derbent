@@ -13,12 +13,14 @@ import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import tech.derbent.Application;
+
 
 /**
  * Comprehensive CRUD test for Users view following standard testing patterns.
  * Uses navigateToViewByText() for navigation as per TESTING_RULES.md
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource(properties = {
     "spring.datasource.url=jdbc:h2:mem:testdb",
     "spring.datasource.username=sa",

@@ -13,8 +13,10 @@ import org.springframework.test.context.ActiveProfiles;
 import tech.derbent.api.utils.Check;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import tech.derbent.Application;
 
-@SpringBootTest(classes = tech.derbent.Application.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+
+@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles({
 		"test", "bab", "reset-db"
 })

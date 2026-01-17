@@ -13,6 +13,8 @@ import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
 
 
 /**
@@ -20,7 +22,7 @@ import org.junit.jupiter.api.Assumptions;
  * Uses generic helper methods from CBaseUITest for testing attachments and comments.
  * Tests cover full Create, Read, Update, Delete lifecycle with attachments and comments.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource(properties = {
 	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.datasource.username=sa",
