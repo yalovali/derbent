@@ -537,4 +537,59 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 		this.payments = payments;
 		updateLastModified();
 	}
+
+	@Override
+	public CInvoice createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		final CInvoice clone = super.createClone(options);
+		clone.invoiceNumber = this.invoiceNumber + " (Copy)";
+		clone.customerName = this.customerName;
+		clone.customerEmail = this.customerEmail;
+		clone.customerAddress = this.customerAddress;
+		clone.customerTaxId = this.customerTaxId;
+		clone.subtotal = this.subtotal;
+		clone.taxRate = this.taxRate;
+		clone.taxAmount = this.taxAmount;
+		clone.discountRate = this.discountRate;
+		clone.discountAmount = this.discountAmount;
+		clone.totalAmount = this.totalAmount;
+		clone.paidAmount = BigDecimal.ZERO;
+		clone.paymentStatus = CPaymentStatus.PENDING;
+		clone.paymentTerms = this.paymentTerms;
+		clone.notes = this.notes;
+		if (!options.isResetDates()) {
+			clone.invoiceDate = this.invoiceDate;
+			clone.dueDate = this.dueDate;
+		}
+		if (!options.isResetAssignments()) {
+			if (this.currency != null) {
+				clone.currency = this.currency;
+			}
+			if (this.issuedBy != null) {
+				clone.issuedBy = this.issuedBy;
+			}
+		}
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					// Silently skip failed comment clones
+				}
+			}
+		}
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					// Silently skip failed attachment clones
+				}
+			}
+		}
+		return clone;
+	}
 }

@@ -177,4 +177,37 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 		this.comments = comments;
 		updateLastModified();
 	}
+
+	@Override
+	public CProductVersion createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		final CProductVersion clone = super.createClone(options);
+		clone.versionNumber = this.versionNumber;
+		clone.entityType = this.entityType;
+		if (!options.isResetAssignments() && this.product != null) {
+			clone.product = this.product;
+		}
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					// Silently skip failed comment clones
+				}
+			}
+		}
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					// Silently skip failed attachment clones
+				}
+			}
+		}
+		return clone;
+	}
 }
