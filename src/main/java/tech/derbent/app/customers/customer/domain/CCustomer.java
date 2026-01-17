@@ -215,6 +215,27 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 		return entityType;
 	}
 
+	/** Gets the start date for Gantt chart display. For customers, this is the relationship start date.
+	 * @return the relationship start date */
+	@Override
+	public LocalDate getStartDate() {
+		return relationshipStartDate;
+	}
+
+	/** Gets the end date for Gantt chart display. For customers, this is the last interaction date.
+	 * @return the last interaction date */
+	@Override
+	public LocalDate getEndDate() {
+		return lastInteractionDate;
+	}
+
+	/** Gets the icon for Gantt chart display.
+	 * @return the customer icon identifier */
+	@Override
+	public String getIconString() {
+		return DEFAULT_ICON;
+	}
+
 	@Override
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
