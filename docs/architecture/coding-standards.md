@@ -3690,6 +3690,16 @@ page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasTe
 page.navigate("http://localhost:8080/cdynamicpagerouter/activities");
 ```
 
+**Rule:** Never use the side menu for Playwright navigation. The test support page is the only allowed entry point.  
+**Rule:** Use `-Dtest.titleContains=...` or `-Dtest.targetButtonId=...` to filter targets when needed.  
+**Rule:** To run every match for a keyword, pass `-Dtest.runAllMatches=true`.  
+
+Example:
+```bash
+mvn test -Dtest=CAdaptivePageTest -Dtest.titleContains=user
+mvn test -Dtest=CAdaptivePageTest -Dtest.titleContains=user -Dtest.runAllMatches=true
+```
+
 **How CAdaptivePageTest Works:**
 1. Navigates to CPageTestAuxillary
 2. Discovers all buttons with `[id^='test-aux-btn-']` selector

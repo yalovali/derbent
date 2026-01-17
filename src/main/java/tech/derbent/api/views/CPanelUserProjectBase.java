@@ -141,7 +141,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		CGrid.styleColumnHeader(grid.addComponentColumn(settings -> CLabelEntity.createUserLabel(settings.getUser())).setAutoWidth(true), "User");
 		CGrid.styleColumnHeader(grid.addColumn(CUserProjectSettings::getProjectName).setAutoWidth(true).setSortable(true), "Project Name");
 		CGrid.styleColumnHeader(grid.addColumn(CPanelUserProjectBase::getPermissionAsString).setAutoWidth(true), "Permission");
-		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		final GridSingleSelectionModel<CUserProjectSettings> sm = (GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();
 		sm.setDeselectAllowed(false);
 		addToContent(grid);

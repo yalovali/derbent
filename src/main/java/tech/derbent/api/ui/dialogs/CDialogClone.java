@@ -52,8 +52,13 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	@Override
 	protected String getFormTitleString() { return "Copy Configuration"; }
 
+	@Override
+	protected void save() {
+		performCopy();
+	}
+
 	/** Performs the copy operation when save is triggered. Creates a copy with the selected options and invokes the save callback. */
-	protected void on_save_clicked() {
+	private void performCopy() {
 		try {
 			validateForm();
 			// Determine target class

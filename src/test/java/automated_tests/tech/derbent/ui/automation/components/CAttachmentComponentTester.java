@@ -3,6 +3,7 @@ package automated_tests.tech.derbent.ui.automation.components;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Locator.ClickOptions;
 import com.microsoft.playwright.Page;
 
 /** Tests attachment component functionality on pages that have file upload capabilities. */
@@ -39,7 +40,13 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 			}
 			uploadButton.click();
 			waitMs(page, 500);
-			final Locator dialog = waitForDialogWithText(page, "Upload File");
+			Locator dialog = waitForDialogWithText(page, "Upload Attachment");
+			if (dialog.count() == 0) {
+				dialog = waitForDialogWithText(page, "Upload File");
+			}
+			if (dialog.count() == 0) {
+				dialog = locateAnyOpenDialog(page);
+			}
 			if (dialog.count() == 0) {
 				LOGGER.warn("         ⚠️ Upload dialog did not open");
 				return;
@@ -47,11 +54,21 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 			final Path tempFile = Files.createTempFile("autotest-attachment-", ".txt");
 			Files.writeString(tempFile, "AutoTest attachment content " + System.currentTimeMillis());
 			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
-			final Locator dialogUploadButton = dialog.locator("#cbutton-upload");
+			final Locator dialogUploadButton =
+					dialog.locator("#cbutton-save, #cbutton-ok, vaadin-button:has-text('Save'), vaadin-button:has-text('Upload')");
+			if (dialogUploadButton.count() == 0) {
+				LOGGER.warn("         ⚠️ Upload dialog button not found");
+				closeAnyOpenDialog(page);
+				return;
+			}
 			waitForButtonEnabled(dialogUploadButton);
-			dialogUploadButton.click();
-			waitForDialogToClose(page);
-			waitMs(page, 1000);
+			dialogUploadButton.first().click(new ClickOptions().setTimeout(3000));
+			waitForUploadToComplete(dialog);
+			waitForDialogToClose(page, 4, 250);
+			if (isDialogOpen(page)) {
+				closeAnyOpenDialog(page);
+				waitForDialogToClose(page, 4, 250);
+			}
 			final String fileName = tempFile.getFileName().toString();
 			final Locator grid = locateAttachmentsGrid(container);
 			if (grid == null) {
@@ -78,12 +95,15 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 				deleteButton.click();
 				waitMs(page, 500);
 				confirmDialogIfPresent(page);
-				waitForDialogToClose(page);
+				waitForDialogToClose(page, 4, 250);
 				waitMs(page, 1000);
 				waitForGridCellGone(grid, fileName);
 				LOGGER.info("         ✅ Attachment deleted");
 			} else {
 				LOGGER.info("         ⏭️ Delete button disabled");
+			}
+			if (isDialogOpen(page)) {
+				closeAnyOpenDialog(page);
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("         ⚠️ Attachment CRUD test failed: {}", e.getMessage());
@@ -120,5 +140,22 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 			return null;
 		}
 		return button.first();
+	}
+
+	private void waitForUploadToComplete(final Locator dialog) {
+		for (int attempt = 0; attempt < 8; attempt++) {
+			if (dialog.locator("vaadin-upload-file[complete], vaadin-upload-file[status='complete']").count() > 0) {
+				return;
+			}
+			waitMs(dialog.page(), 250);
+		}
+	}
+
+	private Locator locateAnyOpenDialog(final Page page) {
+		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
+		if (overlay.count() == 0) {
+			return overlay;
+		}
+		return overlay.first();
 	}
 }

@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import com.microsoft.playwright.Locator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import automated_tests.tech.derbent.ui.automation.components.CStatusFieldTester;
 import automated_tests.tech.derbent.ui.automation.components.CUserComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import automated_tests.tech.derbent.ui.automation.signatures.CControlSignature;
+import automated_tests.tech.derbent.ui.automation.signatures.CSignatureFilter;
 import automated_tests.tech.derbent.ui.automation.signatures.IControlSignature;
 
 /** Intelligent adaptive page testing framework that automatically detects UI components and runs appropriate tests.
@@ -102,10 +104,10 @@ public class CAdaptivePageTest extends CBaseUITest {
 					"vaadin-tab:has-text('Comments'), vaadin-tab:has-text('Comment'), vaadin-accordion-panel:has-text('Comments')",
 					commentTester),
 			CControlSignature.forSelector("Project View Signature",
-					"#field-entityType, label:has-text('Project Type'), text=Project Management",
+					"#field-entityType, label:has-text('Project Type')",
 					projectTester),
 			CControlSignature.forSelector("User View Signature",
-					"#field-login, #field-email, label:has-text('Login'), text=User Management",
+					"#field-login, #field-email, label:has-text('Login')",
 					userTester),
 			CControlSignature.forSelector("Status Combo Signature", "#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']",
 					statusFieldTester),
@@ -167,8 +169,14 @@ public class CAdaptivePageTest extends CBaseUITest {
 	 * @param pageName Page name for logging */
 	private void testPageComponents(final String pageName) {
 		LOGGER.info("   🔍 Detecting control signatures on page: {}", pageName);
+		final CSignatureFilter signatureFilter = new CSignatureFilter();
+		final List<IControlSignature> activeSignatures = signatureFilter.filter(controlSignatures);
+		if (!signatureFilter.getIncludeKeywords().isEmpty() || !signatureFilter.getExcludeKeywords().isEmpty()) {
+			LOGGER.info("      🎯 Signature filter include={}, exclude={}", signatureFilter.getIncludeKeywords(),
+					signatureFilter.getExcludeKeywords());
+		}
 		final List<IControlSignature> detectedSignatures = new ArrayList<>();
-		for (final IControlSignature signature : controlSignatures) {
+		for (final IControlSignature signature : activeSignatures) {
 			try {
 				if (signature.isDetected(page)) {
 					detectedSignatures.add(signature);
@@ -191,13 +199,59 @@ public class CAdaptivePageTest extends CBaseUITest {
 			final IComponentTester tester = entry.getKey();
 			try {
 				LOGGER.info("      🧩 Running {} for signatures: {}", tester.getComponentName(), entry.getValue());
+				closeBlockingDialogs();
 				tester.test(page);
+				closeBlockingDialogs();
 				testersRun++;
 			} catch (final Exception e) {
 				LOGGER.error("      ❌ Error testing {}: {}", tester.getComponentName(), e.getMessage());
 			}
 		}
 		LOGGER.info("   ✅ Completed {} component tests", testersRun);
+	}
+
+	private void closeBlockingDialogs() {
+		final Locator overlays = page.locator("vaadin-dialog-overlay[opened]");
+		if (overlays.count() == 0) {
+			return;
+		}
+		for (int attempt = 0; attempt < 2; attempt++) {
+			for (int i = 0; i < overlays.count(); i++) {
+				final Locator overlay = overlays.nth(i);
+				if (clickFirstEnabled(overlay, "#cbutton-save, #cbutton-upload, #cbutton-ok, #cbutton-yes")) {
+					continue;
+				}
+				if (clickFirstEnabled(overlay, "#cbutton-cancel, #cbutton-close, [part='close-button']")) {
+					continue;
+				}
+				if (clickFirstEnabled(overlay, "vaadin-button:has-text('Save'), vaadin-button:has-text('OK'), vaadin-button:has-text('Done')")) {
+					continue;
+				}
+				if (clickFirstEnabled(overlay, "vaadin-button:has-text('Cancel'), vaadin-button:has-text('Close')")) {
+					continue;
+				}
+				page.keyboard().press("Escape");
+			}
+			wait_500();
+			if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
+				return;
+			}
+		}
+	}
+
+	private boolean clickFirstEnabled(final Locator scope, final String selector) {
+		final Locator button = scope.locator(selector);
+		if (button.count() == 0) {
+			return false;
+		}
+		for (int i = 0; i < button.count(); i++) {
+			final Locator candidate = button.nth(i);
+			if (!candidate.isDisabled()) {
+				candidate.click();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Test
@@ -227,36 +281,31 @@ public class CAdaptivePageTest extends CBaseUITest {
 			if (buttons.isEmpty()) {
 				throw new AssertionError("No navigation buttons found");
 			}
-			final ButtonInfo targetButton;
-			if (targetButtonId != null && !targetButtonId.isBlank()) {
-				targetButton = buttons.stream().filter(b -> targetButtonId.equals(b.id)).findFirst().orElse(null);
-				if (targetButton == null) {
-					throw new AssertionError("Target button ID not found: " + targetButtonId);
+			final List<ButtonInfo> targetButtons = resolveTargetButtons(buttons, targetButtonId);
+			LOGGER.info("🧪 Step 4: Testing page(s) via test support buttons...");
+			for (final ButtonInfo targetButton : targetButtons) {
+				LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+				LOGGER.info("🎯 Testing page: {}", targetButton.title);
+				try {
+					page.locator("#" + targetButton.id).first().click();
+					wait_2000();
+					final boolean hasExceptionDialog = page.locator("#custom-exception-dialog").count() > 0
+							|| page.locator("#custom-exception-details-dialog").count() > 0;
+					if (hasExceptionDialog) {
+						LOGGER.error("   ❌ Exception detected on page load");
+						takeScreenshot(String.format("%03d-exception-%s", screenshotCounter++, targetButton.id), true);
+						throw new AssertionError("Exception on page: " + targetButton.title);
+					}
+					testPageComponents(targetButton.title);
+					pagesVisited++;
+					LOGGER.info("   ✅ Page test complete");
+					navigateToTestAuxillaryPage();
+					wait_2000();
+				} catch (final Exception e) {
+					LOGGER.error("   ❌ Page test failed: {}", e.getMessage());
+					takeScreenshot(String.format("%03d-page-%s-failure", screenshotCounter++, targetButton.id), true);
+					throw new AssertionError("Failed testing page: " + targetButton.title, e);
 				}
-			} else {
-				targetButton = buttons.get(0);
-				LOGGER.info("🎯 No target button specified - using first button: {}", targetButton.title);
-			}
-			LOGGER.info("🧪 Step 4: Testing single page via test support button...");
-			LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-			LOGGER.info("🎯 Testing page: {}", targetButton.title);
-			try {
-				page.locator("#" + targetButton.id).first().click();
-				wait_2000();
-				final boolean hasExceptionDialog = page.locator("#custom-exception-dialog").count() > 0
-						|| page.locator("#custom-exception-details-dialog").count() > 0;
-				if (hasExceptionDialog) {
-					LOGGER.error("   ❌ Exception detected on page load");
-					takeScreenshot(String.format("%03d-exception-%s", screenshotCounter++, targetButton.id), true);
-					throw new AssertionError("Exception on page: " + targetButton.title);
-				}
-				testPageComponents(targetButton.title);
-				pagesVisited++;
-				LOGGER.info("   ✅ Page test complete");
-			} catch (final Exception e) {
-				LOGGER.error("   ❌ Page test failed: {}", e.getMessage());
-				takeScreenshot(String.format("%03d-page-%s-failure", screenshotCounter++, targetButton.id), true);
-				throw new AssertionError("Failed testing page: " + targetButton.title, e);
 			}
 			// Summary
 			LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -267,5 +316,57 @@ public class CAdaptivePageTest extends CBaseUITest {
 			LOGGER.error("❌ Test suite failed: {}", e.getMessage(), e);
 			throw new AssertionError("Adaptive page test failed", e);
 		}
+	}
+
+	private List<ButtonInfo> resolveTargetButtons(final List<ButtonInfo> buttons, final String targetButtonId) {
+		if (targetButtonId != null && !targetButtonId.isBlank()) {
+			final ButtonInfo targetButton = buttons.stream().filter(b -> targetButtonId.equals(b.id)).findFirst().orElse(null);
+			if (targetButton == null) {
+				throw new AssertionError("Target button ID not found: " + targetButtonId);
+			}
+			return List.of(targetButton);
+		}
+		final String titleFilter = System.getProperty("test.titleContains");
+		final String filterValue = (titleFilter == null || titleFilter.isBlank()) ? "user" : titleFilter.trim();
+		final List<ButtonInfo> filtered = new ArrayList<>();
+		for (final ButtonInfo button : buttons) {
+			if (button.title != null && button.title.toLowerCase().contains(filterValue.toLowerCase())) {
+				filtered.add(button);
+			}
+		}
+		if (filtered.isEmpty()) {
+			LOGGER.warn("⚠️ No buttons matched title filter '{}'; defaulting to first button", filterValue);
+			return List.of(buttons.get(0));
+		}
+		filtered.sort((a, b) -> {
+			final int scoreA = scoreTitleMatch(a.title, filterValue);
+			final int scoreB = scoreTitleMatch(b.title, filterValue);
+			if (scoreA != scoreB) {
+				return Integer.compare(scoreB, scoreA);
+			}
+			return a.title.compareToIgnoreCase(b.title);
+		});
+		final boolean runAllMatches = Boolean.getBoolean("test.runAllMatches");
+		if (runAllMatches) {
+			LOGGER.info("🎯 Using title filter '{}' -> {} button(s) matched (run all)", filterValue, filtered.size());
+			return filtered;
+		}
+		LOGGER.info("🎯 Using title filter '{}' -> best match: {}", filterValue, filtered.get(0).title);
+		return List.of(filtered.get(0));
+	}
+
+	private int scoreTitleMatch(final String title, final String filterValue) {
+		if (title == null) {
+			return 0;
+		}
+		final String normalized = title.trim().toLowerCase();
+		final String filter = filterValue.toLowerCase();
+		if (normalized.equals(filter) || normalized.equals(filter + "s")) {
+			return 3;
+		}
+		if (normalized.startsWith(filter)) {
+			return 2;
+		}
+		return 1;
 	}
 }

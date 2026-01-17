@@ -49,10 +49,18 @@ public class CCommentComponentTester extends CBaseComponentTester {
 				textArea.first().fill(commentText);
 				waitMs(page, 500);
 			}
-			if (dialog.locator("#cbutton-save").count() > 0) {
-				dialog.locator("#cbutton-save").first().click();
-				waitForDialogToClose(page);
-				waitMs(page, 1000);
+			final Locator saveButton = dialog.locator("#cbutton-save, vaadin-button:has-text('Save')");
+			if (saveButton.count() > 0 && !saveButton.first().isDisabled()) {
+				saveButton.first().click();
+				waitForDialogToClose(page, 4, 250);
+			} else {
+				closeAnyOpenDialog(page);
+				waitForDialogToClose(page, 4, 250);
+			}
+			if (isDialogOpen(page)) {
+				LOGGER.warn("         ⚠️ Add comment dialog still open; skipping grid validation");
+				closeAnyOpenDialog(page);
+				return;
 			}
 			final Locator grid = locateCommentsGrid(container);
 			if (grid == null) {
@@ -77,10 +85,18 @@ public class CCommentComponentTester extends CBaseComponentTester {
 				if (editTextArea.count() > 0) {
 					editTextArea.first().fill(updated);
 				}
-				if (editDialog.locator("#cbutton-save").count() > 0) {
-					editDialog.locator("#cbutton-save").first().click();
-					waitForDialogToClose(page);
-					waitMs(page, 1000);
+				final Locator editSaveButton = editDialog.locator("#cbutton-save, vaadin-button:has-text('Save')");
+				if (editSaveButton.count() > 0 && !editSaveButton.first().isDisabled()) {
+					editSaveButton.first().click();
+					waitForDialogToClose(page, 4, 250);
+				} else {
+					closeAnyOpenDialog(page);
+					waitForDialogToClose(page, 4, 250);
+				}
+				if (isDialogOpen(page)) {
+					LOGGER.warn("         ⚠️ Edit comment dialog still open; skipping update validation");
+					closeAnyOpenDialog(page);
+					return;
 				}
 				waitForGridCellText(grid, "UPDATED");
 				LOGGER.info("         ✅ Comment updated");

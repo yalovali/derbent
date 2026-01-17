@@ -118,6 +118,59 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		}
 	}
 
+	protected void waitForDialogToClose(final Page page, final int maxAttempts, final int delayMs) {
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			if (!isDialogOpen(page)) {
+				return;
+			}
+			waitMs(page, delayMs);
+		}
+	}
+
+	protected boolean isDialogOpen(final Page page) {
+		return page.locator("vaadin-dialog-overlay[opened]").count() > 0;
+	}
+
+	protected boolean closeAnyOpenDialog(final Page page) {
+		final Locator overlays = page.locator("vaadin-dialog-overlay[opened]");
+		if (overlays.count() == 0) {
+			return false;
+		}
+		for (int i = 0; i < overlays.count(); i++) {
+			final Locator overlay = overlays.nth(i);
+			if (clickFirstEnabled(overlay, "#cbutton-save, #cbutton-upload, #cbutton-ok, #cbutton-yes")) {
+				continue;
+			}
+			if (clickFirstEnabled(overlay, "#cbutton-cancel, #cbutton-close, [part='close-button']")) {
+				continue;
+			}
+			if (clickFirstEnabled(overlay, "vaadin-button:has-text('Save'), vaadin-button:has-text('OK'), vaadin-button:has-text('Done')")) {
+				continue;
+			}
+			if (clickFirstEnabled(overlay, "vaadin-button:has-text('Cancel'), vaadin-button:has-text('Close')")) {
+				continue;
+			}
+			page.keyboard().press("Escape");
+		}
+		return true;
+	}
+
+	private boolean clickFirstEnabled(final Locator scope, final String selector) {
+		final Locator button = scope.locator(selector);
+		if (button.count() == 0) {
+			return false;
+		}
+		for (int i = 0; i < button.count(); i++) {
+			final Locator candidate = button.nth(i);
+			if (!candidate.isDisabled()) {
+				candidate.click();
+				waitMs(scope.page(), 250);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	protected void waitForButtonEnabled(final Locator button) {
 		for (int attempt = 0; attempt < 10; attempt++) {
 			if (button.count() > 0 && !button.first().isDisabled()) {
@@ -256,6 +309,90 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		} catch (final Exception e) {
 			LOGGER.debug("Failed to select first combo box option: {}", e.getMessage());
 			return false;
+		}
+	}
+
+	protected void fillRequiredFields(final Page page, final String seed) {
+		fillRequiredInputs(page, "vaadin-text-field[required] input, vaadin-text-field[aria-required='true'] input", seed);
+		fillRequiredInputs(page, "vaadin-text-area[required] textarea, vaadin-text-area[aria-required='true'] textarea", seed);
+		fillRequiredInputs(page, "vaadin-password-field[required] input, vaadin-password-field[aria-required='true'] input", "Test12345!");
+		fillRequiredInputs(page, "input[required], textarea[required]", seed);
+		fillEmailFields(page, seed);
+		fillRequiredInputs(page, "vaadin-email-field[required] input, vaadin-email-field[aria-required='true'] input", seed + "@example.com");
+		fillRequiredComboBoxes(page);
+	}
+
+	private void fillEmailFields(final Page page, final String seed) {
+		try {
+			final String selector = "input[id*='email'], #field-email input, vaadin-text-field[id*='email'] input";
+			final Locator inputs = page.locator(selector);
+			for (int i = 0; i < inputs.count(); i++) {
+				final Locator input = inputs.nth(i);
+				if (!input.isVisible()) {
+					continue;
+				}
+				final String current = input.inputValue();
+				if (current != null && current.contains("@")) {
+					continue;
+				}
+				input.fill(seed + "@example.com");
+				waitMs(page, 150);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Failed to fill email fields: {}", e.getMessage());
+		}
+	}
+
+	private void fillRequiredInputs(final Page page, final String selector, final String value) {
+		try {
+			final Locator inputs = page.locator(selector);
+			for (int i = 0; i < inputs.count(); i++) {
+				final Locator input = inputs.nth(i);
+				if (!input.isVisible()) {
+					continue;
+				}
+				final String current = input.inputValue();
+				if (current != null && !current.isBlank()) {
+					continue;
+				}
+				input.fill(value);
+				waitMs(page, 150);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Failed to fill required inputs for selector {}: {}", selector, e.getMessage());
+		}
+	}
+
+	private void fillRequiredComboBoxes(final Page page) {
+		try {
+			final Locator comboBoxes = page.locator("vaadin-combo-box[required], vaadin-combo-box[aria-required='true']");
+			for (int i = 0; i < comboBoxes.count(); i++) {
+				final Locator comboBox = comboBoxes.nth(i);
+				if (!comboBox.isVisible()) {
+					continue;
+				}
+				final Object value = comboBox.evaluate("el => el.value ?? ''");
+				if (value != null && !value.toString().trim().isEmpty()) {
+					continue;
+				}
+				selectFirstComboBoxOption(comboBox);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Failed to fill required combo boxes: {}", e.getMessage());
+		}
+	}
+
+	private void selectFirstComboBoxOption(final Locator comboBox) {
+		try {
+			comboBox.click();
+			wait_500(comboBox.page());
+			final Locator items = comboBox.page().locator("vaadin-combo-box-item");
+			if (items.count() > 0) {
+				items.first().click();
+				wait_500(comboBox.page());
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Failed to select combo box option: {}", e.getMessage());
 		}
 	}
 
