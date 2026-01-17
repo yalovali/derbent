@@ -31,6 +31,7 @@ import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.invoices.invoiceitem.domain.CInvoiceItem;
 import tech.derbent.app.invoices.payment.domain.CPayment;
 import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
+import tech.derbent.app.milestones.milestone.domain.CMilestone;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.base.users.domain.CUser;
 
@@ -205,6 +206,36 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 			description = "Additional notes or instructions", hidden = false, maxLength = 2000
 	)
 	private String notes;
+
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "milestone_id", nullable = true)
+	@AMetaData (
+			displayName = "Related Milestone", required = false, readOnly = false,
+			description = "Project milestone this invoice is associated with (e.g., milestone acceptance payment)", hidden = false,
+			dataProviderBean = "CMilestoneService"
+	)
+	private CMilestone relatedMilestone;
+
+	@Column (name = "is_milestone_payment", nullable = true)
+	@AMetaData (
+			displayName = "Milestone Payment", required = false, readOnly = false,
+			description = "Indicates if this is a milestone acceptance payment", hidden = false
+	)
+	private Boolean isMilestonePayment = false;
+
+	@Column (name = "payment_plan_installments", nullable = true)
+	@AMetaData (
+			displayName = "Payment Plan Installments", required = false, readOnly = false,
+			description = "Total number of installments if this is part of a payment plan", hidden = false
+	)
+	private Integer paymentPlanInstallments;
+
+	@Column (name = "installment_number", nullable = true)
+	@AMetaData (
+			displayName = "Installment Number", required = false, readOnly = false,
+			description = "Current installment number (e.g., 1 of 4)", hidden = false
+	)
+	private Integer installmentNumber;
 
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "invoice")
 	@AMetaData (
@@ -511,6 +542,34 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 
 	public void setNotes(final String notes) {
 		this.notes = notes;
+		updateLastModified();
+	}
+
+	public CMilestone getRelatedMilestone() { return relatedMilestone; }
+
+	public void setRelatedMilestone(final CMilestone relatedMilestone) {
+		this.relatedMilestone = relatedMilestone;
+		updateLastModified();
+	}
+
+	public Boolean getIsMilestonePayment() { return isMilestonePayment; }
+
+	public void setIsMilestonePayment(final Boolean isMilestonePayment) {
+		this.isMilestonePayment = isMilestonePayment;
+		updateLastModified();
+	}
+
+	public Integer getPaymentPlanInstallments() { return paymentPlanInstallments; }
+
+	public void setPaymentPlanInstallments(final Integer paymentPlanInstallments) {
+		this.paymentPlanInstallments = paymentPlanInstallments;
+		updateLastModified();
+	}
+
+	public Integer getInstallmentNumber() { return installmentNumber; }
+
+	public void setInstallmentNumber(final Integer installmentNumber) {
+		this.installmentNumber = installmentNumber;
 		updateLastModified();
 	}
 
