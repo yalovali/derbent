@@ -36,6 +36,19 @@ public class CBudgetInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			
+			// Budget Amounts
+			detailSection.addScreenLine(CDetailLinesService.createSection("Budget Amounts"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currency"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "budgetAmount"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "alertThreshold"));
+			
+			// PMBOK Earned Value Management (EVM)
+			detailSection.addScreenLine(CDetailLinesService.createSection("Earned Value Management (PMBOK)"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "plannedValue"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "earnedValue"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
