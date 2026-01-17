@@ -63,4 +63,14 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	public String toString() {
 		return currencyCode != null ? currencyCode + " (" + getName() + ")" : super.toString();
 	}
+
+	@Override
+	public CCurrency createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		final CCurrency clone = super.createClone(options);
+
+		clone.currencyCode = this.currencyCode;
+		clone.currencySymbol = this.currencySymbol;
+
+		return clone;
+	}
 }

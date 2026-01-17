@@ -102,4 +102,24 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 			addKanbanColumn(column);
 		}
 	}
+
+	@Override
+	public CKanbanLine createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		final CKanbanLine clone = super.createClone(options);
+
+		if (options.isFullDeepClone() && this.kanbanColumns != null && !this.kanbanColumns.isEmpty()) {
+			clone.kanbanColumns = new java.util.LinkedHashSet<>();
+			for (final CKanbanColumn column : this.kanbanColumns) {
+				try {
+					final CKanbanColumn columnClone = column.createClone(options);
+					columnClone.setKanbanLine(clone);
+					clone.kanbanColumns.add(columnClone);
+				} catch (final CloneNotSupportedException e) {
+					throw new CloneNotSupportedException("Failed to clone kanban column: " + e.getMessage());
+				}
+			}
+		}
+
+		return clone;
+	}
 }

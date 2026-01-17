@@ -151,4 +151,51 @@ public class CTestScenario extends CEntityOfProject<CTestScenario> implements IH
 		this.testCases = testCases;
 		updateLastModified();
 	}
+
+	@Override
+	public CTestScenario createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		final CTestScenario clone = super.createClone(options);
+
+		clone.description = this.description;
+		clone.objective = this.objective;
+		clone.prerequisites = this.prerequisites;
+
+		if (options.isFullDeepClone() && this.testCases != null && !this.testCases.isEmpty()) {
+			clone.testCases = new HashSet<>();
+			for (final CTestCase testCase : this.testCases) {
+				try {
+					final CTestCase testCaseClone = testCase.createClone(options);
+					clone.testCases.add(testCaseClone);
+				} catch (final CloneNotSupportedException e) {
+					throw new CloneNotSupportedException("Failed to clone test case: " + e.getMessage());
+				}
+			}
+		}
+
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final CloneNotSupportedException e) {
+					throw new CloneNotSupportedException("Failed to clone attachment: " + e.getMessage());
+				}
+			}
+		}
+
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final CloneNotSupportedException e) {
+					throw new CloneNotSupportedException("Failed to clone comment: " + e.getMessage());
+				}
+			}
+		}
+
+		return clone;
+	}
 }
