@@ -27,7 +27,7 @@ class CBabDataInitializerTest {
 
 	@BeforeEach
 	void setUpAuthentication() {
-		final var auth = new UsernamePasswordAuthenticationToken("test", "test", java.util.List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+		final var auth = new UsernamePasswordAuthenticationToken("test", "test", List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 		SecurityContextHolder.getContext().setAuthentication(auth);
 	}
 

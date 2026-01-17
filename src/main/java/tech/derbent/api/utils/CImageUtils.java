@@ -1,11 +1,14 @@
 package tech.derbent.api.utils;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Base64;
 
 import javax.imageio.ImageIO;
 
@@ -39,7 +42,7 @@ public final class CImageUtils {
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.notEmpty(imageData, "Image data cannot be empty");
 		final String mimeType = detectImageMimeType(imageData);
-		final String base64Image = java.util.Base64.getEncoder().encodeToString(imageData);
+		final String base64Image = Base64.getEncoder().encodeToString(imageData);
 		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
 		LOGGER.debug("Created data URL with length: {}", dataUrl.length());
 		return dataUrl;
@@ -125,14 +128,14 @@ public final class CImageUtils {
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			// Generate a consistent background color based on the initials
-			final java.awt.Color backgroundColor = generateColorFromText(initials);
+			final Color backgroundColor = generateColorFromText(initials);
 			g2d.setColor(backgroundColor);
 			g2d.fillRect(0, 0, size, size);
 			// Draw the initials text in white
-			g2d.setColor(java.awt.Color.WHITE);
+			g2d.setColor(Color.WHITE);
 			// Calculate font size based on avatar size (roughly 40% of size for 2 chars)
 			final int fontSize = Math.max(8, (int) (size * 0.4));
-			final java.awt.Font font = new java.awt.Font("SansSerif", java.awt.Font.BOLD, fontSize);
+			final Font font = new Font("SansSerif", Font.BOLD, fontSize);
 			g2d.setFont(font);
 			// Calculate text position to center it
 			final java.awt.FontMetrics fm = g2d.getFontMetrics();

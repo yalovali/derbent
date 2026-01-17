@@ -2,6 +2,7 @@ package tech.derbent.api.interfaces;
 
 import java.time.LocalDate;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -42,7 +43,7 @@ import tech.derbent.base.users.domain.CUser;
  * @see ISprintItemPageService */
 public interface ISprintableItem {
 
-	Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ISprintableItem.class);
+	Logger LOGGER = LoggerFactory.getLogger(ISprintableItem.class);
 
 	/** Adds a backlog item (sprintable entity) to a sprint.
 	 * <p>
