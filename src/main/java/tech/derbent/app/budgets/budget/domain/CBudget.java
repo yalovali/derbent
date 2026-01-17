@@ -38,7 +38,6 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	public static final String ENTITY_TITLE_PLURAL = "Budgets";
 	public static final String ENTITY_TITLE_SINGULAR = "Budget";
 	public static final String VIEW_NAME = "Budget View";
-	
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
@@ -46,16 +45,14 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 			dataProviderBean = "CBudgetTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CBudgetType entityType;
-	
 	@Column (nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.0", message = "Budget amount must be positive")
 	@DecimalMax (value = "9999999999.99", message = "Budget amount cannot exceed 9999999999.99")
 	@AMetaData (
-			displayName = "Budget Amount", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Total budget amount allocated", hidden = false
+			displayName = "Budget Amount", required = false, readOnly = false, defaultValue = "0.00", description = "Total budget amount allocated",
+			hidden = false
 	)
 	private BigDecimal budgetAmount = BigDecimal.ZERO;
-	
 	@Column (nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
 	@DecimalMax (value = "9999999999.99", message = "Actual cost cannot exceed 9999999999.99")
@@ -64,7 +61,6 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 			description = "Actual cost spent (calculated from expenses)", hidden = false
 	)
 	private BigDecimal actualCost = BigDecimal.ZERO;
-	
 	@Column (nullable = true, precision = 8, scale = 2)
 	@DecimalMin (value = "0.0", message = "Alert threshold must be positive")
 	@DecimalMax (value = "100.0", message = "Alert threshold cannot exceed 100%")
@@ -73,37 +69,30 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 			description = "Alert when actual exceeds this percentage of budget", hidden = false
 	)
 	private BigDecimal alertThreshold = new BigDecimal("80.00");
-	
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "currency_id", nullable = true)
 	@AMetaData (
-			displayName = "Currency", required = false, readOnly = false,
-			description = "Currency for budget amounts", hidden = false,
+			displayName = "Currency", required = false, readOnly = false, description = "Currency for budget amounts", hidden = false,
 			dataProviderBean = "CCurrencyService"
 	)
 	private CCurrency currency;
-	
 	// PMI PMBOK - Earned Value Management (EVM) Fields
 	@Column (nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.0", message = "Planned Value must be positive")
 	@DecimalMax (value = "9999999999.99", message = "Planned Value cannot exceed 9999999999.99")
 	@AMetaData (
 			displayName = "Planned Value (PV)", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Budget Baseline - Authorized budget for scheduled work (PMBOK EVM)",
-			hidden = false, order = 70
+			description = "Budget Baseline - Authorized budget for scheduled work (PMBOK EVM)", hidden = false
 	)
 	private BigDecimal plannedValue = BigDecimal.ZERO;
-	
 	@Column (nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.0", message = "Earned Value must be positive")
 	@DecimalMax (value = "9999999999.99", message = "Earned Value cannot exceed 9999999999.99")
 	@AMetaData (
 			displayName = "Earned Value (EV)", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Value of work actually completed - Budgeted Cost of Work Performed (PMBOK EVM)",
-			hidden = false, order = 71
+			description = "Value of work actually completed - Budgeted Cost of Work Performed (PMBOK EVM)", hidden = false
 	)
 	private BigDecimal earnedValue = BigDecimal.ZERO;
-	
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "budget_id")
@@ -132,6 +121,29 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		initializeDefaults();
 	}
 
+	/** Calculate variance between budget and actual cost.
+	 * @return variance amount (positive means under budget, negative means over budget) */
+	public BigDecimal calculateVariance() {
+		if (budgetAmount == null || actualCost == null) {
+			return BigDecimal.ZERO;
+		}
+		return budgetAmount.subtract(actualCost);
+	}
+
+	/** Calculate variance percentage.
+	 * @return variance percentage (positive means under budget, negative means over budget) */
+	public BigDecimal calculateVariancePercentage() {
+		if (budgetAmount == null || budgetAmount.compareTo(BigDecimal.ZERO) == 0) {
+			return BigDecimal.ZERO;
+		}
+		final BigDecimal variance = calculateVariance();
+		return variance.divide(budgetAmount, 2, java.math.RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+	}
+
+	public BigDecimal getActualCost() { return actualCost; }
+
+	public BigDecimal getAlertThreshold() { return alertThreshold; }
+
 	@Override
 	public Set<CAttachment> getAttachments() {
 		if (attachments == null) {
@@ -139,6 +151,8 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		}
 		return attachments;
 	}
+
+	public BigDecimal getBudgetAmount() { return budgetAmount; }
 
 	@Override
 	public Set<CComment> getComments() {
@@ -148,8 +162,69 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		return comments;
 	}
 
+	/** Calculate Cost Performance Index (CPI = EV / AC) per PMBOK EVM. CPI > 1.0 means under budget, CPI < 1.0 means over budget.
+	 * @return Cost performance index (1.0 = on budget) */
+	public BigDecimal getCostPerformanceIndex() {
+		if (actualCost == null || actualCost.compareTo(BigDecimal.ZERO) == 0) {
+			return BigDecimal.ONE;
+		}
+		if (earnedValue == null) {
+			return BigDecimal.ZERO;
+		}
+		return earnedValue.divide(actualCost, 2, java.math.RoundingMode.HALF_UP);
+	}
+
+	/** Calculate Cost Variance (CV = EV - AC) per PMBOK EVM. Positive CV means under budget, negative means over budget.
+	 * @return Cost variance amount */
+	public BigDecimal getCostVariance() {
+		if (earnedValue == null || actualCost == null) {
+			return BigDecimal.ZERO;
+		}
+		return earnedValue.subtract(actualCost);
+	}
+
+	public CCurrency getCurrency() { return currency; }
+
+	public BigDecimal getEarnedValue() { return earnedValue; }
+
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
+
+	/** Get EVM performance status as human-readable string.
+	 * @return Performance status description */
+	@jakarta.persistence.Transient
+	public String getEVMPerformanceStatus() {
+		final BigDecimal cpi = getCostPerformanceIndex();
+		final BigDecimal spi = getSchedulePerformanceIndex();
+		final String costStatus =
+				cpi.compareTo(BigDecimal.ONE) > 0 ? "Under Budget" : cpi.compareTo(BigDecimal.ONE) < 0 ? "Over Budget" : "On Budget";
+		final String scheduleStatus =
+				spi.compareTo(BigDecimal.ONE) > 0 ? "Ahead of Schedule" : spi.compareTo(BigDecimal.ONE) < 0 ? "Behind Schedule" : "On Schedule";
+		return costStatus + ", " + scheduleStatus;
+	}
+
+	public BigDecimal getPlannedValue() { return plannedValue; }
+
+	/** Calculate Schedule Performance Index (SPI = EV / PV) per PMBOK EVM. SPI > 1.0 means ahead of schedule, SPI < 1.0 means behind schedule.
+	 * @return Schedule performance index (1.0 = on schedule) */
+	public BigDecimal getSchedulePerformanceIndex() {
+		if (plannedValue == null || plannedValue.compareTo(BigDecimal.ZERO) == 0) {
+			return BigDecimal.ONE;
+		}
+		if (earnedValue == null) {
+			return BigDecimal.ZERO;
+		}
+		return earnedValue.divide(plannedValue, 2, java.math.RoundingMode.HALF_UP);
+	}
+
+	/** Calculate Schedule Variance (SV = EV - PV) per PMBOK EVM. Positive SV means ahead of schedule, negative means behind schedule.
+	 * @return Schedule variance amount */
+	public BigDecimal getScheduleVariance() {
+		if (earnedValue == null || plannedValue == null) {
+			return BigDecimal.ZERO;
+		}
+		return earnedValue.subtract(plannedValue);
+	}
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
@@ -162,14 +237,46 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		super.initializeDefaults();
 	}
 
-	@Override
-	public void setAttachments(final Set<CAttachment> attachments) {
-		this.attachments = attachments;
+	/** Check if actual cost exceeds alert threshold.
+	 * @return true if alert threshold is exceeded */
+	public boolean isAlertThresholdExceeded() {
+		if (budgetAmount == null || budgetAmount.compareTo(BigDecimal.ZERO) == 0 || actualCost == null || alertThreshold == null) {
+			return false;
+		}
+		final BigDecimal threshold = budgetAmount.multiply(alertThreshold).divide(new BigDecimal("100"));
+		return actualCost.compareTo(threshold) > 0;
+	}
+	// PMI PMBOK - Earned Value Management (EVM) Methods
+
+	public void setActualCost(final BigDecimal actualCost) {
+		this.actualCost = actualCost;
+		updateLastModified();
+	}
+
+	public void setAlertThreshold(final BigDecimal alertThreshold) {
+		this.alertThreshold = alertThreshold;
+		updateLastModified();
 	}
 
 	@Override
-	public void setComments(final Set<CComment> comments) {
-		this.comments = comments;
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
+	public void setBudgetAmount(final BigDecimal budgetAmount) {
+		this.budgetAmount = budgetAmount;
+		updateLastModified();
+	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
+
+	public void setCurrency(final CCurrency currency) {
+		this.currency = currency;
+		updateLastModified();
+	}
+
+	public void setEarnedValue(final BigDecimal earnedValue) {
+		this.earnedValue = earnedValue;
+		updateLastModified();
 	}
 
 	@Override
@@ -179,149 +286,14 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		Check.notNull(getProject(), "Project must be set before assigning budget type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning budget type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning budget type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match budget project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match budget project company id " + getProject().getCompany().getId());
 		entityType = (CBudgetType) typeEntity;
 		updateLastModified();
 	}
-	
-	public BigDecimal getBudgetAmount() { return budgetAmount; }
-	
-	public void setBudgetAmount(final BigDecimal budgetAmount) {
-		this.budgetAmount = budgetAmount;
-		updateLastModified();
-	}
-	
-	public BigDecimal getActualCost() { return actualCost; }
-	
-	public void setActualCost(final BigDecimal actualCost) {
-		this.actualCost = actualCost;
-		updateLastModified();
-	}
-	
-	public BigDecimal getAlertThreshold() { return alertThreshold; }
-	
-	public void setAlertThreshold(final BigDecimal alertThreshold) {
-		this.alertThreshold = alertThreshold;
-		updateLastModified();
-	}
-	
-	public CCurrency getCurrency() { return currency; }
-	
-	public void setCurrency(final CCurrency currency) {
-		this.currency = currency;
-		updateLastModified();
-	}
-	
-	/** Calculate variance between budget and actual cost.
-	 * @return variance amount (positive means under budget, negative means over budget) */
-	public BigDecimal calculateVariance() {
-		if (budgetAmount == null || actualCost == null) {
-			return BigDecimal.ZERO;
-		}
-		return budgetAmount.subtract(actualCost);
-	}
-	
-	/** Calculate variance percentage.
-	 * @return variance percentage (positive means under budget, negative means over budget) */
-	public BigDecimal calculateVariancePercentage() {
-		if (budgetAmount == null || budgetAmount.compareTo(BigDecimal.ZERO) == 0) {
-			return BigDecimal.ZERO;
-		}
-		BigDecimal variance = calculateVariance();
-		return variance.divide(budgetAmount, 2, java.math.RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
-	}
-	
-	/** Check if actual cost exceeds alert threshold.
-	 * @return true if alert threshold is exceeded */
-	public boolean isAlertThresholdExceeded() {
-		if (budgetAmount == null || budgetAmount.compareTo(BigDecimal.ZERO) == 0 || 
-			actualCost == null || alertThreshold == null) {
-			return false;
-		}
-		BigDecimal threshold = budgetAmount.multiply(alertThreshold).divide(new BigDecimal("100"));
-		return actualCost.compareTo(threshold) > 0;
-	}
-	
-	// PMI PMBOK - Earned Value Management (EVM) Methods
-	
-	public BigDecimal getPlannedValue() {
-		return plannedValue;
-	}
-	
+
 	public void setPlannedValue(final BigDecimal plannedValue) {
 		this.plannedValue = plannedValue;
 		updateLastModified();
-	}
-	
-	public BigDecimal getEarnedValue() {
-		return earnedValue;
-	}
-	
-	public void setEarnedValue(final BigDecimal earnedValue) {
-		this.earnedValue = earnedValue;
-		updateLastModified();
-	}
-	
-	/** Calculate Cost Variance (CV = EV - AC) per PMBOK EVM.
-	 * Positive CV means under budget, negative means over budget.
-	 * @return Cost variance amount */
-	public BigDecimal getCostVariance() {
-		if (earnedValue == null || actualCost == null) {
-			return BigDecimal.ZERO;
-		}
-		return earnedValue.subtract(actualCost);
-	}
-	
-	/** Calculate Schedule Variance (SV = EV - PV) per PMBOK EVM.
-	 * Positive SV means ahead of schedule, negative means behind schedule.
-	 * @return Schedule variance amount */
-	public BigDecimal getScheduleVariance() {
-		if (earnedValue == null || plannedValue == null) {
-			return BigDecimal.ZERO;
-		}
-		return earnedValue.subtract(plannedValue);
-	}
-	
-	/** Calculate Cost Performance Index (CPI = EV / AC) per PMBOK EVM.
-	 * CPI > 1.0 means under budget, CPI < 1.0 means over budget.
-	 * @return Cost performance index (1.0 = on budget) */
-	public BigDecimal getCostPerformanceIndex() {
-		if (actualCost == null || actualCost.compareTo(BigDecimal.ZERO) == 0) {
-			return BigDecimal.ONE;
-		}
-		if (earnedValue == null) {
-			return BigDecimal.ZERO;
-		}
-		return earnedValue.divide(actualCost, 2, java.math.RoundingMode.HALF_UP);
-	}
-	
-	/** Calculate Schedule Performance Index (SPI = EV / PV) per PMBOK EVM.
-	 * SPI > 1.0 means ahead of schedule, SPI < 1.0 means behind schedule.
-	 * @return Schedule performance index (1.0 = on schedule) */
-	public BigDecimal getSchedulePerformanceIndex() {
-		if (plannedValue == null || plannedValue.compareTo(BigDecimal.ZERO) == 0) {
-			return BigDecimal.ONE;
-		}
-		if (earnedValue == null) {
-			return BigDecimal.ZERO;
-		}
-		return earnedValue.divide(plannedValue, 2, java.math.RoundingMode.HALF_UP);
-	}
-	
-	/** Get EVM performance status as human-readable string.
-	 * @return Performance status description */
-	@jakarta.persistence.Transient
-	public String getEVMPerformanceStatus() {
-		final BigDecimal cpi = getCostPerformanceIndex();
-		final BigDecimal spi = getSchedulePerformanceIndex();
-		
-		final String costStatus = cpi.compareTo(BigDecimal.ONE) > 0 ? "Under Budget" :
-		                         cpi.compareTo(BigDecimal.ONE) < 0 ? "Over Budget" : "On Budget";
-		final String scheduleStatus = spi.compareTo(BigDecimal.ONE) > 0 ? "Ahead of Schedule" :
-		                              spi.compareTo(BigDecimal.ONE) < 0 ? "Behind Schedule" : "On Schedule";
-		
-		return costStatus + ", " + scheduleStatus;
 	}
 }

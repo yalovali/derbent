@@ -46,11 +46,13 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-
 	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "risk_id")
-	@AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this risk", hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent")
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "risk_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this risk", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
@@ -77,8 +79,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Mitigation Strategy", required = false, readOnly = false,
-			description = "Strategy to mitigate or reduce the risk - ISO 31000", hidden = false,
-			maxLength = 2000
+			description = "Strategy to mitigate or reduce the risk - ISO 31000", hidden = false, maxLength = 2000
 	)
 	private String mitigation;
 	@Column (nullable = true, length = 2000)
@@ -116,41 +117,34 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			hidden = false, useRadioButtons = false
 	)
 	private ERiskSeverity riskSeverity;
-	
 	// ISO 31000:2018 Risk Management - Quantitative Risk Assessment
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Probability (1-10)", required = false, readOnly = false,
-			description = "Quantitative likelihood of risk occurrence (1=Very Low, 10=Very High) - ISO 31000",
-			hidden = false, order = 50
+			description = "Quantitative likelihood of risk occurrence (1=Very Low, 10=Very High) - ISO 31000", hidden = false
 	)
 	private Integer probability;
-	
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Impact Score (1-10)", required = false, readOnly = false,
-			description = "Quantitative magnitude of consequences if risk occurs (1=Minimal, 10=Catastrophic) - ISO 31000",
-			hidden = false, order = 51
+			description = "Quantitative magnitude of consequences if risk occurs (1=Minimal, 10=Catastrophic) - ISO 31000", hidden = false
 	)
 	private Integer impactScore;
-	
 	// ISO 31000:2018 - Risk Treatment Strategy
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_response_strategy", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Response Strategy", required = false, readOnly = false,
-			description = "Risk treatment approach per ISO 31000 (Avoid, Transfer, Mitigate, Accept, Escalate)",
-			hidden = false, useRadioButtons = false, order = 52
+			description = "Risk treatment approach per ISO 31000 (Avoid, Transfer, Mitigate, Accept, Escalate)", hidden = false,
+			useRadioButtons = false
 	)
 	private ERiskResponseStrategy riskResponseStrategy;
-	
 	// ISO 31000:2018 - Residual Risk Assessment
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Residual Risk", required = false, readOnly = false,
-			description = "Remaining risk after mitigation measures are applied - ISO 31000",
-			hidden = false, maxLength = 2000, order = 53
+			description = "Remaining risk after mitigation measures are applied - ISO 31000", hidden = false, maxLength = 2000
 	)
 	private String residualRisk;
 
@@ -174,6 +168,8 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		return attachments;
 	}
 
+	public String getCause() { return cause; }
+
 	// IHasComments interface methods
 	@Override
 	public Set<CComment> getComments() {
@@ -183,22 +179,58 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		return comments;
 	}
 
-	public String getCause() { return cause; }
-
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	public String getImpact() { return impact; }
 
+	public Integer getImpactScore() { return impactScore; }
+
 	public String getMitigation() { return mitigation; }
 
 	public String getPlan() { return plan; }
+
+	public Integer getProbability() { return probability; }
+
+	public String getResidualRisk() { return residualRisk; }
 
 	public String getResult() { return result; }
 
 	public ERiskCriticality getRiskCriticality() { return riskCriticality; }
 
 	public ERiskLikelihood getRiskLikelihood() { return riskLikelihood; }
+
+	/** Get Risk Matrix Category based on calculated risk score (ISO 31000 risk matrix).
+	 * @return Risk category: Critical (75+), High (50-74), Medium (25-49), Low (1-24), or "Not Assessed" */
+	@jakarta.persistence.Transient
+	public String getRiskMatrixCategory() {
+		final Integer score = getRiskScore();
+		if (score == null) {
+			return "Not Assessed";
+		}
+		if (score >= 75) {
+			return "Critical";
+		}
+		if (score >= 50) {
+			return "High";
+		}
+		if (score >= 25) {
+			return "Medium";
+		}
+		return "Low";
+	}
+
+	public ERiskResponseStrategy getRiskResponseStrategy() { return riskResponseStrategy; }
+
+	/** Calculate Risk Score as Probability × Impact (ISO 31000 quantitative assessment).
+	 * @return Risk score value from 1-100, or null if probability or impact not set */
+	@jakarta.persistence.Transient
+	public Integer getRiskScore() {
+		if (probability != null && impactScore != null) {
+			return probability * impactScore;
+		}
+		return null;
+	}
 
 	public ERiskSeverity getRiskSeverity() { return riskSeverity; }
 
@@ -247,15 +279,13 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	@Override
-	public void setComments(final Set<CComment> comments) {
-		this.comments = comments;
-	}
-
 	public void setCause(final String cause) {
 		this.cause = cause;
 		updateLastModified();
 	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
@@ -274,6 +304,12 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		this.impact = impact;
 		updateLastModified();
 	}
+	// ISO 31000:2018 - Quantitative Risk Assessment Getters/Setters
+
+	public void setImpactScore(final Integer impactScore) {
+		this.impactScore = impactScore;
+		updateLastModified();
+	}
 
 	public void setMitigation(final String mitigation) {
 		this.mitigation = mitigation;
@@ -282,6 +318,16 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	public void setPlan(final String plan) {
 		this.plan = plan;
+		updateLastModified();
+	}
+
+	public void setProbability(final Integer probability) {
+		this.probability = probability;
+		updateLastModified();
+	}
+
+	public void setResidualRisk(final String residualRisk) {
+		this.residualRisk = residualRisk;
 		updateLastModified();
 	}
 
@@ -300,76 +346,13 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		updateLastModified();
 	}
 
-	public void setRiskSeverity(final ERiskSeverity riskSeverity) {
-		this.riskSeverity = riskSeverity;
-		updateLastModified();
-	}
-	
-	// ISO 31000:2018 - Quantitative Risk Assessment Getters/Setters
-	
-	public Integer getProbability() {
-		return probability;
-	}
-	
-	public void setProbability(final Integer probability) {
-		this.probability = probability;
-		updateLastModified();
-	}
-	
-	public Integer getImpactScore() {
-		return impactScore;
-	}
-	
-	public void setImpactScore(final Integer impactScore) {
-		this.impactScore = impactScore;
-		updateLastModified();
-	}
-	
-	/** Calculate Risk Score as Probability × Impact (ISO 31000 quantitative assessment).
-	 * @return Risk score value from 1-100, or null if probability or impact not set */
-	@jakarta.persistence.Transient
-	public Integer getRiskScore() {
-		if (probability != null && impactScore != null) {
-			return probability * impactScore;
-		}
-		return null;
-	}
-	
-	/** Get Risk Matrix Category based on calculated risk score (ISO 31000 risk matrix).
-	 * @return Risk category: Critical (75+), High (50-74), Medium (25-49), Low (1-24), or "Not Assessed" */
-	@jakarta.persistence.Transient
-	public String getRiskMatrixCategory() {
-		final Integer score = getRiskScore();
-		if (score == null) {
-			return "Not Assessed";
-		}
-		if (score >= 75) {
-			return "Critical";
-		}
-		if (score >= 50) {
-			return "High";
-		}
-		if (score >= 25) {
-			return "Medium";
-		}
-		return "Low";
-	}
-	
-	public ERiskResponseStrategy getRiskResponseStrategy() {
-		return riskResponseStrategy;
-	}
-	
 	public void setRiskResponseStrategy(final ERiskResponseStrategy riskResponseStrategy) {
 		this.riskResponseStrategy = riskResponseStrategy;
 		updateLastModified();
 	}
-	
-	public String getResidualRisk() {
-		return residualRisk;
-	}
-	
-	public void setResidualRisk(final String residualRisk) {
-		this.residualRisk = residualRisk;
+
+	public void setRiskSeverity(final ERiskSeverity riskSeverity) {
+		this.riskSeverity = riskSeverity;
 		updateLastModified();
 	}
 }

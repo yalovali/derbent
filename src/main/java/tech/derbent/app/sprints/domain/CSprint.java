@@ -43,7 +43,8 @@ import tech.derbent.app.meetings.domain.CMeeting;
 @Entity
 @Table (name = "csprint")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_id"))
-public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasIcon, IHasAttachments, IHasComments {
+public class CSprint extends CProjectItem<CSprint>
+		implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasIcon, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - time-boxed work
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
@@ -141,43 +142,34 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint", hidden = false
 	)
 	private LocalDate startDate;
-	
 	// Scrum Guide 2020 - Core Sprint Artifacts
 	@Column (nullable = true, length = 500)
 	@Size (max = 500)
 	@AMetaData (
 			displayName = "Sprint Goal", required = false, readOnly = false,
-			description = "The single objective for the Sprint - Scrum Guide 2020 core artifact",
-			hidden = false, maxLength = 500, order = 60
+			description = "The single objective for the Sprint - Scrum Guide 2020 core artifact", hidden = false, maxLength = 500
 	)
 	private String sprintGoal;
-	
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Definition of Done", required = false, readOnly = false,
-			description = "Shared understanding of what it means for work to be complete - Scrum Guide 2020",
-			hidden = false, maxLength = 2000, order = 61
+			description = "Shared understanding of what it means for work to be complete - Scrum Guide 2020", hidden = false, maxLength = 2000
 	)
 	private String definitionOfDone;
-	
 	@Column (nullable = true)
 	@AMetaData (
-			displayName = "Velocity", required = false, readOnly = true,
-			description = "Story points completed in this sprint - Agile metric",
-			hidden = false, order = 62
+			displayName = "Velocity", required = false, readOnly = true, description = "Story points completed in this sprint - Agile metric",
+			hidden = false
 	)
 	private Integer velocity;
-	
 	@Column (nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
 			displayName = "Retrospective Notes", required = false, readOnly = false,
-			description = "What went well, what needs improvement, action items - Scrum Guide 2020",
-			hidden = false, maxLength = 4000, order = 63
+			description = "What went well, what needs improvement, action items - Scrum Guide 2020", hidden = false, maxLength = 4000
 	)
 	private String retrospectiveNotes;
-	
 	// Calculated field for total story points - populated automatically after entity load via @PostLoad
 	// Service callback: CSprintService.getTotalStoryPoints(CSprint)
 	@Transient
@@ -241,6 +233,23 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		}
 	}
 
+	/** Calculate velocity from completed sprint items (Scrum Guide 2020 metric). Velocity is the sum of story points for items that have reached a
+	 * final status. This method should be called at sprint completion to record historical velocity. */
+	public void calculateVelocity() {
+		if (sprintItems == null) {
+			velocity = 0;
+			return;
+		}
+		velocity = sprintItems.stream().filter(item -> item.getParentItem() != null).filter(item -> {
+			final ISprintableItem parent = item.getParentItem();
+			if (parent.getStatus() != null && parent.getStatus().getFinalStatus()) {
+				return true;
+			}
+			return false;
+		}).map(CSprintItem::getStoryPoint).filter(sp -> sp != null).mapToInt(Long::intValue).sum();
+		updateLastModified();
+	}
+
 	/** Gets the activities in this sprint.
 	 * @return list of activities */
 	public List<CActivity> getActivities() {
@@ -264,6 +273,9 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		return attachments;
 	}
 
+	@Override
+	public String getColor() { return color; }
+
 	// IHasComments interface methods
 	@Override
 	public Set<CComment> getComments() {
@@ -273,10 +285,9 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		return comments;
 	}
 
-	@Override
-	public String getColor() { return color; }
-
 	public CComponentWidgetEntity<CSprint> getComponentWidget() { return componentWidget; }
+
+	public String getDefinitionOfDone() { return definitionOfDone; }
 
 	@Override
 	public String getDescription() { return description; }
@@ -342,6 +353,10 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		return (int) (completedCount * 100 / activities.size());
 	}
 
+	public String getRetrospectiveNotes() { return retrospectiveNotes; }
+
+	public String getSprintGoal() { return sprintGoal; }
+
 	/** Gets the sprint items collection.
 	 * @return list of sprint items */
 	public List<CSprintItem> getSprintItems() { return sprintItems != null ? sprintItems : new ArrayList<>(); }
@@ -364,6 +379,8 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		}
 		return total;
 	}
+
+	public Integer getVelocity() { return velocity; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() { return getEntityType().getWorkflow(); }
@@ -515,11 +532,16 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-
-	@Override
 	public void setColor(final String color) {
 		this.color = color;
+		updateLastModified();
+	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
+
+	public void setDefinitionOfDone(final String definitionOfDone) {
+		this.definitionOfDone = definitionOfDone;
 		updateLastModified();
 	}
 
@@ -547,6 +569,7 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		entityType = (CSprintType) typeEntity;
 		updateLastModified();
 	}
+	// Scrum Guide 2020 - Getters/Setters
 
 	public void setItemCount(final Integer itemCount) { this.itemCount = itemCount; }
 	// IHasStatusAndWorkflow implementation
@@ -591,6 +614,16 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
+	public void setRetrospectiveNotes(final String retrospectiveNotes) {
+		this.retrospectiveNotes = retrospectiveNotes;
+		updateLastModified();
+	}
+
+	public void setSprintGoal(final String sprintGoal) {
+		this.sprintGoal = sprintGoal;
+		updateLastModified();
+	}
+
 	/** Sets the sprint items collection.
 	 * @param sprintItems the sprint items to set */
 	public void setSprintItems(final List<CSprintItem> sprintItems) {
@@ -605,66 +638,9 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	public void setTotalStoryPoints(final Long totalStoryPoints) {
 		this.totalStoryPoints = totalStoryPoints;
 	}
-	
-	// Scrum Guide 2020 - Getters/Setters
-	
-	public String getSprintGoal() {
-		return sprintGoal;
-	}
-	
-	public void setSprintGoal(final String sprintGoal) {
-		this.sprintGoal = sprintGoal;
-		updateLastModified();
-	}
-	
-	public String getDefinitionOfDone() {
-		return definitionOfDone;
-	}
-	
-	public void setDefinitionOfDone(final String definitionOfDone) {
-		this.definitionOfDone = definitionOfDone;
-		updateLastModified();
-	}
-	
-	public Integer getVelocity() {
-		return velocity;
-	}
-	
+
 	public void setVelocity(final Integer velocity) {
 		this.velocity = velocity;
-		updateLastModified();
-	}
-	
-	/** Calculate velocity from completed sprint items (Scrum Guide 2020 metric).
-	 * Velocity is the sum of story points for items that have reached a final status.
-	 * This method should be called at sprint completion to record historical velocity. */
-	public void calculateVelocity() {
-		if (sprintItems == null) {
-			velocity = 0;
-			return;
-		}
-		velocity = sprintItems.stream()
-				.filter(item -> item.getParentItem() != null)
-				.filter(item -> {
-					final ISprintableItem parent = item.getParentItem();
-					if (parent.getStatus() != null && parent.getStatus().getFinalStatus()) {
-						return true;
-					}
-					return false;
-				})
-				.map(CSprintItem::getStoryPoint)
-				.filter(sp -> sp != null)
-				.mapToInt(Long::intValue)
-				.sum();
-		updateLastModified();
-	}
-	
-	public String getRetrospectiveNotes() {
-		return retrospectiveNotes;
-	}
-	
-	public void setRetrospectiveNotes(final String retrospectiveNotes) {
-		this.retrospectiveNotes = retrospectiveNotes;
 		updateLastModified();
 	}
 }

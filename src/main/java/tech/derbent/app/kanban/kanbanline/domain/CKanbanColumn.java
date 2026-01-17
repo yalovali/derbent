@@ -65,30 +65,25 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 			displayName = "Kanban Line", required = true, readOnly = true, description = "Parent Kanban line that owns this column", hidden = true
 	)
 	private CKanbanLine kanbanLine;
-	
 	// Kanban Method (David J. Anderson, 2010) - WIP Limits & Flow Management
 	@Column (name = "wip_limit", nullable = true)
 	@AMetaData (
 			displayName = "WIP Limit", required = false, readOnly = false,
-			description = "Work In Progress limit - maximum items allowed in this column (Kanban Method)",
-			hidden = false, order = 70
+			description = "Work In Progress limit - maximum items allowed in this column (Kanban Method)", hidden = false
 	)
 	private Integer wipLimit;
-	
 	@Column (name = "wip_limit_enabled", nullable = false)
 	@AMetaData (
 			displayName = "Enforce WIP Limit", required = false, readOnly = false, defaultValue = "false",
-			description = "Block adding items when WIP limit is reached (Kanban Method explicit policy)",
-			hidden = false, order = 71
+			description = "Block adding items when WIP limit is reached (Kanban Method explicit policy)", hidden = false
 	)
 	private Boolean wipLimitEnabled = false;
-	
 	@jakarta.persistence.Enumerated (jakarta.persistence.EnumType.STRING)
 	@Column (name = "service_class", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Class of Service", required = false, readOnly = false,
-			description = "Priority policy for items in this column - Kanban Method (Expedite, Fixed Date, Standard, Intangible)",
-			hidden = false, useRadioButtons = false, order = 72
+			description = "Priority policy for items in this column - Kanban Method (Expedite, Fixed Date, Standard, Intangible)", hidden = false,
+			useRadioButtons = false
 	)
 	private EServiceClass serviceClass;
 
@@ -109,6 +104,16 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	@Override
 	public String getColor() { return color; }
 
+	/** Get current Work In Progress count for this column (Kanban Method metric). This should be implemented by counting items with statuses in this
+	 * column.
+	 * @return Current number of items in this column, or null if not calculated */
+	@jakarta.persistence.Transient
+	public Integer getCurrentWIP() {
+		// This would typically be calculated by the service layer
+		// by querying items that have statuses in this column's includedStatuses list
+		return null; // Placeholder - implement in CKanbanColumnService
+	}
+
 	/** Returns true when this column is the fallback/default bucket. */
 	public boolean getDefaultColumn() { return defaultColumn; }
 
@@ -121,6 +126,35 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 
 	/** Returns the owning kanban line. */
 	public CKanbanLine getKanbanLine() { return kanbanLine; }
+
+	public EServiceClass getServiceClass() { return serviceClass; }
+
+	/** Get WIP limit status display string.
+	 * @return Display string like "3/5" (current/limit) or "5" (no limit) */
+	@jakarta.persistence.Transient
+	public String getWIPDisplay() {
+		final Integer current = getCurrentWIP();
+		if (wipLimit != null && getWipLimitEnabled()) {
+			return (current != null ? current : 0) + "/" + wipLimit;
+		}
+		return current != null ? current.toString() : "0";
+	}
+
+	public Integer getWipLimit() { return wipLimit; }
+
+	public Boolean getWipLimitEnabled() { return wipLimitEnabled != null ? wipLimitEnabled : false; }
+	// Kanban Method (David J. Anderson) - Getters/Setters
+
+	/** Check if WIP limit is exceeded (Kanban Method explicit limit policy).
+	 * @return true if WIP limit is enabled and current WIP meets or exceeds the limit */
+	@jakarta.persistence.Transient
+	public boolean isWIPLimitExceeded() {
+		if (!getWipLimitEnabled() || wipLimit == null) {
+			return false;
+		}
+		final Integer currentWIP = getCurrentWIP();
+		return currentWIP != null && currentWIP >= wipLimit;
+	}
 
 	/** Sets the background color, defaulting when blank. */
 	@Override
@@ -149,62 +183,10 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 		}
 		this.kanbanLine = kanbanLine;
 	}
-	
-	// Kanban Method (David J. Anderson) - Getters/Setters
-	
-	public Integer getWipLimit() {
-		return wipLimit;
-	}
-	
-	public void setWipLimit(final Integer wipLimit) {
-		this.wipLimit = wipLimit;
-	}
-	
-	public Boolean getWipLimitEnabled() {
-		return wipLimitEnabled != null ? wipLimitEnabled : false;
-	}
-	
-	public void setWipLimitEnabled(final Boolean wipLimitEnabled) {
-		this.wipLimitEnabled = wipLimitEnabled;
-	}
-	
-	public EServiceClass getServiceClass() {
-		return serviceClass;
-	}
-	
-	public void setServiceClass(final EServiceClass serviceClass) {
-		this.serviceClass = serviceClass;
-	}
-	
-	/** Get current Work In Progress count for this column (Kanban Method metric).
-	 * This should be implemented by counting items with statuses in this column.
-	 * @return Current number of items in this column, or null if not calculated */
-	@jakarta.persistence.Transient
-	public Integer getCurrentWIP() {
-		// This would typically be calculated by the service layer
-		// by querying items that have statuses in this column's includedStatuses list
-		return null; // Placeholder - implement in CKanbanColumnService
-	}
-	
-	/** Check if WIP limit is exceeded (Kanban Method explicit limit policy).
-	 * @return true if WIP limit is enabled and current WIP meets or exceeds the limit */
-	@jakarta.persistence.Transient
-	public boolean isWIPLimitExceeded() {
-		if (!getWipLimitEnabled() || wipLimit == null) {
-			return false;
-		}
-		final Integer currentWIP = getCurrentWIP();
-		return currentWIP != null && currentWIP >= wipLimit;
-	}
-	
-	/** Get WIP limit status display string.
-	 * @return Display string like "3/5" (current/limit) or "5" (no limit) */
-	@jakarta.persistence.Transient
-	public String getWIPDisplay() {
-		final Integer current = getCurrentWIP();
-		if (wipLimit != null && getWipLimitEnabled()) {
-			return (current != null ? current : 0) + "/" + wipLimit;
-		}
-		return current != null ? current.toString() : "0";
-	}
+
+	public void setServiceClass(final EServiceClass serviceClass) { this.serviceClass = serviceClass; }
+
+	public void setWipLimit(final Integer wipLimit) { this.wipLimit = wipLimit; }
+
+	public void setWipLimitEnabled(final Boolean wipLimitEnabled) { this.wipLimitEnabled = wipLimitEnabled; }
 }

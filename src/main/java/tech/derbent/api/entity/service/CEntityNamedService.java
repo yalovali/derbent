@@ -89,7 +89,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Transactional
 	public EntityClass newEntity(final String name) throws Exception {
 		try {
-			LOGGER.debug("Creating new entity instance of {} with name: {}", getEntityClass().getName(), name);
+			// LOGGER.debug("Creating new entity instance of {} with name: {}", getEntityClass().getName(), name);
 			if ("fail".equals(name)) {
 				throw new RuntimeException("This is for testing the error handler");
 			}

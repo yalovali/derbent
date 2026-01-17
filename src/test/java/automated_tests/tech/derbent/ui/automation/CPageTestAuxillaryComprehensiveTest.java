@@ -1169,7 +1169,9 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				LOGGER.warn("⚠️  Button has no route: {}", button.title);
 				return;
 			}
-			final String targetUrl = "http://localhost:" + port + "/" + button.route;
+			// Ensure route starts with "/" to avoid double slashes
+			final String normalizedRoute = button.route.startsWith("/") ? button.route : "/" + button.route;
+			final String targetUrl = "http://localhost:" + port + normalizedRoute;
 			page.navigate(targetUrl);
 			try {
 				wait_1000(); // Wait for navigation and page load

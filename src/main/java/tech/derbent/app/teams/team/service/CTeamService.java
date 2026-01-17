@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -43,7 +43,7 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 
 	@Transactional (readOnly = true)
 	public List<CTeam> findByCompany(final CCompany company) {
-		LOGGER.debug("Finding teams for company: {}", company != null ? company.getName() : "null");
+		// LOGGER.debug("Finding teams for company: {}", company != null ? company.getName() : "null");
 		return ((ITeamRepository) repository).findByCompany(company);
 	}
 

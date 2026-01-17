@@ -30,6 +30,7 @@ public interface IProjectRepository extends IEntityOfCompanyRepository<CProject>
 	@Query ("""
 			SELECT p FROM CProject p
 			LEFT JOIN FETCH p.company
+			LEFT JOIN FETCH p.comments
 			LEFT JOIN FETCH p.attachments
 			LEFT JOIN FETCH p.kanbanLine
 			WHERE p.id = :id
@@ -45,6 +46,7 @@ public interface IProjectRepository extends IEntityOfCompanyRepository<CProject>
 	@Query ("""
 			SELECT p FROM CProject p
 			LEFT JOIN FETCH p.company
+			LEFT JOIN FETCH p.comments
 			LEFT JOIN FETCH p.attachments
 			LEFT JOIN FETCH p.kanbanLine
 			WHERE p.company.id = :company_id
