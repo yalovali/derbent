@@ -1,5 +1,4 @@
 package tech.derbent.app.invoices.invoice.view;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -33,6 +32,7 @@ import tech.derbent.app.invoices.invoice.service.CFinancialSummaryService;
 import tech.derbent.app.invoices.invoice.service.CInvoiceService;
 import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
 import tech.derbent.base.session.service.ISessionService;
+import java.time.temporal.ChronoUnit;
 
 /** CFinancialDashboardView - Financial summary dashboard for project management.
  * Displays comprehensive financial metrics including invoices, payments, income, expenses, and profitability.
@@ -242,7 +242,7 @@ public class CFinancialDashboardView extends CAbstractPage {
 		dueSoonGrid.addColumn(inv -> formatCurrency(inv.getRemainingBalance())).setHeader("Balance Due").setAutoWidth(true);
 		dueSoonGrid.addColumn(CInvoice::getDueDate).setHeader("Due Date").setAutoWidth(true);
 		dueSoonGrid.addColumn(inv -> {
-			final long daysUntilDue = java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(), inv.getDueDate());
+			final long daysUntilDue = ChronoUnit.DAYS.between(LocalDate.now(), inv.getDueDate());
 			return daysUntilDue + " days";
 		}).setHeader("Days Until Due").setAutoWidth(true);
 

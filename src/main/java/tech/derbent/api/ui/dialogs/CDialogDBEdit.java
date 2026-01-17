@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.dialogs;
-
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +6,7 @@ import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import com.vaadin.flow.component.Key;
 
 /** Abstract base class for data-aware dialogs. Uses generics to allow any data type. Handles dialog setup, form layout, and save/cancel button logic.
  * Child classes must implement form population and validation. */
@@ -76,7 +76,7 @@ public abstract class CDialogDBEdit<EntityClass> extends CDialog {
 			}
 		});
 		// Add Enter key shortcut for save button
-		saveButton.addClickShortcut(com.vaadin.flow.component.Key.ENTER);
+		saveButton.addClickShortcut(Key.ENTER);
 		final CButton cancelButton = CButton.createCancelButton("Cancel", e -> close());
 		// Esc key is already handled by setCloseOnEsc(true) in dialog setup
 		buttonLayout.add(saveButton, cancelButton);

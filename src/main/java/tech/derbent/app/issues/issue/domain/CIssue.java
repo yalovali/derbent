@@ -1,5 +1,4 @@
 package tech.derbent.app.issues.issue.domain;
-
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,6 +33,7 @@ import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.issues.issuetype.domain.CIssueType;
 import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
 
 @Entity
 @Table (name = "cissue")
@@ -322,7 +322,7 @@ public class CIssue extends CProjectItem<CIssue>
 	}
 
 	@Override
-	public tech.derbent.api.workflow.domain.CWorkflowEntity getWorkflow() { return entityType != null ? entityType.getWorkflow() : null; }
+	public CWorkflowEntity getWorkflow() { return entityType != null ? entityType.getWorkflow() : null; }
 
 	@Override
 	protected void initializeDefaults() {

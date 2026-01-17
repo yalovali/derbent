@@ -18,6 +18,8 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.IHasColor;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.utils.Check;
+import jakarta.persistence.EnumType;
+
 
 @Entity
 @Table (name = "ckanbancolumn")
@@ -78,7 +80,7 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 			description = "Block adding items when WIP limit is reached (Kanban Method explicit policy)", hidden = false
 	)
 	private Boolean wipLimitEnabled = false;
-	@jakarta.persistence.Enumerated (jakarta.persistence.EnumType.STRING)
+	@jakarta.persistence.Enumerated (EnumType.STRING)
 	@Column (name = "service_class", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
 			displayName = "Class of Service", required = false, readOnly = false,

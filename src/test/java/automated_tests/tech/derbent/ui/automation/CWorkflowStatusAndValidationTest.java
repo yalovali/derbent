@@ -14,6 +14,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
+
 
 /**
  * Test suite for workflow status management and name field validation features.
@@ -23,7 +27,7 @@ import java.util.List;
  * 3. Save button is disabled when name field is empty
  * 4. Save button is enabled when name field has content
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource(properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb",
 		"spring.datasource.username=sa",
@@ -59,7 +63,7 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -140,7 +144,7 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -230,7 +234,7 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {

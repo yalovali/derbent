@@ -23,11 +23,13 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.Application;
+
 
 /** Validates that the interface refactoring maintains proper contracts for CRUD operations. This test verifies that: 1. IPageServiceImplementer
  * properly extends IContentOwner 2. All key abstract page classes implement the correct interfaces 3. Method signatures are compatible across the
  * hierarchy 4. Services can be properly accessed through interfaces */
-@SpringBootTest (classes = tech.derbent.Application.class)
+@SpringBootTest (classes = Application.class)
 @ActiveProfiles ("test")
 @SuppressWarnings ("static-method")
 @DisplayName ("Interface Refactoring Validation Tests")

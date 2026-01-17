@@ -1,7 +1,7 @@
 package tech.derbent.api.ui.component.filter;
-
 import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
+import tech.derbent.api.utils.CValueStorageHelper;
 
 /**
  * IFilterComponent - Interface for composable filter components.
@@ -67,7 +67,7 @@ public interface IFilterComponent<T> {
 	 * </p>
 	 * <p>
 	 * <b>Implementation Pattern:</b><br>
-	 * Most filter components should delegate to {@link tech.derbent.api.utils.CValueStorageHelper#valuePersist_enable}
+	 * Most filter components should delegate to {@link CValueStorageHelper#valuePersist_enable}
 	 * with a converter function that knows how to restore the value from a string.
 	 * </p>
 	 * <p>
@@ -93,7 +93,7 @@ public interface IFilterComponent<T> {
 	 * </p>
 	 * 
 	 * @param storageId The base storage identifier from the parent toolbar (must not be null or blank)
-	 * @see tech.derbent.api.utils.CValueStorageHelper
+	 * @see CValueStorageHelper
 	 */
 	void valuePersist_enable(String storageId);
 }

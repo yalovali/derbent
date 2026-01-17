@@ -1,5 +1,4 @@
 package tech.derbent.app.testcases.teststep.view;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -31,6 +30,7 @@ import tech.derbent.app.testcases.testcase.domain.CTestCase;
 import tech.derbent.app.testcases.teststep.domain.CTestStep;
 import tech.derbent.app.testcases.teststep.service.CTestStepService;
 import tech.derbent.base.session.service.ISessionService;
+import com.vaadin.flow.component.html.Div;
 
 /** CComponentListTestSteps - Component for managing test steps in test cases.
  * <p>
@@ -142,33 +142,33 @@ public class CComponentListTestSteps extends CVerticalLayout
 						"3px solid var(--lumo-primary-color)");
 				// Action
 				if (step.getAction() != null && !step.getAction().isEmpty()) {
-					final com.vaadin.flow.component.html.Div actionDiv = new com.vaadin.flow.component.html.Div();
+					final Div actionDiv = new Div();
 					actionDiv.add(createBoldSpan("Action: "));
-					actionDiv.add(new com.vaadin.flow.component.html.Span(step.getAction()));
+					actionDiv.add(new Span(step.getAction()));
 					actionDiv.getStyle().set("margin-bottom", "0.5rem");
 					detailsLayout.add(actionDiv);
 				}
 				// Expected result
 				if (step.getExpectedResult() != null && !step.getExpectedResult().isEmpty()) {
-					final com.vaadin.flow.component.html.Div resultDiv = new com.vaadin.flow.component.html.Div();
+					final Div resultDiv = new Div();
 					resultDiv.add(createBoldSpan("Expected Result: "));
-					resultDiv.add(new com.vaadin.flow.component.html.Span(step.getExpectedResult()));
+					resultDiv.add(new Span(step.getExpectedResult()));
 					resultDiv.getStyle().set("margin-bottom", "0.5rem");
 					detailsLayout.add(resultDiv);
 				}
 				// Test data
 				if (step.getTestData() != null && !step.getTestData().isEmpty()) {
-					final com.vaadin.flow.component.html.Div dataDiv = new com.vaadin.flow.component.html.Div();
+					final Div dataDiv = new Div();
 					dataDiv.add(createBoldSpan("Test Data: "));
-					dataDiv.add(new com.vaadin.flow.component.html.Span(step.getTestData()));
+					dataDiv.add(new Span(step.getTestData()));
 					dataDiv.getStyle().set("margin-bottom", "0.5rem");
 					detailsLayout.add(dataDiv);
 				}
 				// Notes
 				if (step.getNotes() != null && !step.getNotes().isEmpty()) {
-					final com.vaadin.flow.component.html.Div notesDiv = new com.vaadin.flow.component.html.Div();
+					final Div notesDiv = new Div();
 					notesDiv.add(createBoldSpan("Notes: "));
-					notesDiv.add(new com.vaadin.flow.component.html.Span(step.getNotes()));
+					notesDiv.add(new Span(step.getNotes()));
 					detailsLayout.add(notesDiv);
 				}
 				return detailsLayout;

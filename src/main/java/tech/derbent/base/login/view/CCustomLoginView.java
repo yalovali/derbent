@@ -1,5 +1,4 @@
 package tech.derbent.base.login.view;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -43,6 +42,8 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.bab.config.CBabDataInitializer;
 import tech.derbent.base.session.service.ISessionService;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 /** Custom login view using basic Vaadin components instead of LoginOverlay. This provides an alternative login interface for testing purposes. */
 @Route (value = "login", autoLayout = false)
@@ -58,7 +59,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private static HorizontalLayout createHorizontalField(final String labelText, final Component field) {
 		final HorizontalLayout layout = new HorizontalLayout();
 		layout.setWidthFull();
-		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+		layout.setAlignItems(FlexComponent.Alignment.CENTER);
 		final Paragraph label = new Paragraph(labelText);
 		label.addClassNames(LumoUtility.FontWeight.MEDIUM);
 		label.setWidth("120px");
@@ -283,14 +284,14 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		usernameField.setRequiredIndicatorVisible(true);
 		usernameField.setId("custom-username-input");
 		// Add enter key listener to username field
-		usernameField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
+		usernameField.addKeyPressListener(Key.ENTER, e -> handleLogin());
 		// Password field setup
 		passwordField.setWidthFull();
 		passwordField.setRequired(true);
 		passwordField.setRequiredIndicatorVisible(true);
 		passwordField.setId("custom-password-input");
 		// Add enter key listener to password field
-		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
+		passwordField.addKeyPressListener(Key.ENTER, e -> handleLogin());
 		// Add click listener to login button
 		loginButton.addClickListener(e -> handleLogin());
 		loginButton.setMinWidth("120px");

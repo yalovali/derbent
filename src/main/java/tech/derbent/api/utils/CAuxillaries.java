@@ -1,5 +1,4 @@
 package tech.derbent.api.utils;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -7,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.registry.CEntityRegistry;
+import com.vaadin.flow.component.HasText;
 
 public class CAuxillaries {
 
@@ -134,8 +134,8 @@ public class CAuxillaries {
 
 	private static String getComponentText(final Component component) {
 		Check.notNull(component, "component is null");
-		if (component instanceof com.vaadin.flow.component.HasText) {
-			return ((com.vaadin.flow.component.HasText) component).getText();
+		if (component instanceof HasText) {
+			return ((HasText) component).getText();
 		}
 		return null;
 	}

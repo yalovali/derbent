@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
@@ -134,7 +135,7 @@ super(TestNamedEntity.class, name);
 }
 }
 
-private static class TestProjectEntity extends tech.derbent.api.entityOfProject.domain.CEntityOfProject<TestProjectEntity> {
+private static class TestProjectEntity extends CEntityOfProject<TestProjectEntity> {
 
 public TestProjectEntity(final String name, final CProject project) {
 super(TestProjectEntity.class, name, project);

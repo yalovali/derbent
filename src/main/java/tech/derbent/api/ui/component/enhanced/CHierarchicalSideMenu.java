@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.enhanced;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +37,8 @@ import tech.derbent.api.views.CPageTestAuxillaryService;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageMenuIntegrationService;
 import tech.derbent.api.page.view.CDynamicPageRouter;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 
 /** CHierarchicalSideMenu - A hierarchical side menu component with up to 4 levels of navigation. Layer: View (MVC) Features: - Supports up to 4
  * levels of menu hierarchy - Sliding animations between levels - Back button navigation - Parses menu entries from route annotations in format:
@@ -473,7 +474,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 	/** Handles back button click events.
 	 * @param event The click event */
-	private void handleBackButtonClick(final ClickEvent<com.vaadin.flow.component.button.Button> event) {
+	private void handleBackButtonClick(final ClickEvent<Button> event) {
 		LOGGER.debug("Back button clicked from level: {}", currentLevel != null ? currentLevel.getLevelKey() : "unknown");
 		if (currentLevel != null && currentLevel.getParent() != null) {
 			showLevel(currentLevel.getParent().getLevelKey());
@@ -585,7 +586,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			levelIcon = createMenuIcon(VaadinIcon.ARROW_LEFT.create(), "var(--lumo-primary-color)");
 			final CButton backButton = new CButton("", levelIcon, this::handleBackButtonClick);
 			backButton.addClassNames(BACK_BUTTON_CLASS);
-			backButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY_INLINE);
+			backButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
 			// backButton.getStyle().set("min-width", "40px").set("min-height", "40px");
 			headerLayout.add(backButton);
 		} else {

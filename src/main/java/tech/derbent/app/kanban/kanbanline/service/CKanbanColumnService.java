@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
@@ -88,7 +89,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 					statusRemovalCount += removedCount;
 					LOGGER.debug("[KanbanValidation] Removing {} overlapping status(es) from column '{}' (ID: {}) to maintain status uniqueness",
 						removedCount, column.getName(), column.getId());
-					final List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> remainingStatuses = column.getIncludedStatuses().stream()
+					final List<CProjectItemStatus> remainingStatuses = column.getIncludedStatuses().stream()
 							.filter(status -> status != null && status.getId() != null && remainingStatusIds.contains(status.getId()))
 							.collect(Collectors.toList());
 					column.setIncludedStatuses(remainingStatuses);

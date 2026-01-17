@@ -1,6 +1,6 @@
 package tech.derbent.api.interfaces;
-
 import tech.derbent.api.services.pageservice.CPageService;
+import com.vaadin.flow.component.Component;
 
 /**
  * Interface for components that can automatically register themselves with a CPageService.
@@ -54,7 +54,7 @@ import tech.derbent.api.services.pageservice.CPageService;
  * }
  * </pre>
  * 
- * @see CPageService#registerComponent(String, com.vaadin.flow.component.Component)
+ * @see CPageService#registerComponent(String, Component)
  * @see CPageService#bindMethods(CPageService)
  */
 public interface IPageServiceAutoRegistrable {

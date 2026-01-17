@@ -28,6 +28,8 @@ import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.orders.currency.domain.CCurrency;
+import java.math.RoundingMode;
+
 
 @Entity
 @Table (name = "\"cbudget\"")
@@ -138,7 +140,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 			return BigDecimal.ZERO;
 		}
 		final BigDecimal variance = calculateVariance();
-		return variance.divide(budgetAmount, 2, java.math.RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+		return variance.divide(budgetAmount, 2, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 	}
 
 	@Override
@@ -209,7 +211,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		if (earnedValue == null) {
 			return BigDecimal.ZERO;
 		}
-		return earnedValue.divide(actualCost, 2, java.math.RoundingMode.HALF_UP);
+		return earnedValue.divide(actualCost, 2, RoundingMode.HALF_UP);
 	}
 
 	/** Calculate Cost Variance (CV = EV - AC) per PMBOK EVM. Positive CV means under budget, negative means over budget.
@@ -252,7 +254,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		if (earnedValue == null) {
 			return BigDecimal.ZERO;
 		}
-		return earnedValue.divide(plannedValue, 2, java.math.RoundingMode.HALF_UP);
+		return earnedValue.divide(plannedValue, 2, RoundingMode.HALF_UP);
 	}
 
 	/** Calculate Schedule Variance (SV = EV - PV) per PMBOK EVM. Positive SV means ahead of schedule, negative means behind schedule.

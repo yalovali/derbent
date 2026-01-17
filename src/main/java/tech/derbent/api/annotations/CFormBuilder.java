@@ -1,5 +1,4 @@
 package tech.derbent.api.annotations;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;

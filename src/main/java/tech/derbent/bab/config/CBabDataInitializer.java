@@ -1,5 +1,4 @@
 package tech.derbent.bab.config;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -33,6 +32,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.service.CUserInitializerService;
+import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 
 @Component
 @Profile ("bab")
@@ -124,7 +124,7 @@ public class CBabDataInitializer {
 			initializeStandardViews(project);
 			CSystemSettingsInitializerService.initializeSampleBab(project, minimal);
 			// Initialize BAB device and nodes
-			tech.derbent.bab.device.service.CBabDeviceInitializerService.initializeSample(project, minimal);
+			CBabDeviceInitializerService.initializeSample(project, minimal);
 			if (!minimal) {
 				LOGGER.info("BAB initializer uses minimal defaults for all modes.");
 			}

@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.enhanced;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import tech.derbent.api.screens.view.CDialogFieldSelection;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
@@ -65,7 +65,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			searchField.setPlaceholder("Search...");
 			searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
 			searchField.setClearButtonVisible(true);
-			searchField.setValueChangeMode(com.vaadin.flow.data.value.ValueChangeMode.LAZY);
+			searchField.setValueChangeMode(ValueChangeMode.LAZY);
 			searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
 			// Edit Grid Columns Button
 			btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), e1 -> {

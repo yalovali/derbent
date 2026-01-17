@@ -1,5 +1,4 @@
 package tech.derbent.app.kanban.kanbanline.view;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.service.CPageServiceKanbanLine;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
+import com.vaadin.flow.data.provider.Query;
+import java.util.stream.Collectors;
 
 /** CComponentKanbanColumnBacklog - A specialized kanban column that displays the project backlog.
  * <p>
@@ -150,8 +151,8 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 			return;
 		}
 		try {
-			final List<?> items = backlogComponent.getGrid().getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>())
-					.collect(java.util.stream.Collectors.toList());
+			final List<?> items = backlogComponent.getGrid().getDataProvider().fetch(new Query<>())
+					.collect(Collectors.toList());
 			long totalStoryPoints = 0;
 			for (final Object item : items) {
 				if (item instanceof final ISprintableItem sprintableItem) {

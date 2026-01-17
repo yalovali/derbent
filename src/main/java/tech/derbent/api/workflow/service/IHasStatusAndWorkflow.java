@@ -1,5 +1,4 @@
 package tech.derbent.api.workflow.service;
-
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 
 /** IHasStatusAndWorkflow - Interface for entities that support workflow-based status management.
  * <p>
@@ -40,7 +40,7 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
  * @param <EntityClass> The entity class implementing this interface
  * @see CWorkflowEntity
  * @see CProjectItemStatus
- * @see tech.derbent.api.workflow.domain.CWorkflowStatusRelation */
+ * @see CWorkflowStatusRelation */
 public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow<EntityClass>> {
 
 	Logger LOGGER = LoggerFactory.getLogger(IHasStatusAndWorkflow.class);

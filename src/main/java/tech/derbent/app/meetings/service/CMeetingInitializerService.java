@@ -1,5 +1,4 @@
 package tech.derbent.app.meetings.service;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +11,8 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 
 public class CMeetingInitializerService extends CInitializerServiceBase {
 
@@ -54,10 +55,10 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "linkedElement"));
 			
 			// Attachments section - standard section for ALL entities
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, ENTITY_CLASS);
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, ENTITY_CLASS);
 			
 			// Comments section - standard section for discussion entities
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, ENTITY_CLASS);
+			CCommentInitializerService.addCommentsSection(detailSection, ENTITY_CLASS);
 			
 			detailSection.debug_printScreenInformation();
 			return detailSection;

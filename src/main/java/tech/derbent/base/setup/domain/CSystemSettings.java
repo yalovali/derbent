@@ -1,5 +1,4 @@
 package tech.derbent.base.setup.domain;
-
 import java.math.BigDecimal;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -12,6 +11,8 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /** CSystemSettings - Domain entity representing system-wide configuration settings. Layer: Domain (MVC) This entity stores application-level
  * configurations that apply across the entire system regardless of company, including application metadata, security settings, file management, email
@@ -105,8 +106,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	// Database and Performance Settings
 	@Column (name = "database_name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = "Database name cannot exceed " + CEntityConstants.MAX_LENGTH_NAME + " characters")
-	@jakarta.validation.constraints.NotNull (message = "Database name cannot be null")
-	@jakarta.validation.constraints.NotBlank (message = "Database name cannot be blank")
+	@NotNull (message = "Database name cannot be null")
+	@NotBlank (message = "Database name cannot be blank")
 	@AMetaData (
 			displayName = "Database Name", required = true, readOnly = false, defaultValue = "derbent",
 			description = "Name of the database to connect to", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME

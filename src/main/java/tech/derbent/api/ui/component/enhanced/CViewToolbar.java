@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.enhanced;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -229,7 +228,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		// Handle home button click - navigate to dashboard
 		homeButton.addClickListener(e -> {
 			LOGGER.info("Home button clicked, navigating to dashboard");
-			com.vaadin.flow.component.UI.getCurrent().navigate("home");
+			UI.getCurrent().navigate("home");
 		});
 		return homeButton;
 	}

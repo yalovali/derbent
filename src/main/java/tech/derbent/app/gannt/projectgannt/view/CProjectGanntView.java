@@ -18,6 +18,8 @@ import tech.derbent.app.gannt.projectgannt.service.CPageServiceProjectGannt;
 import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.app.gannt.projectgannt.view.CProjectGanntView;
+
 
 @Route ("cprojectganntview")
 @PageTitle ("Project Gannt View")

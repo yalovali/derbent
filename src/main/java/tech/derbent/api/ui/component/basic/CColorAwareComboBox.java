@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.basic;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -214,7 +213,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		persistenceEnabled = true;
 		// Get session service
 		if (sessionService == null) {
-			sessionService = CSpringContext.getBean(tech.derbent.base.session.service.ISessionService.class);
+			sessionService = CSpringContext.getBean(ISessionService.class);
 		}
 		LOGGER.info("[CColorAwareComboBox] Persistence enabled for key: {}", storageKey);
 		// Add value change listener to save on every change

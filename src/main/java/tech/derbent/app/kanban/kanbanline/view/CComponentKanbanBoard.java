@@ -1,5 +1,4 @@
 package tech.derbent.app.kanban.kanbanline.view;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -457,7 +456,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			availableSprints.sort(sprintRecencyComparator.reversed());
 			final CSprint defaultSprint = resolveDefaultSprint(availableSprints);
 			filterToolbar.setAvailableSprints(availableSprints, defaultSprint);
-			currentSprint = filterToolbar.getCurrentCriteria().getValue(tech.derbent.api.ui.component.filter.CSprintFilter.FILTER_KEY);
+			currentSprint = filterToolbar.getCurrentCriteria().getValue(CSprintFilter.FILTER_KEY);
 			loadSprintItemsForSprint(currentSprint);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load sprints for Kanban board", e);
@@ -477,7 +476,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		if (mode == null || mode == CResponsibleUserFilter.ResponsibleFilterMode.ALL) {
 			return true;
 		}
-		if (mode == tech.derbent.api.ui.component.filter.CResponsibleUserFilter.ResponsibleFilterMode.CURRENT_USER) {
+		if (mode == CResponsibleUserFilter.ResponsibleFilterMode.CURRENT_USER) {
 			final CUser activeUser = sessionService.getActiveUser().orElse(null);
 			Check.notNull(activeUser, "Active user not available for Kanban board filtering");
 			return matchesResponsibleUser(sprintItem, activeUser);

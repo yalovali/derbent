@@ -1,5 +1,4 @@
 package tech.derbent.api.entity.domain;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,9 +24,10 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.interfaces.ICopyable;
 
 @MappedSuperclass
-public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, tech.derbent.api.interfaces.ICopyable<EntityClass> {
+public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, ICopyable<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 

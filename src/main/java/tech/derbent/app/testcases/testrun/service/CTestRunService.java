@@ -21,6 +21,10 @@ import tech.derbent.app.testcases.testrun.domain.CTestRun;
 import tech.derbent.app.testcases.testrun.domain.CTestStepResult;
 import tech.derbent.app.testcases.testscenario.domain.CTestScenario;
 import tech.derbent.base.session.service.ISessionService;
+import java.time.Duration;
+
+import java.util.Comparator;
+
 
 @Service
 @PreAuthorize("isAuthenticated()")
@@ -92,7 +96,7 @@ public class CTestRunService extends CEntityOfProjectService<CTestRun> implement
 			final Set<CTestStep> testStepsSet = testCase.getTestSteps();
 			if (testStepsSet != null && !testStepsSet.isEmpty()) {
 				final List<CTestStep> testSteps = new java.util.ArrayList<>(testStepsSet);
-				testSteps.sort(java.util.Comparator.comparing(CTestStep::getStepOrder));
+				testSteps.sort(Comparator.comparing(CTestStep::getStepOrder));
 				for (final CTestStep testStep : testSteps) {
 					final CTestStepResult stepResult = new CTestStepResult();
 					stepResult.setTestCaseResult(caseResult);
@@ -124,7 +128,7 @@ public class CTestRunService extends CEntityOfProjectService<CTestRun> implement
 		LOGGER.debug("Completing test run {}", testRun.getId());
 		testRun.setExecutionEnd(LocalDateTime.now(clock));
 		if (testRun.getExecutionStart() != null && testRun.getExecutionEnd() != null) {
-			final long durationMs = java.time.Duration.between(testRun.getExecutionStart(), testRun.getExecutionEnd()).toMillis();
+			final long durationMs = Duration.between(testRun.getExecutionStart(), testRun.getExecutionEnd()).toMillis();
 			testRun.setDurationMs(durationMs);
 			LOGGER.debug("Test run duration calculated: {} ms", durationMs);
 		}

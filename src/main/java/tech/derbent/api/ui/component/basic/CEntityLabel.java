@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.basic;
-
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -30,7 +29,7 @@ import tech.derbent.api.utils.CColorUtils;
  *
  * @author Derbent Framework
  * @since 1.0
- * @see tech.derbent.api.utils.CColorUtils */
+ * @see CColorUtils */
 public class CEntityLabel extends HorizontalLayout {
 
 	private static final String DEFAULT_BORDER_RADIUS = "4px";

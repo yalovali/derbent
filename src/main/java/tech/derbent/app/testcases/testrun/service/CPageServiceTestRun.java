@@ -1,5 +1,4 @@
 package tech.derbent.app.testcases.testrun.service;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.testcases.testrun.domain.CTestRun;
 import tech.derbent.app.testcases.testrun.view.CComponentTestExecution;
+import com.vaadin.flow.component.button.ButtonVariant;
 
 public class CPageServiceTestRun extends CPageServiceDynamicPage<CTestRun> {
 
@@ -37,8 +37,8 @@ public class CPageServiceTestRun extends CPageServiceDynamicPage<CTestRun> {
 				if (toolbar != null && buttonExecute == null) {
 					// Create Execute button with primary styling
 					buttonExecute = new CButton("Execute", VaadinIcon.PLAY.create());
-					buttonExecute.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_PRIMARY,
-							com.vaadin.flow.component.button.ButtonVariant.LUMO_SUCCESS);
+					buttonExecute.addThemeVariants(ButtonVariant.LUMO_PRIMARY,
+							ButtonVariant.LUMO_SUCCESS);
 					buttonExecute.getElement().setAttribute("title", "Execute this test session");
 					buttonExecute.addClickListener(e -> on_execute_clicked());
 					buttonExecute.setEnabled(false); // Initially disabled until entity is loaded

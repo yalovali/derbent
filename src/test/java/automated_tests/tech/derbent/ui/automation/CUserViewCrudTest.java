@@ -2,6 +2,7 @@ package automated_tests.tech.derbent.ui.automation;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -10,13 +11,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import tech.derbent.Application;
+
 
 /**
  * Comprehensive CRUD test for Users view following standard testing patterns.
  * Uses navigateToViewByText() for navigation as per TESTING_RULES.md
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource(properties = {
     "spring.datasource.url=jdbc:h2:mem:testdb",
     "spring.datasource.username=sa",
@@ -36,7 +40,7 @@ public class CUserViewCrudTest extends CBaseUITest {
 
         if (!isBrowserAvailable()) {
             LOGGER.warn("⚠️ Browser not available - skipping test");
-            org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available");
+            Assumptions.assumeTrue(false, "Browser not available");
             return;
         }
 
@@ -101,7 +105,7 @@ public class CUserViewCrudTest extends CBaseUITest {
 
             // Step 6: Test CREATE (if New button exists)
             LOGGER.info("➕ Step 6: Testing CREATE operation...");
-            Locator newButton = page.getByRole(AriaRole.BUTTON, new com.microsoft.playwright.Page.GetByRoleOptions().setName("New"));
+            Locator newButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("New"));
             if (newButton.count() > 0) {
                 LOGGER.info("   Clicking New button...");
                 newButton.click();
@@ -115,7 +119,7 @@ public class CUserViewCrudTest extends CBaseUITest {
                 wait_500();
 
                 // Save
-                Locator saveButton = page.getByRole(AriaRole.BUTTON, new com.microsoft.playwright.Page.GetByRoleOptions().setName("Save"));
+                Locator saveButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Save"));
                 if (saveButton.count() > 0) {
                     saveButton.click();
                     wait_2000();
@@ -130,7 +134,7 @@ public class CUserViewCrudTest extends CBaseUITest {
 
             // Step 7: Test UPDATE
             LOGGER.info("✏️ Step 7: Testing UPDATE operation...");
-            Locator editButton = page.getByRole(AriaRole.BUTTON, new com.microsoft.playwright.Page.GetByRoleOptions().setName("Edit"));
+            Locator editButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Edit"));
             if (editButton.count() > 0) {
                 editButton.click();
                 wait_1000();
@@ -141,7 +145,7 @@ public class CUserViewCrudTest extends CBaseUITest {
                 wait_500();
 
                 // Save
-                Locator saveButton = page.getByRole(AriaRole.BUTTON, new com.microsoft.playwright.Page.GetByRoleOptions().setName("Save"));
+                Locator saveButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Save"));
                 if (saveButton.count() > 0) {
                     saveButton.click();
                     wait_2000();

@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,8 +67,8 @@ class CActivityParentChildTest {
         project = new CProject("Test Project", company);
         setEntityId(project, 1L);
         // Mock session service
-        when(sessionService.getActiveProject()).thenReturn(java.util.Optional.of(project));
-        when(sessionService.getActiveCompany()).thenReturn(java.util.Optional.of(company));
+        when(sessionService.getActiveProject()).thenReturn(Optional.of(project));
+        when(sessionService.getActiveCompany()).thenReturn(Optional.of(company));
     }
 
     @Test

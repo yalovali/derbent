@@ -1,5 +1,4 @@
 package tech.derbent.app.testcases.testrun.service;
-
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.app.testcases.testrun.domain.CTestCaseResult;
 import tech.derbent.app.testcases.testrun.view.CComponentListTestCaseResults;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.config.CSpringContext;
 
 /** CTestCaseResultService - Service for managing test case results within test runs. Handles CRUD operations for individual test case execution
  * results. */
@@ -26,7 +26,7 @@ public class CTestCaseResultService extends CAbstractService<CTestCaseResult> {
 
 	public Component createComponentListTestCaseResults() {
 		try {
-			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
+			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
 			final CComponentListTestCaseResults component = new CComponentListTestCaseResults(this, sessionService);
 			LOGGER.debug("Created test case result component");
 			return component;

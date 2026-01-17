@@ -1,5 +1,4 @@
 package tech.derbent.app.attachments.service;
-
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -26,6 +25,7 @@ import tech.derbent.app.attachments.view.CComponentListAttachments;
 import tech.derbent.app.documenttypes.service.CDocumentTypeService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
+import java.util.stream.Collectors;
 
 /** Service for managing CAttachment entities and file operations. Provides CRUD operations, file upload/download, and version management. */
 @Service
@@ -53,7 +53,7 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 		final List<CAttachment> newerVersions = attachmentRepository.findByPreviousVersion(attachment);
 		if (!newerVersions.isEmpty()) {
 			return "Cannot delete attachment - it is referenced by newer version(s). Version numbers: "
-					+ newerVersions.stream().map(v -> String.valueOf(v.getVersionNumber())).collect(java.util.stream.Collectors.joining(", "));
+					+ newerVersions.stream().map(v -> String.valueOf(v.getVersionNumber())).collect(Collectors.joining(", "));
 		}
 		return super.checkDeleteAllowed(attachment);
 	}

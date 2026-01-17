@@ -1,5 +1,4 @@
 package tech.derbent.api.projects.service;
-
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +28,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.domain.CProjectType;
 import tech.derbent.api.projects.events.ProjectListChangeEvent;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -168,7 +168,7 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
                 Check.notNull(entity.getWorkflow(), 
                         "Workflow cannot be null for project type " + selectedType.getName());
                 final CProjectItemStatus initialStatus = 
-                        tech.derbent.api.workflow.service.IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+                        IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
                 Check.notNull(initialStatus, 
                         "Initial status cannot be null for project");
                 entity.setStatus(initialStatus);
