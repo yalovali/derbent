@@ -2,6 +2,8 @@ package tech.derbent.app.assets.asset.domain;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -14,6 +16,7 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -33,6 +36,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
 	public static final String ENTITY_TITLE_PLURAL = "Assets";
 	public static final String ENTITY_TITLE_SINGULAR = "Asset";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAsset.class);
 	public static final String VIEW_NAME = "Asset View";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -121,5 +125,65 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 						+ getProject().getCompany().getId());
 		entityType = (CAssetType) typeEntity;
 		updateLastModified();
+	}
+
+	/**
+	 * Creates a clone of this asset with the specified options.
+	 * This implementation follows the recursive cloning pattern:
+	 * 1. Calls parent's createClone() to handle inherited fields (CProjectItem)
+	 * 2. Clones asset-specific fields based on options
+	 * 3. Recursively clones collections (comments, attachments) if requested
+	 * 
+	 * Cloning behavior:
+	 * - Basic fields (strings, numbers, enums) are always cloned
+	 * - Workflow field is cloned only if options.isCloneWorkflow()
+	 * - Comments collection is recursively cloned if options.includesComments()
+	 * - Attachments collection is recursively cloned if options.includesAttachments()
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the asset with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	public CAsset createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CAsset clone = super.createClone(options);
+
+		// Clone entity type (asset type)
+		clone.entityType = this.entityType;
+		
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
+			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
+		}
+		
+		// Clone comments if requested
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Clone attachments if requested
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		LOGGER.debug("Successfully cloned asset '{}' with options: {}", this.getName(), options);
+		return clone;
 	}
 }

@@ -11,9 +11,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
@@ -33,6 +36,7 @@ public class CProjectComponent extends CProjectItem<CProjectComponent> implement
 	public static final String DEFAULT_ICON = "vaadin:cogs";
 	public static final String ENTITY_TITLE_PLURAL = "Components";
 	public static final String ENTITY_TITLE_SINGULAR = "Component";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponent.class);
 	public static final String VIEW_NAME = "Components View";
 	@Column (nullable = true, length = 100)
 	@AMetaData (
@@ -160,5 +164,68 @@ public class CProjectComponent extends CProjectItem<CProjectComponent> implement
 	public void setComments(final Set<CComment> comments) {
 		this.comments = comments;
 		updateLastModified();
+	}
+
+	/**
+	 * Creates a clone of this component with the specified options.
+	 * This implementation follows the recursive cloning pattern:
+	 * 1. Calls parent's createClone() to handle inherited fields (CProjectItem)
+	 * 2. Clones component-specific fields based on options
+	 * 3. Recursively clones collections (comments, attachments) if requested
+	 * 
+	 * Cloning behavior:
+	 * - Basic fields (strings, numbers, enums) are always cloned
+	 * - Workflow field is cloned only if options.isCloneWorkflow()
+	 * - Comments collection is recursively cloned if options.includesComments()
+	 * - Attachments collection is recursively cloned if options.includesAttachments()
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the component with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	public CProjectComponent createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CProjectComponent clone = super.createClone(options);
+
+		// Clone entity type (component type)
+		clone.entityType = this.entityType;
+		
+		// Clone basic fields
+		clone.componentCode = this.componentCode;
+		
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
+			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
+		}
+		
+		// Clone comments if requested
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Clone attachments if requested
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		LOGGER.debug("Successfully cloned component '{}' with options: {}", this.getName(), options);
+		return clone;
 	}
 }

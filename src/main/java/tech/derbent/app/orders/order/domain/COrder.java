@@ -338,4 +338,53 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		this.requiredDate = requiredDate;
 		updateLastModified();
 	}
+
+	@Override
+	public COrder createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		final COrder clone = super.createClone(options);
+		clone.orderNumber = this.orderNumber != null ? this.orderNumber + " (Copy)" : null;
+		clone.providerCompanyName = this.providerCompanyName;
+		clone.providerContactName = this.providerContactName;
+		clone.providerEmail = this.providerEmail;
+		clone.deliveryAddress = this.deliveryAddress;
+		clone.estimatedCost = this.estimatedCost;
+		clone.actualCost = this.actualCost;
+		clone.entityType = this.entityType;
+		if (!options.isResetDates()) {
+			clone.orderDate = this.orderDate;
+			clone.requiredDate = this.requiredDate;
+			clone.deliveryDate = this.deliveryDate;
+		}
+		if (!options.isResetAssignments()) {
+			if (this.currency != null) {
+				clone.currency = this.currency;
+			}
+			if (this.requestor != null) {
+				clone.requestor = this.requestor;
+			}
+		}
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					// Silently skip failed comment clones
+				}
+			}
+		}
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					// Silently skip failed attachment clones
+				}
+			}
+		}
+		return clone;
+	}
 }

@@ -2,6 +2,8 @@ package tech.derbent.app.testcases.testcase.domain;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -17,6 +19,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -39,6 +42,7 @@ public class CTestCase extends CProjectItem<CTestCase>
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
 	public static final String ENTITY_TITLE_PLURAL = "Test Cases";
 	public static final String ENTITY_TITLE_SINGULAR = "Test Case";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CTestCase.class);
 	public static final String VIEW_NAME = "Test Cases View";
 
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -249,5 +253,88 @@ public class CTestCase extends CProjectItem<CTestCase>
 	public void setTestSteps(final Set<CTestStep> testSteps) {
 		this.testSteps = testSteps;
 		updateLastModified();
+	}
+
+	/**
+	 * Creates a clone of this test case with the specified options.
+	 * This implementation follows the recursive cloning pattern:
+	 * 1. Calls parent's createClone() to handle inherited fields (CProjectItem)
+	 * 2. Clones test case-specific fields based on options
+	 * 3. Recursively clones collections (comments, attachments, test steps) if requested
+	 * 
+	 * Cloning behavior:
+	 * - Basic fields (strings, numbers, enums) are always cloned
+	 * - Workflow field is cloned only if options.isCloneWorkflow()
+	 * - Comments collection is recursively cloned if options.includesComments()
+	 * - Attachments collection is recursively cloned if options.includesAttachments()
+	 * - Test steps collection is always cloned (test case-specific children)
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the test case with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	public CTestCase createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CTestCase clone = super.createClone(options);
+
+		// Clone entity type (test case type)
+		clone.entityType = this.entityType;
+		
+		// Clone basic fields
+		clone.preconditions = this.preconditions;
+		clone.priority = this.priority;
+		clone.severity = this.severity;
+		clone.automated = this.automated;
+		clone.automatedTestPath = this.automatedTestPath;
+		clone.testScenario = this.testScenario;
+		
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
+			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
+		}
+		
+		// Clone test steps (test case-specific children)
+		if (this.testSteps != null && !this.testSteps.isEmpty()) {
+			clone.testSteps = new HashSet<>();
+			for (final CTestStep testStep : this.testSteps) {
+				try {
+					final CTestStep testStepClone = testStep.createClone(options);
+					testStepClone.setTestCase(clone);
+					clone.testSteps.add(testStepClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone test step: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Clone comments if requested
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Clone attachments if requested
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		LOGGER.debug("Successfully cloned test case '{}' with options: {}", this.getName(), options);
+		return clone;
 	}
 }

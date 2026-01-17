@@ -16,9 +16,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.IEntityDBStatics;
+import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.interfaces.ICloneable;
 
 @MappedSuperclass
-public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics {
+public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, ICloneable<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 
@@ -180,6 +182,57 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	@Override
 	public String toString() {
 		return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
+	}
+
+	/**
+	 * Creates a clone of this entity with the specified options.
+	 * This base implementation clones the 'active' field.
+	 * Subclasses must override this method to add their specific fields.
+	 * 
+	 * Implementation pattern for subclasses:
+	 * 1. Call super.createClone(options) to get parent's clone
+	 * 2. Clone own fields based on options
+	 * 3. Return the cloned entity
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the entity with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public EntityClass createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		try {
+			// Create new instance using reflection
+			final Class<?> entityClass = ProxyUtils.getUserClass(getClass());
+			final EntityClass clone = (EntityClass) entityClass.getDeclaredConstructor().newInstance();
+			
+			// Clone basic fields from CEntityDB
+			if (clone instanceof CEntityDB) {
+				final CEntityDB<?> cloneEntity = (CEntityDB<?>) clone;
+				// Always clone active field
+				cloneEntity.setActive(this.getActive());
+				// ID is never cloned (will be generated on save)
+				
+				LOGGER.debug("Created base clone for entity type: {}", entityClass.getSimpleName());
+			}
+			
+			return clone;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating clone for entity type: {}", getClass().getSimpleName(), e);
+			throw new CloneNotSupportedException("Failed to create clone: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Gets the entity class for this entity instance.
+	 * Required by ICloneable interface.
+	 * 
+	 * @return the entity class
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public Class<EntityClass> getEntityClass() {
+		return (Class<EntityClass>) ProxyUtils.getUserClass(getClass());
 	}
 
 	/** Helper method to update audit fields using reflection. Looks for common audit fields like 'lastModifiedDate', 'updatedAt'. */

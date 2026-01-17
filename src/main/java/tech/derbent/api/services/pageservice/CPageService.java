@@ -123,6 +123,51 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 	}
 
+	/**
+	 * Handle clone action triggered from the CRUD toolbar.
+	 * Opens a dialog to configure clone options, then creates a clone of the current entity.
+	 * 
+	 * @throws Exception if the clone operation fails
+	 */
+	public void actionClone() throws Exception {
+		try {
+			final EntityClass entity = getValue();
+			LOGGER.debug("Clone action triggered for entity: {}", entity != null ? entity.getId() : "null");
+			if (entity == null || entity.getId() == null) {
+				CNotificationService.showWarning("Please select an item to clone.");
+				return;
+			}
+
+			// Open clone dialog with options
+			final tech.derbent.api.ui.dialogs.CDialogClone<EntityClass> dialog = 
+					new tech.derbent.api.ui.dialogs.CDialogClone<>(entity, clonedEntity -> {
+				try {
+					// Initialize the cloned entity (sets status, workflow, etc.)
+					getEntityService().initializeNewEntity(clonedEntity);
+					
+					// Save the cloned entity
+					final EntityClass saved = getEntityService().save(clonedEntity);
+					LOGGER.info("Entity cloned successfully with new ID: {}", saved.getId());
+					
+					// Update the view with the new entity
+					setValue(saved);
+					getView().onEntityCreated(saved);
+					getView().populateForm();
+					
+					CNotificationService.showSuccess("Entity cloned successfully");
+				} catch (final Exception ex) {
+					LOGGER.error("Error saving cloned entity: {}", ex.getMessage(), ex);
+					CNotificationService.showException("Error saving cloned entity", ex);
+				}
+			});
+			dialog.open();
+			
+		} catch (final Exception e) {
+			LOGGER.error("Error during clone action: {}", e.getMessage());
+			throw e;
+		}
+	}
+
 	@SuppressWarnings ("unchecked")
 	public void actionRefresh() throws Exception {
 		try {

@@ -177,4 +177,37 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 		this.comments = comments;
 		updateLastModified();
 	}
+
+	@Override
+	public CProjectComponentVersion createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		final CProjectComponentVersion clone = super.createClone(options);
+		clone.versionNumber = this.versionNumber;
+		clone.entityType = this.entityType;
+		if (!options.isResetAssignments() && this.projectComponent != null) {
+			clone.projectComponent = this.projectComponent;
+		}
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					// Silently skip failed comment clones
+				}
+			}
+		}
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					// Silently skip failed attachment clones
+				}
+			}
+		}
+		return clone;
+	}
 }

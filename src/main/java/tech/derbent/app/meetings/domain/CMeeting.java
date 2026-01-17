@@ -23,6 +23,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -429,5 +430,88 @@ public class CMeeting extends CProjectItem<CMeeting>
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.storyPoint = storyPoint; // Keep for backward compatibility
 		sprintItem.setStoryPoint(storyPoint);
+	}
+
+	/**
+	 * Creates a clone of this meeting with the specified options.
+	 * Follows the recursive cloning pattern established in the entity hierarchy.
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the meeting with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	public CMeeting createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CMeeting clone = super.createClone(options);
+
+		// Clone basic meeting fields
+		clone.agenda = this.agenda;
+		clone.linkedElement = this.linkedElement;
+		clone.location = this.location;
+		clone.minutes = this.minutes;
+		clone.objective = this.objective;
+		
+		// Clone meeting type
+		clone.entityType = this.entityType;
+		
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && this.workflow != null) {
+			clone.workflow = this.workflow;
+		}
+		
+		// Handle date/time fields based on options
+		if (!options.isResetDates()) {
+			clone.endDate = this.endDate;
+			clone.endTime = this.endTime;
+			clone.startDate = this.startDate;
+			clone.startTime = this.startTime;
+		}
+		
+		// Clone attendees and participants if relations are included
+		if (options.includesRelations()) {
+			if (this.attendees != null) {
+				clone.attendees = new HashSet<>(this.attendees);
+			}
+			if (this.participants != null) {
+				clone.participants = new HashSet<>(this.participants);
+			}
+		}
+		
+		// Clone related activities if full deep clone
+		if (options.isFullDeepClone() && this.relatedActivities != null && !this.relatedActivities.isEmpty()) {
+			clone.relatedActivities = new HashSet<>(this.relatedActivities);
+		}
+		
+		// Clone comments if requested
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					// Log warning but continue with other comments
+				}
+			}
+		}
+		
+		// Clone attachments if requested
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					// Log warning but continue with other attachments
+				}
+			}
+		}
+		
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint
+		// Note: Action items are not cloned to avoid creating duplicate tasks
+		
+		return clone;
 	}
 }

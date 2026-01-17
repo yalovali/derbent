@@ -25,4 +25,9 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 	public CGanntViewEntity(final String name, final CProject project) {
 		super(CGanntViewEntity.class, name, project);
 	}
+
+	@Override
+	public CGanntViewEntity createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		return super.createClone(options);
+	}
 }

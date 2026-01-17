@@ -135,4 +135,38 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		this.status = status;
 		updateLastModified();
 	}
+
+	/**
+	 * Creates a clone of this project item with the specified options.
+	 * This implementation clones parent relationships and status.
+	 * Subclasses must override to add their specific fields.
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the entity with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public EntityClass createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final EntityClass clone = super.createClone(options);
+
+		if (clone instanceof CProjectItem) {
+			final CProjectItem<?> cloneItem = (CProjectItem<?>) clone;
+			
+			// Clone parent relationships if requested
+			if (options.includesRelations()) {
+				cloneItem.parentId = this.getParentId();
+				cloneItem.parentType = this.getParentType();
+			}
+			
+			// Clone status if requested
+			if (options.isCloneStatus() && this.getStatus() != null) {
+				cloneItem.status = this.getStatus();
+			}
+			// If not cloning status, leave it null (will be set by service initialization)
+		}
+
+		return clone;
+	}
 }

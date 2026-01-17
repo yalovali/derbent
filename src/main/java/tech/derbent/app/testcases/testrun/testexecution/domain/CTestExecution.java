@@ -178,4 +178,28 @@ public class CTestExecution extends CEntityOfProject<CTestExecution> {
 		this.testCase = testCase;
 		updateLastModified();
 	}
+
+	@Override
+	public CTestExecution createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+		final CTestExecution clone = super.createClone(options);
+
+		clone.testCase = this.testCase;
+		clone.result = this.result;
+		clone.notes = this.notes;
+		clone.actualResults = this.actualResults;
+		clone.errorDetails = this.errorDetails;
+		clone.buildNumber = this.buildNumber;
+		clone.environment = this.environment;
+		clone.executionDurationMs = this.executionDurationMs;
+
+		if (!options.isResetDates()) {
+			clone.executionDate = this.executionDate;
+		}
+
+		if (!options.isResetAssignments()) {
+			clone.executedBy = this.executedBy;
+		}
+
+		return clone;
+	}
 }
