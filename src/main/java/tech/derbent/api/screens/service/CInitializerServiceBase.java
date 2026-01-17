@@ -173,7 +173,7 @@ public abstract class CInitializerServiceBase {
 				if (item instanceof IHasStatusAndWorkflow) {
 					/* item has: void setEntityType(CTypeEntity<?> typeEntity); void setStatus(CProjectItemStatus status); */
 					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-					if (statusItem instanceof final tech.derbent.api.entityOfCompany.domain.CEntityOfCompany<?> companyEntity) {
+					if (statusItem instanceof final CEntityOfCompany<?> companyEntity) {
 						final CTypeEntityService<?> typeServiceInstance = getEntityTypeService(statusItem);
 						final CCompany companyContext = companyEntity.getCompany();
 						Check.notNull(companyContext, "Company is required to choose entity type for " + item.getClass().getSimpleName());

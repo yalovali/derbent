@@ -23,6 +23,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.storage.IAttachmentStorage;
 import tech.derbent.app.attachments.view.CComponentListAttachments;
+import tech.derbent.app.documenttypes.service.CDocumentTypeService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -36,10 +37,10 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAttachmentService.class);
 	private final IAttachmentRepository attachmentRepository;
 	private final IAttachmentStorage attachmentStorage;
-	private final tech.derbent.app.documenttypes.service.CDocumentTypeService documentTypeService;
+	private final CDocumentTypeService documentTypeService;
 
 	public CAttachmentService(final IAttachmentRepository repository, final Clock clock, final ISessionService sessionService,
-			final IAttachmentStorage attachmentStorage, final tech.derbent.app.documenttypes.service.CDocumentTypeService documentTypeService) {
+			final IAttachmentStorage attachmentStorage, final CDocumentTypeService documentTypeService) {
 		super(repository, clock, sessionService);
 		this.attachmentStorage = attachmentStorage;
 		this.documentTypeService = documentTypeService;

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.utils.CImageUtils;
 
 /** Test class to verify that user icons render correctly with the new innerHTML-based implementation. This test validates that icons are properly
  * generated and contain SVG content in their innerHTML. */
@@ -47,7 +48,7 @@ class CUserIconRenderingTest {
 		final CUser user = new CUser("jsmith", "password", "Jane", "jane@example.com", company, role);
 		user.setLastname("Smith");
 		// Generate a test avatar image and set it as profile picture
-		final byte[] avatarData = tech.derbent.api.utils.CImageUtils.generateAvatarWithInitials("JS", 16);
+		final byte[] avatarData = CImageUtils.generateAvatarWithInitials("JS", 16);
 		user.setProfilePictureData(avatarData);
 		// Get the icon
 		final Icon icon = user.getIcon();

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.domain.CSprint;
 
 /** ISprintItemRepository - Repository interface for CSprintItem entity. Provides database access for sprint items which are progress tracking
  * components. */
@@ -29,5 +30,5 @@ public interface ISprintItemRepository extends IAbstractRepository<CSprintItem> 
 	@Query (
 		"SELECT e FROM #{#entityName} e WHERE e.sprint = :sprint OR (e.sprint IS NULL AND :sprint IS NULL) ORDER BY e.itemOrder ASC NULLS LAST, e.id DESC"
 	)
-	List<CSprintItem> findBySprint(@Param ("sprint") tech.derbent.app.sprints.domain.CSprint sprint);
+	List<CSprintItem> findBySprint(@Param ("sprint") CSprint sprint);
 }

@@ -26,6 +26,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.attachments.service.CAttachmentService;
@@ -412,7 +413,7 @@ public class CComponentListAttachments extends CVerticalLayout
 	}
 
 	@Override
-	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
+	public void registerWithPageService(final CPageService<?> pageService) {
 		tech.derbent.api.utils.Check.notNull(pageService, "Page service cannot be null");
 		pageService.registerComponent(getComponentName(), this);
 		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());

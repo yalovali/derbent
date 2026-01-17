@@ -74,7 +74,7 @@ public class CNotificationService {
 		Check.notNull(position, "Position cannot be null");
 		LOGGER.debug("Showing custom notification: {} at {} for {}ms", message, position, durationMs);
 		final Notification notification = Notification.show(message, durationMs, position);
-		if ((variants != null) && (variants.length > 0)) {
+		if (variants != null && variants.length > 0) {
 			notification.addThemeVariants(variants);
 		}
 	}
@@ -92,7 +92,7 @@ public class CNotificationService {
 	/** Shows an error notification toast (red, middle, long duration) */
 	public static void showError(final String message) {
 		Check.notBlank(message, "Error message cannot be empty");
-		LOGGER.debug("Showing error notification: {}", message);
+		LOGGER.error("Showing error notification: {}", message);
 		final Notification notification = Notification.show(message, LONG_DURATION, Notification.Position.MIDDLE);
 		notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
 	}
@@ -100,7 +100,7 @@ public class CNotificationService {
 	/** Shows an error dialog (modal with OK button) */
 	public static void showErrorDialog(final Exception exception) {
 		Check.notNull(exception, "Exception cannot be null");
-		LOGGER.debug("Showing error dialog for exception: {}", exception.getClass().getSimpleName());
+		LOGGER.error("Showing error dialog for exception: {}", exception.getClass().getSimpleName());
 		final CDialogException dialog = new CDialogException(exception);
 		dialog.open();
 	}
@@ -108,7 +108,7 @@ public class CNotificationService {
 	/** Shows an error dialog with custom message */
 	public static void showErrorDialog(final String message) {
 		Check.notBlank(message, "Error dialog message cannot be empty");
-		LOGGER.debug("Showing error dialog: {}", message);
+		LOGGER.error("Showing error dialog: {}", message);
 		final CDialogException dialog = new CDialogException(new RuntimeException(message));
 		dialog.open();
 	}
@@ -120,7 +120,7 @@ public class CNotificationService {
 	public static void showException(final String message, final Exception exception) {
 		Check.notBlank(message, "Message cannot be empty");
 		Check.notNull(exception, "Exception cannot be null");
-		LOGGER.debug("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
+		LOGGER.error("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
 		closeOpenProgressDialogs();
 		final CDialogMessageWithDetails dialog = new CDialogMessageWithDetails(message, exception);
 		dialog.open();
@@ -129,7 +129,7 @@ public class CNotificationService {
 	/** Shows an info notification toast (blue, bottom-start, medium duration) */
 	public static void showInfo(final String message) {
 		Check.notBlank(message, "Info message cannot be empty");
-		LOGGER.debug("Showing info notification: {}", message);
+		LOGGER.info("Showing info notification: {}", message);
 		final Notification notification = Notification.show(message, MEDIUM_DURATION, Notification.Position.BOTTOM_START);
 		notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
 	}
@@ -137,7 +137,7 @@ public class CNotificationService {
 	/** Shows an information dialog (modal with OK button) */
 	public static void showInfoDialog(final String message) {
 		Check.notBlank(message, "Info dialog message cannot be empty");
-		LOGGER.debug("Showing info dialog: {}", message);
+		LOGGER.info("Showing info dialog: {}", message);
 		final CDialogInformation dialog = new CDialogInformation(message);
 		dialog.open();
 	}
@@ -150,7 +150,7 @@ public class CNotificationService {
 	public static CDialogProgress showProgressDialog(final String title, final String message) {
 		Check.notBlank(title, "Progress dialog title cannot be empty");
 		Check.notBlank(message, "Progress dialog message cannot be empty");
-		LOGGER.debug("Showing progress dialog: {}", title);
+		LOGGER.info("Showing progress dialog: {}", title);
 		final CDialogProgress dialog = new CDialogProgress(title, message);
 		dialog.open();
 		return dialog;

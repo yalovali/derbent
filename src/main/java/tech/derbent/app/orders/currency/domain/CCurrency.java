@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 
 /** CCurrency - Domain entity representing currencies used in orders. Layer: Domain (MVC) Defines the various currencies that can be used in order
@@ -65,7 +66,7 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	}
 
 	@Override
-	public CCurrency createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CCurrency createClone(final CCloneOptions options) throws Exception {
 		final CCurrency clone = super.createClone(options);
 
 		clone.currencyCode = this.currencyCode;

@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.testcases.testcase.domain.CTestCase;
 import tech.derbent.base.users.domain.CUser;
@@ -180,7 +181,7 @@ public class CTestExecution extends CEntityOfProject<CTestExecution> {
 	}
 
 	@Override
-	public CTestExecution createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CTestExecution createClone(final CCloneOptions options) throws Exception {
 		final CTestExecution clone = super.createClone(options);
 
 		clone.testCase = this.testCase;

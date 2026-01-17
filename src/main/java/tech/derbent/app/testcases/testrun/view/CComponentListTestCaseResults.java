@@ -29,6 +29,7 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.app.testcases.testrun.domain.CTestCaseResult;
 import tech.derbent.app.testcases.testrun.domain.CTestResult;
 import tech.derbent.app.testcases.testrun.domain.CTestRun;
@@ -379,8 +380,8 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 	}
 
 	@Override
-	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
-		tech.derbent.api.utils.Check.notNull(pageService, "Page service cannot be null");
+	public void registerWithPageService(final CPageService<?> pageService) {
+		Check.notNull(pageService, "Page service cannot be null");
 		pageService.registerComponent(getComponentName(), this);
 		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
 	}

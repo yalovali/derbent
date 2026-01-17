@@ -19,6 +19,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
@@ -357,7 +358,7 @@ public class CIssue extends CProjectItem<CIssue>
 	public void setEntityType(final CIssueType entityType) { this.entityType = entityType; }
 
 	@Override
-	public void setEntityType(final tech.derbent.api.domains.CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		if (typeEntity instanceof CIssueType) {
 			setEntityType((CIssueType) typeEntity);
 		}

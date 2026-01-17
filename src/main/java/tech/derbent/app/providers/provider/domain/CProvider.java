@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -124,7 +125,7 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	}
 
 	@Override
-	public CProvider createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CProvider createClone(final CCloneOptions options) throws Exception {
 		final CProvider clone = super.createClone(options);
 		clone.entityType = this.entityType;
 		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {

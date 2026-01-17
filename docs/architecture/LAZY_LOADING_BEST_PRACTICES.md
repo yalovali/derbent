@@ -91,7 +91,7 @@ The following entities have been updated to follow this pattern:
 | CTicket | ITicketRepository | ✅ **FIXED** |
 | CDeliverable | IDeliverableRepository | ✅ **FIXED** |
 | CProject | IProjectRepository | ✅ Already correct |
-| CUser | IUserRepository | ✅ Already correct |
+| CUser | IUserRepository | ✅ **FIXED** (2026-01-17) - Added comments to findById |
 
 ## Testing
 
@@ -141,5 +141,6 @@ When reviewing PRs that add new entities:
 
 ## Update History
 
+- 2026-01-17: Fixed CUser.findById() - added missing LEFT JOIN FETCH u.comments
 - 2026-01-16: Initial document created after fixing Asset, Ticket, and Deliverable entities
 - Pattern applies to ALL entities with `IHasAttachments` or `IHasComments`

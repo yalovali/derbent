@@ -1122,17 +1122,23 @@ public void configureGrid(final CGrid<CActivity> grid) {
 
 ### Import Organization (Mandatory)
 
-**ALWAYS use import statements instead of full class names:**
+**ALWAYS use import statements instead of fully-qualified class names:**
 
 #### ✅ Correct
 ```java
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.api.projects.domain.CProject;
+import java.util.List;
+import java.time.LocalDate;
 
 public class CActivityService {
     public CActivity createActivity(String name, CProject project) {
         CActivity activity = new CActivity(name, project);
         return save(activity);
+    }
+    
+    public List<CActivity> findActivitiesByDate(LocalDate date) {
+        return repository.findByDate(date);
     }
 }
 ```
@@ -1146,6 +1152,11 @@ public class CActivityService {
             new CActivity(name, project);
         return save(activity);
     }
+    
+    // WRONG: Using fully-qualified names for java.* classes
+    public java.util.List<CActivity> findActivitiesByDate(java.time.LocalDate date) {
+        return repository.findByDate(date);
+    }
 }
 ```
 
@@ -1155,8 +1166,13 @@ public class CActivityService {
 - Better IDE support and refactoring
 - Reduced line length
 - Consistent with Java best practices
+- Eliminates visual clutter from long package names
 
-**Rule**: Full package paths should only appear in import statements at the top of the file.
+**Rule**: Full package paths (tech.derbent.*, java.*, org.*, etc.) should ONLY appear in import statements at the top of the file. Never use fully-qualified class names in method signatures, field declarations, local variables, or method bodies.
+
+**Exceptions**:
+- When there are name conflicts between classes (e.g., `java.util.Date` vs `java.sql.Date`)
+- In rare cases where a class is used only once and importing would add clutter (very rare)
 
 ### Sample Data Initialization Pattern (Mandatory)
 
@@ -1433,7 +1449,36 @@ public Page<CActivity> findAll(Pageable pageable) {
 
 ### Lazy Loading
 
+**MANDATORY**: All repository queries MUST eagerly fetch lazy collections when entities will be used in UI.
+
+For entities implementing `IHasAttachments` and/or `IHasComments`, **ALL queries MUST include**:
+
 ```java
+LEFT JOIN FETCH entity.attachments
+LEFT JOIN FETCH entity.comments
+```
+
+See [Lazy Loading Best Practices](LAZY_LOADING_BEST_PRACTICES.md) for complete details.
+
+**Example**:
+```java
+@Override
+@Query("""
+    SELECT u FROM #{#entityName} u
+    LEFT JOIN FETCH u.company
+    LEFT JOIN FETCH u.attachments
+    LEFT JOIN FETCH u.comments
+    WHERE u.id = :id
+    """)
+Optional<CUser> findById(@Param("id") Long id);
+```
+
+**Pattern for all entities**:
+```java
+// Use LAZY for collections in entity definition
+@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+private Set<CAttachment> attachments = new HashSet<>();
+
 // Use LAZY for optional relationships
 @ManyToOne(fetch = FetchType.LAZY)
 @JoinColumn(name = "parent_id")
@@ -3047,3 +3092,722 @@ All display/list grids MUST:
    - Numbers: `addColumn_number()`
    - Status/workflow: `addColumn_status()`
 
+---
+
+# Testing Standards and Patterns (MANDATORY)
+
+**Version:** 2.0  
+**Date:** 2026-01-17  
+**Status:** MANDATORY - All tests must follow these rules
+
+## 🎯 Core Testing Principles
+
+### 1. Browser Visibility - MANDATORY
+
+```bash
+# ✅ CORRECT - Browser ALWAYS visible by default
+PLAYWRIGHT_HEADLESS=false mvn test -Dtest=TestClass
+
+# ❌ WRONG - Don't run headless during development
+PLAYWRIGHT_HEADLESS=true mvn test
+```
+
+**Rule:** Browser must be VISIBLE during test development and debugging.  
+**Rationale:** Visual feedback is essential for understanding test behavior and debugging failures.  
+**Default:** `CBaseUITest.java` defaults to visible browser mode
+
+### 2. Playwright Logging - MANDATORY
+
+```bash
+# ✅ CORRECT - Always log to /tmp/playwright.log
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest 2>&1 | tee /tmp/playwright.log
+
+# Monitor in another terminal
+tail -f /tmp/playwright.log
+```
+
+**Rule:** ALL Playwright test output must be logged to `/tmp/playwright.log`.  
+**Rationale:** Centralized logging location for debugging and monitoring across all test runs.  
+**Implementation:** Add `2>&1 | tee /tmp/playwright.log` to all test runner commands.
+
+### 3. Navigation Pattern - MANDATORY (Use CPageTestAuxillary Buttons)
+
+```java
+// ❌ WRONG - Don't navigate via side menu
+navigateToViewByText("Activities");
+clickMenuItem("Activities");
+
+// ❌ WRONG - Don't create custom navigation test scripts  
+@Test
+void testJumpToSpecificView() {
+    page.navigate("http://localhost:8080/cdynamicpagerouter/specific-view");
+}
+
+// ✅ CORRECT - Use CPageTestAuxillary buttons with deterministic IDs
+@Test
+void testSpecificView() {
+    loginToApplication();
+    
+    // Navigate to CPageTestAuxillary page
+    page.navigate("http://localhost:" + port + "/cpagetestauxillary");
+    wait_500();
+    
+    // Click button by ID (stable, deterministic)
+    page.locator("#test-aux-btn-activities-0").click();
+    wait_1000();
+    
+    // Continue test...
+}
+
+// ✅ BETTER - Use route filtering from comprehensive test
+@Test
+void testFilteredViews() {
+    // Set system property to filter by keyword
+    System.setProperty("test.routeKeyword", "activity");
+    
+    // Run comprehensive test - it will only test matching routes
+    testAllAuxillaryPages();
+}
+```
+
+**Rule:** Always use **CPageTestAuxillary button IDs** for navigation in Playwright tests.  
+**Rationale:**
+- **Deterministic**: Button IDs are stable and generated consistently
+- **No Side Menu Issues**: Avoids Vaadin side menu rendering/timing issues
+- **Filtering Support**: Can skip already-passed tests via keyword filtering
+- **Single Source**: CPageTestAuxillaryService provides all routes dynamically
+
+**Button ID Pattern:**
+- Format: `test-aux-btn-{sanitized-title}-{index}`
+- Example: `#test-aux-btn-activities-0`, `#test-aux-btn-budget-types-5`
+- Attributes: `data-route`, `data-title`, `data-button-index` for metadata
+
+**Filtering Pattern:**
+```bash
+# Test only specific routes by keyword
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity
+
+# Test only specific button by ID
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetButtonId=test-aux-btn-activities-0
+
+# Test specific route directly
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetRoute=cdynamicpagerouter/activities
+```
+
+### 4. Exception Handling - MANDATORY
+
+```java
+// ✅ CORRECT - Always throw exceptions, never ignore
+catch (Exception e) {
+    LOGGER.error("Error: {}", e.getMessage(), e);  // Log with stack trace
+    CNotificationService.showError("Error occurred"); // Notify user
+    throw new RuntimeException("Context info", e);   // Throw, don't ignore
+}
+
+// ❌ WRONG - Never silently ignore exceptions
+catch (Exception e) {
+    LOGGER.warn("Error: {}", e.getMessage());  // Only warning
+    // No throw - execution continues
+}
+```
+
+**Rule:** All exceptions must be logged, shown to user (if UI context), and thrown.  
+**Rationale:** Silent failures mask problems and make debugging impossible.
+
+### 5. Fail-Fast on Errors - MANDATORY
+
+```java
+// ✅ CORRECT - Stop immediately on exceptions
+@Test
+void testEntity() {
+    try {
+        performOperation();
+        performFailFastCheck("Operation Name");  // Checks for exception dialogs
+    } catch (AssertionError e) {
+        takeScreenshot("error-operation", true);
+        throw e;  // Propagate immediately
+    }
+}
+```
+
+**Rule:** Tests must stop immediately when exceptions occur.  
+**Rationale:** Continuing after errors wastes time and produces misleading results.
+
+## 📋 Comprehensive CRUD Testing Pattern
+
+### Entity Test Checklist (MANDATORY for all entities)
+
+```java
+@Test
+@DisplayName("🧪 Test Entity CRUD Operations")
+void testEntityCrud() {
+    String pageName = "entity-name";
+    
+    // 1. NAVIGATE via CPageTestAuxillary
+    page.navigate("http://localhost:" + port + "/cpagetestauxillary");
+    wait_500();
+    page.locator("#test-aux-btn-entity-name-0").click();
+    wait_1000();
+    takeScreenshot("001-entity-page-loaded");
+    
+    // 2. VERIFY GRID LOADS
+    boolean hasGrid = checkGridExists();
+    LOGGER.info("Grid present: {}", hasGrid);
+    
+    // 3. VERIFY CRUD TOOLBAR
+    boolean hasCrud = checkCrudToolbarExists();
+    LOGGER.info("CRUD toolbar present: {}", hasCrud);
+    
+    // 4. TEST CREATE
+    if (checkCrudButtonExists(CRUD_NEW_BUTTON_ID)) {
+        testCreateAndSave(pageName);
+    }
+    
+    // 5. TEST UPDATE
+    if (checkGridHasData() && checkCrudButtonExists(CRUD_SAVE_BUTTON_ID)) {
+        testUpdateAndSave(pageName);
+    }
+    
+    // 6. TEST DELETE
+    if (checkGridHasData() && checkCrudButtonExists(CRUD_DELETE_BUTTON_ID)) {
+        testDeleteButton(pageName);
+    }
+    
+    // 7. TEST CUSTOM COMPONENTS
+    if (hasKanbanBoard()) {
+        runKanbanBoardTests(pageName);
+    }
+    
+    takeScreenshot("999-entity-test-complete");
+}
+```
+
+### Test Execution Order (MANDATORY)
+
+1. **Login** → `loginToApplication()`
+2. **Navigate to Test Auxiliary** → `page.navigate(".../cpagetestauxillary")`
+3. **Click Target Button** → `page.locator("#test-aux-btn-...").click()`
+4. **Analyze Page** → Check for grids, CRUD toolbars, custom components
+5. **Test Grid** → If present: sort, filter, select
+6. **Test CRUD** → If present: create, update, delete
+7. **Test Components** → If present: kanban, attachments, comments
+8. **Screenshot** → At each major step
+
+### Component-Specific Testing
+
+#### Kanban Board Testing
+```java
+private void runKanbanBoardTests(String pageName) {
+    Locator columns = page.locator(".kanban-column");
+    Locator postits = page.locator(".kanban-postit");
+    
+    // Test story point editing
+    editKanbanStoryPoints(pageName, postits.first());
+    
+    // Test drag between columns
+    dragKanbanPostitBetweenColumns(pageName, columns, postits.first());
+    
+    // Test drag to backlog
+    dragKanbanPostitToBacklog(pageName, columns, postits.first());
+    
+    takeScreenshot("kanban-tested");
+}
+```
+
+#### Attachments Section Testing
+```java
+private void testAttachmentsSection(String pageName) {
+    clickTabOrSection("Attachments");
+    
+    // Test upload
+    uploadFile("test-document.pdf");
+    verifyAttachmentInList("test-document.pdf");
+    
+    // Test download
+    downloadAttachment("test-document.pdf");
+    
+    // Test delete
+    deleteAttachment("test-document.pdf");
+    confirmDialog();
+    
+    takeScreenshot("attachments-tested");
+}
+```
+
+#### Comments Section Testing
+```java
+private void testCommentsSection(String pageName) {
+    clickTabOrSection("Comments");
+    
+    // Test add
+    fillCommentField("Test comment " + System.currentTimeMillis());
+    clickButton("Add Comment");
+    verifyCommentInList("Test comment");
+    
+    // Test edit
+    selectComment("Test comment");
+    clickButton("Edit");
+    fillCommentField("Updated comment");
+    clickButton("Save");
+    
+    // Test delete
+    deleteComment("Updated comment");
+    
+    takeScreenshot("comments-tested");
+}
+```
+
+## 🎯 Test Helper Methods (MANDATORY)
+
+All test classes extending `CBaseUITest` must use these standardized helpers:
+
+### Navigation Helpers
+```java
+// Login
+protected void loginToApplication();
+protected void loginToApplication(String username, String password);
+
+// Navigate to test auxiliary page
+protected void navigateToTestAuxillaryPage();
+
+// Click button by ID (from CPageTestAuxillary)
+protected void clickAuxillaryButton(String buttonId);
+```
+
+### Grid Helpers
+```java
+protected boolean checkGridExists();
+protected boolean checkGridHasData();
+protected boolean checkGridIsSortable();
+protected int getGridRowCount();
+protected String getFirstGridCellText();
+protected void selectGridRowByCellText(String text);
+protected void testGridSorting(String pageName);
+protected void testGridFiltering(String pageName);
+```
+
+### CRUD Helpers
+```java
+protected boolean checkCrudToolbarExists();
+protected boolean checkCrudButtonExists(String buttonId);
+protected void testCreateAndSave(String pageName);
+protected void testUpdateAndSave(String pageName);
+protected void testDeleteButton(String pageName);
+protected void testRefreshButton(String pageName);
+```
+
+### Field Helpers
+```java
+protected void fillFieldById(String fieldId, String value);
+protected String readFieldValueById(String fieldId);
+protected void selectFirstComboBoxOptionById(String fieldId);
+protected boolean isComboBoxById(String fieldId);
+protected boolean isFieldEditable(Locator field);
+protected FieldValueResult populateEditableFields(String pageName);
+```
+
+### Screenshot Helpers
+```java
+protected void takeScreenshot(String name);
+protected void takeScreenshot(String name, boolean isError);
+```
+
+**Screenshot Policy - MANDATORY:**
+- ❌ **NEVER** take screenshots on successful operations
+- ✅ **ONLY** take screenshots when errors/exceptions occur
+- **Rationale**: Reduces test runtime, disk usage, and focuses attention on failures
+
+```java
+// ❌ WRONG - Taking screenshot after every operation
+loginToApplication();
+takeScreenshot("after-login", false);  // ← Remove this
+clickNewButton();
+takeScreenshot("clicked-new", false);  // ← Remove this
+
+// ✅ CORRECT - Only screenshot on errors
+try {
+    loginToApplication();
+    clickNewButton();
+    fillForm();
+    clickSave();
+    // No screenshots - test passed
+} catch (Exception e) {
+    takeScreenshot("test-failure", true);  // ← Only on error
+    throw e;
+}
+```
+
+### Wait Helpers
+```java
+protected void wait_500();
+protected void wait_1000();
+protected void wait_2000();
+protected void wait_afterlogin();
+```
+
+## 📊 Test Reporting Format (MANDATORY)
+
+### Log Format
+```
+INFO  (TestClass.java:123) testMethod:🚀 Starting comprehensive test...
+INFO  (TestClass.java:125) testMethod:📝 Step 1: Logging into application...
+INFO  (TestClass.java:130) testMethod:✅ Successfully logged in
+INFO  (TestClass.java:135) testMethod:🧭 Step 2: Navigating to CPageTestAuxillary...
+INFO  (TestClass.java:140) testMethod:🔍 Step 3: Discovering navigation buttons...
+INFO  (TestClass.java:145) testMethod:🔍 Discovered 45 navigation buttons
+INFO  (TestClass.java:150) testMethod:🎯 Testing button 1/45: Activities
+INFO  (TestClass.java:155) testMethod:   ✓ Grid has data: true
+INFO  (TestClass.java:160) testMethod:   ✓ CRUD toolbar present: true
+INFO  (TestClass.java:165) testMethod:   ➕ Testing New button...
+INFO  (TestClass.java:170) testMethod:      ✓ Created row (5 -> 6)
+INFO  (TestClass.java:175) testMethod:   ✏️  Testing Update + Save...
+INFO  (TestClass.java:180) testMethod:      ✓ Updated value
+INFO  (TestClass.java:185) testMethod:   🗑️ Testing Delete button...
+INFO  (TestClass.java:190) testMethod:      ✓ Deleted row (6 -> 5)
+INFO  (TestClass.java:195) testMethod:✅ Completed testing button 1/45
+```
+
+### Screenshot Naming Convention
+```
+001-after-login.png
+002-test-auxillary-page.png
+003-page-activities-initial.png
+004-page-activities-grid-tested.png
+005-page-activities-created.png
+006-page-activities-updated.png
+007-page-activities-deleted.png
+008-page-activities-final.png
+```
+
+**Pattern**: `{counter:03d}-{description}.png`
+
+## 🔁 Test Execution Strategy
+
+### Run Comprehensive Test with Filtering
+
+```bash
+# Run all pages
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest 2>&1 | tee /tmp/playwright.log
+
+# Run only activity-related pages
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/playwright.log
+
+# Run only test management pages
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=test 2>&1 | tee /tmp/playwright.log
+
+# Run only financial pages
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=budget 2>&1 | tee /tmp/playwright.log
+
+# Run specific single page by button ID
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
+
+# Run specific route directly
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetRoute=cdynamicpagerouter/activities 2>&1 | tee /tmp/playwright.log
+```
+
+### Repeat Until Success Pattern
+
+```bash
+#!/bin/bash
+# run-tests-until-success.sh
+
+while true; do
+    echo "🚀 Starting test run..."
+    mvn test -Dtest=CPageTestAuxillaryComprehensiveTest 2>&1 | tee /tmp/playwright.log
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ ALL TESTS PASSED!"
+        break
+    else
+        echo "❌ Tests failed, analyzing logs..."
+        tail -n 100 /tmp/playwright.log
+        echo "Fix issues and press Enter to retry..."
+        read
+    fi
+done
+```
+
+## 🤖 Intelligent Adaptive Testing Pattern (MANDATORY)
+
+### Overview
+
+The **Adaptive Testing Pattern** uses intelligent component detection to automatically test pages based on their actual UI components, eliminating hardcoded test scripts and making tests self-maintaining.
+
+### Architecture
+
+```
+CAdaptivePageTest (Main Test Class)
+├── IControlSignature (Interface)
+│   ├── isDetected(Page) → boolean
+│   ├── getSignatureName() → String
+│   └── getTester() → IComponentTester
+├── CControlSignature (Default Implementation)
+├── IComponentTester (Interface)
+│   ├── canTest(Page) → boolean
+│   ├── getComponentName() → String
+│   └── test(Page) → void
+├── CBaseComponentTester (Base Class)
+│   └── Common utilities (elementExists, clickButton, wait_*)
+└── Component Implementations
+    ├── CCrudToolbarTester
+    ├── CCloneToolbarTester
+    ├── CGridComponentTester
+    ├── CAttachmentComponentTester
+    ├── CCommentComponentTester
+    ├── CStatusFieldTester
+    └── CDatePickerTester
+```
+
+### Rule 1: Use CAdaptivePageTest for All Page Testing (MANDATORY)
+
+```bash
+# ✅ CORRECT - Use adaptive test for all pages
+mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+
+# ✅ CORRECT - Test specific page by test support button ID
+mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
+
+# ❌ WRONG - Don't create page-specific test classes
+@Test
+void testActivitiesPage() { ... }  // DON'T DO THIS
+
+# ❌ WRONG - Don't hardcode component tests in test methods
+@Test
+void testWithAttachments() {
+    if (page.locator("#attachment").count() > 0) {  // DON'T DO THIS
+        // hardcoded attachment test
+    }
+}
+```
+
+**Rationale:**
+- **Self-Maintaining**: New pages automatically tested without new test code
+- **Component-Based**: Tests adapt to page content (grid, CRUD, attachments, etc.)
+- **No Duplication**: Single test class handles ALL pages
+- **Extensible**: Add new component testers without touching test logic
+
+### Rule 2: Create Component Testers, Not Page-Specific Tests (MANDATORY)
+
+When you need to test a new UI component type (e.g., tags, calendar, charts):
+
+```java
+// ✅ CORRECT - Create a component tester
+package automated_tests.tech.derbent.ui.automation.components;
+
+public class CTagComponentTester extends CBaseComponentTester {
+    
+    private static final String TAG_SELECTOR = "#custom-tag-component, [id*='tag']";
+    
+    @Override
+    public boolean canTest(final Page page) {
+        return elementExists(page, TAG_SELECTOR);
+    }
+    
+    @Override
+    public String getComponentName() {
+        return "Tag Component";
+    }
+    
+    @Override
+    public void test(final Page page) {
+        LOGGER.info("      🏷️ Testing Tag Component...");
+        // Test tag-specific functionality
+        if (elementExists(page, "#cbutton-add-tag")) {
+            LOGGER.info("         ✓ Add tag button found");
+            // Perform actual operation test if possible
+            try {
+                page.locator("#cbutton-add-tag").click();
+                waitMs(page, 500);
+                checkForExceptions(page);
+                LOGGER.info("         ✅ Add tag button works");
+            } catch (Exception e) {
+                LOGGER.warn("         ⚠️ Add tag failed: {}", e.getMessage());
+            }
+        }
+        LOGGER.info("      ✅ Tag component test complete");
+    }
+}
+```
+
+Then register it in `CAdaptivePageTest` control signatures:
+
+```java
+private final IComponentTester tagTester = new CTagComponentTester();
+
+private final List<IControlSignature> controlSignatures = List.of(
+    CControlSignature.forSelector("Tag Signature", "#custom-tag-component, [id*='tag']", tagTester)
+);
+```
+
+**Result:** Every page with tags is automatically tested—no additional test methods needed!
+
+**Component Tester Best Practices:**
+- ✅ **Validate Operations**: Don't just check existence—test button clicks work
+- ✅ **Check Side Effects**: Verify grid counts change after Create/Delete
+- ✅ **Open Tabs/Accordions**: If a signature is a tab/accordion, open it before CRUD checks (attachments/comments)
+- ✅ **Handle Exceptions**: Catch and log errors gracefully
+- ✅ **Generic Implementation**: Work across all pages, not page-specific
+- ❌ **Never Assume**: Use try-catch for all interactions
+
+### Rule 3: Component Testers Must Be Generic (MANDATORY)
+
+```java
+// ✅ CORRECT - Generic, works with any entity
+public class CAttachmentComponentTester extends CBaseComponentTester {
+    @Override
+    public void test(final Page page) {
+        // Generic test - works for Activities, Meetings, Issues, etc.
+        if (elementExists(page, "#cbutton-add-attachment")) {
+            LOGGER.info("         ✓ Add attachment button found");
+        }
+    }
+}
+
+// ❌ WRONG - Entity-specific logic
+public class CAttachmentComponentTester extends CBaseComponentTester {
+    @Override
+    public void test(final Page page) {
+        if (page.url().contains("activity")) {  // DON'T CHECK ENTITY TYPE
+            // activity-specific test
+        }
+    }
+}
+```
+
+**Rule:** Component testers must work generically across all pages—no entity-specific logic.
+
+### Rule 4: Navigation via CPageTestAuxillary Buttons (MANDATORY)
+
+```java
+// ✅ CORRECT - CAdaptivePageTest uses buttons automatically
+// Just run the test - it discovers all buttons itself
+mvn test -Dtest=CAdaptivePageTest
+
+// ❌ WRONG - Don't navigate via side menu
+page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText("Activities")).click();
+
+// ❌ WRONG - Don't create custom navigation
+page.navigate("http://localhost:8080/cdynamicpagerouter/activities");
+```
+
+**How CAdaptivePageTest Works:**
+1. Navigates to CPageTestAuxillary
+2. Discovers all buttons with `[id^='test-aux-btn-']` selector
+3. Selects target button (first by default or `-Dtest.targetButtonId=...`)
+4. Clicks the test support button to navigate
+5. Detects control signatures on the page
+6. Runs component testers mapped to detected signatures
+
+### Rule 5: Exception Detection is Automatic (MANDATORY)
+
+Component testers inherit exception detection from `CBaseComponentTester`:
+
+```java
+// Automatically available in all component testers
+protected boolean hasException(final Page page);  // Checks for exception dialogs
+protected boolean elementExists(final Page page, final String selector);
+protected boolean clickButton(final Page page, final String buttonId);
+protected boolean fillField(final Page page, final String fieldId, final String value);
+protected void wait_500(final Page page);
+```
+
+**Rule:** Use inherited utilities—don't reimplement common functionality.
+
+### Example: Adding a New Component Tester
+
+Scenario: You want to test calendar/schedule components.
+
+**Step 1:** Create the tester:
+
+```java
+package automated_tests.tech.derbent.ui.automation.components;
+
+public class CCalendarComponentTester extends CBaseComponentTester {
+    
+    private static final String CALENDAR_SELECTOR = "vaadin-calendar, [id*='calendar']";
+    
+    @Override
+    public boolean canTest(final Page page) {
+        return elementExists(page, CALENDAR_SELECTOR);
+    }
+    
+    @Override
+    public String getComponentName() {
+        return "Calendar Component";
+    }
+    
+    @Override
+    public void test(final Page page) {
+        LOGGER.info("      📅 Testing Calendar Component...");
+        if (elementExists(page, "vaadin-calendar")) {
+            LOGGER.info("         ✓ Calendar component detected");
+            // Test calendar-specific functionality
+        }
+        LOGGER.info("      ✅ Calendar component test complete");
+    }
+}
+```
+
+**Step 2:** Register in `CAdaptivePageTest` control signatures:
+
+```java
+private final IComponentTester calendarTester = new CCalendarComponentTester();
+
+private final List<IControlSignature> controlSignatures = List.of(
+    CControlSignature.forSelector("Calendar Signature", "vaadin-calendar, [id*='calendar']", calendarTester)
+);
+```
+
+**Step 3:** Done! Run test:
+
+```bash
+mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+```
+
+All pages with calendars are now automatically tested!
+
+## ✅ Testing Rules Summary
+
+1. **Browser Visible**: Default to visible mode for development
+2. **Log to /tmp/playwright.log**: All Playwright output centralized
+3. **Use CAdaptivePageTest**: Single test class for all pages (no page-specific tests)
+4. **Create Component Testers**: Extend `CBaseComponentTester`, implement `IComponentTester`
+5. **Navigate via CPageTestAuxillary**: Use test support buttons (no direct routes)
+6. **Target with Button ID**: Use `-Dtest.targetButtonId` for a specific page
+7. **Throw Exceptions**: Never silently ignore errors
+8. **Fail-Fast**: Stop immediately on exceptions
+9. **Generic Component Tests**: Work across all entities, no entity-specific logic
+10. **Inherit Utilities**: Use `CBaseComponentTester` methods, don't reimplement
+11. **Deterministic IDs**: All buttons/fields have stable IDs
+12. **Run Until Success**: Don't stop until all tests pass
+
+## 📁 Required Test Files
+
+```
+src/test/java/automated_tests/tech/derbent/ui/automation/
+├── CBaseUITest.java                           ✅ Base test class with helpers
+├── CPageTestAuxillaryComprehensiveTest.java  ✅ Main comprehensive test
+├── CPageTestNewEntities.java                  ✅ Focused new entity tests
+└── [Entity]CrudTest.java                      ✅ Individual entity tests
+
+src/main/java/tech/derbent/api/views/
+├── CPageTestAuxillary.java                    ✅ Navigation button page
+└── CPageTestAuxillaryService.java             ✅ Route discovery service
+```
+
+## 🎯 Success Criteria
+
+- ✅ Browser visible during all test runs
+- ✅ All output logged to `/tmp/playwright.log`
+- ✅ Navigation via CPageTestAuxillary buttons (not side menu)
+- ✅ All exceptions logged and thrown
+- ✅ Tests stop immediately on errors
+- ✅ All CRUD operations tested per entity
+- ✅ Custom components tested (kanban, attachments, comments)
+- ✅ Screenshots captured at each step
+- ✅ Tests filtered by keyword to skip passed pages
+- ✅ Deterministic button/field IDs used throughout
+
+---
+
+**END OF TESTING STANDARDS**

@@ -1325,9 +1325,13 @@ public abstract class CBaseUITest {
 			return;
 		}
 		try {
-			LOGGER.info("🧭 Priming navigation menu to ensure dynamic items are loaded");
-			final int visited = visitMenuItems(false, true, "prime");
-			LOGGER.info("✅ Navigation primed by visiting {} menu entries", visited);
+			LOGGER.info("🧭 Priming navigation menu by checking menu items exist");
+			// Just verify menu is visible, don't click anything
+			final String menuSelector =
+					".hierarchical-menu-item, vaadin-side-nav-item, vaadin-tabs vaadin-tab, nav a[href], .nav-item a[href], a[href].menu-link, a[href].side-nav-link";
+			page.waitForSelector(menuSelector, new Page.WaitForSelectorOptions().setTimeout(10000));
+			final int menuItemCount = page.locator(menuSelector).count();
+			LOGGER.info("✅ Navigation menu ready with {} items", menuItemCount);
 		} catch (final AssertionError e) {
 			LOGGER.error("❌ Navigation priming failed: {}", e.getMessage());
 			throw e;

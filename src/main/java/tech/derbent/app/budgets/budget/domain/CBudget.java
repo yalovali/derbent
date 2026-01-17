@@ -17,6 +17,7 @@ import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -141,7 +142,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	}
 
 	@Override
-	public CBudget createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CBudget createClone(final CCloneOptions options) throws Exception {
 		final CBudget clone = super.createClone(options);
 		clone.budgetAmount = budgetAmount;
 		clone.actualCost = actualCost;

@@ -29,6 +29,11 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.ui.component.filter.CAbstractFilterToolbar;
+import tech.derbent.api.ui.component.filter.CEntityTypeFilter;
+import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
+import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.ui.component.filter.CSprintFilter;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CDiv;
@@ -160,8 +165,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		LOGGER.debug("Applying filters to Kanban board component");
 		final CKanbanLine currentLine = getValue();
 		Check.notNull(currentLine, "Kanban line must be set before applying filters");
-		final tech.derbent.api.ui.component.filter.CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
-		final CSprint sprint = criteria.getValue(tech.derbent.api.ui.component.filter.CSprintFilter.FILTER_KEY);
+		final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
+		final CSprint sprint = criteria.getValue(CSprintFilter.FILTER_KEY);
 		// PERFORMANCE OPTIMIZATION: Check if sprint changed before reloading from
 		// database
 		final boolean sprintChanged = !isSameSprint(sprint);
@@ -308,11 +313,11 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	 * @param criteria The filter criteria to apply
 	 * @return Filtered list of sprint items matching the criteria */
 	private List<CSprintItem>
-			filterSprintItems(final tech.derbent.api.ui.component.filter.CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria) {
+			filterSprintItems(final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria) {
 		final List<CSprintItem> filtered = new ArrayList<>();
-		final Class<?> entityType = criteria.getValue(tech.derbent.api.ui.component.filter.CEntityTypeFilter.FILTER_KEY);
-		final tech.derbent.api.ui.component.filter.CResponsibleUserFilter.ResponsibleFilterMode responsibleMode =
-				criteria.getValue(tech.derbent.api.ui.component.filter.CResponsibleUserFilter.FILTER_KEY);
+		final Class<?> entityType = criteria.getValue(CEntityTypeFilter.FILTER_KEY);
+		final CResponsibleUserFilter.ResponsibleFilterMode responsibleMode =
+				criteria.getValue(CResponsibleUserFilter.FILTER_KEY);
 		for (final CSprintItem sprintItem : allSprintItems) {
 			if (sprintItem == null || sprintItem.getParentItem() == null) {
 				continue;
@@ -466,10 +471,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	/** Filters items by responsible mode. */
 	private boolean matchesResponsibleFilter(final CSprintItem sprintItem,
-			final tech.derbent.api.ui.component.filter.CResponsibleUserFilter.ResponsibleFilterMode mode) {
+			final CResponsibleUserFilter.ResponsibleFilterMode mode) {
 		// LOGGER.debug("Checking responsible filter for Kanban board item {}",
 		// sprintItem != null ? sprintItem.getId() : "null");
-		if (mode == null || mode == tech.derbent.api.ui.component.filter.CResponsibleUserFilter.ResponsibleFilterMode.ALL) {
+		if (mode == null || mode == CResponsibleUserFilter.ResponsibleFilterMode.ALL) {
 			return true;
 		}
 		if (mode == tech.derbent.api.ui.component.filter.CResponsibleUserFilter.ResponsibleFilterMode.CURRENT_USER) {
@@ -701,7 +706,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	}
 
 	@Override
-	public void registerWithPageService(final tech.derbent.api.services.pageservice.CPageService<?> pageService) {
+	public void registerWithPageService(final CPageService<?> pageService) {
 		Check.notNull(pageService, "Page service cannot be null when registering Kanban board");
 		pageService.registerComponent(getComponentName(), this);
 		LOGGER.debug("[BindDebug] Registered Kanban board component as '{}'", getComponentName());
@@ -717,7 +722,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			loadSprintItemsForSprint(currentSprint);
 			LOGGER.info("[DragDrop] After loadSprintItemsForSprint - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
 			// Reapply filters to maintain filter state after reload
-			final tech.derbent.api.ui.component.filter.CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria =
+			final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria =
 					filterToolbar.getCurrentCriteria();
 			sprintItems = filterSprintItems(criteria);
 			LOGGER.info("[DragDrop] After filterSprintItems - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");

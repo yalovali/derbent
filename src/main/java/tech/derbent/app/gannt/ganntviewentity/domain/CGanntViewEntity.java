@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 
 @Entity
@@ -27,7 +28,7 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 	}
 
 	@Override
-	public CGanntViewEntity createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CGanntViewEntity createClone(final CCloneOptions options) throws Exception {
 		return super.createClone(options);
 	}
 }

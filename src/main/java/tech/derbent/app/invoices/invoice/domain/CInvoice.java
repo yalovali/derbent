@@ -22,6 +22,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.attachments.domain.CAttachment;
@@ -239,7 +240,7 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 	}
 
 	@Override
-	public CInvoice createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CInvoice createClone(final CCloneOptions options) throws Exception {
 		final CInvoice clone = super.createClone(options);
 		clone.invoiceNumber = invoiceNumber + " (Copy)";
 		clone.customerName = customerName;

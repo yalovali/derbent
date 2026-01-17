@@ -21,6 +21,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -178,7 +179,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	}
 
 	@Override
-	public COrder createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public COrder createClone(final CCloneOptions options) throws Exception {
 		final COrder clone = super.createClone(options);
 		clone.orderNumber = orderNumber != null ? orderNumber + " (Copy)" : null;
 		clone.providerCompanyName = providerCompanyName;

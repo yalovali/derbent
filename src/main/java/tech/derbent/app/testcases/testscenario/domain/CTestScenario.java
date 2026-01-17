@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
@@ -153,7 +154,7 @@ public class CTestScenario extends CEntityOfProject<CTestScenario> implements IH
 	}
 
 	@Override
-	public CTestScenario createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CTestScenario createClone(final CCloneOptions options) throws Exception {
 		final CTestScenario clone = super.createClone(options);
 
 		clone.description = this.description;

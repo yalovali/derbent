@@ -22,6 +22,7 @@ import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
+import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 
 /** CWorkflowEntityInitializerService - Initializer service for workflow entity screens. Layer: Service (MVC) Provides screen and grid configurations
  * for workflow entity management. */
@@ -67,7 +68,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 	 * @throws IllegalArgumentException if status names are not found */
 	private static void createFlowFromTo(final CWorkflowEntity workflow, final String startStatusName, final String destinationStatusName,
 			final List<CProjectItemStatus> statuses, final List<CUserProjectRole> roles, final boolean isInitialStatus,
-			final tech.derbent.api.workflow.service.CWorkflowStatusRelationService workflowStatusRelationService) {
+			final CWorkflowStatusRelationService workflowStatusRelationService) {
 		Check.notNull(workflow, "Workflow cannot be null");
 		Check.notBlank(startStatusName, "Start status name cannot be blank");
 		Check.notBlank(destinationStatusName, "Destination status name cannot be blank");

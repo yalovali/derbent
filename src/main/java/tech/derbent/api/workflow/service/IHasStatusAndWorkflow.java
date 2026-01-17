@@ -5,8 +5,9 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 
 /** IHasStatusAndWorkflow - Interface for entities that support workflow-based status management.
@@ -82,8 +83,8 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 	 * @param target the target entity
 	 * @param options copy options controlling whether status and workflow are copied
 	 * @return true if status/workflow were copied, false if skipped */
-	static boolean copyStatusAndWorkflowTo(final tech.derbent.api.entity.domain.CEntityDB<?> source,
-			final tech.derbent.api.entity.domain.CEntityDB<?> target, final tech.derbent.api.interfaces.CCloneOptions options) {
+	static boolean copyStatusAndWorkflowTo(final CEntityDB<?> source,
+			final CEntityDB<?> target, final CCloneOptions options) {
 		// Check if both source and target implement IHasStatusAndWorkflow
 		if (!(source instanceof IHasStatusAndWorkflow) || !(target instanceof IHasStatusAndWorkflow)) {
 			return false; // Skip silently if target doesn't support status/workflow

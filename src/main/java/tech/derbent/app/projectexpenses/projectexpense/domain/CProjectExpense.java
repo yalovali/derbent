@@ -18,6 +18,7 @@ import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
@@ -192,7 +193,7 @@ public class CProjectExpense extends CProjectItem<CProjectExpense> implements IH
 	}
 
 	@Override
-	public CProjectExpense createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CProjectExpense createClone(final CCloneOptions options) throws Exception {
 		final CProjectExpense clone = super.createClone(options);
 		clone.amount = this.amount;
 		clone.entityType = this.entityType;

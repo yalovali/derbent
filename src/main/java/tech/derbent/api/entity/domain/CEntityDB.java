@@ -4,7 +4,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +21,10 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.IEntityDBStatics;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, tech.derbent.api.interfaces.ICopyable<EntityClass> {
@@ -62,7 +70,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	}
 
 	public void copy_invokeCopy(final CEntityDB<?> source, final CEntityDB<?> target, final Boolean getActiveMethod,
-			final java.util.function.Consumer<Boolean> setActiveMethod) throws Exception {
+			final Consumer<Boolean> setActiveMethod) throws Exception {
 		setActiveMethod.accept(getActiveMethod);
 	}
 
@@ -71,7 +79,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @param supplier The getter method reference (e.g., this::getFieldName)
 	 * @param consumer The setter method reference (e.g., target::setFieldName)
 	 * @param <T>      The field type */
-	public <T> void copyField(final java.util.function.Supplier<T> supplier, final java.util.function.Consumer<T> consumer) {
+	public <T> void copyField(final Supplier<T> supplier, final Consumer<T> consumer) {
 		if (supplier == null || consumer == null) {
 			return; // Skip if either is missing
 		}
@@ -89,8 +97,8 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @param consumer  The collection setter
 	 * @param createNew If true, creates new HashSet/ArrayList; if false, reuses reference
 	 * @param <T>       The collection element type */
-	public <T> void copyCollection(final java.util.function.Supplier<? extends Collection<T>> supplier,
-			final java.util.function.Consumer<? super Collection<T>> consumer, final boolean createNew) {
+	public <T> void copyCollection(final Supplier<? extends Collection<T>> supplier,
+			final Consumer<? super Collection<T>> consumer, final boolean createNew) {
 		if (supplier == null || consumer == null) {
 			return;
 		}
@@ -101,8 +109,8 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 				return;
 			}
 			if (createNew) {
-				if (source instanceof java.util.Set) {
-					consumer.accept(new java.util.HashSet<>(source));
+				if (source instanceof Set) {
+					consumer.accept(new HashSet<>(source));
 				} else {
 					consumer.accept(new ArrayList<>(source));
 				}
@@ -123,9 +131,9 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		copyField(this::getActive, target::setActive);
 		// Automatically copy common interface fields if both source and target implement them
 		// This reduces code duplication across all entities
-		tech.derbent.app.comments.domain.IHasComments.copyCommentsTo(this, target, options);
-		tech.derbent.app.attachments.domain.IHasAttachments.copyAttachmentsTo(this, target, options);
-		tech.derbent.api.workflow.service.IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
+		IHasComments.copyCommentsTo(this, target, options);
+		IHasAttachments.copyAttachmentsTo(this, target, options);
+		IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
 	}
 
 	public void copyEntityTo(CEntityDB<?> target) throws Exception {
@@ -318,7 +326,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	private void updateAuditFields() {
 		try {
 			final Class<?> entityClass = ProxyUtils.getUserClass(this.getClass());
-			final Method updateMethod = tech.derbent.api.utils.CAuxillaries.getMethod(entityClass, "updateLastModified");
+			final Method updateMethod = CAuxillaries.getMethod(entityClass, "updateLastModified");
 			if (updateMethod != null) {
 				updateMethod.invoke(this);
 				LOGGER.debug("Updated audit fields for: {}", this.getClass().getSimpleName());

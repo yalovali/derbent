@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -28,6 +29,7 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.base.session.service.ISessionService;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
@@ -37,12 +39,12 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	private final Class<T> entityType;
 	private String minWidth = "100%";
 	private String padding = "4px 8px";
-	private java.util.function.Function<String, T> persistenceConverter;
+	private Function<String, T> persistenceConverter;
 	private boolean persistenceEnabled = false;
 	private String persistenceKey;
 	// Styling configuration
 	private Boolean roundedCorners = Boolean.TRUE;
-	private tech.derbent.base.session.service.ISessionService sessionService;
+	private ISessionService sessionService;
 
 	/** Constructor for CColorAwareComboBox with entity type.
 	 * @param entityType the entity class for the ComboBox */
@@ -175,7 +177,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	 * <p>
 	 * After calling this method, the ComboBox will no longer automatically save or restore its value.
 	 * </p>
-	 * @see #enablePersistence(String, java.util.function.Function) */
+	 * @see #enablePersistence(String, Function) */
 	public void disablePersistence() {
 		persistenceEnabled = false;
 		LOGGER.info("[CColorAwareComboBox] Persistence disabled for key: {}", persistenceKey);
@@ -200,7 +202,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	 * @param converter  Function to convert stored ID back to entity (return null if not found)
 	 * @throws IllegalArgumentException if storageKey is null/blank or converter is null
 	 * @see #disablePersistence() */
-	public void enablePersistence(final String storageKey, final java.util.function.Function<String, T> converter) {
+	public void enablePersistence(final String storageKey, final Function<String, T> converter) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");
 		}

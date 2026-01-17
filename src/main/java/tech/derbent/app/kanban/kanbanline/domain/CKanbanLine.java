@@ -14,6 +14,7 @@ import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
 
 @Entity
@@ -64,10 +65,10 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	}
 
 	@Override
-	public CKanbanLine createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CKanbanLine createClone(final CCloneOptions options) throws Exception {
 		final CKanbanLine clone = super.createClone(options);
 		if (options.isFullDeepClone() && kanbanColumns != null && !kanbanColumns.isEmpty()) {
-			clone.kanbanColumns = new java.util.LinkedHashSet<>();
+			clone.kanbanColumns = new LinkedHashSet<>();
 			for (final CKanbanColumn column : kanbanColumns) {
 				try {
 					final CKanbanColumn columnClone = column.createClone(options);

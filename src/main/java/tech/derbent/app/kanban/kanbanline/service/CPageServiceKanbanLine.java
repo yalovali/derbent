@@ -29,6 +29,8 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.app.kanban.kanbanline.view.CDialogKanbanStatusSelection;
 import tech.derbent.api.page.view.CDynamicPageViewWithoutGrid;
+import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -209,10 +211,10 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			Check.notNull(currentSprint.getId(), "Current sprint must be persisted");
 			LOGGER.info("[DragDrop] Current sprint: {} (id: {})", currentSprint.getName(), currentSprint.getId());
 			// Update the existing sprint item owned by the parent (Activity/Meeting)
-			final tech.derbent.app.sprints.service.CSprintItemService sprintItemService =
-					CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
+			final CSprintItemService sprintItemService =
+					CSpringContext.getBean(CSprintItemService.class);
 			// Get the sprint item from the sprintable item (Activity/Meeting)
-			final tech.derbent.api.interfaces.ISprintableItem sprintableItem = (tech.derbent.api.interfaces.ISprintableItem) projectItem;
+			final ISprintableItem sprintableItem = (ISprintableItem) projectItem;
 			final CSprintItem existingSprintItem = sprintableItem.getSprintItem();
 			Check.notNull(existingSprintItem, "Sprint item must exist for sprintable item");
 			LOGGER.info("[DragDrop] Existing sprint item id: {}, current sprint: {}, kanbanColumnId: {}", existingSprintItem.getId(),
@@ -479,8 +481,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			Check.notNull(sprintItem, "Sprint item cannot be null");
 			Check.notNull(sprintItem.getId(), "Sprint item must have ID to save");
 			// Get sprint item service and save
-			final tech.derbent.app.sprints.service.CSprintItemService sprintItemService =
-					CSpringContext.getBean(tech.derbent.app.sprints.service.CSprintItemService.class);
+			final CSprintItemService sprintItemService =
+					CSpringContext.getBean(CSprintItemService.class);
 			sprintItemService.save(sprintItem);
 			LOGGER.info("Saved sprint item {} with kanbanColumnId {} (no status change)", sprintItem.getId(), sprintItem.getKanbanColumnId());
 		} catch (final Exception e) {

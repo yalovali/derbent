@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -145,8 +146,8 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
-			final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService =
-					CSpringContext.getBean(tech.derbent.api.entityOfCompany.service.CProjectItemStatusService.class);
+			final CProjectItemStatusService projectItemStatusService =
+					CSpringContext.getBean(CProjectItemStatusService.class);
 			
 			// Scrum Guide 2020 - Sprint Goal examples
 			final String[] sprintGoals = {

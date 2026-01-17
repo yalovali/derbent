@@ -11,6 +11,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ICopyable;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -76,8 +77,8 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 			@SuppressWarnings ("unchecked")
 			final CEntityDB<?> copy = ((CEntityDB<EntityClass>) original).copyTo((Class<? extends CEntityDB<?>>) targetClass, options);
 			// Update the name from the dialog
-			if (copy instanceof tech.derbent.api.entity.domain.CEntityNamed) {
-				((tech.derbent.api.entity.domain.CEntityNamed<?>) copy).setName(textFieldNewName.getValue());
+			if (copy instanceof CEntityNamed) {
+				((CEntityNamed<?>) copy).setName(textFieldNewName.getValue());
 			}
 			LOGGER.info("Successfully copied entity: {} -> {} (type: {})", original, copy, targetClass.getSimpleName());
 			// Invoke the save callback with the copied entity

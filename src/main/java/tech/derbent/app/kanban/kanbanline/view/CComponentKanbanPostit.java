@@ -207,12 +207,12 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	}
 
 	@Override
-	public void select_checkEventAfterPass(final tech.derbent.api.interfaces.drag.CEvent event) {
+	public void select_checkEventAfterPass(final CEvent event) {
 		LOGGER.debug("[KanbanSelect] Selection event propagated for sprint item {}", entity.getId());
 	}
 
 	@Override
-	public void select_checkEventBeforePass(final tech.derbent.api.interfaces.drag.CEvent event) {
+	public void select_checkEventBeforePass(final CEvent event) {
 		Check.notNull(event, "Selection event cannot be null for kanban post-it");
 		LOGGER.debug("[KanbanSelect] Handling selection for sprint item {}", entity.getId());
 	}

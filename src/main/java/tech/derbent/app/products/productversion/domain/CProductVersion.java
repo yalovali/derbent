@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -80,7 +81,7 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 	}
 
 	@Override
-	public CProductVersion createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CProductVersion createClone(final CCloneOptions options) throws Exception {
 		final CProductVersion clone = super.createClone(options);
 		clone.versionNumber = versionNumber;
 		clone.entityType = entityType;

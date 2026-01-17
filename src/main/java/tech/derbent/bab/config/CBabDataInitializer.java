@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import tech.derbent.bab.device.service.CBabDeviceService;
+import tech.derbent.bab.node.service.CBabNodeService;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -49,13 +51,13 @@ public class CBabDataInitializer {
 	private final CGridEntityService gridEntityService;
 	@PersistenceContext
 	private EntityManager entityManager;
-	private final tech.derbent.bab.device.service.CBabDeviceService babDeviceService;
-	private final tech.derbent.bab.node.service.CBabNodeService babNodeService;
+	private final CBabDeviceService babDeviceService;
+	private final CBabNodeService babNodeService;
 
 	public CBabDataInitializer(final JdbcTemplate jdbcTemplate, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService,
-			final tech.derbent.bab.device.service.CBabDeviceService babDeviceService,
-			final tech.derbent.bab.node.service.CBabNodeService babNodeService) {
+			final CBabDeviceService babDeviceService,
+			final CBabNodeService babNodeService) {
 		Check.notNull(jdbcTemplate, "JdbcTemplate cannot be null");
 		Check.notNull(gridEntityService, "GridEntityService cannot be null");
 		Check.notNull(detailSectionService, "DetailSectionService cannot be null");

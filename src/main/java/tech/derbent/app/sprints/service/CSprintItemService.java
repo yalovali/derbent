@@ -15,7 +15,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.IActivityRepository;
 import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.meetings.service.IMeetingRepository;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -91,7 +92,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	/** Get the next item order for a new item in a sprint.
 	 * @param sprint the sprint
 	 * @return the next available order number */
-	public Integer getNextItemOrder(final tech.derbent.app.sprints.domain.CSprint sprint) {
+	public Integer getNextItemOrder(final CSprint sprint) {
 		if (sprint == null || sprint.getId() == null) {
 			return 1; // Default for backlog or new sprint
 		}

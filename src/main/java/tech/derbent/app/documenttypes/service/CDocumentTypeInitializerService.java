@@ -1,21 +1,23 @@
 package tech.derbent.app.documenttypes.service;
 
 import org.springframework.stereotype.Service;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.documenttypes.domain.CDocumentType;
 
 /** Initializer service for CDocumentType entities. Provides sample data initialization for document types. */
 @Service
 public class CDocumentTypeInitializerService extends CInitializerServiceBase {
 
-	private static final Class<?> clazz = tech.derbent.app.documenttypes.domain.CDocumentType.class;
+	private static final Class<?> clazz = CDocumentType.class;
 
 	/** Initialize sample document types for a project.
 	 * @param project the project to initialize document types for
 	 * @param minimal if true, create minimal dataset (3 types), otherwise full dataset (10 types)
 	 * @throws Exception if initialization fails */
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		final tech.derbent.api.companies.domain.CCompany company = project.getCompany();
+		final CCompany company = project.getCompany();
 		final String[][] nameAndDescriptions = minimal ? new String[][] {
 				{
 						"Specification", "Requirements and specifications documents"

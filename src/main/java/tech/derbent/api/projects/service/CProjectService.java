@@ -17,6 +17,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -36,12 +37,12 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
 	private final CProjectTypeService projectTypeService;
-	private final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService;
+	private final CProjectItemStatusService projectItemStatusService;
 
 	public CProjectService(final IProjectRepository repository, final Clock clock, final ISessionService sessionService,
 			final ApplicationEventPublisher eventPublisher,
 			final CProjectTypeService projectTypeService,
-			final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService) {
+			final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
 		this.projectTypeService = projectTypeService;

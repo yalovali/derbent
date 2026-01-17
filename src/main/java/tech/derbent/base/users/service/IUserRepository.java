@@ -55,7 +55,7 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 	/** Find user by ID with eager loading using generic pattern */
 	@Override
 	@Query ("SELECT u FROM #{#entityName} u " + /* */
-			"LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.attachments LEFT JOIN FETCH u.activities WHERE u.id = :userId"
+			"LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.attachments LEFT JOIN FETCH u.comments LEFT JOIN FETCH u.activities WHERE u.id = :userId"
 	)
 	Optional<CUser> findById(@Param ("userId") Long id);
 	/** Find all users by project ID with eager loading using generic pattern */

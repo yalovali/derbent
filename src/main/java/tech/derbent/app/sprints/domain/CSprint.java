@@ -39,6 +39,8 @@ import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
+import tech.derbent.app.activities.service.IActivityRepository;
+import tech.derbent.app.meetings.service.IMeetingRepository;
 
 // @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "sprint_status_id"))
 @Entity
@@ -465,10 +467,10 @@ public class CSprint extends CProjectItem<CSprint>
 				field.set(this, value);
 			}
 			if (sprintItems != null && !sprintItems.isEmpty()) {
-				final tech.derbent.app.activities.service.IActivityRepository activityRepo =
-						CSpringContext.getBean(tech.derbent.app.activities.service.IActivityRepository.class);
-				final tech.derbent.app.meetings.service.IMeetingRepository meetingRepo =
-						CSpringContext.getBean(tech.derbent.app.meetings.service.IMeetingRepository.class);
+				final IActivityRepository activityRepo =
+						CSpringContext.getBean(IActivityRepository.class);
+				final IMeetingRepository meetingRepo =
+						CSpringContext.getBean(IMeetingRepository.class);
 				for (final CSprintItem item : sprintItems) {
 					if (item.getId() == null) {
 						continue;

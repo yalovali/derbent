@@ -7,6 +7,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -153,7 +154,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 					.collect(java.util.stream.Collectors.toList());
 			long totalStoryPoints = 0;
 			for (final Object item : items) {
-				if (item instanceof final tech.derbent.api.interfaces.ISprintableItem sprintableItem) {
+				if (item instanceof final ISprintableItem sprintableItem) {
 					final Long sp = sprintableItem.getStoryPoint();
 					if (sp != null) {
 						totalStoryPoints += sp;

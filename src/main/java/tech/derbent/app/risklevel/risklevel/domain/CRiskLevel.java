@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
@@ -119,7 +120,7 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	}
 
 	@Override
-	public CRiskLevel createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+	public CRiskLevel createClone(final CCloneOptions options) throws Exception {
 		final CRiskLevel clone = super.createClone(options);
 		clone.riskLevel = this.riskLevel;
 		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
