@@ -38,6 +38,23 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			
+			// ISO 31000:2018 Risk Assessment Section
+			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Assessment (ISO 31000)"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskLikelihood"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "probability"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "impact"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "impactScore"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskCriticality"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cause"));
+			
+			// ISO 31000:2018 Risk Treatment Section
+			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Treatment (ISO 31000)"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskResponseStrategy"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "mitigation"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "plan"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "residualRisk"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "result"));
+			
 			// Attachments section - standard section for ALL entities
 			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 			

@@ -76,7 +76,8 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Mitigation", required = false, readOnly = false, description = "Strategy to mitigate or reduce the risk", hidden = false,
+			displayName = "Mitigation Strategy", required = false, readOnly = false,
+			description = "Strategy to mitigate or reduce the risk - ISO 31000", hidden = false,
 			maxLength = 2000
 	)
 	private String mitigation;
@@ -115,6 +116,43 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			hidden = false, useRadioButtons = false
 	)
 	private ERiskSeverity riskSeverity;
+	
+	// ISO 31000:2018 Risk Management - Quantitative Risk Assessment
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Probability (1-10)", required = false, readOnly = false,
+			description = "Quantitative likelihood of risk occurrence (1=Very Low, 10=Very High) - ISO 31000",
+			hidden = false, order = 50
+	)
+	private Integer probability;
+	
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Impact Score (1-10)", required = false, readOnly = false,
+			description = "Quantitative magnitude of consequences if risk occurs (1=Minimal, 10=Catastrophic) - ISO 31000",
+			hidden = false, order = 51
+	)
+	private Integer impactScore;
+	
+	// ISO 31000:2018 - Risk Treatment Strategy
+	@Enumerated (EnumType.STRING)
+	@Column (name = "risk_response_strategy", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
+	@AMetaData (
+			displayName = "Response Strategy", required = false, readOnly = false,
+			description = "Risk treatment approach per ISO 31000 (Avoid, Transfer, Mitigate, Accept, Escalate)",
+			hidden = false, useRadioButtons = false, order = 52
+	)
+	private ERiskResponseStrategy riskResponseStrategy;
+	
+	// ISO 31000:2018 - Residual Risk Assessment
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Residual Risk", required = false, readOnly = false,
+			description = "Remaining risk after mitigation measures are applied - ISO 31000",
+			hidden = false, maxLength = 2000, order = 53
+	)
+	private String residualRisk;
 
 	/** Default constructor for JPA. */
 	public CRisk() {
@@ -264,6 +302,74 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	public void setRiskSeverity(final ERiskSeverity riskSeverity) {
 		this.riskSeverity = riskSeverity;
+		updateLastModified();
+	}
+	
+	// ISO 31000:2018 - Quantitative Risk Assessment Getters/Setters
+	
+	public Integer getProbability() {
+		return probability;
+	}
+	
+	public void setProbability(final Integer probability) {
+		this.probability = probability;
+		updateLastModified();
+	}
+	
+	public Integer getImpactScore() {
+		return impactScore;
+	}
+	
+	public void setImpactScore(final Integer impactScore) {
+		this.impactScore = impactScore;
+		updateLastModified();
+	}
+	
+	/** Calculate Risk Score as Probability × Impact (ISO 31000 quantitative assessment).
+	 * @return Risk score value from 1-100, or null if probability or impact not set */
+	@jakarta.persistence.Transient
+	public Integer getRiskScore() {
+		if (probability != null && impactScore != null) {
+			return probability * impactScore;
+		}
+		return null;
+	}
+	
+	/** Get Risk Matrix Category based on calculated risk score (ISO 31000 risk matrix).
+	 * @return Risk category: Critical (75+), High (50-74), Medium (25-49), Low (1-24), or "Not Assessed" */
+	@jakarta.persistence.Transient
+	public String getRiskMatrixCategory() {
+		final Integer score = getRiskScore();
+		if (score == null) {
+			return "Not Assessed";
+		}
+		if (score >= 75) {
+			return "Critical";
+		}
+		if (score >= 50) {
+			return "High";
+		}
+		if (score >= 25) {
+			return "Medium";
+		}
+		return "Low";
+	}
+	
+	public ERiskResponseStrategy getRiskResponseStrategy() {
+		return riskResponseStrategy;
+	}
+	
+	public void setRiskResponseStrategy(final ERiskResponseStrategy riskResponseStrategy) {
+		this.riskResponseStrategy = riskResponseStrategy;
+		updateLastModified();
+	}
+	
+	public String getResidualRisk() {
+		return residualRisk;
+	}
+	
+	public void setResidualRisk(final String residualRisk) {
+		this.residualRisk = residualRisk;
 		updateLastModified();
 	}
 }
