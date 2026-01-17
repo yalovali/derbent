@@ -1,21 +1,30 @@
 package tech.derbent.api.ui.dialogs;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ICopyable;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.base.session.service.ISessionService;
 
 /** Dialog for copying entities with configurable options. Allows users to copy to same or different entity types with flexible field mapping.
  * @param <EntityClass> the entity type being copied */
@@ -92,6 +101,8 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				final EntityClass typedCopy = (EntityClass) copy;
 				onSave.accept(typedCopy);
 			}
+			// Navigate to the new entity's page after successful save
+			navigateToEntity(copy);
 			close();
 		} catch (final Exception e) {
 			LOGGER.error("Error during copy operation", e);
@@ -142,9 +153,16 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		// Target class selector (for cross-type copying)
 		comboBoxTargetClass = new ComboBox<>("Copy To Type (Optional)");
 		comboBoxTargetClass.setItems(getCompatibleTargetClasses());
-		comboBoxTargetClass.setItemLabelGenerator(clazz -> clazz == null ? "Same Type" : clazz.getSimpleName());
+		comboBoxTargetClass.setItemLabelGenerator(clazz -> {
+			if (clazz == null) {
+				return "Same Type";
+			}
+			// Get the singular title from registry if available
+			final String title = CEntityRegistry.getEntityTitleSingular(clazz);
+			return title != null ? title : clazz.getSimpleName();
+		});
 		comboBoxTargetClass.setPlaceholder("Same type as source");
-		comboBoxTargetClass.setTooltipText("Select a different entity type to copy to (experimental)");
+		comboBoxTargetClass.setTooltipText("Select a different entity type to copy to");
 		comboBoxTargetClass.setWidth("100%");
 		comboBoxTargetClass.setClearButtonVisible(true);
 		layout.add(comboBoxTargetClass);
@@ -178,16 +196,89 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		getDialogLayout().add(layout);
 	}
 
-	/** Returns list of compatible target classes for cross-type copying. Currently returns same type only. Can be extended to support cross-type
-	 * copying based on interface implementation.
+	/** Returns list of compatible target classes for cross-type copying. Discovers all CProjectItem subclasses from the entity registry and filters based on ICopyable compatibility.
 	 * @return list of compatible entity classes */
 	@SuppressWarnings ("unchecked")
 	private List<Class<? extends CEntityDB<?>>> getCompatibleTargetClasses() {
 		final List<Class<? extends CEntityDB<?>>> compatibleClasses = new ArrayList<>();
-		// For now, only allow same type
-		// TODO: Add logic to discover compatible types via ICopyable interface
-		compatibleClasses.add((Class<? extends CEntityDB<?>>) getEntity().getClass());
-		return compatibleClasses;
+		try {
+			// Always include the source entity's class
+			compatibleClasses.add((Class<? extends CEntityDB<?>>) getEntity().getClass());
+			// If this is a CProjectItem, discover other CProjectItem types
+			if (getEntity() instanceof CProjectItem) {
+				// Get all registered entity classes from the registry
+				// We'll iterate through common CProjectItem types
+				final String[] projectItemTypes = {
+						"CActivity", "CMeeting", "CDecision", "CRisk", "CIssue",
+						"CTicket", "COrder", "CMilestone", "CTestCase",
+						"CBudget", "CProjectExpense", "CProjectIncome", "CInvoice",
+						"CProduct", "CProductVersion", "CDeliverable",
+						"CProjectComponent", "CProjectComponentVersion",
+						"CAsset", "CProvider", "CCustomer", "CSprint", "CRiskLevel"
+				};
+				for (final String typeName : projectItemTypes) {
+					try {
+						if (CEntityRegistry.isRegistered(typeName)) {
+							final Class<?> clazz = CEntityRegistry.getEntityClass(typeName);
+							// Check if it's a CProjectItem and implements ICopyable
+							if (CProjectItem.class.isAssignableFrom(clazz) && ICopyable.class.isAssignableFrom(clazz)) {
+								// Check if source entity can copy to this target
+								if (getEntity() instanceof ICopyable && ((ICopyable<?>) getEntity()).canCopyTo(clazz)) {
+									// Avoid duplicates
+									if (!compatibleClasses.contains(clazz)) {
+										compatibleClasses.add((Class<? extends CEntityDB<?>>) clazz);
+									}
+								}
+							}
+						}
+					} catch (final Exception e) {
+						LOGGER.debug("Could not check compatibility for type: {}", typeName);
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error discovering compatible target classes", e);
+			// Fallback to just the source type
+			if (compatibleClasses.isEmpty()) {
+				compatibleClasses.add((Class<? extends CEntityDB<?>>) getEntity().getClass());
+			}
+		}
+		// Sort by simple name for better UX
+		return compatibleClasses.stream().sorted((a, b) -> a.getSimpleName().compareTo(b.getSimpleName())).collect(Collectors.toList());
+	}
+
+	/** Navigates to the dynamic page view for the copied entity.
+	 * @param copiedEntity the entity that was copied and saved */
+	private void navigateToEntity(final CEntityDB<?> copiedEntity) {
+		try {
+			if (copiedEntity == null || copiedEntity.getId() == null) {
+				LOGGER.debug("Cannot navigate to entity: entity or ID is null");
+				return;
+			}
+			// Get the VIEW_NAME from the entity class
+			final Class<?> entityClass = copiedEntity.getClass();
+			final Field viewNameField = entityClass.getField("VIEW_NAME");
+			final String viewName = (String) viewNameField.get(null);
+			if (viewName == null || viewName.isBlank()) {
+				LOGGER.debug("No VIEW_NAME found for entity class: {}", entityClass.getSimpleName());
+				return;
+			}
+			// Get the page entity for this view
+			final CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
+			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
+			final CPageEntity pageEntity = pageService.findByNameAndProject(viewName, sessionService.getActiveProject().orElse(null)).orElse(null);
+			if (pageEntity == null) {
+				LOGGER.debug("No page entity found for view name: {}", viewName);
+				return;
+			}
+			// Navigate to the entity page with item parameter
+			final String route = pageEntity.getRoute() + "&item:" + copiedEntity.getId();
+			LOGGER.info("Navigating to copied entity: {} at route: {}", copiedEntity, route);
+			UI.getCurrent().navigate(route);
+		} catch (final Exception e) {
+			LOGGER.error("Error navigating to copied entity", e);
+			// Don't show error to user - navigation failure shouldn't block the copy operation
+		}
 	}
 
 	@Override
