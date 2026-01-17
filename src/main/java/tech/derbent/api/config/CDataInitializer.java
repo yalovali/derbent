@@ -1,5 +1,4 @@
 package tech.derbent.api.config;
-
 import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.List;
@@ -140,6 +139,8 @@ import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserInitializerService;
 import tech.derbent.base.users.service.CUserProjectSettingsService;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.app.issues.issue.service.CIssueInitializerService;
+import tech.derbent.app.issues.issuetype.service.CIssueTypeInitializerService;
 
 /** CSampleDataInitializer - System Bootstrap and Sample Data Initialization This class serves dual purposes: 1. SYSTEM INITIALIZATION: Creates
  * essential base entities required for system operation - Companies, Projects, Users (core business entities) - Status entities (Activity, Meeting,
@@ -899,7 +900,7 @@ public class CDataInitializer {
 						CDecisionTypeInitializerService.initializeSample(sampleProject, minimal);
 						COrderTypeInitializerService.initializeSample(sampleProject, minimal);
 						CActivityTypeInitializerService.initializeSample(sampleProject, minimal);
-						tech.derbent.app.issues.issuetype.service.CIssueTypeInitializerService.initializeSample(sampleProject, minimal);
+						CIssueTypeInitializerService.initializeSample(sampleProject, minimal);
 						CRiskTypeInitializerService.initializeSample(sampleProject, minimal);
 						CAssetTypeInitializerService.initializeSample(sampleProject, minimal);
 						CBudgetTypeInitializerService.initializeSample(sampleProject, minimal);
@@ -937,7 +938,7 @@ public class CDataInitializer {
 					COrderApprovalInitializerService.initializeSample(project, minimal);
 					initializeSampleTeams(project, minimal);
 					CRiskInitializerService.initializeSample(project, minimal);
-					tech.derbent.app.issues.issue.service.CIssueInitializerService.initializeSample(project, minimal);
+					CIssueInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);
 					// test management - must be after types are initialized
 					CTestScenarioInitializerService.initializeSample(project, minimal);

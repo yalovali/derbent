@@ -17,6 +17,8 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
 import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.app.products.productversion.domain.CProductVersion;
+import org.junit.jupiter.api.Assumptions;
+
 
 /** Comprehensive test suite for CPageTestAuxillary that dynamically tests all pages accessible via navigation buttons.
  * <p>
@@ -946,7 +948,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {

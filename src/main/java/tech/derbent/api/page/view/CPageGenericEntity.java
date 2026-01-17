@@ -1,5 +1,4 @@
 package tech.derbent.api.page.view;
-
 import java.lang.reflect.Field;
 
 import org.slf4j.Logger;
@@ -25,6 +24,7 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
+import java.lang.reflect.Method;
 
 /** Generic base class for entity management pages that provides common functionality for displaying and managing different entity types through
  * reflection and generic patterns.
@@ -312,7 +312,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		Check.notNull(grid, "Grid component is not initialized");
 		try {
 			// Use reflection to call the private refreshGridData method
-			final java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
+			final Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
 			refreshMethod.setAccessible(true);
 			refreshMethod.invoke(grid);
 			LOGGER.debug("Grid refreshed successfully");

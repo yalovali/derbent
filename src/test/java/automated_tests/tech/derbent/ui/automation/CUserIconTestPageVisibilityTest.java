@@ -10,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
+import org.junit.jupiter.api.Assumptions;
+
 
 /** Test to verify that the User Icon Test page is accessible from the Test Support Page and that icons display correctly on the User Icon Test page.
  * This test addresses the issue: "user icon test page doesn't show up in Test Support Page and icons not show still in
@@ -32,7 +34,7 @@ public class CUserIconTestPageVisibilityTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {

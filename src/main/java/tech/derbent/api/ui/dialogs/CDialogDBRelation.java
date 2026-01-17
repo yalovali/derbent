@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.dialogs;
-
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +17,7 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import com.vaadin.flow.component.Component;
 
 /** Abstract base class for relationship dialogs. This class provides common functionality for dialogs that manage relationships between two entity
  * types. It handles the common patterns of: - Entity selection via ComboBox - Role and permission management - Form validation with proper error
@@ -112,7 +112,7 @@ public abstract class CDialogDBRelation<RelationshipClass extends CEntityDB<Rela
 	 * the bound entity instance is different from the items list instance.
 	 * @param component The component to search */
 	@SuppressWarnings ("unchecked")
-	private void refreshComboBoxesInComponent(final com.vaadin.flow.component.Component component) {
+	private void refreshComboBoxesInComponent(final Component component) {
 		if (component instanceof ComboBox) {
 			try {
 				final ComboBox<Object> comboBox = (ComboBox<Object>) component;

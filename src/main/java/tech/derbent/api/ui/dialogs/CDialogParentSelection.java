@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.dialogs;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +21,7 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import java.lang.reflect.Method;
 
 /** CDialogParentSelection - Dialog for selecting a hierarchical parent for a project item.
  * <p>
@@ -154,7 +154,7 @@ public class CDialogParentSelection extends CDialog {
 
 	private CTypeEntity<?> getEntityType(final CProjectItem<?> item) {
 		try {
-			final java.lang.reflect.Method getEntityTypeMethod = item.getClass().getMethod("getEntityType");
+			final Method getEntityTypeMethod = item.getClass().getMethod("getEntityType");
 			final Object entityType = getEntityTypeMethod.invoke(item);
 			if (entityType instanceof CTypeEntity) {
 				return (CTypeEntity<?>) entityType;

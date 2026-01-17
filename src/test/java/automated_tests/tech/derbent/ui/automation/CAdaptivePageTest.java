@@ -23,6 +23,8 @@ import automated_tests.tech.derbent.ui.automation.components.CUserComponentTeste
 import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import automated_tests.tech.derbent.ui.automation.signatures.CControlSignature;
 import automated_tests.tech.derbent.ui.automation.signatures.IControlSignature;
+import org.junit.jupiter.api.Assumptions;
+
 
 /** Intelligent adaptive page testing framework that automatically detects UI components and runs appropriate tests.
  * <p>
@@ -207,7 +209,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 		// Check browser availability
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available");
+			Assumptions.assumeTrue(false, "Browser not available");
 			return;
 		}
 		try {

@@ -1,5 +1,4 @@
 package tech.derbent.app.invoices.invoice.service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,6 +26,9 @@ import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.currency.service.CCurrencyService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
+import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
 
 public class CInvoiceInitializerService extends CInitializerServiceBase {
 
@@ -77,9 +79,9 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "paymentTerms"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			// Attachments section
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 			// Comments section
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -173,7 +175,7 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		payment1.setPaymentMethod("Bank Transfer");
 		payment1.setReferenceNumber("REF-ML-ALPHA-001");
 		payment1.setReceivedBy(issuer);
-		payment1.setStatus(tech.derbent.app.invoices.payment.domain.CPaymentStatus.PAID);
+		payment1.setStatus(CPaymentStatus.PAID);
 		payment1.setNotes("Payment received upon Alpha milestone acceptance");
 		paymentService.save(payment1);
 		// Scenario 2: Payment Plan Invoice with 4 installments (Currently on installment 2)
@@ -209,7 +211,7 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		payment2.setPaymentMethod("Credit Card");
 		payment2.setReferenceNumber("CC-Q2-2026-789");
 		payment2.setReceivedBy(issuer);
-		payment2.setStatus(tech.derbent.app.invoices.payment.domain.CPaymentStatus.PAID);
+		payment2.setStatus(CPaymentStatus.PAID);
 		payment2.setNotes("Second quarterly installment - on time payment");
 		paymentService.save(payment2);
 		// Scenario 3: Partial Payment Invoice (50% paid, balance due)
@@ -250,7 +252,7 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		payment3.setPaymentMethod("Wire Transfer");
 		payment3.setReferenceNumber("WIRE-DEV-2026-456");
 		payment3.setReceivedBy(issuer);
-		payment3.setStatus(tech.derbent.app.invoices.payment.domain.CPaymentStatus.PAID);
+		payment3.setStatus(CPaymentStatus.PAID);
 		payment3.setNotes("50% upfront payment received - balance due upon delivery");
 		paymentService.save(payment3);
 		// Scenario 4: Overdue Invoice (Late payment)

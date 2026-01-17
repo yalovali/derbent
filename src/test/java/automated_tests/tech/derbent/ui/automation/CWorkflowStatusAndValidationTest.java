@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Assumptions;
+
 
 /**
  * Test suite for workflow status management and name field validation features.
@@ -59,7 +61,7 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -140,7 +142,7 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -230,7 +232,7 @@ public class CWorkflowStatusAndValidationTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -192,7 +193,7 @@ public class CFinancialAndTestManagementCrudTest extends CBaseUITest {
 	void testInvoiceCrudWithAttachmentsAndComments() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -283,7 +284,7 @@ public class CFinancialAndTestManagementCrudTest extends CBaseUITest {
 	void testTestCaseCrudWithAttachmentsAndComments() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -374,7 +375,7 @@ public class CFinancialAndTestManagementCrudTest extends CBaseUITest {
 	void testTestCaseTypeCrud() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -417,7 +418,7 @@ public class CFinancialAndTestManagementCrudTest extends CBaseUITest {
 	void testTestRunCrudWithAttachmentsAndComments() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -472,7 +473,7 @@ public class CFinancialAndTestManagementCrudTest extends CBaseUITest {
 	void testTestScenarioCrudWithAttachmentsAndComments() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {

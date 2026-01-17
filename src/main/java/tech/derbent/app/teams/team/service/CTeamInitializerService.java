@@ -1,5 +1,4 @@
 package tech.derbent.app.teams.team.service;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,8 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.teams.team.domain.CTeam;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 
 public class CTeamInitializerService extends CInitializerServiceBase {
 
@@ -48,10 +49,10 @@ public class CTeamInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 			
 			// Comments section - standard section for discussion entities
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 			
 			detailSection.debug_printScreenInformation();
 			return detailSection;

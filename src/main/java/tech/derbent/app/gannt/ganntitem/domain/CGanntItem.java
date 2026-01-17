@@ -1,5 +1,4 @@
 package tech.derbent.app.gannt.ganntitem.domain;
-
 import java.time.LocalDate;
 import org.springframework.security.core.Transient;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
@@ -11,6 +10,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.base.users.domain.CUser;
+import java.time.temporal.ChronoUnit;
 
 /** CGanttItem - Data transfer object for Gantt chart representation of project items. This class wraps project items (CActivity, CMeeting, CDecision,
  * COrder) to provide a unified interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity
@@ -126,7 +126,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	 * @return The duration in days, or 1 if dates are not available */
 	public long getDurationDays() {
 		if (startDate != null && endDate != null) {
-			return java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
+			return ChronoUnit.DAYS.between(startDate, endDate) + 1;
 		}
 		return 1; // Default duration
 	}
@@ -208,8 +208,8 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 				return 0; // Task hasn't started
 			}
 			// Task is in progress - estimate based on time elapsed
-			final long totalDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
-			final long elapsedDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, now);
+			final long totalDays = ChronoUnit.DAYS.between(startDate, endDate);
+			final long elapsedDays = ChronoUnit.DAYS.between(startDate, now);
 			if (totalDays > 0) {
 				return (int) (elapsedDays * 100 / totalDays);
 			}

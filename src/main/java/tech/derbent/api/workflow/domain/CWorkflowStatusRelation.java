@@ -1,5 +1,4 @@
 package tech.derbent.api.workflow.domain;
-
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.AttributeOverride;
@@ -17,6 +16,7 @@ import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.roles.domain.CUserProjectRole;
+import java.util.stream.Collectors;
 
 @Entity
 @Table (name = "cworkflowstatusrelation", uniqueConstraints = @UniqueConstraint (columnNames = {
@@ -100,6 +100,6 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
                                 workflowEntity != null ? CSpringAuxillaries.safeGetId(workflowEntity) : null,
                                 fromStatus != null ? CSpringAuxillaries.safeGetId(fromStatus) : null,
                                 toStatus != null ? CSpringAuxillaries.safeGetId(toStatus) : null,
-				roles != null ? roles.stream().map(CSpringAuxillaries::safeToString).collect(java.util.stream.Collectors.joining(", ")) : "[]");
+				roles != null ? roles.stream().map(CSpringAuxillaries::safeToString).collect(Collectors.joining(", ")) : "[]");
 	}
 }

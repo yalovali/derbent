@@ -1,5 +1,4 @@
 package tech.derbent.api.entity.view;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +49,7 @@ import tech.derbent.api.views.CAccordionDBEntity;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
+import com.vaadin.flow.data.provider.SortDirection;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
@@ -347,7 +347,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			final List<QuerySortOrder> sortOrders = Optional.ofNullable(query.getSortOrders()).orElse(java.util.Collections.emptyList());
 			final Sort springSort = sortOrders.isEmpty() ? Sort.unsorted()
 					: Sort.by(sortOrders.stream().map(so -> new Sort.Order(
-							so.getDirection() == com.vaadin.flow.data.provider.SortDirection.DESCENDING ? Sort.Direction.DESC : Sort.Direction.ASC,
+							so.getDirection() == SortDirection.DESCENDING ? Sort.Direction.DESC : Sort.Direction.ASC,
 							so.getSorted())).toList());
 			// --- paging
 			final int limit = query.getLimit();

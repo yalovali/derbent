@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import com.microsoft.playwright.Page;
+
 
 /** CPageTestNewEntities - Focused tests for newly added entities (this week) Tests Financial, Test Management, and Team/Issue entities added recently
  * with deep CRUD validation including attachments and comments sections. */
@@ -287,7 +289,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 		try {
 			// Wait for either grid or "no data" message
 			page.waitForSelector("vaadin-grid, .no-data-message, .empty-state",
-					new com.microsoft.playwright.Page.WaitForSelectorOptions().setTimeout(15000));
+					new Page.WaitForSelectorOptions().setTimeout(15000));
 			LOGGER.info("      ✅ Page content loaded");
 		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.warn("      ⚠️  Grid not found, checking if page loaded correctly");

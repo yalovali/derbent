@@ -1,4 +1,6 @@
 package tech.derbent.api.interfaces;
+import tech.derbent.api.utils.CValueStorageHelper;
+import tech.derbent.base.session.service.ISessionService;
 
 /**
  * IHasSelectedValueStorage - Interface for components that need session-based value persistence.
@@ -18,7 +20,7 @@ package tech.derbent.api.interfaces;
  * </ul>
  * </p>
  * <p>
- * <b>Use {@link tech.derbent.api.utils.CValueStorageHelper} instead when:</b>
+ * <b>Use {@link CValueStorageHelper} instead when:</b>
  * <ul>
  * <li>You have a standard Vaadin component (ComboBox, TextField)</li>
  * <li>You want automatic save on change, restore on attach</li>
@@ -92,8 +94,8 @@ package tech.derbent.api.interfaces;
  * }
  * </pre>
  * 
- * @see tech.derbent.api.utils.CValueStorageHelper
- * @see tech.derbent.base.session.service.ISessionService
+ * @see CValueStorageHelper
+ * @see ISessionService
  */
 public interface IHasSelectedValueStorage {
 

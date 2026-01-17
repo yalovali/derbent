@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import org.junit.jupiter.api.Assumptions;
+
 
 /**
  * Comprehensive CRUD operations test for Test Case and Test Scenario entities.
@@ -38,7 +40,7 @@ public class CTestCaseScenarioCrudTest extends CBaseUITest {
 	void testTestCaseCrudOperations() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 
@@ -158,7 +160,7 @@ public class CTestCaseScenarioCrudTest extends CBaseUITest {
 	void testTestScenarioCrudOperations() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 

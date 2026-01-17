@@ -3,6 +3,7 @@ package automated_tests.tech.derbent.ui.automation;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import org.junit.jupiter.api.Assumptions;
+
 
 /**
  * Comprehensive attachment and comment operations test for Team entity.
@@ -38,7 +41,7 @@ public class CTeamAttachmentCommentTest extends CBaseUITest {
 	void testTeamAttachmentOperations() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 
@@ -96,7 +99,7 @@ public class CTeamAttachmentCommentTest extends CBaseUITest {
 			wait_500();
 
 			final Locator dialog = waitForDialogWithText("Upload File");
-			final java.nio.file.Path tempFile = Files.createTempFile("test-team-attachment-", ".txt");
+			final Path tempFile = Files.createTempFile("test-team-attachment-", ".txt");
 			Files.writeString(tempFile, "Test team attachment content - " + System.currentTimeMillis());
 			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
 
@@ -157,7 +160,7 @@ public class CTeamAttachmentCommentTest extends CBaseUITest {
 	void testTeamCommentOperations() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 

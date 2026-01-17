@@ -1,7 +1,9 @@
 package tech.derbent.api.domains;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
+import tech.derbent.api.utils.Check;
 
 /** Test class for CParentChildRelationService to verify fail-fast validation.
  * Tests the new validation checks added to ensure proper error handling. */
@@ -46,10 +48,10 @@ class CParentChildRelationServiceFailFastTest {
 
 		public boolean wouldCreateCircularDependency(final Long parentId, final String parentType, final Long childId, final String childType) {
 			// Reproduce the fail-fast validation from the actual service
-			java.util.Objects.requireNonNull(parentId, "Parent ID cannot be null");
-			tech.derbent.api.utils.Check.notBlank(parentType, "Parent type cannot be blank");
-			java.util.Objects.requireNonNull(childId, "Child ID cannot be null");
-			tech.derbent.api.utils.Check.notBlank(childType, "Child type cannot be blank");
+			Objects.requireNonNull(parentId, "Parent ID cannot be null");
+			Check.notBlank(parentType, "Parent type cannot be blank");
+			Objects.requireNonNull(childId, "Child ID cannot be null");
+			Check.notBlank(childType, "Child type cannot be blank");
 			return false; // Actual implementation not needed for validation tests
 		}
 	}

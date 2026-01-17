@@ -1,5 +1,4 @@
 package tech.derbent.api.domains;
-
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +15,7 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
+import java.lang.reflect.Method;
 
 /** Service for managing parent-child relationships between project items. Provides methods for establishing, removing, and querying hierarchical
  * relationships with validation for circular dependencies and type compatibility. */
@@ -42,7 +42,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		}
 		try {
 			// Use reflection to get entityType (not all CProjectItem subclasses have this method)
-			final java.lang.reflect.Method getEntityTypeMethod = item.getClass().getMethod("getEntityType");
+			final Method getEntityTypeMethod = item.getClass().getMethod("getEntityType");
 			final Object entityType = getEntityTypeMethod.invoke(item);
 			if (entityType instanceof CTypeEntity) {
 				return ((CTypeEntity<?>) entityType).getCanHaveChildren();

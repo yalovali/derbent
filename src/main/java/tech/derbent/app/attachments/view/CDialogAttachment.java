@@ -1,5 +1,4 @@
 package tech.derbent.app.attachments.view;
-
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -20,6 +19,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.service.CAttachmentService;
 import tech.derbent.base.session.service.ISessionService;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
 
 /** CDialogAttachment - Unified dialog for uploading new attachments or editing existing ones. Upload mode (isNew = true): - Shows file upload
  * component with drag-and-drop - Auto-detects document type from file extension - Creates new attachment entity Edit mode (isNew = false): - Uses
@@ -86,7 +87,7 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 			upload = new Upload(buffer);
 			upload.setMaxFileSize((int) MAX_FILE_SIZE);
 			upload.setDropLabel(new Span("Drop file here or click to browse"));
-			upload.setUploadButton(new com.vaadin.flow.component.button.Button("Choose File"));
+			upload.setUploadButton(new Button("Choose File"));
 			// Upload listeners - populate entity fields when file is selected
 			upload.addSucceededListener(event -> {
 				uploadedFileName = event.getFileName();
@@ -128,10 +129,10 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 		getDialogLayout().add(formBuilder.build(CAttachment.class, binder, fields));
 		// Mark file metadata as read-only (safety - cannot change file content)
 		if (formBuilder.getComponentMap().containsKey("fileName")) {
-			((com.vaadin.flow.component.HasValue<?, ?>) formBuilder.getComponentMap().get("fileName")).setReadOnly(true);
+			((HasValue<?, ?>) formBuilder.getComponentMap().get("fileName")).setReadOnly(true);
 		}
 		if (formBuilder.getComponentMap().containsKey("fileSize")) {
-			((com.vaadin.flow.component.HasValue<?, ?>) formBuilder.getComponentMap().get("fileSize")).setReadOnly(true);
+			((HasValue<?, ?>) formBuilder.getComponentMap().get("fileSize")).setReadOnly(true);
 		}
 		// Edit mode: add safety notice
 		if (!isNew) {

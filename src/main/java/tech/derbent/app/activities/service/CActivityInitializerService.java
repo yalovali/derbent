@@ -1,5 +1,4 @@
 package tech.derbent.app.activities.service;
-
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -15,6 +14,8 @@ import tech.derbent.api.screens.service.CInitializerServiceProjectItem;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 
 public class CActivityInitializerService extends CInitializerServiceProjectItem {
 
@@ -54,11 +55,11 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			
 			/******************/
 			// Attachments section - standard section for ALL entities
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
 			
 			/******************/
 			// Comments section - standard section for discussion entities
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(scr, clazz);
+			CCommentInitializerService.addCommentsSection(scr, clazz);
 			
 			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));

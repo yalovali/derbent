@@ -1,5 +1,4 @@
 package tech.derbent.api.workflow.view;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
@@ -18,6 +17,9 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.ISessionService;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import java.util.stream.Collectors;
 
 /** Generic base class for Workflow-Status relationship components. This class provides common functionality for workflow status transition management
  * components, reducing code duplication while maintaining flexibility for specific implementations.
@@ -54,7 +56,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		final String fromStatusName = selected.getFromStatus().getName();
 		final String toStatusName = selected.getToStatus().getName();
 		final String rolesText = selected.getRoles() != null && !selected.getRoles().isEmpty()
-				? selected.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.joining(", ")) : "All Roles";
+				? selected.getRoles().stream().map(r -> r.getName()).collect(Collectors.joining(", ")) : "All Roles";
 		return String.format("Are you sure you want to delete the transition from '%s' to '%s' for roles: %s? This action cannot be undone.",
 				fromStatusName, toStatusName, rolesText);
 	}
@@ -75,7 +77,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 				return CColorUtils.getDisplayTextFromEntity(relation.getToStatus());
 			case "roles":
 				return relation.getRoles() != null && !relation.getRoles().isEmpty() ? relation.getRoles().stream()
-						.map(r -> CColorUtils.getDisplayTextFromEntity(r)).collect(java.util.stream.Collectors.joining(", ")) : "All Roles";
+						.map(r -> CColorUtils.getDisplayTextFromEntity(r)).collect(Collectors.joining(", ")) : "All Roles";
 			default:
 				return "";
 			}
@@ -130,7 +132,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 						return new CLabelEntity(relation.getWorkflowEntity());
 					} catch (@SuppressWarnings ("unused") final Exception e) {
 						LOGGER.error("Failed to create workflow component.");
-                                                return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflowEntity"));
+                                                return new Span(getDisplayText(relation, "workflowEntity"));
 					}
 				}).setAutoWidth(true).setSortable(true), "Workflow");
 			}
@@ -139,7 +141,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					return new CLabelEntity(relation.getFromStatus());
 				} catch (@SuppressWarnings ("unused") final Exception e) {
 					LOGGER.error("Failed to create from status component.");
-					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "fromStatus"));
+					return new Span(getDisplayText(relation, "fromStatus"));
 				}
 			}).setAutoWidth(true).setSortable(true), "From Status");
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
@@ -147,30 +149,30 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					return new CLabelEntity(relation.getToStatus());
 				} catch (@SuppressWarnings ("unused") final Exception e) {
 					LOGGER.error("Failed to create to status component.");
-					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "toStatus"));
+					return new Span(getDisplayText(relation, "toStatus"));
 				}
 			}).setAutoWidth(true).setSortable(true), "To Status");
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					if (relation.getRoles() != null && !relation.getRoles().isEmpty()) {
-						final com.vaadin.flow.component.orderedlayout.HorizontalLayout rolesLayout =
-								new com.vaadin.flow.component.orderedlayout.HorizontalLayout();
+						final HorizontalLayout rolesLayout =
+								new HorizontalLayout();
 						rolesLayout.setSpacing(true);
 						for (int i = 0; i < relation.getRoles().size(); i++) {
 							rolesLayout.add(new CLabelEntity(relation.getRoles().get(i)));
 							if (i < relation.getRoles().size() - 1) {
-								rolesLayout.add(new com.vaadin.flow.component.html.Span(", "));
+								rolesLayout.add(new Span(", "));
 							}
 						}
 						return rolesLayout;
 					}
-					final com.vaadin.flow.component.html.Span span = new com.vaadin.flow.component.html.Span("All Roles");
+					final Span span = new Span("All Roles");
 					span.getStyle().set("font-style", "italic");
 					span.getStyle().set("color", "#666");
 					return span;
 				} catch (@SuppressWarnings ("unused") final Exception e) {
 					LOGGER.error("Failed to create roles component.");
-					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "roles"));
+					return new Span(getDisplayText(relation, "roles"));
 				}
 			}).setAutoWidth(true).setSortable(true), "Roles");
 		} catch (final Exception e) {

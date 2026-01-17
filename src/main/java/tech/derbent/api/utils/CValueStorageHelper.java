@@ -1,5 +1,4 @@
 package tech.derbent.api.utils;
-
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import com.vaadin.flow.component.textfield.TextField;
 
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.interfaces.IHasSelectedValueStorage;
 
 /**
  * CValueStorageHelper - Utility for enabling automatic value persistence on UI
@@ -48,7 +48,7 @@ import tech.derbent.base.session.service.ISessionService;
  * </ul>
  * </p>
  * <p>
- * <b>Use {@link tech.derbent.api.interfaces.IHasSelectedValueStorage} instead
+ * <b>Use {@link IHasSelectedValueStorage} instead
  * for:</b>
  * <ul>
  * <li>Complex components with multiple related values</li>
@@ -134,8 +134,8 @@ import tech.derbent.base.session.service.ISessionService;
  * as default</li>
  * </ul>
  * 
- * @see tech.derbent.api.interfaces.IHasSelectedValueStorage
- * @see tech.derbent.base.session.service.ISessionService
+ * @see IHasSelectedValueStorage
+ * @see ISessionService
  */
 public class CValueStorageHelper {
 

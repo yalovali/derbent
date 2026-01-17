@@ -1,9 +1,10 @@
 package tech.derbent.api.ui.component.filter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
+import tech.derbent.api.utils.CValueStorageHelper;
 
 /**
  * CAbstractFilterComponent - Abstract base class for filter components.
@@ -103,7 +104,7 @@ public abstract class CAbstractFilterComponent<T> implements IFilterComponent<T>
 	 * <p>
 	 * <b>Default Implementation:</b> Does nothing. Subclasses that want to support value
 	 * persistence MUST override this method and delegate to 
-	 * {@link tech.derbent.api.utils.CValueStorageHelper#valuePersist_enable}.
+	 * {@link CValueStorageHelper#valuePersist_enable}.
 	 * </p>
 	 * <p>
 	 * <b>Why Override:</b> Value persistence allows filter selections to survive:
@@ -141,7 +142,7 @@ public abstract class CAbstractFilterComponent<T> implements IFilterComponent<T>
 	 * </p>
 	 * 
 	 * @param storageId The base storage identifier from the parent toolbar
-	 * @see tech.derbent.api.utils.CValueStorageHelper#valuePersist_enable(com.vaadin.flow.component.combobox.ComboBox, String, tech.derbent.api.utils.CValueStorageHelper.ValueConverter)
+	 * @see CValueStorageHelper#valuePersist_enable(ComboBox, String, CValueStorageHelper.ValueConverter)
 	 */
 	@Override
 	public void valuePersist_enable(final String storageId) {

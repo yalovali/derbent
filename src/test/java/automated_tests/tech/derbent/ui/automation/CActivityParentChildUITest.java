@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import org.junit.jupiter.api.Assumptions;
+
 
 /**
  * UI automation test for Activity parent-child relationship functionality.
@@ -40,7 +42,7 @@ public class CActivityParentChildUITest extends CBaseUITest {
     void testParentActivityDisplayInWidget() {
         if (!isBrowserAvailable()) {
             LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-            org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+            Assumptions.assumeTrue(false, "Browser not available in CI environment");
             return;
         }
 
@@ -104,7 +106,7 @@ public class CActivityParentChildUITest extends CBaseUITest {
     void testParentActivitySelection() {
         if (!isBrowserAvailable()) {
             LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-            org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+            Assumptions.assumeTrue(false, "Browser not available in CI environment");
             return;
         }
 
@@ -179,7 +181,7 @@ public class CActivityParentChildUITest extends CBaseUITest {
     void testHierarchicalActivityStructure() {
         if (!isBrowserAvailable()) {
             LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-            org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+            Assumptions.assumeTrue(false, "Browser not available in CI environment");
             return;
         }
 

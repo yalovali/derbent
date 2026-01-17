@@ -1,5 +1,4 @@
 package tech.derbent.app.projectexpenses.projectexpense.service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +21,8 @@ import tech.derbent.app.orders.currency.service.CCurrencyService;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 
 public class CProjectExpenseInitializerService extends CInitializerServiceBase {
 
@@ -45,10 +46,10 @@ public class CProjectExpenseInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 
 			// Attachments section
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 
 			// Comments section
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
