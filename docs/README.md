@@ -16,7 +16,8 @@ docs/
 ├── components/           # 🎨 Component library documentation
 ├── configuration/        # ⚙️ Configuration guides
 ├── fixes/                # 🐛 Bug fix documentation
-└── references/           # 📚 Reference materials
+├── references/           # 📚 Reference materials
+└── CODE_QUALITY_MATRIX.xlsx  # 📊 Comprehensive quality tracking (NEW!)
 ```
 
 ## Getting Started
@@ -27,6 +28,7 @@ docs/
 1. Start with [Architecture README](architecture/README.md)
 2. Read [Coding Standards](architecture/coding-standards.md)
 3. Check [GitHub Copilot Guidelines](development/copilot-guidelines.md) if using AI assistants
+4. Review [Code Quality Matrix](CODE_QUALITY_MATRIX_README.md) for standards compliance
 
 **Working on specific tasks?**
 - UI/Styling → [UI, CSS, and Layout Coding Standards](architecture/ui-css-coding-standards.md)
@@ -34,6 +36,7 @@ docs/
 - Services → [Service Layer Patterns](architecture/service-layer-patterns.md)
 - Entities → [Entity Inheritance Patterns](architecture/entity-inheritance-patterns.md)
 - Testing → [Testing Guidelines](testing/)
+- **Quality Review** → [Code Quality Matrix](CODE_QUALITY_MATRIX.xlsx) + [Guide](CODE_QUALITY_MATRIX_GUIDE.md)
 
 ### For AI Agents (GitHub Copilot, Codex)
 
@@ -201,6 +204,10 @@ Use this format for documenting code patterns:
 
 ### Internal Tools
 
+- **[Code Quality Matrix](CODE_QUALITY_MATRIX.xlsx)** - Comprehensive quality tracking (556 classes × 51 dimensions)
+  - [Quick Start Guide](CODE_QUALITY_MATRIX_README.md)
+  - [Complete Guide](CODE_QUALITY_MATRIX_GUIDE.md)
+  - [Regeneration Scripts](../scripts/quality/)
 - [Database Query Debugging](DATABASE_QUERY_DEBUGGING.md)
 - [GraphViz Documentation Guide](GRAPHVIZ_DOCUMENTATION_GUIDE.md)
 - [Doxygen Usage](DOXYGEN_USAGE.md)
@@ -222,9 +229,10 @@ Use this format for documenting code patterns:
 ---
 
 **Quick Links**:
+- [Code Quality Matrix](CODE_QUALITY_MATRIX_README.md) - Quality tracking for all 556 classes
 - [Architecture Documentation](architecture/README.md)
 - [Development Guidelines](development/)
 - [Testing Documentation](testing/)
 - [Feature Documentation](features/)
 
-**Last Updated**: 2026-01-01
+**Last Updated**: 2026-01-17
