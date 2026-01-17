@@ -101,9 +101,11 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				final EntityClass typedCopy = (EntityClass) copy;
 				onSave.accept(typedCopy);
 			}
-			// Navigate to the new entity's page after successful save
-			navigateToEntity(copy);
+			// Close dialog
 			close();
+			// Navigate to the new entity's page after successful save
+			// The entity should now have an ID set by the save operation
+			navigateToEntity(copy);
 		} catch (final Exception e) {
 			LOGGER.error("Error during copy operation", e);
 			CNotificationService.showException("Error during copy", e);
