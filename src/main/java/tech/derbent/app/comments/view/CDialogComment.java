@@ -1,5 +1,4 @@
 package tech.derbent.app.comments.view;
-
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +17,7 @@ import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.service.CCommentService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
+import com.vaadin.flow.component.html.Span;
 
 /** CDialogComment - Dialog for adding or editing comments.
  * <p>
@@ -91,7 +91,7 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 
 		// Author display (read-only)
 		if (!isNew) {
-			final com.vaadin.flow.component.html.Span authorLabel = new com.vaadin.flow.component.html.Span(
+			final Span authorLabel = new Span(
 					"Author: " + getEntity().getAuthorName());
 			authorLabel.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-style", "italic");
 			formLayout.add(authorLabel);

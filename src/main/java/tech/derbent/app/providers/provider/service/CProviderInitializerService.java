@@ -1,5 +1,4 @@
 package tech.derbent.app.providers.provider.service;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +17,8 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.providers.provider.domain.CProvider;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 
 public class CProviderInitializerService extends CInitializerServiceBase {
 
@@ -42,10 +43,10 @@ public class CProviderInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			
 			// Attachments section - standard section for ALL entities
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 			
 			// Comments section - standard section for discussion entities
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 			
 			detailSection.debug_printScreenInformation();
 			return detailSection;

@@ -1,5 +1,4 @@
 package tech.derbent.api.projects.service;
-
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -9,11 +8,12 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.companies.service.ICompanyEntityRepositoryBase;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProjectType;
 
 public interface IProjectRepository extends IEntityOfCompanyRepository<CProject>, ICompanyEntityRepositoryBase<CProject> {
 
 	@Query ("SELECT COUNT(p) FROM CProject p WHERE p.entityType = :type")
-	long countByType(@Param ("type") tech.derbent.api.projects.domain.CProjectType type);
+	long countByType(@Param ("type") CProjectType type);
 	@Override
 	@Query ("""
 			SELECT p FROM CProject p

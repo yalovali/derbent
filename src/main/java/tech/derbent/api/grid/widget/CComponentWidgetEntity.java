@@ -1,5 +1,4 @@
 package tech.derbent.api.grid.widget;
-
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +30,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
+import java.lang.reflect.Method;
 
 public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CHorizontalLayout
         implements IHasDragControl {
@@ -142,7 +142,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
                 return null;
             }
             try {
-                final java.lang.reflect.Method getter = entity.getClass().getMethod(getterName);
+                final Method getter = entity.getClass().getMethod(getterName);
                 return (V) getter.invoke(entity);
             } catch (final Exception e) {
                 LOGGER.debug("Could not get property {}: {}", propertyName, e.getMessage());

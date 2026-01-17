@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.enhanced;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +46,7 @@ import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
+import com.vaadin.flow.component.grid.Grid;
 
 /** CComponentEntitySelection - Reusable component for selecting entities from a grid with search/filter capabilities.
  * <p>
@@ -429,10 +429,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		grid.setMinHeight("120px");
 		// Configure selection mode
 		if (multiSelect) {
-			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
+			grid.setSelectionMode(Grid.SelectionMode.MULTI);
 			grid.asMultiSelect().addValueChangeListener(e -> on_gridItems_multiSelectionChanged(e.getValue()));
 		} else {
-			grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
+			grid.setSelectionMode(Grid.SelectionMode.SINGLE);
 			grid.asSingleSelect().addValueChangeListener(e -> on_gridItems_singleSelectionChanged(e.getValue()));
 		}
 		// Add click listener to toggle selection in multi-select mode

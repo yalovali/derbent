@@ -1,5 +1,4 @@
 package tech.derbent.app.meetings.domain;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -39,6 +38,9 @@ import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.base.users.domain.CUser;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import tech.derbent.app.sprints.service.CSprintItemService;
 
 /** CMeeting - Domain entity representing meetings. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association. */
 @Entity
@@ -136,11 +138,11 @@ public class CMeeting extends CProjectItem<CMeeting>
 	// Sprint Item relationship - REQUIRED: every meeting must have a sprint item for progress tracking
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = false)
-	@jakarta.validation.constraints.NotNull (message = "Sprint item is required for progress tracking")
+	@NotNull (message = "Sprint item is required for progress tracking")
 	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this meeting", hidden = true)
 	private CSprintItem sprintItem;
 	@Column (name = "sprint_order", nullable = true)
-	@jakarta.validation.constraints.Min (value = 1, message = "Sprint order must be positive")
+	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
 			displayName = "Sprint Order", required = false, readOnly = false,
 			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
@@ -169,7 +171,7 @@ public class CMeeting extends CProjectItem<CMeeting>
 		participants = new HashSet<>();
 		// Ensure sprint item is always created for composition pattern
 		if (sprintItem == null) {
-			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+			sprintItem = CSprintItemService.createDefaultSprintItem();
 		}
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {
@@ -181,7 +183,7 @@ public class CMeeting extends CProjectItem<CMeeting>
 		super(CMeeting.class, name, project);
 		// Ensure sprint item is always created for composition pattern
 		if (sprintItem == null) {
-			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+			sprintItem = CSprintItemService.createDefaultSprintItem();
 		}
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {
@@ -198,7 +200,7 @@ public class CMeeting extends CProjectItem<CMeeting>
 		entityType = meetingType;
 		// Ensure sprint item is always created for composition pattern
 		if (sprintItem == null) {
-			sprintItem = tech.derbent.app.sprints.service.CSprintItemService.createDefaultSprintItem();
+			sprintItem = CSprintItemService.createDefaultSprintItem();
 		}
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {

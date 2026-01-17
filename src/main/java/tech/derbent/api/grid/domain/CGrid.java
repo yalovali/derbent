@@ -1,5 +1,4 @@
 package tech.derbent.api.grid.domain;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -52,6 +51,9 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
+import java.util.function.BiConsumer;
+import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 
 /** CGrid - Base grid class for consistent field width management based on data types. Layer: View (MVC) Follows the project's coding guidelines by
  * providing a base class for all grids to ensure consistent column widths based on field types: - ID fields: Very small width (80px) - Integer
@@ -304,7 +306,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	 * @param fieldDisplayName  Display name for the field (used in edit dialog)
 	 * @return The created column */
 	public Column<EntityClass> addEditableImageColumn(final ValueProvider<EntityClass, byte[]> imageDataProvider,
-			final java.util.function.BiConsumer<EntityClass, byte[]> imageDataSetter, final String header, final String fieldDisplayName) {
+			final BiConsumer<EntityClass, byte[]> imageDataSetter, final String header, final String fieldDisplayName) {
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			// Create field info for the picture selector
 			final EntityFieldInfo fieldInfo = new EntityFieldInfo();
@@ -502,8 +504,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	 * @param widgetProvider the function that creates widgets for entities
 	 * @param comparator     optional comparator for sorting (null to disable sorting)
 	 * @return the created column
-	 * @see tech.derbent.api.grid.widget.IComponentWidgetEntityProvider
-	 * @see tech.derbent.api.grid.widget.CComponentWidgetEntity */
+	 * @see IComponentWidgetEntityProvider
+	 * @see CComponentWidgetEntity */
 	public <T extends Component> Column<EntityClass> addWidgetColumn(final Function<EntityClass, T> widgetProvider,
 			final Comparator<EntityClass> comparator) {
 		Check.notNull(widgetProvider, "Widget provider cannot be null");

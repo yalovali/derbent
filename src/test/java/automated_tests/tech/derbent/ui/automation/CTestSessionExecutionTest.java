@@ -12,11 +12,15 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
+
 
 /** Comprehensive CRUD and execution test for Test Session (Test Run) entities. Tests the complete test execution workflow including: - Test Session
  * CRUD operations - Execute button functionality - Test execution interface - Step-by-step test recording - Result recording
  * (PASS/FAIL/SKIP/BLOCK) */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
@@ -33,7 +37,7 @@ public class CTestSessionExecutionTest extends CBaseUITest {
 	void testExecuteButtonAndWorkflow() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -104,7 +108,7 @@ public class CTestSessionExecutionTest extends CBaseUITest {
 	void testResultRecording() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {
@@ -174,7 +178,7 @@ public class CTestSessionExecutionTest extends CBaseUITest {
 	void testTestSessionCrudOperations() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {

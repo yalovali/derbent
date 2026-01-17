@@ -15,6 +15,8 @@ import tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense;
 import tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseService;
 import tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeService;
+import java.math.RoundingMode;
+
 
 /** CFinancialSummaryService - Service for generating financial reports and summaries. Provides period-based financial reporting including income,
  * expenses, and profit calculations. */
@@ -57,7 +59,7 @@ public class CFinancialSummaryService {
 			return BigDecimal.ZERO;
 		}
 		final BigDecimal netProfit = calculateNetProfit(project, startDate, endDate);
-		return netProfit.divide(totalIncome, 4, java.math.RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+		return netProfit.divide(totalIncome, 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 	}
 
 	/** Calculate total project expenses for a period.

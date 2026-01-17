@@ -17,6 +17,10 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
 import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.app.products.productversion.domain.CProductVersion;
+import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
+
 
 /** Comprehensive test suite for CPageTestAuxillary that dynamically tests all pages accessible via navigation buttons.
  * <p>
@@ -44,7 +48,7 @@ import tech.derbent.app.products.productversion.domain.CProductVersion;
  * <li><b>Detailed logging</b>: Clear progress indicators and error messages
  * </ul>
  */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop"
@@ -946,7 +950,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		// Check if browser is available
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 		try {

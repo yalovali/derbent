@@ -8,13 +8,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+
 
 /** Test class for CPageService HasValue event propagation. Verifies that CPageService properly binds value change events from components implementing
  * HasValue interface to handler methods using the on_{componentName}_change pattern. */
 class CPageServiceHasValueEventPropagationTest {
 
 	// Test component implementing HasValue
-	static class TestHasValueComponent extends com.vaadin.flow.component.Composite<com.vaadin.flow.component.orderedlayout.VerticalLayout>
+	static class TestHasValueComponent extends Composite<VerticalLayout>
 			implements HasValue<HasValue.ValueChangeEvent<String>, String> {
 
 		/**

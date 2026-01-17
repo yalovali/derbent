@@ -1,5 +1,4 @@
 package tech.derbent.app.comments.view;
-
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -406,7 +405,7 @@ public class CComponentListComments extends CVerticalLayout
 
 	@Override
 	public void registerWithPageService(final CPageService<?> pageService) {
-		tech.derbent.api.utils.Check.notNull(pageService, "Page service cannot be null");
+		Check.notNull(pageService, "Page service cannot be null");
 		pageService.registerComponent(getComponentName(), this);
 		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
 	}

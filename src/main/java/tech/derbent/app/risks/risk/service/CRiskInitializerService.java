@@ -1,5 +1,4 @@
 package tech.derbent.app.risks.risk.service;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +17,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.risks.risk.domain.CRisk;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
+import tech.derbent.app.risks.risk.domain.ERiskResponseStrategy;
 
 public class CRiskInitializerService extends CInitializerServiceBase {
 
@@ -56,10 +58,10 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "result"));
 			
 			// Attachments section - standard section for ALL entities
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 			
 			// Comments section - standard section for discussion entities
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
@@ -113,35 +115,35 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 						case 0: // Data Breach - Critical Risk
 							risk.setProbability(8);
 							risk.setImpactScore(9);
-							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.MITIGATE);
+							risk.setRiskResponseStrategy(ERiskResponseStrategy.MITIGATE);
 							risk.setMitigation("Implement multi-factor authentication, encryption at rest and in transit, regular security audits");
 							risk.setResidualRisk("Low probability of breach remains even with controls; insider threat risk persists");
 							break;
 						case 1: // Technical Debt - High Risk
 							risk.setProbability(7);
 							risk.setImpactScore(6);
-							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.MITIGATE);
+							risk.setRiskResponseStrategy(ERiskResponseStrategy.MITIGATE);
 							risk.setMitigation("Allocate 20% of sprint capacity to refactoring, implement code review standards");
 							risk.setResidualRisk("Some legacy code will remain; requires ongoing attention");
 							break;
 						case 2: // Vendor Dependency - Medium Risk
 							risk.setProbability(4);
 							risk.setImpactScore(7);
-							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.TRANSFER);
+							risk.setRiskResponseStrategy(ERiskResponseStrategy.TRANSFER);
 							risk.setMitigation("Diversify vendor portfolio, maintain backup vendors, negotiate exit clauses in contracts");
 							risk.setResidualRisk("Transition costs and time remain if vendor fails");
 							break;
 						case 3: // Regulatory Compliance - High Risk
 							risk.setProbability(6);
 							risk.setImpactScore(9);
-							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.AVOID);
+							risk.setRiskResponseStrategy(ERiskResponseStrategy.AVOID);
 							risk.setMitigation("Hire compliance officer, conduct quarterly audits, implement compliance management system");
 							risk.setResidualRisk("Regulatory changes may introduce new requirements");
 							break;
 						case 4: // Key Personnel Loss - Medium Risk
 							risk.setProbability(5);
 							risk.setImpactScore(7);
-							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.ACCEPT);
+							risk.setRiskResponseStrategy(ERiskResponseStrategy.ACCEPT);
 							risk.setMitigation("Cross-training programs, documentation standards, competitive compensation");
 							risk.setResidualRisk("Knowledge gaps may exist despite documentation efforts");
 							break;

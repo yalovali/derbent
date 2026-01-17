@@ -1,5 +1,4 @@
 package tech.derbent.api.screens.view;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -272,7 +271,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	/** Adds a selection change listener to receive notifications when the grid selection changes */
-	public Registration addSelectionChangeListener(com.vaadin.flow.component.ComponentEventListener<SelectionChangeEvent> listener) {
+	public Registration addSelectionChangeListener(ComponentEventListener<SelectionChangeEvent> listener) {
 		return addListener(SelectionChangeEvent.class, listener);
 	}
 

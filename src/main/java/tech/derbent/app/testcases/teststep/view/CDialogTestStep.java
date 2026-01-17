@@ -1,5 +1,4 @@
 package tech.derbent.app.testcases.teststep.view;
-
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.testcases.teststep.domain.CTestStep;
 import tech.derbent.app.testcases.teststep.service.CTestStepService;
 import tech.derbent.base.session.service.ISessionService;
+import com.vaadin.flow.component.html.Span;
 
 /** CDialogTestStep - Dialog for adding or editing test steps.
  * <p>
@@ -73,7 +73,7 @@ public class CDialogTestStep extends CDialogDBEdit<CTestStep> {
 		formLayout.setSpacing(true);
 
 		// Step order display (read-only)
-		final com.vaadin.flow.component.html.Span orderLabel = new com.vaadin.flow.component.html.Span(
+		final Span orderLabel = new Span(
 				"Step Order: " + getEntity().getStepOrder());
 		orderLabel.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)")
 				.set("font-weight", "bold").set("margin-bottom", "1rem");

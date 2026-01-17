@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.enhanced;
-
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -7,6 +6,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.utils.CAuxillaries;
+import com.vaadin.flow.component.ComponentEvent;
 
 /** CSearchToolbar - A reusable search toolbar component with debounced text input. Layer: View (MVC) Provides a text field for live searching with
  * configurable debounce delay to avoid excessive search requests while the user is typing. Follows the project's coding guidelines for component
@@ -88,7 +88,7 @@ public class CSearchToolbar extends HorizontalLayout {
 	public TextField getSearchField() { return searchField; }
 
 	/** Event fired when search text changes. */
-	public static class SearchEvent extends com.vaadin.flow.component.ComponentEvent<CSearchToolbar> {
+	public static class SearchEvent extends ComponentEvent<CSearchToolbar> {
 
 		private static final long serialVersionUID = 1L;
 		private final String searchText;

@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.view;
-
 import java.io.ByteArrayInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +47,7 @@ import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.base.users.view.CDialogUserProfile;
+import com.vaadin.flow.component.UI;
 
 /** The main layout is a top-level placeholder for other views. It provides a side navigation menu and a user menu. */
 // vaadin applayout is used to create a layout with a side navigation menu it
@@ -228,7 +228,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		header.getStyle().set("cursor", "pointer");
 		header.addClickListener(e -> {
 			LOGGER.debug("Header clicked - navigating to home");
-			com.vaadin.flow.component.UI.getCurrent().navigate("home");
+			UI.getCurrent().navigate("home");
 		});
 		// Add hover effects
 		header.getElement().addEventListener("mouseenter", e -> header.getStyle().set("background-color", "var(--lumo-contrast-5pct)"));

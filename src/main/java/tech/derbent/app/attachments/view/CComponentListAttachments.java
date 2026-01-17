@@ -1,5 +1,4 @@
 package tech.derbent.app.attachments.view;
-
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,6 +31,7 @@ import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.attachments.service.CAttachmentService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
+import com.vaadin.flow.component.html.Anchor;
 
 /** CComponentListAttachments - Component for managing attachments on entities. Displays a list of attachments with version number, filename, size,
  * type, upload date and uploaded by user. Supports upload, download, delete and version history operations. This component uses the IHasAttachments
@@ -306,7 +306,7 @@ public class CComponentListAttachments extends CVerticalLayout
 				}
 			});
 			// Trigger download via anchor
-			final com.vaadin.flow.component.html.Anchor downloadLink = new com.vaadin.flow.component.html.Anchor(resource, "");
+			final Anchor downloadLink = new Anchor(resource, "");
 			downloadLink.getElement().setAttribute("download", true);
 			downloadLink.setId("download-" + selected.getId());
 			// Add to UI temporarily
@@ -414,7 +414,7 @@ public class CComponentListAttachments extends CVerticalLayout
 
 	@Override
 	public void registerWithPageService(final CPageService<?> pageService) {
-		tech.derbent.api.utils.Check.notNull(pageService, "Page service cannot be null");
+		Check.notNull(pageService, "Page service cannot be null");
 		pageService.registerComponent(getComponentName(), this);
 		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
 	}

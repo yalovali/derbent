@@ -2,6 +2,8 @@ package automated_tests.tech.derbent.ui.automation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,8 +28,10 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import com.vaadin.flow.router.Route;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.users.domain.CUser;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -1529,7 +1533,7 @@ public abstract class CBaseUITest {
 				// Use cached Playwright Chromium directly to bypass download
 				LOGGER.info("📦 Using cached Playwright Chromium at: {}", playwrightCache);
 				playwright = Playwright.create();
-				launchOptions.setExecutablePath(java.nio.file.Paths.get(playwrightCache));
+				launchOptions.setExecutablePath(Paths.get(playwrightCache));
 				browser = playwright.chromium().launch(launchOptions);
 			} else {
 				// Try Playwright default download first
@@ -1548,7 +1552,7 @@ public abstract class CBaseUITest {
 							if (playwright == null) {
 								playwright = Playwright.create();
 							}
-							launchOptions.setExecutablePath(java.nio.file.Paths.get(chromiumPath));
+							launchOptions.setExecutablePath(Paths.get(chromiumPath));
 							browser = playwright.chromium().launch(launchOptions);
 							break;
 						}
@@ -1720,8 +1724,8 @@ public abstract class CBaseUITest {
 				LOGGER.warn("⚠️ Upload dialog did not open");
 				return false;
 			}
-			final java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("test-attachment-", ".txt");
-			java.nio.file.Files.writeString(tempFile, "Test attachment content - " + System.currentTimeMillis());
+			final Path tempFile = Files.createTempFile("test-attachment-", ".txt");
+			Files.writeString(tempFile, "Test attachment content - " + System.currentTimeMillis());
 			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
 			final Locator dialogUploadButton = dialog.locator("#cbutton-upload");
 			waitForButtonEnabled(dialogUploadButton);
@@ -2083,7 +2087,7 @@ public abstract class CBaseUITest {
 				}
 			}
 			// Fallback: try direct navigation using navigateToFirstPage
-			return navigateToFirstPage(null, tech.derbent.api.companies.domain.CCompany.class);
+			return navigateToFirstPage(null, CCompany.class);
 		} catch (final Exception e) {
 			LOGGER.error("❌ Failed to test navigation to company page: {}", e.getMessage());
 			return false;
@@ -2118,7 +2122,7 @@ public abstract class CBaseUITest {
 				}
 			}
 			// Fallback: try direct navigation using navigateToFirstPage
-			return navigateToFirstPage(null, tech.derbent.base.users.domain.CUser.class);
+			return navigateToFirstPage(null, CUser.class);
 		} catch (final Exception e) {
 			LOGGER.error("❌ Failed to test navigation to user page: {}", e.getMessage());
 			return false;

@@ -1,5 +1,4 @@
 package tech.derbent.app.issues.issue.service;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +17,10 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.app.issues.issue.domain.CIssue;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
+import tech.derbent.app.issues.issue.domain.EIssuePriority;
+import tech.derbent.app.issues.issue.domain.EIssueSeverity;
 
 public class CIssueInitializerService extends CInitializerServiceBase {
 
@@ -51,10 +54,10 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "resolvedDate"));
 
 			// Attachments section - standard section for ALL entities
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 
 			// Comments section - standard section for discussion entities
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
@@ -113,8 +116,8 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 					issue.setAssignedTo(user);
 					
 					// Set required enum fields
-					issue.setIssueSeverity(tech.derbent.app.issues.issue.domain.EIssueSeverity.MINOR);
-					issue.setIssuePriority(tech.derbent.app.issues.issue.domain.EIssuePriority.MEDIUM);
+					issue.setIssueSeverity(EIssueSeverity.MINOR);
+					issue.setIssuePriority(EIssuePriority.MEDIUM);
 				});
 	}
 }

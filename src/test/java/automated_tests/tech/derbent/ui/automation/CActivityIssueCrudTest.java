@@ -12,6 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
+
 
 /**
  * Comprehensive CRUD test for Activity and Issue entities with auxiliary features:
@@ -21,7 +25,7 @@ import com.microsoft.playwright.Page;
  * - Story points
  * - Sprint integration
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource(properties = {
 	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.datasource.username=sa",
@@ -41,7 +45,7 @@ public class CActivityIssueCrudTest extends CBaseUITest {
 	void testActivityCrudWithAuxiliaryFeatures() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 
@@ -150,7 +154,7 @@ public class CActivityIssueCrudTest extends CBaseUITest {
 	void testIssueCrudWithAuxiliaryFeatures() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 

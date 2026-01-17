@@ -1,5 +1,4 @@
 package tech.derbent.app.testcases.testrun.service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
@@ -22,6 +21,8 @@ import tech.derbent.app.testcases.testscenario.domain.CTestScenario;
 import tech.derbent.app.testcases.testscenario.service.CTestScenarioService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 
 public class CTestRunInitializerService extends CInitializerServiceBase {
 
@@ -64,10 +65,10 @@ public class CTestRunInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 
 			// Attachments section
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 
 			// Comments section
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));

@@ -12,13 +12,17 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import org.junit.jupiter.api.Assumptions;
+import tech.derbent.Application;
+
+
 
 /**
  * Comprehensive CRUD operations test for Test Case and Test Scenario entities.
  * Uses generic helper methods from CBaseUITest for testing attachments and comments.
  * Tests cover full Create, Read, Update, Delete lifecycle with attachments and comments.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource(properties = {
 	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.datasource.username=sa",
@@ -38,7 +42,7 @@ public class CTestCaseScenarioCrudTest extends CBaseUITest {
 	void testTestCaseCrudOperations() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 
@@ -158,7 +162,7 @@ public class CTestCaseScenarioCrudTest extends CBaseUITest {
 	void testTestScenarioCrudOperations() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping test (expected in CI without browser)");
-			org.junit.jupiter.api.Assumptions.assumeTrue(false, "Browser not available in CI environment");
+			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
 

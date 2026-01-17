@@ -1,5 +1,4 @@
 package tech.derbent.api.ui.component.enhanced;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -363,7 +362,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.info("Setting {} source items for selection component", items.size());
 			sourceItems.clear();
 			// Filter out null items before adding
-			final List<DetailEntity> validItems = items.stream().filter(Objects::nonNull).collect(java.util.stream.Collectors.toList());
+			final List<DetailEntity> validItems = items.stream().filter(Objects::nonNull).collect(Collectors.toList());
 			sourceItems.addAll(validItems);
 			// Safe sorting with null checks
 			sourceItems.sort((a, b) -> {

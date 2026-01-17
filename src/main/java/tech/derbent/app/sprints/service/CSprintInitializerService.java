@@ -1,10 +1,10 @@
 package tech.derbent.app.sprints.service;
-
 import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -23,6 +23,8 @@ import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintType;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
@@ -102,10 +104,10 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			
 			// Attachments section - standard section for ALL entities
-			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
+			CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
 			
 			// Comments section - standard section for discussion entities
-			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(scr, clazz);
+			CCommentInitializerService.addCommentsSection(scr, clazz);
 			
 			scr.debug_printScreenInformation();
 			return scr;
@@ -180,7 +182,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				
 				// Set initial status from workflow (CRITICAL: all project items must have status)
 				if (sprintType != null && sprintType.getWorkflow() != null) {
-					final java.util.List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> initialStatuses =
+					final List<CProjectItemStatus> initialStatuses =
 							projectItemStatusService.getValidNextStatuses(sprint);
 					if (!initialStatuses.isEmpty()) {
 						sprint.setStatus(initialStatuses.get(0));

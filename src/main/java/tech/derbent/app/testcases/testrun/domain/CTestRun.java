@@ -24,6 +24,8 @@ import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.testcases.testscenario.domain.CTestScenario;
 import tech.derbent.base.users.domain.CUser;
+import java.time.Duration;
+
 
 /** CTestRun - Entity tracking test scenario execution and results.
  * A test run executes a test scenario and records results for all test cases and steps within it.
@@ -273,7 +275,7 @@ public class CTestRun extends CEntityOfProject<CTestRun> implements IHasAttachme
 		updateLastModified();
 		// Auto-calculate duration
 		if (executionStart != null && executionEnd != null) {
-			durationMs = java.time.Duration.between(executionStart, executionEnd).toMillis();
+			durationMs = Duration.between(executionStart, executionEnd).toMillis();
 		}
 	}
 
