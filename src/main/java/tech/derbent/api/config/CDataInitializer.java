@@ -328,6 +328,8 @@ public class CDataInitializer {
 	}
 
 	/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
+	 * Creates a multi-level hierarchy: Phase 1 → Requirements → User Stories → Task 1, Task 2
+	 * and Phase 1 → Architecture → Components → Component Design, Component Testing
 	 * @param project the project to create activities for
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleActivities(final CProject project, final boolean minimal) {
@@ -336,7 +338,7 @@ public class CDataInitializer {
 			final CActivityType type1 = activityTypeService.getRandom(project.getCompany());
 			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
-			// Create parent activity
+			// Create parent activity (Level 1)
 			final CActivity activity1 = new CActivity("Phase 1: Planning and Analysis", project);
 			activity1.setDescription("Initial planning phase covering requirements and architecture design");
 			activity1.setEntityType(type1);
@@ -352,7 +354,7 @@ public class CDataInitializer {
 				}
 			}
 			activityService.save(activity1);
-			// Create child activity 1
+			// Create child activity 1 (Level 2)
 			final CActivityType type2 = activityTypeService.getRandom(project.getCompany());
 			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
@@ -375,7 +377,7 @@ public class CDataInitializer {
 			if (minimal) {
 				return;
 			}
-			// Create child activity 2
+			// Create child activity 2 (Level 2)
 			final CActivityType type3 = activityTypeService.getRandom(project.getCompany());
 			final CActivityPriority priority3 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user3 = userService.getRandom(project.getCompany());
@@ -395,7 +397,102 @@ public class CDataInitializer {
 				}
 			}
 			activityService.save(activity3);
-			LOGGER.debug("Created sample activities with parent-child relationships for project: {}", project.getName());
+			// Create grandchild activities (Level 3) - children of Requirements Gathering
+			final CActivityType type4 = activityTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority4 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user4 = userService.getRandom(project.getCompany());
+			final CActivity activity4 = new CActivity("Define User Stories", project);
+			activity4.setDescription("Create detailed user stories from requirements");
+			activity4.setEntityType(type4);
+			activity4.setPriority(priority4);
+			activity4.setAssignedTo(user4);
+			activity4.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 30)));
+			activity4.setDueDate(activity4.getStartDate().plusDays((long) (Math.random() * 20)));
+			activity4.setParent(activity2);
+			if (type4 != null && type4.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity4);
+				if (!initialStatuses.isEmpty()) {
+					activity4.setStatus(initialStatuses.get(0));
+				}
+			}
+			activityService.save(activity4);
+			// Create grandchild activities (Level 3) - children of Architecture Design
+			final CActivityType type5 = activityTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority5 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user5 = userService.getRandom(project.getCompany());
+			final CActivity activity5 = new CActivity("Design System Components", project);
+			activity5.setDescription("Define and document system components and interfaces");
+			activity5.setEntityType(type5);
+			activity5.setPriority(priority5);
+			activity5.setAssignedTo(user5);
+			activity5.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 30)));
+			activity5.setDueDate(activity5.getStartDate().plusDays((long) (Math.random() * 25)));
+			activity5.setParent(activity3);
+			if (type5 != null && type5.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity5);
+				if (!initialStatuses.isEmpty()) {
+					activity5.setStatus(initialStatuses.get(0));
+				}
+			}
+			activityService.save(activity5);
+			// Create great-grandchild activities (Level 4) - children of User Stories
+			final CActivityType type6 = activityTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority6 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user6 = userService.getRandom(project.getCompany());
+			final CActivity activity6 = new CActivity("User Story: Login Functionality", project);
+			activity6.setDescription("As a user, I want to login to access the system");
+			activity6.setEntityType(type6);
+			activity6.setPriority(priority6);
+			activity6.setAssignedTo(user6);
+			activity6.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 20)));
+			activity6.setDueDate(activity6.getStartDate().plusDays((long) (Math.random() * 10)));
+			activity6.setParent(activity4);
+			if (type6 != null && type6.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity6);
+				if (!initialStatuses.isEmpty()) {
+					activity6.setStatus(initialStatuses.get(0));
+				}
+			}
+			activityService.save(activity6);
+			// Create another great-grandchild (Level 4) - child of User Stories
+			final CActivityType type7 = activityTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority7 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user7 = userService.getRandom(project.getCompany());
+			final CActivity activity7 = new CActivity("User Story: Dashboard View", project);
+			activity7.setDescription("As a user, I want to see a dashboard with key metrics");
+			activity7.setEntityType(type7);
+			activity7.setPriority(priority7);
+			activity7.setAssignedTo(user7);
+			activity7.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 20)));
+			activity7.setDueDate(activity7.getStartDate().plusDays((long) (Math.random() * 10)));
+			activity7.setParent(activity4);
+			if (type7 != null && type7.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity7);
+				if (!initialStatuses.isEmpty()) {
+					activity7.setStatus(initialStatuses.get(0));
+				}
+			}
+			activityService.save(activity7);
+			// Create great-grandchild (Level 4) - child of Component Design
+			final CActivityType type8 = activityTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority8 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user8 = userService.getRandom(project.getCompany());
+			final CActivity activity8 = new CActivity("Component Design Document", project);
+			activity8.setDescription("Create detailed design document for all system components");
+			activity8.setEntityType(type8);
+			activity8.setPriority(priority8);
+			activity8.setAssignedTo(user8);
+			activity8.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 20)));
+			activity8.setDueDate(activity8.getStartDate().plusDays((long) (Math.random() * 15)));
+			activity8.setParent(activity5);
+			if (type8 != null && type8.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity8);
+				if (!initialStatuses.isEmpty()) {
+					activity8.setStatus(initialStatuses.get(0));
+				}
+			}
+			activityService.save(activity8);
+			LOGGER.debug("Created sample activities with multi-level parent-child hierarchy for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
