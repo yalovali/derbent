@@ -25,8 +25,8 @@ public class CTestCaseInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CTestCase.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTestCaseInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".30";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Test Cases";
+	private static final String menuOrder = Menu_Order_TESTS + ".10";
+	private static final String menuTitle = MenuTitle_TESTS + ".Test Cases";
 	private static final String pageDescription = "Test case design and management";
 	private static final String pageTitle = "Test Case Management";
 	private static final boolean showInQuickToolbar = false;

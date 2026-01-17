@@ -28,11 +28,11 @@ import tech.derbent.app.testcases.testcase.domain.CTestCase;
 @AttributeOverride (name = "id", column = @Column (name = "testscenario_id"))
 public class CTestScenario extends CEntityOfProject<CTestScenario> implements IHasAttachments, IHasComments {
 
-	public static final String DEFAULT_COLOR = "#6495ED"; // CornflowerBlue - test scenarios
+	public static final String DEFAULT_COLOR = "#6495ED"; // CornflowerBlue - test suites
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
-	public static final String ENTITY_TITLE_PLURAL = "Test Scenarios";
-	public static final String ENTITY_TITLE_SINGULAR = "Test Scenario";
-	public static final String VIEW_NAME = "Test Scenarios View";
+	public static final String ENTITY_TITLE_PLURAL = "Test Suites";
+	public static final String ENTITY_TITLE_SINGULAR = "Test Suite";
+	public static final String VIEW_NAME = "Test Suites View";
 
 	@Column (nullable = true, length = 5000)
 	@Size (max = 5000)

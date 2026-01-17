@@ -27,10 +27,10 @@ public class CTestRunInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CTestRun.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTestRunInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".32";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Test Runs";
+	private static final String menuOrder = Menu_Order_TESTS + ".30";
+	private static final String menuTitle = MenuTitle_TESTS + ".Test Sessions";
 	private static final String pageDescription = "Test execution tracking and results";
-	private static final String pageTitle = "Test Run Management";
+	private static final String pageTitle = "Test Session Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -88,12 +88,60 @@ public class CTestRunInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
+	/**
+	 * Creates the execution view for single-page test execution interface.
+	 * This view shows only the test execution component in full-screen mode.
+	 */
+	private static CDetailSection createExecutionView(final CProject project) throws Exception {
+		try {
+			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+			
+			// Minimal header info - just test run name and description
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			
+			// Full-screen execution component
+			detailSection.addScreenLine(CDetailLinesService.createSection("Test Execution"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "testExecutionComponent"));
+			
+			LOGGER.debug("Created execution view for test run");
+			return detailSection;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating test run execution view: {}", e.getMessage(), e);
+			throw e;
+		}
+	}
+
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		
+		// View 1: Standard CRUD for test session management
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, 
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+		
+		// View 2: Single-page execution view (full-screen test execution interface)
+		final CDetailSection executionSection = createExecutionView(project);
+		final CGridEntity executionGrid = createGridEntity(project);
+		
+		// Set unique names for execution view
+		executionSection.setName("Test Execution Section");
+		executionGrid.setName("Test Execution Grid");
+		
+		// CRITICAL: Hide grid to show only execution component
+		executionGrid.setAttributeNone(true);
+		
+		// Register single-page execution view as separate menu item
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService,
+				executionSection, executionGrid,
+				menuTitle + ".Execute Tests",     // Submenu: Tests.Test Sessions.Execute Tests
+				"Test Execution",                 // Page title
+				"Execute tests step-by-step with result recording",  // Description
+				true,                              // Show in quick toolbar
+				menuOrder + ".1");                 // Submenu order
+		
+		LOGGER.info("Initialized test session views: standard management + execution interface");
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {

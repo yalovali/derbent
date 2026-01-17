@@ -27,10 +27,11 @@ public class CTestCaseResultService extends CAbstractService<CTestCaseResult> {
 
 	public Component createComponentListTestCaseResults() {
 		try {
-			final Div container = new Div();
-			container.add(new Span("Test Case Results Component - Under Development"));
-			LOGGER.debug("Created test case result component placeholder");
-			return container;
+			final ISessionService sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
+			final tech.derbent.app.testcases.testrun.view.CComponentListTestCaseResults component =
+					new tech.derbent.app.testcases.testrun.view.CComponentListTestCaseResults(this, sessionService);
+			LOGGER.debug("Created test case result component");
+			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create test case result component.", e);
 			final Div errorDiv = new Div();

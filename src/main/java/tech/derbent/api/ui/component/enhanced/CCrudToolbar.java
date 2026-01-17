@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
@@ -18,6 +19,7 @@ import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 public class CCrudToolbar extends HorizontalLayout {
@@ -272,5 +274,30 @@ public class CCrudToolbar extends HorizontalLayout {
         if (refreshButton != null) {
             refreshButton.setEnabled(pageBase != null && hasEntity);
         }
+    }
+
+    /**
+     * Adds a custom component to the toolbar at the specified index position.
+     * This allows page services to inject custom buttons or components into the toolbar.
+     * 
+     * @param component the component to add (typically a CButton)
+     * @param index the position index (0 = before New button, components.size() = after last button)
+     */
+    public void addCustomComponent(final Component component, final int index) {
+        Check.notNull(component, "Component cannot be null");
+        addComponentAtIndex(index, component);
+        LOGGER.debug("Added custom component {} at index {}", component.getClass().getSimpleName(), index);
+    }
+
+    /**
+     * Adds a custom component to the toolbar after all standard buttons.
+     * Convenience method for adding components at the end of the toolbar.
+     * 
+     * @param component the component to add
+     */
+    public void addCustomComponent(final Component component) {
+        Check.notNull(component, "Component cannot be null");
+        add(component);
+        LOGGER.debug("Added custom component {} at end of toolbar", component.getClass().getSimpleName());
     }
 }

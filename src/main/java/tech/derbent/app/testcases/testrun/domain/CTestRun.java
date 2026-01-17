@@ -33,17 +33,17 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "testrun_id"))
 public class CTestRun extends CEntityOfProject<CTestRun> implements IHasAttachments, IHasComments {
 
-	public static final String DEFAULT_COLOR = "#32CD32"; // LimeGreen - test results
+	public static final String DEFAULT_COLOR = "#32CD32"; // LimeGreen - test sessions
 	public static final String DEFAULT_ICON = "vaadin:play-circle";
-	public static final String ENTITY_TITLE_PLURAL = "Test Runs";
-	public static final String ENTITY_TITLE_SINGULAR = "Test Run";
-	public static final String VIEW_NAME = "Test Runs View";
+	public static final String ENTITY_TITLE_PLURAL = "Test Sessions";
+	public static final String ENTITY_TITLE_SINGULAR = "Test Session";
+	public static final String VIEW_NAME = "Test Sessions View";
 
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "testscenario_id", nullable = false)
 	@AMetaData (
-			displayName = "Test Scenario", required = true, readOnly = false,
-			description = "Test scenario being executed", hidden = false,
+			displayName = "Test Suite", required = true, readOnly = false,
+			description = "Test suite being executed in this session", hidden = false,
 			dataProviderBean = "CTestScenarioService"
 	)
 	private CTestScenario testScenario;
@@ -177,6 +177,15 @@ public class CTestRun extends CEntityOfProject<CTestRun> implements IHasAttachme
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+
+	// Transient field for test execution component (not stored in database)
+	@jakarta.persistence.Transient
+	@AMetaData (
+			displayName = "Test Execution", required = false, readOnly = false,
+			description = "Test execution interface", hidden = false,
+			dataProviderBean = "CPageServiceTestRun", createComponentMethod = "createTestExecutionComponent"
+	)
+	private transient Object testExecutionComponent;
 
 	/** Default constructor for JPA. */
 	public CTestRun() {
